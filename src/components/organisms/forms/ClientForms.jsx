@@ -1,0 +1,135 @@
+import { useState } from 'react'
+import ModalShell from '../../molecules/ModalShell'
+import Button from '../../atoms/Button'
+import Field from '../../atoms/Field'
+import { useData } from '../../../store/DataContext'
+import { useModal } from '../../../store/ModalContext'
+import { uid } from '../../../lib/format'
+import { todayISO } from '../../../lib/dates'
+
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
+
+export function ClientForm({ client }) {
+  const { commit, tz } = useData()
+  const { closeModal } = useModal()
+  const [f, setF] = useState(
+    client || { name: '', email: '', phone: '', goal: '', level: 'Beginner', status: 'Active', plan: 'Standard', notes: '' },
+  )
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+
+  const save = () => {
+    if (!f.name.trim()) return alert('Name is required')
+    commit((db) => {
+      if (client) Object.assign(db.clients.find((c) => c.id === client.id), f)
+      else
+        db.clients.push({
+          id: uid(), joined: todayISO(tz), planId: null, monitorOptIn: false,
+          anthro: { age: null, heightCm: null, massKg: null, bodyFatPct: null, leanMassKg: null },
+          intake: { questionnaire: '', medical: '', injury: '', diet: '' }, ...f,
+        })
+    })
+    closeModal()
+  }
+  const del = () => {
+    if (!confirm('Delete this client and all their data?')) return
+    commit((db) => {
+      db.clients = db.clients.filter((c) => c.id !== client.id)
+      ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions'].forEach(
+        (k) => (db[k] = db[k].filter((x) => x.clientId !== client.id)),
+      )
+    })
+    closeModal()
+  }
+
+  return (
+    <ModalShell
+      title={(client ? 'Edit' : 'Add') + ' Client'}
+      onClose={closeModal}
+      footer={
+        <>
+          {client && <Button variant="danger" onClick={del}>Delete</Button>}
+          <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+          <Button onClick={save}>Save</Button>
+        </>
+      }
+    >
+      <Field label="Full name">
+        <input value={f.name} onChange={set('name')} placeholder="e.g. Sarah Mitchell" />
+      </Field>
+      <div className="row2">
+        <Field label="Email"><input value={f.email} onChange={set('email')} /></Field>
+        <Field label="Phone"><input value={f.phone} onChange={set('phone')} /></Field>
+      </div>
+      <Field label="Goal"><input value={f.goal} onChange={set('goal')} placeholder="e.g. Lose 8kg & tone" /></Field>
+      <div className="row3">
+        <Field label="Level">
+          <select value={f.level} onChange={set('level')}>{LEVELS.map((o) => <option key={o}>{o}</option>)}</select>
+        </Field>
+        <Field label="Status">
+          <select value={f.status} onChange={set('status')}>{['Active', 'Paused'].map((o) => <option key={o}>{o}</option>)}</select>
+        </Field>
+        <Field label="Plan tier">
+          <select value={f.plan} onChange={set('plan')}>{['Standard', 'Premium'].map((o) => <option key={o}>{o}</option>)}</select>
+        </Field>
+      </div>
+      <Field label="Notes"><textarea value={f.notes} onChange={set('notes')} placeholder="Injuries, preferences, etc." /></Field>
+    </ModalShell>
+  )
+}
+
+export function InviteAthleteForm({ client }) {
+  const { commit } = useData()
+  const { closeModal } = useModal()
+  const [code, setCode] = useState(client.inviteCode || '')
+  const gen = () => {
+    const c = (Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 4))
+      .toUpperCase().replace(/(.{4})(.{2})/, '$1-$2')
+    setCode(c)
+    commit((db) => { db.clients.find((x) => x.id === client.id).inviteCode = c })
+  }
+  if (client.userId) {
+    return (
+      <ModalShell title="Athlete access" onClose={closeModal} footer={<Button onClick={closeModal}>Close</Button>}>
+        <p>✓ {client.name} has linked their athlete account and can submit their own check-ins.</p>
+      </ModalShell>
+    )
+  }
+  return (
+    <ModalShell title={'Invite ' + client.name} onClose={closeModal} footer={<Button onClick={closeModal}>Done</Button>}>
+      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+        Share this code with your athlete. They sign up, choose “I have an invite code”, and enter it to link their account — then they can submit their own morning check-ins and session RPE.
+      </p>
+      {code && (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div className="muted" style={{ fontSize: 11 }}>INVITE CODE</div>
+          <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: 2 }}>{code}</div>
+        </div>
+      )}
+      <Button style={{ marginTop: 12 }} onClick={gen}>{code ? 'Regenerate code' : 'Generate invite code'}</Button>
+    </ModalShell>
+  )
+}
+
+export function AssignPlanForm({ client }) {
+  const { db, commit } = useData()
+  const { closeModal } = useModal()
+  const [planId, setPlanId] = useState(client.planId || '')
+  const save = () => {
+    commit((d) => { d.clients.find((c) => c.id === client.id).planId = planId || null })
+    closeModal()
+  }
+  return (
+    <ModalShell
+      title={'Assign Plan to ' + client.name}
+      onClose={closeModal}
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save</Button></>}
+    >
+      <Field label="Workout plan">
+        <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
+          <option value="">— None —</option>
+          {db.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+      </Field>
+    </ModalShell>
+  )
+}
