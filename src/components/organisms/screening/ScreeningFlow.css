@@ -18,6 +18,9 @@
 .scr-legal{color:var(--muted);font-size:10.5px;line-height:1.5;margin-top:14px;border-top:1px solid var(--border);padding-top:10px}
 .scr-banner{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12.5px;margin-bottom:14px}
 .scr-declaration{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12.5px;line-height:1.55;margin-bottom:12px}
-.scr-check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13px;cursor:pointer}
-.scr-check input{margin-top:2px}
+.scr-check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13px;cursor:pointer;text-align:left}
+/* The app sets a global `input{width:100%}` — pin checkboxes to their natural
+   size or they stretch across the flex row and push the label text away. */
+.scr-check input[type=checkbox]{width:18px;height:18px;flex:none;margin-top:1px;padding:0;accent-color:var(--accent)}
+.scr-check span{flex:1}
 .scr-foot{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
