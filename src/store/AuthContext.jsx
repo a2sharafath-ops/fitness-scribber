@@ -22,13 +22,18 @@ export function AuthProvider({ children }) {
     return () => sub.subscription.unsubscribe()
   }, [])
 
+  // Keyed on the user id, NOT the session object: supabase fires auth events on
+  // every window refocus/token refresh with a fresh session object, and reloading
+  // the profile then (profileReady=false) unmounts the whole app — which looks
+  // like a full page refresh. The profile only needs reloading when the user changes.
+  const userId = session?.user?.id || null
   const loadProfile = useCallback(async () => {
-    if (!hasBackend || !session) { setProfile(null); setProfileReady(true); return }
+    if (!hasBackend || !userId) { setProfile(null); setProfileReady(true); return }
     setProfileReady(false)
-    const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle()
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
     setProfile(data || null)
     setProfileReady(true)
-  }, [session])
+  }, [userId])
 
   useEffect(() => { loadProfile() }, [loadProfile])
 
