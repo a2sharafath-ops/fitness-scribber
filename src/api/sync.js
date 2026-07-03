@@ -12,7 +12,9 @@ export async function fetchAll() {
   const db = {}
   for (const t of TABLES) {
     const { data, error } = await supabase.from(t).select('*')
-    if (error) throw error
+    // Be resilient to a table that hasn't been migrated yet (e.g. workouts before
+    // schema_workouts.sql is applied) — fall back to empty instead of breaking load.
+    if (error) { console.warn('fetch', t, 'failed:', error.message); db[t] = []; continue }
     db[t] = stripOwner(data || [])
   }
   const { data: s } = await supabase.from('settings').select('*').maybeSingle()

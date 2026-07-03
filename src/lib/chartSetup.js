@@ -2,13 +2,13 @@
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement, BarElement,
-  BarController, LineController, ScatterController,
+  BarController, LineController, ScatterController, DoughnutController,
   Title, Tooltip, Legend, Filler, ArcElement,
 } from 'chart.js'
 
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, BarElement,
-  BarController, LineController, ScatterController,
+  BarController, LineController, ScatterController, DoughnutController,
   Title, Tooltip, Legend, Filler, ArcElement,
 )
 

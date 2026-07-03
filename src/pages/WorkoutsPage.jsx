@@ -2,9 +2,12 @@ import { useState } from 'react'
 import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
+import ExerciseThumb from '../components/molecules/ExerciseThumb'
 import { ExerciseForm, PlanForm } from '../components/organisms/forms/WorkoutForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
+
+const DIFF_COLOR = { Beginner: 'green', Intermediate: 'orange', Advanced: 'red' }
 
 export default function WorkoutsPage() {
   const { db } = useData()
@@ -52,10 +55,15 @@ export default function WorkoutsPage() {
       ) : (
         <div className="card" style={{ padding: 0 }}>
           <table>
-            <thead><tr><th>Exercise</th><th>Muscle group</th><th>Equipment</th><th /></tr></thead>
+            <thead><tr><th>Demo</th><th>Exercise</th><th>Muscle group</th><th>Equipment</th><th>Difficulty</th><th /></tr></thead>
             <tbody>
               {db.exercises.map((e) => (
-                <tr key={e.id}><td><strong>{e.name}</strong></td><td><Tag color="gray">{e.muscle}</Tag></td><td className="muted">{e.equip}</td>
+                <tr key={e.id}>
+                  <td style={{ width: 110 }}><ExerciseThumb exercise={e} size="sm" /></td>
+                  <td><strong>{e.name}</strong></td>
+                  <td><Tag color="gray">{e.muscle}</Tag></td>
+                  <td className="muted">{e.equip}</td>
+                  <td><Tag color={DIFF_COLOR[e.difficulty] || 'gray'}>{e.difficulty || '—'}</Tag></td>
                   <td style={{ textAlign: 'right' }}><Button variant="ghost" size="sm" onClick={() => openModal(<ExerciseForm exercise={e} />)}>Edit</Button></td></tr>
               ))}
             </tbody>

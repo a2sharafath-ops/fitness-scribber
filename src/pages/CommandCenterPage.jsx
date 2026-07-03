@@ -28,7 +28,7 @@ export default function CommandCenterPage() {
     <>
       <div className="cc-topbar">
         <div className="flex gap">
-          <button className="back" style={{ margin: 0 }} onClick={() => nav('/clients')} aria-label="Back to clients">←</button>
+          <button className="back" style={{ margin: 0 }} onClick={() => nav('/clients/' + c.id)} aria-label="Back to Load-Response snapshot">←</button>
           <div className="mini-profile" role="button" tabIndex={0} title="View full profile"
             onClick={() => setProfileOpen(true)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setProfileOpen(true) } }}>

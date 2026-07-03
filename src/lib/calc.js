@@ -1,5 +1,5 @@
 // Pure sports-science calculations. Every function takes data explicitly (no globals).
-import { lastNDates } from './dates'
+import { lastNDates, addDays } from './dates'
 
 export const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0)
 
@@ -133,6 +133,29 @@ export function readinessFor(db, clientId) {
     }
   }
   return { label, color, wellness: w ? w.score : null, hrvDev: dev }
+}
+
+// Per-day snapshot of the four headline load-response metrics, all ending on `date`.
+// readiness = composite for that day; acwr = 7d acute / 28d chronic ending on date;
+// monotony & strain = over the 7-day window ending on date. Pass a precomputed
+// `intMap` (dailySum of sRPE-TL) to avoid recomputing it per cell.
+export function dayMetrics(db, clientId, date, intMap) {
+  const im = intMap || dailySum(db.srpe, clientId, 'tl')
+  const win = (n) => {
+    const a = []
+    for (let i = n - 1; i >= 0; i--) a.push(im[addDays(date, -i)] || 0)
+    return a
+  }
+  const w28 = win(28)
+  const acute = mean(w28.slice(-7))
+  const chronic = mean(w28)
+  const w7 = w28.slice(-7)
+  return {
+    readiness: readinessScore(db, clientId, date),
+    acwr: chronic > 0 ? +(acute / chronic).toFixed(2) : null,
+    monotony: trainingMonotony(w7),
+    strain: trainingStrain(w7),
+  }
 }
 
 export const openConcerns = (db, clientId) =>

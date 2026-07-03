@@ -5,12 +5,18 @@ import RangeSlider from '../components/atoms/RangeSlider'
 import Field from '../components/atoms/Field'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import Avatar from '../components/atoms/Avatar'
+import ChangePasswordCard from '../components/organisms/forms/ChangePasswordCard'
+import ChatThread from '../components/organisms/ChatThread'
+import SelfAssessment from '../components/organisms/SelfAssessment'
+import ScreeningCard from '../components/organisms/screening/ScreeningCard'
+import TodayWorkout from '../components/organisms/workout/TodayWorkout'
 import { useAuth } from '../store/AuthContext'
 import { supabase } from '../lib/supabase'
 import { callFunction } from '../api/functions'
 import { uid } from '../lib/format'
-import { todayISO, fmtDate, fmtDay } from '../lib/dates'
-import { calcWellness, calcSRPETL, readinessFor } from '../lib/calc'
+import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
+import { calcWellness, calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
+import { screeningsFor, finalizeScreening } from '../lib/screening'
 
 export default function AthletePortal() {
   const { user, signOut } = useAuth()
@@ -24,11 +30,16 @@ export default function AthletePortal() {
     const client = clients?.[0]
     if (!client) { setState({ client: null }); return }
     const out = {}
-    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'wearable_tokens']) {
+    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'wearable_tokens', 'workouts', 'assessments', 'screenings']) {
       const { data } = await supabase.from(t).select('*').eq('clientId', client.id)
       out[t] = data || []
     }
-    setState({ client, ...out })
+    // Coach-owned library (RLS lets the linked athlete read it); not clientId-scoped.
+    const [{ data: plans }, { data: exercises }] = await Promise.all([
+      supabase.from('plans').select('*'),
+      supabase.from('exercises').select('*'),
+    ])
+    setState({ client, plans: plans || [], exercises: exercises || [], ...out })
   }, [user])
   useEffect(() => { load() }, [load])
 
@@ -61,7 +72,6 @@ export default function AthletePortal() {
   const { client } = state
   const readiness = readinessFor({ wellness: state.wellness, wearable: state.wearable }, client.id)
   const checkedIn = state.wellness.some((w) => w.date === today)
-  const todaysPlan = state.prescriptions.filter((p) => p.date === today)
   const recent = [...state.wellness].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7)
 
   const insert = async (table, row) => {
@@ -71,6 +81,53 @@ export default function AthletePortal() {
     if (error) { alert(error.message); return false }
     await load()
     return true
+  }
+
+  // Athlete self-report (pain / lifestyle / goals) → assessments.
+  const submitAssessment = (type, data) => {
+    const phase = (state.assessments || []).some((a) => a.type === type) ? 'reassessment' : 'baseline'
+    return insert('assessments', { type, date: today, phase, data, notes: '' })
+  }
+
+  // Pre-participation screening: step saves upsert the draft; submit finalizes
+  // (outcome computed silently — never shown here) and reloads.
+  const scr = screeningsFor(state.screenings || [], client.id)
+  const saveScreening = async (row) => {
+    const { error } = await supabase.from('screenings')
+      .upsert({ ...row, clientId: client.id, coachId: client.coachId, updatedAt: new Date().toISOString() })
+    if (error) { alert(error.message); return false }
+    return true
+  }
+  const completeScreening = async (row) => {
+    setBusy(true)
+    const ok = await saveScreening(finalizeScreening(row, today))
+    setBusy(false)
+    if (ok) await load()
+    return ok
+  }
+
+  // Today's Workout
+  const todayW = (state.workouts || []).find((w) => w.date === today) || null
+  const rScore = readinessScore({ wellness: state.wellness, wearable: state.wearable }, client.id, today)
+  const acwr = acwrSeries(dailySum(state.srpe, client.id, 'tl'), lastNDates(28)).filter((v) => v != null).slice(-1)[0]
+  const restingHr = latestOf(state.wearable, client.id)?.rhr ?? null
+  const saveWorkout = async (w) => {
+    const { error } = await supabase.from('workouts').upsert({ ...w, clientId: client.id, coachId: client.coachId })
+    if (error) { alert(error.message); return }
+    await load()
+  }
+  const clearWorkout = async () => {
+    if (!todayW) return
+    await supabase.from('workouts').delete().eq('id', todayW.id)
+    await load()
+  }
+  const completeWorkout = async (w) => {
+    const maxHr = 220 - (client.anthro?.age || 30)
+    const rpe = w.hrMax ? Math.max(1, Math.min(10, Math.round((w.hrMax / maxHr) * 10))) : 6
+    const minutes = w.durationSec ? Math.max(1, Math.round(w.durationSec / 60)) : 30
+    await supabase.from('workouts').upsert({ ...w, clientId: client.id, coachId: client.coachId })
+    await supabase.from('srpe').insert({ id: uid(), clientId: client.id, coachId: client.coachId, date: w.date, sessionId: null, rpe, duration: minutes, tl: calcSRPETL(rpe, minutes) })
+    await load()
   }
 
   return (
@@ -85,6 +142,8 @@ export default function AthletePortal() {
           <Button variant="ghost" onClick={signOut}>Sign out</Button>
         </div>
 
+        <ScreeningCard clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
+          onSave={saveScreening} onComplete={completeScreening} />
         <CheckInCard checkedIn={checkedIn} busy={busy} onSubmit={(v) => insert('wellness', v)} today={today} />
         <RPECard busy={busy} onSubmit={(v) => insert('srpe', v)} today={today} />
         <WearableSection
@@ -94,13 +153,17 @@ export default function AthletePortal() {
           onChange={load}
         />
 
-        <Card style={{ marginTop: 16 }}>
-          <div className="section-title" style={{ margin: '0 0 10px' }}>Today's session</div>
-          {todaysPlan.length ? todaysPlan.flatMap((p) => p.items).map((it, i) => (
-            <div className="ex-item" key={i}><div style={{ flex: 1 }}><strong>{it.exercise}</strong>
-              <div className="muted" style={{ fontSize: 12 }}>{it.sets} × {it.reps} @ {it.intensity}{it.intensityType === '%1RM' ? '% 1RM' : ' RPE'}{it.tempo ? ` · tempo ${it.tempo}` : ''}{it.group ? ` · superset ${it.group}` : ''}</div></div></div>
-          )) : <div className="muted">Nothing prescribed for today — enjoy the recovery.</div>}
+        <div style={{ marginTop: 16 }}>
+          <TodayWorkout client={client} today={today} workout={todayW} plans={state.plans} exercises={state.exercises}
+            units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
+            onSave={saveWorkout} onComplete={completeWorkout} onClear={clearWorkout} />
+        </div>
+
+        <Card style={{ marginTop: 16, padding: 0, overflow: 'hidden' }} className="msg-thread-card">
+          <ChatThread clientId={client.id} viewerRole="athlete" headerName="Your coach" subtitle="Questions, form checks, updates" />
         </Card>
+
+        <SelfAssessment onSubmit={submitAssessment} busy={busy} />
 
         <Card style={{ marginTop: 16 }}>
           <div className="section-title" style={{ margin: '0 0 10px' }}>Recent check-ins</div>
@@ -110,6 +173,8 @@ export default function AthletePortal() {
             </div>
           )) : <div className="muted">No check-ins yet.</div>}
         </Card>
+
+        <ChangePasswordCard style={{ marginTop: 16 }} />
       </main>
     </div>
   )

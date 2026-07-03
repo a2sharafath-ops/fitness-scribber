@@ -5,17 +5,22 @@ import Tag from '../components/atoms/Tag'
 import AnthroCell from '../components/molecules/AnthroCell'
 import { ClientForm } from '../components/organisms/forms/ClientForms'
 import { EditProfileForm } from '../components/organisms/ProfilePanel'
+import ScreeningReview from '../components/organisms/screening/ScreeningReview'
+import ScreeningProfile from '../components/organisms/screening/ScreeningProfile'
+import CoachScreeningModal from '../components/organisms/screening/CoachScreeningModal'
+import { RISK_ICON } from '../lib/format'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
-import { fmtDate } from '../lib/dates'
+import { fmtDate, todayISO } from '../lib/dates'
+import { screeningsFor, programStatus, rescreenDue, OUTCOME_META } from '../lib/screening'
 
 const LEVEL = { Beginner: 'blue', Intermediate: 'purple', Advanced: 'orange' }
 
 export default function ClientProfilePage() {
   const { id } = useParams()
   const nav = useNavigate()
-  const { db } = useData()
+  const { db, commit } = useData()
   const { openModal } = useModal()
   const { fmtWt } = useFormat()
   const c = db.clients.find((x) => x.id === id)
@@ -23,6 +28,12 @@ export default function ClientProfilePage() {
 
   const a = c.anthro || {}
   const ik = c.intake || {}
+  const scr = screeningsFor(db.screenings, c.id)
+  const saveClearance = (cl) => commit((d) => {
+    const row = d.screenings.find((x) => x.id === scr.complete.id)
+    row.clearance = cl
+    row.programStatus = programStatus(row)
+  })
   const bmi = a.heightCm && a.massKg ? (a.massKg / (a.heightCm / 100) ** 2).toFixed(1) : '—'
 
   return (
@@ -32,6 +43,20 @@ export default function ClientProfilePage() {
         <div className="flex gap"><Avatar name={c.name} size={52} /><div>
           <h1>{c.name}</h1>
           <div className="sub">{c.email} · {c.phone}</div>
+          {scr.complete && (
+            // §4.1 snapshot — trainer-only badges (screening outcome, program gate, expiry)
+            <div className="flex gap" style={{ marginTop: 6, flexWrap: 'wrap' }}>
+              <Tag color={(OUTCOME_META[scr.complete.outcome] || {}).color || 'gray'}>
+                {RISK_ICON[(OUTCOME_META[scr.complete.outcome] || {}).color || 'gray']} {(OUTCOME_META[scr.complete.outcome] || {}).label || 'Screened'}
+              </Tag>
+              <Tag color={programStatus(scr.complete) === 'gated' ? 'red' : 'green'}>
+                {programStatus(scr.complete) === 'gated' ? RISK_ICON.red + ' Gated – pending review' : RISK_ICON.green + ' Program ready'}
+              </Tag>
+              <Tag color={rescreenDue(scr.complete, todayISO()) ? 'yellow' : 'gray'}>
+                {rescreenDue(scr.complete, todayISO()) ? RISK_ICON.yellow + ' Re-screen due' : 'Valid until ' + fmtDate(scr.complete.validUntil)}
+              </Tag>
+            </div>
+          )}
         </div></div>
         <div className="flex gap">
           <Button variant="ghost" onClick={() => openModal(<ClientForm client={c} />)}>Edit basics</Button>
@@ -61,6 +86,18 @@ export default function ClientProfilePage() {
           </div>
         </div>
       </div>
+
+      <div style={{ marginTop: 16 }}>
+        <ScreeningReview screening={scr.complete} draft={scr.draft} onClearance={saveClearance}
+          onStart={() => openModal(<CoachScreeningModal client={c} />, true)} />
+      </div>
+
+      {scr.complete && (
+        <div className="card" style={{ marginTop: 16 }}>
+          <div className="section-title" style={{ margin: '0 0 12px' }}>Client Profile — from screening</div>
+          <ScreeningProfile screening={scr.complete} trainerView />
+        </div>
+      )}
 
       <div className="card" style={{ marginTop: 16 }}>
         <div className="section-title" style={{ margin: '0 0 12px' }}>Intake &amp; History Snapshot</div>

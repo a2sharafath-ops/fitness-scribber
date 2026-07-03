@@ -8,11 +8,12 @@ import { uid } from '../../../lib/format'
 
 const GROUPS = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Hamstrings', 'Glutes', 'Full Body']
 const EQUIPS = ['Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Bands']
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
 export function ExerciseForm({ exercise }) {
   const { commit } = useData()
   const { closeModal } = useModal()
-  const [f, setF] = useState(exercise || { name: '', muscle: 'Chest', equip: 'Barbell' })
+  const [f, setF] = useState(exercise || { name: '', muscle: 'Chest', equip: 'Barbell', difficulty: 'Beginner', video: '', thumb: '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const save = () => {
     if (!f.name.trim()) return alert('Name required')
@@ -41,6 +42,11 @@ export function ExerciseForm({ exercise }) {
         <Field label="Muscle group"><select value={f.muscle} onChange={set('muscle')}>{GROUPS.map((g) => <option key={g}>{g}</option>)}</select></Field>
         <Field label="Equipment"><select value={f.equip} onChange={set('equip')}>{EQUIPS.map((q) => <option key={q}>{q}</option>)}</select></Field>
       </div>
+      <div className="row2">
+        <Field label="Difficulty"><select value={f.difficulty || 'Beginner'} onChange={set('difficulty')}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select></Field>
+        <Field label="Video URL"><input value={f.video || ''} onChange={set('video')} placeholder="YouTube/Vimeo/MP4 link" /></Field>
+      </div>
+      <Field label="Thumbnail image URL (optional)"><input value={f.thumb || ''} onChange={set('thumb')} placeholder="Leave blank to use a placeholder" /></Field>
     </ModalShell>
   )
 }

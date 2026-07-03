@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useData } from '../../store/DataContext'
+import { useConversations } from '../../hooks/useConversations'
 import { openConcerns } from '../../lib/calc'
 
 const ITEMS = [
@@ -8,11 +9,13 @@ const ITEMS = [
   ['/workouts', '🏋️', 'Workouts'],
   ['/schedule', '📅', 'Schedule'],
   ['/progress', '📈', 'Progress'],
+  ['/messages', '💬', 'Messages'],
   ['/concerns', '🚩', 'Concerns'],
 ]
 
 export default function Sidebar() {
   const { db } = useData()
+  const { totalUnread } = useConversations()
   const openCount = openConcerns(db).length
   return (
     <nav id="sidebar" aria-label="Main navigation">
@@ -25,6 +28,7 @@ export default function Sidebar() {
           <span className="ic" aria-hidden="true">{ic}</span>
           <span>{label}</span>
           {to === '/concerns' && <span className={'nav-badge' + (openCount > 0 ? ' show' : '')}>{openCount}</span>}
+          {to === '/messages' && <span className={'nav-badge' + (totalUnread > 0 ? ' show' : '')}>{totalUnread}</span>}
         </NavLink>
       ))}
       <div className="nav-spacer" />

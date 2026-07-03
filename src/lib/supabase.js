@@ -12,5 +12,6 @@ export const hasBackend = !!supabase
 // Collection arrays in the store that map 1:1 to Postgres tables (table name === key).
 export const TABLES = [
   'clients', 'exercises', 'plans', 'sessions', 'logs', 'wellness',
-  'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions', 'templates',
+  'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions', 'templates', 'workouts', 'assessments',
+  'screenings',
 ]

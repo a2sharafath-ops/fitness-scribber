@@ -10,6 +10,8 @@ function migrate(db) {
   })
   if (!db.prescriptions) db.prescriptions = []
   if (!db.templates) db.templates = []
+  if (!db.assessments) db.assessments = []
+  if (!db.screenings) db.screenings = []
   db.settings = db.settings || {}
   if (!db.settings.units) db.settings.units = 'kg'
   if (db.settings.tz === undefined) db.settings.tz = ''

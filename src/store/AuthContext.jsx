@@ -8,11 +8,17 @@ export function AuthProvider({ children }) {
   const [ready, setReady] = useState(!hasBackend)
   const [profile, setProfile] = useState(null)
   const [profileReady, setProfileReady] = useState(!hasBackend)
+  // True after the user follows a password-reset email link — forces the
+  // "set a new password" screen until they choose one.
+  const [recovery, setRecovery] = useState(false)
 
   useEffect(() => {
     if (!hasBackend) return
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true) })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s)
+      if (event === 'PASSWORD_RECOVERY') setRecovery(true)
+    })
     return () => sub.subscription.unsubscribe()
   }, [])
 
@@ -38,6 +44,16 @@ export function AuthProvider({ children }) {
     return { clientId: data }
   }
 
+  // Change the signed-in user's own password (also used to finish a reset).
+  const updatePassword = async (password) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (!error) setRecovery(false)
+    return { error }
+  }
+  // Email a password-reset link that returns to this app.
+  const sendPasswordReset = (email) =>
+    supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin })
+
   const value = {
     session,
     user: session?.user || null,
@@ -45,11 +61,14 @@ export function AuthProvider({ children }) {
     profile,
     role: profile?.role || null,
     profileReady,
+    recovery,
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
     signUp: (email, password) => supabase.auth.signUp({ email, password }),
     signOut: () => supabase.auth.signOut(),
     becomeCoach,
     redeemInvite,
+    updatePassword,
+    sendPasswordReset,
     refreshProfile: loadProfile,
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

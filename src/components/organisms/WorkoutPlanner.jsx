@@ -1,59 +1,119 @@
 import { useState } from 'react'
 import Button from '../atoms/Button'
+import SegToggle from '../molecules/SegToggle'
+import DayMetrics from '../molecules/DayMetrics'
 import PrescriptionModal from './PrescriptionModal'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { useFormat } from '../../hooks/useFormat'
-import { weekDates, fmtDate, todayISO } from '../../lib/dates'
+import { dailySum, dayMetrics } from '../../lib/calc'
+import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths } from '../../lib/dates'
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-export default function WorkoutPlanner({ client }) {
+export default function WorkoutPlanner({ client, featured = false, size }) {
+  const sz = size || (featured ? 'featured' : 'default')
+  const isFeatured = sz === 'featured'
+  const isMedium = sz === 'medium'
   const { db, tz } = useData()
   const { openModal } = useModal()
   const { fmtVL } = useFormat()
+  const [view, setView] = useState(isFeatured ? 'month' : 'week')
+  const [anchor, setAnchor] = useState(todayISO(tz)) // any date within the shown month
   const [weekStart, setWeekStart] = useState(0)
-  const wk = weekDates(weekStart, tz)
+  const [collapsed, setCollapsed] = useState(false)
   const today = todayISO(tz)
 
+  const intMap = dailySum(db.srpe, client.id, 'tl')
+  const prescribe = (dt) => openModal(<PrescriptionModal clientId={client.id} date={dt} />, true)
+  const dayData = (dt) => {
+    const presc = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
+    const items = presc.flatMap((p) => p.items)
+    const names = presc.map((p) => (p.notes || '').trim()).filter(Boolean)
+    const name = names.length ? names.join(' · ') : (items.length ? 'Session' : null)
+    return { items, vl: items.reduce((s, it) => s + (it.volumeLoad || 0), 0), name }
+  }
+  const open = (dt) => (e) => { if (!e.key || e.key === 'Enter' || e.key === ' ') { e.preventDefault?.(); prescribe(dt) } }
+
+  // One-line summary shown when the card is collapsed.
+  const shownDates = view === 'month' ? monthGridDates(anchor) : weekDates(weekStart, tz)
+  const prescribedDates = new Set(db.prescriptions.filter((p) => p.clientId === client.id && p.items.length).map((p) => p.date))
+  const plannedDays = shownDates.filter((d) => prescribedDates.has(d)).length
+  const nextDate = [...prescribedDates].filter((d) => d >= today).sort()[0]
+  const summary = `${plannedDays} session${plannedDays === 1 ? '' : 's'} ${view === 'month' ? 'this month' : 'this week'}${nextDate ? ` · next ${fmtDay(nextDate)}` : ''}`
+
   return (
-    <div className="card">
-      <div className="flex between">
-        <div className="section-title" style={{ margin: 0 }}>Workout Planner</div>
-        <div className="flex gap">
-          <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStart - 7)}>←</Button>
-          <Button variant="ghost" size="sm" onClick={() => setWeekStart(0)}>This week</Button>
-          <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStart + 7)}>→</Button>
-        </div>
+    <div className={'card' + (isFeatured ? ' planner-featured' : '') + (isMedium ? ' planner-medium' : '')}>
+      <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
+        <button className="planner-collapse" onClick={() => setCollapsed((v) => !v)}
+          aria-expanded={!collapsed} aria-label={collapsed ? 'Expand workout planner' : 'Collapse workout planner'}>
+          <span className="pc-caret" aria-hidden="true">{collapsed ? '▸' : '▾'}</span>
+          <span className="section-title" style={{ margin: 0, fontSize: isFeatured ? 19 : undefined }}>Workout Planner</span>
+        </button>
+        {collapsed ? (
+          <span className="planner-summary muted">{summary}</span>
+        ) : (
+          <div className="flex gap" style={{ flexWrap: 'wrap' }}>
+            <SegToggle options={[['week', 'Week'], ['month', 'Month']]} value={view} onChange={setView} ariaLabel="Calendar view" />
+            {view === 'month' ? (
+              <div className="flex gap">
+                <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(anchor, -1))} aria-label="Previous month">←</Button>
+                <Button variant="ghost" size="sm" onClick={() => setAnchor(today)}>Today</Button>
+                <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(anchor, 1))} aria-label="Next month">→</Button>
+              </div>
+            ) : (
+              <div className="flex gap">
+                <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStart - 7)} aria-label="Previous week">←</Button>
+                <Button variant="ghost" size="sm" onClick={() => setWeekStart(0)}>This week</Button>
+                <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStart + 7)} aria-label="Next week">→</Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      <div style={{ fontSize: 12, color: 'var(--muted)', margin: '8px 0' }}>
-        Week of {fmtDate(wk[0])} — click a day to prescribe
-      </div>
-      <div className="plan-week">
-        {DAYS.map((dn, i) => {
-          const dt = wk[i]
-          const pres = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
-          const vl = pres.reduce((a, p) => a + p.items.reduce((s, it) => s + (it.volumeLoad || 0), 0), 0)
-          const exItems = pres.flatMap((p) => p.items).slice(0, 4)
-          return (
-            <div
-              key={dt}
-              className={'plan-day' + (dt === today ? ' today' : '')}
-              role="button"
-              tabIndex={0}
-              aria-label={`Prescribe ${dn} ${dt}`}
-              onClick={() => openModal(<PrescriptionModal clientId={client.id} date={dt} />, true)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(<PrescriptionModal clientId={client.id} date={dt} />, true) } }}
-            >
-              <div className="pd-date">{dn} {+dt.slice(8, 10)}</div>
-              {exItems.map((it, j) => (
-                <div className="plan-ex" key={j}>{it.exercise}{it.group ? <span className="superset-tag">SS {it.group}</span> : null}</div>
-              ))}
-              {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
-            </div>
-          )
-        })}
-      </div>
+
+      {collapsed ? null : view === 'month' ? (
+        <>
+          <div style={{ margin: '10px 0 8px', fontSize: 14, fontWeight: 700 }}>
+            {monthLabel(anchor)} <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>— click a day to prescribe</span>
+          </div>
+          <div className="plan-dow">{DOW.map((d) => <div key={d}>{d}</div>)}</div>
+          <div className="plan-month">
+            {monthGridDates(anchor).map((dt) => {
+              const { vl, name } = dayData(dt)
+              return (
+                <div key={dt} className={'plan-cell' + (dt === today ? ' today' : '') + (dt.slice(0, 7) !== anchor.slice(0, 7) ? ' out' : '')}
+                  role="button" tabIndex={0} aria-label={`Prescribe ${dt}`} onClick={open(dt)} onKeyDown={open(dt)}>
+                  <div className="pc-date">{+dt.slice(8, 10)}{dt === today && <span className="pc-today">today</span>}</div>
+                  {name && <div className="plan-session" title={name}>{name}</div>}
+                  {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : null}
+                  {dt >= today && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '8px 0' }}>
+            Week of {fmtDate(weekDates(weekStart, tz)[0])} — click a day to prescribe
+          </div>
+          <div className="plan-week">
+            {weekDates(weekStart, tz).map((dt, i) => {
+              const { vl, name } = dayData(dt)
+              return (
+                <div key={dt} className={'plan-day' + (dt === today ? ' today' : '')}
+                  role="button" tabIndex={0} aria-label={`Prescribe ${DOW[i]} ${dt}`} onClick={open(dt)} onKeyDown={open(dt)}>
+                  <div className="pd-date">{DOW[i]} {+dt.slice(8, 10)}</div>
+                  {name ? <div className="plan-session" title={name}>{name}</div> : <div className="plan-rest muted">Rest / unplanned</div>}
+                  {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
+                  {dt >= today && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }

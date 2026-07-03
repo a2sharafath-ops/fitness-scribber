@@ -11,6 +11,7 @@ import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { lastNDates, fmtDate, todayISO } from '../lib/dates'
 import { readinessFor, dailySum, acwrSeries, trainingMonotony } from '../lib/calc'
+import { forClient, baseline, latest, movementScore, compare, MOVEMENT_MAX } from '../lib/assessment'
 
 const SEV = { High: 'red', Medium: 'yellow', Low: 'gray' }
 
@@ -33,6 +34,13 @@ export default function ReportPage() {
   const conc = db.concerns.filter((x) => x.clientId === c.id && x.status === 'Open')
   const recentRes = db.resistance.filter((x) => x.clientId === c.id).sort((x, y) => y.date.localeCompare(x.date)).slice(0, 8)
   const today = todayISO(tz)
+
+  // Assessment summary: movement (baseline→latest), body-comp deltas, goals.
+  const alist = forClient(db.assessments, c.id)
+  const mvB = baseline(alist, 'movement'), mvL = latest(alist, 'movement')
+  const bcB = baseline(alist, 'body_comp'), bcL = latest(alist, 'body_comp')
+  const bcRows = bcB && bcL && bcB.id !== bcL.id ? compare('body_comp', bcB, bcL) : []
+  const goalsL = latest(alist, 'goals')
 
   return (
     <>
@@ -65,6 +73,42 @@ export default function ReportPage() {
         <div className="section-title">Intake &amp; history</div>
         <div className="intake-block"><div className="i-h">🩹 Injury history</div><div className="i-b">{ik.injury || '—'}</div></div>
         <div className="intake-block"><div className="i-h">🩺 Medical</div><div className="i-b">{ik.medical || '—'}</div></div>
+        {alist.length > 0 && (
+          <>
+            <div className="section-title">Assessments</div>
+            {mvL && (
+              <div className="intake-block">
+                <div className="i-h">🤸 Movement screen</div>
+                <div className="i-b">
+                  {mvB && mvB.id !== mvL.id
+                    ? `Baseline ${movementScore(mvB.data).score}/${MOVEMENT_MAX} (${fmtDate(mvB.date)}) → Latest ${movementScore(mvL.data).score}/${MOVEMENT_MAX} (${fmtDate(mvL.date)})`
+                    : `${movementScore(mvL.data).score}/${MOVEMENT_MAX} (${fmtDate(mvL.date)})`}
+                </div>
+              </div>
+            )}
+            {bcRows.length > 0 && (
+              <table>
+                <thead><tr><th>Body composition</th><th>{fmtDate(bcB.date)}</th><th>{fmtDate(bcL.date)}</th><th>Δ</th></tr></thead>
+                <tbody>
+                  {bcRows.map((r, i) => (
+                    <tr key={i}><td>{r.label}</td><td>{r.from ?? '—'}{r.from != null ? r.unit : ''}</td><td>{r.to ?? '—'}{r.to != null ? r.unit : ''}</td>
+                      <td>{r.delta != null && r.delta !== 0 ? `${r.delta > 0 ? '+' : ''}${r.delta}${r.unit || ''}` : '—'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {goalsL && (goalsL.data.shortTerm?.length || goalsL.data.longTerm?.length) ? (
+              <div className="intake-block">
+                <div className="i-h">🎯 Goals</div>
+                <div className="i-b">
+                  {(goalsL.data.shortTerm || []).map((g, i) => <div key={'s' + i}>• {g.text}{g.by ? ` (by ${fmtDate(g.by)})` : ''} <span className="muted">— short-term</span></div>)}
+                  {(goalsL.data.longTerm || []).map((g, i) => <div key={'l' + i}>• {g.text}{g.by ? ` (by ${fmtDate(g.by)})` : ''} <span className="muted">— long-term</span></div>)}
+                </div>
+              </div>
+            ) : null}
+          </>
+        )}
+
         <div className="section-title">Open concerns ({conc.length})</div>
         {conc.length ? conc.map((x) => (
           <div className="intake-block" key={x.id}><div className="i-b"><Tag color={SEV[x.severity]}><Shape color={SEV[x.severity]} /> {x.severity}</Tag> {x.text}</div></div>

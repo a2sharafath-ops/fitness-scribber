@@ -2,46 +2,66 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
-import Kpi from '../components/atoms/Kpi'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import ConcernCard from '../components/molecules/ConcernCard'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
-import { AssignPlanForm, InviteAthleteForm } from '../components/organisms/forms/ClientForms'
+import AICoach from '../components/organisms/AICoach'
+import TodayWorkout from '../components/organisms/workout/TodayWorkout'
+import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
 import { BodyMetricForm } from '../components/organisms/forms/LogForms'
 import { hasBackend } from '../lib/supabase'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
+import { uid } from '../lib/format'
+import { calcSRPETL } from '../lib/calc'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
-import { readinessFor, readinessScore, dailySum, acwrSeries, trainingMonotony, trainingStrain } from '../lib/calc'
+import { readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
+import { forClient, baselineProgress } from '../lib/assessment'
 
 const SSTATUS = { Confirmed: 'green', Pending: 'orange', Completed: 'blue', Cancelled: 'gray' }
 
 export default function ClientDetailPage() {
   const { id } = useParams()
   const nav = useNavigate()
-  const { db, commit, tz } = useData()
+  const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
   const c = db.clients.find((x) => x.id === id)
   if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
 
-  const plan = c.planId ? db.plans.find((p) => p.id === c.planId) : null
-  const exName = (eid) => db.exercises.find((e) => e.id === eid)?.name || '?'
   const sessions = db.sessions.filter((s) => s.clientId === id).sort((a, b) => b.date.localeCompare(a.date))
   const concerns = db.concerns.filter((x) => x.clientId === id)
 
-  // Load-Response snapshot KPIs (charts/detail live in the Command Center)
+  // Readiness + ACWR still feed TodayWorkout's context; per-day metrics render inside the planner.
   const today = todayISO(tz)
   const intMap = dailySum(db.srpe, c.id, 'tl')
-  const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
-  const mono = trainingMonotony(last7)
-  const strain = trainingStrain(last7)
   const acwr = acwrSeries(intMap, lastNDates(28, tz)).filter((v) => v != null).slice(-1)[0]
   const rScore = readinessScore(db, c.id, today) ?? (() => {
     const d = [...lastNDates(28, tz)].reverse().find((x) => readinessScore(db, c.id, x) != null)
     return d ? readinessScore(db, c.id, d) : null
   })()
+
+  // Today's Workout
+  const workouts = db.workouts || []
+  const todayW = workouts.find((w) => w.clientId === c.id && w.date === today) || null
+  const lastWear = latestOf(db.wearable, c.id)
+  const restingHr = lastWear?.rhr ?? null
+  const age = c.anthro?.age ?? null
+  const saveWorkout = (w) => commit((d) => { d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w] })
+  const saveTemplate = (plan) => commit((d) => { d.plans = [...d.plans, plan] })
+  const clearWorkout = () => { if (!todayW) return; commit((d) => { d.workouts = (d.workouts || []).filter((x) => x.id !== todayW.id) }) }
+  const completeWorkout = (w) => {
+    const maxHr = 220 - (age || 30)
+    const rpe = w.hrMax ? Math.max(1, Math.min(10, Math.round((w.hrMax / maxHr) * 10))) : 6
+    const minutes = w.durationSec ? Math.max(1, Math.round(w.durationSec / 60)) : 30
+    commit((d) => {
+      d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w]
+      d.srpe = [...d.srpe, { id: uid(), clientId: c.id, date: w.date, sessionId: null, rpe, duration: minutes, tl: calcSRPETL(rpe, minutes) }]
+    })
+  }
+
+  const baseProg = baselineProgress(forClient(db.assessments, c.id))
 
   const resolve = (cid) => { const note = prompt('Resolution note (optional):', ''); if (note === null) return; commit((d) => { const x = d.concerns.find((q) => q.id === cid); x.status = 'Resolved'; x.resolution = note.trim() }) }
   const reopen = (cid) => commit((d) => { const x = d.concerns.find((q) => q.id === cid); x.status = 'Open'; x.resolution = '' })
@@ -57,41 +77,41 @@ export default function ClientDetailPage() {
         </div></div>
         <div className="flex gap">
           <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/profile')}>👤 Profile</Button>
+          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/assessments')}>📋 Assessments</Button>
           <Button variant="ghost" onClick={() => openModal(<BodyMetricForm clientId={c.id} />)}>＋ Log Progress</Button>
           {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}>🎟️ Invite</Button>}
         </div>
       </div>
 
-      {/* Load-Response snapshot — full charts/breakdowns live in the Command Center */}
-      <div className="flex between" style={{ marginBottom: 12 }}>
-        <div className="section-title" style={{ margin: 0 }}>Load-Response snapshot</div>
+      {baseProg.done < baseProg.total && (
+        <div className="card onboard-banner" style={{ marginBottom: 12 }}>
+          <div>
+            <div style={{ fontWeight: 700 }}>📋 Onboarding assessments incomplete</div>
+            <div className="muted" style={{ fontSize: 12 }}>{baseProg.done}/{baseProg.total} baselines recorded · missing {baseProg.missing.length}</div>
+          </div>
+          <Button size="sm" onClick={() => nav('/clients/' + c.id + '/assessments')}>Complete now →</Button>
+        </div>
+      )}
+
+      {/* Load-Response now lives per-day inside the planner. Full charts/breakdowns are in the Command Center. */}
+      <div className="flex between" style={{ marginBottom: 4 }}>
+        <div className="section-title" style={{ margin: 0 }}>Load-Response by day</div>
         <Button variant="ghost" size="sm" onClick={() => nav('/command/' + c.id)}>Open full dashboard →</Button>
       </div>
-      <div className="kpi-strip">
-        <Kpi label="Readiness" value={rScore ?? '—'} delta="composite /100" onClick={() => nav('/clients/' + c.id + '/metric/readiness')} />
-        <Kpi label="ACWR" value={acwr ? acwr.toFixed(2) : '—'} delta={acwr ? (acwr >= 0.8 && acwr <= 1.3 ? 'sweet spot' : acwr > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwr ? (acwr >= 0.8 && acwr <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} onClick={() => nav('/clients/' + c.id + '/metric/acwr')} />
-        <Kpi label="Monotony (7d)" value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} onClick={() => nav('/clients/' + c.id + '/metric/monotony')} />
-        <Kpi label="Strain (7d)" value={strain.toLocaleString()} delta="load × monotony" onClick={() => nav('/clients/' + c.id + '/metric/strain')} />
+
+      {/* Workout planner — the primary day-to-day tool, with the AI coach beside it as a chat */}
+      <div className="cc-wrap" style={{ marginTop: 16 }}>
+        <div className="cc-main"><WorkoutPlanner client={c} size="medium" /></div>
+        <div className="cc-side"><AICoach client={c} /></div>
       </div>
 
-      <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
-        <div className="card">
-          <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Assigned Plan</div>
-            <Button variant="ghost" size="sm" onClick={() => openModal(<AssignPlanForm client={c} />)}>Change</Button></div>
-          {plan ? (
-            <div style={{ marginTop: 12 }}>
-              <strong>{plan.name}</strong><div className="muted" style={{ fontSize: 12, marginBottom: 12 }}>{plan.desc}</div>
-              {plan.items.map((it, i) => (
-                <div className="ex-item" key={i}><div style={{ flex: 1 }}><strong>{exName(it.exId)}</strong>
-                  <div className="muted" style={{ fontSize: 12 }}>{it.sets} × {it.reps} · rest {it.rest}</div></div></div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty" style={{ padding: 30 }}><div className="big">📋</div>No plan assigned
-              <div><Button size="sm" style={{ marginTop: 10 }} onClick={() => openModal(<AssignPlanForm client={c} />)}>Assign plan</Button></div>
-            </div>
-          )}
-        </div>
+      {/* Secondary: Today's Workout + Recent sessions. Today's Workout takes the
+          full width only while a session is live; otherwise they sit side by side. */}
+      <div className={'grid' + (todayW?.status === 'in_progress' ? '' : ' cards-2')} style={{ marginTop: 16, alignItems: 'start' }}>
+        <TodayWorkout client={c} today={today} workout={todayW} plans={db.plans} exercises={db.exercises}
+          units={units} context={{ readiness: rScore, acwr }} restingHr={restingHr} age={age} bodyMassKg={c.anthro?.massKg ?? null}
+          onSave={saveWorkout} onComplete={completeWorkout} onClear={clearWorkout} onTemplate={saveTemplate} />
+
         <div className="card">
           <div className="section-title" style={{ margin: '0 0 10px' }}>Recent sessions</div>
           {sessions.slice(0, 6).map((s) => (
@@ -103,9 +123,6 @@ export default function ClientDetailPage() {
           <Button variant="ghost" size="sm" style={{ marginTop: 12 }} onClick={() => nav('/command/' + c.id)}>View progress charts →</Button>
         </div>
       </div>
-
-      {/* Workout planner overview */}
-      <div style={{ marginTop: 16 }}><WorkoutPlanner client={c} /></div>
 
       {/* Concerns */}
       <div className="card" style={{ marginTop: 16 }}>

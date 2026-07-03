@@ -6,6 +6,7 @@ import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
+import { screeningsFor, programStatus } from '../../../lib/screening'
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
@@ -114,7 +115,13 @@ export function AssignPlanForm({ client }) {
   const { db, commit } = useData()
   const { closeModal } = useModal()
   const [planId, setPlanId] = useState(client.planId || '')
+  // Safety gate: a screening with outcome C (or a major red flag) blocks starting
+  // an active program until the trainer records clearance as Received.
+  const { complete } = screeningsFor(db.screenings, client.id)
+  const gated = !!complete && programStatus(complete) === 'gated'
+  const blocked = gated && !!planId
   const save = () => {
+    if (blocked) return
     commit((d) => { d.clients.find((c) => c.id === client.id).planId = planId || null })
     closeModal()
   }
@@ -122,7 +129,7 @@ export function AssignPlanForm({ client }) {
     <ModalShell
       title={'Assign Plan to ' + client.name}
       onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save</Button></>}
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button disabled={blocked} onClick={save}>Save</Button></>}
     >
       <Field label="Workout plan">
         <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
@@ -130,6 +137,13 @@ export function AssignPlanForm({ client }) {
           {db.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </Field>
+      {gated && (
+        <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
+          ⚠ {client.name}'s health screening needs review before an active program starts.
+          Record physician/ePARmed-X+ clearance as <strong>Received</strong> in their profile
+          (Health screening card) to unlock plan assignment.
+        </p>
+      )}
     </ModalShell>
   )
 }

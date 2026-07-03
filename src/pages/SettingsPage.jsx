@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import Field from '../components/atoms/Field'
 import ExportMenu from '../components/organisms/forms/ExportMenu'
+import ChangePasswordCard from '../components/organisms/forms/ChangePasswordCard'
+import CommsSettingsCard from '../components/organisms/forms/CommsSettingsCard'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { useAuth } from '../store/AuthContext'
@@ -45,6 +47,8 @@ export default function SettingsPage() {
         <div className="muted" style={{ fontSize: 12 }}>Today resolves to: <strong>{fmtDate(todayISO(f.tz))}</strong></div>
         <div className="modal-foot"><Button onClick={save}>Save settings</Button></div>
       </div>
+
+      <CommsSettingsCard />
       <div className="card" style={{ maxWidth: 560, marginTop: 16 }}>
         <div className="section-title" style={{ margin: '0 0 8px' }}>Data</div>
         <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
@@ -62,6 +66,7 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+      {hasBackend && <ChangePasswordCard style={{ maxWidth: 560, marginTop: 16 }} />}
     </>
   )
 }

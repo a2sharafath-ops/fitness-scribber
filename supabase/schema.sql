@@ -22,7 +22,8 @@ create table if not exists clients (
 create table if not exists exercises (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  "name" text not null, "muscle" text, "equip" text
+  "name" text not null, "muscle" text, "equip" text,
+  "difficulty" text, "video" text, "thumb" text
 );
 
 create table if not exists plans (
