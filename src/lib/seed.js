@@ -73,6 +73,36 @@ export function seed() {
     prescriptions: [],
     templates: [],
     assessments: [],
+    // Voice-parsing synonym index: spoken/parsed phrase → database standard term.
+    synonyms: [
+      { id: uid(), phrase: 'bb squat', exercise: 'Barbell Back Squat' },
+      { id: uid(), phrase: 'back squat', exercise: 'Barbell Back Squat' },
+      { id: uid(), phrase: 'squats', exercise: 'Barbell Back Squat' },
+      { id: uid(), phrase: 'rdl', exercise: 'Romanian Deadlift' },
+      { id: uid(), phrase: 'db rdl', exercise: 'Romanian Deadlift' },
+      { id: uid(), phrase: 'straight leg deadlift', exercise: 'Romanian Deadlift' },
+      { id: uid(), phrase: 'db bench', exercise: 'Bench Press' },
+      { id: uid(), phrase: 'flat dumbbell press', exercise: 'Bench Press' },
+      { id: uid(), phrase: 'ohp', exercise: 'Overhead Press' },
+      { id: uid(), phrase: 'military press', exercise: 'Overhead Press' },
+      { id: uid(), phrase: 'chin up', exercise: 'Pull-up' },
+      { id: uid(), phrase: 'chins', exercise: 'Pull-up' },
+      { id: uid(), phrase: 'pull ups', exercise: 'Pull-up' },
+      { id: uid(), phrase: 'deads', exercise: 'Deadlift' },
+      { id: uid(), phrase: 'conventional deadlift', exercise: 'Deadlift' },
+      { id: uid(), phrase: 'lunges', exercise: 'Dumbbell Lunge' },
+      { id: uid(), phrase: 'split squat', exercise: 'Dumbbell Lunge' },
+    ],
+    // Lift-max ledger: 'e1rm' events feed the rolling 30-day Absolute 1RM;
+    // 'tm' rows are Training Max checkpoints (block-start resets).
+    maxes: [
+      { id: uid(), clientId: c2, exercise: 'Back Squat', date: d(-24), kind: 'e1rm', valueKg: 172.5, source: 'auto' },
+      { id: uid(), clientId: c2, exercise: 'Back Squat', date: d(-10), kind: 'e1rm', valueKg: 176.5, source: 'auto' },
+      { id: uid(), clientId: c2, exercise: 'Back Squat', date: d(-28), kind: 'tm', valueKg: 165, source: 'block-start' },
+      { id: uid(), clientId: c2, exercise: 'Deadlift', date: d(-8), kind: 'e1rm', valueKg: 205, source: 'auto' },
+      { id: uid(), clientId: c2, exercise: 'Deadlift', date: d(-28), kind: 'tm', valueKg: 190, source: 'block-start' },
+      { id: uid(), clientId: c1, exercise: 'Goblet Squat', date: d(-12), kind: 'e1rm', valueKg: 34, source: 'auto' },
+    ],
     settings: { trainerName: 'Alex Rivera', businessName: 'FitScribe Studio', units: 'kg', tz: '' },
   }
 

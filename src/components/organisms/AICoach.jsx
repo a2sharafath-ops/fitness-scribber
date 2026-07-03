@@ -4,6 +4,7 @@ import { useFormat } from '../../hooks/useFormat'
 import { callFunction, hasBackend } from '../../api/functions'
 import { lastNDates, todayISO, fmtDay } from '../../lib/dates'
 import { dailySum, acwrSeries, trainingMonotony, readinessScore, readinessFor, rolling30Baseline, deviationPct, latestOf, mean } from '../../lib/calc'
+import { programStats } from '../../lib/program'
 
 // Rule-based synthesis of live metrics into actionable coaching prompts.
 function suggest(db, client, tz, fmtVL) {
@@ -20,7 +21,8 @@ function suggest(db, client, tz, fmtVL) {
   let hrvDev = null
   if (hr) { const b = rolling30Baseline(db, client.id, 'hrv', hr.date); if (b) hrvDev = deviationPct(hr.hrv, b) }
   const upcoming = db.prescriptions.filter((p) => p.clientId === client.id && p.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0]
-  const planVL = upcoming ? upcoming.items.reduce((s, it) => s + (it.volumeLoad || 0), 0) : 0
+  const upStats = upcoming ? programStats(upcoming) : null
+  const planVL = upStats ? upStats.volume : 0
   const avgVL = mean(lastNDates(28, tz).map((d) => dailySum(db.resistance, client.id, 'volumeLoad')[d] || 0).filter((v) => v > 0))
 
   if (hrvDev != null && hrvDev < -8) out.push({ t: 'warn', h: 'HRV suppressed', m: `Morning HRV is ${hrvDev.toFixed(0)}% below the 30-day baseline. Favor aerobic/technical work today and delay high-intensity loading.` })
@@ -28,7 +30,7 @@ function suggest(db, client, tz, fmtVL) {
   else if (rScore != null && rScore < 45) out.push({ t: 'warn', h: 'Reduced readiness', m: `Composite readiness is ${rScore}/100. If training proceeds, cut one working set per lift or drop intensity ~5%.` })
   if (upcoming) {
     if (planVL > avgVL * 1.3 && avgVL > 0) out.push({ t: 'warn', h: 'Planned load spike', m: `${fmtDay(upcoming.date)}'s session is ${Math.round((planVL / avgVL - 1) * 100)}% above the 7–28d average Volume Load (${fmtVL(Math.round(planVL))}). Confirm this progression is intentional.` })
-    else if (planVL > 0) out.push({ t: 'info', h: 'Session drafted', m: `${fmtDay(upcoming.date)}: ${upcoming.items.length} exercise(s), ~${fmtVL(Math.round(planVL))} Volume Load. ${rScore != null && rScore >= 65 ? 'Readiness supports it — green light.' : 'Cross-check against today’s readiness before confirming.'}` })
+    else if (planVL > 0) out.push({ t: 'info', h: 'Session drafted', m: `${fmtDay(upcoming.date)}: ${upStats.exercises} exercise(s), ~${fmtVL(Math.round(planVL))} Volume Load. ${rScore != null && rScore >= 65 ? 'Readiness supports it — green light.' : 'Cross-check against today’s readiness before confirming.'}` })
   }
   if (acwr != null && acwr > 1.5) out.push({ t: 'warn', h: 'Acute:chronic spike', m: `ACWR is ${acwr.toFixed(2)} (>1.5) — elevated injury-risk zone. Cap or deload weekly load to pull back toward 0.8–1.3.` })
   else if (acwr != null && acwr < 0.8) out.push({ t: 'info', h: 'Detraining risk', m: `ACWR is ${acwr.toFixed(2)} (<0.8). There's room to progressively add load this week.` })
@@ -51,13 +53,14 @@ function summarize(db, client, tz, fmtVL) {
   let hrvDev = null
   if (hr) { const b = rolling30Baseline(db, client.id, 'hrv', hr.date); if (b) hrvDev = deviationPct(hr.hrv, b) }
   const upcoming = db.prescriptions.filter((p) => p.clientId === client.id && p.date >= todayISO(tz)).sort((a, b) => a.date.localeCompare(b.date))[0]
-  const planVL = upcoming ? upcoming.items.reduce((s, it) => s + (it.volumeLoad || 0), 0) : 0
+  const upStats = upcoming ? programStats(upcoming) : null
+  const planVL = upStats ? upStats.volume : 0
   return [
     `Athlete: ${client.name}, goal: ${client.goal}, level: ${client.level}.`,
     `Readiness: ${r.label} (wellness ${r.wellness ?? 'n/a'}/28${hrvDev != null ? `, HRV ${hrvDev.toFixed(0)}% vs baseline` : ''}).`,
     `Weekly internal load (sRPE-TL): ${Math.round(last7.reduce((a, b) => a + b, 0))} AU. ACWR ${acwr ? acwr.toFixed(2) : 'n/a'}. Monotony ${mono}.`,
     w ? `Latest wellness — sleep ${w.sleep}/7, stress ${w.stress}/7, fatigue ${w.fatigue}/7, soreness ${w.soreness}/7.` : 'No recent wellness check-in.',
-    upcoming ? `Next prescribed session ${fmtDay(upcoming.date)}: ${upcoming.items.length} exercises, ~${fmtVL(Math.round(planVL))} volume load.` : 'No upcoming session prescribed.',
+    upcoming ? `Next prescribed session ${fmtDay(upcoming.date)}: ${upStats.exercises} exercises, ~${fmtVL(Math.round(planVL))} volume load.` : 'No upcoming session prescribed.',
   ].join('\n')
 }
 

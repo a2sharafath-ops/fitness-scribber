@@ -28,6 +28,19 @@ Open **SQL Editor** in the Supabase dashboard, paste the contents of
 indexes, enables **Row-Level Security**, and adds a policy so each coach can only read/write
 their own rows (`"coachId" = auth.uid()`).
 
+Then run [`supabase/schema_program.sql`](./supabase/schema_program.sql) (Advanced
+Programming Platform: block-structured workouts, `maxes` 1RM/Training-Max ledger,
+`synonyms` voice index — plus a one-time migration of flat prescription items into
+blocks). Existing installs: re-running it is safe (idempotent).
+
+### Voice-to-workout parsing (optional)
+Deploy the `parse-workout` edge function alongside `insights` — it reuses the same
+`LLM_PROVIDER` + `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` secrets:
+```bash
+supabase functions deploy parse-workout
+```
+Without it (or in local mode) dictation falls back to the built-in heuristic parser.
+
 ## 4. Auth settings
 - **Authentication → Providers → Email** is on by default. For quick local testing you can turn
   **off** "Confirm email" (Authentication → Providers → Email) so signup logs you straight in.

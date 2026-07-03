@@ -2,11 +2,12 @@ import { useState } from 'react'
 import Button from '../atoms/Button'
 import SegToggle from '../molecules/SegToggle'
 import DayMetrics from '../molecules/DayMetrics'
-import PrescriptionModal from './PrescriptionModal'
+import WorkoutBuilderModal from './program/WorkoutBuilderModal'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { useFormat } from '../../hooks/useFormat'
 import { dailySum, dayMetrics } from '../../lib/calc'
+import { programStats } from '../../lib/program'
 import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths } from '../../lib/dates'
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -25,19 +26,19 @@ export default function WorkoutPlanner({ client, featured = false, size }) {
   const today = todayISO(tz)
 
   const intMap = dailySum(db.srpe, client.id, 'tl')
-  const prescribe = (dt) => openModal(<PrescriptionModal clientId={client.id} date={dt} />, true)
+  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} />, true)
   const dayData = (dt) => {
     const presc = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
-    const items = presc.flatMap((p) => p.items)
+    const stats = presc.map(programStats).reduce((a, s) => ({ exercises: a.exercises + s.exercises, sets: a.sets + s.sets, volume: a.volume + s.volume }), { exercises: 0, sets: 0, volume: 0 })
     const names = presc.map((p) => (p.notes || '').trim()).filter(Boolean)
-    const name = names.length ? names.join(' · ') : (items.length ? 'Session' : null)
-    return { items, vl: items.reduce((s, it) => s + (it.volumeLoad || 0), 0), name }
+    const name = names.length ? names.join(' · ') : (stats.exercises ? `Session · ${stats.exercises} ex / ${stats.sets} sets` : null)
+    return { vl: Math.round(stats.volume), name }
   }
   const open = (dt) => (e) => { if (!e.key || e.key === 'Enter' || e.key === ' ') { e.preventDefault?.(); prescribe(dt) } }
 
   // One-line summary shown when the card is collapsed.
   const shownDates = view === 'month' ? monthGridDates(anchor) : weekDates(weekStart, tz)
-  const prescribedDates = new Set(db.prescriptions.filter((p) => p.clientId === client.id && p.items.length).map((p) => p.date))
+  const prescribedDates = new Set(db.prescriptions.filter((p) => p.clientId === client.id && programStats(p).exercises).map((p) => p.date))
   const plannedDays = shownDates.filter((d) => prescribedDates.has(d)).length
   const nextDate = [...prescribedDates].filter((d) => d >= today).sort()[0]
   const summary = `${plannedDays} session${plannedDays === 1 ? '' : 's'} ${view === 'month' ? 'this month' : 'this week'}${nextDate ? ` · next ${fmtDay(nextDate)}` : ''}`

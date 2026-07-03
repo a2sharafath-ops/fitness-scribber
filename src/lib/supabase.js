@@ -13,5 +13,5 @@ export const hasBackend = !!supabase
 export const TABLES = [
   'clients', 'exercises', 'plans', 'sessions', 'logs', 'wellness',
   'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions', 'templates', 'workouts', 'assessments',
-  'screenings',
+  'screenings', 'maxes', 'synonyms',
 ]

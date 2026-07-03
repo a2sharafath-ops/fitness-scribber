@@ -5,6 +5,7 @@ import Button from '../components/atoms/Button'
 import SegToggle from '../components/molecules/SegToggle'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import LoadResponseDashboard from '../components/organisms/LoadResponseDashboard'
+import StrengthDashboard from '../components/organisms/StrengthDashboard'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
 import AICoach from '../components/organisms/AICoach'
 import ProfilePanel from '../components/organisms/ProfilePanel'
@@ -51,6 +52,7 @@ export default function CommandCenterPage() {
       <div className="cc-wrap">
         <div className="cc-main">
           <LoadResponseDashboard client={c} win={win} range={range} />
+          <StrengthDashboard client={c} range={range >= 56 ? range : 90} />
           <WorkoutPlanner client={c} />
         </div>
         <div className="cc-side"><AICoach client={c} /></div>

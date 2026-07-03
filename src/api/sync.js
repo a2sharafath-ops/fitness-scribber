@@ -3,6 +3,7 @@
 // so every existing `commit(db => ...)` call site keeps working unchanged.
 import { supabase, TABLES } from '../lib/supabase'
 import { seed } from '../lib/seed'
+import { ensureProgramShape } from '../lib/program'
 
 const stripOwner = (rows) => rows.map(({ coachId: _own, ...r }) => r)
 const byId = (arr) => Object.fromEntries((arr || []).map((r) => [r.id, r]))
@@ -26,6 +27,8 @@ export async function fetchAll() {
     if (!c.intake) c.intake = { questionnaire: '', medical: '', injury: '', diet: '' }
     if (c.monitorOptIn == null) c.monitorOptIn = false
   })
+  // Blocks upgrade for rows written before schema_program.sql was applied.
+  ensureProgramShape(db)
   return db
 }
 

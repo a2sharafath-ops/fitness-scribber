@@ -1,5 +1,6 @@
 // localStorage persistence with forward-compatible migration of older saved data.
 import { seed } from './seed'
+import { ensureProgramShape } from './program'
 
 const KEY = 'fitscribe_v1'
 
@@ -20,6 +21,9 @@ function migrate(db) {
     if (!c.intake) c.intake = { questionnaire: '', medical: '', injury: '', diet: '' }
     if (c.monitorOptIn === undefined) c.monitorOptIn = false
   })
+  // Advanced Programming Platform: maxes/synonyms collections + lazy
+  // items→blocks upgrade of prescriptions and templates.
+  ensureProgramShape(db)
   return db
 }
 
