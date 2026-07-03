@@ -8,7 +8,7 @@ const BLOCK_HINT = {
   'Warm-up': 'Mobility & activation — ignored for strength tracking',
   'Main Lifts': 'Primary compounds — drives 1RM baselines & failure flags',
   'Assisted': 'Isolation & accessory work',
-  'Core/Hypertrophy': 'Trunk stability & structural volume',
+  'Core/Others': 'Trunk stability, structural volume & everything else',
   'Cool-down': 'Recovery protocols',
 }
 

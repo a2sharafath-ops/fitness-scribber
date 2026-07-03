@@ -10,8 +10,18 @@ export default function ExerciseCard({
   toDisp, dispToKg, unitName,
   onChange, onRemove,
 }) {
+  // Set 1 acts as the template row: edits to its prescription fields
+  // auto-fill every later set that hasn't been edited individually
+  // (copy-paste ergonomics). Touching a lower set opts it out.
+  const PROPAGATE = ['prescribedReps', 'prescribedIntensityValue', 'prescribedLoadKg', 'prescribedTempo', 'prescribedRestSeconds']
   const setSet = (si) => (k, v) =>
-    onChange({ sets: ex.sets.map((s, j) => (j === si ? { ...s, [k]: v, ...(k === 'status' ? { flagged: false, e1rmApplied: false } : {}) } : s)) })
+    onChange({
+      sets: ex.sets.map((s, j) => {
+        if (j === si) return { ...s, [k]: v, ...(si > 0 && PROPAGATE.includes(k) ? { touched: true } : {}), ...(k === 'status' ? { flagged: false, e1rmApplied: false } : {}) }
+        if (si === 0 && j > 0 && !s.touched && s.status === 'Pending' && PROPAGATE.includes(k)) return { ...s, [k]: v }
+        return s
+      }),
+    })
   const addSet = () => {
     const last = ex.sets[ex.sets.length - 1]
     const next = last ? { ...structuredClone(last), setId: newSet().setId, setNumber: ex.sets.length + 1, completedReps: null, completedLoadKg: null, status: 'Pending' } : newSet(1)
@@ -65,6 +75,7 @@ export default function ExerciseCard({
           onChange={setSet(si)} onRemove={removeSet(si)} />
       ))}
       <button type="button" className="link-btn" onClick={addSet}>＋ Add set</button>
+      {ex.sets.length > 1 && <span className="muted" style={{ fontSize: 10, marginLeft: 8 }}>set 1 auto-fills the sets below until they’re edited</span>}
     </div>
   )
 }

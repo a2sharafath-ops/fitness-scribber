@@ -13,7 +13,7 @@ const SYSTEM =
   'literal historical dictates. If a coach changes a parameter value, immediately discard the ' +
   'previous value and capture the final state.\n\n' +
   'Return ONLY a JSON object (no markdown fences, no commentary) of the shape:\n' +
-  '{"blocks":[{"blockType":"Warm-up"|"Main Lifts"|"Assisted"|"Core/Hypertrophy"|"Cool-down",' +
+  '{"blocks":[{"blockType":"Warm-up"|"Main Lifts"|"Assisted"|"Core/Others"|"Cool-down",' +
   '"autoCalculate1RM":boolean,"exercises":[{"exerciseName":string,"intensityType":"%1RM"|"RPE"|"Load"|"Target HR",' +
   '"supersetLinkId":string|null,"setCount":number,"prescribedReps":number,' +
   '"prescribedIntensityValue":number|null,"prescribedLoadKg":number|null}]}]}\n' +

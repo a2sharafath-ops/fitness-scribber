@@ -8,7 +8,10 @@ import { addDays } from './dates'
 import { dayMetrics } from './calc'
 
 // ---- Vocabulary -----------------------------------------------------------
-export const BLOCK_TYPES = ['Warm-up', 'Main Lifts', 'Assisted', 'Core/Hypertrophy', 'Cool-down']
+export const BLOCK_TYPES = ['Warm-up', 'Main Lifts', 'Assisted', 'Core/Others', 'Cool-down']
+
+// A fresh workout opens with the trainer's standard three-block scaffold.
+export const defaultBlocks = () => [newBlock('Warm-up', 1), newBlock('Main Lifts', 2), newBlock('Core/Others', 3)]
 export const INTENSITY_TYPES = ['%1RM', 'RPE', 'Load', 'Target HR']
 export const SET_STATUS = ['Pending', 'Completed', 'Failed']
 export const SUPERSET_GROUPS = ['', 'A', 'B', 'C', 'D']
@@ -160,13 +163,18 @@ export function ensureProgramShape(db) {
   if (!db.maxes) db.maxes = []
   if (!db.synonyms) db.synonyms = []
   ;(db.clients || []).forEach((c) => { if (!c.trackedLifts) c.trackedLifts = [] })
+  const renameBlocks = (blocks) => (blocks || []).forEach((b) => {
+    if (b.blockType === 'Core/Hypertrophy') b.blockType = 'Core/Others'
+  })
   ;(db.prescriptions || []).forEach((p) => {
     if (!p.blocks?.length && p.items?.length) p.blocks = itemsToBlocks(p.items)
     if (!p.blocks) p.blocks = []
+    renameBlocks(p.blocks)
   })
   ;(db.templates || []).forEach((t) => {
     if (!t.blocks?.length && t.items?.length) t.blocks = itemsToBlocks(t.items)
     if (!t.blocks) t.blocks = []
+    renameBlocks(t.blocks)
   })
   return db
 }

@@ -26,7 +26,7 @@ export default function WorkoutPlanner({ client, featured = false, size }) {
   const today = todayISO(tz)
 
   const intMap = dailySum(db.srpe, client.id, 'tl')
-  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} />, true)
+  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} />, 'xl')
   const dayData = (dt) => {
     const presc = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
     const stats = presc.map(programStats).reduce((a, s) => ({ exercises: a.exercises + s.exercises, sets: a.sets + s.sets, volume: a.volume + s.volume }), { exercises: 0, sets: 0, volume: 0 })

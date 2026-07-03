@@ -77,6 +77,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-ra
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto}
 .modal.wide{max-width:760px}
+.modal.xl{max-width:min(1180px,96vw);max-height:94vh}
 .modal h2{font-size:18px;margin-bottom:18px;font-weight:800}
 .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
 .x{cursor:pointer;color:var(--muted);font-size:22px;line-height:1;background:none;border:none}

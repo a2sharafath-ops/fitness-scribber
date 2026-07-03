@@ -15,7 +15,7 @@ const BLOCK_RE = [
   [/warm[\s-]?up/i, 'Warm-up'],
   [/main (?:lift|block|lifts)/i, 'Main Lifts'],
   [/assist(?:ed|ance)|accessor/i, 'Assisted'],
-  [/core|hypertrophy/i, 'Core/Hypertrophy'],
+  [/core|hypertrophy|other/i, 'Core/Others'],
   [/cool[\s-]?down/i, 'Cool-down'],
 ]
 

@@ -6,6 +6,7 @@ export function ModalProvider({ children }) {
   const [node, setNode] = useState(null)
   const [wide, setWide] = useState(false)
 
+  // isWide: false | true | 'xl' (extra-wide, e.g. the workout builder)
   const openModal = useCallback((content, isWide = false) => {
     setNode(() => content)
     setWide(isWide)
@@ -32,7 +33,7 @@ export function ModalProvider({ children }) {
             if (e.target === e.currentTarget) closeModal()
           }}
         >
-          <div className={'modal' + (wide ? ' wide' : '')} role="dialog" aria-modal="true">
+          <div className={'modal' + (wide ? ' wide' : '') + (wide === 'xl' ? ' xl' : '')} role="dialog" aria-modal="true">
             {node}
           </div>
         </div>

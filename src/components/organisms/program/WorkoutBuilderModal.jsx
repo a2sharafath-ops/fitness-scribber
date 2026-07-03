@@ -16,11 +16,13 @@ import { useFormat } from '../../../hooks/useFormat'
 import { uid } from '../../../lib/format'
 import { fmtDay, addDays } from '../../../lib/dates'
 import {
-  newBlock, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
+  newBlock, defaultBlocks, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
   applyProgression, trainingMaxKg, hasUnmapped, resetTrainingMaxes, applyCompletionEffects,
 } from '../../../lib/program'
 
-const fromExisting = (p) => (p?.blocks?.length ? structuredClone(p.blocks) : p?.items?.length ? itemsToBlocks(p.items) : [])
+// Existing sessions load as saved; a fresh day opens with the standard
+// three-block scaffold (Warm-up / Main Lifts / Core/Others).
+const fromExisting = (p) => (p?.blocks?.length ? structuredClone(p.blocks) : p?.items?.length ? itemsToBlocks(p.items) : defaultBlocks())
 
 export default function WorkoutBuilderModal({ clientId, date }) {
   const { db, commit, tz } = useData()
@@ -44,7 +46,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
   const copyLast = () => {
     const prev = db.prescriptions.filter((p) => p.clientId === clientId && p.date < date).sort((a, b) => b.date.localeCompare(a.date))[0]
     if (!prev) return alert('No earlier session to copy.')
-    setBlocks(cloneBlocksFresh(fromExisting(prev)))
+    setBlocks(cloneBlocksFresh(prev.blocks?.length ? prev.blocks : itemsToBlocks(prev.items)))
     if (prev.notes) setNotes(prev.notes)
   }
 
