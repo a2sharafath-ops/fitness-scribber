@@ -204,8 +204,39 @@ export const defaultRuleFor = (blockType) =>
     ? { type: 'load', value: 2.5 }
     : { type: 'reps', value: 1 }
 
-// rules: { [blockId]: { enabled, type: 'load'|'percentage'|'reps'|'sets',
-//          value, exercises: { [exerciseId]: bool } } }
+// Apply one progression scheme to an exercise's sets.
+function progressSets(e, type, value, resolveTm) {
+  let sets = e.sets.map((s) => ({ ...s }))
+  if (type === 'load') {
+    sets = sets.map((s) => (s.prescribedLoadKg != null
+      ? { ...s, prescribedLoadKg: +(+s.prescribedLoadKg + +value).toFixed(2) } : s))
+  } else if (type === 'percentage') {
+    sets = sets.map((s) => {
+      const pct = s.prescribedIntensityValue != null ? +s.prescribedIntensityValue + +value : null
+      const tm = resolveTm(e.exerciseName)
+      return {
+        ...s,
+        prescribedIntensityValue: pct ?? s.prescribedIntensityValue,
+        prescribedLoadKg: e.intensityType === '%1RM' && pct != null && tm
+          ? targetKg(tm, pct) : s.prescribedLoadKg,
+      }
+    })
+  } else if (type === 'reps') {
+    sets = sets.map((s) => ({ ...s, prescribedReps: (+s.prescribedReps || 0) + +value }))
+  } else if (type === 'sets') {
+    for (let i = 0; i < +value; i++) {
+      const last = sets[sets.length - 1]
+      sets.push({ ...structuredClone(last), setId: uid(), setNumber: sets.length + 1 })
+    }
+  }
+  return sets
+}
+
+// rules: { [blockId]: { enabled, type, value, exercises: { [exerciseId]:
+//   rule } } } where each exercise rule is either an object
+//   { enabled, type, value } (own scheme), a bare boolean (legacy:
+//   false = stays static, true = inherit block default), or absent
+//   (inherit block default). types: 'load'|'percentage'|'reps'|'sets'.
 // resolveTm(exerciseName) supplies the Training Max so %1RM rows can
 // re-evaluate absolute target weights after a percentage bump.
 export function applyProgression(blocks, rules, resolveTm = () => null) {
@@ -215,31 +246,11 @@ export function applyProgression(blocks, rules, resolveTm = () => null) {
     return {
       ...b,
       exercises: b.exercises.map((e) => {
-        if (rule.exercises && rule.exercises[e.exerciseId] === false) return e
-        let sets = e.sets.map((s) => ({ ...s }))
-        if (rule.type === 'load') {
-          sets = sets.map((s) => (s.prescribedLoadKg != null
-            ? { ...s, prescribedLoadKg: +(+s.prescribedLoadKg + +rule.value).toFixed(2) } : s))
-        } else if (rule.type === 'percentage') {
-          sets = sets.map((s) => {
-            const pct = s.prescribedIntensityValue != null ? +s.prescribedIntensityValue + +rule.value : null
-            const tm = resolveTm(e.exerciseName)
-            return {
-              ...s,
-              prescribedIntensityValue: pct ?? s.prescribedIntensityValue,
-              prescribedLoadKg: e.intensityType === '%1RM' && pct != null && tm
-                ? targetKg(tm, pct) : s.prescribedLoadKg,
-            }
-          })
-        } else if (rule.type === 'reps') {
-          sets = sets.map((s) => ({ ...s, prescribedReps: (+s.prescribedReps || 0) + +rule.value }))
-        } else if (rule.type === 'sets') {
-          for (let i = 0; i < +rule.value; i++) {
-            const last = sets[sets.length - 1]
-            sets.push({ ...structuredClone(last), setId: uid(), setNumber: sets.length + 1 })
-          }
-        }
-        return { ...e, sets }
+        const exR = rule.exercises?.[e.exerciseId]
+        if (exR === false || exR?.enabled === false) return e
+        const type = exR?.type ?? rule.type
+        const value = exR?.value ?? rule.value
+        return { ...e, sets: progressSets(e, type, value, resolveTm) }
       }),
     }
   })

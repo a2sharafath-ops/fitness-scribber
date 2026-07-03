@@ -427,3 +427,9 @@ canvas{max-width:100%}
 .clp-entry{display:flex;gap:6px;align-items:center}
 .clp-entry input{width:76px;padding:6px 7px;font-size:12px}
 @media(max-width:900px){.clp-row{grid-template-columns:1fr 1fr 1fr;row-gap:4px}.clp-row.clp-head{display:none}}
+.prog-all{font-size:11px;font-weight:700;align-self:flex-end;padding-bottom:8px}
+.prog-ex-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:4px 0;border-bottom:1px dashed var(--border)}
+.prog-ex-row.off{opacity:.55}
+.prog-ex-row .prog-ex{min-width:180px;align-self:center}
+.prog-ex-rule{display:flex;gap:10px}
+.prog-ex-rule .sf{width:120px}

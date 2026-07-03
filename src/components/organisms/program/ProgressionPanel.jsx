@@ -1,8 +1,8 @@
 // Progression Rule Window (spec 3.2). Calendar duplication into a future
-// microcycle stops here first: per block choose the scheme (+Load /
-// +Percentage / +Reps / +Sets), the increment, and which exercises
-// participate (unchecked → stays static). Presentational; the builder
-// applies the rules on confirm.
+// microcycle stops here first. Every exercise carries its own editable
+// scheme (+Load / +Percentage / +Reps / +Sets and increment), initialised
+// from the block default; the block-level controls re-apply a scheme to all
+// of that block's exercises at once. Unchecked exercises stay static.
 import { useState } from 'react'
 import Button from '../../atoms/Button'
 import { defaultRuleFor } from '../../../lib/program'
@@ -11,6 +11,18 @@ import { fmtDay } from '../../../lib/dates'
 const TYPE_LABEL = { load: '(+) Load', percentage: '(+) Percentage', reps: '(+) Reps', sets: '(+) Sets' }
 const UNIT_HINT = { load: 'kg', percentage: '% points', reps: 'reps', sets: 'sets' }
 
+const TypeValue = ({ rule, ariaBase, onChange }) => (
+  <>
+    <label className="sf"><span>Type</span>
+      <select value={rule.type} aria-label={`${ariaBase} progression type`} onChange={(e) => onChange({ type: e.target.value })}>
+        {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+      </select></label>
+    <label className="sf"><span>Value (+{UNIT_HINT[rule.type]})</span>
+      <input type="number" step="0.5" value={rule.value} aria-label={`${ariaBase} progression value`}
+        onChange={(e) => onChange({ value: +e.target.value })} /></label>
+  </>
+)
+
 export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
   const [rules, setRules] = useState(() =>
     Object.fromEntries(blocks.map((b) => {
@@ -18,11 +30,20 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
       return [b.blockId, {
         enabled: b.blockType !== 'Warm-up' && b.blockType !== 'Cool-down',
         type: d.type, value: d.value,
-        exercises: Object.fromEntries(b.exercises.map((e) => [e.exerciseId, true])),
+        exercises: Object.fromEntries(b.exercises.map((e) => [e.exerciseId, { enabled: true, type: d.type, value: d.value }])),
       }]
     })))
-  const upd = (id, patch) => setRules((r) => ({ ...r, [id]: { ...r[id], ...patch } }))
-  const updEx = (id, exId, v) => setRules((r) => ({ ...r, [id]: { ...r[id], exercises: { ...r[id].exercises, [exId]: v } } }))
+
+  const updBlock = (id, patch) => setRules((r) => ({ ...r, [id]: { ...r[id], ...patch } }))
+  // Block-level scheme = "apply to all": overwrites every exercise's rule in the block.
+  const setBlockScheme = (id) => (patch) => setRules((r) => {
+    const br = { ...r[id], ...patch }
+    br.exercises = Object.fromEntries(Object.entries(br.exercises).map(([eid, er]) => [eid, { ...er, ...patch }]))
+    return { ...r, [id]: br }
+  })
+  const setExRule = (id, exId) => (patch) => setRules((r) => ({
+    ...r, [id]: { ...r[id], exercises: { ...r[id].exercises, [exId]: { ...r[id].exercises[exId], ...patch } } },
+  }))
 
   return (
     <div>
@@ -35,7 +56,7 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
         return (
           <div key={b.blockId} className={'prog-block' + (r.enabled ? '' : ' off')}>
             <label className="prog-head">
-              <input type="checkbox" checked={r.enabled} onChange={(e) => upd(b.blockId, { enabled: e.target.checked })} />
+              <input type="checkbox" checked={r.enabled} onChange={(e) => updBlock(b.blockId, { enabled: e.target.checked })} />
               <strong>{b.blockType} Block</strong>
               <span className="muted" style={{ fontSize: 11 }}>
                 (default: {defaultRuleFor(b.blockType).type === 'load' ? 'Load' : 'Rep'} progression)
@@ -44,23 +65,25 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
             {r.enabled && (
               <>
                 <div className="prog-rule">
-                  <label className="sf"><span>Type</span>
-                    <select value={r.type} aria-label={`${b.blockType} progression type`} onChange={(e) => upd(b.blockId, { type: e.target.value })}>
-                      {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                    </select></label>
-                  <label className="sf"><span>Value (+{UNIT_HINT[r.type]})</span>
-                    <input type="number" step="0.5" value={r.value} aria-label={`${b.blockType} progression value`}
-                      onChange={(e) => upd(b.blockId, { value: +e.target.value })} /></label>
+                  <span className="prog-all muted">Set all exercises:</span>
+                  <TypeValue rule={r} ariaBase={b.blockType} onChange={setBlockScheme(b.blockId)} />
                 </div>
                 <div className="prog-exs">
-                  {b.exercises.map((e) => (
-                    <label key={e.exerciseId} className="prog-ex">
-                      <input type="checkbox" checked={r.exercises[e.exerciseId] !== false}
-                        onChange={(ev) => updEx(b.blockId, e.exerciseId, ev.target.checked)} />
-                      {e.exerciseName || 'Unnamed exercise'}
-                      {r.exercises[e.exerciseId] === false && <span className="muted" style={{ fontSize: 10 }}> — stays static</span>}
-                    </label>
-                  ))}
+                  {b.exercises.map((e) => {
+                    const er = r.exercises[e.exerciseId]
+                    return (
+                      <div key={e.exerciseId} className={'prog-ex-row' + (er.enabled ? '' : ' off')}>
+                        <label className="prog-ex">
+                          <input type="checkbox" checked={er.enabled}
+                            onChange={(ev) => setExRule(b.blockId, e.exerciseId)({ enabled: ev.target.checked })} />
+                          {e.exerciseName || 'Unnamed exercise'}
+                        </label>
+                        {er.enabled
+                          ? <span className="prog-ex-rule"><TypeValue rule={er} ariaBase={e.exerciseName || 'exercise'} onChange={setExRule(b.blockId, e.exerciseId)} /></span>
+                          : <span className="muted" style={{ fontSize: 10 }}>stays static</span>}
+                      </div>
+                    )
+                  })}
                   {!b.exercises.length && <div className="muted" style={{ fontSize: 11 }}>No exercises in this block.</div>}
                 </div>
               </>
