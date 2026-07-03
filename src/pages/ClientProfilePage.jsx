@@ -14,6 +14,7 @@ import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { fmtDate, todayISO } from '../lib/dates'
 import { screeningsFor, programStatus, rescreenDue, OUTCOME_META } from '../lib/screening'
+import { resolveAnthro } from '../lib/assessment'
 
 const LEVEL = { Beginner: 'blue', Intermediate: 'purple', Advanced: 'orange' }
 
@@ -26,7 +27,8 @@ export default function ClientProfilePage() {
   const c = db.clients.find((x) => x.id === id)
   if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
 
-  const a = c.anthro || {}
+  // Anthro merges manual entry with screening/body-comp fallbacks.
+  const a = resolveAnthro(db, c)
   const ik = c.intake || {}
   const scr = screeningsFor(db.screenings, c.id)
   const saveClearance = (cl) => commit((d) => {
@@ -84,6 +86,7 @@ export default function ClientProfilePage() {
             <AnthroCell label="Lean Mass" value={a.leanMassKg != null ? fmtWt(a.leanMassKg) : null} />
             <AnthroCell label="BMI" value={bmi} />
           </div>
+          {a.derived && <div className="muted" style={{ fontSize: 11, marginTop: 8 }}>Auto-filled from screening / latest body-comp assessment — “Edit details” to override.</div>}
         </div>
       </div>
 

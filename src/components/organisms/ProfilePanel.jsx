@@ -10,11 +10,13 @@ import { useModal } from '../../store/ModalContext'
 import { useFormat } from '../../hooks/useFormat'
 import { fmtDate } from '../../lib/dates'
 import { readinessFor } from '../../lib/calc'
+import { resolveAnthro } from '../../lib/assessment'
 
 export function EditProfileForm({ client }) {
-  const { commit } = useData()
+  const { db, commit } = useData()
   const { closeModal } = useModal()
-  const [a, setA] = useState(client.anthro || {})
+  // Prefilled with screening/assessment fallbacks; saving persists them.
+  const [a, setA] = useState(() => resolveAnthro(db, client))
   const [ik, setIk] = useState(client.intake || {})
   const numOrNull = (v) => (v === '' ? null : +v)
   const save = () => {
@@ -53,7 +55,7 @@ export default function ProfilePanel({ client, open, onClose }) {
   const { db } = useData()
   const { openModal } = useModal()
   const { fmtWt } = useFormat()
-  const a = client.anthro || {}
+  const a = resolveAnthro(db, client)
   const ik = client.intake || {}
   const bmi = a.heightCm && a.massKg ? (a.massKg / (a.heightCm / 100) ** 2).toFixed(1) : '—'
 

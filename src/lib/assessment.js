@@ -1,4 +1,5 @@
 import { addDays } from './dates'
+import { screeningsFor } from './screening'
 
 // Pure helpers for the Assessment module — no React, no I/O.
 // One record shape: { id, clientId, type, date, phase, data, notes }.
@@ -38,6 +39,28 @@ export const latest = (list, type) =>
 export const baseline = (list, type) => {
   const of = list.filter((a) => a.type === type)
   return of.find((a) => a.phase === 'baseline') || of.sort((a, b) => (a.date || '').localeCompare(b.date || ''))[0] || null
+}
+
+// Merge anthropometrics from every source the app collects them in.
+// Manually entered values (client.anthro) win; gaps fill from the latest
+// body-composition assessment, then the completed screening's HHQ personal
+// details — so the profile card is populated as soon as screening or
+// assessment data exists, without re-typing. `derived` flags that at least
+// one shown value came from a fallback source.
+export function resolveAnthro(db, client) {
+  const a = client.anthro || {}
+  const bc = latest(forClient(db.assessments, client.id), 'body_comp')?.data || {}
+  const hp = screeningsFor(db.screenings, client.id).complete?.hhq?.personal || {}
+  const pick = (...vals) => { for (const v of vals) { const n = num(v); if (n != null) return n } return null }
+  const merged = {
+    age: pick(a.age, hp.age),
+    heightCm: pick(a.heightCm, hp.heightCm),
+    massKg: pick(a.massKg, bc.massKg, hp.massKg),
+    bodyFatPct: pick(a.bodyFatPct, bc.bodyFatPct),
+    leanMassKg: pick(a.leanMassKg, bc.leanMassKg),
+  }
+  merged.derived = Object.entries(merged).some(([k, v]) => v != null && num(a[k]) == null)
+  return merged
 }
 
 export function movementScore(data) {
