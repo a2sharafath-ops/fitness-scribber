@@ -52,12 +52,20 @@ export function rolling30Baseline(db, clientId, field, beforeDate) {
   return mean(vals)
 }
 
+// ACWR needs a chronic training base before the ratio means anything: with a
+// single logged session the math degenerates to (L/7)÷(L/28) = exactly 4.00,
+// falsely flagging every new athlete as "elevated injury risk". Report null
+// until the 28-day window holds at least this many trained days.
+export const MIN_ACWR_DAYS = 3
+
 export function acwrSeries(loadMap, dates) {
   const loads = dates.map((d) => loadMap[d] || 0)
   return dates.map((d, i) => {
-    const acute = mean(loads.slice(Math.max(0, i - 6), i + 1))
-    const chronic = mean(loads.slice(Math.max(0, i - 27), i + 1))
-    return chronic > 0 ? +(acute / chronic).toFixed(2) : null
+    const chronicW = loads.slice(Math.max(0, i - 27), i + 1)
+    const acute = mean(chronicW.slice(-7))
+    const chronic = mean(chronicW)
+    const trained = chronicW.filter((v) => v > 0).length
+    return chronic > 0 && trained >= MIN_ACWR_DAYS ? +(acute / chronic).toFixed(2) : null
   })
 }
 
@@ -149,10 +157,11 @@ export function dayMetrics(db, clientId, date, intMap) {
   const w28 = win(28)
   const acute = mean(w28.slice(-7))
   const chronic = mean(w28)
+  const trained = w28.filter((v) => v > 0).length
   const w7 = w28.slice(-7)
   return {
     readiness: readinessScore(db, clientId, date),
-    acwr: chronic > 0 ? +(acute / chronic).toFixed(2) : null,
+    acwr: chronic > 0 && trained >= MIN_ACWR_DAYS ? +(acute / chronic).toFixed(2) : null,
     monotony: trainingMonotony(w7),
     strain: trainingStrain(w7),
   }

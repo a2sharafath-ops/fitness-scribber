@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useData } from '../../store/DataContext'
 import { useConversations } from '../../hooks/useConversations'
 import { openConcerns } from '../../lib/calc'
+import { hasBackend } from '../../lib/supabase'
 
 const ITEMS = [
   ['/', '📊', 'Dashboard', true],
@@ -36,7 +37,7 @@ export default function Sidebar() {
         <span className="ic" aria-hidden="true">⚙️</span>
         <span>Settings</span>
       </NavLink>
-      <div className="sb-foot">FitScribe v2.0<br />All data saved locally</div>
+      <div className="sb-foot">FitScribe v2.0<br />{hasBackend ? 'Synced to your account' : 'All data saved locally'}</div>
     </nav>
   )
 }
