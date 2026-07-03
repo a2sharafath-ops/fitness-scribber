@@ -420,3 +420,9 @@ canvas{max-width:100%}
 .dictate textarea{width:100%;resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;color:inherit;font:inherit;font-size:13px}
 .dictate-preview{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px}
 .dp-unmapped{color:#e8853d}
+.clp-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.clp-row.clp-head{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);padding:10px 0 4px}
+.clp-val{font-weight:800;color:var(--green)}
+.clp-entry{display:flex;gap:6px;align-items:center}
+.clp-entry input{width:76px;padding:6px 7px;font-size:12px}
+@media(max-width:900px){.clp-row{grid-template-columns:1fr 1fr 1fr;row-gap:4px}.clp-row.clp-head{display:none}}

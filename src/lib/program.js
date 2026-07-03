@@ -159,6 +159,7 @@ export function itemsToBlocks(items) {
 export function ensureProgramShape(db) {
   if (!db.maxes) db.maxes = []
   if (!db.synonyms) db.synonyms = []
+  ;(db.clients || []).forEach((c) => { if (!c.trackedLifts) c.trackedLifts = [] })
   ;(db.prescriptions || []).forEach((p) => {
     if (!p.blocks?.length && p.items?.length) p.blocks = itemsToBlocks(p.items)
     if (!p.blocks) p.blocks = []
@@ -275,9 +276,8 @@ export function applyCompletionEffects(draft, prescription, tz) {
             s.e1rmApplied = true
             const abs = absolute1RM(draft.maxes, clientId, e.exerciseName, date)
             if (!abs || est > abs) {
-              draft.maxes.push({ id: uid(), clientId, exercise: e.exerciseName, date, kind: 'e1rm', valueKg: est, source: 'auto' })
-              autoUpdateAssessment(draft, clientId, e.exerciseName, est, date)
-              events.push({ type: 'peak', exercise: e.exerciseName, valueKg: est })
+              const tracked = recordLiftMax(draft, clientId, e.exerciseName, est, date, 'auto')
+              events.push({ type: 'peak', exercise: e.exerciseName, valueKg: est, tracked })
             }
           }
         }
@@ -312,14 +312,32 @@ function failureConcern(draft, p, e, s, tz) {
   }
 }
 
+// Is this lift on the client's "Current Lifts Performance" watch list?
+export const isTrackedLift = (client, lift) =>
+  (client?.trackedLifts || []).some((t) => t.toLowerCase() === String(lift).toLowerCase())
+
+// Single entry point for a new 1RM value (auto Epley peak or manual trainer
+// entry). Appends the e1rm ledger event; if the lift is one the trainer
+// chose to track, also pushes the fitness-assessment auto-update.
+// Returns whether the assessment was updated.
+export function recordLiftMax(draft, clientId, lift, valueKg, date, source = 'manual') {
+  draft.maxes.push({ id: uid(), clientId, exercise: lift, date, kind: 'e1rm', valueKg, source })
+  const client = (draft.clients || []).find((c) => c.id === clientId)
+  if (!isTrackedLift(client, lift)) return false
+  autoUpdateAssessment(draft, clientId, lift, valueKg, date, source)
+  return true
+}
+
 // Spec 6.2 — push a fresh e1RM peak straight onto the athlete's central
 // metrics board (a new auto-sourced fitness assessment record).
-function autoUpdateAssessment(draft, clientId, lift, valueKg, date) {
+function autoUpdateAssessment(draft, clientId, lift, valueKg, date, source) {
   if (!draft.assessments) draft.assessments = []
   draft.assessments.push({
     id: uid(), clientId, type: 'fitness', date, phase: 'progress',
     data: { strength: [{ lift, valueKg }] },
-    notes: `Auto-update: new estimated 1RM peak (${valueKg}kg) from a completed top set.`,
+    notes: source === 'auto'
+      ? `Auto-update: new estimated 1RM peak (${valueKg}kg) from a completed top set.`
+      : `Trainer-recorded 1RM: ${valueKg}kg (Current Lifts Performance).`,
   })
 }
 

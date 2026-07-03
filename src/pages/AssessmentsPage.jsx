@@ -5,6 +5,7 @@ import { useModal } from '../store/ModalContext'
 import { NewAssessmentMenu, assessmentForm } from '../components/organisms/forms/AssessmentForms'
 import AssessmentChecklist from '../components/organisms/AssessmentChecklist'
 import AssessmentTrends from '../components/organisms/AssessmentTrends'
+import CurrentLiftsPerformance from '../components/organisms/CurrentLiftsPerformance'
 import { TYPES, ACTIVE_TYPES, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, forClient, latest, baseline, summarize, compare, dueStatus } from '../lib/assessment'
 import { fmtDate } from '../lib/dates'
 
@@ -48,6 +49,10 @@ export default function AssessmentsPage() {
 
       <div style={{ marginBottom: 16 }}>
         <AssessmentChecklist list={list} intervalDays={interval} onAdd={addType} />
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <CurrentLiftsPerformance client={c} />
       </div>
 
       <div className="grid cards-2" style={{ alignItems: 'start' }}>

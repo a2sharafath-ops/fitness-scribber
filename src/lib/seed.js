@@ -18,7 +18,7 @@ export function seed() {
   const db = {
     clients: [
       { id: c1, name: 'Sarah Mitchell', email: 'sarah.m@email.com', phone: '555-0142', goal: 'Lose 8kg & tone', level: 'Intermediate', status: 'Active', plan: 'Premium', joined: '2025-11-02', notes: 'Prefers morning sessions. Knee sensitivity — avoid deep lunges.', planId: p1 },
-      { id: c2, name: 'James Carter', email: 'jcarter@email.com', phone: '555-0198', goal: 'Build muscle mass', level: 'Advanced', status: 'Active', plan: 'Premium', joined: '2025-09-15', notes: 'Training for powerlifting meet in spring.', planId: p2 },
+      { id: c2, name: 'James Carter', email: 'jcarter@email.com', phone: '555-0198', goal: 'Build muscle mass', level: 'Advanced', status: 'Active', plan: 'Premium', joined: '2025-09-15', notes: 'Training for powerlifting meet in spring.', planId: p2, trackedLifts: ['Back Squat', 'Deadlift'] },
       { id: c3, name: 'Priya Nair', email: 'priya.n@email.com', phone: '555-0176', goal: 'General fitness', level: 'Beginner', status: 'Active', plan: 'Standard', joined: '2026-01-20', notes: 'New to strength training. Build confidence first.', planId: p1 },
       { id: c4, name: 'Marcus Lee', email: 'marcus.lee@email.com', phone: '555-0123', goal: 'Marathon prep', level: 'Intermediate', status: 'Paused', plan: 'Standard', joined: '2025-12-08', notes: 'Travelling for work — resumes July.', planId: null },
     ],

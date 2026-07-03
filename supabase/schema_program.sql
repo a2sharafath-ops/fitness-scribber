@@ -10,6 +10,10 @@
 alter table prescriptions add column if not exists "blocks" jsonb default '[]'::jsonb;
 alter table templates     add column if not exists "blocks" jsonb default '[]'::jsonb;
 
+-- Trainer-chosen lifts for "Current Lifts Performance": only these push
+-- automatic fitness-assessment updates when a new e1RM peak is recorded.
+alter table clients add column if not exists "trackedLifts" jsonb default '[]'::jsonb;
+
 -- ---- Lift-max ledger ----------------------------------------------------
 -- kind = 'e1rm' (Epley-estimated 1RM event, feeds the rolling 30-day
 -- Absolute 1RM) or 'tm' (Training Max checkpoint, set manually or by the

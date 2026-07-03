@@ -106,7 +106,9 @@ export default function WorkoutBuilderModal({ clientId, date }) {
         if (reset.length) events.push(`Training Max reset to rolling Absolute 1RM: ${reset.join(', ')}`)
       }
       applyCompletionEffects(d, p, tz).forEach((e) => events.push(
-        e.type === 'peak' ? `New Absolute 1RM peak — ${e.exercise}: ${e.valueKg}kg (assessment auto-updated)` : `Failure flag raised — ${e.exercise} (see Concerns)`))
+        e.type === 'peak'
+          ? `New Absolute 1RM peak — ${e.exercise}: ${e.valueKg}kg${e.tracked ? ' (assessment auto-updated)' : ''}`
+          : `Failure flag raised — ${e.exercise} (see Concerns)`))
     })
     if (events.length) alert(events.join('\n'))
     closeModal()
