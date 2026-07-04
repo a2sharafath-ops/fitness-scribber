@@ -1,22 +1,21 @@
 import { useEffect, useState, useCallback } from 'react'
 import Card from '../components/atoms/Card'
 import Button from '../components/atoms/Button'
-import RangeSlider from '../components/atoms/RangeSlider'
-import Field from '../components/atoms/Field'
 import ReadinessTag from '../components/molecules/ReadinessTag'
-import ModalShell from '../components/molecules/ModalShell'
 import Avatar from '../components/atoms/Avatar'
 import ChangePasswordCard from '../components/organisms/forms/ChangePasswordCard'
 import ChatThread from '../components/organisms/ChatThread'
 import SelfAssessment from '../components/organisms/SelfAssessment'
 import ScreeningCard from '../components/organisms/screening/ScreeningCard'
 import TodayWorkout from '../components/organisms/workout/TodayWorkout'
+import CheckInModal from '../components/organisms/workout/CheckInModal'
+import RPEModal from '../components/organisms/workout/RPEModal'
 import { useAuth } from '../store/AuthContext'
 import { supabase } from '../lib/supabase'
 import { callFunction } from '../api/functions'
 import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
-import { calcWellness, calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
+import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
 import { screeningsFor, finalizeScreening } from '../lib/screening'
 
 export default function AthletePortal() {
@@ -277,60 +276,3 @@ function WearableSection({ clientId, tokens, latest, onChange }) {
   )
 }
 
-// Pops right after ▶ Start (only when today's check-in is missing). Submitting
-// logs the Hooper wellness entry and then starts the session; Skip starts it
-// without logging; × cancels the start entirely.
-function CheckInModal({ busy, today, onSubmit, onSkip, onClose }) {
-  const [f, setF] = useState({ sleep: 5, stress: 3, fatigue: 3, soreness: 3 })
-  const score = calcWellness(f.sleep, f.stress, f.fatigue, f.soreness)
-  return (
-    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="modal" role="dialog" aria-modal="true">
-        <ModalShell title="Morning check-in (Hooper)" onClose={onClose}
-          footer={<>
-            <Button variant="ghost" disabled={busy} onClick={onSkip}>Skip — start anyway</Button>
-            <Button disabled={busy} onClick={() => onSubmit({ date: today, ...f, score })}>{busy ? 'Saving…' : 'Submit & start workout'}</Button>
-          </>}>
-          <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>Quick check-in before you start — this helps your coach match your training to how you feel.</p>
-          <RangeSlider label="Sleep Quality" value={f.sleep} min={1} max={7} lo="Terrible" hi="Excellent" onChange={(v) => setF({ ...f, sleep: v })} />
-          <RangeSlider label="Stress" value={f.stress} min={1} max={7} lo="None" hi="Extreme" onChange={(v) => setF({ ...f, stress: v })} />
-          <RangeSlider label="Fatigue" value={f.fatigue} min={1} max={7} lo="Fresh" hi="Exhausted" onChange={(v) => setF({ ...f, fatigue: v })} />
-          <RangeSlider label="Muscle Soreness" value={f.soreness} min={1} max={7} lo="None" hi="Severe" onChange={(v) => setF({ ...f, soreness: v })} />
-          <div className="muted" style={{ fontSize: 12 }}>Wellness score: <strong>{score}/28</strong></div>
-        </ModalShell>
-      </div>
-    </div>
-  )
-}
-
-// Pops when the athlete presses ✓ Complete. Shows RPE plus the session
-// duration (pre-filled from the live timer, editable by the athlete).
-// Submitting saves the completed workout (with the edited duration) plus its
-// sRPE row; Skip saves the workout without an RPE entry; × keeps it running.
-function RPEModal({ busy, workout, age, onSubmit, onSkip, onClose }) {
-  const maxHr = 220 - (age || 30)
-  const suggested = workout.hrMax ? Math.max(1, Math.min(10, Math.round((workout.hrMax / maxHr) * 10))) : 6
-  const [rpe, setRpe] = useState(suggested)
-  const [minutes, setMinutes] = useState(workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30)
-  const mins = Math.max(1, Math.round(+minutes || 0) || 1)
-  return (
-    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="modal" role="dialog" aria-modal="true">
-        <ModalShell title="How hard was that session?" onClose={onClose}
-          footer={<>
-            <Button variant="ghost" disabled={busy} onClick={() => onSkip(mins)}>Skip</Button>
-            <Button disabled={busy} onClick={() => onSubmit(rpe, mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
-          </>}>
-          <RangeSlider label="Session RPE (Borg CR10)" value={rpe} min={1} max={10} lo="Rest" hi="Max effort" onChange={setRpe} />
-          <Field label="Workout duration (minutes)">
-            <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
-          </Field>
-          <div className="muted" style={{ fontSize: 12 }}>
-            Training load: <strong>{calcSRPETL(rpe, mins)} AU</strong>
-            {workout.hrMax ? <span> · suggested {suggested}/10 from your peak HR</span> : null}
-          </div>
-        </ModalShell>
-      </div>
-    </div>
-  )
-}

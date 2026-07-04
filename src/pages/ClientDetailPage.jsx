@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
@@ -7,6 +8,8 @@ import ConcernCard from '../components/molecules/ConcernCard'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
 import AICoach from '../components/organisms/AICoach'
 import TodayWorkout from '../components/organisms/workout/TodayWorkout'
+import CheckInModal from '../components/organisms/workout/CheckInModal'
+import RPEModal from '../components/organisms/workout/RPEModal'
 import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
 import { BodyMetricForm } from '../components/organisms/forms/LogForms'
@@ -27,6 +30,8 @@ export default function ClientDetailPage() {
   const nav = useNavigate()
   const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
+  const [checkinW, setCheckinW] = useState(null) // workout waiting to start until the check-in popup resolves
+  const [rpeW, setRpeW] = useState(null)         // completed workout waiting for the RPE popup
   const c = db.clients.find((x) => x.id === id)
   if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
 
@@ -52,14 +57,31 @@ export default function ClientDetailPage() {
   const saveWorkout = (w) => commit((d) => { d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w] })
   const saveTemplate = (plan) => commit((d) => { d.plans = [...d.plans, plan] })
   const clearWorkout = () => { if (!todayW) return; commit((d) => { d.workouts = (d.workouts || []).filter((x) => x.id !== todayW.id) }) }
-  const completeWorkout = (w) => {
-    const maxHr = 220 - (age || 30)
-    const rpe = w.hrMax ? Math.max(1, Math.min(10, Math.round((w.hrMax / maxHr) * 10))) : 6
-    const minutes = w.durationSec ? Math.max(1, Math.round(w.durationSec / 60)) : 30
+
+  // Same flow as the athlete portal: ▶ Start pops the morning check-in (unless
+  // already logged today); ✓ Complete pops the RPE + duration form.
+  const checkedIn = db.wellness.some((w) => w.clientId === c.id && w.date === today)
+  const startWorkout = (w) => { if (checkedIn) saveWorkout(w); else setCheckinW(w) }
+  const submitCheckin = (v) => {
+    const w = checkinW
+    setCheckinW(null)
     commit((d) => {
-      d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w]
-      d.srpe = [...d.srpe, { id: uid(), clientId: c.id, date: w.date, sessionId: null, rpe, duration: minutes, tl: calcSRPETL(rpe, minutes) }]
+      d.wellness = [...d.wellness, { id: uid(), clientId: c.id, ...v }]
+      if (w) d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w]
     })
+  }
+  const skipCheckin = () => { const w = checkinW; setCheckinW(null); if (w) saveWorkout(w) }
+  const requestComplete = (w) => setRpeW(w)
+  const finishWorkout = (w, rpe, minutes) => {
+    const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec
+    commit((d) => {
+      d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), { ...w, durationSec }]
+      if (rpe != null) {
+        const mins = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
+        d.srpe = [...d.srpe, { id: uid(), clientId: c.id, date: w.date, sessionId: null, rpe, duration: mins, tl: calcSRPETL(rpe, mins) }]
+      }
+    })
+    setRpeW(null)
   }
 
   const baseProg = baselineProgress(forClient(db.assessments, c.id))
@@ -111,7 +133,7 @@ export default function ClientDetailPage() {
       <div className={'grid' + (todayW?.status === 'in_progress' ? '' : ' cards-2')} style={{ marginTop: 16, alignItems: 'start' }}>
         <TodayWorkout client={c} today={today} workout={todayW} prescription={todayP} plans={db.plans} exercises={db.exercises}
           units={units} context={{ readiness: rScore, acwr }} restingHr={restingHr} age={age} bodyMassKg={c.anthro?.massKg ?? null}
-          onSave={saveWorkout} onComplete={completeWorkout} onClear={clearWorkout} onTemplate={saveTemplate} />
+          onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} onTemplate={saveTemplate} />
 
         <div className="card">
           <div className="section-title" style={{ margin: '0 0 10px' }}>Recent sessions</div>
@@ -136,6 +158,15 @@ export default function ClientDetailPage() {
           )) : <div className="empty" style={{ padding: 24 }}><div className="big">✅</div>No concerns flagged.</div>}
         </div>
       </div>
+
+      {checkinW && (
+        <CheckInModal today={today} onSubmit={submitCheckin} onSkip={skipCheckin} onClose={() => setCheckinW(null)} />
+      )}
+      {rpeW && (
+        <RPEModal workout={rpeW} age={age}
+          onSubmit={(rpe, minutes) => finishWorkout(rpeW, rpe, minutes)}
+          onSkip={(minutes) => finishWorkout(rpeW, null, minutes)} onClose={() => setRpeW(null)} />
+      )}
     </>
   )
 }
