@@ -147,8 +147,12 @@ export function readinessFor(db, clientId) {
 // readiness = composite for that day; acwr = 7d acute / 28d chronic ending on date;
 // monotony & strain = over the 7-day window ending on date. Pass a precomputed
 // `intMap` (dailySum of sRPE-TL) to avoid recomputing it per cell.
+// The three load metrics are only reported once a session RPE has been logged
+// for that day — before that the day's load is unknown, so no ACWR/monotony/
+// strain is calculated (readiness stays independent: it comes from check-ins).
 export function dayMetrics(db, clientId, date, intMap) {
   const im = intMap || dailySum(db.srpe, clientId, 'tl')
+  const logged = im[date] !== undefined
   const win = (n) => {
     const a = []
     for (let i = n - 1; i >= 0; i--) a.push(im[addDays(date, -i)] || 0)
@@ -161,9 +165,9 @@ export function dayMetrics(db, clientId, date, intMap) {
   const w7 = w28.slice(-7)
   return {
     readiness: readinessScore(db, clientId, date),
-    acwr: chronic > 0 && trained >= MIN_ACWR_DAYS ? +(acute / chronic).toFixed(2) : null,
-    monotony: trainingMonotony(w7),
-    strain: trainingStrain(w7),
+    acwr: logged && chronic > 0 && trained >= MIN_ACWR_DAYS ? +(acute / chronic).toFixed(2) : null,
+    monotony: logged ? trainingMonotony(w7) : 0,
+    strain: logged ? trainingStrain(w7) : 0,
   }
 }
 

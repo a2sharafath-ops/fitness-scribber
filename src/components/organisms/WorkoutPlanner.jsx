@@ -88,7 +88,9 @@ export default function WorkoutPlanner({ client, featured = false, size }) {
                   <div className="pc-date">{+dt.slice(8, 10)}{dt === today && <span className="pc-today">today</span>}</div>
                   {name && <div className="plan-session" title={name}>{name}</div>}
                   {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : null}
-                  {dt >= today && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
+                  {/* Load metrics for a day exist only once its session RPE is logged;
+                      future days therefore show no ACWR/Mono/Strain projections. */}
+                  {(dt === today || (dt > today && intMap[dt] !== undefined)) && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
                 </div>
               )
             })}
@@ -108,7 +110,9 @@ export default function WorkoutPlanner({ client, featured = false, size }) {
                   <div className="pd-date">{DOW[i]} {+dt.slice(8, 10)}</div>
                   {name ? <div className="plan-session" title={name}>{name}</div> : <div className="plan-rest muted">Rest / unplanned</div>}
                   {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
-                  {dt >= today && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
+                  {/* Load metrics for a day exist only once its session RPE is logged;
+                      future days therefore show no ACWR/Mono/Strain projections. */}
+                  {(dt === today || (dt > today && intMap[dt] !== undefined)) && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
                 </div>
               )
             })}
