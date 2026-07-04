@@ -4,16 +4,18 @@ import Tag from '../../atoms/Tag'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import WorkoutPlayer from './WorkoutPlayer'
 import WorkoutSummary from './WorkoutSummary'
-import { buildFromPlan, adaptFromPlan, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
+import { buildFromPlan, buildFromPrescription, adaptFromPlan, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
+import { programStats } from '../../../lib/program'
 import { fmtVL } from '../../../lib/units'
 
-const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray' }
+const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'green' }
 
 // Controller for the "Today's Workout" card. Walks through:
-//   pick (suggested / alternate plan / adaptive / manual) → overview → start/edit → completed.
+//   pick (prescribed / suggested / alternate plan / adaptive / manual) → overview → start/edit → completed.
 // Persistence is owned by the parent via onSave / onComplete / onClear so the
-// same component serves both the coach folder and the athlete portal.
-export default function TodayWorkout({ client, today, workout, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, onSave, onComplete, onClear, onTemplate }) {
+// same component serves both the coach folder and the athlete portal. When the
+// coach prescribed a session for today (workout planner), it is offered first.
+export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, onSave, onComplete, onClear, onTemplate }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -24,9 +26,19 @@ export default function TodayWorkout({ client, today, workout, plans, exercises,
   if (!workout) {
     const suggested = defaultPlan || plans[0] || null
     const pick = (w) => onSave(w)
+    const pStats = prescription ? programStats(prescription) : null
     return (
       <Shell>
-        {suggested ? (
+        {prescription ? (
+          <div className="tw-suggest">
+            <div className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Prescribed for today</div>
+            <div style={{ fontSize: 17, fontWeight: 800, margin: '4px 0 2px' }}>Coach's session</div>
+            <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>{pStats.exercises} exercises · {pStats.sets} sets{prescription.notes ? ' · ' + prescription.notes : ''}</div>
+            <div className="flex gap" style={{ flexWrap: 'wrap' }}>
+              <Button onClick={() => pick(buildFromPrescription(prescription, ctx))}>Use this workout</Button>
+            </div>
+          </div>
+        ) : suggested ? (
           <div className="tw-suggest">
             <div className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Suggested for today</div>
             <div style={{ fontSize: 17, fontWeight: 800, margin: '4px 0 2px' }}>{suggested.name}</div>

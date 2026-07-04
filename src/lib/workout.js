@@ -2,6 +2,7 @@
 // React-free: components import these and render the result (no fabricated
 // data lives in the UI — the structure is generated here from real inputs).
 import { uid } from './format'
+import { itemsToBlocks } from './program'
 
 // "60s" / "3m" / "90" → seconds. Numbers pass through.
 export const restToSec = (r) => {
@@ -75,6 +76,37 @@ export function buildFromPlan(plan, exercises, { clientId, date }) {
   return base({ clientId, date, title: plan?.name || 'Workout', source: 'plan', planId: plan?.id || null, main, note: 'From plan library' })
 }
 
+// Map a coach prescription (blocks → exercises → prescribed sets) into an
+// editable session. Warm-up / Cool-down blocks feed their sections; every
+// other block feeds the main set. Legacy item-shaped rows are migrated first.
+// Loads stay in kg (set 1 is the template row, matching blocksToItems).
+export function buildFromPrescription(presc, { clientId, date }) {
+  const blocks = presc?.blocks?.length ? presc.blocks : itemsToBlocks(presc?.items)
+  const toItem = (e) => {
+    const s = e.sets?.[0] || {}
+    return {
+      id: uid(),
+      name: e.exerciseName || 'Exercise',
+      sets: e.sets?.length || 1,
+      reps: String(s.prescribedReps ?? '10'),
+      duration: null,
+      weight: s.prescribedLoadKg ?? null,
+      rest: s.prescribedRestSeconds ?? 60,
+      done: false,
+    }
+  }
+  const section = (type) => (blocks || []).filter((b) => b.blockType === type).flatMap((b) => b.exercises.map(toItem))
+  const main = (blocks || [])
+    .filter((b) => b.blockType !== 'Warm-up' && b.blockType !== 'Cool-down')
+    .flatMap((b) => b.exercises.map(toItem))
+  const w = base({ clientId, date, title: 'Prescribed workout', source: 'prescribed', planId: null, main, note: presc?.notes || 'Assigned in the workout planner' })
+  const warmup = section('Warm-up')
+  const cooldown = section('Cool-down')
+  if (warmup.length) w.warmup = warmup
+  if (cooldown.length) w.cooldown = cooldown
+  return w
+}
+
 // Empty session for hand-building.
 export function blankWorkout({ clientId, date }) {
   return base({ clientId, date, title: 'Custom workout', source: 'manual', planId: null, main: [newExercise()], note: 'Built manually' })
@@ -98,7 +130,7 @@ export function adaptFromPlan(plan, exercises, { clientId, date, readiness, acwr
 export const workoutVolume = (w) =>
   (w?.main || []).reduce((t, m) => t + (+m.sets || 0) * (parseInt(m.reps, 10) || 0) * (+m.weight || 0), 0)
 
-export const SOURCE_LABEL = { plan: 'Plan', ai: 'Adaptive', manual: 'Manual' }
+export const SOURCE_LABEL = { plan: 'Plan', ai: 'Adaptive', manual: 'Manual', prescribed: 'Coach' }
 
 const CARDIO_RE = /run|jog|bike|cycl|row|cardio|walk|elliptical|sprint|swim|skip/i
 const isCardioItem = (m) => CARDIO_RE.test(m.name) || (m.weight == null && /min|sec|\d\s*s\b|hold/i.test(String(m.reps)))

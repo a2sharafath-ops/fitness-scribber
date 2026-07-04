@@ -106,8 +106,10 @@ export default function AthletePortal() {
     return ok
   }
 
-  // Today's Workout
+  // Today's Workout — the session in progress (workouts) plus whatever the
+  // coach prescribed for today in the planner (prescriptions), if anything.
   const todayW = (state.workouts || []).find((w) => w.date === today) || null
+  const todayP = (state.prescriptions || []).find((p) => p.date === today) || null
   const rScore = readinessScore({ wellness: state.wellness, wearable: state.wearable }, client.id, today)
   const acwr = acwrSeries(dailySum(state.srpe, client.id, 'tl'), lastNDates(28)).filter((v) => v != null).slice(-1)[0]
   const restingHr = latestOf(state.wearable, client.id)?.rhr ?? null
@@ -154,7 +156,7 @@ export default function AthletePortal() {
         />
 
         <div style={{ marginTop: 16 }}>
-          <TodayWorkout client={client} today={today} workout={todayW} plans={state.plans} exercises={state.exercises}
+          <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
             units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
             onSave={saveWorkout} onComplete={completeWorkout} onClear={clearWorkout} />
         </div>

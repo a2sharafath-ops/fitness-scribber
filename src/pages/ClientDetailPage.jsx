@@ -42,9 +42,10 @@ export default function ClientDetailPage() {
     return d ? readinessScore(db, c.id, d) : null
   })()
 
-  // Today's Workout
+  // Today's Workout — session state plus today's planner prescription, if any.
   const workouts = db.workouts || []
   const todayW = workouts.find((w) => w.clientId === c.id && w.date === today) || null
+  const todayP = db.prescriptions.find((p) => p.clientId === c.id && p.date === today) || null
   const lastWear = latestOf(db.wearable, c.id)
   const restingHr = lastWear?.rhr ?? null
   const age = c.anthro?.age ?? null
@@ -108,7 +109,7 @@ export default function ClientDetailPage() {
       {/* Secondary: Today's Workout + Recent sessions. Today's Workout takes the
           full width only while a session is live; otherwise they sit side by side. */}
       <div className={'grid' + (todayW?.status === 'in_progress' ? '' : ' cards-2')} style={{ marginTop: 16, alignItems: 'start' }}>
-        <TodayWorkout client={c} today={today} workout={todayW} plans={db.plans} exercises={db.exercises}
+        <TodayWorkout client={c} today={today} workout={todayW} prescription={todayP} plans={db.plans} exercises={db.exercises}
           units={units} context={{ readiness: rScore, acwr }} restingHr={restingHr} age={age} bodyMassKg={c.anthro?.massKg ?? null}
           onSave={saveWorkout} onComplete={completeWorkout} onClear={clearWorkout} onTemplate={saveTemplate} />
 
