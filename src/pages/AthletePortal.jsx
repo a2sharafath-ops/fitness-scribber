@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Card from '../components/atoms/Card'
 import Button from '../components/atoms/Button'
 import RangeSlider from '../components/atoms/RangeSlider'
+import Field from '../components/atoms/Field'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import ModalShell from '../components/molecules/ModalShell'
 import Avatar from '../components/atoms/Avatar'
@@ -145,18 +146,20 @@ export default function AthletePortal() {
     if (w) await saveWorkout(w)
   }
 
-  // Complete flow: pressing ✓ Complete pops the session-RPE form; the workout
-  // and its sRPE row are saved together on submit.
+  // Complete flow: pressing ✓ Complete pops the session-RPE form (RPE + an
+  // editable duration); the workout and its sRPE row are saved together on
+  // submit. The edited duration is written back onto the workout itself.
   const requestComplete = (w) => setRpeW(w)
-  const finishWorkout = async (w, rpe) => {
+  const finishWorkout = async (w, rpe, minutes) => {
     setBusy(true)
-    const { error } = await supabase.from('workouts').upsert({ ...w, clientId: client.id, coachId: client.coachId })
+    const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec
+    const { error } = await supabase.from('workouts').upsert({ ...w, durationSec, clientId: client.id, coachId: client.coachId })
     if (error) { setBusy(false); alert(error.message); return }
     if (rpe != null) {
-      const minutes = w.durationSec ? Math.max(1, Math.round(w.durationSec / 60)) : 30
+      const mins = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
       const { error: e2 } = await supabase.from('srpe').insert({
         id: uid(), clientId: client.id, coachId: client.coachId,
-        date: w.date, sessionId: null, rpe, duration: minutes, tl: calcSRPETL(rpe, minutes),
+        date: w.date, sessionId: null, rpe, duration: mins, tl: calcSRPETL(rpe, mins),
       })
       if (e2) alert(e2.message)
     }
@@ -198,7 +201,8 @@ export default function AthletePortal() {
         )}
         {rpeW && (
           <RPEModal busy={busy} workout={rpeW} age={client.anthro?.age ?? null}
-            onSubmit={(rpe) => finishWorkout(rpeW, rpe)} onSkip={() => finishWorkout(rpeW, null)} onClose={() => setRpeW(null)} />
+            onSubmit={(rpe, minutes) => finishWorkout(rpeW, rpe, minutes)}
+            onSkip={(minutes) => finishWorkout(rpeW, null, minutes)} onClose={() => setRpeW(null)} />
         )}
 
         <Card style={{ marginTop: 16, padding: 0, overflow: 'hidden' }} className="msg-thread-card">
@@ -299,25 +303,30 @@ function CheckInModal({ busy, today, onSubmit, onSkip, onClose }) {
   )
 }
 
-// Pops when the athlete presses ✓ Complete. Submitting saves the completed
-// workout plus its sRPE row; Skip saves the workout without an RPE entry;
-// × keeps the session running.
+// Pops when the athlete presses ✓ Complete. Shows RPE plus the session
+// duration (pre-filled from the live timer, editable by the athlete).
+// Submitting saves the completed workout (with the edited duration) plus its
+// sRPE row; Skip saves the workout without an RPE entry; × keeps it running.
 function RPEModal({ busy, workout, age, onSubmit, onSkip, onClose }) {
   const maxHr = 220 - (age || 30)
   const suggested = workout.hrMax ? Math.max(1, Math.min(10, Math.round((workout.hrMax / maxHr) * 10))) : 6
   const [rpe, setRpe] = useState(suggested)
-  const minutes = workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30
+  const [minutes, setMinutes] = useState(workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30)
+  const mins = Math.max(1, Math.round(+minutes || 0) || 1)
   return (
     <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal" role="dialog" aria-modal="true">
         <ModalShell title="How hard was that session?" onClose={onClose}
           footer={<>
-            <Button variant="ghost" disabled={busy} onClick={onSkip}>Skip</Button>
-            <Button disabled={busy} onClick={() => onSubmit(rpe)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
+            <Button variant="ghost" disabled={busy} onClick={() => onSkip(mins)}>Skip</Button>
+            <Button disabled={busy} onClick={() => onSubmit(rpe, mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
           </>}>
           <RangeSlider label="Session RPE (Borg CR10)" value={rpe} min={1} max={10} lo="Rest" hi="Max effort" onChange={setRpe} />
+          <Field label="Workout duration (minutes)">
+            <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
+          </Field>
           <div className="muted" style={{ fontSize: 12 }}>
-            Duration {minutes} min · Training load: <strong>{calcSRPETL(rpe, minutes)} AU</strong>
+            Training load: <strong>{calcSRPETL(rpe, mins)} AU</strong>
             {workout.hrMax ? <span> · suggested {suggested}/10 from your peak HR</span> : null}
           </div>
         </ModalShell>
