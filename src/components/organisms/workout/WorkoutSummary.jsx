@@ -10,9 +10,19 @@ const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, C
 
 // Post-completion summary: session vitals, muscular/cardio breakdown, per-muscle
 // strain, the completed exercise list, and Edit / Share / Delete / Save-as-template.
-export default function WorkoutSummary({ workout, units, exercises = [], restingHr, age, bodyMassKg, onEdit, onDelete, onTemplate }) {
+// locked = coach-prescribed session viewed by the athlete: no Edit / Delete —
+// only the duration stays adjustable (via onDuration).
+export default function WorkoutSummary({ workout, units, exercises = [], restingHr, age, bodyMassKg, locked, onEdit, onDelete, onTemplate, onDuration }) {
   const s = summarize(workout, { exercises, restingHr, age, bodyMassKg })
   const main = workout.main || []
+
+  const editDuration = () => {
+    const cur = Math.max(1, Math.round((workout.durationSec || 0) / 60)) || 30
+    const v = prompt('Workout duration (minutes):', String(cur))
+    if (v == null) return
+    const min = Math.max(1, Math.round(+v))
+    if (!isNaN(min)) onDuration?.(min * 60)
+  }
 
   const kpis = [
     ['Strain', s.strain || '—', '/21 · est'],
@@ -57,10 +67,11 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
             <div className="muted" style={{ fontSize: 12 }}>{fmtDate(workout.date)} · {s.doneMain}/{s.totalMain} exercises ticked</div></div>
         </div>
         <div className="flex gap" style={{ flexWrap: 'wrap' }}>
-          <Button variant="ghost" size="sm" onClick={onEdit}>✎ Edit</Button>
+          {!locked && <Button variant="ghost" size="sm" onClick={onEdit}>✎ Edit</Button>}
+          {onDuration && <Button variant="ghost" size="sm" onClick={editDuration}>⏱ Edit duration</Button>}
           <Button variant="ghost" size="sm" onClick={share}>↗ Share</Button>
-          {onTemplate && <Button variant="ghost" size="sm" onClick={template}>＋ Save as template</Button>}
-          <Button variant="danger" size="sm" onClick={del}>🗑 Delete</Button>
+          {!locked && onTemplate && <Button variant="ghost" size="sm" onClick={template}>＋ Save as template</Button>}
+          {!locked && <Button variant="danger" size="sm" onClick={del}>🗑 Delete</Button>}
         </div>
       </div>
 
@@ -95,18 +106,31 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
         </div>
       </div>
 
-      <div className="section-title">Completed exercises</div>
-      {main.map((m) => (
-        <div key={m.id} className="ex-row">
-          <span style={{ color: m.done ? 'var(--green)' : 'var(--muted)', flex: 'none', width: 18 }}>{m.done ? '✓' : '○'}</span>
-          <div style={{ flex: 1 }}>
-            <strong>{m.name}</strong>
-            <div className="muted" style={{ fontSize: 12 }}>
-              {m.sets} × {m.duration || m.reps}{m.weight != null ? ` · ${toDisp(m.weight, units)} ${unitName(units)}` : ''} · rest {secToClock(m.rest)}
+      <div className="section-title">Prescribed vs done</div>
+      {main.map((m) => {
+        const logged = m.doneSets != null || m.doneReps != null || m.doneWeight != null
+        return (
+          <div key={m.id} className="ex-row" style={m.done ? undefined : { opacity: .75 }}>
+            <span style={{ color: m.done ? 'var(--green)' : 'var(--amber, #f59e0b)', flex: 'none', width: 18 }} aria-hidden="true">{m.done ? '✓' : '⚠'}</span>
+            <div style={{ flex: 1 }}>
+              <div className="flex gap" style={{ alignItems: 'center' }}>
+                <strong>{m.name}</strong>
+                {!m.done && <Tag color="orange">Not completed</Tag>}
+              </div>
+              <div className="muted" style={{ fontSize: 12 }}>
+                Prescribed: {m.sets} × {m.duration || m.reps}{m.weight != null ? ` · ${toDisp(m.weight, units)} ${unitName(units)}` : ''} · rest {secToClock(m.rest)}
+              </div>
+              {m.done && (
+                <div style={{ fontSize: 12, color: 'var(--green)' }}>
+                  Done: {(m.doneSets ?? m.sets)} × {(m.doneReps ?? (m.duration || m.reps))}
+                  {(m.doneWeight ?? m.weight) != null ? ` · ${toDisp(m.doneWeight ?? m.weight, units)} ${unitName(units)}` : ''}
+                  {!logged && <span className="muted"> (as prescribed)</span>}
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

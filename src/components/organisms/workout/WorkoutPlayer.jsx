@@ -8,7 +8,10 @@ import { fmtVL } from '../../../lib/units'
 // The live/edit surface for a Today's Workout.
 //   running=false → edit mode (adjust before starting; "Save" / "Cancel")
 //   running=true  → live mode (timer + HR + done toggles; "Complete")
-export default function WorkoutPlayer({ workout, units, restingHr, age, running, onSave, onComplete, onCancel }) {
+//   locked=true   → coach-prescribed session in the athlete portal: the
+//                   prescription is read-only; the athlete only records done
+//                   sets / reps / load per exercise (no add / edit / remove).
+export default function WorkoutPlayer({ workout, units, restingHr, age, running, locked, onSave, onComplete, onCancel }) {
   const [w, setW] = useState(workout)
   const [now, setNow] = useState(Date.now())
   const [showWarm, setShowWarm] = useState(true)
@@ -70,27 +73,27 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
 
       <Section title={`Warm-up (${running ? doneCount('warmup') + '/' : ''}${w.warmup.length})`} open={showWarm} onToggle={() => setShowWarm((v) => !v)}>
         {w.warmup.map((ex) => (
-          <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode={running ? 'run' : 'edit'}
+          <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode={running ? (locked ? 'log' : 'run') : 'edit'}
             onChange={(p) => setItem('warmup', ex.id, p)} onRemove={() => removeEx('warmup', ex.id)} />
         ))}
-        <Button variant="ghost" size="sm" style={{ marginTop: 6 }} onClick={() => addEx('warmup')}>＋ Add warm-up</Button>
+        {!locked && <Button variant="ghost" size="sm" style={{ marginTop: 6 }} onClick={() => addEx('warmup')}>＋ Add warm-up</Button>}
       </Section>
 
       <div className="wp-section-title">
         <span>Main set {running && <span className="muted" style={{ fontWeight: 400 }}>· {done}/{w.main.length} done</span>}</span>
-        <Button variant="ghost" size="sm" onClick={() => addEx('main')}>＋ Add exercise</Button>
+        {!locked && <Button variant="ghost" size="sm" onClick={() => addEx('main')}>＋ Add exercise</Button>}
       </div>
       {w.main.length ? w.main.map((ex) => (
-        <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode={running ? 'run' : 'edit'}
+        <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode={running ? (locked ? 'log' : 'run') : 'edit'}
           onChange={(p) => setItem('main', ex.id, p)} onRemove={() => removeEx('main', ex.id)} />
-      )) : <div className="muted" style={{ padding: '8px 0' }}>No exercises yet — add one.</div>}
+      )) : <div className="muted" style={{ padding: '8px 0' }}>No exercises yet{locked ? '.' : ' — add one.'}</div>}
 
       <Section title={`Cool-down (${running ? doneCount('cooldown') + '/' : ''}${w.cooldown.length})`} open={showCool} onToggle={() => setShowCool((v) => !v)}>
         {w.cooldown.map((ex) => (
-          <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode={running ? 'run' : 'edit'}
+          <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode={running ? (locked ? 'log' : 'run') : 'edit'}
             onChange={(p) => setItem('cooldown', ex.id, p)} onRemove={() => removeEx('cooldown', ex.id)} />
         ))}
-        <Button variant="ghost" size="sm" style={{ marginTop: 6 }} onClick={() => addEx('cooldown')}>＋ Add cool-down</Button>
+        {!locked && <Button variant="ghost" size="sm" style={{ marginTop: 6 }} onClick={() => addEx('cooldown')}>＋ Add cool-down</Button>}
       </Section>
 
       <div className="modal-foot" style={{ gap: 8 }}>

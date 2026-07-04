@@ -135,9 +135,17 @@ export const SOURCE_LABEL = { plan: 'Plan', ai: 'Adaptive', manual: 'Manual', pr
 const CARDIO_RE = /run|jog|bike|cycl|row|cardio|walk|elliptical|sprint|swim|skip/i
 const isCardioItem = (m) => CARDIO_RE.test(m.name) || (m.weight == null && /min|sec|\d\s*s\b|hold/i.test(String(m.reps)))
 
+// Actuals: athletes log what they really did (doneSets / doneReps / doneWeight)
+// against the prescription. Fall back to the prescribed value when not logged,
+// so coach-built sessions without actuals keep working unchanged.
+export const actualSets = (m) => +(m.doneSets ?? m.sets) || 0
+export const actualReps = (m) => parseInt(m.doneReps ?? m.reps, 10) || 0
+export const actualWeight = (m) => +(m.doneWeight ?? m.weight) || 0
+
 // Derive a completed session's vitals + breakdowns. Several values (energy, HRR,
 // strain) are physiological estimates from duration + heart rate and are labelled
-// as such in the UI — the wearable doesn't stream them yet.
+// as such in the UI — the wearable doesn't stream them yet. Tonnage/reps use the
+// logged actuals where present, so the summary reflects what was actually done.
 export function summarize(w, { exercises = [], restingHr = null, age = null, bodyMassKg = null } = {}) {
   const minutes = (w.durationSec || 0) / 60
   const maxHr = 220 - (age || 30)
@@ -148,11 +156,11 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
   const intensity = avg ? Math.min(1, avg / maxHr) : 0
 
   const main = w.main || []
-  const repsOf = (m) => (+m.sets || 0) * (parseInt(m.reps, 10) || 0)
-  const volume = main.reduce((t, m) => t + repsOf(m) * (+m.weight || 0), 0)
+  const repsOf = (m) => actualSets(m) * actualReps(m)
+  const volume = main.reduce((t, m) => t + repsOf(m) * actualWeight(m), 0)
   const reps = main.reduce((t, m) => t + repsOf(m), 0)
-  const sets = main.reduce((t, m) => t + (+m.sets || 0), 0)
-  const topWeight = main.reduce((mx, m) => Math.max(mx, +m.weight || 0), 0)
+  const sets = main.reduce((t, m) => t + actualSets(m), 0)
+  const topWeight = main.reduce((mx, m) => Math.max(mx, actualWeight(m)), 0)
 
   const met = 2 + intensity * 9
   const energy = Math.round((met * 3.5 * (bodyMassKg || 75)) / 200 * minutes)
@@ -166,7 +174,7 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
   let muscular = 0, cardio = 0
   const byMuscle = {}
   for (const m of main) {
-    const work = repsOf(m) * (+m.weight || 0) || repsOf(m) || (+m.sets || 0) || 1
+    const work = repsOf(m) * actualWeight(m) || repsOf(m) || actualSets(m) || 1
     if (isCardioItem(m)) { cardio += work }
     else { muscular += work; const mu = muscleOf(m.name) || 'General'; byMuscle[mu] = (byMuscle[mu] || 0) + work }
   }

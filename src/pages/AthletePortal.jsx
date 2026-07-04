@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import Card from '../components/atoms/Card'
 import Button from '../components/atoms/Button'
 import RangeSlider from '../components/atoms/RangeSlider'
-import Field from '../components/atoms/Field'
 import ReadinessTag from '../components/molecules/ReadinessTag'
+import ModalShell from '../components/molecules/ModalShell'
 import Avatar from '../components/atoms/Avatar'
 import ChangePasswordCard from '../components/organisms/forms/ChangePasswordCard'
 import ChatThread from '../components/organisms/ChatThread'
@@ -22,6 +22,8 @@ export default function AthletePortal() {
   const { user, signOut } = useAuth()
   const [state, setState] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [checkinW, setCheckinW] = useState(null) // workout waiting to start until the check-in popup resolves
+  const [rpeW, setRpeW] = useState(null)         // completed workout waiting for the RPE popup
   const today = todayISO()
 
   const load = useCallback(async () => {
@@ -123,12 +125,43 @@ export default function AthletePortal() {
     await supabase.from('workouts').delete().eq('id', todayW.id)
     await load()
   }
-  const completeWorkout = async (w) => {
-    const maxHr = 220 - (client.anthro?.age || 30)
-    const rpe = w.hrMax ? Math.max(1, Math.min(10, Math.round((w.hrMax / maxHr) * 10))) : 6
-    const minutes = w.durationSec ? Math.max(1, Math.round(w.durationSec / 60)) : 30
-    await supabase.from('workouts').upsert({ ...w, clientId: client.id, coachId: client.coachId })
-    await supabase.from('srpe').insert({ id: uid(), clientId: client.id, coachId: client.coachId, date: w.date, sessionId: null, rpe, duration: minutes, tl: calcSRPETL(rpe, minutes) })
+
+  // Start flow: pressing ▶ Start first pops the morning check-in (skipped if
+  // already done today), then the session actually starts.
+  const startWorkout = (w) => {
+    if (checkedIn) { saveWorkout(w); return }
+    setCheckinW(w)
+  }
+  const submitCheckin = async (v) => {
+    const ok = await insert('wellness', v)
+    if (!ok) return
+    const w = checkinW
+    setCheckinW(null)
+    if (w) await saveWorkout(w)
+  }
+  const skipCheckin = async () => {
+    const w = checkinW
+    setCheckinW(null)
+    if (w) await saveWorkout(w)
+  }
+
+  // Complete flow: pressing ✓ Complete pops the session-RPE form; the workout
+  // and its sRPE row are saved together on submit.
+  const requestComplete = (w) => setRpeW(w)
+  const finishWorkout = async (w, rpe) => {
+    setBusy(true)
+    const { error } = await supabase.from('workouts').upsert({ ...w, clientId: client.id, coachId: client.coachId })
+    if (error) { setBusy(false); alert(error.message); return }
+    if (rpe != null) {
+      const minutes = w.durationSec ? Math.max(1, Math.round(w.durationSec / 60)) : 30
+      const { error: e2 } = await supabase.from('srpe').insert({
+        id: uid(), clientId: client.id, coachId: client.coachId,
+        date: w.date, sessionId: null, rpe, duration: minutes, tl: calcSRPETL(rpe, minutes),
+      })
+      if (e2) alert(e2.message)
+    }
+    setBusy(false)
+    setRpeW(null)
     await load()
   }
 
@@ -146,8 +179,6 @@ export default function AthletePortal() {
 
         <ScreeningCard clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
           onSave={saveScreening} onComplete={completeScreening} />
-        <CheckInCard checkedIn={checkedIn} busy={busy} onSubmit={(v) => insert('wellness', v)} today={today} />
-        <RPECard busy={busy} onSubmit={(v) => insert('srpe', v)} today={today} />
         <WearableSection
           clientId={client.id}
           tokens={state.wearable_tokens || []}
@@ -158,8 +189,17 @@ export default function AthletePortal() {
         <div style={{ marginTop: 16 }}>
           <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
             units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
-            onSave={saveWorkout} onComplete={completeWorkout} onClear={clearWorkout} />
+            athlete onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
         </div>
+
+        {checkinW && (
+          <CheckInModal busy={busy} today={today}
+            onSubmit={submitCheckin} onSkip={skipCheckin} onClose={() => setCheckinW(null)} />
+        )}
+        {rpeW && (
+          <RPEModal busy={busy} workout={rpeW} age={client.anthro?.age ?? null}
+            onSubmit={(rpe) => finishWorkout(rpeW, rpe)} onSkip={() => finishWorkout(rpeW, null)} onClose={() => setRpeW(null)} />
+        )}
 
         <Card style={{ marginTop: 16, padding: 0, overflow: 'hidden' }} className="msg-thread-card">
           <ChatThread clientId={client.id} viewerRole="athlete" headerName="Your coach" subtitle="Questions, form checks, updates" />
@@ -233,56 +273,55 @@ function WearableSection({ clientId, tokens, latest, onChange }) {
   )
 }
 
-function CheckInCard({ checkedIn, busy, onSubmit, today }) {
-  const [open, setOpen] = useState(false)
+// Pops right after ▶ Start (only when today's check-in is missing). Submitting
+// logs the Hooper wellness entry and then starts the session; Skip starts it
+// without logging; × cancels the start entirely.
+function CheckInModal({ busy, today, onSubmit, onSkip, onClose }) {
   const [f, setF] = useState({ sleep: 5, stress: 3, fatigue: 3, soreness: 3 })
   const score = calcWellness(f.sleep, f.stress, f.fatigue, f.soreness)
-  const submit = async () => {
-    const ok = await onSubmit({ date: today, ...f, score })
-    if (ok) setOpen(false)
-  }
   return (
-    <Card style={{ marginTop: 16 }}>
-      <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Morning check-in (Hooper)</div>
-        {checkedIn && <span className="tag green">✓ Done today</span>}</div>
-      {!open ? (
-        <Button style={{ marginTop: 12 }} onClick={() => setOpen(true)}>{checkedIn ? 'Update check-in' : 'Start check-in'}</Button>
-      ) : (
-        <div style={{ marginTop: 12 }}>
+    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal" role="dialog" aria-modal="true">
+        <ModalShell title="Morning check-in (Hooper)" onClose={onClose}
+          footer={<>
+            <Button variant="ghost" disabled={busy} onClick={onSkip}>Skip — start anyway</Button>
+            <Button disabled={busy} onClick={() => onSubmit({ date: today, ...f, score })}>{busy ? 'Saving…' : 'Submit & start workout'}</Button>
+          </>}>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>Quick check-in before you start — this helps your coach match your training to how you feel.</p>
           <RangeSlider label="Sleep Quality" value={f.sleep} min={1} max={7} lo="Terrible" hi="Excellent" onChange={(v) => setF({ ...f, sleep: v })} />
           <RangeSlider label="Stress" value={f.stress} min={1} max={7} lo="None" hi="Extreme" onChange={(v) => setF({ ...f, stress: v })} />
           <RangeSlider label="Fatigue" value={f.fatigue} min={1} max={7} lo="Fresh" hi="Exhausted" onChange={(v) => setF({ ...f, fatigue: v })} />
           <RangeSlider label="Muscle Soreness" value={f.soreness} min={1} max={7} lo="None" hi="Severe" onChange={(v) => setF({ ...f, soreness: v })} />
-          <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>Wellness score: <strong>{score}/28</strong></div>
-          <div className="flex gap"><Button disabled={busy} onClick={submit}>{busy ? 'Saving…' : 'Submit'}</Button><Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button></div>
-        </div>
-      )}
-    </Card>
+          <div className="muted" style={{ fontSize: 12 }}>Wellness score: <strong>{score}/28</strong></div>
+        </ModalShell>
+      </div>
+    </div>
   )
 }
 
-function RPECard({ busy, onSubmit, today }) {
-  const [open, setOpen] = useState(false)
-  const [rpe, setRpe] = useState(6)
-  const [duration, setDuration] = useState(60)
-  const submit = async () => {
-    const ok = await onSubmit({ date: today, rpe, duration, sessionId: null, tl: calcSRPETL(rpe, duration) })
-    if (ok) setOpen(false)
-  }
+// Pops when the athlete presses ✓ Complete. Submitting saves the completed
+// workout plus its sRPE row; Skip saves the workout without an RPE entry;
+// × keeps the session running.
+function RPEModal({ busy, workout, age, onSubmit, onSkip, onClose }) {
+  const maxHr = 220 - (age || 30)
+  const suggested = workout.hrMax ? Math.max(1, Math.min(10, Math.round((workout.hrMax / maxHr) * 10))) : 6
+  const [rpe, setRpe] = useState(suggested)
+  const minutes = workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30
   return (
-    <Card style={{ marginTop: 16 }}>
-      <div className="section-title" style={{ margin: 0 }}>Log session RPE</div>
-      {!open ? (
-        <Button style={{ marginTop: 12 }} onClick={() => setOpen(true)}>Log a session</Button>
-      ) : (
-        <div style={{ marginTop: 12 }}>
-          <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>Best logged 15–30 min after your session.</p>
+    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal" role="dialog" aria-modal="true">
+        <ModalShell title="How hard was that session?" onClose={onClose}
+          footer={<>
+            <Button variant="ghost" disabled={busy} onClick={onSkip}>Skip</Button>
+            <Button disabled={busy} onClick={() => onSubmit(rpe)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
+          </>}>
           <RangeSlider label="Session RPE (Borg CR10)" value={rpe} min={1} max={10} lo="Rest" hi="Max effort" onChange={setRpe} />
-          <Field label="Duration (minutes)"><input type="number" value={duration} onChange={(e) => setDuration(+e.target.value)} /></Field>
-          <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>Training load: <strong>{calcSRPETL(rpe, duration)} AU</strong></div>
-          <div className="flex gap"><Button disabled={busy} onClick={submit}>{busy ? 'Saving…' : 'Submit'}</Button><Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button></div>
-        </div>
-      )}
-    </Card>
+          <div className="muted" style={{ fontSize: 12 }}>
+            Duration {minutes} min · Training load: <strong>{calcSRPETL(rpe, minutes)} AU</strong>
+            {workout.hrMax ? <span> · suggested {suggested}/10 from your peak HR</span> : null}
+          </div>
+        </ModalShell>
+      </div>
+    </div>
   )
 }
