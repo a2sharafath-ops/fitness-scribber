@@ -103,7 +103,7 @@ export function seed() {
       { id: uid(), clientId: c2, exercise: 'Deadlift', date: d(-28), kind: 'tm', valueKg: 190, source: 'block-start' },
       { id: uid(), clientId: c1, exercise: 'Goblet Squat', date: d(-12), kind: 'e1rm', valueKg: 34, source: 'auto' },
     ],
-    settings: { trainerName: 'Alex Rivera', businessName: 'FitScribe Studio', units: 'kg', tz: '' },
+    settings: { trainerName: 'Alex Rivera', businessName: 'Fitness Partner Studio', units: 'kg', tz: '' },
   }
 
   // ----- Assessments: onboarding baseline + a later reassessment for Sarah -----

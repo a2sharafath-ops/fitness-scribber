@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import Field from '../components/atoms/Field'
+import Brand from '../components/atoms/Brand'
 import { useAuth } from '../store/AuthContext'
 
 // Shown once for a brand-new account that has no profile yet.
@@ -21,10 +22,10 @@ export default function RoleOnboarding() {
   return (
     <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ width: 400, maxWidth: '92vw' }}>
-        <div className="brand" style={{ padding: '0 0 14px' }}><span className="logo" aria-hidden="true">💪</span><span>FitScribe</span></div>
+        <Brand style={{ padding: '0 0 14px' }} />
         {!mode && (
           <>
-            <h2 style={{ fontSize: 18, marginBottom: 4 }}>Welcome — how will you use FitScribe?</h2>
+            <h2 style={{ fontSize: 18, marginBottom: 4 }}>Welcome — how will you use Fitness Partner?</h2>
             <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Pick one to set up your account.</p>
             <div className="grid" style={{ gap: 10 }}>
               <Button onClick={becomeCoach}>🏋️ I'm a coach — manage athletes</Button>

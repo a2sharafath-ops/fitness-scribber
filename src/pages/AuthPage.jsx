@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import Field from '../components/atoms/Field'
+import Brand from '../components/atoms/Brand'
 import { useAuth } from '../store/AuthContext'
 
 const TITLES = { signin: 'Coach sign in', signup: 'Create coach account', reset: 'Reset your password' }
@@ -36,7 +37,7 @@ export default function AuthPage() {
   return (
     <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ width: 360, maxWidth: '92vw' }}>
-        <div className="brand" style={{ padding: '0 0 18px' }}><span className="logo" aria-hidden="true">💪</span><span>FitScribe</span></div>
+        <Brand style={{ padding: '0 0 18px' }} />
         <h2 style={{ fontSize: 18, marginBottom: 4 }}>{TITLES[mode]}</h2>
         <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>
           {mode === 'reset' ? "Enter your account email and we'll send you a reset link." : "Your athletes' data is private to your account."}

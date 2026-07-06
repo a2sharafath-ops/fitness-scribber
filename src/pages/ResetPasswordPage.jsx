@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import Field from '../components/atoms/Field'
+import Brand from '../components/atoms/Brand'
 import { useAuth } from '../store/AuthContext'
 
 // Shown after the user follows a password-reset email link. On success the
@@ -25,7 +26,7 @@ export default function ResetPasswordPage() {
   return (
     <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ width: 360, maxWidth: '92vw' }}>
-        <div className="brand" style={{ padding: '0 0 18px' }}><span className="logo" aria-hidden="true">💪</span><span>FitScribe</span></div>
+        <Brand style={{ padding: '0 0 18px' }} />
         <h2 style={{ fontSize: 18, marginBottom: 4 }}>Set a new password</h2>
         <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Choose a new password for your account.</p>
         <form onSubmit={submit}>
