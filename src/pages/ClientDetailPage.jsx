@@ -5,10 +5,9 @@ import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import ConcernCard from '../components/molecules/ConcernCard'
-import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
+import PlannerWidget from '../components/organisms/PlannerWidget'
 import AICoach from '../components/organisms/AICoach'
 import ClientSubnav from '../components/templates/ClientSubnav'
-import TodayWorkout from '../components/organisms/workout/TodayWorkout'
 import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
 import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
@@ -132,18 +131,21 @@ export default function ClientDetailPage() {
         <Button variant="ghost" size="sm" onClick={() => nav('/command/' + c.id)}>Open full dashboard →</Button>
       </div>
 
-      {/* Workout planner — the primary day-to-day tool, with the AI coach beside it as a chat */}
+      {/* Planner widget — Today's Workout by default, expandable to the week/month
+          planner from the same card, with the AI coach beside it as a chat */}
       <div className="cc-wrap" style={{ marginTop: 16 }}>
-        <div className="cc-main"><WorkoutPlanner client={c} size="medium" /></div>
+        <div className="cc-main">
+          <PlannerWidget client={c} size="medium" todayProps={{
+            client: c, today, workout: todayW, prescription: todayP, plans: db.plans, exercises: db.exercises,
+            units, context: { readiness: rScore, acwr }, restingHr, age, bodyMassKg: c.anthro?.massKg ?? null,
+            onStart: startWorkout, onSave: saveWorkout, onComplete: requestComplete, onClear: clearWorkout, onTemplate: saveTemplate,
+          }} />
+        </div>
         <div className="cc-side"><AICoach client={c} /></div>
       </div>
 
-      {/* Secondary: Today's Workout + Recent sessions. Today's Workout takes the
-          full width only while a session is live; otherwise they sit side by side. */}
-      <div className={'grid' + (todayW?.status === 'in_progress' ? '' : ' cards-2')} style={{ marginTop: 16, alignItems: 'start' }}>
-        <TodayWorkout client={c} today={today} workout={todayW} prescription={todayP} plans={db.plans} exercises={db.exercises}
-          units={units} context={{ readiness: rScore, acwr }} restingHr={restingHr} age={age} bodyMassKg={c.anthro?.massKg ?? null}
-          onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} onTemplate={saveTemplate} />
+      {/* Secondary: Recent sessions (Today's Workout now lives in the planner widget above). */}
+      <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
 
         <div className="card">
           <div className="section-title" style={{ margin: '0 0 10px' }}>Recent sessions</div>

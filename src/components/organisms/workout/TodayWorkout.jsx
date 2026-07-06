@@ -18,7 +18,7 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // athlete=true: coach-prescribed sessions are locked — the athlete can't edit,
 // swap or delete them, only record done sets / reps / load. onStart (optional)
 // intercepts the Start press so the parent can run a pre-flight (check-in popup).
-export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, onStart, onSave, onComplete, onClear, onTemplate }) {
+export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, onStart, onSave, onComplete, onClear, onTemplate, headerExtra }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -32,7 +32,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
     const pick = (w) => onSave(w)
     const pStats = prescription ? programStats(prescription) : null
     return (
-      <Shell>
+      <Shell extra={headerExtra}>
         {prescription ? (
           <div className="tw-suggest">
             <div className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Prescribed for today</div>
@@ -79,7 +79,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   // ---- Editing a suggested session (never reachable when locked) ----
   if (editing && !locked && workout.status !== 'in_progress') {
     return (
-      <Shell>
+      <Shell extra={headerExtra}>
         <WorkoutPlayer workout={workout} units={units} running={false}
           onSave={(w) => { onSave(w); setEditing(false) }} onCancel={() => setEditing(false)} />
       </Shell>
@@ -89,7 +89,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   // ---- Live session -------------------------------------------------
   if (workout.status === 'in_progress') {
     return (
-      <Shell>
+      <Shell extra={headerExtra}>
         <WorkoutPlayer workout={workout} units={units} running locked={locked} restingHr={restingHr} age={age}
           onSave={onSave} onComplete={onComplete} />
       </Shell>
@@ -99,7 +99,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   // ---- Completed → full summary -------------------------------------
   if (workout.status === 'completed') {
     return (
-      <Shell action={!locked && <Button variant="ghost" size="sm" onClick={onClear}>New workout →</Button>}>
+      <Shell extra={headerExtra} action={!locked && <Button variant="ghost" size="sm" onClick={onClear}>New workout →</Button>}>
         <WorkoutSummary workout={workout} units={units} exercises={exercises} restingHr={restingHr} age={age} bodyMassKg={bodyMassKg}
           locked={locked} onEdit={() => setEditing(true)} onDelete={onClear} onTemplate={onTemplate}
           onDuration={(sec) => onSave({ ...workout, durationSec: sec })} />
@@ -111,7 +111,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   const vol = workoutVolume(workout)
   const start = () => (onStart || onSave)({ ...workout, status: 'in_progress', startedAt: new Date().toISOString() })
   return (
-    <Shell>
+    <Shell extra={headerExtra}>
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
         <div>
           <div className="flex gap"><Tag color={SRC_COLOR[workout.source]}>{SOURCE_LABEL[workout.source]}</Tag>
@@ -137,12 +137,12 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   )
 }
 
-function Shell({ children, action }) {
+function Shell({ children, action, extra }) {
   return (
     <div className="card">
       <div className="flex between" style={{ marginBottom: 12 }}>
         <div className="section-title" style={{ margin: 0 }}>Today's Workout</div>
-        {action}
+        <div className="flex gap">{extra}{action}</div>
       </div>
       {children}
     </div>

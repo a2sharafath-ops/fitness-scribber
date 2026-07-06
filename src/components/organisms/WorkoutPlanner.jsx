@@ -12,14 +12,14 @@ import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMo
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-export default function WorkoutPlanner({ client, featured = false, size }) {
+export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay }) {
   const sz = size || (featured ? 'featured' : 'default')
   const isFeatured = sz === 'featured'
   const isMedium = sz === 'medium'
   const { db, tz } = useData()
   const { openModal } = useModal()
   const { fmtVL } = useFormat()
-  const [view, setView] = useState(isFeatured ? 'month' : 'week')
+  const [view, setView] = useState(initialView || (isFeatured ? 'month' : 'week'))
   const [anchor, setAnchor] = useState(todayISO(tz)) // any date within the shown month
   const [weekStart, setWeekStart] = useState(0)
   const [collapsed, setCollapsed] = useState(false)
@@ -55,7 +55,7 @@ export default function WorkoutPlanner({ client, featured = false, size }) {
           <span className="planner-summary muted">{summary}</span>
         ) : (
           <div className="flex gap" style={{ flexWrap: 'wrap' }}>
-            <SegToggle options={[['week', 'Week'], ['month', 'Month']]} value={view} onChange={setView} ariaLabel="Calendar view" />
+            <SegToggle options={onDay ? [['day', 'Day'], ['week', 'Week'], ['month', 'Month']] : [['week', 'Week'], ['month', 'Month']]} value={view} onChange={(v) => (v === 'day' ? onDay() : setView(v))} ariaLabel="Calendar view" />
             {view === 'month' ? (
               <div className="flex gap">
                 <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(anchor, -1))} aria-label="Previous month">←</Button>

@@ -443,6 +443,94 @@ canvas{max-width:100%}
 .prog-ex-rule{display:flex;gap:10px}
 .prog-ex-rule .sf{width:120px}
 
+/* ===== Dashboard (Cureocity "03 · Dashboard") ===== */
+.dash{display:flex;flex-direction:column;gap:20px}
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.dash-stat{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:left;cursor:pointer;font-family:inherit;color:inherit;transition:.15s}
+.dash-stat:hover{transform:translateY(-2px);border-color:var(--accent)}
+.dash-stat-head{display:flex;align-items:center;width:100%}
+.dash-chip{width:36px;height:36px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.dash-pill{margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.dash-stat-num{font-size:24px;font-weight:700;letter-spacing:-.6px;line-height:1}
+.dash-stat-label{font-size:12px;color:var(--muted);font-weight:500}
+.dash-insights{display:grid;grid-template-columns:1fr 372px;gap:16px;align-items:stretch}
+.dash-side{display:flex;flex-direction:column;gap:16px}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px}
+.dash-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.dash-card-title{font-size:18px;font-weight:600;color:var(--text)}
+.dash-card-sub{font-size:12px;color:#9a9ba2;font-weight:500;margin-top:2px}
+.dash-xlabels{display:flex;justify-content:space-between;font-size:12px;color:#9a9ba2;font-weight:500;margin-top:8px;padding-left:34px}
+.dash-ai{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.dash-ai-head{display:flex;align-items:center;gap:8px}
+.dash-ai-chip{width:28px;height:28px;border-radius:10px;background:var(--tint-red);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.dash-ai-tag{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--accent)}
+.dash-ai-title{font-size:18px;font-weight:600;color:var(--text)}
+.dash-ai-body{font-size:12px;line-height:1.5;color:var(--muted)}
+.dash-next{background:var(--text);color:#fff;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;font-family:inherit;cursor:pointer}
+.dash-next-label{font-size:10px;font-weight:800;letter-spacing:.8px;opacity:.64}
+.dash-next-title{font-size:18px;font-weight:600}
+.dash-next-sub{font-size:12px;font-weight:500;opacity:.72}
+.dash-lists{display:grid;grid-template-columns:1fr 372px;gap:16px;align-items:start}
+.dash-list{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 24px}
+.dash-list-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px}
+.dash-list-title{font-size:18px;font-weight:600;color:var(--text)}
+.dash-viewall{background:none;border:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;padding:0}
+.dash-viewall:hover{text-decoration:underline}
+.dash-row{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.05);width:100%;text-align:left;background:none;font-family:inherit;cursor:pointer}
+.dash-list .dash-row:last-child{border-bottom:none}
+.dash-row:hover{background:var(--surface2)}
+.dash-time{width:52px;font-size:12px;font-weight:700;flex:none;color:var(--text)}
+.dash-rinfo{flex:1;min-width:0}
+.dash-rinfo .t{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-rinfo .s{font-size:12px;color:#9a9ba2;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-att-av{width:36px;height:36px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.sc{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;flex:none}
+.sc .sc-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.sc-green{background:var(--tint-green);color:var(--green)}
+.sc-indigo{background:#ebebfa;color:#5856d6}
+.sc-gray{background:var(--tint-gray);color:var(--muted)}
+.sc-amber{background:var(--tint-amber);color:var(--accent2)}
+.sc-red{background:var(--tint-red);color:var(--accent)}
+.sc-blue{background:var(--tint-blue);color:var(--blue)}
+
+/* ===== Clients table (Cureocity "04 · Clients") ===== */
+.cl-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.cl-toolbar .search-field{margin-left:auto}
+.cl-table{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+.cl-head,.cl-row{display:grid;grid-template-columns:1fr 150px 150px 90px 110px 24px;gap:16px;align-items:center;padding:12px 20px}
+.cl-head{background:#faf9f7;border-bottom:1px solid var(--border)}
+.cl-head span{font-size:10px;font-weight:700;letter-spacing:.6px;color:#9a9ba2;text-transform:uppercase}
+.cl-row{border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;background:none;width:100%;text-align:left;font-family:inherit;color:inherit}
+.cl-row:last-of-type{border-bottom:none}
+.cl-row:hover{background:var(--surface2)}
+.cl-client{display:flex;align-items:center;gap:12px;min-width:0}
+.cl-id{min-width:0}
+.cl-id .n{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-id .e{font-size:12px;color:#9a9ba2;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-prog{min-width:0}
+.cl-prog .p{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-prog .w{font-size:12px;color:#9a9ba2;font-weight:500}
+.cl-adh{display:flex;align-items:center;gap:10px}
+.cl-bar{width:90px;height:6px;background:#eceae7;border-radius:999px;overflow:hidden;flex:none}
+.cl-bar>div{height:100%;border-radius:999px}
+.cl-adh .pct{font-size:12px;font-weight:700;color:var(--text)}
+.cl-last{font-size:12px;color:var(--muted);font-weight:500}
+.cl-chev{color:#9a9ba2;display:flex;justify-content:flex-end}
+.cl-foot{display:flex;align-items:center;padding:14px 20px;font-size:12px;color:#9a9ba2;font-weight:500}
+@media(max-width:920px){
+  .cl-head,.cl-row{grid-template-columns:1fr 120px 24px}
+  .cl-col-prog,.cl-col-last{display:none}
+}
+@media(max-width:560px){
+  .cl-head,.cl-row{grid-template-columns:1fr 24px}
+  .cl-col-adh{display:none}
+}
+@media(max-width:1000px){
+  .dash-stats{grid-template-columns:repeat(2,1fr)}
+  .dash-insights,.dash-lists{grid-template-columns:1fr}
+}
+@media(max-width:560px){.dash-stats{grid-template-columns:1fr}}
+
 /* ===== Auth / Login-Signup (Cureocity "01 · Login / Sign up") ===== */
 .auth-wrap{display:flex;min-height:100vh}
 .auth-brand{width:620px;flex-shrink:0;display:flex;flex-direction:column;padding:56px;color:#fff;
