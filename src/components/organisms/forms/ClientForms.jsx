@@ -7,6 +7,7 @@ import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
 import { screeningsFor, programStatus } from '../../../lib/screening'
+import { toast, confirmDialog } from '../../../lib/toast'
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
@@ -19,7 +20,7 @@ export function ClientForm({ client }) {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
   const save = () => {
-    if (!f.name.trim()) return alert('Name is required')
+    if (!f.name.trim()) return toast('Name is required', 'error')
     commit((db) => {
       if (client) Object.assign(db.clients.find((c) => c.id === client.id), f)
       else
@@ -30,9 +31,10 @@ export function ClientForm({ client }) {
         })
     })
     closeModal()
+    toast(client ? 'Client updated' : 'Client added')
   }
-  const del = () => {
-    if (!confirm('Delete this client and all their data?')) return
+  const del = async () => {
+    if (!await confirmDialog({ title: 'Delete client', message: 'Delete this client and all their data? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
     commit((db) => {
       db.clients = db.clients.filter((c) => c.id !== client.id)
       ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions'].forEach(
@@ -40,6 +42,7 @@ export function ClientForm({ client }) {
       )
     })
     closeModal()
+    toast('Client deleted')
   }
 
   return (

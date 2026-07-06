@@ -10,7 +10,10 @@ import BulkWellnessForm from '../components/organisms/forms/BulkWellnessForm'
 import SessionForm from '../components/organisms/forms/SessionForm'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
+import InfoTip from '../components/atoms/InfoTip'
+import Icon from '../components/atoms/Icon'
 import { colorFor } from '../lib/format'
+import { GLOSSARY } from '../lib/glossary'
 import { todayISO } from '../lib/dates'
 import { squadRow, openConcerns, readinessFor } from '../lib/calc'
 
@@ -26,8 +29,8 @@ export default function DashboardPage() {
   const todaySessions = db.sessions.filter((s) => s.date === today)
   const upcoming = db.sessions.filter((s) => s.date >= today && s.status !== 'Completed').length
   const completed = db.sessions.filter((s) => s.status === 'Completed').length
-  const revenue = db.clients.filter((c) => c.status === 'Active').reduce((a, c) => a + (c.plan === 'Premium' ? 180 : 120), 0)
-  const highConcerns = openConcerns(db).filter((x) => x.severity === 'High')
+  const openC = openConcerns(db)
+  const highConcerns = openC.filter((x) => x.severity === 'High')
 
   const squad = db.clients.map((c) => squadRow(db, c, tz)).sort((a, b) => RANK[a.r.color] - RANK[b.r.color] || b.openC - a.openC)
   const go = (id) => nav('/command/' + id)
@@ -40,14 +43,14 @@ export default function DashboardPage() {
           <div className="sub">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
         </div>
         <div className="flex gap">
-          <Button variant="ghost" onClick={() => openModal(<BulkWellnessForm />, true)}>📝 Bulk morning check-in</Button>
+          <Button variant="ghost" onClick={() => openModal(<BulkWellnessForm />, true)}><Icon name="clipboard" size={15} /> Bulk morning check-in</Button>
           <Button onClick={() => openModal(<SessionForm />)}>＋ Book Session</Button>
         </div>
       </div>
 
       {highConcerns.length > 0 && (
         <div className="alert-banner">
-          <span className="ab-ic">🚩</span>
+          <span className="ab-ic"><Icon name="flag" size={20} /></span>
           <div style={{ flex: 1 }}>
             <strong>{highConcerns.length} high-severity concern{highConcerns.length > 1 ? 's' : ''} need attention</strong>
             <div className="muted" style={{ fontSize: 12 }}>{highConcerns.map((x) => db.clients.find((c) => c.id === x.clientId)?.name).filter(Boolean).join(', ')}</div>
@@ -59,15 +62,15 @@ export default function DashboardPage() {
       <div className="grid cards-4">
         <StatCard label="Active Clients" value={active} delta={'▲ ' + db.clients.length + ' total'} onClick={() => nav('/clients')} ariaLabel="Active clients, view all clients" />
         <StatCard label="Sessions Today" value={todaySessions.length} delta={upcoming + ' upcoming'} onClick={() => nav('/schedule')} ariaLabel="Sessions today, open schedule" />
-        <StatCard label="Sessions Done" value={completed} delta="▲ all time" onClick={() => nav('/schedule')} ariaLabel="Sessions completed, open schedule" />
-        <StatCard label="Est. Monthly Rev." value={'$' + revenue.toLocaleString()} delta={'▲ from ' + active + ' active'} onClick={() => nav('/clients')} ariaLabel="Estimated monthly revenue, view clients" />
+        <StatCard label="Sessions Done" value={completed} delta="all time" onClick={() => nav('/schedule')} ariaLabel="Sessions completed, open schedule" />
+        <StatCard label="Open Concerns" value={openC.length} delta={highConcerns.length + ' high severity'} onClick={() => nav('/concerns')} ariaLabel="Open concerns, review concerns" />
       </div>
 
       <div className="section-title" style={{ marginTop: 24 }}>Squad Readiness &amp; Workload Overview</div>
       <div className="card" style={{ padding: 0, overflowX: 'auto', marginBottom: 24 }}>
         <table>
           <caption className="sr-only">Squad readiness and workload, sorted by risk</caption>
-          <thead><tr><th>Client</th><th>Readiness</th><th>ACWR</th><th>Wellness</th><th>Concerns</th></tr></thead>
+          <thead><tr><th>Client</th><th>Readiness</th><th>ACWR <InfoTip {...GLOSSARY.acwr} /></th><th>Wellness <InfoTip {...GLOSSARY.wellness} /></th><th>Concerns</th></tr></thead>
           <tbody>
             {squad.map((x) => (
               <tr key={x.c.id} className={'clickable risk-row-' + x.r.color} tabIndex={0} role="button"
@@ -103,23 +106,25 @@ export default function DashboardPage() {
                   <Tag color={{ Confirmed: 'green', Pending: 'orange', Completed: 'blue', Cancelled: 'gray' }[s.status]}>{s.status}</Tag>
                 </div>
               )
-            }) : <div className="empty"><div className="big">☕</div>No sessions today. Enjoy the rest!</div>}
+            }) : <div className="empty"><div className="big"><Icon name="coffee" size={40} /></div>No sessions today. Enjoy the rest!</div>}
           </div>
         </div>
         <div className="card">
-          <div className="section-title" style={{ margin: '0 0 12px' }}>Client Goals Progress</div>
+          <div className="section-title" style={{ margin: '0 0 12px' }}><Icon name="dumbbell" size={16} /> Strength Trend <span className="muted" style={{ fontWeight: 500, fontSize: 12 }}>· squat since first log</span></div>
           {db.clients.filter((c) => c.status === 'Active').map((c) => {
-            const logs = db.logs.filter((l) => l.clientId === c.id).sort((a, b) => a.date.localeCompare(b.date))
-            let pct = 50
-            if (logs.length > 1) { const first = logs[0].squat, last = logs[logs.length - 1].squat; pct = Math.min(100, Math.round(((last - first) / first) * 100) + 40) }
+            const logs = db.logs.filter((l) => l.clientId === c.id && l.squat > 0).sort((a, b) => a.date.localeCompare(b.date))
+            const enough = logs.length > 1
+            const deltaPct = enough ? Math.round(((logs[logs.length - 1].squat - logs[0].squat) / logs[0].squat) * 100) : null
             return (
               <div key={c.id} className="row-link" style={{ marginBottom: 6, padding: 8 }} role="button" tabIndex={0} aria-label={`${c.name}, open Command Center`}
                 onClick={() => go(c.id)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(c.id) } }}>
                 <div className="flex between">
                   <span><Avatar name={c.name} size={26} /> <strong style={{ marginLeft: 6 }}>{c.name}</strong> <ReadinessTag readiness={readinessFor(db, c.id)} short /></span>
-                  <span className="muted" style={{ fontSize: 12 }}>{c.goal}</span>
+                  <span className="muted" style={{ fontSize: 12 }}>
+                    {deltaPct == null ? 'No data yet' : `${deltaPct >= 0 ? '+' : ''}${deltaPct}% squat`}
+                  </span>
                 </div>
-                <ProgressBar pct={pct} />
+                {deltaPct != null && <ProgressBar pct={Math.max(0, Math.min(100, deltaPct))} />}
               </div>
             )
           })}

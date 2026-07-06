@@ -6,6 +6,7 @@ import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
+import { toast, confirmDialog } from '../../../lib/toast'
 
 const TYPES = ['1-on-1 Training', 'Assessment', 'Consultation', 'Group Session', 'Check-in']
 const STATUSES = ['Pending', 'Confirmed', 'Completed', 'Cancelled']
@@ -18,16 +19,19 @@ export default function SessionForm({ session, date }) {
   )
   const set = (k, num) => (e) => setF({ ...f, [k]: num ? +e.target.value : e.target.value })
   const save = () => {
-    if (!f.clientId) return alert('Add a client first')
+    if (!f.clientId) return toast('Add a client first', 'error')
     commit((d) => {
       if (session) Object.assign(d.sessions.find((s) => s.id === session.id), f)
       else d.sessions.push({ id: uid(), ...f })
     })
     closeModal()
+    toast(session ? 'Session updated' : 'Session booked')
   }
-  const del = () => {
+  const del = async () => {
+    if (!await confirmDialog({ title: 'Delete session', message: 'Delete this session?', confirmLabel: 'Delete', danger: true })) return
     commit((d) => { d.sessions = d.sessions.filter((s) => s.id !== session.id) })
     closeModal()
+    toast('Session deleted')
   }
   return (
     <ModalShell title={(session ? 'Edit' : 'Book') + ' Session'} onClose={closeModal}

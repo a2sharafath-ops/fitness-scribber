@@ -4,6 +4,7 @@
 // hugging the basement (right, workload axis). Data: maxes ledger + sRPE.
 import { useState } from 'react'
 import { Chart } from 'react-chartjs-2'
+import Icon from '../atoms/Icon'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { baseOptions, COLORS, GRID, TEXT, shortLabel } from '../../lib/chartSetup'
@@ -39,7 +40,7 @@ export default function StrengthDashboard({ client, range = 90 }) {
     return (
       <div className="card">
         <div className="section-title" style={{ margin: 0 }}>Strength — Absolute 1RM vs Training Max</div>
-        <div className="empty" style={{ padding: 24 }}><div className="big">🏋️</div>
+        <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="dumbbell" size={40} /></div>
           No 1RM history yet. Complete sets in a Main Lifts block (auto-1RM on) and peaks will appear here automatically.</div>
       </div>
     )

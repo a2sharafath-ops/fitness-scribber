@@ -6,6 +6,7 @@ import RangeSlider from '../atoms/RangeSlider'
 import SegToggle from '../molecules/SegToggle'
 import { ACTIVITY_LEVELS } from '../../lib/assessment'
 import Icon from '../atoms/Icon'
+import { toast } from '../../lib/toast'
 
 // Athlete-facing self-report for pain / lifestyle / goals. Presentational:
 // gathers input and raises onSubmit(type, data, notes) — the portal persists
@@ -41,7 +42,7 @@ export default function SelfAssessment({ onSubmit, busy }) {
 
   const submit = async () => {
     const data = build()
-    if (!data) { alert('Please fill in at least one field.'); return }
+    if (!data) { toast('Please fill in at least one field.', 'error'); return }
     const ok = await onSubmit(tab, data)
     if (ok) {
       setDone(tab)

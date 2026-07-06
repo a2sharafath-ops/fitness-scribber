@@ -69,6 +69,9 @@ export function AuthProvider({ children }) {
     recovery,
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
     signUp: (email, password) => supabase.auth.signUp({ email, password }),
+    // Redirects to Google when the provider is configured in Supabase; otherwise
+    // returns an error the caller surfaces as a toast (no broken redirect).
+    signInWithGoogle: () => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }),
     signOut: () => supabase.auth.signOut(),
     becomeCoach,
     redeemInvite,

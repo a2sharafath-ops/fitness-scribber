@@ -9,6 +9,7 @@ import { useFormat } from '../../../hooks/useFormat'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
 import { calcWellness, calcSRPETL, calcVolumeLoad } from '../../../lib/calc'
+import { toast } from '../../../lib/toast'
 
 const upsert = (arr, match, value) => {
   const ex = arr.find(match)
@@ -173,9 +174,10 @@ export function BodyMetricForm({ clientId }) {
   const { dispToKg, unitName } = useFormat()
   const [f, setF] = useState({ clientId: clientId || db.clients[0]?.id, date: todayISO(tz), weight: '', squat: '' })
   const save = () => {
-    if (!f.clientId) return alert('Add a client first')
+    if (!f.clientId) return toast('Add a client first', 'error')
     commit((d) => d.logs.push({ id: uid(), clientId: f.clientId, date: f.date, weightKg: dispToKg(f.weight) || 0, squat: dispToKg(f.squat) || 0 }))
     closeModal()
+    toast('Progress logged')
   }
   return (
     <ModalShell title="Log Body Metric" onClose={closeModal}

@@ -6,6 +6,7 @@ import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO, fmtDay } from '../../../lib/dates'
+import { toast } from '../../../lib/toast'
 
 const CATS = ['Pain', 'Injury', 'Equipment', 'Scheduling', 'Form/Technique', 'Other']
 
@@ -18,14 +19,15 @@ export default function ConcernForm({ concern, clientId }) {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const sessions = db.sessions.filter((s) => s.clientId === f.clientId).sort((a, b) => b.date.localeCompare(a.date))
   const save = () => {
-    if (!f.clientId) return alert('Add a client first')
-    if (!f.text.trim()) return alert('Please describe the concern')
+    if (!f.clientId) return toast('Add a client first', 'error')
+    if (!f.text.trim()) return toast('Please describe the concern', 'error')
     commit((d) => {
       const val = { clientId: f.clientId, category: f.category, severity: f.severity, date: f.date, sessionId: f.sessionId || null, text: f.text.trim(), source: 'Client' }
       if (concern) Object.assign(d.concerns.find((c) => c.id === concern.id), val)
       else d.concerns.push({ id: uid(), status: 'Open', resolution: '', ...val })
     })
     closeModal()
+    toast(concern ? 'Concern updated' : 'Concern flagged')
   }
   return (
     <ModalShell title={(concern ? 'Edit' : 'Flag a') + ' Concern'} onClose={closeModal}

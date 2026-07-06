@@ -280,7 +280,7 @@ export function NewAssessmentMenu({ clientId }) {
       <div className="grid cards-2" style={{ gap: 10 }}>
         {ACTIVE_TYPES.map((t) => {
           const m = typeMeta(t)
-          return <Button key={t} variant="ghost" onClick={() => openModal(FORMS[t](clientId))}>{m.icon} {m.label}</Button>
+          return <Button key={t} variant="ghost" onClick={() => openModal(FORMS[t](clientId))}><Icon name={m.icon} size={14} /> {m.label}</Button>
         })}
       </div>
       <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Pain, lifestyle and goals can also be self-reported by the athlete in their portal.</p>

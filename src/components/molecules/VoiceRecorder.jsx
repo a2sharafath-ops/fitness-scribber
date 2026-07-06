@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { toast } from '../../lib/toast'
 
 // Mic button that records audio via MediaRecorder and raises onRecorded(blob,
 // seconds) when stopped. Presentational + local state only; no data access.
@@ -14,7 +15,7 @@ export default function VoiceRecorder({ onRecorded, disabled }) {
 
   const start = async () => {
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-      alert('Voice recording is not supported in this browser.')
+      toast('Voice recording is not supported in this browser.', 'error')
       return
     }
     try {
@@ -35,7 +36,7 @@ export default function VoiceRecorder({ onRecorded, disabled }) {
       setSecs(0)
       timerRef.current = setInterval(() => setSecs((s) => s + 1), 1000)
     } catch {
-      alert('Microphone access was denied.')
+      toast('Microphone access was denied.', 'error')
     }
   }
 

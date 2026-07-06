@@ -1,16 +1,24 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
-import Field from '../components/atoms/Field'
-import Brand from '../components/atoms/Brand'
+import Icon from '../components/atoms/Icon'
 import { useAuth } from '../store/AuthContext'
+import { toast } from '../lib/toast'
 
-const TITLES = { signin: 'Coach sign in', signup: 'Create coach account', reset: 'Reset your password' }
+// Copy per mode — mirrors the Cureocity "01 · Login / Sign up" Figma frame,
+// adapted for the three auth flows the backend supports.
+const COPY = {
+  signin: { h: 'Welcome back', sub: 'Sign in to your trainer studio', cta: 'Sign in' },
+  signup: { h: 'Create your account', sub: 'Start your trainer studio', cta: 'Create account' },
+  reset: { h: 'Reset your password', sub: "We'll email you a reset link", cta: 'Send reset link' },
+}
 
 export default function AuthPage() {
-  const { signIn, signUp, sendPasswordReset } = useAuth()
+  const { signIn, signUp, sendPasswordReset, signInWithGoogle } = useAuth()
   const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
+  const [remember, setRemember] = useState(true)
   const [msg, setMsg] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -32,39 +40,97 @@ export default function AuthPage() {
     else if (mode === 'signup') setMsg({ type: 'ok', text: 'Account created. Check your email to confirm, then sign in.' })
   }
 
-  const cta = busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Sign up' : 'Send reset link'
+  const google = async () => {
+    const { error } = await signInWithGoogle()
+    if (error) toast('Google sign-in isn’t enabled yet.', 'error')
+  }
+
+  const copy = COPY[mode]
+  const cta = busy ? 'Please wait…' : copy.cta
 
   return (
-    <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <div className="card" style={{ width: 360, maxWidth: '92vw' }}>
-        <Brand style={{ padding: '0 0 18px' }} />
-        <h2 style={{ fontSize: 18, marginBottom: 4 }}>{TITLES[mode]}</h2>
-        <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>
-          {mode === 'reset' ? "Enter your account email and we'll send you a reset link." : "Your athletes' data is private to your account."}
-        </p>
-        <form onSubmit={submit}>
-          <Field label="Email"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></Field>
-          {mode !== 'reset' && (
-            <Field label="Password"><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} /></Field>
-          )}
-          {msg && <div style={{ fontSize: 12, marginBottom: 10, color: msg.type === 'err' ? '#fb404a' : 'var(--green)' }}>{msg.text}</div>}
-          <Button type="submit" disabled={busy} style={{ width: '100%' }}>{cta}</Button>
-        </form>
-        {mode === 'signin' && (
-          <div style={{ marginTop: 10, textAlign: 'center', fontSize: 13 }}>
-            <button className="back" style={{ margin: 0 }} onClick={() => go('reset')}>Forgot password?</button>
-          </div>
-        )}
-        <div style={{ marginTop: mode === 'signin' ? 6 : 14, textAlign: 'center', fontSize: 13 }}>
-          {mode === 'reset' ? (
-            <button className="back" style={{ margin: 0 }} onClick={() => go('signin')}>← Back to sign in</button>
-          ) : (
-            <button className="back" style={{ margin: 0 }} onClick={() => go(mode === 'signin' ? 'signup' : 'signin')}>
-              {mode === 'signin' ? 'Need an account? Sign up' : 'Have an account? Sign in'}
-            </button>
-          )}
+    <div className="auth-wrap">
+      <aside className="auth-brand">
+        <div className="auth-brandmark">
+          <span className="auth-logo"><Icon name="dumbbell" size={20} /></span>
+          <span className="auth-brand-name">Cureocity</span>
         </div>
-      </div>
+        <div className="auth-spacer" />
+        <div className="auth-hero">
+          <h2>Coach smarter.<br />Every client, one studio.</h2>
+          <p>Programs, schedules, health insights and Curio Ai — everything your coaching practice needs in one place.</p>
+        </div>
+        <div className="auth-spacer" />
+        <figure className="auth-quote">
+          <blockquote>“I cut my admin time in half. My clients feel the difference every week.”</blockquote>
+          <figcaption>Maya Chen · Strength coach, Berlin</figcaption>
+        </figure>
+      </aside>
+
+      <main className="auth-panel">
+        <div className="auth-card">
+          <div className="auth-head">
+            <h1 className="auth-h">{copy.h}</h1>
+            <p className="auth-sub">{copy.sub}</p>
+          </div>
+
+          <form onSubmit={submit} className="auth-form">
+            <label className="auth-field">
+              <span className="auth-label">Email</span>
+              <input className="auth-input" type="email" value={email} placeholder="alex@cureocity.studio"
+                onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+            </label>
+
+            {mode !== 'reset' && (
+              <label className="auth-field">
+                <span className="auth-label">Password</span>
+                <span className="auth-input-wrap">
+                  <input className="auth-input" type={showPw ? 'text' : 'password'} value={password}
+                    onChange={(e) => setPassword(e.target.value)} required
+                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
+                  <button type="button" className="auth-eye" aria-label={showPw ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPw} onClick={() => setShowPw((s) => !s)}>
+                    <Icon name={showPw ? 'eyeOff' : 'eye'} size={18} />
+                  </button>
+                </span>
+              </label>
+            )}
+
+            {mode === 'signin' && (
+              <div className="auth-meta">
+                <label className="auth-remember">
+                  <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                  Remember me for 30 days
+                </label>
+                <button type="button" className="auth-link" onClick={() => go('reset')}>Forgot password?</button>
+              </div>
+            )}
+
+            {msg && <div className={'auth-msg ' + msg.type}>{msg.text}</div>}
+
+            <Button type="submit" className="auth-submit" disabled={busy}>{cta}</Button>
+          </form>
+
+          {mode !== 'reset' && (
+            <>
+              <div className="auth-divider"><span /> or <span /></div>
+              <button type="button" className="auth-google" onClick={google}>
+                <span className="auth-g">G</span> Continue with Google
+              </button>
+            </>
+          )}
+
+          <div className="auth-foot">
+            {mode === 'reset' ? (
+              <button type="button" className="auth-link" onClick={() => go('signin')}>← Back to sign in</button>
+            ) : mode === 'signin' ? (
+              <><span className="muted">New to Cureocity?</span><button type="button" className="auth-link" onClick={() => go('signup')}>Create an account</button></>
+            ) : (
+              <><span className="muted">Have an account?</span><button type="button" className="auth-link" onClick={() => go('signin')}>Sign in</button></>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import Button from '../atoms/Button'
 import Avatar from '../atoms/Avatar'
 import { useModal } from '../../store/ModalContext'
 import { sendBroadcast } from '../../api/messages'
+import { toast } from '../../lib/toast'
 
 // Coach composes one update and fans it out to the chosen athletes. Each
 // recipient receives it in their own thread (via api/messages.sendBroadcast).
@@ -33,7 +34,7 @@ export default function BroadcastComposer({ clients = [], onSent }) {
       closeModal()
     } catch (e) {
       setBusy(false)
-      alert('Broadcast failed: ' + (e.message || 'unknown error'))
+      toast('Broadcast failed: ' + (e.message || 'unknown error'), 'error')
     }
   }
 

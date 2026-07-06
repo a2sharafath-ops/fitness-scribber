@@ -1,5 +1,6 @@
 import { Scatter } from 'react-chartjs-2'
 import Tag from '../atoms/Tag'
+import Icon from '../atoms/Icon'
 import { useData } from '../../store/DataContext'
 import { lastNDates, fmtDate } from '../../lib/dates'
 import { rolling30Baseline, deviationPct } from '../../lib/calc'
@@ -26,7 +27,7 @@ export default function ReadinessMatrix({ client }) {
   const { db, tz } = useData()
   if (!client.monitorOptIn) {
     return (
-      <div className="empty"><div className="big">⌚</div>Wearables not enabled for this athlete</div>
+      <div className="empty"><div className="big"><Icon name="watch" size={40} /></div>Wearables not enabled for this athlete</div>
     )
   }
   const pts = []

@@ -10,21 +10,22 @@ import { useAuth } from '../store/AuthContext'
 import { hasBackend } from '../lib/supabase'
 import { seedRemote } from '../api/sync'
 import { todayISO, fmtDate } from '../lib/dates'
+import { toast, confirmDialog } from '../lib/toast'
 
 const TZS = ['', 'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Berlin', 'Asia/Kolkata', 'Asia/Dubai', 'Asia/Singapore', 'Australia/Sydney']
 
 export default function SettingsPage() {
-  const { db, commit } = useData()
+  const { db, commit, refresh } = useData()
   const { openModal } = useModal()
   const { user, signOut } = useAuth()
   const s = db.settings
   const loadDemo = async () => {
-    if (!confirm('Load demo athletes & 28 days of sample data into your account?')) return
-    try { await seedRemote(); window.location.reload() } catch (e) { alert('Seed failed: ' + e.message) }
+    if (!await confirmDialog({ title: 'Load demo data', message: 'Load demo athletes & 28 days of sample data into your account?', confirmLabel: 'Load' })) return
+    try { await seedRemote(); await refresh(); toast('Demo data loaded') } catch (e) { toast('Seed failed: ' + e.message, 'error') }
   }
   const [f, setF] = useState({ trainerName: s.trainerName || '', businessName: s.businessName || '', units: s.units, tz: s.tz })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const save = () => commit((d) => { Object.assign(d.settings, { trainerName: f.trainerName.trim(), businessName: f.businessName.trim(), units: f.units, tz: f.tz }) })
+  const save = () => { commit((d) => { Object.assign(d.settings, { trainerName: f.trainerName.trim(), businessName: f.businessName.trim(), units: f.units, tz: f.tz }) }); toast('Settings saved') }
 
   return (
     <>

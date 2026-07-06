@@ -7,20 +7,22 @@ import { screeningsFor } from './screening'
 // baseline/latest, score movement screens, summarise a record, and diff a
 // baseline against the latest for the compare view.
 
+// `icon` values are Icon-component names (see components/atoms/Icon.jsx),
+// rendered as <Icon name={meta.icon} /> at each site.
 export const TYPES = [
-  { key: 'fitness', label: 'Fitness', icon: '🏋️', by: 'coach' },
-  { key: 'movement', label: 'Movement screen', icon: '🤸', by: 'coach' },
-  { key: 'body_comp', label: 'Body composition', icon: '⚖️', by: 'coach' },
-  { key: 'pain', label: 'Pain', icon: '🩹', by: 'athlete' },
-  { key: 'lifestyle', label: 'Lifestyle', icon: '😴', by: 'athlete' },
-  { key: 'goals', label: 'Goals', icon: '🎯', by: 'athlete' },
+  { key: 'fitness', label: 'Fitness', icon: 'dumbbell', by: 'coach' },
+  { key: 'movement', label: 'Movement screen', icon: 'activity', by: 'coach' },
+  { key: 'body_comp', label: 'Body composition', icon: 'scale', by: 'coach' },
+  { key: 'pain', label: 'Pain', icon: 'danger', by: 'athlete' },
+  { key: 'lifestyle', label: 'Lifestyle', icon: 'watch', by: 'athlete' },
+  { key: 'goals', label: 'Goals', icon: 'target', by: 'athlete' },
 ]
 // Types with a form implemented (coach can record any; pain/lifestyle/goals
 // are also athlete self-reportable from the portal).
 export const ACTIVE_TYPES = ['fitness', 'movement', 'body_comp', 'pain', 'lifestyle', 'goals']
 export const SELF_REPORT_TYPES = ['pain', 'lifestyle', 'goals']
 export const ACTIVITY_LEVELS = ['Sedentary', 'Light', 'Moderate', 'Active', 'Very active']
-export const typeMeta = (key) => TYPES.find((t) => t.key === key) || { key, label: key, icon: '📋' }
+export const typeMeta = (key) => TYPES.find((t) => t.key === key) || { key, label: key, icon: 'clipboard' }
 
 export const MOVEMENT_PATTERNS = ['squat', 'hinge', 'lunge', 'push', 'pull']
 export const MOVEMENT_MAX = MOVEMENT_PATTERNS.length * 3

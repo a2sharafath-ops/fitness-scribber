@@ -8,6 +8,8 @@ import { EditProfileForm } from '../components/organisms/ProfilePanel'
 import ScreeningReview from '../components/organisms/screening/ScreeningReview'
 import ScreeningProfile from '../components/organisms/screening/ScreeningProfile'
 import CoachScreeningModal from '../components/organisms/screening/CoachScreeningModal'
+import ClientSubnav from '../components/templates/ClientSubnav'
+import Icon from '../components/atoms/Icon'
 import { RISK_ICON } from '../lib/format'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -40,7 +42,7 @@ export default function ClientProfilePage() {
 
   return (
     <>
-      <button className="back" onClick={() => nav('/clients/' + c.id)}>← Back to {c.name.split(' ')[0]}'s overview</button>
+      <ClientSubnav client={c} />
       <div className="topbar">
         <div className="flex gap"><Avatar name={c.name} size={52} /><div>
           <h1>{c.name}</h1>
@@ -104,9 +106,9 @@ export default function ClientProfilePage() {
 
       <div className="card" style={{ marginTop: 16 }}>
         <div className="section-title" style={{ margin: '0 0 12px' }}>Intake &amp; History Snapshot</div>
-        {[['📋', 'Initial questionnaire', ik.questionnaire], ['🩺', 'Medical history', ik.medical], ['🩹', 'Injury history', ik.injury], ['🥗', 'Dietary notes', ik.diet]].map(([icn, h, v]) => (
+        {[['clipboard', 'Initial questionnaire', ik.questionnaire], ['listHeart', 'Medical history', ik.medical], ['danger', 'Injury history', ik.injury], ['fileText', 'Dietary notes', ik.diet]].map(([icn, h, v]) => (
           <div className="intake-block" key={h}>
-            <div className="i-h">{icn} {h}</div>
+            <div className="i-h"><Icon name={icn} size={15} /> {h}</div>
             <div className="i-b">{v || '—'}</div>
           </div>
         ))}

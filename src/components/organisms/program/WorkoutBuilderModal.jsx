@@ -19,6 +19,7 @@ import {
   newBlock, defaultBlocks, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
   applyProgression, trainingMaxKg, hasUnmapped, resetTrainingMaxes, applyCompletionEffects,
 } from '../../../lib/program'
+import { toast, confirmDialog } from '../../../lib/toast'
 
 // Existing sessions load as saved; a fresh day opens with the standard
 // three-block scaffold (Warm-up / Main Lifts / Core/Others).
@@ -45,9 +46,10 @@ export default function WorkoutBuilderModal({ clientId, date }) {
 
   const copyLast = () => {
     const prev = db.prescriptions.filter((p) => p.clientId === clientId && p.date < date).sort((a, b) => b.date.localeCompare(a.date))[0]
-    if (!prev) return alert('No earlier session to copy.')
+    if (!prev) return toast('No earlier session to copy.', 'error')
     setBlocks(cloneBlocksFresh(prev.blocks?.length ? prev.blocks : itemsToBlocks(prev.items)))
     if (prev.notes) setNotes(prev.notes)
+    toast('Copied last session', 'info')
   }
 
   // Persist a blocks payload onto a target date (used by quick clones & bulk paste).
@@ -60,12 +62,12 @@ export default function WorkoutBuilderModal({ clientId, date }) {
 
   // Spec 3.1 — quick clones duplicate the structure onto tomorrow / day after
   // with brand-new ids, no progression.
-  const quickClone = (offset) => {
+  const quickClone = async (offset) => {
     const dt = addDays(date, offset)
     if (db.prescriptions.some((p) => p.clientId === clientId && p.date === dt) &&
-      !confirm(`${fmtDay(dt)} already has a session — overwrite it?`)) return
+      !await confirmDialog({ title: 'Overwrite session', message: `${fmtDay(dt)} already has a session — overwrite it?`, confirmLabel: 'Overwrite' })) return
     commit((d) => writeTo(d, dt, cloneBlocksFresh(blocks)))
-    alert(`Copied to ${fmtDay(dt)}.`)
+    toast(`Copied to ${fmtDay(dt)}.`)
   }
 
   // Spec 3.2 — calendar duplication is gated behind the Progression Rule Window.
@@ -75,7 +77,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
     commit((d) => dates.forEach((dt) => writeTo(d, dt, cloneBlocksFresh(progressed))))
     setStep('edit')
     setTargets(new Set())
-    alert(`Cloned with progression to ${dates.length} date${dates.length === 1 ? '' : 's'}.`)
+    toast(`Cloned with progression to ${dates.length} date${dates.length === 1 ? '' : 's'}.`)
   }
 
   const insertDictated = (parsed) => {
@@ -92,7 +94,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
   }
 
   const save = () => {
-    if (hasUnmapped(blocks)) return alert('Some dictated exercises are unvalidated (orange) — pick their standard library term first.')
+    if (hasUnmapped(blocks)) return toast('Some dictated exercises are unvalidated (orange) — pick their standard library term first.', 'error')
     const payload = blocks.map((b, i) => ({ ...b, order: i + 1 }))
     const events = []
     commit((d) => {
@@ -112,12 +114,15 @@ export default function WorkoutBuilderModal({ clientId, date }) {
           ? `New Absolute 1RM peak — ${e.exercise}: ${e.valueKg}kg${e.tracked ? ' (assessment auto-updated)' : ''}`
           : `Failure flag raised — ${e.exercise} (see Concerns)`))
     })
-    if (events.length) alert(events.join('\n'))
     closeModal()
+    toast('Workout saved')
+    if (events.length) events.forEach((e, i) => setTimeout(() => toast(e, 'info', 6000), i * 350))
   }
-  const del = () => {
+  const del = async () => {
+    if (!await confirmDialog({ title: 'Delete workout', message: 'Delete this prescribed workout?', confirmLabel: 'Delete', danger: true })) return
     commit((d) => { d.prescriptions = d.prescriptions.filter((p) => !(p.clientId === clientId && p.date === date)) })
     closeModal()
+    toast('Workout deleted')
   }
 
   const total = blocksVolume(blocks)

@@ -6,6 +6,7 @@
 // also record a 1RM manually (e.g. a tested baseline at intake).
 import { useState } from 'react'
 import Button from '../atoms/Button'
+import Icon from '../atoms/Icon'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { todayISO, fmtDate } from '../../lib/dates'
@@ -42,7 +43,7 @@ export default function CurrentLiftsPerformance({ client }) {
   return (
     <div className="card">
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <div className="section-title" style={{ margin: 0 }}>🏆 Current lifts performance</div>
+        <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> Current lifts performance</div>
         <span className="muted" style={{ fontSize: 11 }}>
           1RM auto-updates from completed main-lift sets · baselines %1RM prescription targets
         </span>

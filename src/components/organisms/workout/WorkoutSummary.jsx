@@ -5,6 +5,7 @@ import { baseOptions, COLORS } from '../../../lib/chartSetup'
 import { fmtDate } from '../../../lib/dates'
 import { toDisp, unitName, fmtVL } from '../../../lib/units'
 import { summarize, workoutToPlan, secToClock } from '../../../lib/workout'
+import { toast, confirmDialog, promptDialog } from '../../../lib/toast'
 
 const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, COLORS.red, '#5ac8fa', '#f59ec4']
 
@@ -16,12 +17,12 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
   const s = summarize(workout, { exercises, restingHr, age, bodyMassKg })
   const main = workout.main || []
 
-  const editDuration = () => {
+  const editDuration = async () => {
     const cur = Math.max(1, Math.round((workout.durationSec || 0) / 60)) || 30
-    const v = prompt('Workout duration (minutes):', String(cur))
+    const v = await promptDialog({ title: 'Edit duration', message: 'Workout duration (minutes):', defaultValue: String(cur), confirmLabel: 'Save' })
     if (v == null) return
     const min = Math.max(1, Math.round(+v))
-    if (!isNaN(min)) onDuration?.(min * 60)
+    if (!isNaN(min)) { onDuration?.(min * 60); toast('Duration updated') }
   }
 
   const kpis = [
@@ -49,14 +50,14 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
   const share = async () => {
     const text = shareText()
     try { if (navigator.share) { await navigator.share({ title: workout.title, text }); return } } catch { /* cancelled */ }
-    try { await navigator.clipboard.writeText(text); alert('Summary copied to clipboard.') } catch { alert(text) }
+    try { await navigator.clipboard.writeText(text); toast('Summary copied to clipboard.') } catch { toast('Could not copy to clipboard.', 'error') }
   }
-  const del = () => { if (confirm('Delete this workout? This cannot be undone.')) onDelete() }
-  const template = () => {
-    const name = prompt('Name this plan template:', workout.title.replace(' · auto', ''))
+  const del = async () => { if (await confirmDialog({ title: 'Delete workout', message: 'Delete this workout? This cannot be undone.', confirmLabel: 'Delete', danger: true })) onDelete() }
+  const template = async () => {
+    const name = await promptDialog({ title: 'Save as template', message: 'Name this plan template:', defaultValue: workout.title.replace(' · auto', ''), confirmLabel: 'Save' })
     if (name == null) return
     onTemplate(workoutToPlan(workout, name))
-    alert('Saved to your plan library.')
+    toast('Saved to your plan library.')
   }
 
   return (

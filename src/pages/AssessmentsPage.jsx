@@ -6,8 +6,11 @@ import { NewAssessmentMenu, assessmentForm } from '../components/organisms/forms
 import AssessmentChecklist from '../components/organisms/AssessmentChecklist'
 import AssessmentTrends from '../components/organisms/AssessmentTrends'
 import CurrentLiftsPerformance from '../components/organisms/CurrentLiftsPerformance'
+import ClientSubnav from '../components/templates/ClientSubnav'
+import Icon from '../components/atoms/Icon'
 import { TYPES, ACTIVE_TYPES, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, forClient, latest, baseline, summarize, compare, dueStatus } from '../lib/assessment'
 import { fmtDate } from '../lib/dates'
+import { toast, confirmDialog } from '../lib/toast'
 
 function DeltaRow({ r }) {
   const arrow = r.delta == null || r.delta === 0 ? '' : r.delta > 0 ? '▲' : '▼'
@@ -37,11 +40,15 @@ export default function AssessmentsPage() {
   const typesToShow = TYPES.filter((t) => ACTIVE_TYPES.includes(t.key) || list.some((a) => a.type === t.key))
   const newAssessment = () => openModal(<NewAssessmentMenu clientId={id} />)
   const addType = (type) => openModal(assessmentForm(type, id))
-  const del = (aid) => { if (confirm('Delete this assessment record?')) commit((d) => { d.assessments = d.assessments.filter((a) => a.id !== aid) }) }
+  const del = async (aid) => {
+    if (!await confirmDialog({ title: 'Delete assessment', message: 'Delete this assessment record?', confirmLabel: 'Delete', danger: true })) return
+    commit((d) => { d.assessments = d.assessments.filter((a) => a.id !== aid) })
+    toast('Assessment deleted')
+  }
 
   return (
     <>
-      <button className="back" onClick={() => nav('/clients/' + id)}>← Back to {c.name}</button>
+      <ClientSubnav client={c} />
       <div className="topbar">
         <div><h1>Assessments</h1><div className="sub">{c.name} · baselines &amp; reassessments</div></div>
         <Button onClick={newAssessment}>＋ New assessment</Button>
@@ -65,7 +72,7 @@ export default function AssessmentsPage() {
           return (
             <div className="card" key={t.key}>
               <div className="flex between">
-                <div className="section-title" style={{ margin: 0 }}>{t.icon} {t.label}</div>
+                <div className="section-title" style={{ margin: 0 }}><Icon name={t.icon} size={16} /> {t.label}</div>
                 <span className="flex gap" style={{ alignItems: 'center' }}>
                   {due.has && due.overdue ? <span className="ac-due overdue">Reassess due</span> : null}
                   {recs.length ? <span className="muted" style={{ fontSize: 11 }}>{recs.length} record{recs.length === 1 ? '' : 's'}</span> : null}
@@ -74,7 +81,7 @@ export default function AssessmentsPage() {
 
               {!recs.length ? (
                 <div className="empty" style={{ padding: 20 }}>
-                  <div className="big">{t.icon}</div>No {t.label.toLowerCase()} recorded.
+                  <div className="big"><Icon name={t.icon} size={40} /></div>No {t.label.toLowerCase()} recorded.
                   {ACTIVE_TYPES.includes(t.key) && <div style={{ marginTop: 8 }}><Button size="sm" variant="ghost" onClick={newAssessment}>Add baseline</Button></div>}
                 </div>
               ) : (

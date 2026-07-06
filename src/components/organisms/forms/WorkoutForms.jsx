@@ -5,6 +5,7 @@ import Field from '../../atoms/Field'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
+import { toast, confirmDialog } from '../../../lib/toast'
 
 const GROUPS = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Hamstrings', 'Glutes', 'Full Body']
 const EQUIPS = ['Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Bands']
@@ -16,19 +17,22 @@ export function ExerciseForm({ exercise }) {
   const [f, setF] = useState(exercise || { name: '', muscle: 'Chest', equip: 'Barbell', difficulty: 'Beginner', video: '', thumb: '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const save = () => {
-    if (!f.name.trim()) return alert('Name required')
+    if (!f.name.trim()) return toast('Exercise name is required', 'error')
     commit((db) => {
       if (exercise) Object.assign(db.exercises.find((x) => x.id === exercise.id), f)
       else db.exercises.push({ id: uid(), ...f })
     })
     closeModal()
+    toast(exercise ? 'Exercise updated' : 'Exercise added')
   }
-  const del = () => {
+  const del = async () => {
+    if (!await confirmDialog({ title: 'Delete exercise', message: 'Delete this exercise? It will be removed from all plans.', confirmLabel: 'Delete', danger: true })) return
     commit((db) => {
       db.exercises = db.exercises.filter((x) => x.id !== exercise.id)
       db.plans.forEach((p) => (p.items = p.items.filter((it) => it.exId !== exercise.id)))
     })
     closeModal()
+    toast('Exercise deleted')
   }
   return (
     <ModalShell title={(exercise ? 'Edit' : 'New') + ' Exercise'} onClose={closeModal}
@@ -63,19 +67,22 @@ export function PlanForm({ plan }) {
   const upd = (i, k, v) => setItems(items.map((it, j) => (j === i ? { ...it, [k]: v } : it)))
   const add = () => setItems([...items, { exId: addEx, sets: 3, reps: '10', rest: '60s' }])
   const save = () => {
-    if (!name.trim()) return alert('Plan name required')
+    if (!name.trim()) return toast('Plan name is required', 'error')
     commit((d) => {
       if (plan) Object.assign(d.plans.find((p) => p.id === plan.id), { name, desc, items })
       else d.plans.push({ id: uid(), name, desc, items })
     })
     closeModal()
+    toast(plan ? 'Plan updated' : 'Plan created')
   }
-  const del = () => {
+  const del = async () => {
+    if (!await confirmDialog({ title: 'Delete plan', message: 'Delete this plan? Clients using it will be unassigned.', confirmLabel: 'Delete', danger: true })) return
     commit((d) => {
       d.plans = d.plans.filter((p) => p.id !== plan.id)
       d.clients.forEach((c) => { if (c.planId === plan.id) c.planId = null })
     })
     closeModal()
+    toast('Plan deleted')
   }
   return (
     <ModalShell title={(plan ? 'Edit' : 'New') + ' Workout Plan'} onClose={closeModal}

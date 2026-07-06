@@ -3,6 +3,7 @@ import MessageBubble from '../molecules/MessageBubble'
 import ChatComposer from '../molecules/ChatComposer'
 import { useThread } from '../../hooks/useThread'
 import { useMediaUrls } from '../../hooks/useMediaUrls'
+import { toast } from '../../lib/toast'
 
 // Feed + composer for one thread. `viewerRole` decides which side is "mine"
 // and who a sent message comes from ('coach' in the trainer app, 'athlete' in
@@ -18,7 +19,7 @@ export default function ChatThread({ clientId, viewerRole, headerName, subtitle 
   }, [messages])
 
   const guard = (fn) => async (...args) => {
-    try { await fn(...args) } catch (e) { alert('Upload failed: ' + (e.message || 'unknown error')) }
+    try { await fn(...args) } catch (e) { toast('Upload failed: ' + (e.message || 'unknown error'), 'error') }
   }
 
   return (

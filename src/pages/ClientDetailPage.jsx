@@ -7,6 +7,7 @@ import ReadinessTag from '../components/molecules/ReadinessTag'
 import ConcernCard from '../components/molecules/ConcernCard'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
 import AICoach from '../components/organisms/AICoach'
+import ClientSubnav from '../components/templates/ClientSubnav'
 import TodayWorkout from '../components/organisms/workout/TodayWorkout'
 import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
@@ -17,6 +18,7 @@ import { hasBackend } from '../lib/supabase'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
+import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { calcSRPETL } from '../lib/calc'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
@@ -87,21 +89,28 @@ export default function ClientDetailPage() {
 
   const baseProg = baselineProgress(forClient(db.assessments, c.id))
 
-  const resolve = (cid) => { const note = prompt('Resolution note (optional):', ''); if (note === null) return; commit((d) => { const x = d.concerns.find((q) => q.id === cid); x.status = 'Resolved'; x.resolution = note.trim() }) }
-  const reopen = (cid) => commit((d) => { const x = d.concerns.find((q) => q.id === cid); x.status = 'Open'; x.resolution = '' })
-  const delConcern = (cid) => { if (confirm('Delete this concern?')) commit((d) => { d.concerns = d.concerns.filter((q) => q.id !== cid) }) }
+  const resolve = async (cid) => {
+    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional):', multiline: true, confirmLabel: 'Resolve' })
+    if (note === null) return
+    commit((d) => { const x = d.concerns.find((q) => q.id === cid); x.status = 'Resolved'; x.resolution = note.trim() })
+    toast('Concern resolved')
+  }
+  const reopen = (cid) => { commit((d) => { const x = d.concerns.find((q) => q.id === cid); x.status = 'Open'; x.resolution = '' }); toast('Concern reopened', 'info') }
+  const delConcern = async (cid) => {
+    if (!await confirmDialog({ title: 'Delete concern', message: 'Delete this concern? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
+    commit((d) => { d.concerns = d.concerns.filter((q) => q.id !== cid) })
+    toast('Concern deleted')
+  }
 
   return (
     <>
-      <button className="back" onClick={() => nav('/clients')}>← Back to clients</button>
+      <ClientSubnav client={c} />
       <div className="topbar">
         <div className="flex gap"><Avatar name={c.name} size={52} /><div>
           <h1>{c.name}</h1>
           <div className="sub">{c.email} · {c.phone} · <ReadinessTag readiness={readinessFor(db, c.id)} short /></div>
         </div></div>
         <div className="flex gap">
-          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/profile')}><Icon name="users" size={14} /> Profile</Button>
-          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/assessments')}><Icon name="clipboard" size={14} /> Assessments</Button>
           <Button variant="ghost" onClick={() => openModal(<BodyMetricForm clientId={c.id} />)}>＋ Log Progress</Button>
           {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}><Icon name="link" size={14} /> Invite</Button>}
         </div>
@@ -144,19 +153,18 @@ export default function ClientDetailPage() {
             </div>
           ))}
           {!sessions.length && <div className="muted">No sessions yet</div>}
-          <Button variant="ghost" size="sm" style={{ marginTop: 12 }} onClick={() => nav('/command/' + c.id)}>View progress charts →</Button>
         </div>
       </div>
 
       {/* Concerns */}
       <div className="card" style={{ marginTop: 16 }}>
         <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Flagged Concerns</div>
-          <Button size="sm" onClick={() => openModal(<ConcernForm clientId={c.id} />)}>＋ Flag a concern</Button></div>
+          <Button size="sm" onClick={() => openModal(<ConcernForm clientId={c.id} />)}><Icon name="flag" size={13} /> Flag a concern</Button></div>
         <div style={{ marginTop: 12 }}>
           {concerns.length ? concerns.sort((a, b) => (b.status === 'Open') - (a.status === 'Open') || b.date.localeCompare(a.date)).map((x) => (
             <ConcernCard key={x.id} concern={x} clientName={c.name} session={x.sessionId ? db.sessions.find((s) => s.id === x.sessionId) : null}
               onResolve={() => resolve(x.id)} onReopen={() => reopen(x.id)} onEdit={() => openModal(<ConcernForm concern={x} />)} onDelete={() => delConcern(x.id)} />
-          )) : <div className="empty" style={{ padding: 24 }}><div className="big">✅</div>No concerns flagged.</div>}
+          )) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div>No concerns flagged.</div>}
         </div>
       </div>
 

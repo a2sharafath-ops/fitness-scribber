@@ -9,6 +9,7 @@ import StrengthDashboard from '../components/organisms/StrengthDashboard'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
 import AICoach from '../components/organisms/AICoach'
 import ProfilePanel from '../components/organisms/ProfilePanel'
+import ClientSubnav from '../components/templates/ClientSubnav'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -27,9 +28,9 @@ export default function CommandCenterPage() {
 
   return (
     <>
+      <ClientSubnav client={c} />
       <div className="cc-topbar">
         <div className="flex gap">
-          <button className="back" style={{ margin: 0 }} onClick={() => nav('/clients/' + c.id)} aria-label="Back to Load-Response snapshot">←</button>
           <div className="mini-profile" role="button" tabIndex={0} title="View full profile"
             onClick={() => setProfileOpen(true)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setProfileOpen(true) } }}>

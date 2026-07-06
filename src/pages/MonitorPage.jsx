@@ -5,8 +5,10 @@ import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
 import Kpi from '../components/atoms/Kpi'
+import InfoTip from '../components/atoms/InfoTip'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import ReadinessMatrix from '../components/organisms/ReadinessMatrix'
+import ClientSubnav from '../components/templates/ClientSubnav'
 import { WellnessForm, SRPEForm, ResistanceForm, CardioForm, WearableForm } from '../components/organisms/forms/LogForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -16,6 +18,8 @@ import { uid } from '../lib/format'
 import { lastNDates, fmtDate } from '../lib/dates'
 import { baseOptions } from '../lib/chartSetup'
 import { readinessFor, latestOf, rolling30Baseline, deviationPct } from '../lib/calc'
+import { toast, confirmDialog } from '../lib/toast'
+import { GLOSSARY } from '../lib/glossary'
 
 const shortLbl = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 
@@ -29,13 +33,17 @@ export default function MonitorPage() {
   const c = db.clients.find((x) => x.id === id)
   if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
 
-  const del = (coll, eid) => { if (confirm('Delete this entry?')) commit((d) => { d[coll] = d[coll].filter((x) => x.id !== eid) }) }
+  const del = async (coll, eid) => {
+    if (!await confirmDialog({ title: 'Delete entry', message: 'Delete this entry?', confirmLabel: 'Delete', danger: true })) return
+    commit((d) => { d[coll] = d[coll].filter((x) => x.id !== eid) })
+    toast('Entry deleted')
+  }
   const r = readinessFor(db, c.id)
   const tabs = [['readiness', 'Readiness'], ['subjective', 'Subjective Log'], ['objective', 'Objective Log'], ['wearables', 'Wearables']]
 
   return (
     <>
-      <button className="back" onClick={() => nav('/command/' + c.id)}>← Back to Command Center</button>
+      <ClientSubnav client={c} />
       <div className="topbar">
         <div className="flex gap"><Avatar name={c.name} size={46} /><div>
           <h1 style={{ fontSize: 21 }}>Athlete Monitor — {c.name}</h1>
@@ -119,7 +127,7 @@ function SubjectiveTab({ client, del, openModal }) {
           <Button size="sm" onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Log</Button></div>
         {srpe.length > 1 && <div style={{ height: 150, marginTop: 12 }}><Bar data={{ labels: sAsc.map((x) => shortLbl(x.date)), datasets: [{ label: 'sRPE-TL', data: sAsc.map((x) => x.tl), backgroundColor: '#fb404a' }] }} options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 6, font: { size: 9 } } }, y: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } } } }} /></div>}
         <table style={{ marginTop: 12 }}>
-          <thead><tr><th>Date</th><th>sRPE</th><th>Duration</th><th>sRPE-TL</th><th /></tr></thead>
+          <thead><tr><th>Date</th><th>sRPE</th><th>Duration</th><th>sRPE-TL <InfoTip {...GLOSSARY.srpeTl} /></th><th /></tr></thead>
           <tbody>
             {srpe.slice(0, 8).map((s) => (
               <tr key={s.id}><td>{fmtDate(s.date)}</td><td>{s.rpe}</td><td>{s.duration} min</td><td><strong>{s.tl}</strong> AU</td>
@@ -161,7 +169,7 @@ function ObjectiveTab({ client, del, openModal, fmtVL, toDisp }) {
         <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Conditioning Load</div>
           <Button size="sm" onClick={() => openModal(<CardioForm clientId={client.id} />)}>＋ Log</Button></div>
         <table style={{ marginTop: 12 }}>
-          <thead><tr><th>Date</th><th>Modality</th><th>TRIMP</th><th>TiZ</th><th>TSS</th><th>HSD</th><th /></tr></thead>
+          <thead><tr><th>Date</th><th>Modality</th><th>TRIMP <InfoTip {...GLOSSARY.trimp} /></th><th>TiZ <InfoTip {...GLOSSARY.tiz} /></th><th>TSS <InfoTip {...GLOSSARY.tss} /></th><th>HSD <InfoTip {...GLOSSARY.hsd} /></th><th /></tr></thead>
           <tbody>
             {card.slice(0, 10).map((x) => (
               <tr key={x.id}><td>{fmtDate(x.date)}</td><td>{x.modality}</td><td>{x.trimp}</td><td>{x.tiz}m</td><td>{x.tss}</td><td>{x.hsd}km</td>
@@ -176,16 +184,17 @@ function ObjectiveTab({ client, del, openModal, fmtVL, toDisp }) {
 }
 
 function ConnectDevices({ clientId }) {
+  const { refresh } = useData()
   const [busy, setBusy] = useState(false)
   const connect = async (provider) => {
     setBusy(true)
     try { const { url } = await callFunction('wearable-connect', { provider, clientId }); if (url) window.location.href = url }
-    catch (e) { alert('Connect failed: ' + (e.message || 'function not deployed')) } finally { setBusy(false) }
+    catch (e) { toast('Connect failed: ' + (e.message || 'function not deployed'), 'error') } finally { setBusy(false) }
   }
   const sync = async () => {
     setBusy(true)
-    try { const r = await callFunction('wearable-sync', { clientId }); alert(`Synced ${r.synced ?? 0} device(s).`); window.location.reload() }
-    catch (e) { alert('Sync failed: ' + (e.message || 'function not deployed')) } finally { setBusy(false) }
+    try { const r = await callFunction('wearable-sync', { clientId }); await refresh(); toast(`Synced ${r.synced ?? 0} device(s).`) }
+    catch (e) { toast('Sync failed: ' + (e.message || 'function not deployed'), 'error') } finally { setBusy(false) }
   }
   return (
     <div className="card" style={{ marginTop: 16 }}>
@@ -204,7 +213,11 @@ function ConnectDevices({ clientId }) {
 
 function WearablesTab({ client, del, openModal, commit, tz, db }) {
   if (!client.monitorOptIn) {
-    const enable = () => { if (confirm('Confirm the athlete has consented to share wearable data?')) commit((d) => { d.clients.find((c) => c.id === client.id).monitorOptIn = true }) }
+    const enable = async () => {
+      if (!await confirmDialog({ title: 'Confirm consent', message: 'Confirm the athlete has consented to share wearable data?', confirmLabel: 'Confirm' })) return
+      commit((d) => { d.clients.find((c) => c.id === client.id).monitorOptIn = true })
+      toast('Wearable sync enabled')
+    }
     return (
       <div className="card"><div className="empty">
         <div className="big">⌚</div><strong>Wearable sync is opt-in</strong>
@@ -248,7 +261,7 @@ function WearablesTab({ client, del, openModal, commit, tz, db }) {
       </div>
       {latest && (
         <div className="kpi-strip" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-          {card('Morning HRV (RMSSD)', latest.hrv, ' ms', 'hrv', true)}
+          {card(<>Morning HRV (RMSSD) <InfoTip {...GLOSSARY.rmssd} /></>, latest.hrv, ' ms', 'hrv', true)}
           {card('Resting HR', latest.rhr, ' bpm', 'rhr', false)}
           {card('Total Sleep', latest.sleepHrs, ' h', 'sleepHrs', true)}
         </div>

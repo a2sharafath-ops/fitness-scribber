@@ -1,4 +1,5 @@
 import Button from '../atoms/Button'
+import Icon from '../atoms/Icon'
 import { ONBOARDING_TYPES, typeMeta, latest, dueStatus } from '../../lib/assessment'
 import { fmtDate } from '../../lib/dates'
 
@@ -25,7 +26,7 @@ export default function AssessmentChecklist({ list, intervalDays, onAdd }) {
           return (
             <div className="ac-row" key={t}>
               <span className={'ac-check' + (has ? ' on' : '')}>{has ? '✓' : '○'}</span>
-              <span className="ac-name">{m.icon} {m.label}</span>
+              <span className="ac-name"><Icon name={m.icon} size={15} /> {m.label}</span>
               {has ? (
                 <span className="ac-meta">
                   <span className="muted">{fmtDate(l.date)}</span>

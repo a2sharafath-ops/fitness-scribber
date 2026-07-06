@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Chart, Scatter } from 'react-chartjs-2'
 import Kpi from '../atoms/Kpi'
+import InfoTip from '../atoms/InfoTip'
 import { useData } from '../../store/DataContext'
+import { GLOSSARY } from '../../lib/glossary'
 import { baseOptions } from '../../lib/chartSetup'
 import { METRICS } from '../../lib/metrics'
 import { lastNDates, fmtDate } from '../../lib/dates'
@@ -84,10 +86,10 @@ export default function LoadResponseDashboard({ client, win, range }) {
     <div className="card">
       <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
       <div className="kpi-strip" style={{ marginTop: 12 }}>
-        <Kpi label="Readiness" value={rNow ?? '—'} delta="composite /100" />
-        <Kpi label="ACWR" value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
-        <Kpi label="Monotony (7d)" value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} />
-        <Kpi label="Strain (7d)" value={strain.toLocaleString()} delta="load × monotony" />
+        <Kpi label={<>Readiness <InfoTip {...GLOSSARY.readiness} /></>} value={rNow ?? '—'} delta="composite /100" />
+        <Kpi label={<>ACWR <InfoTip {...GLOSSARY.acwr} /></>} value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
+        <Kpi label={<>Monotony (7d) <InfoTip {...GLOSSARY.monotony} /></>} value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} />
+        <Kpi label={<>Strain (7d) <InfoTip {...GLOSSARY.strain} /></>} value={strain.toLocaleString()} delta="load × monotony" />
       </div>
       <div className="toggle-bar">
         <div className="tg"><label>X axis</label>

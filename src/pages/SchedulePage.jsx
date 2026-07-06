@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
+import Icon from '../components/atoms/Icon'
 import SessionForm from '../components/organisms/forms/SessionForm'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -71,7 +72,7 @@ export default function SchedulePage() {
                 <Tag color={SSTATUS[s.status]}>{s.status}</Tag>
               </div>
             )
-          }) : <div className="empty"><div className="big">📅</div>No upcoming sessions</div>}
+          }) : <div className="empty"><div className="big"><Icon name="calendar" size={40} /></div>No upcoming sessions</div>}
         </div>
       </div>
     </>

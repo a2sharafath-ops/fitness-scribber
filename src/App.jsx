@@ -23,6 +23,7 @@ import ConcernsPage from './pages/ConcernsPage'
 import MessagesPage from './pages/MessagesPage'
 import SettingsPage from './pages/SettingsPage'
 import ReportPage from './pages/ReportPage'
+import Toaster from './components/organisms/Toaster'
 import './lib/chartSetup'
 
 function Shell() {
@@ -73,6 +74,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Gate />
+      <Toaster />
     </AuthProvider>
   )
 }

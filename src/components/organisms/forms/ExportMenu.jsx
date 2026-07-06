@@ -2,6 +2,7 @@ import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
+import { toast } from '../../../lib/toast'
 
 function toCSV(rows) {
   return rows
@@ -23,7 +24,7 @@ function downloadFile(name, content) {
     a.click()
     setTimeout(() => { URL.revokeObjectURL(url); a.remove() }, 100)
   } catch {
-    alert('Export not supported here.')
+    toast('Export not supported here.', 'error')
   }
 }
 

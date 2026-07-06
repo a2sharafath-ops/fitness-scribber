@@ -6,9 +6,11 @@ import { hasBackend } from '../lib/supabase'
 import { computeNudges } from '../lib/nudges'
 import { ensureSystemMessages } from '../api/messages'
 import Button from '../components/atoms/Button'
+import Icon from '../components/atoms/Icon'
 import ConversationList from '../components/organisms/ConversationList'
 import ChatThread from '../components/organisms/ChatThread'
 import BroadcastComposer from '../components/organisms/BroadcastComposer'
+import { toast } from '../lib/toast'
 
 export default function MessagesPage() {
   const { db } = useData()
@@ -27,14 +29,14 @@ export default function MessagesPage() {
   }, [])
 
   const broadcast = () => openModal(
-    <BroadcastComposer clients={clients} onSent={(n) => { reload(); if (n) alert(`Broadcast sent to ${n} athlete${n === 1 ? '' : 's'}.`) }} />,
+    <BroadcastComposer clients={clients} onSent={(n) => { reload(); if (n) toast(`Broadcast sent to ${n} athlete${n === 1 ? '' : 's'}.`) }} />,
   )
 
   return (
     <>
       <div className="topbar">
         <div><h1>Messages</h1><div className="sub">Chat with your athletes</div></div>
-        <Button onClick={broadcast} disabled={!clients.length}>📣 Broadcast</Button>
+        <Button onClick={broadcast} disabled={!clients.length}><Icon name="megaphone" size={15} /> Broadcast</Button>
       </div>
       <div className="msg-layout">
         <div className="card msg-list-card">
@@ -44,7 +46,7 @@ export default function MessagesPage() {
           {sel ? (
             <ChatThread clientId={sel.id} viewerRole="coach" headerName={sel.name} subtitle={sel.email} />
           ) : (
-            <div className="empty" style={{ padding: 40 }}><div className="big">💬</div>Select a conversation to start chatting.</div>
+            <div className="empty" style={{ padding: 40 }}><div className="big"><Icon name="message" size={40} /></div>Select a conversation to start chatting.</div>
           )}
         </div>
       </div>
