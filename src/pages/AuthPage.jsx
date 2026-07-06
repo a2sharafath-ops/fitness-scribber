@@ -52,7 +52,7 @@ export default function AuthPage() {
     <div className="auth-wrap">
       <aside className="auth-brand">
         <div className="auth-brandmark">
-          <span className="auth-logo"><Icon name="dumbbell" size={20} /></span>
+          <span className="auth-logo"><img src="/cureocity-logo.png" alt="Cureocity" /></span>
           <span className="auth-brand-name">Cureocity</span>
         </div>
         <div className="auth-spacer" />

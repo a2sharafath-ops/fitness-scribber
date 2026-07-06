@@ -449,7 +449,8 @@ canvas{max-width:100%}
   background:linear-gradient(121deg,#8e0e15 14%,#d62430 53%,#fb404a 85%)}
 .auth-spacer{flex:1}
 .auth-brandmark{display:flex;align-items:center;gap:10px}
-.auth-logo{width:36px;height:36px;border-radius:12px;background:#fff;color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+.auth-logo{width:36px;height:36px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.auth-logo img{width:24px;height:24px;object-fit:contain;display:block}
 .auth-brand-name{font-weight:600;font-size:18px;letter-spacing:-.2px}
 .auth-hero h2{font-size:32px;font-weight:600;line-height:1.22;letter-spacing:-.5px}
 .auth-hero p{margin-top:16px;font-size:16px;font-weight:500;line-height:1.5;opacity:.78;max-width:440px}
