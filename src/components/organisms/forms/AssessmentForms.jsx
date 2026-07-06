@@ -8,6 +8,7 @@ import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
 import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta } from '../../../lib/assessment'
+import Icon from '../../atoms/Icon'
 
 const numOrNull = (v) => (v === '' || v == null || Number.isNaN(+v) ? null : +v)
 
@@ -46,7 +47,7 @@ export function MovementScreenForm({ clientId }) {
   const upd = (i, k, v) => setScreens(screens.map((s, j) => (j === i ? { ...s, [k]: v } : s)))
   const save = useSave(clientId, 'movement', () => ({ screens }))
   return (
-    <ModalShell title="🤸 Movement screen" onClose={closeModal}
+    <ModalShell title={<><Icon name="treadmill" size={16} /> Movement screen</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       <div className="asr-head"><span>Pattern</span><span>Score /3</span><span>Pain</span></div>
@@ -88,7 +89,7 @@ export function BodyCompForm({ clientId }) {
     if (v.leanMassKg != null) c.anthro.leanMassKg = v.leanMassKg
   })
   return (
-    <ModalShell title="⚖️ Body composition" onClose={closeModal}
+    <ModalShell title={<><Icon name="tuning" size={16} /> Body composition</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       <Field label="Method">
@@ -126,7 +127,7 @@ export function FitnessAssessmentForm({ clientId }) {
   })
   const save = useSave(clientId, 'fitness', data)
   return (
-    <ModalShell title="🏋️ Fitness assessment" onClose={closeModal}
+    <ModalShell title={<><Icon name="dumbbellAlt" size={16} /> Fitness assessment</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
 
@@ -174,7 +175,7 @@ export function PainAssessmentForm({ clientId }) {
   const data = () => ({ sites: sites.filter((s) => s.area.trim()).map((s) => ({ area: s.area.trim(), severity: +s.severity, aggravating: s.aggravating.trim(), limitation: s.limitation.trim() })) })
   const save = useSave(clientId, 'pain', data)
   return (
-    <ModalShell title="🩹 Pain assessment" onClose={closeModal}
+    <ModalShell title={<><Icon name="danger" size={16} /> Pain assessment</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       {sites.map((s, i) => (
@@ -205,7 +206,7 @@ export function LifestyleForm({ clientId }) {
   const data = () => ({ sleepHrs: numOrNull(f.sleepHrs), sleepQuality: +f.sleepQuality, stress: +f.stress, hydrationL: numOrNull(f.hydrationL), activityLevel: f.activityLevel, steps: numOrNull(f.steps) })
   const save = useSave(clientId, 'lifestyle', data)
   return (
-    <ModalShell title="😴 Lifestyle assessment" onClose={closeModal}
+    <ModalShell title={<><Icon name="watch" size={16} /> Lifestyle assessment</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       <div className="row2">
@@ -248,7 +249,7 @@ export function GoalForm({ clientId }) {
     </>
   )
   return (
-    <ModalShell title="🎯 Goal setting" onClose={closeModal}
+    <ModalShell title={<><Icon name="like" size={16} /> Goal setting</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       {rows(shortTerm, setShort, 'Short-term goals')}

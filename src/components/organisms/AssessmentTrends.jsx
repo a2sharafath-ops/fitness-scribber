@@ -1,6 +1,7 @@
 import { Line } from 'react-chartjs-2'
 import { baseOptions, COLORS, shortLabel, TEXT } from '../../lib/chartSetup'
 import { movementScore, MOVEMENT_MAX } from '../../lib/assessment'
+import Icon from '../atoms/Icon'
 
 // Progress-over-time charts built from assessment history. Renders a chart
 // only when a type has at least two dated records. `list` = client assessments.
@@ -42,13 +43,13 @@ export default function AssessmentTrends({ list }) {
     <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
       {hasMv && (
         <div className="card">
-          <div className="section-title" style={{ margin: '0 0 8px' }}>🤸 Movement score trend</div>
+          <div className="section-title" style={{ margin: '0 0 8px' }}><Icon name="treadmill" size={15} /> Movement score trend</div>
           <div style={{ height: 220 }}><Line data={mvData} options={mvOpts} /></div>
         </div>
       )}
       {hasBc && (
         <div className="card">
-          <div className="section-title" style={{ margin: '0 0 8px' }}>⚖️ Body composition trend</div>
+          <div className="section-title" style={{ margin: '0 0 8px' }}><Icon name="tuning" size={15} /> Body composition trend</div>
           <div style={{ height: 220 }}><Line data={bcData} options={bcOpts} /></div>
         </div>
       )}

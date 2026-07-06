@@ -11,6 +11,7 @@ import { useFormat } from '../../hooks/useFormat'
 import { fmtDate } from '../../lib/dates'
 import { readinessFor } from '../../lib/calc'
 import { resolveAnthro } from '../../lib/assessment'
+import Icon from '../atoms/Icon'
 
 export function EditProfileForm({ client }) {
   const { db, commit } = useData()
@@ -84,9 +85,9 @@ export default function ProfilePanel({ client, open, onClose }) {
           <AnthroCell label="BMI" value={bmi} />
         </div>
         <div className="section-title" style={{ margin: '6px 0 10px' }}>Intake & History Snapshot</div>
-        {[['📋', 'Initial questionnaire', ik.questionnaire], ['🩺', 'Medical history', ik.medical], ['🩹', 'Injury history', ik.injury], ['🥗', 'Dietary notes', ik.diet]].map(([icn, h, v]) => (
+        {[['clipboard', 'Initial questionnaire', ik.questionnaire], ['listHeart', 'Medical history', ik.medical], ['danger', 'Injury history', ik.injury], ['fileText', 'Dietary notes', ik.diet]].map(([icn, h, v]) => (
           <div className="intake-block" key={h}>
-            <div className="i-h">{icn} {h}</div>
+            <div className="i-h"><Icon name={icn} size={15} /> {h}</div>
             <div className="i-b">{v || '—'}</div>
           </div>
         ))}

@@ -7,6 +7,7 @@
   --chart-green:#34c759; --chart-yellow:#ffcc00;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+a{color:inherit;text-decoration:none}
 body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
 #root{min-height:100vh}
@@ -14,7 +15,8 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI'
 #sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;padding:22px 14px;position:fixed;height:100vh;z-index:10}
 .brand{display:flex;align-items:center;gap:10px;padding:0 10px 22px}
-.brand .logo{width:36px;height:36px;flex-shrink:0;display:block}
+.brand .logo{width:34px;height:34px;flex-shrink:0;display:block;object-fit:contain}
+.i-h svg,.section-title svg,.modal h2 svg,.tab svg,.btn svg{vertical-align:-3px;flex:none}
 .brand-text{display:flex;flex-direction:column;line-height:1.15}
 .brand-name{font-weight:800;font-size:16px;letter-spacing:-.3px;color:var(--text)}
 .brand-by{font-weight:400;font-size:11px;letter-spacing:.1px;color:var(--muted)}

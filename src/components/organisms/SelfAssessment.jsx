@@ -5,11 +5,12 @@ import Field from '../atoms/Field'
 import RangeSlider from '../atoms/RangeSlider'
 import SegToggle from '../molecules/SegToggle'
 import { ACTIVITY_LEVELS } from '../../lib/assessment'
+import Icon from '../atoms/Icon'
 
 // Athlete-facing self-report for pain / lifestyle / goals. Presentational:
 // gathers input and raises onSubmit(type, data, notes) — the portal persists
 // it (Supabase insert). `self: true` tags it as athlete-reported for the coach.
-const TABS = [['pain', '🩹 Pain'], ['lifestyle', '😴 Lifestyle'], ['goals', '🎯 Goals']]
+const TABS = [['pain', <><Icon name="danger" size={14} /> Pain</>], ['lifestyle', <><Icon name="watch" size={14} /> Lifestyle</>], ['goals', <><Icon name="like" size={14} /> Goals</>]]
 
 export default function SelfAssessment({ onSubmit, busy }) {
   const [tab, setTab] = useState('pain')

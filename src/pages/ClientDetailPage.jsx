@@ -22,6 +22,7 @@ import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
 import { readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
 import { forClient, baselineProgress } from '../lib/assessment'
+import Icon from '../components/atoms/Icon'
 
 const SSTATUS = { Confirmed: 'green', Pending: 'orange', Completed: 'blue', Cancelled: 'gray' }
 
@@ -99,17 +100,17 @@ export default function ClientDetailPage() {
           <div className="sub">{c.email} · {c.phone} · <ReadinessTag readiness={readinessFor(db, c.id)} short /></div>
         </div></div>
         <div className="flex gap">
-          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/profile')}>👤 Profile</Button>
-          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/assessments')}>📋 Assessments</Button>
+          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/profile')}><Icon name="users" size={14} /> Profile</Button>
+          <Button variant="ghost" onClick={() => nav('/clients/' + c.id + '/assessments')}><Icon name="clipboard" size={14} /> Assessments</Button>
           <Button variant="ghost" onClick={() => openModal(<BodyMetricForm clientId={c.id} />)}>＋ Log Progress</Button>
-          {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}>🎟️ Invite</Button>}
+          {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}><Icon name="link" size={14} /> Invite</Button>}
         </div>
       </div>
 
       {baseProg.done < baseProg.total && (
         <div className="card onboard-banner" style={{ marginBottom: 12 }}>
           <div>
-            <div style={{ fontWeight: 700 }}>📋 Onboarding assessments incomplete</div>
+            <div style={{ fontWeight: 700 }}><Icon name="clipboard" size={14} /> Onboarding assessments incomplete</div>
             <div className="muted" style={{ fontSize: 12 }}>{baseProg.done}/{baseProg.total} baselines recorded · missing {baseProg.missing.length}</div>
           </div>
           <Button size="sm" onClick={() => nav('/clients/' + c.id + '/assessments')}>Complete now →</Button>
