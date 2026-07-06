@@ -46,7 +46,7 @@ export default function AuthPage() {
           {mode !== 'reset' && (
             <Field label="Password"><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} /></Field>
           )}
-          {msg && <div style={{ fontSize: 12, marginBottom: 10, color: msg.type === 'err' ? '#ff7b6b' : 'var(--green)' }}>{msg.text}</div>}
+          {msg && <div style={{ fontSize: 12, marginBottom: 10, color: msg.type === 'err' ? '#fb404a' : 'var(--green)' }}>{msg.text}</div>}
           <Button type="submit" disabled={busy} style={{ width: '100%' }}>{cta}</Button>
         </form>
         {mode === 'signin' && (

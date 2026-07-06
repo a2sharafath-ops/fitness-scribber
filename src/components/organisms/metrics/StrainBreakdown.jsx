@@ -42,7 +42,7 @@ export default function StrainBreakdown({ client, range }) {
         <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>Rolling 7-day strain. Sharp climbs mean load and monotony are rising together.</div>
         <div style={{ height: 220 }}>
           <Line
-            data={{ labels, datasets: [{ label: 'Training strain', data: strain, borderColor: COLORS.red, backgroundColor: 'rgba(255,90,60,.12)', fill: true, tension: 0.3, pointRadius: 0 }] }}
+            data={{ labels, datasets: [{ label: 'Training strain', data: strain, borderColor: COLORS.red, backgroundColor: 'rgba(251,64,74,.12)', fill: true, tension: 0.3, pointRadius: 0 }] }}
             options={{ ...baseOptions(), plugins: { legend: { display: false } } }}
           />
         </div>
@@ -66,7 +66,7 @@ export default function StrainBreakdown({ client, range }) {
               interaction: { mode: 'index', intersect: false },
               scales: {
                 x: baseOptions().scales.x,
-                y: { position: 'left', title: { display: true, text: 'Weekly load', color: COLORS.blue, font: { size: 10 } }, grid: { color: '#2a3039' }, ticks: { color: COLORS.muted } },
+                y: { position: 'left', title: { display: true, text: 'Weekly load', color: COLORS.blue, font: { size: 10 } }, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } },
                 y1: { position: 'right', title: { display: true, text: 'Monotony', color: COLORS.purple, font: { size: 10 } }, min: 0, grid: { drawOnChartArea: false }, ticks: { color: COLORS.muted } },
               },
             }}

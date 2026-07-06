@@ -14,9 +14,9 @@ const quadBg = {
     const yt = scales.y.getPixelForValue(0)
     ctx.save()
     ctx.fillStyle = 'rgba(61,220,151,.07)'; ctx.fillRect(xt, a.top, a.right - xt, yt - a.top)
-    ctx.fillStyle = 'rgba(255,90,60,.08)'; ctx.fillRect(a.left, yt, xt - a.left, a.bottom - yt)
+    ctx.fillStyle = 'rgba(251,64,74,.08)'; ctx.fillRect(a.left, yt, xt - a.left, a.bottom - yt)
     ctx.fillStyle = 'rgba(255,210,63,.06)'; ctx.fillRect(a.left, a.top, xt - a.left, yt - a.top); ctx.fillRect(xt, yt, a.right - xt, a.bottom - yt)
-    ctx.strokeStyle = '#2a3039'; ctx.lineWidth = 1
+    ctx.strokeStyle = '#eceae7'; ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(xt, a.top); ctx.lineTo(xt, a.bottom); ctx.moveTo(a.left, yt); ctx.lineTo(a.right, yt); ctx.stroke()
     ctx.restore()
   },
@@ -40,7 +40,7 @@ export default function ReadinessMatrix({ client }) {
   })
   if (!pts.length) return <div className="empty"><div className="big">📉</div>Need overlapping wellness + wearable days</div>
 
-  const color = (p) => { const sg = p.x >= 20, og = p.y >= -5; return sg && og ? '#3ddc97' : !sg && !og ? '#ff5a3c' : '#ffd23f' }
+  const color = (p) => { const sg = p.x >= 20, og = p.y >= -5; return sg && og ? '#34c759' : !sg && !og ? '#fb404a' : '#ffcc00' }
   return (
     <>
       <div style={{ height: 240 }}>
@@ -50,8 +50,8 @@ export default function ReadinessMatrix({ client }) {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${fmtDate(c.raw.date)}: wellness ${c.raw.x}/28, HRV ${c.raw.y > 0 ? '+' : ''}${c.raw.y}%` } } },
             scales: {
-              x: { min: 4, max: 28, title: { display: true, text: 'Wellness (Hooper)', color: '#8b95a5' }, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } },
-              y: { min: -20, max: 20, title: { display: true, text: 'HRV deviation %', color: '#8b95a5' }, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } },
+              x: { min: 4, max: 28, title: { display: true, text: 'Wellness (Hooper)', color: '#6e6f76' }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
+              y: { min: -20, max: 20, title: { display: true, text: 'HRV deviation %', color: '#6e6f76' }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
             },
           }}
           plugins={[quadBg]}

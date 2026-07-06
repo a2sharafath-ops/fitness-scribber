@@ -1,4 +1,4 @@
-// Register the Chart.js pieces we use, once, and expose shared dark-theme options.
+// Register the Chart.js pieces we use, once, and expose shared light-theme options.
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement, BarElement,
@@ -12,17 +12,17 @@ ChartJS.register(
   Title, Tooltip, Legend, Filler, ArcElement,
 )
 
-const GRID = '#2a3039'
-const TEXT = '#8b95a5'
+const GRID = '#eceae7'
+const TEXT = '#6e6f76'
 
 // Shared dataset palette so charts across pages stay consistent.
 export const COLORS = {
-  blue: '#4aa8ff',
-  red: '#ff5a3c',
-  green: '#3ddc97',
-  purple: '#a78bfa',
-  amber: '#f5b14c',
-  muted: '#8b95a5',
+  blue: '#0b87c9',
+  red: '#fb404a',
+  green: '#34c759',
+  purple: '#af52de',
+  amber: '#e8850c',
+  muted: '#9a9ba2',
 }
 
 // Short axis label from an ISO date ("Jun 30").

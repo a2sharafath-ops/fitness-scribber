@@ -63,7 +63,7 @@ export default function MonotonyBreakdown({ client, range }) {
                 { label: 'Threshold (2.0)', data: D.map(() => 2), borderColor: COLORS.red, borderDash: [5, 4], pointRadius: 0 },
               ],
             }}
-            options={{ ...baseOptions(), interaction: { mode: 'index', intersect: false }, scales: { x: baseOptions().scales.x, y: { min: 0, suggestedMax: 3, grid: { color: '#2a3039' }, ticks: { color: COLORS.muted } } } }}
+            options={{ ...baseOptions(), interaction: { mode: 'index', intersect: false }, scales: { x: baseOptions().scales.x, y: { min: 0, suggestedMax: 3, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } } } }}
           />
         </div>
       </div>

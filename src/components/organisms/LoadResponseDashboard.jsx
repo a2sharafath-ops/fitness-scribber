@@ -41,17 +41,17 @@ export default function LoadResponseDashboard({ client, win, range }) {
         data={{
           labels,
           datasets: [
-            { type: m1.kind, label: m1.label(units), data: d1, yAxisID: 'y', order: 2, borderColor: '#4aa8ff', backgroundColor: m1.kind === 'bar' ? 'rgba(74,168,255,.45)' : 'rgba(74,168,255,.12)', tension: 0.3, spanGaps: true },
-            { type: m2.kind === 'bar' ? 'line' : m2.kind, label: m2.label(units), data: d2, yAxisID: 'y1', order: 1, borderColor: '#ff5a3c', backgroundColor: 'rgba(255,90,60,.1)', tension: 0.3, spanGaps: true, pointRadius: 2 },
+            { type: m1.kind, label: m1.label(units), data: d1, yAxisID: 'y', order: 2, borderColor: '#0b87c9', backgroundColor: m1.kind === 'bar' ? 'rgba(74,168,255,.45)' : 'rgba(74,168,255,.12)', tension: 0.3, spanGaps: true },
+            { type: m2.kind === 'bar' ? 'line' : m2.kind, label: m2.label(units), data: d2, yAxisID: 'y1', order: 1, borderColor: '#fb404a', backgroundColor: 'rgba(251,64,74,.1)', tension: 0.3, spanGaps: true, pointRadius: 2 },
           ],
         }}
         options={{
           ...baseOptions(),
           interaction: { mode: 'index', intersect: false },
           scales: {
-            x: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5', maxTicksLimit: 8, font: { size: 9 } } },
-            y: { position: 'left', title: { display: true, text: m1.label(units), color: '#4aa8ff', font: { size: 10 } }, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } },
-            y1: { position: 'right', title: { display: true, text: m2.label(units), color: '#ff5a3c', font: { size: 10 } }, grid: { drawOnChartArea: false }, ticks: { color: '#8b95a5' } },
+            x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 8, font: { size: 9 } } },
+            y: { position: 'left', title: { display: true, text: m1.label(units), color: '#0b87c9', font: { size: 10 } }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
+            y1: { position: 'right', title: { display: true, text: m2.label(units), color: '#fb404a', font: { size: 10 } }, grid: { drawOnChartArea: false }, ticks: { color: '#6e6f76' } },
           },
         }}
       />
@@ -63,13 +63,13 @@ export default function LoadResponseDashboard({ client, win, range }) {
     chart1 = (
       <Scatter
         height={120}
-        data={{ datasets: [{ label: `${METRICS[y1].label(units)} vs ${METRICS[x].label(units)}`, data: pts, pointBackgroundColor: '#a78bfa', pointRadius: 5 }] }}
+        data={{ datasets: [{ label: `${METRICS[y1].label(units)} vs ${METRICS[x].label(units)}`, data: pts, pointBackgroundColor: '#af52de', pointRadius: 5 }] }}
         options={{
           ...baseOptions(),
-          plugins: { legend: { labels: { color: '#8b95a5', boxWidth: 12 } }, tooltip: { callbacks: { label: (o) => `${fmtDate(o.raw.date)}: (${o.raw.x}, ${o.raw.y})` } } },
+          plugins: { legend: { labels: { color: '#6e6f76', boxWidth: 12 } }, tooltip: { callbacks: { label: (o) => `${fmtDate(o.raw.date)}: (${o.raw.x}, ${o.raw.y})` } } },
           scales: {
-            x: { title: { display: true, text: METRICS[x].label(units), color: '#8b95a5' }, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } },
-            y: { title: { display: true, text: METRICS[y1].label(units), color: '#8b95a5' }, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } },
+            x: { title: { display: true, text: METRICS[x].label(units), color: '#6e6f76' }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
+            y: { title: { display: true, text: METRICS[y1].label(units), color: '#6e6f76' }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
           },
         }}
       />
@@ -107,11 +107,11 @@ export default function LoadResponseDashboard({ client, win, range }) {
           data={{
             labels,
             datasets: [
-              { type: 'line', label: 'Readiness (rolling)', data: rTrend, borderColor: '#3ddc97', backgroundColor: 'rgba(61,220,151,.12)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
-              { type: 'line', label: 'Baseline (28d)', data: rBase, borderColor: '#8b95a5', borderDash: [5, 4], pointRadius: 0, spanGaps: true },
+              { type: 'line', label: 'Readiness (rolling)', data: rTrend, borderColor: '#34c759', backgroundColor: 'rgba(61,220,151,.12)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
+              { type: 'line', label: 'Baseline (28d)', data: rBase, borderColor: '#6e6f76', borderDash: [5, 4], pointRadius: 0, spanGaps: true },
             ],
           }}
-          options={{ ...baseOptions(), scales: { x: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5', maxTicksLimit: 8, font: { size: 9 } } }, y: { min: 0, max: 100, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } } } }}
+          options={{ ...baseOptions(), scales: { x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 8, font: { size: 9 } } }, y: { min: 0, max: 100, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } } } }}
         />
       </div>
     </div>

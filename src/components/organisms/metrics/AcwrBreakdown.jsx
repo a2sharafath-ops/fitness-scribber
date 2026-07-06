@@ -52,7 +52,7 @@ export default function AcwrBreakdown({ client, range }) {
               ...baseOptions(),
               interaction: { mode: 'index', intersect: false },
               plugins: { legend: { labels: { color: COLORS.muted, boxWidth: 12, filter: (l) => l.text === 'ACWR' } } },
-              scales: { x: baseOptions().scales.x, y: { min: 0, suggestedMax: 2, grid: { color: '#2a3039' }, ticks: { color: COLORS.muted } } },
+              scales: { x: baseOptions().scales.x, y: { min: 0, suggestedMax: 2, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } } },
             }}
           />
         </div>
@@ -67,7 +67,7 @@ export default function AcwrBreakdown({ client, range }) {
               data={{
                 labels,
                 datasets: [
-                  { label: 'Acute (7d avg)', data: acute, borderColor: COLORS.red, backgroundColor: 'rgba(255,90,60,.10)', fill: true, tension: 0.3, pointRadius: 0 },
+                  { label: 'Acute (7d avg)', data: acute, borderColor: COLORS.red, backgroundColor: 'rgba(251,64,74,.10)', fill: true, tension: 0.3, pointRadius: 0 },
                   { label: 'Chronic (28d avg)', data: chronic, borderColor: COLORS.blue, backgroundColor: 'rgba(74,168,255,.10)', fill: true, tension: 0.3, pointRadius: 0 },
                 ],
               }}

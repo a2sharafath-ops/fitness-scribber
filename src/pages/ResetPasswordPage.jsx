@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
         <form onSubmit={submit}>
           <Field label="New password"><input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={8} autoComplete="new-password" /></Field>
           <Field label="Confirm new password"><input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required autoComplete="new-password" /></Field>
-          {msg && <div style={{ fontSize: 12, marginBottom: 10, color: '#ff7b6b' }}>{msg}</div>}
+          {msg && <div style={{ fontSize: 12, marginBottom: 10, color: '#fb404a' }}>{msg}</div>}
           <Button type="submit" disabled={busy} style={{ width: '100%' }}>{busy ? 'Saving…' : 'Update password'}</Button>
         </form>
         <div style={{ marginTop: 14, textAlign: 'center', fontSize: 13 }}>

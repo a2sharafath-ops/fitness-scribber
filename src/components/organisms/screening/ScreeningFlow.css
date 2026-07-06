@@ -8,7 +8,7 @@
 
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.chip.on{background:rgba(255,90,60,.15);border-color:var(--accent);color:var(--accent)}
+.chip.on{background:var(--tint-red);border-color:var(--accent);color:var(--accent)}
 
 .scr-progress{display:flex;gap:4px;margin:10px 0 16px}
 .scr-progress i{flex:1;height:4px;border-radius:2px;background:var(--surface2)}

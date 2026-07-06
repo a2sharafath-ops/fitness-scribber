@@ -45,10 +45,10 @@ export default function ProgressPage() {
           </div>
           <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
             <div className="card"><div className="section-title" style={{ margin: '0 0 12px' }}>Body Weight Trend</div>
-              {logs.length > 1 ? <div style={{ height: 200 }}><Line data={{ labels: logs.map((l) => fmtDate(l.date)), datasets: [{ label: unitName(), data: logs.map((l) => toDisp(l.weightKg)), borderColor: '#4aa8ff', backgroundColor: 'rgba(74,168,255,.12)', fill: true, tension: 0.3 }] }} options={opts} /></div> : <div className="empty"><div className="big">📈</div>Need 2+ entries to chart</div>}
+              {logs.length > 1 ? <div style={{ height: 200 }}><Line data={{ labels: logs.map((l) => fmtDate(l.date)), datasets: [{ label: unitName(), data: logs.map((l) => toDisp(l.weightKg)), borderColor: '#0b87c9', backgroundColor: 'rgba(74,168,255,.12)', fill: true, tension: 0.3 }] }} options={opts} /></div> : <div className="empty"><div className="big">📈</div>Need 2+ entries to chart</div>}
             </div>
             <div className="card"><div className="section-title" style={{ margin: '0 0 12px' }}>Strength Trend (Squat)</div>
-              {logs.length > 1 ? <div style={{ height: 200 }}><Line data={{ labels: logs.map((l) => fmtDate(l.date)), datasets: [{ label: unitName(), data: logs.map((l) => toDisp(l.squat)), borderColor: '#ff5a3c', backgroundColor: 'rgba(255,90,60,.12)', fill: true, tension: 0.3 }] }} options={opts} /></div> : <div className="empty"><div className="big">🏋️</div>Need 2+ entries to chart</div>}
+              {logs.length > 1 ? <div style={{ height: 200 }}><Line data={{ labels: logs.map((l) => fmtDate(l.date)), datasets: [{ label: unitName(), data: logs.map((l) => toDisp(l.squat)), borderColor: '#fb404a', backgroundColor: 'rgba(251,64,74,.12)', fill: true, tension: 0.3 }] }} options={opts} /></div> : <div className="empty"><div className="big">🏋️</div>Need 2+ entries to chart</div>}
             </div>
           </div>
           <div className="card" style={{ marginTop: 16, padding: 0 }}>

@@ -1,7 +1,7 @@
 // Small pure formatting/identity helpers shared across the app.
 export const uid = () => Math.random().toString(36).slice(2, 9)
 
-const palette = ['#ff5a3c', '#4aa8ff', '#3ddc97', '#a78bfa', '#ffd23f', '#f472b6', '#22d3ee']
+const palette = ['#fb404a', '#0b87c9', '#1f9a43', '#af52de', '#e8850c', '#f472b6', '#5856d6']
 export const colorFor = (s) =>
   palette[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % palette.length]
 

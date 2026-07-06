@@ -6,7 +6,7 @@ import { fmtDate } from '../../../lib/dates'
 import { toDisp, unitName, fmtVL } from '../../../lib/units'
 import { summarize, workoutToPlan, secToClock } from '../../../lib/workout'
 
-const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, COLORS.red, '#6ee7d6', '#f59ec4']
+const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, COLORS.red, '#5ac8fa', '#f59ec4']
 
 // Post-completion summary: session vitals, muscular/cardio breakdown, per-muscle
 // strain, the completed exercise list, and Edit / Share / Delete / Save-as-template.
@@ -99,7 +99,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
             <div style={{ height: 180 }}>
               <Bar
                 data={{ labels: s.muscleStrain.map((m) => m.muscle), datasets: [{ data: s.muscleStrain.map((m) => m.val), backgroundColor: s.muscleStrain.map((_, i) => MUSCLE_COLORS[i % MUSCLE_COLORS.length]) }] }}
-                options={{ ...baseOptions(), indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a3039' }, ticks: { color: COLORS.muted } }, y: { grid: { display: false }, ticks: { color: COLORS.muted } } } }}
+                options={{ ...baseOptions(), indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } }, y: { grid: { display: false }, ticks: { color: COLORS.muted } } } }}
               />
             </div>
           ) : <div className="muted" style={{ fontSize: 13 }}>No weighted work to attribute.</div>}
@@ -111,7 +111,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
         const logged = m.doneSets != null || m.doneReps != null || m.doneWeight != null
         return (
           <div key={m.id} className="ex-row" style={m.done ? undefined : { opacity: .75 }}>
-            <span style={{ color: m.done ? 'var(--green)' : 'var(--amber, #f59e0b)', flex: 'none', width: 18 }} aria-hidden="true">{m.done ? '✓' : '⚠'}</span>
+            <span style={{ color: m.done ? 'var(--green)' : 'var(--amber, #e8850c)', flex: 'none', width: 18 }} aria-hidden="true">{m.done ? '✓' : '⚠'}</span>
             <div style={{ flex: 1 }}>
               <div className="flex gap" style={{ alignItems: 'center' }}>
                 <strong>{m.name}</strong>

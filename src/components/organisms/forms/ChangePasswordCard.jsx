@@ -43,7 +43,7 @@ export default function ChangePasswordCard({ style }) {
           <Field label="Confirm new password">
             <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required autoComplete="new-password" />
           </Field>
-          {msg?.type === 'err' && <p style={{ fontSize: 12, color: '#ff7b6b', marginBottom: 10 }}>{msg.text}</p>}
+          {msg?.type === 'err' && <p style={{ fontSize: 12, color: '#fb404a', marginBottom: 10 }}>{msg.text}</p>}
           <div className="flex gap">
             <Button type="submit" disabled={busy}>{busy ? 'Saving…' : 'Update password'}</Button>
             <Button type="button" variant="ghost" onClick={close}>Cancel</Button>

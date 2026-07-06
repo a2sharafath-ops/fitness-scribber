@@ -102,7 +102,7 @@ function SubjectiveTab({ client, del, openModal }) {
       <div className="card">
         <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Hooper Index — Wellness</div>
           <Button size="sm" onClick={() => openModal(<WellnessForm clientId={client.id} />)}>＋ Log</Button></div>
-        {well.length > 1 && <div style={{ height: 150, marginTop: 12 }}><Line data={{ labels: wAsc.map((x) => shortLbl(x.date)), datasets: [{ label: 'Wellness /28', data: wAsc.map((x) => x.score), borderColor: '#3ddc97', backgroundColor: 'rgba(61,220,151,.12)', fill: true, tension: 0.3 }] }} options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5', maxTicksLimit: 6, font: { size: 9 } } }, y: { min: 4, max: 28, grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } } } }} /></div>}
+        {well.length > 1 && <div style={{ height: 150, marginTop: 12 }}><Line data={{ labels: wAsc.map((x) => shortLbl(x.date)), datasets: [{ label: 'Wellness /28', data: wAsc.map((x) => x.score), borderColor: '#34c759', backgroundColor: 'rgba(61,220,151,.12)', fill: true, tension: 0.3 }] }} options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 6, font: { size: 9 } } }, y: { min: 4, max: 28, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } } } }} /></div>}
         <table style={{ marginTop: 12 }}>
           <thead><tr><th>Date</th><th>Slp</th><th>Str</th><th>Fat</th><th>Sor</th><th>Score</th><th /></tr></thead>
           <tbody>
@@ -117,7 +117,7 @@ function SubjectiveTab({ client, del, openModal }) {
       <div className="card">
         <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Session RPE — Internal Load</div>
           <Button size="sm" onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Log</Button></div>
-        {srpe.length > 1 && <div style={{ height: 150, marginTop: 12 }}><Bar data={{ labels: sAsc.map((x) => shortLbl(x.date)), datasets: [{ label: 'sRPE-TL', data: sAsc.map((x) => x.tl), backgroundColor: '#ff5a3c' }] }} options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5', maxTicksLimit: 6, font: { size: 9 } } }, y: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } } } }} /></div>}
+        {srpe.length > 1 && <div style={{ height: 150, marginTop: 12 }}><Bar data={{ labels: sAsc.map((x) => shortLbl(x.date)), datasets: [{ label: 'sRPE-TL', data: sAsc.map((x) => x.tl), backgroundColor: '#fb404a' }] }} options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 6, font: { size: 9 } } }, y: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } } } }} /></div>}
         <table style={{ marginTop: 12 }}>
           <thead><tr><th>Date</th><th>sRPE</th><th>Duration</th><th>sRPE-TL</th><th /></tr></thead>
           <tbody>
@@ -144,7 +144,7 @@ function ObjectiveTab({ client, del, openModal, fmtVL, toDisp }) {
       <div className="card">
         <div className="flex between"><div className="section-title" style={{ margin: 0 }}>Resistance — Volume Load</div>
           <Button size="sm" onClick={() => openModal(<ResistanceForm clientId={client.id} />)}>＋ Log</Button></div>
-        {byPat.some((v) => v) && <div style={{ height: 150, marginTop: 12 }}><Doughnut data={{ labels: patterns, datasets: [{ data: byPat, backgroundColor: ['#ff5a3c', '#4aa8ff', '#3ddc97', '#a78bfa', '#ffd23f', '#8b95a5'] }] }} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#8b95a5', boxWidth: 12, font: { size: 11 } } }, title: { display: true, text: 'Volume Load by movement pattern', color: '#8b95a5' } } }} /></div>}
+        {byPat.some((v) => v) && <div style={{ height: 150, marginTop: 12 }}><Doughnut data={{ labels: patterns, datasets: [{ data: byPat, backgroundColor: ['#fb404a', '#0b87c9', '#34c759', '#af52de', '#ffcc00', '#6e6f76'] }] }} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#6e6f76', boxWidth: 12, font: { size: 11 } } }, title: { display: true, text: 'Volume Load by movement pattern', color: '#6e6f76' } } }} /></div>}
         <table style={{ marginTop: 12 }}>
           <thead><tr><th>Date</th><th>Exercise</th><th>Pattern</th><th>S×R×W</th><th>VL</th><th /></tr></thead>
           <tbody>
@@ -258,9 +258,9 @@ function WearablesTab({ client, del, openModal, commit, tz, db }) {
         <div className="section-title" style={{ margin: '0 0 10px' }}>HRV vs 30-day baseline</div>
         {data.length > 1 ? (
           <div style={{ height: 160 }}><Line data={{ labels: dts.map(shortLbl), datasets: [
-            { label: 'HRV (ms)', data: series, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,.12)', tension: 0.3, spanGaps: true, fill: true },
-            { label: '30-day baseline', data: base, borderColor: '#8b95a5', borderDash: [5, 4], pointRadius: 0, spanGaps: true },
-          ] }} options={{ ...baseOptions(), scales: { x: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5', maxTicksLimit: 8, font: { size: 9 } } }, y: { grid: { color: '#2a3039' }, ticks: { color: '#8b95a5' } } } }} /></div>
+            { label: 'HRV (ms)', data: series, borderColor: '#af52de', backgroundColor: 'rgba(167,139,250,.12)', tension: 0.3, spanGaps: true, fill: true },
+            { label: '30-day baseline', data: base, borderColor: '#6e6f76', borderDash: [5, 4], pointRadius: 0, spanGaps: true },
+          ] }} options={{ ...baseOptions(), scales: { x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 8, font: { size: 9 } } }, y: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } } } }} /></div>
         ) : <div className="muted">Need more readings</div>}
       </div>
       <div className="card" style={{ marginTop: 16, padding: 0 }}>

@@ -30,7 +30,7 @@ export default function ReadinessBreakdown({ client, range }) {
     interaction: { mode: 'index', intersect: false },
     scales: {
       x: baseOptions().scales.x,
-      y: { min: 0, max: 100, grid: { color: '#2a3039' }, ticks: { color: COLORS.muted } },
+      y: { min: 0, max: 100, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } },
     },
   }
 
@@ -100,7 +100,7 @@ export default function ReadinessBreakdown({ client, range }) {
                   { label: 'Soreness', data: sub('soreness'), borderColor: COLORS.purple, tension: 0.3, spanGaps: true, pointRadius: 0 },
                 ],
               }}
-              options={{ ...baseOptions(), interaction: { mode: 'index', intersect: false }, scales: { x: baseOptions().scales.x, y: { min: 1, max: 7, grid: { color: '#2a3039' }, ticks: { color: COLORS.muted, stepSize: 1 } } } }}
+              options={{ ...baseOptions(), interaction: { mode: 'index', intersect: false }, scales: { x: baseOptions().scales.x, y: { min: 1, max: 7, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted, stepSize: 1 } } } }}
             />
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function ReadinessBreakdown({ client, range }) {
                 labels: ['Sleep', 'Stress (8−)', 'Fatigue (8−)', 'Soreness (8−)'],
                 datasets: [{ label: 'Contribution', data: [w.sleep, 8 - w.stress, 8 - w.fatigue, 8 - w.soreness], backgroundColor: [COLORS.green, COLORS.red, COLORS.amber, COLORS.purple] }],
               }}
-              options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: baseOptions().scales.x, y: { min: 0, max: 8, grid: { color: '#2a3039' }, ticks: { color: COLORS.muted } } } }}
+              options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: baseOptions().scales.x, y: { min: 0, max: 8, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } } } }}
             />
           </div>
         </div>
