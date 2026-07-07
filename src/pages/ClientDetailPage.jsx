@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Line } from 'react-chartjs-2'
 import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
-import Tag from '../components/atoms/Tag'
 import ReadinessTag from '../components/molecules/ReadinessTag'
 import SegToggle from '../components/molecules/SegToggle'
 import ConcernCard from '../components/molecules/ConcernCard'
@@ -23,13 +23,12 @@ import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { calcSRPETL } from '../lib/calc'
+import { baseOptions } from '../lib/chartSetup'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
 import { readinessFor, readinessScore, dailySum, acwrSeries, latestOf, rolling30Baseline, deviationPct } from '../lib/calc'
 import { forClient, baselineProgress } from '../lib/assessment'
 import Icon from '../components/atoms/Icon'
-
-const SSTATUS = { Confirmed: 'green', Pending: 'orange', Completed: 'blue', Cancelled: 'gray' }
 
 // Compact health metric card (Figma: Client Detail metrics row).
 function MetricCard({ label, value, unit, state, color }) {
@@ -78,6 +77,45 @@ export default function ClientDetailPage() {
   const pastS = sessions.filter((s) => s.date <= today && s.status !== 'Cancelled')
   const doneS = pastS.filter((s) => s.status === 'Completed').length
   const adherence = pastS.length ? Math.round((doneS / pastS.length) * 100) : 0
+
+  // Training streak — consecutive weeks (ending this week) with a completed session.
+  const hasCompletedInWeek = (k) => {
+    const end = new Date(Date.parse(today) - k * 7 * 86400000)
+    const start = new Date(end.getTime() - 6 * 86400000)
+    const s0 = start.toISOString().slice(0, 10), e0 = end.toISOString().slice(0, 10)
+    return pastS.some((x) => x.status === 'Completed' && x.date >= s0 && x.date <= e0)
+  }
+  let streak = 0
+  while (streak < 52 && hasCompletedInWeek(streak)) streak++
+
+  // Stress trend — daily wellness check-ins over the last 30 days.
+  const D30 = lastNDates(30, tz)
+  const stressMap = {}
+  ;(db.wellness || []).forEach((w) => { if (w.clientId === c.id) stressMap[w.date] = w.stress })
+  const stressSeries = D30.map((d) => stressMap[d] ?? null)
+  const sVals = stressSeries.filter((v) => v != null)
+  const half = Math.floor(sVals.length / 2)
+  const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null)
+  const sDelta = sVals.length >= 4 ? avg(sVals.slice(half)) - avg(sVals.slice(0, half)) : null
+  const trend = sDelta == null ? null : sDelta <= -0.4 ? ['↓ Decreasing', 'var(--tint-green)', 'var(--green)']
+    : sDelta >= 0.4 ? ['↑ Increasing', 'var(--tint-red)', 'var(--accent)'] : ['→ Stable', 'var(--tint-blue)', 'var(--blue)']
+
+  // Current program + unified activity feed.
+  const plan = c.planId ? db.plans.find((x) => x.id === c.planId) : null
+  const activity = [
+    ...sessions.filter((x) => x.status === 'Completed').map((x) => ({
+      date: x.date, icon: 'check', tint: 'var(--tint-green)', fg: 'var(--green)',
+      title: `Completed session · ${x.type}`, meta: `${fmtDate(x.date)} · ${x.time} · ${x.dur} min` })),
+    ...sessions.filter((x) => x.status === 'Cancelled').map((x) => ({
+      date: x.date, icon: 'clock', tint: 'var(--tint-amber)', fg: 'var(--accent2)',
+      title: `Session cancelled · ${x.type}`, meta: `${fmtDate(x.date)} · ${x.time}` })),
+    ...(db.wellness || []).filter((w) => w.clientId === c.id).map((w) => ({
+      date: w.date, icon: 'heart', tint: 'var(--tint-red)', fg: 'var(--accent)',
+      title: 'Logged morning check-in', meta: `${fmtDate(w.date)} · sleep ${w.sleep}/7 · stress ${w.stress}/7` })),
+    ...(db.maxes || []).filter((m) => m.clientId === c.id && m.kind === 'e1rm').map((m) => ({
+      date: m.date, icon: 'activity', tint: '#ebebfa', fg: '#5856d6',
+      title: `New personal best · ${m.exercise}`, meta: `${fmtDate(m.date)} · ${m.valueKg} kg e1RM` })),
+  ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6)
   const restingHr = lastWear?.rhr ?? null
   const age = c.anthro?.age ?? null
   const saveWorkout = (w) => commit((d) => { d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w] })
@@ -153,7 +191,7 @@ export default function ClientDetailPage() {
         <div className="ch-stats">
           <div className="ch-stat"><div className="v">{adherence}%</div><div className="l">ADHERENCE</div></div>
           <div className="ch-stat"><div className="v">{sessions.length}</div><div className="l">SESSIONS</div></div>
-          <div className="ch-stat"><div className="v">{rScore ?? '—'}</div><div className="l">READINESS</div></div>
+          <div className="ch-stat"><div className="v">{streak}w</div><div className="l">STREAK</div></div>
         </div>
         <div className="ch-actions">
           <Button variant="ghost" size="sm" onClick={() => nav('/messages')}>Message</Button>
@@ -188,6 +226,48 @@ export default function ClientDetailPage() {
           color={well ? (well.sleep >= 5 ? 'var(--green)' : 'var(--accent2)') : 'var(--muted)'} />
       </div>
 
+      {/* Stress trend + current program (Figma: Client Detail) */}
+      <div className="overview-trend">
+        <div className="card">
+          <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
+            <div>
+              <div className="section-title" style={{ margin: 0 }}>Stress trend</div>
+              <div className="muted" style={{ fontSize: 12 }}>Daily check-ins · last 30 days</div>
+            </div>
+            {trend && <span className="trend-chip" style={{ background: trend[1], color: trend[2] }}>{trend[0]}</span>}
+          </div>
+          {sVals.length > 1 ? (
+            <div style={{ height: 190, marginTop: 12 }}>
+              <Line
+                data={{ labels: D30.map((d) => d.slice(5)), datasets: [{ data: stressSeries, borderColor: '#34c759', backgroundColor: 'rgba(52,199,89,.08)', fill: true, tension: 0.35, spanGaps: true, pointRadius: 2, borderWidth: 2 }] }}
+                options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#9a9ba2', maxTicksLimit: 6, font: { size: 9 } } }, y: { min: 0, max: 7, grid: { color: '#eceae7' }, ticks: { color: '#9a9ba2', stepSize: 1 } } } }} />
+            </div>
+          ) : (
+            <div className="empty" style={{ padding: '36px 20px' }}>No check-ins yet — stress trends appear once {c.name.split(' ')[0]} logs morning wellness.</div>
+          )}
+        </div>
+        <div className="card">
+          <div className="m-l" style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', color: '#9a9ba2' }}>CURRENT PROGRAM</div>
+          {plan ? (
+            <>
+              <div style={{ fontSize: 17, fontWeight: 700, margin: '6px 0 2px' }}>{plan.name}</div>
+              <div className="muted" style={{ fontSize: 12 }}>{plan.desc} · {plan.items?.length || 0} exercises</div>
+              <div className="progress-bar"><div style={{ width: adherence + '%' }} /></div>
+              <div className="flex between" style={{ marginTop: 8 }}>
+                <span className="muted" style={{ fontSize: 12 }}>{doneS}/{pastS.length} sessions completed</span>
+                <button className="link-btn" onClick={() => nav('/workouts')}>View program →</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 15, fontWeight: 700, margin: '6px 0 2px' }}>No plan assigned</div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>Assign a training plan so sessions and progress track against it.</div>
+              <button className="link-btn" onClick={() => nav('/workouts')}>Assign in Workouts →</button>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Planner widget — Today's Workout by default, expandable to the week/month
           planner from the same card, with the AI coach beside it as a chat */}
       <div className="cc-wrap" style={{ marginTop: 16 }}>
@@ -215,17 +295,19 @@ export default function ClientDetailPage() {
         <StrengthDashboard client={c} range={range >= 56 ? range : 90} />
       </div>
 
-      {/* Secondary: Recent sessions (Today's Workout now lives in the planner widget above). */}
-      <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
-
-        <div className="card">
-          <div className="section-title" style={{ margin: '0 0 10px' }}>Recent sessions</div>
-          {sessions.slice(0, 6).map((s) => (
-            <div key={s.id} className="flex between" style={{ padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-              <span>{fmtDate(s.date)} · {s.time}</span><Tag color={SSTATUS[s.status]}>{s.status}</Tag>
+      {/* Recent activity — sessions, check-ins and PBs in one feed (Figma: Client Detail) */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="flex between">
+          <div className="section-title" style={{ margin: 0 }}>Recent activity</div>
+          <Button variant="ghost" size="sm" onClick={() => nav('/monitor/' + c.id)}>View all</Button>
+        </div>
+        <div style={{ marginTop: 6 }}>
+          {activity.length ? activity.map((ev, i) => (
+            <div key={i} className="act-row">
+              <span className="act-chip" style={{ background: ev.tint, color: ev.fg }}><Icon name={ev.icon} size={16} /></span>
+              <span className="act-info"><span className="t">{ev.title}</span><span className="s">{ev.meta}</span></span>
             </div>
-          ))}
-          {!sessions.length && <div className="muted">No sessions yet</div>}
+          )) : <div className="empty" style={{ padding: 24 }}>No activity yet — completed sessions, check-ins and PBs land here.</div>}
         </div>
       </div>
 
