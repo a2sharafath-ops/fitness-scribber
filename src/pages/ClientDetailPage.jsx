@@ -4,12 +4,9 @@ import { Line } from 'react-chartjs-2'
 import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
 import ReadinessTag from '../components/molecules/ReadinessTag'
-import SegToggle from '../components/molecules/SegToggle'
 import ConcernCard from '../components/molecules/ConcernCard'
 import PlannerWidget from '../components/organisms/PlannerWidget'
 import AICoach from '../components/organisms/AICoach'
-import LoadResponseDashboard from '../components/organisms/LoadResponseDashboard'
-import StrengthDashboard from '../components/organisms/StrengthDashboard'
 import ProfilePanel from '../components/organisms/ProfilePanel'
 import ClientSubnav from '../components/templates/ClientSubnav'
 import CheckInModal from '../components/organisms/workout/CheckInModal'
@@ -46,9 +43,8 @@ export default function ClientDetailPage() {
   const nav = useNavigate()
   const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
-  const [win, setWin] = useState(7)         // rolling window for the analytics charts
-  const [range, setRange] = useState(28)    // date range for the analytics charts
   const [profileOpen, setProfileOpen] = useState(false)
+  const [trendKey, setTrendKey] = useState('stress') // which 30-day trend the chart shows
   const [checkinW, setCheckinW] = useState(null) // workout waiting to start until the check-in popup resolves
   const [rpeW, setRpeW] = useState(null)         // completed workout waiting for the RPE popup
   const c = db.clients.find((x) => x.id === id)
@@ -88,17 +84,32 @@ export default function ClientDetailPage() {
   let streak = 0
   while (streak < 52 && hasCompletedInWeek(streak)) streak++
 
-  // Stress trend — daily wellness check-ins over the last 30 days.
+  // 30-day trend chart — selectable metric across wellness check-ins + wearable data.
+  const TRENDS = {
+    stress: { label: 'Stress', src: 'wellness', field: 'stress', sub: 'Daily check-ins', max: 7, goodDown: true, color: '#34c759', bg: 'rgba(52,199,89,.08)' },
+    sleep: { label: 'Sleep', src: 'wellness', field: 'sleep', sub: 'Daily check-ins', max: 7, goodDown: false, color: '#5856d6', bg: 'rgba(88,86,214,.08)' },
+    fatigue: { label: 'Fatigue', src: 'wellness', field: 'fatigue', sub: 'Daily check-ins', max: 7, goodDown: true, color: '#e8850c', bg: 'rgba(232,133,12,.08)' },
+    soreness: { label: 'Soreness', src: 'wellness', field: 'soreness', sub: 'Daily check-ins', max: 7, goodDown: true, color: '#af52de', bg: 'rgba(175,82,222,.08)' },
+    hrv: { label: 'HRV', src: 'wearable', field: 'hrv', sub: 'Wearable data', goodDown: false, color: '#0b87c9', bg: 'rgba(11,135,201,.08)' },
+    rhr: { label: 'Resting HR', src: 'wearable', field: 'rhr', sub: 'Wearable data', goodDown: true, color: '#fb404a', bg: 'rgba(251,64,74,.08)' },
+  }
+  const tm = TRENDS[trendKey]
   const D30 = lastNDates(30, tz)
-  const stressMap = {}
-  ;(db.wellness || []).forEach((w) => { if (w.clientId === c.id) stressMap[w.date] = w.stress })
-  const stressSeries = D30.map((d) => stressMap[d] ?? null)
-  const sVals = stressSeries.filter((v) => v != null)
+  const trendMap = {}
+  ;(db[tm.src] || []).forEach((r) => { if (r.clientId === c.id && r[tm.field] != null) trendMap[r.date] = r[tm.field] })
+  const trendSeries = D30.map((d) => trendMap[d] ?? null)
+  const sVals = trendSeries.filter((v) => v != null)
   const half = Math.floor(sVals.length / 2)
   const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null)
   const sDelta = sVals.length >= 4 ? avg(sVals.slice(half)) - avg(sVals.slice(0, half)) : null
-  const trend = sDelta == null ? null : sDelta <= -0.4 ? ['↓ Decreasing', 'var(--tint-green)', 'var(--green)']
-    : sDelta >= 0.4 ? ['↑ Increasing', 'var(--tint-red)', 'var(--accent)'] : ['→ Stable', 'var(--tint-blue)', 'var(--blue)']
+  const thresh = tm.max ? 0.4 : (avg(sVals) || 0) * 0.03
+  const trend = (() => {
+    if (sDelta == null) return null
+    if (Math.abs(sDelta) < thresh) return ['→ Stable', 'var(--tint-blue)', 'var(--blue)']
+    const arrow = sDelta < 0 ? '↓ Decreasing' : '↑ Increasing'
+    const good = sDelta < 0 ? tm.goodDown : !tm.goodDown
+    return [arrow, good ? 'var(--tint-green)' : 'var(--tint-red)', good ? 'var(--green)' : 'var(--accent)']
+  })()
 
   // Current program + unified activity feed.
   const plan = c.planId ? db.plans.find((x) => x.id === c.planId) : null
@@ -165,7 +176,6 @@ export default function ClientDetailPage() {
 
   return (
     <>
-      <ClientSubnav client={c} />
       <div className="topbar">
         <div>
           <h1>{c.name}</h1>
@@ -211,6 +221,9 @@ export default function ClientDetailPage() {
         </div>
       )}
 
+      {/* Section tabs sit just above the metric cards (Figma: Client Detail) */}
+      <ClientSubnav client={c} tabsOnly />
+
       {/* Health metric cards (Figma: Client Detail) — latest wellness check-in + wearable */}
       <div className="metric-row">
         <MetricCard label="STRESS" value={well ? well.stress : '—'} unit={well ? '/7' : ''}
@@ -231,19 +244,27 @@ export default function ClientDetailPage() {
         <div className="card">
           <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
             <div>
-              <div className="section-title" style={{ margin: 0 }}>Stress trend</div>
-              <div className="muted" style={{ fontSize: 12 }}>Daily check-ins · last 30 days</div>
+              <div className="section-title" style={{ margin: 0 }}>{tm.label} trend</div>
+              <div className="muted" style={{ fontSize: 12 }}>{tm.sub} · last 30 days</div>
             </div>
-            {trend && <span className="trend-chip" style={{ background: trend[1], color: trend[2] }}>{trend[0]}</span>}
+            <div className="flex gap">
+              {trend && <span className="trend-chip" style={{ background: trend[1], color: trend[2] }}>{trend[0]}</span>}
+              <select value={trendKey} onChange={(e) => setTrendKey(e.target.value)} aria-label="Trend metric"
+                style={{ width: 'auto', padding: '6px 10px', fontSize: 12, fontWeight: 600 }}>
+                {Object.entries(TRENDS).map(([k, m]) => <option key={k} value={k}>{m.label}</option>)}
+              </select>
+            </div>
           </div>
           {sVals.length > 1 ? (
             <div style={{ height: 190, marginTop: 12 }}>
               <Line
-                data={{ labels: D30.map((d) => d.slice(5)), datasets: [{ data: stressSeries, borderColor: '#34c759', backgroundColor: 'rgba(52,199,89,.08)', fill: true, tension: 0.35, spanGaps: true, pointRadius: 2, borderWidth: 2 }] }}
-                options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#9a9ba2', maxTicksLimit: 6, font: { size: 9 } } }, y: { min: 0, max: 7, grid: { color: '#eceae7' }, ticks: { color: '#9a9ba2', stepSize: 1 } } } }} />
+                data={{ labels: D30.map((d) => d.slice(5)), datasets: [{ data: trendSeries, borderColor: tm.color, backgroundColor: tm.bg, fill: true, tension: 0.35, spanGaps: true, pointRadius: 2, borderWidth: 2 }] }}
+                options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#9a9ba2', maxTicksLimit: 6, font: { size: 9 } } }, y: { ...(tm.max ? { min: 0, max: tm.max, ticks: { color: '#9a9ba2', stepSize: 1 } } : { ticks: { color: '#9a9ba2' } }), grid: { color: '#eceae7' } } } }} />
             </div>
           ) : (
-            <div className="empty" style={{ padding: '36px 20px' }}>No check-ins yet — stress trends appear once {c.name.split(' ')[0]} logs morning wellness.</div>
+            <div className="empty" style={{ padding: '36px 20px' }}>
+              No {tm.label.toLowerCase()} data yet — {tm.src === 'wellness' ? `trends appear once ${c.name.split(' ')[0]} logs morning wellness` : 'trends appear once wearable data syncs'}.
+            </div>
           )}
         </div>
         <div className="card">
@@ -279,20 +300,6 @@ export default function ClientDetailPage() {
           }} />
         </div>
         <div className="cc-side"><AICoach client={c} /></div>
-      </div>
-
-      {/* Analytics — Load-Response + Strength context; rolling/range controls live here */}
-      <div className="flex between" style={{ marginTop: 16, marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
-        <div className="section-title" style={{ margin: 0 }}>Analytics</div>
-        <div className="flex gap" style={{ flexWrap: 'wrap' }}>
-          <span className="muted" style={{ fontSize: 11, fontWeight: 700 }}>ROLLING</span>
-          <SegToggle options={[[1, 'Raw'], [7, '7-day'], [28, '28-day']]} value={win} onChange={setWin} ariaLabel="Rolling window" />
-          <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '12 wk']]} value={range} onChange={setRange} ariaLabel="Date range" />
-        </div>
-      </div>
-      <div className="overview-analytics" style={{ marginTop: 0 }}>
-        <LoadResponseDashboard client={c} win={win} range={range} />
-        <StrengthDashboard client={c} range={range >= 56 ? range : 90} />
       </div>
 
       {/* Recent activity — sessions, check-ins and PBs in one feed (Figma: Client Detail) */}
