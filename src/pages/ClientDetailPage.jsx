@@ -4,15 +4,19 @@ import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
 import ReadinessTag from '../components/molecules/ReadinessTag'
+import SegToggle from '../components/molecules/SegToggle'
 import ConcernCard from '../components/molecules/ConcernCard'
 import PlannerWidget from '../components/organisms/PlannerWidget'
 import AICoach from '../components/organisms/AICoach'
+import LoadResponseDashboard from '../components/organisms/LoadResponseDashboard'
+import StrengthDashboard from '../components/organisms/StrengthDashboard'
+import ProfilePanel from '../components/organisms/ProfilePanel'
 import ClientSubnav from '../components/templates/ClientSubnav'
 import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
 import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
-import { BodyMetricForm } from '../components/organisms/forms/LogForms'
+import { BodyMetricForm, QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { hasBackend } from '../lib/supabase'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -32,6 +36,9 @@ export default function ClientDetailPage() {
   const nav = useNavigate()
   const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
+  const [win, setWin] = useState(7)         // rolling window for the analytics charts
+  const [range, setRange] = useState(28)    // date range for the analytics charts
+  const [profileOpen, setProfileOpen] = useState(false)
   const [checkinW, setCheckinW] = useState(null) // workout waiting to start until the check-in popup resolves
   const [rpeW, setRpeW] = useState(null)         // completed workout waiting for the RPE popup
   const c = db.clients.find((x) => x.id === id)
@@ -107,12 +114,31 @@ export default function ClientDetailPage() {
       <div className="topbar">
         <div className="flex gap"><Avatar name={c.name} size={52} /><div>
           <h1>{c.name}</h1>
-          <div className="sub">{c.email} · {c.phone} · <ReadinessTag readiness={readinessFor(db, c.id)} short /></div>
+          <div className="sub">Clients / {c.name} / Overview · {c.email} · {c.phone}</div>
         </div></div>
         <div className="flex gap">
           <Button variant="ghost" onClick={() => openModal(<BodyMetricForm clientId={c.id} />)}>＋ Log Progress</Button>
           {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}><Icon name="link" size={14} /> Invite</Button>}
         </div>
+      </div>
+
+      {/* Client bar — mini profile, readiness and analysis controls (Figma: Client Overview) */}
+      <div className="card overview-bar">
+        <div className="mini-profile" role="button" tabIndex={0} title="View full profile"
+          onClick={() => setProfileOpen(true)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setProfileOpen(true) } }}>
+          <Avatar name={c.name} size={40} />
+          <div><div className="mp-name">{c.name}</div><div className="mp-goal">Goal · {c.goal}</div></div>
+          <span className="mp-caret">▸ profile</span>
+        </div>
+        <ReadinessTag readiness={readinessFor(db, c.id)} short />
+        <div className="nav-spacer" />
+        <span className="muted" style={{ fontSize: 11, fontWeight: 700 }}>ROLLING</span>
+        <SegToggle options={[[1, 'Raw'], [7, '7-day'], [28, '28-day']]} value={win} onChange={setWin} ariaLabel="Rolling window" />
+        <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '12 wk']]} value={range} onChange={setRange} ariaLabel="Date range" />
+        <Button size="sm" onClick={() => openModal(<QuickLogMenu clientId={c.id} />)}>＋ Quick log</Button>
+        <Button variant="ghost" size="sm" onClick={() => nav('/monitor/' + c.id)}>Detailed logs</Button>
+        <Button variant="ghost" size="sm" onClick={() => nav('/report/' + c.id)}>Report</Button>
       </div>
 
       {baseProg.done < baseProg.total && (
@@ -125,12 +151,6 @@ export default function ClientDetailPage() {
         </div>
       )}
 
-      {/* Load-Response now lives per-day inside the planner. Full charts/breakdowns are in the Command Center. */}
-      <div className="flex between" style={{ marginBottom: 4 }}>
-        <div className="section-title" style={{ margin: 0 }}>Load-Response by day</div>
-        <Button variant="ghost" size="sm" onClick={() => nav('/command/' + c.id)}>Open full dashboard →</Button>
-      </div>
-
       {/* Planner widget — Today's Workout by default, expandable to the week/month
           planner from the same card, with the AI coach beside it as a chat */}
       <div className="cc-wrap" style={{ marginTop: 16 }}>
@@ -142,6 +162,12 @@ export default function ClientDetailPage() {
           }} />
         </div>
         <div className="cc-side"><AICoach client={c} /></div>
+      </div>
+
+      {/* Analytics — Load-Response + Strength context inline (Figma: Client Overview) */}
+      <div className="overview-analytics">
+        <LoadResponseDashboard client={c} win={win} range={range} />
+        <StrengthDashboard client={c} range={range >= 56 ? range : 90} />
       </div>
 
       {/* Secondary: Recent sessions (Today's Workout now lives in the planner widget above). */}
@@ -169,6 +195,8 @@ export default function ClientDetailPage() {
           )) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div>No concerns flagged.</div>}
         </div>
       </div>
+
+      <ProfilePanel client={c} open={profileOpen} onClose={() => setProfileOpen(false)} />
 
       {checkinW && (
         <CheckInModal today={today} onSubmit={submitCheckin} onSkip={skipCheckin} onClose={() => setCheckinW(null)} />
