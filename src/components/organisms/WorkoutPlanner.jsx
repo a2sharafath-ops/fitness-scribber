@@ -12,7 +12,7 @@ import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMo
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay }) {
+export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay, bare }) {
   const sz = size || (featured ? 'featured' : 'default')
   const isFeatured = sz === 'featured'
   const isMedium = sz === 'medium'
@@ -44,18 +44,22 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   const summary = `${plannedDays} session${plannedDays === 1 ? '' : 's'} ${view === 'month' ? 'this month' : 'this week'}${nextDate ? ` · next ${fmtDay(nextDate)}` : ''}`
 
   return (
-    <div className={'card' + (isFeatured ? ' planner-featured' : '') + (isMedium ? ' planner-medium' : '')}>
+    <div className={bare ? 'pw-planner-bare' : 'card' + (isFeatured ? ' planner-featured' : '') + (isMedium ? ' planner-medium' : '')}>
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <button className="planner-collapse" onClick={() => setCollapsed((v) => !v)}
-          aria-expanded={!collapsed} aria-label={collapsed ? 'Expand workout planner' : 'Collapse workout planner'}>
-          <span className="pc-caret" aria-hidden="true">{collapsed ? '▸' : '▾'}</span>
-          <span className="section-title" style={{ margin: 0, fontSize: isFeatured ? 19 : undefined }}>Workout Planner</span>
-        </button>
+        {bare ? (
+          <span className="pw-sublabel">{view === 'month' ? 'MONTH PLANNER' : 'WEEK PLANNER'}</span>
+        ) : (
+          <button className="planner-collapse" onClick={() => setCollapsed((v) => !v)}
+            aria-expanded={!collapsed} aria-label={collapsed ? 'Expand workout planner' : 'Collapse workout planner'}>
+            <span className="pc-caret" aria-hidden="true">{collapsed ? '▸' : '▾'}</span>
+            <span className="section-title" style={{ margin: 0, fontSize: isFeatured ? 19 : undefined }}>Workout Planner</span>
+          </button>
+        )}
         {collapsed ? (
           <span className="planner-summary muted">{summary}</span>
         ) : (
           <div className="flex gap" style={{ flexWrap: 'wrap' }}>
-            <SegToggle options={onDay ? [['day', 'Day'], ['week', 'Week'], ['month', 'Month']] : [['week', 'Week'], ['month', 'Month']]} value={view} onChange={(v) => (v === 'day' ? onDay() : setView(v))} ariaLabel="Calendar view" />
+            {!bare && <SegToggle options={onDay ? [['day', 'Day'], ['week', 'Week'], ['month', 'Month']] : [['week', 'Week'], ['month', 'Month']]} value={view} onChange={(v) => (v === 'day' ? onDay() : setView(v))} ariaLabel="Calendar view" />}
             {view === 'month' ? (
               <div className="flex gap">
                 <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(anchor, -1))} aria-label="Previous month">←</Button>

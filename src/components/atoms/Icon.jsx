@@ -1,6 +1,8 @@
 // Line icons matching the Cureocity design-system icon set (Figma: _Web Components).
 // Stroke-based, 24px grid, inherit color via currentColor.
 const PATHS = {
+  'chevron-down': <path d="m6 9 6 6 6-6" />,
+  'chevron-right': <path d="m9 18 6-6-6-6" />,
   dashboard: (
     <>
       <rect x="3" y="3" width="7" height="9" rx="1.5" />

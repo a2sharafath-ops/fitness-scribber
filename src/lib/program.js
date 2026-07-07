@@ -12,7 +12,7 @@ export const BLOCK_TYPES = ['Warm-up', 'Main Lifts', 'Assisted', 'Core/Others', 
 
 // A fresh workout opens with the trainer's standard three-block scaffold.
 export const defaultBlocks = () => [newBlock('Warm-up', 1), newBlock('Main Lifts', 2), newBlock('Core/Others', 3)]
-export const INTENSITY_TYPES = ['%1RM', 'RPE', 'Load', 'Target HR']
+export const INTENSITY_TYPES = ['%1RM', 'RIR', 'RPE', 'Seconds', 'Minutes', 'Load', 'Target HR']
 export const SET_STATUS = ['Pending', 'Completed', 'Failed']
 export const SUPERSET_GROUPS = ['', 'A', 'B', 'C', 'D']
 
@@ -81,6 +81,88 @@ export function trainingMaxKg(maxes, clientId, exercise, date) {
 // %1RM → target kg off the Training Max, rounded to the nearest 0.5 kg.
 export const targetKg = (tmKg, pct) =>
   tmKg > 0 && pct > 0 ? Math.round((tmKg * pct) / 100 * 2) / 2 : null
+
+// ---- Subjective load → %1RM (NSCA Table 18.10) ------------------------------
+// Exact reproduction of Table 18.10 (Subjective Loading Efforts and
+// Corresponding Set-Repetition Best Relative Percentages). Each effort carries
+// the table's own relative-percentage band as its exact endpoints [low, high]
+// (low = null marks an open "<high%" band). No interpolation or invented
+// mid-points — the numbers are taken verbatim from the table.
+// Source: NSCA, Essentials of Strength Training and Conditioning — Table 18.10.
+const LOAD_EFFORTS = {
+  maximal: { label: 'Maximal', band: '100%', low: 100, high: 100 },
+  veryHeavy: { label: 'Very heavy', band: '95–99%', low: 95, high: 99 },
+  heavy: { label: 'Heavy', band: '90–94%', low: 90, high: 94 },
+  moderateHeavy: { label: 'Moderate-heavy', band: '85–89%', low: 85, high: 89 },
+  moderate: { label: 'Moderate', band: '80–84%', low: 80, high: 84 },
+  lightModerate: { label: 'Light-moderate', band: '75–79%', low: 75, high: 79 },
+  light: { label: 'Light', band: '70–74%', low: 70, high: 74 },
+  veryLight: { label: 'Very light', band: '<70%', low: null, high: 70 },
+  veryVeryLight: { label: 'Very, very light', band: '<60%', low: null, high: 60 },
+}
+
+// RPE column of Table 18.10 → effort. Thresholds reproduce every row exactly,
+// including the half-point ratings (9.5, 8.5, 7.5, 6.5):
+//   10 & 9.5→Maximal · 9 & 8.5→Very heavy · 8 & 7.5→Heavy · 7 & 6.5→Mod-heavy ·
+//   6 & 5.5→Moderate · 5→Light-moderate · 4.5 & 4→Light · 3.5 & 3→Very light ·
+//   ≤2→Very, very light.
+function rpeEffort(v) {
+  if (v >= 9.5) return LOAD_EFFORTS.maximal
+  if (v >= 8.5) return LOAD_EFFORTS.veryHeavy
+  if (v >= 7.5) return LOAD_EFFORTS.heavy
+  if (v >= 6.5) return LOAD_EFFORTS.moderateHeavy
+  if (v >= 5.5) return LOAD_EFFORTS.moderate
+  if (v >= 5) return LOAD_EFFORTS.lightModerate
+  if (v >= 4) return LOAD_EFFORTS.light
+  if (v >= 3) return LOAD_EFFORTS.veryLight
+  return LOAD_EFFORTS.veryVeryLight
+}
+
+// RIR column of Table 18.10 → effort (reps in reserve, exact):
+//   0→Maximal · 1→Very heavy · 2→Heavy · 3→Mod-heavy · 4→Moderate ·
+//   5→Light-moderate · 6→Light · 7→Very light · ≥8→Very, very light.
+function rirEffort(v) {
+  if (v <= 0) return LOAD_EFFORTS.maximal
+  if (v === 1) return LOAD_EFFORTS.veryHeavy
+  if (v === 2) return LOAD_EFFORTS.heavy
+  if (v === 3) return LOAD_EFFORTS.moderateHeavy
+  if (v === 4) return LOAD_EFFORTS.moderate
+  if (v === 5) return LOAD_EFFORTS.lightModerate
+  if (v === 6) return LOAD_EFFORTS.light
+  if (v === 7) return LOAD_EFFORTS.veryLight
+  return LOAD_EFFORTS.veryVeryLight
+}
+
+// Table 18.10 effort descriptor for an RPE/RIR value: { label, band, low, high }.
+// Returns null when the value is blank or the metric isn't a subjective one.
+export function subjectiveEffort(intensityType, value) {
+  if (value == null || value === '') return null
+  const v = +value
+  if (Number.isNaN(v)) return null
+  return intensityType === 'RPE' ? rpeEffort(v)
+    : intensityType === 'RIR' ? rirEffort(v) : null
+}
+
+// Exact %1RM band [low, high] from Table 18.10 for an RPE/RIR value (low = null
+// for the open "<high%" bands), else null.
+export const subjectivePct = (intensityType, value) => {
+  const e = subjectiveEffort(intensityType, value)
+  return e ? { low: e.low, high: e.high, band: e.band } : null
+}
+
+// Exact target working-load band (kg) implied by an RPE/RIR prescription
+// against the Training Max, from the Table 18.10 percentage endpoints — no
+// interpolation. Returns { low, high, open } in kg (open bands have low=null),
+// or null when there's no value/TM.
+export function subjectiveTargetBand(tmKg, intensityType, value) {
+  const e = subjectiveEffort(intensityType, value)
+  if (!e || !(tmKg > 0)) return null
+  return {
+    low: e.low != null ? targetKg(tmKg, e.low) : null,
+    high: targetKg(tmKg, e.high),
+    open: e.low == null,
+  }
+}
 
 // Aerobic zone indicator for Target HR entries. Values ≤ 100 read as %MaxHR,
 // larger values as bpm against the supplied max HR.

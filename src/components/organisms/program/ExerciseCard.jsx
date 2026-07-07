@@ -49,8 +49,8 @@ export default function ExerciseCard({
           <select value={ex.supersetLinkId || ''} aria-label="Superset group" onChange={(e) => onChange({ supersetLinkId: e.target.value || null })}>
             {SUPERSET_GROUPS.map((g) => <option key={g} value={g}>{g || 'None'}</option>)}
           </select></label>
-        {ex.intensityType === '%1RM' && (
-          <span className="ex-tm muted" title="Training Max used for %1RM targets">
+        {['%1RM', 'RPE', 'RIR'].includes(ex.intensityType) && (
+          <span className="ex-tm muted" title="Training Max used for %1RM / RPE / RIR load targets">
             TM {tmKg ? `${toDisp(tmKg)} ${unitName()}` : '— none yet'}
           </span>
         )}

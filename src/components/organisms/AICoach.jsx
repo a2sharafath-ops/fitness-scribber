@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import Icon from '../atoms/Icon'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { callFunction, hasBackend } from '../../api/functions'
@@ -90,7 +91,7 @@ export default function AICoach({ client }) {
   return (
     <div className="ai-panel">
       <div className="ai-head">
-        <div className="ai-t">✨ AI Coaching Assistant</div>
+        <div className="ai-t"><span className="ai-spark"><Icon name="sparkles" size={15} /></span> AI Coaching Assistant</div>
         <div className="ai-ingest">
           {['Readiness', 'Load trends', 'Drafted workout'].map((c) => (
             <span className="ai-chip" key={c}><span className="pulse" />{c}</span>
@@ -115,7 +116,7 @@ export default function AICoach({ client }) {
         <button className="btn ghost sm" style={{ width: '100%' }} onClick={() => setNonce((n) => n + 1)}>⟳ Re-analyze current data</button>
         {hasBackend && (
           <button className="btn sm" style={{ width: '100%', marginTop: 8 }} onClick={askLive} disabled={loadingLive}>
-            {loadingLive ? 'Thinking…' : '✨ Ask AI (live)'}
+            {loadingLive ? 'Thinking…' : <><Icon name="sparkles" size={14} /> Ask AI (live)</>}
           </button>
         )}
         <div className="muted" style={{ fontSize: 10, marginTop: 8, textAlign: 'center' }}>

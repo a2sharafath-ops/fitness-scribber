@@ -88,7 +88,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
               {b.exercises.map((e) => (
                 <div key={e.exerciseId} className={e.unmapped ? 'dp-unmapped' : ''} style={{ fontSize: 12, paddingLeft: 10 }}>
                   {e.unmapped ? '⚠ ' : '✓ '}{e.exerciseName} — {e.sets.length}×{e.sets[0]?.prescribedReps}
-                  {e.sets[0]?.prescribedIntensityValue != null ? ` @ ${e.sets[0].prescribedIntensityValue}${e.intensityType === '%1RM' ? '%' : e.intensityType === 'RPE' ? ' RPE' : ''}` : ''}
+                  {e.sets[0]?.prescribedIntensityValue != null ? ` @ ${e.sets[0].prescribedIntensityValue}${e.intensityType === '%1RM' ? '%' : e.intensityType === 'RPE' ? ' RPE' : e.intensityType === 'RIR' ? ' RIR' : e.intensityType === 'Seconds' ? 's' : e.intensityType === 'Minutes' ? ' min' : ''}` : ''}
                   {e.sets[0]?.prescribedLoadKg != null ? ` · ${e.sets[0].prescribedLoadKg}kg` : ''}
                   {e.unmapped ? ' (needs validation)' : ''}
                 </div>

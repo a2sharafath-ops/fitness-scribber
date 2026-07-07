@@ -715,3 +715,43 @@ canvas{max-width:100%}
 .act-info .t{font-weight:700;font-size:13px}
 .act-info .s{color:var(--muted);font-size:12px}
 @media print{.global-bar{display:none !important}}
+
+/* ===== Planner widget — collapsed state (Figma: Client Overview focus row) ===== */
+.pw{border:1.5px solid rgba(251,64,74,.45)}
+.pw-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pw-caret{display:inline-flex;align-items:center;gap:9px;background:none;border:none;color:var(--text);cursor:pointer;font-size:13px;font-weight:700;padding:0;font-family:inherit;text-align:left}
+.pw-caret-ic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;background:var(--surface2);color:var(--muted);flex:none}
+.pw-caret:hover .pw-caret-ic,.pw-caret:focus-visible .pw-caret-ic{background:var(--tint-red);color:var(--accent)}
+.pw-caret:hover .section-title{color:var(--accent)}
+.pw-caret-cue{font-size:11px;font-weight:700;color:var(--accent);background:var(--tint-red);padding:2px 9px;border-radius:999px;white-space:nowrap}
+/* View swap animates so expand/collapse reads as growth, not replacement */
+@keyframes pw-in{from{opacity:.5;transform:translateY(-6px) scale(.995)}to{opacity:1;transform:none}}
+.pw-view{animation:pw-in .18s ease}
+@media(prefers-reduced-motion:reduce){.pw-view{animation:none}}
+.pw-badge{background:var(--tint-red);color:var(--accent);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pw-expand{width:28px;height:28px;border-radius:999px;background:var(--surface2);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none}
+.pw-expand:hover{color:var(--text)}
+.pw-today{display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:14px;padding:10px 12px 10px 14px;margin-top:12px;cursor:pointer;flex-wrap:wrap;transition:.15s}
+.pw-today:hover{background:#efedea}
+.pw-overline{font-size:9px;font-weight:800;letter-spacing:.5px;color:var(--accent)}
+.pw-trow{display:flex;align-items:center;gap:8px;margin-top:2px;flex-wrap:wrap}
+.pw-tname{font-weight:700;font-size:14px}
+.pw-chip{background:var(--surface);border:1px solid rgba(0,0,0,.07);border-radius:7px;padding:3px 8px;font-size:10px;font-weight:800;color:#9a9ba2;display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
+.pw-week{display:flex;gap:8px;margin-top:12px}
+.pw-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0;border-radius:10px;background:none;border:none;cursor:pointer;font-family:inherit}
+.pw-day:hover{background:var(--surface2)}
+.pw-day.today{background:var(--tint-red)}
+.pw-day .dw{font-size:10px;font-weight:800;color:#9a9ba2}
+.pw-day.today .dw{color:var(--accent)}
+.pw-dot{width:8px;height:8px;border-radius:50%}
+.pw-dot.planned{background:var(--blue)}
+.pw-dot.today{background:var(--accent)}
+.pw-dot.rest{background:none;border:1.5px solid #c6c7cc}
+.pw-day .dn{font-size:10px;color:#9a9ba2;font-weight:600}
+.pw-hint{font-size:10px;margin-top:10px}
+/* AI assistant header spark chip (Figma) */
+.ai-spark{width:28px;height:28px;border-radius:10px;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
+/* Widget body: expanded views render bare inside the persistent card */
+.pw-body{margin-top:2px}
+.pw-sublabel{font-size:10px;font-weight:800;letter-spacing:.5px;color:#9a9ba2}
+.pw-planner-bare .plan-week{gap:8px}

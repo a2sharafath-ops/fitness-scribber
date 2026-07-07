@@ -13,7 +13,7 @@ import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
 import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
-import { BodyMetricForm, QuickLogMenu } from '../components/organisms/forms/LogForms'
+import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { hasBackend } from '../lib/supabase'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -182,7 +182,6 @@ export default function ClientDetailPage() {
           <div className="sub">Clients / {c.name} / Overview</div>
         </div>
         <div className="flex gap">
-          <Button variant="ghost" onClick={() => openModal(<BodyMetricForm clientId={c.id} />)}>＋ Log Progress</Button>
           {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}><Icon name="link" size={14} /> Invite</Button>}
         </div>
       </div>
