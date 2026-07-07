@@ -118,13 +118,16 @@ export default function DashboardPage() {
         </div>
 
         <div className="dash-insights">
-          <div className="dash-card" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="dash-card clickable" style={{ display: 'flex', flexDirection: 'column' }} role="button" tabIndex={0}
+            onClick={() => nav('/schedule')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/schedule') }} aria-label="Open schedule">
             <div className="dash-card-head">
               <div style={{ flex: 1 }}>
                 <div className="dash-card-title">Client activity</div>
                 <div className="dash-card-sub">Completed sessions across your roster</div>
               </div>
-              <SegToggle options={Object.keys(RANGE).map((k) => [k, k])} value={range} onChange={setRange} ariaLabel="Activity range" />
+              <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                <SegToggle options={Object.keys(RANGE).map((k) => [k, k])} value={range} onChange={setRange} ariaLabel="Activity range" />
+              </span>
             </div>
             {hasActivity ? (
               <>
@@ -137,7 +140,8 @@ export default function DashboardPage() {
           </div>
 
           <div className="dash-side">
-            <div className="dash-ai">
+            <div className="dash-ai clickable" role="button" tabIndex={0}
+              onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Open clients roster">
               <div className="dash-ai-head">
                 <span className="dash-ai-chip"><Icon name="sparkles" size={14} /></span>
                 <span className="dash-ai-tag">CURIO AI</span>
@@ -151,33 +155,34 @@ export default function DashboardPage() {
             </div>
 
             {next ? (
-              <button className="dash-next" onClick={() => openModal(<SessionForm session={next} />)}>
+              <button className="dash-next" onClick={() => nav('/schedule')} aria-label="Open schedule">
                 <div className="dash-next-label">NEXT SESSION · {next.date === today ? next.time : fmtDay(next.date) + ' ' + next.time}</div>
                 <div className="dash-next-title">{next.type} · {nextClient?.name || 'Client'}</div>
                 <div className="dash-next-sub">{next.dur} min · {nextClient?.goal || 'Session'}</div>
               </button>
             ) : (
-              <div className="dash-next" style={{ cursor: 'default' }}>
+              <button className="dash-next" onClick={() => nav('/schedule')} aria-label="Open schedule">
                 <div className="dash-next-label">NEXT SESSION</div>
                 <div className="dash-next-title">Nothing scheduled</div>
                 <div className="dash-next-sub">Book a session to see it here.</div>
-              </div>
+              </button>
             )}
           </div>
         </div>
 
         <div className="dash-lists">
-          <div className="dash-list">
+          <div className="dash-list clickable" role="button" tabIndex={0}
+            onClick={() => nav('/schedule')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/schedule') }} aria-label="Open schedule">
             <div className="dash-list-head">
               <div className="dash-list-title">Today's schedule</div>
-              <button className="dash-viewall" onClick={() => nav('/schedule')}>View all</button>
+              <button className="dash-viewall" onClick={(e) => { e.stopPropagation(); nav('/schedule') }}>View all</button>
             </div>
             {todaySessions.length ? todaySessions.map((s) => {
               const c = db.clients.find((x) => x.id === s.clientId)
               const isNext = next && s.id === next.id
               const [cls, label] = isNext && s.status !== 'Completed' ? ['sc-indigo', 'Up next'] : (SSTATUS_CHIP[s.status] || ['sc-gray', s.status])
               return (
-                <button key={s.id} className="dash-row" onClick={() => openModal(<SessionForm session={s} />)}>
+                <button key={s.id} className="dash-row" onClick={(e) => { e.stopPropagation(); openModal(<SessionForm session={s} />) }}>
                   <span className="dash-time">{s.time}</span>
                   <span className="dash-rinfo"><div className="t">{s.type}</div><div className="s">{c?.name || 'Client'}</div></span>
                   <StatusChip cls={cls} label={label} />
@@ -186,13 +191,14 @@ export default function DashboardPage() {
             }) : <div className="empty"><div className="big"><Icon name="coffee" size={40} /></div>No sessions today. Enjoy the rest!</div>}
           </div>
 
-          <div className="dash-list">
+          <div className="dash-list clickable" role="button" tabIndex={0}
+            onClick={() => nav('/concerns')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/concerns') }} aria-label="Open concerns">
             <div className="dash-list-head">
               <div className="dash-list-title">Needs attention</div>
-              <button className="dash-viewall" onClick={() => nav('/concerns')}>View all</button>
+              <button className="dash-viewall" onClick={(e) => { e.stopPropagation(); nav('/concerns') }}>View all</button>
             </div>
             {attention.length ? attention.map((a) => (
-              <button key={a.c.id} className="dash-row" onClick={() => nav('/command/' + a.c.id)}>
+              <button key={a.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + a.c.id) }}>
                 <span className="dash-att-av" style={a.tone === 'red' ? { background: 'var(--tint-red)', color: 'var(--accent)' } : { background: 'var(--tint-amber)', color: 'var(--accent2)' }}>{initials(a.c.name)}</span>
                 <span className="dash-rinfo"><div className="t">{a.c.name}</div><div className="s">{a.reason}</div></span>
                 <StatusChip cls={a.tone === 'red' ? 'sc-red' : 'sc-amber'} label={a.chip} />

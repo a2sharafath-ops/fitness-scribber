@@ -25,11 +25,22 @@ import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { calcSRPETL } from '../lib/calc'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
-import { readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
+import { readinessFor, readinessScore, dailySum, acwrSeries, latestOf, rolling30Baseline, deviationPct } from '../lib/calc'
 import { forClient, baselineProgress } from '../lib/assessment'
 import Icon from '../components/atoms/Icon'
 
 const SSTATUS = { Confirmed: 'green', Pending: 'orange', Completed: 'blue', Cancelled: 'gray' }
+
+// Compact health metric card (Figma: Client Detail metrics row).
+function MetricCard({ label, value, unit, state, color }) {
+  return (
+    <div className="metric-card">
+      <div className="m-l">{label}</div>
+      <div className="m-v">{value}{unit ? <span>{unit}</span> : null}</div>
+      {state && <div className="m-s" style={{ color }}><span className="m-dot" style={{ background: color }} />{state}</div>}
+    </div>
+  )
+}
 
 export default function ClientDetailPage() {
   const { id } = useParams()
@@ -61,6 +72,12 @@ export default function ClientDetailPage() {
   const todayW = workouts.find((w) => w.clientId === c.id && w.date === today) || null
   const todayP = db.prescriptions.find((p) => p.clientId === c.id && p.date === today) || null
   const lastWear = latestOf(db.wearable, c.id)
+  const well = latestOf(db.wellness, c.id)
+  const hrvBase = lastWear ? rolling30Baseline(db, c.id, 'hrv', lastWear.date) : null
+  const hrvDev = lastWear && hrvBase ? deviationPct(lastWear.hrv, hrvBase) : null
+  const pastS = sessions.filter((s) => s.date <= today && s.status !== 'Cancelled')
+  const doneS = pastS.filter((s) => s.status === 'Completed').length
+  const adherence = pastS.length ? Math.round((doneS / pastS.length) * 100) : 0
   const restingHr = lastWear?.rhr ?? null
   const age = c.anthro?.age ?? null
   const saveWorkout = (w) => commit((d) => { d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w] })
@@ -112,33 +129,38 @@ export default function ClientDetailPage() {
     <>
       <ClientSubnav client={c} />
       <div className="topbar">
-        <div className="flex gap"><Avatar name={c.name} size={52} /><div>
+        <div>
           <h1>{c.name}</h1>
-          <div className="sub">Clients / {c.name} / Overview · {c.email} · {c.phone}</div>
-        </div></div>
+          <div className="sub">Clients / {c.name} / Overview</div>
+        </div>
         <div className="flex gap">
           <Button variant="ghost" onClick={() => openModal(<BodyMetricForm clientId={c.id} />)}>＋ Log Progress</Button>
           {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={c} />)}><Icon name="link" size={14} /> Invite</Button>}
         </div>
       </div>
 
-      {/* Client bar — mini profile, readiness and analysis controls (Figma: Client Overview) */}
-      <div className="card overview-bar">
-        <div className="mini-profile" role="button" tabIndex={0} title="View full profile"
+      {/* Client header card (Figma: Client Detail) — identity, quick stats & actions */}
+      <div className="card client-header">
+        <div className="ch-id" role="button" tabIndex={0} title="View full profile"
           onClick={() => setProfileOpen(true)}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setProfileOpen(true) } }}>
-          <Avatar name={c.name} size={40} />
-          <div><div className="mp-name">{c.name}</div><div className="mp-goal">Goal · {c.goal}</div></div>
-          <span className="mp-caret">▸ profile</span>
+          <Avatar name={c.name} size={64} />
+          <div>
+            <div className="ch-name">{c.name} <ReadinessTag readiness={readinessFor(db, c.id)} short /></div>
+            <div className="ch-meta">Goal · {c.goal}{c.level ? ` · ${c.level}` : ''} · {c.email} · {c.phone}</div>
+          </div>
         </div>
-        <ReadinessTag readiness={readinessFor(db, c.id)} short />
-        <div className="nav-spacer" />
-        <span className="muted" style={{ fontSize: 11, fontWeight: 700 }}>ROLLING</span>
-        <SegToggle options={[[1, 'Raw'], [7, '7-day'], [28, '28-day']]} value={win} onChange={setWin} ariaLabel="Rolling window" />
-        <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '12 wk']]} value={range} onChange={setRange} ariaLabel="Date range" />
-        <Button size="sm" onClick={() => openModal(<QuickLogMenu clientId={c.id} />)}>＋ Quick log</Button>
-        <Button variant="ghost" size="sm" onClick={() => nav('/monitor/' + c.id)}>Detailed logs</Button>
-        <Button variant="ghost" size="sm" onClick={() => nav('/report/' + c.id)}>Report</Button>
+        <div className="ch-stats">
+          <div className="ch-stat"><div className="v">{adherence}%</div><div className="l">ADHERENCE</div></div>
+          <div className="ch-stat"><div className="v">{sessions.length}</div><div className="l">SESSIONS</div></div>
+          <div className="ch-stat"><div className="v">{rScore ?? '—'}</div><div className="l">READINESS</div></div>
+        </div>
+        <div className="ch-actions">
+          <Button variant="ghost" size="sm" onClick={() => nav('/messages')}>Message</Button>
+          <Button variant="ghost" size="sm" onClick={() => nav('/monitor/' + c.id)}>Detailed logs</Button>
+          <Button variant="ghost" size="sm" onClick={() => nav('/report/' + c.id)}>Report</Button>
+          <Button size="sm" onClick={() => openModal(<QuickLogMenu clientId={c.id} />)}>＋ Quick log</Button>
+        </div>
       </div>
 
       {baseProg.done < baseProg.total && (
@@ -150,6 +172,21 @@ export default function ClientDetailPage() {
           <Button size="sm" onClick={() => nav('/clients/' + c.id + '/assessments')}>Complete now →</Button>
         </div>
       )}
+
+      {/* Health metric cards (Figma: Client Detail) — latest wellness check-in + wearable */}
+      <div className="metric-row">
+        <MetricCard label="STRESS" value={well ? well.stress : '—'} unit={well ? '/7' : ''}
+          state={well ? (well.stress >= 5 ? 'HIGH' : well.stress >= 3 ? 'MEDIUM' : 'LOW') : 'NO DATA'}
+          color={well ? (well.stress >= 5 ? 'var(--accent)' : well.stress >= 3 ? 'var(--accent2)' : 'var(--green)') : 'var(--muted)'} />
+        <MetricCard label="LAST HRV" value={lastWear ? lastWear.hrv : '—'} unit={lastWear ? 'ms' : ''}
+          state={hrvDev == null ? (lastWear ? 'NO BASELINE' : 'NO DATA') : hrvDev < -8 ? 'SUPPRESSED' : 'STABLE'}
+          color={hrvDev == null ? 'var(--muted)' : hrvDev < -8 ? 'var(--accent)' : 'var(--green)'} />
+        <MetricCard label="RESTING HR" value={lastWear ? lastWear.rhr : '—'} unit={lastWear ? 'bpm' : ''}
+          state={lastWear ? 'LATEST' : 'NO DATA'} color="var(--muted)" />
+        <MetricCard label="SLEEP" value={well ? well.sleep : '—'} unit={well ? '/7' : ''}
+          state={well ? (well.sleep >= 5 ? 'GOOD' : 'LOW') : 'NO DATA'}
+          color={well ? (well.sleep >= 5 ? 'var(--green)' : 'var(--accent2)') : 'var(--muted)'} />
+      </div>
 
       {/* Planner widget — Today's Workout by default, expandable to the week/month
           planner from the same card, with the AI coach beside it as a chat */}
@@ -164,8 +201,16 @@ export default function ClientDetailPage() {
         <div className="cc-side"><AICoach client={c} /></div>
       </div>
 
-      {/* Analytics — Load-Response + Strength context inline (Figma: Client Overview) */}
-      <div className="overview-analytics">
+      {/* Analytics — Load-Response + Strength context; rolling/range controls live here */}
+      <div className="flex between" style={{ marginTop: 16, marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+        <div className="section-title" style={{ margin: 0 }}>Analytics</div>
+        <div className="flex gap" style={{ flexWrap: 'wrap' }}>
+          <span className="muted" style={{ fontSize: 11, fontWeight: 700 }}>ROLLING</span>
+          <SegToggle options={[[1, 'Raw'], [7, '7-day'], [28, '28-day']]} value={win} onChange={setWin} ariaLabel="Rolling window" />
+          <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '12 wk']]} value={range} onChange={setRange} ariaLabel="Date range" />
+        </div>
+      </div>
+      <div className="overview-analytics" style={{ marginTop: 0 }}>
         <LoadResponseDashboard client={c} win={win} range={range} />
         <StrengthDashboard client={c} range={range >= 56 ? range : 90} />
       </div>
