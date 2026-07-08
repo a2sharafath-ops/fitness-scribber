@@ -1,17 +1,18 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Avatar from '../atoms/Avatar'
 import Button from '../atoms/Button'
 import Field from '../atoms/Field'
-import AnthroCell from '../molecules/AnthroCell'
+import Tag from '../atoms/Tag'
 import ReadinessTag from '../molecules/ReadinessTag'
 import ModalShell from '../molecules/ModalShell'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
-import { useFormat } from '../../hooks/useFormat'
 import { fmtDate } from '../../lib/dates'
 import { readinessFor } from '../../lib/calc'
 import { resolveAnthro } from '../../lib/assessment'
-import Icon from '../atoms/Icon'
+
+const LEVEL_COLOR = { Beginner: 'blue', Intermediate: 'purple', Advanced: 'orange' }
 
 export function EditProfileForm({ client }) {
   const { db, commit } = useData()
@@ -54,11 +55,8 @@ export function EditProfileForm({ client }) {
 
 export default function ProfilePanel({ client, open, onClose }) {
   const { db } = useData()
-  const { openModal } = useModal()
-  const { fmtWt } = useFormat()
-  const a = resolveAnthro(db, client)
-  const ik = client.intake || {}
-  const bmi = a.heightCm && a.massKg ? (a.massKg / (a.heightCm / 100) ** 2).toFixed(1) : '—'
+  const nav = useNavigate()
+  const viewFull = () => { onClose(); nav('/clients/' + client.id + '/profile') }
 
   return (
     <>
@@ -75,25 +73,17 @@ export default function ProfilePanel({ client, open, onClose }) {
           <button className="x" onClick={onClose} aria-label="Close profile">×</button>
         </div>
         <div className="flex" style={{ marginTop: 10 }}><ReadinessTag readiness={readinessFor(db, client.id)} /></div>
-        <div className="section-title" style={{ margin: '18px 0 0' }}>Anthropometrics</div>
-        <div className="anthro-grid">
-          <AnthroCell label="Age" value={a.age} unit=" yr" />
-          <AnthroCell label="Height" value={a.heightCm} unit=" cm" />
-          <AnthroCell label="Body Mass" value={a.massKg != null ? fmtWt(a.massKg) : null} />
-          <AnthroCell label="Body Fat" value={a.bodyFatPct} unit="%" />
-          <AnthroCell label="Lean Mass" value={a.leanMassKg != null ? fmtWt(a.leanMassKg) : null} />
-          <AnthroCell label="BMI" value={bmi} />
-        </div>
-        <div className="section-title" style={{ margin: '6px 0 10px' }}>Intake & History Snapshot</div>
-        {[['clipboard', 'Initial questionnaire', ik.questionnaire], ['listHeart', 'Medical history', ik.medical], ['danger', 'Injury history', ik.injury], ['fileText', 'Dietary notes', ik.diet]].map(([icn, h, v]) => (
-          <div className="intake-block" key={h}>
-            <div className="i-h"><Icon name={icn} size={15} /> {h}</div>
-            <div className="i-b">{v || '—'}</div>
-          </div>
-        ))}
-        <div className="modal-foot" style={{ marginTop: 8 }}>
-          <Button variant="ghost" onClick={() => openModal(<EditProfileForm client={client} />, true)}>Edit details</Button>
-          <Button onClick={onClose}>Back to Dashboard</Button>
+
+        <div className="section-title" style={{ margin: '18px 0 4px' }}>Profile</div>
+        <div className="field"><label>Goal</label><div>{client.goal || '—'}</div></div>
+        <div className="field"><label>Level</label><div><Tag color={LEVEL_COLOR[client.level]}>{client.level}</Tag></div></div>
+        <div className="field"><label>Status</label><div><Tag color={client.status === 'Active' ? 'green' : 'gray'}>{client.status}</Tag></div></div>
+        <div className="field"><label>Plan tier</label><div><Tag color={client.plan === 'Premium' ? 'purple' : 'gray'}>{client.plan}</Tag></div></div>
+        <div className="field"><label>Member since</label><div>{fmtDate(client.joined)}</div></div>
+        <div className="field" style={{ margin: 0 }}><label>Notes</label><div className="muted">{client.notes || '—'}</div></div>
+
+        <div className="modal-foot" style={{ marginTop: 14 }}>
+          <Button onClick={viewFull}>View full profile →</Button>
         </div>
       </div>
     </>

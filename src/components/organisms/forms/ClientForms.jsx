@@ -114,6 +114,47 @@ export function InviteAthleteForm({ client }) {
   )
 }
 
+// Package tiers a trainer can put a client on. Static reference config (like
+// LEVELS) — the client's chosen tier lives on the client record.
+export const PACKAGE_TIERS = [
+  { id: 'Standard', blurb: 'Core programming, weekly check-ins & progress tracking.' },
+  { id: 'Premium', blurb: 'Everything in Standard plus priority messaging, adaptive AI coaching & detailed reports.' },
+]
+
+export function UpgradePackageForm({ client }) {
+  const { commit } = useData()
+  const { closeModal } = useModal()
+  const [plan, setPlan] = useState(client.plan || 'Standard')
+  const save = () => {
+    commit((db) => { db.clients.find((c) => c.id === client.id).plan = plan })
+    closeModal()
+    toast(plan === client.plan ? 'Package unchanged' : `Package changed to ${plan}`)
+  }
+  return (
+    <ModalShell
+      title={'Package — ' + client.name}
+      onClose={closeModal}
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button disabled={plan === client.plan} onClick={save}>Save package</Button></>}
+    >
+      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+        Current package: <strong>{client.plan}</strong>. Choose {client.name}'s package tier.
+      </p>
+      <div className="pkg-tiers">
+        {PACKAGE_TIERS.map((t) => (
+          <button type="button" key={t.id} className={'pkg-tier' + (plan === t.id ? ' on' : '')}
+            aria-pressed={plan === t.id} onClick={() => setPlan(t.id)}>
+            <div className="pkg-tier-h">
+              <span className="pkg-tier-name">{t.id}</span>
+              {t.id === client.plan && <span className="pkg-tier-cur">Current</span>}
+            </div>
+            <div className="pkg-tier-b muted">{t.blurb}</div>
+          </button>
+        ))}
+      </div>
+    </ModalShell>
+  )
+}
+
 export function AssignPlanForm({ client }) {
   const { db, commit } = useData()
   const { closeModal } = useModal()

@@ -3,13 +3,12 @@ import Avatar from '../components/atoms/Avatar'
 import Button from '../components/atoms/Button'
 import Tag from '../components/atoms/Tag'
 import AnthroCell from '../components/molecules/AnthroCell'
-import { ClientForm } from '../components/organisms/forms/ClientForms'
+import { ClientForm, UpgradePackageForm } from '../components/organisms/forms/ClientForms'
 import { EditProfileForm } from '../components/organisms/ProfilePanel'
 import ScreeningReview from '../components/organisms/screening/ScreeningReview'
 import ScreeningProfile from '../components/organisms/screening/ScreeningProfile'
 import CoachScreeningModal from '../components/organisms/screening/CoachScreeningModal'
 import ClientSubnav from '../components/templates/ClientSubnav'
-import Icon from '../components/atoms/Icon'
 import { RISK_ICON } from '../lib/format'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
@@ -31,7 +30,6 @@ export default function ClientProfilePage() {
 
   // Anthro merges manual entry with screening/body-comp fallbacks.
   const a = resolveAnthro(db, c)
-  const ik = c.intake || {}
   const scr = screeningsFor(db.screenings, c.id)
   const saveClearance = (cl) => commit((d) => {
     const row = d.screenings.find((x) => x.id === scr.complete.id)
@@ -74,7 +72,14 @@ export default function ClientProfilePage() {
           <div className="field"><label>Goal</label><div>{c.goal}</div></div>
           <div className="field"><label>Level</label><div><Tag color={LEVEL[c.level]}>{c.level}</Tag></div></div>
           <div className="field"><label>Status</label><div><Tag color={c.status === 'Active' ? 'green' : 'gray'}>{c.status}</Tag></div></div>
-          <div className="field"><label>Plan tier</label><div><Tag color={c.plan === 'Premium' ? 'purple' : 'gray'}>{c.plan}</Tag></div></div>
+          <div className="field"><label>Plan tier</label>
+            <div className="flex gap" style={{ alignItems: 'center' }}>
+              <Tag color={c.plan === 'Premium' ? 'purple' : 'gray'}>{c.plan}</Tag>
+              <button className="link-btn" onClick={() => openModal(<UpgradePackageForm client={c} />)}>
+                {c.plan === 'Premium' ? 'Change package' : 'Upgrade package'}
+              </button>
+            </div>
+          </div>
           <div className="field"><label>Member since</label><div>{fmtDate(c.joined)}</div></div>
           <div className="field" style={{ margin: 0 }}><label>Notes</label><div className="muted">{c.notes || '—'}</div></div>
         </div>
@@ -103,16 +108,6 @@ export default function ClientProfilePage() {
           <ScreeningProfile screening={scr.complete} trainerView />
         </div>
       )}
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <div className="section-title" style={{ margin: '0 0 12px' }}>Intake &amp; History Snapshot</div>
-        {[['clipboard', 'Initial questionnaire', ik.questionnaire], ['listHeart', 'Medical history', ik.medical], ['danger', 'Injury history', ik.injury], ['fileText', 'Dietary notes', ik.diet]].map(([icn, h, v]) => (
-          <div className="intake-block" key={h}>
-            <div className="i-h"><Icon name={icn} size={15} /> {h}</div>
-            <div className="i-b">{v || '—'}</div>
-          </div>
-        ))}
-      </div>
     </>
   )
 }
