@@ -1,6 +1,8 @@
-// One prescribed set inside an exercise card. Presentational: dynamic fields
-// swap on the parent exercise's intensityType (spec 2.2), values arrive via
-// props and edits are raised through onChange / onRemove / status cycling.
+// One prescribed set inside an exercise card. Presentational and
+// prescription-only: dynamic fields swap on the parent exercise's intensityType
+// (spec 2.2); values arrive via props and edits are raised through
+// onChange / onRemove. Performance/completion is logged in the Today's Workout
+// flow (Start → check-in → Complete → RPE), never here.
 import { targetKg, hrZone, subjectiveEffort, subjectiveTargetBand } from '../../lib/program'
 
 // Exact prescribing scales from NSCA Table 18.10.
@@ -8,8 +10,6 @@ import { targetKg, hrZone, subjectiveEffort, subjectiveTargetBand } from '../../
 // reps-in-reserve column, 0 (maximal) through 10.
 const RPE_SCALE = [10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4, 3.5, 3, 2, 1]
 const RIR_SCALE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-const STATUS_NEXT = { Pending: 'Completed', Completed: 'Failed', Failed: 'Pending' }
-const STATUS_ICON = { Pending: '·', Completed: '✓', Failed: '✗' }
 
 export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispToKg, unitName, onChange, onRemove }) {
   const num = (k) => (e) => onChange(k, e.target.value === '' ? null : +e.target.value)
@@ -29,10 +29,9 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
         : loadBand.low === loadBand.high ? String(toDisp(loadBand.high))
           : `${toDisp(loadBand.low)}–${toDisp(loadBand.high)}`)
       : ''
-  const done = set.status !== 'Pending'
 
   return (
-    <div className={'set-row' + (set.status === 'Completed' ? ' ok' : set.status === 'Failed' ? ' fail' : '')}>
+    <div className="set-row">
       <span className="set-n">{set.setNumber}</span>
 
       {intensityType === '%1RM' && (
@@ -103,21 +102,6 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
       <label className="sf sf-sm"><span>Rest s</span>
         <input type="number" value={set.prescribedRestSeconds ?? ''} aria-label="Rest seconds" onChange={num('prescribedRestSeconds')} /></label>
 
-      <button type="button"
-        className={'set-status s-' + set.status.toLowerCase()}
-        title={`Status: ${set.status} — click to cycle`}
-        aria-label={`Set ${set.setNumber} status ${set.status}`}
-        onClick={() => onChange('status', STATUS_NEXT[set.status])}>
-        {STATUS_ICON[set.status]}
-      </button>
-      {done && (
-        <>
-          <label className="sf sf-sm"><span>Done reps</span>
-            <input type="number" value={set.completedReps ?? ''} aria-label="Completed reps" onChange={num('completedReps')} /></label>
-          <label className="sf sf-sm"><span>Done {unitName()}</span>
-            <input type="number" value={toDisp(set.completedLoadKg) ?? ''} aria-label="Completed load" onChange={kg('completedLoadKg')} /></label>
-        </>
-      )}
       <button className="x" aria-label="Remove set" onClick={onRemove}>×</button>
     </div>
   )

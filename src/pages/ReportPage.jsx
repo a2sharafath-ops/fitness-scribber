@@ -11,7 +11,10 @@ import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { lastNDates, fmtDate, todayISO } from '../lib/dates'
 import { readinessFor, dailySum, acwrSeries, trainingMonotony } from '../lib/calc'
-import { forClient, baseline, latest, movementScore, compare, MOVEMENT_MAX } from '../lib/assessment'
+import { forClient, baseline, latest, movementScore, compare, MOVEMENT_MAX, resolveAnthro } from '../lib/assessment'
+import { RISK_ICON } from '../lib/format'
+import { screeningsFor, redFlags, OUTCOME_META, HHQ_CONDITIONS, HHQ_SYMPTOMS } from '../lib/screening'
+import { questionText, generalYesIds, followupYesIds, DELAY_FLAGS } from '../lib/parq'
 
 const SEV = { High: 'red', Medium: 'yellow', Low: 'gray' }
 
@@ -25,7 +28,7 @@ export default function ReportPage() {
   if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
 
   const r = readinessFor(db, c.id)
-  const a = c.anthro || {}, ik = c.intake || {}
+  const a = resolveAnthro(db, c)
   const intMap = dailySum(db.srpe, c.id, 'tl')
   const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
   const mono = trainingMonotony(last7)
@@ -41,6 +44,24 @@ export default function ReportPage() {
   const bcB = baseline(alist, 'body_comp'), bcL = latest(alist, 'body_comp')
   const bcRows = bcB && bcL && bcB.id !== bcL.id ? compare('body_comp', bcB, bcL) : []
   const goalsL = latest(alist, 'goals')
+
+  // Health history + PAR-Q, drawn from the completed pre-participation screening
+  // (replaces the old free-text intake snapshot — that data now lives in the HHQ).
+  const scr = screeningsFor(db.screenings, c.id).complete
+  const h = scr?.hhq || {}
+  const scrMeta = scr ? OUTCOME_META[scr.outcome] || { label: '—', color: 'gray' } : null
+  const gYes = scr ? generalYesIds(scr.parq?.general) : []
+  const fYes = scr ? followupYesIds(scr.parq?.followup) : []
+  const delays = scr ? DELAY_FLAGS.filter((d) => scr.parq?.delay?.[d.id]) : []
+  const flags = scr ? redFlags(scr) : { major: [], minor: [] }
+  const conditions = HHQ_CONDITIONS.filter((x) => ['past', 'current'].includes(h.conditions?.[x.id]?.status))
+    .map((x) => `${x.label} (${h.conditions[x.id].status})`)
+  const symptoms = HHQ_SYMPTOMS.filter((x) => h.symptoms?.[x.id] === true).map((x) => x.label)
+  const meds = [h.meds?.prescriptions && `Rx: ${h.meds.prescriptions}`, h.meds?.otc && `OTC: ${h.meds.otc}`,
+    h.meds?.supplements && `Supplements: ${h.meds.supplements}`, h.meds?.allergies && `Allergies: ${h.meds.allergies}`].filter(Boolean)
+  const injuries = [h.msk?.currentPain && `Current pain: ${h.msk.currentPain}`, h.msk?.pastInjuries && `Past injuries: ${h.msk.pastInjuries}`,
+    h.msk?.surgeries && `Surgeries: ${h.msk.surgeries}`, h.msk?.romLimits && `ROM limits: ${h.msk.romLimits}`,
+    h.msk?.avoidMovements && `Avoid: ${h.msk.avoidMovements}`].filter(Boolean)
 
   return (
     <>
@@ -70,9 +91,48 @@ export default function ReportPage() {
           <Kpi label="Monotony" value={mono} />
           <Kpi label="Weekly Volume Load" value={fmtVL(wkVL)} />
         </div>
-        <div className="section-title">Intake &amp; history</div>
-        <div className="intake-block"><div className="i-h">🩹 Injury history</div><div className="i-b">{ik.injury || '—'}</div></div>
-        <div className="intake-block"><div className="i-h">🩺 Medical</div><div className="i-b">{ik.medical || '—'}</div></div>
+        <div className="section-title">Health history &amp; PAR-Q</div>
+        {!scr ? (
+          <div className="muted">No pre-participation screening on file.</div>
+        ) : (
+          <>
+            <div className="intake-block">
+              <div className="i-h">📋 PAR-Q+ outcome</div>
+              <div className="i-b">
+                <Tag color={scrMeta.color}>{RISK_ICON[scrMeta.color]} {scr.outcome} — {scrMeta.label}</Tag>
+                <span className="muted" style={{ fontSize: 11, marginLeft: 8 }}>Completed {fmtDate(scr.completedOn)} · valid until {fmtDate(scr.validUntil)}</span>
+                {gYes.length || fYes.length || delays.length ? (
+                  <div style={{ marginTop: 6 }}>
+                    {gYes.map((qid) => <div key={qid}>YES — {questionText(qid)}</div>)}
+                    {fYes.map((qid) => <div key={'f' + qid}>YES — {questionText(qid)}</div>)}
+                    {delays.map((d) => <div key={d.id}>{RISK_ICON.yellow} {d.text}</div>)}
+                  </div>
+                ) : <div className="muted" style={{ marginTop: 4 }}>No questions triggered review.</div>}
+              </div>
+            </div>
+            {(flags.major.length > 0 || flags.minor.length > 0) && (
+              <div className="intake-block">
+                <div className="i-h">🚩 Red flags</div>
+                <div className="i-b">
+                  {flags.major.map((x) => <div key={x}>{RISK_ICON.red} {x}</div>)}
+                  {flags.minor.map((x) => <div key={x}>{RISK_ICON.yellow} {x}</div>)}
+                </div>
+              </div>
+            )}
+            <div className="intake-block">
+              <div className="i-h">🩺 Medical &amp; health history</div>
+              <div className="i-b">
+                <div><strong>Conditions:</strong> {conditions.length ? conditions.join(' · ') : '—'}</div>
+                <div><strong>Current symptoms:</strong> {symptoms.length ? symptoms.join(' · ') : '—'}</div>
+                <div><strong>Medications / allergies:</strong> {meds.length ? meds.join(' · ') : '—'}</div>
+              </div>
+            </div>
+            <div className="intake-block">
+              <div className="i-h">🩹 Injuries, pain &amp; movement</div>
+              <div className="i-b">{injuries.length ? injuries.map((t, i) => <div key={i}>{t}</div>) : '—'}</div>
+            </div>
+          </>
+        )}
         {alist.length > 0 && (
           <>
             <div className="section-title">Assessments</div>

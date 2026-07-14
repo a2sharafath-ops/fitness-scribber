@@ -26,8 +26,7 @@ export function ClientForm({ client }) {
       else
         db.clients.push({
           id: uid(), joined: todayISO(tz), planId: null, monitorOptIn: false,
-          anthro: { age: null, heightCm: null, massKg: null, bodyFatPct: null, leanMassKg: null },
-          intake: { questionnaire: '', medical: '', injury: '', diet: '' }, ...f,
+          anthro: { age: null, heightCm: null, massKg: null, bodyFatPct: null, leanMassKg: null }, ...f,
         })
     })
     closeModal()
@@ -116,7 +115,7 @@ export function InviteAthleteForm({ client }) {
 
 // Package tiers a trainer can put a client on. Static reference config (like
 // LEVELS) — the client's chosen tier lives on the client record.
-export const PACKAGE_TIERS = [
+const PACKAGE_TIERS = [
   { id: 'Standard', blurb: 'Core programming, weekly check-ins & progress tracking.' },
   { id: 'Premium', blurb: 'Everything in Standard plus priority messaging, adaptive AI coaching & detailed reports.' },
 ]

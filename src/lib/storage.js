@@ -18,7 +18,6 @@ function migrate(db) {
   if (db.settings.tz === undefined) db.settings.tz = ''
   ;(db.clients || []).forEach((c) => {
     if (!c.anthro) c.anthro = { age: null, heightCm: null, massKg: null, bodyFatPct: null, leanMassKg: null }
-    if (!c.intake) c.intake = { questionnaire: '', medical: '', injury: '', diet: '' }
     if (c.monitorOptIn === undefined) c.monitorOptIn = false
   })
   // Advanced Programming Platform: maxes/synonyms collections + lazy

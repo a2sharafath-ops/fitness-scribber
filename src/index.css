@@ -147,6 +147,10 @@ canvas{max-width:100%}
 
 /* ---- Today's Workout / player ---- */
 .tw-suggest{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+/* Rest day — no session prescribed; the coach can add one from here */
+.tw-rest{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;flex-wrap:wrap}
+.tw-rest-ic{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:999px;background:var(--surface);color:var(--muted);flex:none}
+.tw-rest-h{font-size:16px;font-weight:800}
 .tw-alt{border-top:1px solid var(--border);padding-top:12px}
 .tw-alt select{padding:7px 10px;font-size:13px}
 .ex-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -748,6 +752,14 @@ canvas{max-width:100%}
 .pw-day-ic.today{color:var(--accent);background:var(--surface)}
 .pw-day-ic.rest{color:#b7b8be}
 .pw-day .dn{font-size:10px;color:#9a9ba2;font-weight:600}
+/* Multi-select client picker (Copy workout to clients) */
+.pick-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.pick-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid rgba(0,0,0,.1);border-radius:10px;padding:10px 12px;cursor:pointer;transition:.15s}
+.pick-row:hover{border-color:var(--accent)}
+.pick-row.on{border-color:var(--accent);background:var(--tint-red)}
+.pick-row input{margin:0;flex:none}
+.pick-name{font-size:13.5px;font-weight:700}
+.pick-warn{font-size:10.5px;font-weight:700;color:var(--accent2);background:var(--tint-amber);padding:2px 8px;border-radius:999px;white-space:nowrap}
 /* Package tier picker (Upgrade package modal) */
 .pkg-tiers{display:flex;flex-direction:column;gap:10px}
 .pkg-tier{display:block;width:100%;text-align:left;background:var(--surface);border:1.5px solid rgba(0,0,0,.1);border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit;transition:.15s}

@@ -24,7 +24,6 @@ export async function fetchAll() {
   // defensive defaults so pure calc never sees undefined nested fields
   db.clients.forEach((c) => {
     if (!c.anthro) c.anthro = { age: null, heightCm: null, massKg: null, bodyFatPct: null, leanMassKg: null }
-    if (!c.intake) c.intake = { questionnaire: '', medical: '', injury: '', diet: '' }
     if (c.monitorOptIn == null) c.monitorOptIn = false
   })
   // Blocks upgrade for rows written before schema_program.sql was applied.

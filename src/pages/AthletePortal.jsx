@@ -17,6 +17,7 @@ import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
 import { screeningsFor, finalizeScreening } from '../lib/screening'
+import { workoutPeaks } from '../lib/program'
 
 export default function AthletePortal() {
   const { user, signOut } = useAuth()
@@ -32,7 +33,7 @@ export default function AthletePortal() {
     const client = clients?.[0]
     if (!client) { setState({ client: null }); return }
     const out = {}
-    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'wearable_tokens', 'workouts', 'assessments', 'screenings']) {
+    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'wearable_tokens', 'workouts', 'assessments', 'screenings', 'maxes']) {
       const { data } = await supabase.from(t).select('*').eq('clientId', client.id)
       out[t] = data || []
     }
@@ -152,7 +153,8 @@ export default function AthletePortal() {
   const finishWorkout = async (w, rpe, minutes) => {
     setBusy(true)
     const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec
-    const { error } = await supabase.from('workouts').upsert({ ...w, durationSec, clientId: client.id, coachId: client.coachId })
+    const wc = { ...w, durationSec, status: 'completed', clientId: client.id, coachId: client.coachId }
+    const { error } = await supabase.from('workouts').upsert(wc)
     if (error) { setBusy(false); alert(error.message); return }
     if (rpe != null) {
       const mins = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
@@ -161,6 +163,16 @@ export default function AthletePortal() {
         date: w.date, sessionId: null, rpe, duration: mins, tl: calcSRPETL(rpe, mins),
       })
       if (e2) alert(e2.message)
+    }
+    // Automatic strength tracking: log any new estimated-1RM peaks from the
+    // performed sets so the coach's workout builder picks up the new baselines.
+    const peaks = workoutPeaks(state.maxes, wc)
+    if (peaks.length) {
+      const { error: e3 } = await supabase.from('maxes').insert(peaks.map((p) => ({
+        id: uid(), clientId: client.id, coachId: client.coachId,
+        exercise: p.exercise, date: w.date, kind: 'e1rm', valueKg: p.valueKg, source: 'auto',
+      })))
+      if (e3) console.error('maxes', e3.message)
     }
     setBusy(false)
     setRpeW(null)

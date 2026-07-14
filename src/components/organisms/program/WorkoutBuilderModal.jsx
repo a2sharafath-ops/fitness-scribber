@@ -17,7 +17,7 @@ import { uid } from '../../../lib/format'
 import { fmtDay, addDays } from '../../../lib/dates'
 import {
   newBlock, defaultBlocks, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
-  applyProgression, trainingMaxKg, hasUnmapped, resetTrainingMaxes, applyCompletionEffects,
+  applyProgression, trainingMaxKg, hasUnmapped, resetTrainingMaxes, programStats,
 } from '../../../lib/program'
 import { toast, confirmDialog } from '../../../lib/toast'
 
@@ -26,15 +26,16 @@ import { toast, confirmDialog } from '../../../lib/toast'
 const fromExisting = (p) => (p?.blocks?.length ? structuredClone(p.blocks) : p?.items?.length ? itemsToBlocks(p.items) : defaultBlocks())
 
 export default function WorkoutBuilderModal({ clientId, date }) {
-  const { db, commit, tz } = useData()
+  const { db, commit } = useData()
   const { closeModal } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
   const [blocks, setBlocks] = useState(() => fromExisting(existing))
   const [notes, setNotes] = useState(existing?.notes || '')
   const [blockStart, setBlockStart] = useState(false)
-  const [step, setStep] = useState('edit') // edit | dates | progress | dictate
+  const [step, setStep] = useState('edit') // edit | dates | progress | dictate | clients
   const [targets, setTargets] = useState(new Set())
+  const [clientTargets, setClientTargets] = useState(new Set())
 
   const client = db.clients.find((c) => c.id === clientId)
   const maxHr = 220 - (client?.anthro?.age || 30)
@@ -52,12 +53,38 @@ export default function WorkoutBuilderModal({ clientId, date }) {
     toast('Copied last session', 'info')
   }
 
-  // Persist a blocks payload onto a target date (used by quick clones & bulk paste).
-  const writeTo = (d, dt, payload) => {
+  // Persist a blocks payload onto a target date (used by quick clones, bulk paste
+  // and the copy-to-clients step). Defaults to this client; pass `cid` to write
+  // the same session onto another client's calendar.
+  const writeTo = (d, dt, payload, cid = clientId) => {
     const items = blocksToItems(payload)
-    const ex = d.prescriptions.find((p) => p.clientId === clientId && p.date === dt)
+    const ex = d.prescriptions.find((p) => p.clientId === cid && p.date === dt)
     if (ex) { ex.blocks = payload; ex.items = items; ex.notes = notes }
-    else d.prescriptions.push({ id: uid(), clientId, date: dt, notes, blocks: payload, items })
+    else d.prescriptions.push({ id: uid(), clientId: cid, date: dt, notes, blocks: payload, items })
+  }
+
+  // ---- Copy this session onto other clients (same date) ----------------------
+  const others = db.clients.filter((x) => x.id !== clientId)
+  const hasSession = (cid) =>
+    db.prescriptions.some((p) => p.clientId === cid && p.date === date && programStats(p).exercises)
+  const toggleClient = (cid) => setClientTargets((s) => {
+    const n = new Set(s); if (n.has(cid)) n.delete(cid); else n.add(cid); return n
+  })
+  const leaveClients = () => { setStep('edit'); setClientTargets(new Set()) }
+  const copyToClients = async () => {
+    const ids = [...clientTargets]
+    if (!ids.length) return
+    const clash = ids.filter(hasSession)
+    if (clash.length && !await confirmDialog({
+      title: 'Overwrite sessions',
+      message: `${clash.length} of the selected client${clash.length === 1 ? ' already has' : 's already have'} a session on ${fmtDay(date)} — overwrite ${clash.length === 1 ? 'it' : 'them'}?`,
+      confirmLabel: 'Overwrite',
+    })) return
+    // Each client gets its own deep copy with brand-new ids; %1RM targets
+    // re-resolve against that client's own Training Max when the card renders.
+    commit((d) => ids.forEach((cid) => writeTo(d, date, cloneBlocksFresh(blocks), cid)))
+    leaveClients()
+    toast(`Copied to ${ids.length} client${ids.length === 1 ? '' : 's'}.`)
   }
 
   // Spec 3.1 — quick clones duplicate the structure onto tomorrow / day after
@@ -104,15 +131,12 @@ export default function WorkoutBuilderModal({ clientId, date }) {
         return
       }
       writeTo(d, date, payload)
-      const p = d.prescriptions.find((q) => q.clientId === clientId && q.date === date)
+      // The builder only prescribes — completion (and any 1RM peaks / failure
+      // flags) is logged through the Today's Workout flow, never on save here.
       if (blockStart) {
         const reset = resetTrainingMaxes(d, clientId, payload, date)
         if (reset.length) events.push(`Training Max reset to rolling Absolute 1RM: ${reset.join(', ')}`)
       }
-      applyCompletionEffects(d, p, tz).forEach((e) => events.push(
-        e.type === 'peak'
-          ? `New Absolute 1RM peak — ${e.exercise}: ${e.valueKg}kg${e.tracked ? ' (assessment auto-updated)' : ''}`
-          : `Failure flag raised — ${e.exercise} (see Concerns)`))
     })
     closeModal()
     toast('Workout saved')
@@ -147,6 +171,44 @@ export default function WorkoutBuilderModal({ clientId, date }) {
           </div>
         </>
       )}
+      {step === 'clients' && (
+        <>
+          <div className="section-title" style={{ marginTop: 0 }}>Copy this workout to other clients</div>
+          <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
+            The same blocks, exercises and sets are prescribed for <strong>{fmtDay(date)}</strong>. Loads copy across as-is;
+            %1RM / RPE / RIR targets re-resolve against each client's own Training Max.
+          </p>
+          {others.length ? (
+            <>
+              <div className="flex gap" style={{ marginBottom: 8 }}>
+                <button type="button" className="link-btn" onClick={() => setClientTargets(new Set(others.map((o) => o.id)))}>Select all</button>
+                <button type="button" className="link-btn" onClick={() => setClientTargets(new Set())}>Clear</button>
+                <div className="nav-spacer" />
+                <span className="muted" style={{ fontSize: 12 }}>{clientTargets.size} selected</span>
+              </div>
+              <div className="pick-list">
+                {others.map((o) => (
+                  <label key={o.id} className={'pick-row' + (clientTargets.has(o.id) ? ' on' : '')}>
+                    <input type="checkbox" checked={clientTargets.has(o.id)} onChange={() => toggleClient(o.id)} />
+                    <span className="pick-name">{o.name}</span>
+                    <span className="muted" style={{ fontSize: 11 }}>{o.level} · {o.status}</span>
+                    <div className="nav-spacer" />
+                    {hasSession(o.id) && <span className="pick-warn">has a session — will overwrite</span>}
+                  </label>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="muted" style={{ fontSize: 13 }}>No other clients yet.</div>
+          )}
+          <div className="flex gap" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
+            <Button variant="ghost" onClick={leaveClients}>Cancel</Button>
+            <Button disabled={!clientTargets.size} onClick={copyToClients}>
+              Copy to {clientTargets.size || ''} client{clientTargets.size === 1 ? '' : 's'}
+            </Button>
+          </div>
+        </>
+      )}
       {step === 'progress' && (
         <ProgressionPanel blocks={blocks} dates={[...targets].sort()} onConfirm={bulkApply} onBack={() => setStep('dates')} />
       )}
@@ -158,7 +220,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
         <>
           <div className="flex gap" style={{ marginBottom: 10, flexWrap: 'wrap' }}>
             <Button variant="ghost" size="sm" onClick={() => quickClone(1)} disabled={!blocks.length}>→ Copy to Tomorrow</Button>
-            <Button variant="ghost" size="sm" onClick={() => quickClone(2)} disabled={!blocks.length}>⇉ Copy to Day After</Button>
+            <Button variant="ghost" size="sm" onClick={() => setStep('clients')} disabled={!blocks.length}>👥 Copy to clients…</Button>
             <Button variant="ghost" size="sm" onClick={() => setStep('dates')} disabled={!blocks.length}>📅 Bulk paste…</Button>
             <Button variant="ghost" size="sm" onClick={() => setStep('dictate')}>🎙️ Dictate</Button>
             <Button variant="ghost" size="sm" onClick={copyLast}>↩ Copy last session</Button>

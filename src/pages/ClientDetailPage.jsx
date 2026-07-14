@@ -11,6 +11,7 @@ import ProfilePanel from '../components/organisms/ProfilePanel'
 import ClientSubnav from '../components/templates/ClientSubnav'
 import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
+import WorkoutBuilderModal from '../components/organisms/program/WorkoutBuilderModal'
 import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
@@ -20,6 +21,7 @@ import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { calcSRPETL } from '../lib/calc'
+import { applyWorkoutStrength } from '../lib/program'
 import { baseOptions } from '../lib/chartSetup'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
@@ -149,14 +151,21 @@ export default function ClientDetailPage() {
   const requestComplete = (w) => setRpeW(w)
   const finishWorkout = (w, rpe, minutes) => {
     const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec
+    const wc = { ...w, durationSec, status: 'completed' }
+    let peaks = []
     commit((d) => {
-      d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), { ...w, durationSec }]
+      d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), wc]
       if (rpe != null) {
         const mins = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
         d.srpe = [...d.srpe, { id: uid(), clientId: c.id, date: w.date, sessionId: null, rpe, duration: mins, tl: calcSRPETL(rpe, mins) }]
       }
+      // Automatic strength tracking: only completed sessions feed the 1RM ledger
+      // that the workout builder reads for Training Max / %1RM targets.
+      peaks = applyWorkoutStrength(d, wc)
     })
     setRpeW(null)
+    peaks.forEach((e, i) => setTimeout(() => toast(
+      `New estimated 1RM — ${e.exercise}: ${e.valueKg} kg${e.tracked ? ' (assessment updated)' : ''}`, 'info', 6000), i * 350))
   }
 
   const baseProg = baselineProgress(forClient(db.assessments, c.id))
@@ -296,6 +305,7 @@ export default function ClientDetailPage() {
             client: c, today, workout: todayW, prescription: todayP, plans: db.plans, exercises: db.exercises,
             units, context: { readiness: rScore, acwr }, restingHr, age, bodyMassKg: c.anthro?.massKg ?? null,
             onStart: startWorkout, onSave: saveWorkout, onComplete: requestComplete, onClear: clearWorkout, onTemplate: saveTemplate,
+            onAddSession: () => openModal(<WorkoutBuilderModal clientId={c.id} date={today} />, 'xl'),
           }} />
         </div>
         <div className="cc-side"><AICoach client={c} /></div>

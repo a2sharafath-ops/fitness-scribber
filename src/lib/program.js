@@ -5,7 +5,6 @@
 // detection, assessment auto-update, context-rich failure flags).
 import { uid } from './format'
 import { addDays } from './dates'
-import { dayMetrics } from './calc'
 
 // ---- Vocabulary -----------------------------------------------------------
 export const BLOCK_TYPES = ['Warm-up', 'Main Lifts', 'Assisted', 'Core/Others', 'Cool-down']
@@ -359,58 +358,40 @@ export function mapExercise(phrase, synonyms, exercises) {
 export const hasUnmapped = (blocks) =>
   (blocks || []).some((b) => b.exercises.some((e) => e.unmapped))
 
-// ---- Completion feedback loop (spec 4) -----------------------------------------
-// Runs inside a commit() mutator against the draft store. For each newly
-// completed set in a 1RM-tracked block: Epley e1RM → new rolling-30-day peak?
-// → append a maxes event + auto-refresh the fitness assessment. For each
-// newly failed set: raise a context-rich concern with live stress markers.
-// Sets are stamped (e1rmApplied / flagged) so re-saving is idempotent.
-export function applyCompletionEffects(draft, prescription, tz) {
-  const events = []
-  const { clientId, date } = prescription
-  for (const b of prescription.blocks || []) {
-    for (const e of b.exercises) {
-      for (const s of e.sets) {
-        if (s.status === 'Completed' && TRACKS_1RM(b) && b.autoCalculate1RM && !s.e1rmApplied) {
-          const est = epley1RM(+s.completedLoadKg || +s.prescribedLoadKg, +s.completedReps || +s.prescribedReps)
-          if (est) {
-            s.e1rmApplied = true
-            const abs = absolute1RM(draft.maxes, clientId, e.exerciseName, date)
-            if (!abs || est > abs) {
-              const tracked = recordLiftMax(draft, clientId, e.exerciseName, est, date, 'auto')
-              events.push({ type: 'peak', exercise: e.exerciseName, valueKg: est, tracked })
-            }
-          }
-        }
-        if (s.status === 'Failed' && !s.flagged) {
-          s.flagged = true
-          draft.concerns.push(failureConcern(draft, prescription, e, s, tz))
-          events.push({ type: 'failure', exercise: e.exerciseName })
-        }
-      }
-    }
+// ---- Strength tracking from a completed session (Start → Complete → RPE) ------
+// Estimated-1RM peaks from a finished "Today's Workout". For every MAIN exercise
+// the athlete marked done and actually loaded, take the Epley e1RM of the
+// performed weight × reps and keep only those beating the client's rolling
+// 30-day Absolute 1RM for that lift. Pure: returns [{ exercise, valueKg }].
+// Warm-up/cool-down and cardio/bodyweight rows are skipped naturally — Epley
+// needs a load, so weightless rows yield null.
+export function workoutPeaks(maxes, workout) {
+  if (!workout?.main) return []
+  const { clientId, date } = workout
+  const peaks = []
+  for (const m of workout.main) {
+    if (!m.done) continue
+    const weight = +(m.doneWeight ?? m.weight) || 0
+    const reps = parseInt(m.doneReps ?? m.reps, 10) || 0
+    const est = epley1RM(weight, reps)
+    if (!est) continue
+    const abs = absolute1RM(maxes, clientId, m.name, date)
+    if (!abs || est > abs) peaks.push({ exercise: m.name, valueKg: est })
   }
-  return events
+  return peaks
 }
 
-// Spec 4.3 — alert block with immediate structural context.
-function failureConcern(draft, p, e, s, tz) {
-  const abs = absolute1RM(draft.maxes, p.clientId, e.exerciseName, p.date)
-  const m = dayMetrics(draft, p.clientId, p.date)
-  const acwrTxt = m.acwr != null
-    ? `${m.acwr} (${m.acwr > 1.5 ? 'Elevated Injury Risk Zone' : m.acwr >= 0.8 && m.acwr <= 1.3 ? 'Sweet spot' : 'Outside sweet spot'})` : 'n/a'
-  const monoTxt = m.monotony ? `${m.monotony} (${m.monotony > 2 ? 'High Risk / Low Variation' : 'Healthy variation'})` : 'n/a'
-  const strainTxt = m.strain > 6000 ? 'Extreme' : m.strain > 3000 ? 'High' : m.strain ? 'Moderate' : 'n/a'
-  const load = +s.completedLoadKg || +s.prescribedLoadKg || 0
-  const doneReps = s.completedReps != null ? ` (failed at ${s.completedReps} reps)` : ''
-  return {
-    id: uid(), clientId: p.clientId, date: p.date, sessionId: null,
-    category: 'Performance', severity: m.acwr > 1.5 || m.monotony > 2 ? 'High' : 'Medium',
-    source: 'System', status: 'Open', resolution: '',
-    text: `Prescription Failure Flag: ${e.exerciseName} — ${load}kg × ${s.prescribedReps} reps${doneReps}. ` +
-      `Current Absolute 1RM baseline: ${abs ? abs + 'kg' : 'not established'}. ` +
-      `Stress markers — ACWR: ${acwrTxt} · Monotony: ${monoTxt} · Strain: ${strainTxt}. tz:${tz || 'local'}`,
-  }
+// Local-store hook: record each new peak into the maxes ledger (and auto-update
+// the assessment for tracked lifts) via recordLiftMax. Runs inside a commit()
+// against the draft store. Returns [{ type:'peak', exercise, valueKg, tracked }]
+// for toasts. This is the ONLY automatic strength path now — the workout builder
+// only prescribes; completion is logged through the session flow.
+export function applyWorkoutStrength(draft, workout) {
+  const { clientId, date } = workout || {}
+  return workoutPeaks(draft.maxes, workout).map((p) => ({
+    type: 'peak', exercise: p.exercise, valueKg: p.valueKg,
+    tracked: recordLiftMax(draft, clientId, p.exercise, p.valueKg, date, 'auto'),
+  }))
 }
 
 // Is this lift on the client's "Current Lifts Performance" watch list?

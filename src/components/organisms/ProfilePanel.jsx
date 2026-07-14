@@ -19,18 +19,15 @@ export function EditProfileForm({ client }) {
   const { closeModal } = useModal()
   // Prefilled with screening/assessment fallbacks; saving persists them.
   const [a, setA] = useState(() => resolveAnthro(db, client))
-  const [ik, setIk] = useState(client.intake || {})
   const numOrNull = (v) => (v === '' ? null : +v)
   const save = () => {
     commit((db) => {
       const c = db.clients.find((x) => x.id === client.id)
       c.anthro = { age: numOrNull(a.age), heightCm: numOrNull(a.heightCm), massKg: numOrNull(a.massKg), bodyFatPct: numOrNull(a.bodyFatPct), leanMassKg: numOrNull(a.leanMassKg) }
-      c.intake = { questionnaire: ik.questionnaire || '', medical: ik.medical || '', injury: ik.injury || '', diet: ik.diet || '' }
     })
     closeModal()
   }
   const an = (k) => (e) => setA({ ...a, [k]: e.target.value })
-  const it = (k) => (e) => setIk({ ...ik, [k]: e.target.value })
   return (
     <ModalShell title="Edit Profile Details" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save</Button></>}>
@@ -44,11 +41,9 @@ export function EditProfileForm({ client }) {
         <Field label="Body fat %"><input type="number" step="0.1" value={a.bodyFatPct ?? ''} onChange={an('bodyFatPct')} /></Field>
         <Field label="Lean mass (kg)"><input type="number" step="0.1" value={a.leanMassKg ?? ''} onChange={an('leanMassKg')} /></Field>
       </div>
-      <div className="section-title" style={{ margin: '6px 0 8px' }}>Intake & History</div>
-      <Field label="Initial questionnaire"><textarea value={ik.questionnaire || ''} onChange={it('questionnaire')} /></Field>
-      <Field label="Medical history"><textarea value={ik.medical || ''} onChange={it('medical')} /></Field>
-      <Field label="Injury history"><textarea value={ik.injury || ''} onChange={it('injury')} /></Field>
-      <Field label="Dietary notes"><textarea value={ik.diet || ''} onChange={it('diet')} /></Field>
+      <p className="muted" style={{ fontSize: 12, margin: '4px 0 0' }}>
+        Medical, injury &amp; lifestyle history live in the health screening (HHQ / PAR-Q) — see the client's profile.
+      </p>
     </ModalShell>
   )
 }

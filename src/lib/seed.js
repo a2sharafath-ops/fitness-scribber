@@ -229,12 +229,12 @@ export function seed() {
 
   // ----- static profile data -----
   const profiles = {
-    [c1]: { anthro: { age: 34, heightCm: 168, massKg: 67.5, bodyFatPct: 24, leanMassKg: 51.3 }, intake: { questionnaire: 'Goal: lose 8kg & tone for wedding in Sept. Trains 3×/week, prefers mornings.', medical: 'Mild exercise-induced asthma (reliever inhaler as needed).', injury: 'Right knee — patellofemoral pain (2023). Avoid deep loaded knee flexion / deep lunges.', diet: '~1700 kcal target, vegetarian, tracks via app. Low protein intake flagged.' } },
-    [c2]: { anthro: { age: 28, heightCm: 182, massKg: 87, bodyFatPct: 14, leanMassKg: 74.8 }, intake: { questionnaire: 'Goal: build maximal strength for spring powerlifting meet. Trains 4×/week.', medical: 'No significant history. Annual physical clear.', injury: 'Lower-back tightness after heavy deadlifts — monitor, no diagnosed pathology.', diet: '~3200 kcal lean-bulk, 180g protein, works with a sports dietitian.' } },
-    [c3]: { anthro: { age: 41, heightCm: 165, massKg: 60, bodyFatPct: 27, leanMassKg: 43.8 }, intake: { questionnaire: 'Goal: general fitness & confidence with strength training. New to lifting.', medical: 'Hypertension — managed with medication. Cleared for moderate exercise.', injury: 'None current. History of right shoulder impingement (resolved).', diet: 'Maintenance, no formal tracking. Building consistent meal routine.' } },
-    [c4]: { anthro: { age: 36, heightCm: 178, massKg: 75, bodyFatPct: 18, leanMassKg: 61.5 }, intake: { questionnaire: 'Goal: marathon preparation. Currently travelling — programme paused.', medical: 'No significant history.', injury: 'Left IT band tightness during high mileage.', diet: 'Endurance-focused, high carbohydrate periodised around long runs.' } },
+    [c1]: { anthro: { age: 34, heightCm: 168, massKg: 67.5, bodyFatPct: 24, leanMassKg: 51.3 } },
+    [c2]: { anthro: { age: 28, heightCm: 182, massKg: 87, bodyFatPct: 14, leanMassKg: 74.8 } },
+    [c3]: { anthro: { age: 41, heightCm: 165, massKg: 60, bodyFatPct: 27, leanMassKg: 43.8 } },
+    [c4]: { anthro: { age: 36, heightCm: 178, massKg: 75, bodyFatPct: 18, leanMassKg: 61.5 } },
   }
-  db.clients.forEach((c) => { const p = profiles[c.id]; if (p) { c.anthro = p.anthro; c.intake = p.intake } })
+  db.clients.forEach((c) => { const p = profiles[c.id]; if (p) { c.anthro = p.anthro } })
 
   db.prescriptions = [
     { id: uid(), clientId: c1, date: d(1), notes: 'Lower body — knee-friendly', items: [
