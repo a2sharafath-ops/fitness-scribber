@@ -448,6 +448,10 @@ canvas{max-width:100%}
 .cal-multi .plan-cell.dis{opacity:.35;cursor:not-allowed}
 .cal-multi .plan-cell.src{border-color:var(--accent2)}
 .cal-check{color:var(--green);font-weight:800;font-size:12px}
+/* Per-day session/rest marker in the bulk-paste calendar */
+.cal-state{display:inline-flex;align-items:center;gap:4px;margin-top:2px;font-size:9px;font-weight:800;letter-spacing:.2px;text-transform:uppercase}
+.cal-state.planned{color:var(--blue)}
+.cal-state.rest{color:#b7b8be}
 .dictate textarea{width:100%;resize:vertical;background:var(--surface);border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:9px 11px;color:inherit;font:inherit;font-size:13px}
 .dictate-preview{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-top:8px}
 .dp-unmapped{color:var(--accent2)}

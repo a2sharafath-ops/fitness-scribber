@@ -63,6 +63,12 @@ export default function WorkoutBuilderModal({ clientId, date }) {
     else d.prescriptions.push({ id: uid(), clientId: cid, date: dt, notes, blocks: payload, items })
   }
 
+  // Days this client already has a real (non-empty) session on — surfaced in the
+  // bulk-paste calendar so the trainer sees planned vs rest days at a glance.
+  const sessionDates = new Set(
+    db.prescriptions.filter((p) => p.clientId === clientId && programStats(p).exercises > 0).map((p) => p.date),
+  )
+
   // ---- Copy this session onto other clients (same date) ----------------------
   const others = db.clients.filter((x) => x.id !== clientId)
   const hasSession = (cid) =>
@@ -163,7 +169,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
       {step === 'dates' && (
         <>
           <div className="section-title" style={{ marginTop: 0 }}>Bulk paste — select target dates</div>
-          <MultiDatePicker selected={targets} minDate={date} sourceDate={date}
+          <MultiDatePicker selected={targets} minDate={date} sourceDate={date} sessionDates={sessionDates}
             onToggle={(dt) => setTargets((s) => { const n = new Set(s); if (n.has(dt)) n.delete(dt); else n.add(dt); return n })} />
           <div className="flex gap" style={{ marginTop: 10, justifyContent: 'flex-end' }}>
             <Button variant="ghost" onClick={() => setStep('edit')}>Cancel</Button>
