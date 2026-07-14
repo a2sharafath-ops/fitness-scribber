@@ -14,6 +14,18 @@ export const addDays = (iso, n) => {
   return x.toISOString().slice(0, 10)
 }
 
+// Whole days from `a` to `b` (negative when b is earlier). Both ISO.
+export const daysBetween = (a, b) =>
+  Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000)
+
+// Inclusive ISO range between two dates, ascending, regardless of argument order.
+export const datesBetween = (a, b) => {
+  const [lo, hi] = a <= b ? [a, b] : [b, a]
+  const out = []
+  for (let d = lo; d <= hi; d = addDays(d, 1)) out.push(d)
+  return out
+}
+
 export const lastNDates = (n, tz) => {
   const t = todayISO(tz)
   const a = []

@@ -3,6 +3,7 @@ import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
 import { DataProvider } from './store/DataContext'
 import { ModalProvider } from './store/ModalContext'
+import { ClipboardProvider } from './store/ClipboardContext'
 import AuthPage from './pages/AuthPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleOnboarding from './pages/RoleOnboarding'
@@ -30,6 +31,7 @@ function Shell() {
   return (
     <DataProvider>
       <ModalProvider>
+        <ClipboardProvider>
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
@@ -51,6 +53,7 @@ function Shell() {
             </Route>
           </Routes>
         </BrowserRouter>
+        </ClipboardProvider>
       </ModalProvider>
     </DataProvider>
   )
