@@ -42,7 +42,11 @@ export default function AssessmentsPage() {
   const addType = (type) => openModal(assessmentForm(type, id))
   const del = async (aid) => {
     if (!await confirmDialog({ title: 'Delete assessment', message: 'Delete this assessment record?', confirmLabel: 'Delete', danger: true })) return
-    commit((d) => { d.assessments = d.assessments.filter((a) => a.id !== aid) })
+    commit((d) => {
+      d.assessments = d.assessments.filter((a) => a.id !== aid)
+      // Remove any 1RM-ledger entries this assessment fed into the builder.
+      d.maxes = (d.maxes || []).filter((m) => m.assessmentId !== aid)
+    })
     toast('Assessment deleted')
   }
 

@@ -1,5 +1,6 @@
 import { addDays } from './dates'
 import { screeningsFor } from './screening'
+import { epley1RM } from './program'
 
 // Pure helpers for the Assessment module — no React, no I/O.
 // One record shape: { id, clientId, type, date, phase, data, notes }.
@@ -28,6 +29,17 @@ export const MOVEMENT_PATTERNS = ['squat', 'hinge', 'lunge', 'push', 'pull']
 export const MOVEMENT_MAX = MOVEMENT_PATTERNS.length * 3
 
 const num = (v) => (v == null || v === '' || Number.isNaN(+v) ? null : +v)
+
+// Estimated 1RM for a strength-test entry. A single rep is treated as a true
+// 1RM (returns the weight); multi-rep tests use the Epley estimate — the same
+// formula the completion flow uses — so assessment and training 1RMs are
+// computed identically. Returns null for an empty/invalid weight.
+export function estOneRepMax(weightKg, reps) {
+  const w = num(weightKg), r = num(reps)
+  if (!w || w <= 0) return null
+  if (!r || r <= 1) return +w.toFixed(1)
+  return epley1RM(w, r)
+}
 const byDateDesc = (a, b) => (b.date || '').localeCompare(a.date || '')
 
 export const forClient = (assessments, clientId) =>

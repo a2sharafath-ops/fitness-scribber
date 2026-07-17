@@ -103,13 +103,29 @@ function referenceMaxKg(maxes, clientId, refTerm, date) {
   return e1.length ? Math.max(...e1) : null
 }
 
-// Training Max for an exercise. Prefers the lift's own 1RM history; when there
-// is none, falls back to the imported library's %-of-reference relationship
-// against the client's reference-lift max (e.g. RDL ≈ 75% of their Squat).
-// Returns { kg, source: 'direct'|'derived'|null, relTo, relPct, refKg }.
+// Latest fitness-assessment 1RM for a lift, of any age (assessment-sourced e1RM
+// rows). Used as a fallback when there's no recent training history, so a
+// baseline or reassessment always feeds the builder even months later.
+function assessmentMaxKg(maxes, clientId, exercise) {
+  const row = (maxes || [])
+    .filter((m) => m.clientId === clientId && m.kind === 'e1rm' && m.source === 'assessment' &&
+      String(m.exercise).toLowerCase() === String(exercise).toLowerCase())
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0]
+  return row ? +row.valueKg : null
+}
+
+// Training Max for an exercise, in priority order:
+//   1. direct 1RM history — a 'tm' checkpoint or the rolling 30-day e1RM peak
+//      (this is where recent training PRs and recent assessments land);
+//   2. the latest fitness-assessment 1RM of any age (baseline / reassessment);
+//   3. the imported library's %-of-reference relationship (e.g. RDL ≈ 75% of
+//      Squat) against the client's reference-lift max.
+// Returns { kg, source: 'direct'|'assessment'|'derived'|null, relTo, relPct, refKg }.
 export function resolveTrainingMax(db, clientId, name, date) {
   const direct = trainingMaxKg(db.maxes, clientId, name, date)
   if (direct) return { kg: direct, source: 'direct' }
+  const asr = assessmentMaxKg(db.maxes, clientId, name)
+  if (asr) return { kg: asr, source: 'assessment' }
   const rel = exerciseRelation(db, name)
   if (rel) {
     const refKg = referenceMaxKg(db.maxes, clientId, rel.relTo, date)

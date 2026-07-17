@@ -7,7 +7,7 @@ import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
-import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta } from '../../../lib/assessment'
+import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax } from '../../../lib/assessment'
 import Icon from '../../atoms/Icon'
 
 const numOrNull = (v) => (v === '' || v == null || Number.isNaN(+v) ? null : +v)
@@ -111,35 +111,65 @@ export function BodyCompForm({ clientId }) {
 }
 
 // ---- Fitness (strength lifts + endurance + mobility + posture) ----
+// The strength section is a 1RM-estimation surface: each lift takes a test
+// weight × reps, from which we compute an estimated 1RM (Epley; 1 rep = a true
+// 1RM). On save those estimates are written into the client's 1RM ledger tagged
+// `source:'assessment'`, so the workout builder's Training Max resolves from
+// them (recent training PRs still win; see resolveTrainingMax).
 export function FitnessAssessmentForm({ clientId }) {
+  const { db, commit } = useData()
   const { closeModal } = useModal()
   const [f, setF] = useState({ date: todayISO(), phase: 'baseline', notes: '', enduranceTest: '', enduranceResult: '', posture: '' })
-  const [strength, setStrength] = useState([{ lift: '', valueKg: '' }])
+  const [strength, setStrength] = useState([{ lift: '', weightKg: '', reps: '1' }])
   const [mobility, setMobility] = useState([{ joint: '', value: '', side: '' }])
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const updS = (i, k, v) => setStrength(strength.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
   const updM = (i, k, v) => setMobility(mobility.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
+  // Only rows with a lift name and a valid estimated 1RM are kept.
+  const strengthOut = () => strength
+    .map((r) => ({ lift: r.lift.trim(), weightKg: numOrNull(r.weightKg), reps: numOrNull(r.reps) || 1, valueKg: estOneRepMax(r.weightKg, r.reps) }))
+    .filter((r) => r.lift && r.valueKg != null)
   const data = () => ({
-    strength: strength.filter((r) => r.lift.trim()).map((r) => ({ lift: r.lift.trim(), valueKg: numOrNull(r.valueKg) })),
+    strength: strengthOut(),
     endurance: f.enduranceTest.trim() ? { test: f.enduranceTest.trim(), result: f.enduranceResult.trim() } : null,
     mobility: mobility.filter((r) => r.joint.trim()).map((r) => ({ joint: r.joint.trim(), value: r.value.trim(), side: r.side.trim() })),
     posture: f.posture.trim(),
   })
-  const save = useSave(clientId, 'fitness', data)
+  const save = () => {
+    const lifts = strengthOut()
+    commit((d) => {
+      const aid = uid()
+      d.assessments.push({ id: aid, clientId, type: 'fitness', date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: data() })
+      // Connect into the 1RM ledger — one e1rm event per lift, linked to this
+      // assessment (removed again if the assessment is deleted).
+      for (const s of lifts) {
+        d.maxes.push({ id: uid(), clientId, exercise: s.lift, date: f.date, kind: 'e1rm', valueKg: s.valueKg, source: 'assessment', assessmentId: aid })
+      }
+    })
+    closeModal()
+  }
   return (
     <ModalShell title={<><Icon name="dumbbellAlt" size={16} /> Fitness assessment</>} onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
+      <datalist id="fitnessLiftList">{db.exercises.map((e) => <option key={e.id} value={e.name} />)}</datalist>
 
-      <div className="section-title" style={{ margin: '4px 0 6px', fontSize: 13 }}>Strength</div>
-      {strength.map((r, i) => (
-        <div className="asf-row" key={i}>
-          <input value={r.lift} onChange={(e) => updS(i, 'lift', e.target.value)} placeholder="Lift / test (e.g. Back Squat 5RM)" aria-label="Lift" />
-          <input type="number" step="0.5" value={r.valueKg} onChange={(e) => updS(i, 'valueKg', e.target.value)} placeholder="kg" aria-label="Value kg" />
-          <button className="x" aria-label="Remove lift" onClick={() => setStrength(strength.filter((_, j) => j !== i))}>×</button>
-        </div>
-      ))}
-      <Button variant="ghost" size="sm" onClick={() => setStrength([...strength, { lift: '', valueKg: '' }])}>＋ Add lift</Button>
+      <div className="section-title" style={{ margin: '4px 0 2px', fontSize: 13 }}>Strength — estimated 1RM</div>
+      <p className="muted" style={{ fontSize: 11.5, margin: '0 0 8px' }}>Enter a test weight and reps; we estimate the 1RM (1 rep = a true 1RM). These feed the workout builder's Training Max.</p>
+      <div className="asf-1rm-head"><span>Lift</span><span>Weight (kg)</span><span>Reps</span><span>Est. 1RM</span><span /></div>
+      {strength.map((r, i) => {
+        const est = estOneRepMax(r.weightKg, r.reps)
+        return (
+          <div className="asf-1rm-row" key={i}>
+            <input list="fitnessLiftList" value={r.lift} onChange={(e) => updS(i, 'lift', e.target.value)} placeholder="e.g. Barbell Back Squat" aria-label="Lift" />
+            <input type="number" step="0.5" min="0" value={r.weightKg} onChange={(e) => updS(i, 'weightKg', e.target.value)} placeholder="kg" aria-label="Test weight kg" />
+            <input type="number" step="1" min="1" value={r.reps} onChange={(e) => updS(i, 'reps', e.target.value)} placeholder="1" aria-label="Reps" />
+            <span className="asf-1rm-est">{est != null ? `${est} kg` : '—'}</span>
+            <button className="x" aria-label="Remove lift" onClick={() => setStrength(strength.filter((_, j) => j !== i))}>×</button>
+          </div>
+        )
+      })}
+      <Button variant="ghost" size="sm" onClick={() => setStrength([...strength, { lift: '', weightKg: '', reps: '1' }])}>＋ Add lift</Button>
 
       <div className="section-title" style={{ margin: '12px 0 6px', fontSize: 13 }}>Endurance</div>
       <div className="row2">

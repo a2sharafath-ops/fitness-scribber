@@ -53,9 +53,12 @@ export default function ExerciseCard({
           <span className="ex-tm muted"
             title={tmInfo?.source === 'derived'
               ? `Derived: ${tmInfo.relPct}% of ${tmInfo.relTo} (${toDisp(tmInfo.refKg)} ${unitName()}). Log this lift's own 1RM to override.`
-              : 'Training Max used for %1RM / RPE / RIR load targets'}>
+              : tmInfo?.source === 'assessment'
+                ? 'From the latest fitness assessment. A recent training PR will override it.'
+                : 'Training Max used for %1RM / RPE / RIR load targets'}>
             TM {tmKg ? `${toDisp(tmKg)} ${unitName()}` : '— none yet'}
             {tmInfo?.source === 'derived' && <span className="ex-tm-rel"> · {tmInfo.relPct}% of {tmInfo.relTo}</span>}
+            {tmInfo?.source === 'assessment' && <span className="ex-tm-rel"> · assessment</span>}
           </span>
         )}
         <button className="x" aria-label="Remove exercise" onClick={onRemove}>×</button>

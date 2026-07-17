@@ -369,6 +369,11 @@ canvas{max-width:100%}
 .asr-pain{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
 .asf-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;margin-bottom:6px}
 .asf-row3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:6px}
+/* Strength → estimated-1RM grid (fitness assessment) */
+.asf-1rm-head,.asf-1rm-row{display:grid;grid-template-columns:1fr 92px 64px 78px auto;gap:8px;align-items:center}
+.asf-1rm-row{margin-bottom:6px}
+.asf-1rm-head{font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#9a9ba2;margin-bottom:4px}
+.asf-1rm-est{font-size:13px;font-weight:800;color:var(--accent2);text-align:right;white-space:nowrap}
 .cmp{margin:10px 0}
 .cmp-head,.cmp-row{display:grid;grid-template-columns:1.3fr .8fr 18px .8fr .9fr;gap:6px;align-items:center}
 .cmp-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:6px}
