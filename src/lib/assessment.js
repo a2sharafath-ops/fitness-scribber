@@ -98,6 +98,43 @@ export function summarize(rec) {
   }
 }
 
+// Full breakdown of one record's data as [{ label, value }] rows, for the
+// expandable detail view on each assessment card.
+export function describe(rec) {
+  const d = rec?.data || {}
+  const kv = (pairs) => pairs.filter(([, v]) => v != null && v !== '').map(([label, value]) => ({ label, value: String(value) }))
+  switch (rec?.type) {
+    case 'fitness': {
+      const out = (d.strength || []).map((s) => ({
+        label: s.lift,
+        value: s.valueKg != null ? `${s.valueKg} kg 1RM${s.weightKg != null && s.reps ? ` (${s.weightKg}×${s.reps})` : ''}` : '—',
+      }))
+      if (d.endurance?.test) out.push({ label: 'Endurance', value: `${d.endurance.test}${d.endurance.result ? ' — ' + d.endurance.result : ''}` })
+      ;(d.mobility || []).forEach((m) => out.push({ label: `Mobility · ${m.joint}`, value: [m.value, m.side].filter(Boolean).join(' · ') || '—' }))
+      if (d.posture) out.push({ label: 'Posture', value: d.posture })
+      return out
+    }
+    case 'movement':
+      return (d.screens || []).map((s) => ({ label: s.pattern[0].toUpperCase() + s.pattern.slice(1), value: `${s.score}/3${s.pain ? ' · pain' : ''}` }))
+    case 'body_comp':
+      return kv([['Method', d.method], ['Body mass', d.massKg != null ? d.massKg + ' kg' : null], ['Body fat', d.bodyFatPct != null ? d.bodyFatPct + '%' : null],
+        ['Lean mass', d.leanMassKg != null ? d.leanMassKg + ' kg' : null], ['Skeletal muscle', d.skeletalMuscleKg != null ? d.skeletalMuscleKg + ' kg' : null],
+        ['Visceral fat', d.visceralFat], ['Total body water', d.hydrationL != null ? d.hydrationL + ' L' : null]])
+    case 'pain':
+      return (d.sites || []).map((s) => ({ label: s.area, value: `${s.severity}/10${s.aggravating ? ' · ' + s.aggravating : ''}${s.limitation ? ' · ' + s.limitation : ''}` }))
+    case 'lifestyle':
+      return kv([['Sleep', d.sleepHrs != null ? `${d.sleepHrs} h · quality ${d.sleepQuality}/7` : null], ['Stress', d.stress != null ? `${d.stress}/7` : null],
+        ['Hydration', d.hydrationL != null ? d.hydrationL + ' L' : null], ['Activity', d.activityLevel], ['Daily steps', d.steps]])
+    case 'goals':
+      return [
+        ...(d.shortTerm || []).map((g) => ({ label: 'Short-term', value: `${g.text}${g.target ? ' (' + g.target + ')' : ''}${g.by ? ' by ' + g.by : ''}` })),
+        ...(d.longTerm || []).map((g) => ({ label: 'Long-term', value: `${g.text}${g.target ? ' (' + g.target + ')' : ''}${g.by ? ' by ' + g.by : ''}` })),
+        ...(d.why ? [{ label: 'Why', value: d.why }] : []),
+      ]
+    default: return []
+  }
+}
+
 const row = (label, from, to, dir = 'up', unit = '') => {
   const f = num(from), t = num(to)
   const delta = f != null && t != null ? +(t - f).toFixed(1) : null

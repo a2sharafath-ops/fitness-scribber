@@ -48,9 +48,9 @@ function useSave(clientId, type, buildData, extra, record) {
 }
 
 // ---- Movement screen (squat / hinge / lunge / push / pull, 0–3 + pain) ----
-export function MovementScreenForm({ clientId, record }) {
+export function MovementScreenForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '' })
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '' })
   const [screens, setScreens] = useState(record?.data?.screens?.length ? record.data.screens.map((s) => ({ ...s })) : MOVEMENT_PATTERNS.map((pattern) => ({ pattern, score: 2, pain: false })))
   const upd = (i, k, v) => setScreens(screens.map((s, j) => (j === i ? { ...s, [k]: v } : s)))
   const save = useSave(clientId, 'movement', () => ({ screens }), undefined, record)
@@ -74,11 +74,11 @@ export function MovementScreenForm({ clientId, record }) {
 }
 
 // ---- Body composition (InBody / BIA / calipers) ----
-export function BodyCompForm({ clientId, record }) {
+export function BodyCompForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const d0 = record?.data || {}
   const [f, setF] = useState({
-    date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '', method: d0.method || 'InBody',
+    date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', method: d0.method || 'InBody',
     massKg: d0.massKg ?? '', bodyFatPct: d0.bodyFatPct ?? '', leanMassKg: d0.leanMassKg ?? '',
     skeletalMuscleKg: d0.skeletalMuscleKg ?? '', visceralFat: d0.visceralFat ?? '', hydrationL: d0.hydrationL ?? '',
   })
@@ -126,12 +126,12 @@ export function BodyCompForm({ clientId, record }) {
 // 1RM). The estimates live on the assessment record itself; the workout
 // builder reads them straight from there (resolveTrainingMax → assessmentMaxKg),
 // so nothing extra needs persisting and recent training PRs still win.
-export function FitnessAssessmentForm({ clientId, record }) {
+export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
   const { db } = useData()
   const { closeModal } = useModal()
   const d0 = record?.data || {}
   const [f, setF] = useState({
-    date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '',
+    date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '',
     enduranceTest: d0.endurance?.test || '', enduranceResult: d0.endurance?.result || '', posture: d0.posture || '',
   })
   const [strength, setStrength] = useState(d0.strength?.length
@@ -206,9 +206,9 @@ export function FitnessAssessmentForm({ clientId, record }) {
 }
 
 // ---- Pain (sites: area / severity 0–10 / aggravating movement) ----
-export function PainAssessmentForm({ clientId, record }) {
+export function PainAssessmentForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'reassessment', notes: record?.notes || '' })
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'reassessment', notes: record?.notes || '' })
   const [sites, setSites] = useState(record?.data?.sites?.length
     ? record.data.sites.map((s) => ({ area: s.area || '', severity: s.severity ?? 3, aggravating: s.aggravating || '', limitation: s.limitation || '' }))
     : [{ area: '', severity: 3, aggravating: '', limitation: '' }])
@@ -239,10 +239,10 @@ export function PainAssessmentForm({ clientId, record }) {
 }
 
 // ---- Lifestyle (sleep / stress / hydration / activity) ----
-export function LifestyleForm({ clientId, record }) {
+export function LifestyleForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const d0 = record?.data || {}
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '', sleepHrs: d0.sleepHrs ?? '', sleepQuality: d0.sleepQuality ?? 4, stress: d0.stress ?? 4, hydrationL: d0.hydrationL ?? '', activityLevel: d0.activityLevel || 'Moderate', steps: d0.steps ?? '' })
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', sleepHrs: d0.sleepHrs ?? '', sleepQuality: d0.sleepQuality ?? 4, stress: d0.stress ?? 4, hydrationL: d0.hydrationL ?? '', activityLevel: d0.activityLevel || 'Moderate', steps: d0.steps ?? '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const sl = (k) => (v) => setF({ ...f, [k]: v })
   const data = () => ({ sleepHrs: numOrNull(f.sleepHrs), sleepQuality: +f.sleepQuality, stress: +f.stress, hydrationL: numOrNull(f.hydrationL), activityLevel: f.activityLevel, steps: numOrNull(f.steps) })
@@ -267,11 +267,11 @@ export function LifestyleForm({ clientId, record }) {
 }
 
 // ---- Goals (short-term & long-term) ----
-export function GoalForm({ clientId, record }) {
+export function GoalForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const d0 = record?.data || {}
   const mapGoals = (l) => (l?.length ? l.map((r) => ({ text: r.text || '', target: r.target || '', by: r.by || '' })) : [{ text: '', target: '', by: '' }])
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '', why: d0.why || '' })
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', why: d0.why || '' })
   const [shortTerm, setShort] = useState(mapGoals(d0.shortTerm))
   const [longTerm, setLong] = useState(mapGoals(d0.longTerm))
   const updList = (setter, list) => (i, k, v) => setter(list.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
@@ -304,18 +304,19 @@ export function GoalForm({ clientId, record }) {
 }
 
 const FORMS = {
-  fitness: (clientId, record) => <FitnessAssessmentForm clientId={clientId} record={record} />,
-  movement: (clientId, record) => <MovementScreenForm clientId={clientId} record={record} />,
-  body_comp: (clientId, record) => <BodyCompForm clientId={clientId} record={record} />,
-  pain: (clientId, record) => <PainAssessmentForm clientId={clientId} record={record} />,
-  lifestyle: (clientId, record) => <LifestyleForm clientId={clientId} record={record} />,
-  goals: (clientId, record) => <GoalForm clientId={clientId} record={record} />,
+  fitness: (clientId, record, defaultPhase) => <FitnessAssessmentForm clientId={clientId} record={record} defaultPhase={defaultPhase} />,
+  movement: (clientId, record, defaultPhase) => <MovementScreenForm clientId={clientId} record={record} defaultPhase={defaultPhase} />,
+  body_comp: (clientId, record, defaultPhase) => <BodyCompForm clientId={clientId} record={record} defaultPhase={defaultPhase} />,
+  pain: (clientId, record, defaultPhase) => <PainAssessmentForm clientId={clientId} record={record} defaultPhase={defaultPhase} />,
+  lifestyle: (clientId, record, defaultPhase) => <LifestyleForm clientId={clientId} record={record} defaultPhase={defaultPhase} />,
+  goals: (clientId, record, defaultPhase) => <GoalForm clientId={clientId} record={record} defaultPhase={defaultPhase} />,
 }
 
 // Element factory for one assessment type. Pass `record` to edit it in place;
-// omit it to record a new one.
+// omit it to record a new one. `defaultPhase` presets baseline vs reassessment
+// for a fresh record (e.g. the per-card "Add reassessment" button).
 // eslint-disable-next-line react/only-export-components
-export const assessmentForm = (type, clientId, record) => FORMS[type]?.(clientId, record) || null
+export const assessmentForm = (type, clientId, record, defaultPhase) => FORMS[type]?.(clientId, record, defaultPhase) || null
 
 // Launcher: pick which assessment to record.
 export function NewAssessmentMenu({ clientId }) {

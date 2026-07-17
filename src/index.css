@@ -402,7 +402,19 @@ canvas{max-width:100%}
 .cmp-arrow{color:var(--muted);text-align:center}
 .cmp-delta{font-weight:700;text-align:right}
 .asr-hist{margin-top:12px;border-top:1px solid var(--border);padding-top:8px}
+.asr-hist-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
 .asr-hist-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+/* Expandable record + its data detail */
+.asr-rec{border-radius:8px}
+.asr-rec .asr-hist-row{cursor:pointer;padding:6px 6px;border-radius:8px}
+.asr-rec .asr-hist-row:hover{background:var(--surface2)}
+.asr-rec.open .asr-hist-row{background:var(--surface2)}
+.asr-caret{font-size:10px;color:var(--muted);flex:none;width:10px}
+.asr-detail{display:grid;grid-template-columns:1fr;gap:2px;padding:6px 6px 10px 24px}
+.asr-kv{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--border)}
+.asr-kv:last-child{border-bottom:none}
+.asr-k{color:var(--muted);font-weight:600}
+.asr-v{font-weight:600;text-align:right}
 .asp-site{border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
 .ahr-date{color:var(--muted);white-space:nowrap}
 .ahr-sum{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
