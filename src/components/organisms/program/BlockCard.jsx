@@ -13,7 +13,7 @@ const BLOCK_HINT = {
 }
 
 export default function BlockCard({
-  block, exercises, exListId, tmInfo, maxHr,
+  block, exercises, tmInfo, maxHr,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
 }) {
@@ -44,7 +44,7 @@ export default function BlockCard({
       {block.exercises.map((e, ei) => {
         const info = tmInfo(e.exerciseName)
         return (
-          <ExerciseCard key={e.exerciseId} ex={e} exercises={exercises} exListId={exListId}
+          <ExerciseCard key={e.exerciseId} ex={e} exercises={exercises}
             tmKg={info.kg} tmInfo={info} maxHr={maxHr}
             toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
             onChange={updEx(ei)} onRemove={rmEx(ei)} />

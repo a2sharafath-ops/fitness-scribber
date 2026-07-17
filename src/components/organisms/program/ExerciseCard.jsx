@@ -3,13 +3,15 @@
 // index render with an orange border and force a manual library selection
 // before the builder allows a save (spec 5.2). Presentational only.
 import SetRow from '../../molecules/SetRow'
+import Autocomplete from '../../molecules/Autocomplete'
 import { INTENSITY_TYPES, SUPERSET_GROUPS, newSet } from '../../../lib/program'
 
 export default function ExerciseCard({
-  ex, exercises, exListId, tmKg, tmInfo, maxHr,
+  ex, exercises, tmKg, tmInfo, maxHr,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
 }) {
+  const liftNames = [...exercises.map((e) => e.name)].sort((a, b) => a.localeCompare(b))
   // Set 1 acts as the template row: edits to its prescription fields
   // auto-fill every later set that hasn't been edited individually
   // (copy-paste ergonomics). Touching a lower set opts it out.
@@ -33,13 +35,13 @@ export default function ExerciseCard({
   return (
     <div className={'ex-card' + (ex.unmapped ? ' ex-unmapped' : '')}>
       <div className="ex-head">
-        <input
-          list={exListId}
-          className="presc-ex"
+        <Autocomplete
+          className="ac-grow" inputClassName="presc-ex"
           value={ex.exerciseName}
+          options={liftNames}
           placeholder="Exercise name"
-          aria-label="Exercise name"
-          onChange={(e) => onChange({ exerciseName: e.target.value, unmapped: false, exerciseDbRef: null })}
+          ariaLabel="Exercise name"
+          onChange={(v) => onChange({ exerciseName: v, unmapped: false, exerciseDbRef: null })}
         />
         <label className="sf"><span>Intensity</span>
           <select value={ex.intensityType} aria-label="Intensity metric" onChange={(e) => onChange({ intensityType: e.target.value })}>

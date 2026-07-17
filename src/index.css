@@ -374,6 +374,13 @@ canvas{max-width:100%}
 .asf-1rm-row{margin-bottom:6px}
 .asf-1rm-head{font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#9a9ba2;margin-bottom:4px}
 .asf-1rm-est{font-size:13px;font-weight:800;color:var(--accent2);text-align:right;white-space:nowrap}
+/* Exercise-library autocomplete (filtered suggestions dropdown) */
+.ac-wrap{position:relative;min-width:0}
+.ac-wrap input{width:100%}
+.ac-grow{flex:1;min-width:160px}
+.ac-list{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:60;margin:0;padding:4px;list-style:none;max-height:220px;overflow:auto;background:var(--surface);border:1px solid rgba(0,0,0,.12);border-radius:10px;box-shadow:0 10px 28px rgba(21,22,26,.18)}
+.ac-opt{padding:7px 9px;border-radius:7px;font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-opt.hi{background:var(--tint-red);color:var(--accent)}
 .cmp{margin:10px 0}
 .cmp-head,.cmp-row{display:grid;grid-template-columns:1.3fr .8fr 18px .8fr .9fr;gap:6px;align-items:center}
 .cmp-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:6px}

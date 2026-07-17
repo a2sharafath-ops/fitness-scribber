@@ -9,6 +9,7 @@ import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
 import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax } from '../../../lib/assessment'
 import Icon from '../../atoms/Icon'
+import Autocomplete from '../../molecules/Autocomplete'
 
 const numOrNull = (v) => (v === '' || v == null || Number.isNaN(+v) ? null : +v)
 
@@ -122,6 +123,8 @@ export function FitnessAssessmentForm({ clientId }) {
   const [f, setF] = useState({ date: todayISO(), phase: 'baseline', notes: '', enduranceTest: '', enduranceResult: '', posture: '' })
   const [strength, setStrength] = useState([{ lift: '', weightKg: '', reps: '1' }])
   const [mobility, setMobility] = useState([{ joint: '', value: '', side: '' }])
+  // Exercise-library names for the lift autocomplete, alphabetical.
+  const liftNames = [...db.exercises.map((e) => e.name)].sort((a, b) => a.localeCompare(b))
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const updS = (i, k, v) => setStrength(strength.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
   const updM = (i, k, v) => setMobility(mobility.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
@@ -152,7 +155,6 @@ export function FitnessAssessmentForm({ clientId }) {
     <ModalShell title={<><Icon name="dumbbellAlt" size={16} /> Fitness assessment</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
-      <datalist id="fitnessLiftList">{db.exercises.map((e) => <option key={e.id} value={e.name} />)}</datalist>
 
       <div className="section-title" style={{ margin: '4px 0 2px', fontSize: 13 }}>Strength — estimated 1RM</div>
       <p className="muted" style={{ fontSize: 11.5, margin: '0 0 8px' }}>Enter a test weight and reps; we estimate the 1RM (1 rep = a true 1RM). These feed the workout builder's Training Max.</p>
@@ -161,7 +163,8 @@ export function FitnessAssessmentForm({ clientId }) {
         const est = estOneRepMax(r.weightKg, r.reps)
         return (
           <div className="asf-1rm-row" key={i}>
-            <input list="fitnessLiftList" value={r.lift} onChange={(e) => updS(i, 'lift', e.target.value)} placeholder="e.g. Barbell Back Squat" aria-label="Lift" />
+            <Autocomplete value={r.lift} onChange={(v) => updS(i, 'lift', v)} options={liftNames}
+              placeholder="e.g. Barbell Back Squat" ariaLabel="Lift" />
             <input type="number" step="0.5" min="0" value={r.weightKg} onChange={(e) => updS(i, 'weightKg', e.target.value)} placeholder="kg" aria-label="Test weight kg" />
             <input type="number" step="1" min="1" value={r.reps} onChange={(e) => updS(i, 'reps', e.target.value)} placeholder="1" aria-label="Reps" />
             <span className="asf-1rm-est">{est != null ? `${est} kg` : '—'}</span>

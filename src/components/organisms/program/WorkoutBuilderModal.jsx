@@ -167,7 +167,6 @@ export default function WorkoutBuilderModal({ clientId, date }) {
         <Button variant="ghost" onClick={closeModal}>Cancel</Button>
         <Button onClick={save}>Save Workout</Button>
       </>}>
-      <datalist id="progExList">{db.exercises.map((e) => <option key={e.id} value={e.name} />)}</datalist>
 
       {step === 'dates' && (
         <>
@@ -236,7 +235,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
           </div>
 
           {blocks.map((b, bi) => (
-            <BlockCard key={b.blockId} block={b} exercises={db.exercises} exListId="progExList"
+            <BlockCard key={b.blockId} block={b} exercises={db.exercises}
               tmInfo={tmInfo} maxHr={maxHr}
               toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
               onChange={updBlock(bi)} onRemove={rmBlock(bi)} />
