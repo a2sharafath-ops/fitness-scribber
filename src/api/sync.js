@@ -11,11 +11,14 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 
 export async function fetchAll() {
   const db = {}
+  const loadIssues = []
   for (const t of TABLES) {
     const { data, error } = await supabase.from(t).select('*')
     // Be resilient to a table that hasn't been migrated yet (e.g. workouts before
-    // schema_workouts.sql is applied) — fall back to empty instead of breaking load.
-    if (error) { console.warn('fetch', t, 'failed:', error.message); db[t] = []; continue }
+    // schema_workouts.sql is applied) — fall back to empty instead of breaking load,
+    // but record the failure so the UI can surface it (a missing table means those
+    // records can never save, which must not be silent).
+    if (error) { console.warn('fetch', t, 'failed:', error.message); db[t] = []; loadIssues.push({ table: t, message: error.message }); continue }
     db[t] = stripOwner(data || [])
   }
   const { data: s } = await supabase.from('settings').select('*').maybeSingle()
@@ -28,6 +31,7 @@ export async function fetchAll() {
   })
   // Blocks upgrade for rows written before schema_program.sql was applied.
   ensureProgramShape(db)
+  if (loadIssues.length) db._loadIssues = loadIssues
   return db
 }
 

@@ -378,6 +378,10 @@ canvas{max-width:100%}
 .ac-wrap{position:relative;min-width:0}
 .ac-wrap input{width:100%}
 .ac-grow{flex:1;min-width:160px}
+/* Missing-Supabase-table warning banner */
+.schema-warn{display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:11px 14px;background:var(--tint-red);border:1px solid var(--accent);border-radius:12px;font-size:13px;color:var(--text)}
+.schema-warn-ic{font-size:15px;line-height:1.3;flex:none}
+.schema-warn .x{margin-left:auto;flex:none}
 /* Row actions dropdown (⋯ → Edit / Delete) */
 .menu-wrap{position:relative;display:inline-flex}
 .menu-btn{width:26px;height:26px;border-radius:7px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}

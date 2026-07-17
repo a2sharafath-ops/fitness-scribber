@@ -41,7 +41,7 @@ export function DataProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ db, commit, refresh, tz: db?.settings?.tz, units: db?.settings?.units }),
+    () => ({ db, commit, refresh, tz: db?.settings?.tz, units: db?.settings?.units, loadIssues: db?._loadIssues || [] }),
     [db, commit, refresh],
   )
 
