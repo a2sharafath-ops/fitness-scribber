@@ -13,7 +13,7 @@ const BLOCK_HINT = {
 }
 
 export default function BlockCard({
-  block, exercises, exListId, resolveTm, maxHr,
+  block, exercises, exListId, tmInfo, maxHr,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
 }) {
@@ -41,12 +41,15 @@ export default function BlockCard({
         )}
         <button className="x" aria-label="Remove block" onClick={onRemove}>×</button>
       </div>
-      {block.exercises.map((e, ei) => (
-        <ExerciseCard key={e.exerciseId} ex={e} exercises={exercises} exListId={exListId}
-          tmKg={resolveTm(e.exerciseName)} maxHr={maxHr}
-          toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
-          onChange={updEx(ei)} onRemove={rmEx(ei)} />
-      ))}
+      {block.exercises.map((e, ei) => {
+        const info = tmInfo(e.exerciseName)
+        return (
+          <ExerciseCard key={e.exerciseId} ex={e} exercises={exercises} exListId={exListId}
+            tmKg={info.kg} tmInfo={info} maxHr={maxHr}
+            toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
+            onChange={updEx(ei)} onRemove={rmEx(ei)} />
+        )
+      })}
       <Button variant="ghost" size="sm" onClick={addEx}>＋ Add exercise</Button>
     </div>
   )

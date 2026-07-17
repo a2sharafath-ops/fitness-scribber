@@ -6,7 +6,7 @@ import SetRow from '../../molecules/SetRow'
 import { INTENSITY_TYPES, SUPERSET_GROUPS, newSet } from '../../../lib/program'
 
 export default function ExerciseCard({
-  ex, exercises, exListId, tmKg, maxHr,
+  ex, exercises, exListId, tmKg, tmInfo, maxHr,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
 }) {
@@ -50,8 +50,12 @@ export default function ExerciseCard({
             {SUPERSET_GROUPS.map((g) => <option key={g} value={g}>{g || 'None'}</option>)}
           </select></label>
         {['%1RM', 'RPE', 'RIR'].includes(ex.intensityType) && (
-          <span className="ex-tm muted" title="Training Max used for %1RM / RPE / RIR load targets">
+          <span className="ex-tm muted"
+            title={tmInfo?.source === 'derived'
+              ? `Derived: ${tmInfo.relPct}% of ${tmInfo.relTo} (${toDisp(tmInfo.refKg)} ${unitName()}). Log this lift's own 1RM to override.`
+              : 'Training Max used for %1RM / RPE / RIR load targets'}>
             TM {tmKg ? `${toDisp(tmKg)} ${unitName()}` : '— none yet'}
+            {tmInfo?.source === 'derived' && <span className="ex-tm-rel"> · {tmInfo.relPct}% of {tmInfo.relTo}</span>}
           </span>
         )}
         <button className="x" aria-label="Remove exercise" onClick={onRemove}>×</button>

@@ -82,7 +82,7 @@ export default function AssessmentsPage() {
               {!recs.length ? (
                 <div className="empty" style={{ padding: 20 }}>
                   <div className="big"><Icon name={t.icon} size={40} /></div>No {t.label.toLowerCase()} recorded.
-                  {ACTIVE_TYPES.includes(t.key) && <div style={{ marginTop: 8 }}><Button size="sm" variant="ghost" onClick={newAssessment}>Add baseline</Button></div>}
+                  {ACTIVE_TYPES.includes(t.key) && <div style={{ marginTop: 8 }}><Button size="sm" variant="ghost" onClick={() => addType(t.key)}>Add baseline</Button></div>}
                 </div>
               ) : (
                 <>

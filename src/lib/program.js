@@ -5,6 +5,7 @@
 // detection, assessment auto-update, context-rich failure flags).
 import { uid } from './format'
 import { addDays } from './dates'
+import { EXERCISE_LIBRARY } from './exerciseLibrary'
 
 // ---- Vocabulary -----------------------------------------------------------
 export const BLOCK_TYPES = ['Warm-up', 'Main Lifts', 'Assisted', 'Core/Others', 'Cool-down']
@@ -80,6 +81,42 @@ export function trainingMaxKg(maxes, clientId, exercise, date) {
 // %1RM → target kg off the Training Max, rounded to the nearest 0.5 kg.
 export const targetKg = (tmKg, pct) =>
   tmKg > 0 && pct > 0 ? Math.round((tmKg * pct) / 100 * 2) / 2 : null
+
+// The imported library's %1RM-relative default for an exercise (e.g. Romanian
+// Deadlift ≈ 75% of Squat), or null if the exercise carries no relationship.
+export function exerciseRelation(db, name) {
+  const e = (db?.exercises || []).find((x) => x.name?.toLowerCase() === String(name).toLowerCase())
+  return e && e.relTo && e.relPct ? { relTo: e.relTo, relPct: +e.relPct } : null
+}
+
+// Best Training Max among the client's lifts whose name INCLUDES a reference
+// term (e.g. 'Squat' matches 'Barbell Back Squat'). Latest 'tm' checkpoint wins,
+// else the rolling 30-day e1RM peak — so the manual's %-of-reference defaults
+// resolve even when the reference lift is logged under a specific variant name.
+function referenceMaxKg(maxes, clientId, refTerm, date) {
+  const term = String(refTerm).toLowerCase()
+  const lo = addDays(date, -30)
+  const rows = (maxes || []).filter((m) => m.clientId === clientId && m.date <= date && String(m.exercise).toLowerCase().includes(term))
+  const tm = rows.filter((m) => m.kind === 'tm').sort((a, b) => b.date.localeCompare(a.date))[0]
+  if (tm) return +tm.valueKg
+  const e1 = rows.filter((m) => m.kind === 'e1rm' && m.date > lo).map((m) => +m.valueKg)
+  return e1.length ? Math.max(...e1) : null
+}
+
+// Training Max for an exercise. Prefers the lift's own 1RM history; when there
+// is none, falls back to the imported library's %-of-reference relationship
+// against the client's reference-lift max (e.g. RDL ≈ 75% of their Squat).
+// Returns { kg, source: 'direct'|'derived'|null, relTo, relPct, refKg }.
+export function resolveTrainingMax(db, clientId, name, date) {
+  const direct = trainingMaxKg(db.maxes, clientId, name, date)
+  if (direct) return { kg: direct, source: 'direct' }
+  const rel = exerciseRelation(db, name)
+  if (rel) {
+    const refKg = referenceMaxKg(db.maxes, clientId, rel.relTo, date)
+    if (refKg) return { kg: Math.round((refKg * rel.relPct) / 100 * 2) / 2, source: 'derived', relTo: rel.relTo, relPct: rel.relPct, refKg }
+  }
+  return { kg: null, source: null }
+}
 
 // ---- Subjective load → %1RM (NSCA Table 18.10) ------------------------------
 // Exact reproduction of Table 18.10 (Subjective Loading Efforts and
@@ -257,6 +294,32 @@ export function ensureProgramShape(db) {
     if (!t.blocks) t.blocks = []
     renameBlocks(t.blocks)
   })
+  mergeExerciseLibrary(db)
+  return db
+}
+
+// Idempotently merge the imported Strength-Training-Manual library into
+// db.exercises. Matches by case-insensitive name, so re-running never
+// duplicates and any exercise the trainer already has (or edited) is left
+// untouched — we only ADD the ones that are missing. Runs on every load via
+// ensureProgramShape, so fresh seeds and existing databases both end up with
+// the full library.
+export function mergeExerciseLibrary(db) {
+  if (!db.exercises) db.exercises = []
+  const have = new Set(db.exercises.map((e) => String(e.name).toLowerCase()))
+  for (const x of EXERCISE_LIBRARY) {
+    const key = x.name.toLowerCase()
+    if (have.has(key)) continue
+    have.add(key)
+    db.exercises.push({
+      id: uid(),
+      name: x.name, muscle: x.muscle, equip: x.equip, difficulty: x.difficulty,
+      category: x.category, pattern: x.pattern,
+      relPct: x.relPct ?? null, relTo: x.relTo ?? null,
+      video: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + ' proper form'),
+      thumb: '', source: 'stm-library',
+    })
+  }
   return db
 }
 

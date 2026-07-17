@@ -17,7 +17,7 @@ import { uid } from '../../../lib/format'
 import { fmtDay, addDays } from '../../../lib/dates'
 import {
   newBlock, defaultBlocks, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
-  applyProgression, trainingMaxKg, hasUnmapped, resetTrainingMaxes, programStats,
+  applyProgression, resolveTrainingMax, hasUnmapped, resetTrainingMaxes, programStats,
 } from '../../../lib/program'
 import { toast, confirmDialog } from '../../../lib/toast'
 
@@ -39,7 +39,10 @@ export default function WorkoutBuilderModal({ clientId, date }) {
 
   const client = db.clients.find((c) => c.id === clientId)
   const maxHr = 220 - (client?.anthro?.age || 30)
-  const resolveTm = (name) => (name ? trainingMaxKg(db.maxes, clientId, name, date) : null)
+  // Full Training-Max info (direct 1RM, or the library's %-of-reference fallback).
+  const tmInfo = (name) => (name ? resolveTrainingMax(db, clientId, name, date) : { kg: null, source: null })
+  // Number-only resolver for progression math (applyProgression expects a kg).
+  const resolveTm = (name) => tmInfo(name).kg
 
   const updBlock = (bi) => (patch) => setBlocks(blocks.map((b, j) => (j === bi ? { ...b, ...patch } : b)))
   const rmBlock = (bi) => () => setBlocks(blocks.filter((_, j) => j !== bi).map((b, j) => ({ ...b, order: j + 1 })))
@@ -234,7 +237,7 @@ export default function WorkoutBuilderModal({ clientId, date }) {
 
           {blocks.map((b, bi) => (
             <BlockCard key={b.blockId} block={b} exercises={db.exercises} exListId="progExList"
-              resolveTm={resolveTm} maxHr={maxHr}
+              tmInfo={tmInfo} maxHr={maxHr}
               toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
               onChange={updBlock(bi)} onRemove={rmBlock(bi)} />
           ))}
