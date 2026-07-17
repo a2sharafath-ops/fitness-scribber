@@ -103,15 +103,20 @@ function referenceMaxKg(maxes, clientId, refTerm, date) {
   return e1.length ? Math.max(...e1) : null
 }
 
-// Latest fitness-assessment 1RM for a lift, of any age (assessment-sourced e1RM
-// rows). Used as a fallback when there's no recent training history, so a
-// baseline or reassessment always feeds the builder even months later.
-function assessmentMaxKg(maxes, clientId, exercise) {
-  const row = (maxes || [])
-    .filter((m) => m.clientId === clientId && m.kind === 'e1rm' && m.source === 'assessment' &&
-      String(m.exercise).toLowerCase() === String(exercise).toLowerCase())
-    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0]
-  return row ? +row.valueKg : null
+// Latest fitness-assessment 1RM for a lift, of any age. Read straight from the
+// assessment records (the durable source of truth) rather than a mirrored
+// ledger row — so a baseline or reassessment always feeds the builder, even
+// months later, with no dependency on any extra persistence step.
+function assessmentMaxKg(db, clientId, exercise) {
+  const ex = String(exercise).toLowerCase()
+  const recs = (db.assessments || [])
+    .filter((a) => a.clientId === clientId && a.type === 'fitness')
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+  for (const a of recs) {
+    const s = (a.data?.strength || []).find((x) => String(x.lift).toLowerCase() === ex)
+    if (s) { const v = +(s.valueKg ?? s.e1rmKg); if (v > 0) return v }
+  }
+  return null
 }
 
 // Training Max for an exercise, in priority order:
@@ -124,7 +129,7 @@ function assessmentMaxKg(maxes, clientId, exercise) {
 export function resolveTrainingMax(db, clientId, name, date) {
   const direct = trainingMaxKg(db.maxes, clientId, name, date)
   if (direct) return { kg: direct, source: 'direct' }
-  const asr = assessmentMaxKg(db.maxes, clientId, name)
+  const asr = assessmentMaxKg(db, clientId, name)
   if (asr) return { kg: asr, source: 'assessment' }
   const rel = exerciseRelation(db, name)
   if (rel) {

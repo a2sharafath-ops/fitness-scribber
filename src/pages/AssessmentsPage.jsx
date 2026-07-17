@@ -49,11 +49,7 @@ export default function AssessmentsPage() {
       message: `Delete this ${typeMeta(rec.type).label.toLowerCase()} record from ${fmtDate(rec.date)}? This can't be undone.${fedBuilder ? ' The 1RM values it fed into the workout builder will also be removed.' : ''}`,
       confirmLabel: 'Delete', danger: true,
     })) return
-    commit((d) => {
-      d.assessments = d.assessments.filter((a) => a.id !== rec.id)
-      // Remove any 1RM-ledger entries this assessment fed into the builder.
-      d.maxes = (d.maxes || []).filter((m) => m.assessmentId !== rec.id)
-    })
+    commit((d) => { d.assessments = d.assessments.filter((a) => a.id !== rec.id) })
     toast('Assessment deleted')
   }
 

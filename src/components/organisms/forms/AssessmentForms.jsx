@@ -123,11 +123,11 @@ export function BodyCompForm({ clientId, record }) {
 // ---- Fitness (strength lifts + endurance + mobility + posture) ----
 // The strength section is a 1RM-estimation surface: each lift takes a test
 // weight × reps, from which we compute an estimated 1RM (Epley; 1 rep = a true
-// 1RM). On save those estimates are written into the client's 1RM ledger tagged
-// `source:'assessment'`, so the workout builder's Training Max resolves from
-// them (recent training PRs still win; see resolveTrainingMax).
+// 1RM). The estimates live on the assessment record itself; the workout
+// builder reads them straight from there (resolveTrainingMax → assessmentMaxKg),
+// so nothing extra needs persisting and recent training PRs still win.
 export function FitnessAssessmentForm({ clientId, record }) {
-  const { db, commit } = useData()
+  const { db } = useData()
   const { closeModal } = useModal()
   const d0 = record?.data || {}
   const [f, setF] = useState({
@@ -156,26 +156,10 @@ export function FitnessAssessmentForm({ clientId, record }) {
     mobility: mobility.filter((r) => r.joint.trim()).map((r) => ({ joint: r.joint.trim(), value: r.value.trim(), side: r.side.trim() })),
     posture: f.posture.trim(),
   })
-  const save = () => {
-    const lifts = strengthOut()
-    commit((d) => {
-      const aid = record ? record.id : uid()
-      const rec = { id: aid, clientId, type: 'fitness', date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: data() }
-      const idx = d.assessments.findIndex((x) => x.id === aid)
-      if (idx >= 0) d.assessments[idx] = rec
-      else d.assessments.push(rec)
-      // Re-sync the 1RM ledger: drop this assessment's previous entries, then add
-      // one e1rm event per lift (removed again if the assessment is deleted).
-      d.maxes = (d.maxes || []).filter((m) => m.assessmentId !== aid)
-      for (const s of lifts) {
-        d.maxes.push({ id: uid(), clientId, exercise: s.lift, date: f.date, kind: 'e1rm', valueKg: s.valueKg, source: 'assessment', assessmentId: aid })
-      }
-    })
-    closeModal()
-  }
+  const save = useSave(clientId, 'fitness', data, undefined, record)
   return (
     <ModalShell title={<><Icon name="dumbbellAlt" size={16} /> Fitness assessment</>} onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save assessment</Button></>}>
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
 
       <div className="section-title" style={{ margin: '4px 0 2px', fontSize: 13 }}>Strength — estimated 1RM</div>
