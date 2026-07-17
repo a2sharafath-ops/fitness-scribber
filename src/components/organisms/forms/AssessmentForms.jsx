@@ -28,12 +28,19 @@ function MetaRow({ f, setF }) {
   )
 }
 
-function useSave(clientId, type, buildData, extra) {
+// Save handler for create OR edit. When `record` is supplied the existing
+// assessment is updated in place; otherwise a new one is pushed.
+function useSave(clientId, type, buildData, extra, record) {
   const { commit } = useData()
   const { closeModal } = useModal()
   return (f) => {
     commit((d) => {
-      d.assessments.push({ id: uid(), clientId, type, date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: buildData() })
+      if (record) {
+        const a = d.assessments.find((x) => x.id === record.id)
+        if (a) { a.date = f.date; a.phase = f.phase; a.notes = (f.notes || '').trim(); a.data = buildData() }
+      } else {
+        d.assessments.push({ id: uid(), clientId, type, date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: buildData() })
+      }
       extra?.(d)
     })
     closeModal()
@@ -41,12 +48,12 @@ function useSave(clientId, type, buildData, extra) {
 }
 
 // ---- Movement screen (squat / hinge / lunge / push / pull, 0–3 + pain) ----
-export function MovementScreenForm({ clientId }) {
+export function MovementScreenForm({ clientId, record }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: todayISO(), phase: 'baseline', notes: '' })
-  const [screens, setScreens] = useState(MOVEMENT_PATTERNS.map((pattern) => ({ pattern, score: 2, pain: false })))
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '' })
+  const [screens, setScreens] = useState(record?.data?.screens?.length ? record.data.screens.map((s) => ({ ...s })) : MOVEMENT_PATTERNS.map((pattern) => ({ pattern, score: 2, pain: false })))
   const upd = (i, k, v) => setScreens(screens.map((s, j) => (j === i ? { ...s, [k]: v } : s)))
-  const save = useSave(clientId, 'movement', () => ({ screens }))
+  const save = useSave(clientId, 'movement', () => ({ screens }), undefined, record)
   return (
     <ModalShell title={<><Icon name="treadmill" size={16} /> Movement screen</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
@@ -67,11 +74,13 @@ export function MovementScreenForm({ clientId }) {
 }
 
 // ---- Body composition (InBody / BIA / calipers) ----
-export function BodyCompForm({ clientId }) {
+export function BodyCompForm({ clientId, record }) {
   const { closeModal } = useModal()
+  const d0 = record?.data || {}
   const [f, setF] = useState({
-    date: todayISO(), phase: 'baseline', notes: '', method: 'InBody',
-    massKg: '', bodyFatPct: '', leanMassKg: '', skeletalMuscleKg: '', visceralFat: '', hydrationL: '',
+    date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '', method: d0.method || 'InBody',
+    massKg: d0.massKg ?? '', bodyFatPct: d0.bodyFatPct ?? '', leanMassKg: d0.leanMassKg ?? '',
+    skeletalMuscleKg: d0.skeletalMuscleKg ?? '', visceralFat: d0.visceralFat ?? '', hydrationL: d0.hydrationL ?? '',
   })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const data = () => ({
@@ -88,7 +97,7 @@ export function BodyCompForm({ clientId }) {
     if (v.massKg != null) c.anthro.massKg = v.massKg
     if (v.bodyFatPct != null) c.anthro.bodyFatPct = v.bodyFatPct
     if (v.leanMassKg != null) c.anthro.leanMassKg = v.leanMassKg
-  })
+  }, record)
   return (
     <ModalShell title={<><Icon name="tuning" size={16} /> Body composition</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
@@ -117,12 +126,21 @@ export function BodyCompForm({ clientId }) {
 // 1RM). On save those estimates are written into the client's 1RM ledger tagged
 // `source:'assessment'`, so the workout builder's Training Max resolves from
 // them (recent training PRs still win; see resolveTrainingMax).
-export function FitnessAssessmentForm({ clientId }) {
+export function FitnessAssessmentForm({ clientId, record }) {
   const { db, commit } = useData()
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: todayISO(), phase: 'baseline', notes: '', enduranceTest: '', enduranceResult: '', posture: '' })
-  const [strength, setStrength] = useState([{ lift: '', weightKg: '', reps: '1' }])
-  const [mobility, setMobility] = useState([{ joint: '', value: '', side: '' }])
+  const d0 = record?.data || {}
+  const [f, setF] = useState({
+    date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '',
+    enduranceTest: d0.endurance?.test || '', enduranceResult: d0.endurance?.result || '', posture: d0.posture || '',
+  })
+  const [strength, setStrength] = useState(d0.strength?.length
+    // Back-compat: older records stored only { lift, valueKg } (a stated 1RM).
+    ? d0.strength.map((s) => ({ lift: s.lift || '', weightKg: (s.weightKg ?? s.valueKg) ?? '', reps: String(s.reps ?? 1) }))
+    : [{ lift: '', weightKg: '', reps: '1' }])
+  const [mobility, setMobility] = useState(d0.mobility?.length
+    ? d0.mobility.map((m) => ({ joint: m.joint || '', value: m.value || '', side: m.side || '' }))
+    : [{ joint: '', value: '', side: '' }])
   // Exercise-library names for the lift autocomplete, alphabetical.
   const liftNames = [...db.exercises.map((e) => e.name)].sort((a, b) => a.localeCompare(b))
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
@@ -141,10 +159,14 @@ export function FitnessAssessmentForm({ clientId }) {
   const save = () => {
     const lifts = strengthOut()
     commit((d) => {
-      const aid = uid()
-      d.assessments.push({ id: aid, clientId, type: 'fitness', date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: data() })
-      // Connect into the 1RM ledger — one e1rm event per lift, linked to this
-      // assessment (removed again if the assessment is deleted).
+      const aid = record ? record.id : uid()
+      const rec = { id: aid, clientId, type: 'fitness', date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: data() }
+      const idx = d.assessments.findIndex((x) => x.id === aid)
+      if (idx >= 0) d.assessments[idx] = rec
+      else d.assessments.push(rec)
+      // Re-sync the 1RM ledger: drop this assessment's previous entries, then add
+      // one e1rm event per lift (removed again if the assessment is deleted).
+      d.maxes = (d.maxes || []).filter((m) => m.assessmentId !== aid)
       for (const s of lifts) {
         d.maxes.push({ id: uid(), clientId, exercise: s.lift, date: f.date, kind: 'e1rm', valueKg: s.valueKg, source: 'assessment', assessmentId: aid })
       }
@@ -200,13 +222,15 @@ export function FitnessAssessmentForm({ clientId }) {
 }
 
 // ---- Pain (sites: area / severity 0–10 / aggravating movement) ----
-export function PainAssessmentForm({ clientId }) {
+export function PainAssessmentForm({ clientId, record }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: todayISO(), phase: 'reassessment', notes: '' })
-  const [sites, setSites] = useState([{ area: '', severity: 3, aggravating: '', limitation: '' }])
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'reassessment', notes: record?.notes || '' })
+  const [sites, setSites] = useState(record?.data?.sites?.length
+    ? record.data.sites.map((s) => ({ area: s.area || '', severity: s.severity ?? 3, aggravating: s.aggravating || '', limitation: s.limitation || '' }))
+    : [{ area: '', severity: 3, aggravating: '', limitation: '' }])
   const upd = (i, k, v) => setSites(sites.map((s, j) => (j === i ? { ...s, [k]: v } : s)))
   const data = () => ({ sites: sites.filter((s) => s.area.trim()).map((s) => ({ area: s.area.trim(), severity: +s.severity, aggravating: s.aggravating.trim(), limitation: s.limitation.trim() })) })
-  const save = useSave(clientId, 'pain', data)
+  const save = useSave(clientId, 'pain', data, undefined, record)
   return (
     <ModalShell title={<><Icon name="danger" size={16} /> Pain assessment</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
@@ -231,13 +255,14 @@ export function PainAssessmentForm({ clientId }) {
 }
 
 // ---- Lifestyle (sleep / stress / hydration / activity) ----
-export function LifestyleForm({ clientId }) {
+export function LifestyleForm({ clientId, record }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: todayISO(), phase: 'baseline', notes: '', sleepHrs: '', sleepQuality: 4, stress: 4, hydrationL: '', activityLevel: 'Moderate', steps: '' })
+  const d0 = record?.data || {}
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '', sleepHrs: d0.sleepHrs ?? '', sleepQuality: d0.sleepQuality ?? 4, stress: d0.stress ?? 4, hydrationL: d0.hydrationL ?? '', activityLevel: d0.activityLevel || 'Moderate', steps: d0.steps ?? '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const sl = (k) => (v) => setF({ ...f, [k]: v })
   const data = () => ({ sleepHrs: numOrNull(f.sleepHrs), sleepQuality: +f.sleepQuality, stress: +f.stress, hydrationL: numOrNull(f.hydrationL), activityLevel: f.activityLevel, steps: numOrNull(f.steps) })
-  const save = useSave(clientId, 'lifestyle', data)
+  const save = useSave(clientId, 'lifestyle', data, undefined, record)
   return (
     <ModalShell title={<><Icon name="watch" size={16} /> Lifestyle assessment</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
@@ -258,15 +283,17 @@ export function LifestyleForm({ clientId }) {
 }
 
 // ---- Goals (short-term & long-term) ----
-export function GoalForm({ clientId }) {
+export function GoalForm({ clientId, record }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: todayISO(), phase: 'baseline', notes: '', why: '' })
-  const [shortTerm, setShort] = useState([{ text: '', target: '', by: '' }])
-  const [longTerm, setLong] = useState([{ text: '', target: '', by: '' }])
+  const d0 = record?.data || {}
+  const mapGoals = (l) => (l?.length ? l.map((r) => ({ text: r.text || '', target: r.target || '', by: r.by || '' })) : [{ text: '', target: '', by: '' }])
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || 'baseline', notes: record?.notes || '', why: d0.why || '' })
+  const [shortTerm, setShort] = useState(mapGoals(d0.shortTerm))
+  const [longTerm, setLong] = useState(mapGoals(d0.longTerm))
   const updList = (setter, list) => (i, k, v) => setter(list.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
   const clean = (list) => list.filter((r) => r.text.trim()).map((r) => ({ text: r.text.trim(), target: r.target.trim(), by: r.by }))
   const data = () => ({ shortTerm: clean(shortTerm), longTerm: clean(longTerm), why: f.why.trim() })
-  const save = useSave(clientId, 'goals', data)
+  const save = useSave(clientId, 'goals', data, undefined, record)
   const rows = (list, setter, label) => (
     <>
       <div className="section-title" style={{ margin: '8px 0 6px', fontSize: 13 }}>{label}</div>
@@ -293,17 +320,18 @@ export function GoalForm({ clientId }) {
 }
 
 const FORMS = {
-  fitness: (clientId) => <FitnessAssessmentForm clientId={clientId} />,
-  movement: (clientId) => <MovementScreenForm clientId={clientId} />,
-  body_comp: (clientId) => <BodyCompForm clientId={clientId} />,
-  pain: (clientId) => <PainAssessmentForm clientId={clientId} />,
-  lifestyle: (clientId) => <LifestyleForm clientId={clientId} />,
-  goals: (clientId) => <GoalForm clientId={clientId} />,
+  fitness: (clientId, record) => <FitnessAssessmentForm clientId={clientId} record={record} />,
+  movement: (clientId, record) => <MovementScreenForm clientId={clientId} record={record} />,
+  body_comp: (clientId, record) => <BodyCompForm clientId={clientId} record={record} />,
+  pain: (clientId, record) => <PainAssessmentForm clientId={clientId} record={record} />,
+  lifestyle: (clientId, record) => <LifestyleForm clientId={clientId} record={record} />,
+  goals: (clientId, record) => <GoalForm clientId={clientId} record={record} />,
 }
 
-// Element factory for a single assessment type (used by the onboarding checklist).
+// Element factory for one assessment type. Pass `record` to edit it in place;
+// omit it to record a new one.
 // eslint-disable-next-line react/only-export-components
-export const assessmentForm = (type, clientId) => FORMS[type]?.(clientId) || null
+export const assessmentForm = (type, clientId, record) => FORMS[type]?.(clientId, record) || null
 
 // Launcher: pick which assessment to record.
 export function NewAssessmentMenu({ clientId }) {

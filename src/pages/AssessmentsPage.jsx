@@ -3,12 +3,13 @@ import Button from '../components/atoms/Button'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { NewAssessmentMenu, assessmentForm } from '../components/organisms/forms/AssessmentForms'
+import Menu from '../components/molecules/Menu'
 import AssessmentChecklist from '../components/organisms/AssessmentChecklist'
 import AssessmentTrends from '../components/organisms/AssessmentTrends'
 import CurrentLiftsPerformance from '../components/organisms/CurrentLiftsPerformance'
 import ClientSubnav from '../components/templates/ClientSubnav'
 import Icon from '../components/atoms/Icon'
-import { TYPES, ACTIVE_TYPES, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, forClient, latest, baseline, summarize, compare, dueStatus } from '../lib/assessment'
+import { TYPES, ACTIVE_TYPES, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, forClient, latest, baseline, summarize, compare, dueStatus, typeMeta } from '../lib/assessment'
 import { fmtDate } from '../lib/dates'
 import { toast, confirmDialog } from '../lib/toast'
 
@@ -40,12 +41,18 @@ export default function AssessmentsPage() {
   const typesToShow = TYPES.filter((t) => ACTIVE_TYPES.includes(t.key) || list.some((a) => a.type === t.key))
   const newAssessment = () => openModal(<NewAssessmentMenu clientId={id} />)
   const addType = (type) => openModal(assessmentForm(type, id))
-  const del = async (aid) => {
-    if (!await confirmDialog({ title: 'Delete assessment', message: 'Delete this assessment record?', confirmLabel: 'Delete', danger: true })) return
+  const editRec = (rec) => openModal(assessmentForm(rec.type, id, rec))
+  const del = async (rec) => {
+    const fedBuilder = rec.type === 'fitness' && (rec.data?.strength?.length || 0) > 0
+    if (!await confirmDialog({
+      title: 'Delete assessment',
+      message: `Delete this ${typeMeta(rec.type).label.toLowerCase()} record from ${fmtDate(rec.date)}? This can't be undone.${fedBuilder ? ' The 1RM values it fed into the workout builder will also be removed.' : ''}`,
+      confirmLabel: 'Delete', danger: true,
+    })) return
     commit((d) => {
-      d.assessments = d.assessments.filter((a) => a.id !== aid)
+      d.assessments = d.assessments.filter((a) => a.id !== rec.id)
       // Remove any 1RM-ledger entries this assessment fed into the builder.
-      d.maxes = (d.maxes || []).filter((m) => m.assessmentId !== aid)
+      d.maxes = (d.maxes || []).filter((m) => m.assessmentId !== rec.id)
     })
     toast('Assessment deleted')
   }
@@ -105,7 +112,10 @@ export default function AssessmentsPage() {
                         {a.data?.self ? <span className="tag-sm" style={{ color: 'var(--blue)' }}>self</span> : null}
                         <span className="ahr-date">{fmtDate(a.date)}</span>
                         <span className="ahr-sum">{summarize(a)}{a.notes ? ` — ${a.notes}` : ''}</span>
-                        <button className="x" aria-label="Delete record" onClick={() => del(a.id)}>×</button>
+                        <Menu label="Record actions" items={[
+                          { label: 'Edit', icon: 'settings', onClick: () => editRec(a) },
+                          { label: 'Delete', icon: 'alert', danger: true, onClick: () => del(a) },
+                        ]} />
                       </div>
                     ))}
                   </div>
