@@ -51,6 +51,16 @@ function StatusChip({ cls, label }) {
   return <span className={'sc ' + cls}><span className="sc-dot" />{label}</span>
 }
 
+// A single shortcut button in the quick-actions strip.
+function QuickAction({ icon, label, tint, color, onClick }) {
+  return (
+    <button className="qa-btn" onClick={onClick} aria-label={label}>
+      <span className="qa-ic" style={{ background: tint, color }}><Icon name={icon} size={17} /></span>
+      <span className="qa-label">{label}</span>
+    </button>
+  )
+}
+
 // One step in the empty-state "Get started" checklist.
 function OnboardStep({ n, done, title, desc, action, onClick }) {
   return (
@@ -290,6 +300,15 @@ export default function DashboardPage() {
             pillClass="sc-green" pill={inWin.length ? `${doneWin}/${inWin.length} sessions` : 'no sessions'} trend={adhTrend} onClick={() => nav('/schedule')} />
           <Stat icon="alert" chipBg="var(--tint-amber)" chipColor="var(--accent2)" num={atRisk} label="At-risk clients"
             pillClass="sc-amber" pill={`${openC.length} concern${openC.length === 1 ? '' : 's'}`} onClick={() => nav('/concerns')} />
+        </div>
+
+        <div className="qa-bar">
+          <QuickAction icon="users" label="Add client" tint="var(--tint-red)" color="var(--accent)" onClick={() => openModal(<ClientForm />)} />
+          <QuickAction icon="calendar" label="Book session" tint="#ebebfa" color="#5856d6" onClick={() => openModal(<SessionForm />)} />
+          <QuickAction icon="clipboard" label="Morning check-in" tint="var(--tint-green)" color="var(--green)" onClick={() => openModal(<BulkWellnessForm />, true)} />
+          <QuickAction icon="dumbbell" label="Prescribe workout" tint="var(--tint-blue)" color="var(--blue)" onClick={() => nav('/workouts')} />
+          <QuickAction icon="activity" label="Record assessment" tint="var(--tint-amber)" color="var(--accent2)" onClick={() => nav('/clients')} />
+          <QuickAction icon="alert" label="Review concerns" tint="var(--tint-amber)" color="var(--accent2)" onClick={() => nav('/concerns')} />
         </div>
 
         {/* ── TODAY ── schedule, next session, today's programming */}

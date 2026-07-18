@@ -566,6 +566,14 @@ canvas{max-width:100%}
 .onb-btn{align-self:flex-start;font-size:12px;font-weight:700;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 0}
 .onb-tick{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--green)}
 @media(max-width:720px){.onb-steps{grid-template-columns:1fr}}
+/* Quick-actions strip */
+.qa-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,transform .1s,box-shadow .15s}
+.qa-btn:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.qa-ic{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center}
+.qa-label{font-size:12px;font-weight:700;text-align:center;line-height:1.25}
+@media(max-width:900px){.qa-bar{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.qa-bar{grid-template-columns:repeat(2,1fr)}}
 /* Roster health — readiness meter, load-risk, today's training */
 .dash-health{display:flex;flex-direction:column;gap:16px}
 .dash-health-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
