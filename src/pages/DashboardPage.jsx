@@ -12,6 +12,9 @@ import { initials } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { baseOptions } from '../lib/chartSetup'
 import { squadRow, openConcerns } from '../lib/calc'
+import { programStats } from '../lib/program'
+import { forClient, dueStatus, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, typeMeta } from '../lib/assessment'
+import { screeningsFor, programStatus, rescreenDue } from '../lib/screening'
 
 const RANK = { red: 0, yellow: 1, gray: 2, green: 3 }
 const RANGE = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365 }
@@ -34,6 +37,20 @@ function Stat({ chipBg, chipColor, icon, num, label, pillClass, pill, onClick })
 
 function StatusChip({ cls, label }) {
   return <span className={'sc ' + cls}><span className="sc-dot" />{label}</span>
+}
+
+// Circular progress ring (SVG). `pct` 0–100.
+function Ring({ pct, size = 76, stroke = 8, color }) {
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--surface2)" strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={circ} strokeDashoffset={circ * (1 - pct / 100)} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" fontSize={size * 0.26} fontWeight="800" fill="var(--text)">{pct}%</text>
+    </svg>
+  )
 }
 
 export default function DashboardPage() {
@@ -90,6 +107,104 @@ export default function DashboardPage() {
     return null
   }).filter(Boolean).sort((a, b) => a.rank - b.rank).slice(0, 4)
 
+  // Roster readiness meter — distribution of today's readiness across the roster.
+  const noData = db.clients.length - tracked
+  const readinessSegs = [
+    { key: 'green', label: 'Ready', n: ready, color: 'var(--green)' },
+    { key: 'yellow', label: 'Monitor', n: monitor, color: 'var(--accent2)' },
+    { key: 'red', label: 'At-risk', n: atRisk, color: 'var(--accent)' },
+    { key: 'gray', label: 'No data', n: noData, color: '#c6c7cc' },
+  ]
+
+  // Load-risk spotlight — injury-risk flags from ACWR (> 1.5) and monotony (> 2).
+  const loadRisk = squad
+    .filter((x) => (x.acwr != null && x.acwr > 1.5) || (x.mono > 2 && x.wkLoad > 0))
+    .map((x) => ({
+      c: x.c,
+      reason: x.acwr != null && x.acwr > 1.5
+        ? `ACWR ${x.acwr} · elevated injury risk`
+        : `Monotony ${x.mono.toFixed(1)} · low variation`,
+    }))
+
+  // Today's training board — who has a workout prescribed today vs a rest day,
+  // and who has no program assigned at all.
+  const activeClients = db.clients.filter((c) => c.status === 'Active')
+  const trainingToday = []
+  const noPlan = []
+  activeClients.forEach((c) => {
+    const presc = db.prescriptions.filter((p) => p.clientId === c.id && p.date === today)
+    const ex = presc.reduce((n, p) => n + programStats(p).exercises, 0)
+    if (ex > 0) trainingToday.push({ c, name: presc.map((p) => (p.notes || '').trim()).filter(Boolean).join(' · ') || `${ex} exercise${ex === 1 ? '' : 's'}` })
+    if (!c.planId) noPlan.push(c)
+  })
+  const restToday = activeClients.length - trainingToday.length
+
+  // Morning check-in coverage — active clients who logged wellness today.
+  const checkedInIds = new Set(db.wellness.filter((w) => w.date === today).map((w) => w.clientId))
+  const checkedInCount = activeClients.filter((c) => checkedInIds.has(c.id)).length
+  const checkinPct = activeClients.length ? Math.round((checkedInCount / activeClients.length) * 100) : 0
+  const missingCheckin = activeClients.length - checkedInCount
+  const ringColor = checkinPct >= 80 ? 'var(--green)' : checkinPct >= 40 ? 'var(--accent2)' : 'var(--accent)'
+
+  // Curio AI — the single most useful action for right now, in priority order:
+  // injury risk → missing check-ins → unassigned programs → at-risk readiness.
+  const curio = (() => {
+    const bulk = () => openModal(<BulkWellnessForm />, true)
+    if (loadRisk.length) {
+      const first = loadRisk[0]
+      return { title: `${loadRisk.length} client${loadRisk.length > 1 ? 's' : ''} in the injury-risk zone`,
+        body: `${first.c.name}${loadRisk.length > 1 ? ` and ${loadRisk.length - 1} other${loadRisk.length > 2 ? 's' : ''}` : ''} — ${first.reason.toLowerCase()}. Consider a deload before their next block.`,
+        label: 'Review load', onClick: () => nav('/monitor/' + first.c.id) }
+    }
+    if (missingCheckin > 0 && activeClients.length) {
+      return { title: `${missingCheckin} client${missingCheckin > 1 ? 's haven’t' : ' hasn’t'} checked in today`,
+        body: 'Readiness is only as good as check-in coverage. Log or request morning check-ins to keep the roster current.',
+        label: 'Bulk check-in', onClick: bulk }
+    }
+    if (noPlan.length) {
+      return { title: `${noPlan.length} active client${noPlan.length > 1 ? 's have' : ' has'} no program`,
+        body: 'Assign a training plan so sessions and progress track against it.',
+        label: 'Assign programs', onClick: () => nav('/clients') }
+    }
+    if (atRisk) {
+      return { title: `${atRisk} client${atRisk > 1 ? 's' : ''} at-risk today`,
+        body: 'Review the at-risk list before programming their next block.',
+        label: 'Review roster', onClick: () => nav('/clients') }
+    }
+    if (tracked === 0) {
+      return { title: 'Readiness needs data',
+        body: 'Log morning wellness or connect wearables so Curio can surface readiness insights across your roster.',
+        label: 'Bulk check-in', onClick: bulk }
+    }
+    return { title: 'Roster recovery looks strong',
+      body: `${ready} of ${tracked} tracked client${tracked === 1 ? '' : 's'} ${ready === 1 ? 'is' : 'are'} ready to train today. Good window to progress well-recovered cohorts.`,
+      label: 'Plan workouts', onClick: () => nav('/workouts') }
+  })()
+
+  // Compliance to-do — reassessments due, screening gates / re-screens, across
+  // the roster, most urgent first.
+  const interval = db.settings?.reassessIntervalDays || DEFAULT_REASSESS_DAYS
+  const todo = []
+  activeClients.forEach((c) => {
+    const alist = forClient(db.assessments, c.id)
+    const scr = screeningsFor(db.screenings, c.id).complete
+    if (scr && programStatus(scr) === 'gated') todo.push({ c, label: 'Screening pending clearance', chip: 'Gated', tone: 'red', rank: 0, onClick: () => nav('/clients/' + c.id + '/profile') })
+    else if (scr && rescreenDue(scr, today)) todo.push({ c, label: 'Health re-screen due', chip: 'Re-screen', tone: 'amber', rank: 1, onClick: () => nav('/clients/' + c.id + '/profile') })
+    REASSESS_TYPES.forEach((t) => {
+      const d = dueStatus(alist, t, interval)
+      if (d.has && d.overdue) todo.push({ c, label: `${typeMeta(t).label} reassessment due`, chip: 'Reassess', tone: 'amber', rank: 2, onClick: () => nav(`/clients/${c.id}/assessments/${t}`) })
+    })
+  })
+  todo.sort((a, b) => a.rank - b.rank)
+
+  // Recent bests — newest estimated-1RM peaks logged across the roster.
+  const wins = (db.maxes || [])
+    .filter((m) => m.kind === 'e1rm')
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    .map((m) => ({ m, c: db.clients.find((x) => x.id === m.clientId) }))
+    .filter((w) => w.c)
+    .slice(0, 5)
+
   const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
   return (
@@ -140,18 +255,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="dash-side">
-            <div className="dash-ai clickable" role="button" tabIndex={0}
-              onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Open clients roster">
+            <div className="dash-ai">
               <div className="dash-ai-head">
                 <span className="dash-ai-chip"><Icon name="sparkles" size={14} /></span>
                 <span className="dash-ai-tag">CURIO AI</span>
               </div>
-              <div className="dash-ai-title">{tracked === 0 ? 'Readiness needs data' : ready >= atRisk ? 'Roster recovery looks strong' : 'Several clients need attention'}</div>
-              <div className="dash-ai-body">
-                {tracked === 0
-                  ? 'Log morning wellness or connect wearables so Curio can surface readiness insights across your roster.'
-                  : `${ready} of ${tracked} tracked client${tracked === 1 ? '' : 's'} ${ready === 1 ? 'is' : 'are'} ready to train today${monitor ? `, ${monitor} to monitor` : ''}${atRisk ? `, and ${atRisk} at risk` : ''}. ${atRisk ? 'Review the at-risk list before programming their next block.' : 'Good window to progress well-recovered cohorts.'}`}
-              </div>
+              <div className="dash-ai-title">{curio.title}</div>
+              <div className="dash-ai-body">{curio.body}</div>
+              <button className="dash-ai-btn" onClick={curio.onClick}>{curio.label} →</button>
             </div>
 
             {next ? (
@@ -167,6 +278,128 @@ export default function DashboardPage() {
                 <div className="dash-next-sub">Book a session to see it here.</div>
               </button>
             )}
+          </div>
+        </div>
+
+        {/* Roster health — readiness distribution, load-risk flags, today's programming */}
+        <div className="dash-health">
+          <div className="dash-card dash-readiness clickable" role="button" tabIndex={0}
+            onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Open clients roster">
+            <div className="dash-card-head">
+              <div style={{ flex: 1 }}>
+                <div className="dash-card-title">Roster readiness</div>
+                <div className="dash-card-sub">Today, from morning check-ins &amp; wearables</div>
+              </div>
+              <span className="muted" style={{ fontSize: 12 }}>{tracked} of {db.clients.length} with data</span>
+            </div>
+            <div className="rd-body">
+              <div className="rd-main">
+                {tracked ? (
+                  <>
+                    <div className="rd-bar">
+                      {readinessSegs.filter((s) => s.n > 0).map((s) => (
+                        <span key={s.key} className="rd-seg" style={{ flex: s.n, background: s.color }} title={`${s.label}: ${s.n}`} />
+                      ))}
+                    </div>
+                    <div className="rd-legend">
+                      {readinessSegs.map((s) => <span key={s.key} className="rd-leg"><i style={{ background: s.color }} />{s.label} <b>{s.n}</b></span>)}
+                    </div>
+                    <div className="rd-avatars">
+                      {squad.filter((x) => x.r.color !== 'gray').slice(0, 16).map((x) => (
+                        <span key={x.c.id} className={'rd-av rd-' + x.r.color} title={`${x.c.name} — ${x.r.label || x.r.color}`}>{initials(x.c.name)}</span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="empty" style={{ padding: '20px 0' }}><div className="big"><Icon name="heart" size={34} /></div>No readiness data yet — log morning check-ins to populate.</div>
+                )}
+              </div>
+              <div className="rd-checkin">
+                <Ring pct={checkinPct} color={ringColor} />
+                <div className="rd-checkin-lbl"><b>{checkedInCount}/{activeClients.length}</b> checked in today</div>
+                {missingCheckin > 0 && (
+                  <button className="rd-checkin-btn" onClick={(e) => { e.stopPropagation(); openModal(<BulkWellnessForm />, true) }}>
+                    <Icon name="clipboard" size={13} /> Bulk check-in
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="dash-health-row">
+            <div className="dash-card clickable" role="button" tabIndex={0}
+              onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Load-risk clients">
+              <div className="dash-card-head">
+                <div style={{ flex: 1 }}>
+                  <div className="dash-card-title">Load-risk spotlight {loadRisk.length ? <span className="dash-count-badge">{loadRisk.length}</span> : null}</div>
+                  <div className="dash-card-sub">ACWR &amp; monotony injury-risk flags</div>
+                </div>
+              </div>
+              {loadRisk.length ? loadRisk.slice(0, 4).map((x) => (
+                <button key={x.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/monitor/' + x.c.id) }}>
+                  <span className="dash-att-av" style={{ background: 'var(--tint-red)', color: 'var(--accent)' }}>{initials(x.c.name)}</span>
+                  <span className="dash-rinfo"><div className="t">{x.c.name}</div><div className="s">{x.reason}</div></span>
+                  <StatusChip cls="sc-red" label="Review load" />
+                </button>
+              )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="check" size={34} /></div>No load-risk flags — training loads look balanced.</div>}
+            </div>
+
+            <div className="dash-card clickable" role="button" tabIndex={0}
+              onClick={() => nav('/workouts')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/workouts') }} aria-label="Open workouts">
+              <div className="dash-card-head">
+                <div style={{ flex: 1 }}>
+                  <div className="dash-card-title">Today's training</div>
+                  <div className="dash-card-sub">Prescribed workouts for {shortD(today)}</div>
+                </div>
+                <span className="muted" style={{ fontSize: 12 }}>{trainingToday.length} training · {restToday} rest</span>
+              </div>
+              {trainingToday.length ? trainingToday.slice(0, 4).map((t) => (
+                <button key={t.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + t.c.id) }}>
+                  <span className="dash-att-av" style={{ background: 'var(--tint-blue)', color: 'var(--blue)' }}><Icon name="dumbbell" size={15} /></span>
+                  <span className="dash-rinfo"><div className="t">{t.c.name}</div><div className="s">{t.name}</div></span>
+                </button>
+              )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="coffee" size={34} /></div>No workouts prescribed today.</div>}
+              {noPlan.length ? (
+                <button className="dash-noplan" onClick={(e) => { e.stopPropagation(); nav('/clients') }}>
+                  <Icon name="alert" size={13} /> {noPlan.length} active client{noPlan.length === 1 ? '' : 's'} with no program assigned
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        {/* Compliance to-do + recent bests */}
+        <div className="dash-health-row">
+          <div className="dash-card clickable" role="button" tabIndex={0}
+            onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Assessment & screening to-dos">
+            <div className="dash-card-head">
+              <div style={{ flex: 1 }}>
+                <div className="dash-card-title">To-do {todo.length ? <span className="dash-count-badge">{todo.length}</span> : null}</div>
+                <div className="dash-card-sub">Reassessments &amp; health screenings due</div>
+              </div>
+            </div>
+            {todo.length ? todo.slice(0, 5).map((t, i) => (
+              <button key={t.c.id + '-' + i} className="dash-row" onClick={(e) => { e.stopPropagation(); t.onClick() }}>
+                <span className="dash-att-av" style={t.tone === 'red' ? { background: 'var(--tint-red)', color: 'var(--accent)' } : { background: 'var(--tint-amber)', color: 'var(--accent2)' }}>{initials(t.c.name)}</span>
+                <span className="dash-rinfo"><div className="t">{t.c.name}</div><div className="s">{t.label}</div></span>
+                <StatusChip cls={t.tone === 'red' ? 'sc-red' : 'sc-amber'} label={t.chip} />
+              </button>
+            )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="check" size={34} /></div>All assessments &amp; screenings up to date.</div>}
+          </div>
+
+          <div className="dash-card">
+            <div className="dash-card-head">
+              <div style={{ flex: 1 }}>
+                <div className="dash-card-title">Recent bests</div>
+                <div className="dash-card-sub">New estimated-1RM peaks across your roster</div>
+              </div>
+            </div>
+            {wins.length ? wins.map((w, i) => (
+              <button key={(w.m.id || '') + '-' + i} className="dash-row" onClick={() => nav('/clients/' + w.c.id)}>
+                <span className="dash-att-av" style={{ background: 'var(--tint-green)', color: 'var(--green)' }}><Icon name="activity" size={15} /></span>
+                <span className="dash-rinfo"><div className="t">{w.c.name} · {w.m.exercise}</div><div className="s">{w.m.valueKg} kg 1RM · {shortD(w.m.date)}</div></span>
+              </button>
+            )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="activity" size={34} /></div>No personal bests logged yet.</div>}
           </div>
         </div>
 
