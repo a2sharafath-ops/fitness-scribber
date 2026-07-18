@@ -16,8 +16,11 @@ create table if not exists clients (
   "plan" text, "joined" text, "notes" text, "planId" text,
   "monitorOptIn" boolean default false,
   "anthro" jsonb default '{}'::jsonb,
-  "intake" jsonb default '{}'::jsonb
+  "intake" jsonb default '{}'::jsonb,
+  "trackedLifts" jsonb default '[]'::jsonb        -- Current Lifts Performance: lifts the coach tracks
 );
+-- Migration for databases created before "trackedLifts" existed.
+alter table clients add column if not exists "trackedLifts" jsonb default '[]'::jsonb;
 
 create table if not exists exercises (
   "id" text primary key,
