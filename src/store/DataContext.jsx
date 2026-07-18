@@ -9,6 +9,8 @@ export function DataProvider({ children }) {
   // Local mode: hydrate from localStorage immediately. Backend mode: load async.
   const [db, setDb] = useState(() => (hasBackend ? null : loadDB()))
   const [loadError, setLoadError] = useState(null)
+  // Tables whose last write failed (missing column/table) — surfaced in the UI.
+  const [writeIssues, setWriteIssues] = useState([])
   // Authoritative latest snapshot, so commit() never relies on the updater running
   // (React StrictMode double-invokes updaters in dev — side effects must stay out of them).
   const dbRef = useRef(db)
@@ -37,13 +39,18 @@ export function DataProvider({ children }) {
     mutator(next)
     dbRef.current = next
     setDb(next)
-    if (hasBackend) persistDiff(prev, next).catch((e) => console.error('persist failed', e))
+    if (hasBackend) persistDiff(prev, next).then((issues) => setWriteIssues(issues || [])).catch((e) => console.error('persist failed', e))
   }, [])
 
-  const value = useMemo(
-    () => ({ db, commit, refresh, tz: db?.settings?.tz, units: db?.settings?.units, loadIssues: db?._loadIssues || [] }),
-    [db, commit, refresh],
-  )
+  const value = useMemo(() => {
+    // Combine load failures (missing table) and write failures (missing column),
+    // de-duped by table, for the schema-warning banner.
+    const byTable = new Map()
+    for (const i of [...(db?._loadIssues || []), ...writeIssues]) {
+      if (!byTable.has(i.table)) byTable.set(i.table, { table: i.table, message: i.message, kind: i.kind || 'load' })
+    }
+    return { db, commit, refresh, tz: db?.settings?.tz, units: db?.settings?.units, dbIssues: [...byTable.values()] }
+  }, [db, commit, refresh, writeIssues])
 
   if (hasBackend && !db) {
     if (loadError) {

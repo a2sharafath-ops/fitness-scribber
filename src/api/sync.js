@@ -35,19 +35,24 @@ export async function fetchAll() {
   return db
 }
 
+// Returns the tables whose write (upsert/delete) failed — usually a missing
+// column or table — so the UI can surface that a change wasn't saved instead of
+// failing silently. An empty array means everything persisted.
 export async function persistDiff(prev, next) {
+  const issues = []
   for (const t of TABLES) {
     const a = byId(prev[t]), b = byId(next[t])
     const ups = (next[t] || []).filter((r) => !a[r.id] || !eq(a[r.id], r))
     const dels = (prev[t] || []).filter((r) => !b[r.id]).map((r) => r.id)
-    if (ups.length) { const { error } = await supabase.from(t).upsert(ups); if (error) console.error(t, 'upsert', error) }
-    if (dels.length) { const { error } = await supabase.from(t).delete().in('id', dels); if (error) console.error(t, 'delete', error) }
+    if (ups.length) { const { error } = await supabase.from(t).upsert(ups); if (error) { console.error(t, 'upsert', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
+    if (dels.length) { const { error } = await supabase.from(t).delete().in('id', dels); if (error) { console.error(t, 'delete', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
   }
   if (!eq(prev.settings, next.settings)) {
     const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('settings').upsert({ coachId: user.id, ...next.settings })
-    if (error) console.error('settings', error)
+    if (error) { console.error('settings', error); issues.push({ table: 'settings', message: error.message, kind: 'write' }) }
   }
+  return issues
 }
 
 // One-time demo data load for a fresh coach account.
