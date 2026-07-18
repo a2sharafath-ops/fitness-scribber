@@ -9,7 +9,7 @@ import SessionForm from '../components/organisms/forms/SessionForm'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { initials } from '../lib/format'
-import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
+import { todayISO, fmtDate, fmtDay, lastNDates, addDays } from '../lib/dates'
 import { baseOptions } from '../lib/chartSetup'
 import { squadRow, openConcerns } from '../lib/calc'
 import { programStats } from '../lib/program'
@@ -18,18 +18,29 @@ import { screeningsFor, programStatus, rescreenDue } from '../lib/screening'
 
 const RANK = { red: 0, yellow: 1, gray: 2, green: 3 }
 const RANGE = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365 }
+const METRICS = [['sessions', 'Sessions'], ['load', 'Load'], ['checkins', 'Check-ins']]
+const METRIC_META = {
+  sessions: { sub: 'Completed sessions across your roster', empty: 'No completed sessions' },
+  load: { sub: 'Roster training load (sRPE) — total across clients', empty: 'No training load' },
+  checkins: { sub: 'Morning check-ins logged across your roster', empty: 'No check-ins' },
+}
 const SSTATUS_CHIP = { Completed: ['sc-green', 'Completed'], Confirmed: ['sc-green', 'Confirmed'], Pending: ['sc-gray', 'Scheduled'], Cancelled: ['sc-gray', 'Cancelled'] }
 const shortD = (iso) => fmtDate(iso).replace(/,? *\d{4}$/, '')
 const daysAgo = (iso, today) => Math.round((Date.parse(today) - Date.parse(iso)) / 86400000)
 
-function Stat({ chipBg, chipColor, icon, num, label, pillClass, pill, onClick }) {
+function Stat({ chipBg, chipColor, icon, num, label, pillClass, pill, trend, onClick }) {
   return (
     <button className="dash-stat" onClick={onClick} aria-label={`${label}: ${num}`}>
       <div className="dash-stat-head">
         <span className="dash-chip" style={{ background: chipBg, color: chipColor }}><Icon name={icon} size={18} /></span>
         {pill && <span className={'dash-pill ' + pillClass}>{pill}</span>}
       </div>
-      <div className="dash-stat-num">{num}</div>
+      <div className="dash-stat-num">
+        {num}
+        {trend != null && trend !== 0 && (
+          <span className="dash-trend" style={{ color: trend > 0 ? 'var(--green)' : 'var(--accent)' }}>{trend > 0 ? '▲' : '▼'} {Math.abs(trend)}%</span>
+        )}
+      </div>
       <div className="dash-stat-label">{label}</div>
     </button>
   )
@@ -58,15 +69,25 @@ export default function DashboardPage() {
   const { openModal } = useModal()
   const nav = useNavigate()
   const [range, setRange] = useState('1M')
+  const [metric, setMetric] = useState('sessions')
   const today = todayISO(tz)
   const nowHM = new Date().toTimeString().slice(0, 5)
 
   const active = db.clients.filter((c) => c.status === 'Active').length
   const todaySessions = [...db.sessions.filter((s) => s.date === today)].sort((a, b) => a.time.localeCompare(b.time))
   const upcoming = db.sessions.filter((s) => s.date >= today && s.status !== 'Completed' && s.status !== 'Cancelled').length
-  const past = db.sessions.filter((s) => s.date <= today && s.status !== 'Cancelled')
-  const done = past.filter((s) => s.status === 'Completed').length
-  const adherence = past.length ? Math.round((done / past.length) * 100) : 0
+  // Session adherence over a rolling 30-day window (vs the previous 30 days for a
+  // trend) — far more honest than an all-time % on a tiny sample.
+  const ADH_WIN = 30
+  const winStart = addDays(today, -ADH_WIN + 1)
+  const prevStart = addDays(today, -2 * ADH_WIN + 1)
+  const adhPct = (rows) => (rows.length ? Math.round((rows.filter((s) => s.status === 'Completed').length / rows.length) * 100) : null)
+  const inWin = db.sessions.filter((s) => s.status !== 'Cancelled' && s.date >= winStart && s.date <= today)
+  const inPrev = db.sessions.filter((s) => s.status !== 'Cancelled' && s.date >= prevStart && s.date < winStart)
+  const doneWin = inWin.filter((s) => s.status === 'Completed').length
+  const adhWin = adhPct(inWin)
+  const adhPrev = adhPct(inPrev)
+  const adhTrend = adhWin != null && adhPrev != null ? adhWin - adhPrev : null
   const openC = openConcerns(db)
 
   const squad = db.clients.map((c) => squadRow(db, c, tz)).sort((a, b) => RANK[a.r.color] - RANK[b.r.color] || b.openC - a.openC)
@@ -75,12 +96,14 @@ export default function DashboardPage() {
   const monitor = squad.filter((x) => x.r.color === 'yellow').length
   const tracked = squad.filter((x) => x.r.color !== 'gray').length
 
-  // Client activity — completed sessions bucketed across the selected range.
+  // Roster activity — the selected metric bucketed across the range.
   const days = RANGE[range]
   const dates = lastNDates(days, tz)
-  const compByDate = {}
-  db.sessions.forEach((s) => { if (s.status === 'Completed') compByDate[s.date] = (compByDate[s.date] || 0) + 1 })
-  const perDay = dates.map((d) => compByDate[d] || 0)
+  const seriesByDate = {}
+  if (metric === 'load') db.srpe.forEach((r) => { seriesByDate[r.date] = (seriesByDate[r.date] || 0) + (+r.tl || 0) })
+  else if (metric === 'checkins') db.wellness.forEach((w) => { seriesByDate[w.date] = (seriesByDate[w.date] || 0) + 1 })
+  else db.sessions.forEach((s) => { if (s.status === 'Completed') seriesByDate[s.date] = (seriesByDate[s.date] || 0) + 1 })
+  const perDay = dates.map((d) => seriesByDate[d] || 0)
   const B = 12
   const buckets = Array.from({ length: B }, (_, i) => {
     const a = Math.floor((i * perDay.length) / B), b = Math.floor(((i + 1) * perDay.length) / B)
@@ -226,8 +249,8 @@ export default function DashboardPage() {
             pillClass="sc-gray" pill={`${db.clients.length} total`} onClick={() => nav('/clients')} />
           <Stat icon="calendar" chipBg="#ebebfa" chipColor="#5856d6" num={todaySessions.length} label="Sessions today"
             pillClass="sc-indigo" pill={`${upcoming} upcoming`} onClick={() => nav('/schedule')} />
-          <Stat icon="activity" chipBg="var(--tint-green)" chipColor="var(--green)" num={adherence + '%'} label="Session adherence"
-            pillClass="sc-green" pill={`${done} done`} onClick={() => nav('/schedule')} />
+          <Stat icon="activity" chipBg="var(--tint-green)" chipColor="var(--green)" num={adhWin != null ? adhWin + '%' : '—'} label="Adherence · 30d"
+            pillClass="sc-green" pill={inWin.length ? `${doneWin}/${inWin.length} sessions` : 'no sessions'} trend={adhTrend} onClick={() => nav('/schedule')} />
           <Stat icon="alert" chipBg="var(--tint-amber)" chipColor="var(--accent2)" num={atRisk} label="At-risk clients"
             pillClass="sc-amber" pill={`${openC.length} concern${openC.length === 1 ? '' : 's'}`} onClick={() => nav('/concerns')} />
         </div>
@@ -237,10 +260,11 @@ export default function DashboardPage() {
             onClick={() => nav('/schedule')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/schedule') }} aria-label="Open schedule">
             <div className="dash-card-head">
               <div style={{ flex: 1 }}>
-                <div className="dash-card-title">Client activity</div>
-                <div className="dash-card-sub">Completed sessions across your roster</div>
+                <div className="dash-card-title">Roster activity</div>
+                <div className="dash-card-sub">{METRIC_META[metric].sub}</div>
               </div>
-              <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+              <span className="dash-chart-toggles" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                <SegToggle options={METRICS} value={metric} onChange={setMetric} ariaLabel="Activity metric" />
                 <SegToggle options={Object.keys(RANGE).map((k) => [k, k])} value={range} onChange={setRange} ariaLabel="Activity range" />
               </span>
             </div>
@@ -250,7 +274,7 @@ export default function DashboardPage() {
                 <div className="dash-xlabels"><span>{shortD(dates[0])}</span><span>{shortD(dates[dates.length - 1])}</span></div>
               </>
             ) : (
-              <div className="empty" style={{ padding: '48px 20px' }}><div className="big"><Icon name="chart" size={40} /></div>No completed sessions in this range yet.</div>
+              <div className="empty" style={{ padding: '48px 20px' }}><div className="big"><Icon name="chart" size={40} /></div>{METRIC_META[metric].empty} in this range yet.</div>
             )}
           </div>
 
