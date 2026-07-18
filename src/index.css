@@ -404,17 +404,27 @@ canvas{max-width:100%}
 .asr-hist{margin-top:12px;border-top:1px solid var(--border);padding-top:8px}
 .asr-hist-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
 .asr-hist-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
-/* Expandable record + its data detail */
-.asr-rec{border-radius:8px}
-.asr-rec .asr-hist-row{cursor:pointer;padding:6px 6px;border-radius:8px}
-.asr-rec .asr-hist-row:hover{background:var(--surface2)}
-.asr-rec.open .asr-hist-row{background:var(--surface2)}
 .asr-caret{font-size:10px;color:var(--muted);flex:none;width:10px}
 .asr-detail{display:grid;grid-template-columns:1fr;gap:2px;padding:6px 6px 10px 24px}
 .asr-kv{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--border)}
 .asr-kv:last-child{border-bottom:none}
 .asr-k{color:var(--muted);font-weight:600}
 .asr-v{font-weight:600;text-align:right}
+/* Assessment overview card (clickable → detail page) */
+.assess-card{cursor:pointer;transition:.12s}
+.assess-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(21,22,26,.06)}
+.assess-ov{margin-top:10px}
+.assess-ov-head{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px}
+.assess-ov-kv{display:flex;flex-direction:column}
+.assess-ov-foot{margin-top:8px;font-size:11px;font-weight:700;color:var(--accent)}
+.assess-ov.empty-ov{display:flex;align-items:center;gap:10px;justify-content:space-between}
+/* Assessment detail page — expandable entries */
+.ad-entry{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.ad-entry.open{border-color:var(--accent)}
+.ad-entry-head{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;font-size:12.5px}
+.ad-entry-head:hover{background:var(--surface2)}
+.ad-entry.open .ad-entry-head{background:var(--surface2)}
+.ad-entry-when{font-weight:700;white-space:nowrap}
 .asp-site{border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px}
 .ahr-date{color:var(--muted);white-space:nowrap}
 .ahr-sum{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

@@ -39,7 +39,7 @@ function useSave(clientId, type, buildData, extra, record) {
         const a = d.assessments.find((x) => x.id === record.id)
         if (a) { a.date = f.date; a.phase = f.phase; a.notes = (f.notes || '').trim(); a.data = buildData() }
       } else {
-        d.assessments.push({ id: uid(), clientId, type, date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: buildData() })
+        d.assessments.push({ id: uid(), clientId, type, date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: buildData(), createdAt: new Date().toISOString() })
       }
       extra?.(d)
     })

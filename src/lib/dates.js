@@ -49,6 +49,15 @@ export const fmtDay = (iso) => {
 export const fmtTime = (ts) =>
   ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
 
+// Date + time from a full ISO timestamp (e.g. an assessment's createdAt).
+// Returns '' for a missing/invalid value so callers can fall back to the date.
+export const fmtDateTime = (ts) => {
+  if (!ts) return ''
+  const d = new Date(ts)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
 // Month calendar grid: 42 ISO dates (6 Monday-anchored weeks) covering the month
 // that `anchorISO` falls in, including leading/trailing days from adjacent months.
 export const monthGridDates = (anchorISO) => {
