@@ -36,8 +36,10 @@ export function ClientForm({ client }) {
     if (!await confirmDialog({ title: 'Delete client', message: 'Delete this client and all their data? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
     commit((db) => {
       db.clients = db.clients.filter((c) => c.id !== client.id)
-      ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions'].forEach(
-        (k) => (db[k] = db[k].filter((x) => x.clientId !== client.id)),
+      // Remove every client-scoped collection so no orphaned records are left.
+      ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable', 'concerns',
+        'prescriptions', 'workouts', 'maxes', 'assessments', 'screenings'].forEach(
+        (k) => { if (db[k]) db[k] = db[k].filter((x) => x.clientId !== client.id) },
       )
     })
     closeModal()
