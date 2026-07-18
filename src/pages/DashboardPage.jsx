@@ -6,6 +6,7 @@ import Icon from '../components/atoms/Icon'
 import SegToggle from '../components/molecules/SegToggle'
 import BulkWellnessForm from '../components/organisms/forms/BulkWellnessForm'
 import SessionForm from '../components/organisms/forms/SessionForm'
+import { ClientForm } from '../components/organisms/forms/ClientForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { initials } from '../lib/format'
@@ -48,6 +49,17 @@ function Stat({ chipBg, chipColor, icon, num, label, pillClass, pill, trend, onC
 
 function StatusChip({ cls, label }) {
   return <span className={'sc ' + cls}><span className="sc-dot" />{label}</span>
+}
+
+// One step in the empty-state "Get started" checklist.
+function OnboardStep({ n, done, title, desc, action, onClick }) {
+  return (
+    <div className={'onb-step' + (done ? ' done' : '')}>
+      <span className="onb-num">{done ? '✓' : n}</span>
+      <div className="onb-txt"><div className="onb-title">{title}</div><div className="onb-desc">{desc}</div></div>
+      {done ? <span className="onb-tick">Done</span> : <button className="onb-btn" onClick={onClick}>{action}</button>}
+    </div>
+  )
 }
 
 // Circular progress ring (SVG). `pct` 0–100.
@@ -228,6 +240,14 @@ export default function DashboardPage() {
     .filter((w) => w.c)
     .slice(0, 5)
 
+  // Empty-state onboarding — show the "Get started" checklist only for a genuinely
+  // new setup (no baselines, no check-ins, no sessions yet), so it never nags an
+  // established trainer.
+  const hasClients = db.clients.length > 0
+  const hasBaseline = (db.assessments || []).length > 0
+  const hasCheckin = (db.wellness || []).length > 0 || (db.wearable || []).length > 0
+  const showOnboarding = !hasBaseline && !hasCheckin && db.sessions.length === 0
+
   const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
   return (
@@ -244,6 +264,23 @@ export default function DashboardPage() {
       </div>
 
       <div className="dash">
+        {showOnboarding && (
+          <div className="dash-onboard">
+            <div className="onb-head">
+              <span className="onb-head-ic"><Icon name="sparkles" size={18} /></span>
+              <div>
+                <div className="onb-head-title">Welcome — let’s set up your roster</div>
+                <div className="onb-head-sub">Three quick steps and your dashboard comes to life.</div>
+              </div>
+            </div>
+            <div className="onb-steps">
+              <OnboardStep n={1} done={hasClients} title="Add your first client" desc="Build your roster" action="Add client" onClick={() => openModal(<ClientForm />)} />
+              <OnboardStep n={2} done={hasBaseline} title="Record a baseline" desc="Fitness, movement &amp; body-comp" action="Open a client" onClick={() => nav('/clients')} />
+              <OnboardStep n={3} done={hasCheckin} title="Log morning check-ins" desc="Powers readiness &amp; load" action="Bulk check-in" onClick={() => openModal(<BulkWellnessForm />, true)} />
+            </div>
+          </div>
+        )}
+
         <div className="dash-stats">
           <Stat icon="users" chipBg="var(--tint-red)" chipColor="var(--accent)" num={active} label="Active clients"
             pillClass="sc-gray" pill={`${db.clients.length} total`} onClick={() => nav('/clients')} />
@@ -255,6 +292,70 @@ export default function DashboardPage() {
             pillClass="sc-amber" pill={`${openC.length} concern${openC.length === 1 ? '' : 's'}`} onClick={() => nav('/concerns')} />
         </div>
 
+        {/* ── TODAY ── schedule, next session, today's programming */}
+        <div className="dash-zone">Today</div>
+        <div className="dash-lists">
+          <div className="dash-list clickable" role="button" tabIndex={0}
+            onClick={() => nav('/schedule')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/schedule') }} aria-label="Open schedule">
+            <div className="dash-list-head">
+              <div className="dash-list-title">Today's schedule</div>
+              <button className="dash-viewall" onClick={(e) => { e.stopPropagation(); nav('/schedule') }}>View all</button>
+            </div>
+            {todaySessions.length ? todaySessions.map((s) => {
+              const c = db.clients.find((x) => x.id === s.clientId)
+              const isNext = next && s.id === next.id
+              const [cls, label] = isNext && s.status !== 'Completed' ? ['sc-indigo', 'Up next'] : (SSTATUS_CHIP[s.status] || ['sc-gray', s.status])
+              return (
+                <button key={s.id} className="dash-row" onClick={(e) => { e.stopPropagation(); openModal(<SessionForm session={s} />) }}>
+                  <span className="dash-time">{s.time}</span>
+                  <span className="dash-rinfo"><div className="t">{s.type}</div><div className="s">{c?.name || 'Client'}</div></span>
+                  <StatusChip cls={cls} label={label} />
+                </button>
+              )
+            }) : <div className="empty"><div className="big"><Icon name="coffee" size={40} /></div>No sessions today. Enjoy the rest!</div>}
+          </div>
+
+          <div className="dash-side">
+            {next ? (
+              <button className="dash-next" onClick={() => nav('/schedule')} aria-label="Open schedule">
+                <div className="dash-next-label">NEXT SESSION · {next.date === today ? next.time : fmtDay(next.date) + ' ' + next.time}</div>
+                <div className="dash-next-title">{next.type} · {nextClient?.name || 'Client'}</div>
+                <div className="dash-next-sub">{next.dur} min · {nextClient?.goal || 'Session'}</div>
+              </button>
+            ) : (
+              <button className="dash-next" onClick={() => nav('/schedule')} aria-label="Open schedule">
+                <div className="dash-next-label">NEXT SESSION</div>
+                <div className="dash-next-title">Nothing scheduled</div>
+                <div className="dash-next-sub">Book a session to see it here.</div>
+              </button>
+            )}
+
+            <div className="dash-card clickable" role="button" tabIndex={0}
+              onClick={() => nav('/workouts')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/workouts') }} aria-label="Open workouts">
+              <div className="dash-card-head">
+                <div style={{ flex: 1 }}>
+                  <div className="dash-card-title">Today's training</div>
+                  <div className="dash-card-sub">Prescribed workouts for {shortD(today)}</div>
+                </div>
+                <span className="muted" style={{ fontSize: 12 }}>{trainingToday.length} training · {restToday} rest</span>
+              </div>
+              {trainingToday.length ? trainingToday.slice(0, 4).map((t) => (
+                <button key={t.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + t.c.id) }}>
+                  <span className="dash-att-av" style={{ background: 'var(--tint-blue)', color: 'var(--blue)' }}><Icon name="dumbbell" size={15} /></span>
+                  <span className="dash-rinfo"><div className="t">{t.c.name}</div><div className="s">{t.name}</div></span>
+                </button>
+              )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="coffee" size={34} /></div>No workouts prescribed today.</div>}
+              {noPlan.length ? (
+                <button className="dash-noplan" onClick={(e) => { e.stopPropagation(); nav('/clients') }}>
+                  <Icon name="alert" size={13} /> {noPlan.length} active client{noPlan.length === 1 ? '' : 's'} with no program assigned
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        {/* ── ROSTER HEALTH ── readiness, load, wins, attention */}
+        <div className="dash-zone">Roster health</div>
         <div className="dash-insights">
           <div className="dash-card clickable" style={{ display: 'flex', flexDirection: 'column' }} role="button" tabIndex={0}
             onClick={() => nav('/schedule')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/schedule') }} aria-label="Open schedule">
@@ -288,24 +389,9 @@ export default function DashboardPage() {
               <div className="dash-ai-body">{curio.body}</div>
               <button className="dash-ai-btn" onClick={curio.onClick}>{curio.label} →</button>
             </div>
-
-            {next ? (
-              <button className="dash-next" onClick={() => nav('/schedule')} aria-label="Open schedule">
-                <div className="dash-next-label">NEXT SESSION · {next.date === today ? next.time : fmtDay(next.date) + ' ' + next.time}</div>
-                <div className="dash-next-title">{next.type} · {nextClient?.name || 'Client'}</div>
-                <div className="dash-next-sub">{next.dur} min · {nextClient?.goal || 'Session'}</div>
-              </button>
-            ) : (
-              <button className="dash-next" onClick={() => nav('/schedule')} aria-label="Open schedule">
-                <div className="dash-next-label">NEXT SESSION</div>
-                <div className="dash-next-title">Nothing scheduled</div>
-                <div className="dash-next-sub">Book a session to see it here.</div>
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Roster health — readiness distribution, load-risk flags, today's programming */}
         <div className="dash-health">
           <div className="dash-card dash-readiness clickable" role="button" tabIndex={0}
             onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Open clients roster">
@@ -368,26 +454,19 @@ export default function DashboardPage() {
               )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="check" size={34} /></div>No load-risk flags — training loads look balanced.</div>}
             </div>
 
-            <div className="dash-card clickable" role="button" tabIndex={0}
-              onClick={() => nav('/workouts')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/workouts') }} aria-label="Open workouts">
-              <div className="dash-card-head">
-                <div style={{ flex: 1 }}>
-                  <div className="dash-card-title">Today's training</div>
-                  <div className="dash-card-sub">Prescribed workouts for {shortD(today)}</div>
-                </div>
-                <span className="muted" style={{ fontSize: 12 }}>{trainingToday.length} training · {restToday} rest</span>
+            <div className="dash-list clickable" role="button" tabIndex={0}
+              onClick={() => nav('/concerns')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/concerns') }} aria-label="Open concerns">
+              <div className="dash-list-head">
+                <div className="dash-list-title">Needs attention</div>
+                <button className="dash-viewall" onClick={(e) => { e.stopPropagation(); nav('/concerns') }}>View all</button>
               </div>
-              {trainingToday.length ? trainingToday.slice(0, 4).map((t) => (
-                <button key={t.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + t.c.id) }}>
-                  <span className="dash-att-av" style={{ background: 'var(--tint-blue)', color: 'var(--blue)' }}><Icon name="dumbbell" size={15} /></span>
-                  <span className="dash-rinfo"><div className="t">{t.c.name}</div><div className="s">{t.name}</div></span>
+              {attention.length ? attention.map((a) => (
+                <button key={a.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + a.c.id) }}>
+                  <span className="dash-att-av" style={a.tone === 'red' ? { background: 'var(--tint-red)', color: 'var(--accent)' } : { background: 'var(--tint-amber)', color: 'var(--accent2)' }}>{initials(a.c.name)}</span>
+                  <span className="dash-rinfo"><div className="t">{a.c.name}</div><div className="s">{a.reason}</div></span>
+                  <StatusChip cls={a.tone === 'red' ? 'sc-red' : 'sc-amber'} label={a.chip} />
                 </button>
-              )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="coffee" size={34} /></div>No workouts prescribed today.</div>}
-              {noPlan.length ? (
-                <button className="dash-noplan" onClick={(e) => { e.stopPropagation(); nav('/clients') }}>
-                  <Icon name="alert" size={13} /> {noPlan.length} active client{noPlan.length === 1 ? '' : 's'} with no program assigned
-                </button>
-              ) : null}
+              )) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="check" size={40} /></div>All clear — no clients need attention.</div>}
             </div>
           </div>
         </div>
@@ -424,43 +503,6 @@ export default function DashboardPage() {
                 <span className="dash-rinfo"><div className="t">{w.c.name} · {w.m.exercise}</div><div className="s">{w.m.valueKg} kg 1RM · {shortD(w.m.date)}</div></span>
               </button>
             )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="activity" size={34} /></div>No personal bests logged yet.</div>}
-          </div>
-        </div>
-
-        <div className="dash-lists">
-          <div className="dash-list clickable" role="button" tabIndex={0}
-            onClick={() => nav('/schedule')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/schedule') }} aria-label="Open schedule">
-            <div className="dash-list-head">
-              <div className="dash-list-title">Today's schedule</div>
-              <button className="dash-viewall" onClick={(e) => { e.stopPropagation(); nav('/schedule') }}>View all</button>
-            </div>
-            {todaySessions.length ? todaySessions.map((s) => {
-              const c = db.clients.find((x) => x.id === s.clientId)
-              const isNext = next && s.id === next.id
-              const [cls, label] = isNext && s.status !== 'Completed' ? ['sc-indigo', 'Up next'] : (SSTATUS_CHIP[s.status] || ['sc-gray', s.status])
-              return (
-                <button key={s.id} className="dash-row" onClick={(e) => { e.stopPropagation(); openModal(<SessionForm session={s} />) }}>
-                  <span className="dash-time">{s.time}</span>
-                  <span className="dash-rinfo"><div className="t">{s.type}</div><div className="s">{c?.name || 'Client'}</div></span>
-                  <StatusChip cls={cls} label={label} />
-                </button>
-              )
-            }) : <div className="empty"><div className="big"><Icon name="coffee" size={40} /></div>No sessions today. Enjoy the rest!</div>}
-          </div>
-
-          <div className="dash-list clickable" role="button" tabIndex={0}
-            onClick={() => nav('/concerns')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/concerns') }} aria-label="Open concerns">
-            <div className="dash-list-head">
-              <div className="dash-list-title">Needs attention</div>
-              <button className="dash-viewall" onClick={(e) => { e.stopPropagation(); nav('/concerns') }}>View all</button>
-            </div>
-            {attention.length ? attention.map((a) => (
-              <button key={a.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + a.c.id) }}>
-                <span className="dash-att-av" style={a.tone === 'red' ? { background: 'var(--tint-red)', color: 'var(--accent)' } : { background: 'var(--tint-amber)', color: 'var(--accent2)' }}>{initials(a.c.name)}</span>
-                <span className="dash-rinfo"><div className="t">{a.c.name}</div><div className="s">{a.reason}</div></span>
-                <StatusChip cls={a.tone === 'red' ? 'sc-red' : 'sc-amber'} label={a.chip} />
-              </button>
-            )) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="check" size={40} /></div>All clear — no clients need attention.</div>}
           </div>
         </div>
       </div>

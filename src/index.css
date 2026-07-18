@@ -546,6 +546,26 @@ canvas{max-width:100%}
 .dash-next-label{font-size:10px;font-weight:800;letter-spacing:.8px;opacity:.64}
 .dash-next-title{font-size:18px;font-weight:600}
 .dash-next-sub{font-size:12px;font-weight:500;opacity:.72}
+/* Zone headers — group the dashboard into Today vs Roster health */
+.dash-zone{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 2px -2px;display:flex;align-items:center;gap:10px}
+.dash-zone::after{content:'';flex:1;height:1px;background:var(--border)}
+/* Empty-state onboarding checklist */
+.dash-onboard{background:linear-gradient(135deg,var(--tint-blue),var(--surface));border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+.onb-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.onb-head-ic{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface);color:var(--blue);flex:none;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.onb-head-title{font-size:16px;font-weight:800}
+.onb-head-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.onb-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.onb-step{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.onb-step.done{opacity:.7}
+.onb-num{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:var(--tint-blue);color:var(--blue)}
+.onb-step.done .onb-num{background:var(--tint-green);color:var(--green)}
+.onb-txt{flex:1}
+.onb-title{font-size:14px;font-weight:700}
+.onb-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.onb-btn{align-self:flex-start;font-size:12px;font-weight:700;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 0}
+.onb-tick{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--green)}
+@media(max-width:720px){.onb-steps{grid-template-columns:1fr}}
 /* Roster health — readiness meter, load-risk, today's training */
 .dash-health{display:flex;flex-direction:column;gap:16px}
 .dash-health-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
