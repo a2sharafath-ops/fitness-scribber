@@ -319,28 +319,19 @@ export function ensureProgramShape(db) {
   return db
 }
 
-// Reconcile db.exercises to the imported Strength-Training-Manual library:
-//   • drop any exercise whose name isn't in the library (the trainer wants the
-//     library to be the single source of truth — no stray demo/custom rows),
-//   • backfill library metadata (pattern / category / %1RM-relative) onto rows
-//     that already exist by name, and
-//   • add any library exercise that's missing.
-// Matches by case-insensitive name and runs on every load via ensureProgramShape,
-// so both fresh seeds and existing databases end up with exactly the library.
+// Merge the imported Strength-Training-Manual library into db.exercises, removing
+// only DUPLICATES. Any existing exercise whose name is also in the library is a
+// duplicate of a library entry, so it's dropped and the canonical library
+// version stands (with full pattern / %1RM-relative metadata). Existing
+// exercises NOT in the library (custom or seeded extras) are kept untouched.
+// Runs on every load via ensureProgramShape.
 export function mergeExerciseLibrary(db) {
   if (!db.exercises) db.exercises = []
-  const lib = new Map(EXERCISE_LIBRARY.map((x) => [x.name.toLowerCase(), x]))
-  db.exercises = db.exercises
-    .filter((e) => lib.has(String(e.name).toLowerCase()))
-    .map((e) => {
-      const x = lib.get(String(e.name).toLowerCase())
-      return { ...e, category: e.category ?? x.category, pattern: e.pattern ?? x.pattern, relPct: e.relPct ?? x.relPct ?? null, relTo: e.relTo ?? x.relTo ?? null }
-    })
-  const have = new Set(db.exercises.map((e) => String(e.name).toLowerCase()))
+  const libNames = new Set(EXERCISE_LIBRARY.map((x) => x.name.toLowerCase()))
+  // Keep the extras (names not in the library); library-named rows are the
+  // duplicates and get replaced by the canonical versions added below.
+  db.exercises = db.exercises.filter((e) => !libNames.has(String(e.name).toLowerCase()))
   for (const x of EXERCISE_LIBRARY) {
-    const key = x.name.toLowerCase()
-    if (have.has(key)) continue
-    have.add(key)
     db.exercises.push({
       id: uid(),
       name: x.name, muscle: x.muscle, equip: x.equip, difficulty: x.difficulty,
