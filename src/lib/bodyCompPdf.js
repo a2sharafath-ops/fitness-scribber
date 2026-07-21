@@ -22,12 +22,17 @@ const LB_TO_KG = 0.45359237
 // the first label that yields an in-range number wins. `range` is a sanity gate
 // in the field's canonical unit — values outside it are treated as a mis-read
 // (usually a page number or a reference-range bound picked up by mistake).
+// `concepts` are the fallback: groups of ideas that together identify the
+// measurement. Every token in a group must appear on the line, in any order,
+// allowing for extra words and light OCR damage. Groups are ordered most
+// specific first, because the first that yields a plausible number wins.
 const FIELDS = [
   {
     key: 'massKg',
     unit: 'kg',
     range: [20, 350],
     labels: ['body weight', 'weight', 'total mass', 'peso'],
+    concepts: [['body', 'weight'], ['total', 'mass'], ['weight']],
   },
   {
     key: 'bodyFatPct',
@@ -36,30 +41,38 @@ const FIELDS = [
     // PBF = InBody's "Percent Body Fat". Order matters: more specific first, so
     // "body fat mass" (kg) can't be mistaken for the percentage.
     labels: ['percent body fat', 'body fat percentage', 'total body fat %', 'body fat %', 'pbf', '% body fat', '% fat', 'fat %'],
+    concepts: [['percent', 'body', 'fat'], ['body', 'fat', 'percentage'], ['pbf']],
   },
   {
     key: 'leanMassKg',
     unit: 'kg',
     range: [10, 200],
     labels: ['fat free mass', 'fat-free mass', 'lean body mass', 'lean mass', 'ffm', 'lbm'],
+    concepts: [['fat', 'free', 'mass'], ['lean', 'body', 'mass'], ['lean', 'mass'], ['ffm'], ['lbm']],
   },
   {
     key: 'skeletalMuscleKg',
     unit: 'kg',
     range: [5, 100],
     labels: ['skeletal muscle mass', 'skeletal muscle', 'muscle mass', 'smm'],
+    // "skeletal muscle" alone is enough — the trailing "mass" is optional, which
+    // is what lets a sheet saying "Skeletal Muscle Mass" fill a field we call
+    // "Skeletal muscle". "muscle mass" is a separate, looser group.
+    concepts: [['skeletal', 'muscle'], ['muscle', 'mass'], ['smm']],
   },
   {
     key: 'visceralFat',
     unit: 'raw',
     range: [1, 60],
     labels: ['visceral fat level', 'visceral fat area', 'visceral fat rating', 'visceral fat', 'vfa', 'vfl'],
+    concepts: [['visceral', 'fat']],
   },
   {
     key: 'hydrationL',
     unit: 'L',
     range: [5, 100],
     labels: ['total body water', 'body water', 'tbw'],
+    concepts: [['total', 'body', 'water'], ['body', 'water'], ['tbw']],
   },
 ]
 
@@ -173,6 +186,72 @@ function dropAxisRuns(toks) {
   return out
 }
 
+// ---- Fuzzy (concept) matching ----------------------------------------------
+// Exact phrases are brittle: a report may say "Skeletal Muscle Mass" where we
+// expect "Skeletal Muscle", may reorder words, or may have a letter chewed up
+// by OCR. Concept matching asks a looser question — does this line mention all
+// the ideas that identify the measurement? — regardless of order or wording.
+
+// Levenshtein distance, abandoned once it exceeds `max` (we only care about
+// near-misses, and bailing early keeps this cheap inside the line scan).
+function editDistance(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i]
+    let best = i
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+      if (cur[j] < best) best = cur[j]
+    }
+    if (best > max) return max + 1
+    prev = cur
+  }
+  return prev[b.length]
+}
+
+// How forgiving to be depends on length. Abbreviations (smm, tbw, pbf, ffm) must
+// match exactly — at three letters, one substitution reaches a different word.
+function tokenMatches(token, word) {
+  if (token === word) return true
+  if (token.length < 5) return false
+  // The first letter must agree. Edit distance alone is not enough to tell
+  // clinical terms apart — "intracellular" and "extracellular" are only two
+  // edits from each other, and treating them as the same word made total body
+  // water come out as double the extracellular figure. Distinguishing prefixes
+  // (intra/extra, hyper/hypo) differ at the start, while OCR damage rarely
+  // lands on the leading glyph, so anchoring there separates the two cases.
+  if (token[0] !== word[0]) return false
+  // Two edits from six letters up: OCR merges "cl" into "d" and "rn" into "m",
+  // so "muscle" arrives as "musde" — a distance of two, not one.
+  const tol = token.length >= 6 ? 2 : 1
+  return editDistance(token, word, tol) <= tol
+}
+
+// Splits a line into words with the index just past each, so we can read the
+// numbers that follow the concept rather than any number on the line.
+function wordsWithEnd(line) {
+  const out = []
+  const re = /[a-z0-9%]+/g
+  let m
+  while ((m = re.exec(line)) !== null) out.push({ word: m[0], end: m.index + m[0].length })
+  return out
+}
+
+// True when every token in the group appears somewhere on the line; returns the
+// position after the last of them, which is where the value normally sits.
+function conceptEnd(line, group) {
+  const words = wordsWithEnd(line)
+  let last = -1
+  for (const token of group) {
+    let hit = -1
+    for (const w of words) if (tokenMatches(token, w.word)) { hit = Math.max(hit, w.end) }
+    if (hit < 0) return -1
+    last = Math.max(last, hit)
+  }
+  return last
+}
+
 /**
  * Find a field's value by scanning line by line.
  *
@@ -193,27 +272,44 @@ function findField(lines, field) {
       while ((m = re.exec(lines[i])) !== null) {
         const before = lines[i].slice(0, m.index)
         if (QUALIFIER.test(before)) continue          // "target weight", "weight control"…
-        const after = lines[i].slice(m.index + m[0].length)
+        const v = valueAfter(field, lines, i, m.index + m[0].length)
+        if (v != null) return v
+      }
+    }
+  }
 
-        const here = dropAxisRuns(numbersIn(after))
-        for (const tok of here) {
-          const v = canonical(field, tok)
-          if (v != null) return v
-        }
-        // Fall to the next line only when this label carried no number of its
-        // own — i.e. it is a heading sitting above its value, as chart rows are.
-        // Without this guard a section header ("Body Water Analysis") would
-        // swallow whatever number happened to follow it.
-        if (here.length === 0) {
-          const next = dropAxisRuns(numbersIn(lines[i + 1] || ''))
-          // A dense line is someone else's data, not this label's value.
-          if (next.length > 0 && next.length <= 3) {
-            for (const tok of next) {
-              const v = canonical(field, tok)
-              if (v != null) return v
-            }
-          }
-        }
+  // Nothing matched by exact phrase — try the looser concept match, which
+  // tolerates extra words ("Skeletal Muscle" vs "Skeletal Muscle Mass"),
+  // reordering, and single-character OCR damage.
+  for (let i = 0; i < lines.length; i++) {
+    for (const group of field.concepts || []) {
+      const end = conceptEnd(lines[i], group)
+      if (end < 0) continue
+      const v = valueAfter(field, lines, i, end)
+      if (v != null) return v
+    }
+  }
+  return null
+}
+
+// Reads the value belonging to a label that ends at `from` on line `i`.
+function valueAfter(field, lines, i, from) {
+  const here = dropAxisRuns(numbersIn(lines[i].slice(from)))
+  for (const tok of here) {
+    const v = canonical(field, tok)
+    if (v != null) return v
+  }
+  // Fall to the next line only when this label carried no number of its own —
+  // i.e. it is a heading sitting above its value, as chart rows are. Without
+  // this guard a section header ("Body Water Analysis") would swallow whatever
+  // number happened to follow it.
+  if (here.length === 0) {
+    const next = dropAxisRuns(numbersIn(lines[i + 1] || ''))
+    // A dense line is someone else's data, not this label's value.
+    if (next.length > 0 && next.length <= 3) {
+      for (const tok of next) {
+        const v = canonical(field, tok)
+        if (v != null) return v
       }
     }
   }
@@ -264,9 +360,9 @@ export function parseBodyComp(text, opts = {}) {
 
 // Measurements used only to reconstruct missing fields.
 const HELPERS = [
-  { key: 'fatMassKg', unit: 'kg', range: [1, 150], labels: ['body fat mass', 'fat mass'] },
-  { key: 'icwL', unit: 'L', range: [3, 60], labels: ['intracellular water', 'icw'] },
-  { key: 'ecwL', unit: 'L', range: [2, 40], labels: ['extracellular water', 'ecw'] },
+  { key: 'fatMassKg', unit: 'kg', range: [1, 150], labels: ['body fat mass', 'fat mass'], concepts: [['body', 'fat', 'mass'], ['fat', 'mass']] },
+  { key: 'icwL', unit: 'L', range: [3, 60], labels: ['intracellular water', 'icw'], concepts: [['intracellular', 'water']] },
+  { key: 'ecwL', unit: 'L', range: [2, 40], labels: ['extracellular water', 'ecw'], concepts: [['extracellular', 'water']] },
 ]
 
 const inRange = (v, lo, hi) => v != null && Number.isFinite(v) && v >= lo && v <= hi
