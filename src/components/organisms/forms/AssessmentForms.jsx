@@ -8,6 +8,7 @@ import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
 import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax } from '../../../lib/assessment'
+import { FIELD_LABELS, parseBodyComp } from '../../../lib/bodyCompPdf'
 import Icon from '../../atoms/Icon'
 import Autocomplete from '../../molecules/Autocomplete'
 
@@ -73,6 +74,41 @@ export function MovementScreenForm({ clientId, record, defaultPhase }) {
   )
 }
 
+// Upload control for a device report (InBody / DEXA / BIA printout). Reading the
+// PDF only pre-fills the form — nothing is stored until the coach saves.
+function PdfImport({ pdf, imported, onPick }) {
+  const filled = imported.map((k) => FIELD_LABELS[k]).filter(Boolean)
+  return (
+    <div className="bc-import">
+      <label className={'bc-drop' + (pdf.busy ? ' busy' : '')}>
+        <input type="file" accept="application/pdf,.pdf" disabled={pdf.busy}
+          onChange={(e) => { onPick(e.target.files?.[0]); e.target.value = '' }} />
+        <span className="bc-drop-ic"><Icon name={pdf.busy ? 'activity' : 'clipboard'} size={18} /></span>
+        <span className="bc-drop-txt">
+          <b>{pdf.busy ? 'Reading report…' : 'Upload device report (PDF)'}</b>
+          <em>{pdf.busy ? pdf.name : 'InBody, DEXA or BIA printout — fields fill in automatically'}</em>
+        </span>
+      </label>
+      {pdf.error && <div className="bc-import-msg err" role="alert"><Icon name="alert" size={13} /> {pdf.error}</div>}
+      {!pdf.error && filled.length > 0 && (
+        <div className="bc-import-msg ok" role="status">
+          <Icon name="check" size={13} /> Filled {filled.length} field{filled.length === 1 ? '' : 's'} from <b>{pdf.name}</b>: {filled.join(', ')}. Check them before saving.
+        </div>
+      )}
+    </div>
+  )
+}
+
+// A body-comp number input that shows whether its value came from the PDF.
+function BcField({ label, k, f, set, imported, step = '0.1' }) {
+  const fromPdf = imported.includes(k)
+  return (
+    <Field label={<>{label}{fromPdf && <span className="bc-tag" title="Filled from the uploaded PDF">PDF</span>}</>}>
+      <input type="number" step={step} value={f[k]} onChange={set(k)} className={fromPdf ? 'bc-filled' : undefined} />
+    </Field>
+  )
+}
+
 // ---- Body composition (InBody / BIA / calipers) ----
 export function BodyCompForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
@@ -82,7 +118,42 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
     massKg: d0.massKg ?? '', bodyFatPct: d0.bodyFatPct ?? '', leanMassKg: d0.leanMassKg ?? '',
     skeletalMuscleKg: d0.skeletalMuscleKg ?? '', visceralFat: d0.visceralFat ?? '', hydrationL: d0.hydrationL ?? '',
   })
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  // Which fields the last PDF import filled — drives the "from PDF" highlight.
+  const [imported, setImported] = useState([])
+  // Editing a field by hand makes it the coach's own value, so drop its flag.
+  const set = (k) => (e) => {
+    setF({ ...f, [k]: e.target.value })
+    setImported((prev) => prev.filter((x) => x !== k))
+  }
+  const [pdf, setPdf] = useState({ busy: false, name: '', error: '' })
+
+  // Read a device report and pre-fill the form. Values are never saved
+  // automatically — the coach reviews them and presses Save as usual.
+  const onPdf = async (file) => {
+    if (!file) return
+    setPdf({ busy: true, name: file.name, error: '' })
+    try {
+      // pdf.js is ~330 kB, so it loads only when a report is actually uploaded.
+      const { extractPdfText } = await import('../../../lib/pdfText')
+      const { values, found, method, date } = parseBodyComp(await extractPdfText(file))
+      if (!found.length) {
+        setPdf({ busy: false, name: file.name, error: "Couldn't find any body-composition values in that report. Enter them manually below." })
+        setImported([])
+        return
+      }
+      setF((prev) => ({
+        ...prev,
+        ...Object.fromEntries(found.map((k) => [k, values[k]])),
+        ...(method ? { method } : {}),
+        ...(date && !record ? { date } : {}),
+      }))
+      setImported(found)
+      setPdf({ busy: false, name: file.name, error: '' })
+    } catch (err) {
+      setImported([])
+      setPdf({ busy: false, name: file.name, error: err?.message || 'That PDF could not be read.' })
+    }
+  }
   const data = () => ({
     method: f.method, massKg: numOrNull(f.massKg), bodyFatPct: numOrNull(f.bodyFatPct),
     leanMassKg: numOrNull(f.leanMassKg), skeletalMuscleKg: numOrNull(f.skeletalMuscleKg),
@@ -102,18 +173,19 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
     <ModalShell title={<><Icon name="tuning" size={16} /> Body composition</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
+      <PdfImport pdf={pdf} imported={imported} onPick={onPdf} />
       <Field label="Method">
         <select value={f.method} onChange={set('method')}><option>InBody</option><option>BIA</option><option>Calipers</option><option>DEXA</option></select>
       </Field>
       <div className="row3">
-        <Field label="Body mass (kg)"><input type="number" step="0.1" value={f.massKg} onChange={set('massKg')} /></Field>
-        <Field label="Body fat (%)"><input type="number" step="0.1" value={f.bodyFatPct} onChange={set('bodyFatPct')} /></Field>
-        <Field label="Lean mass (kg)"><input type="number" step="0.1" value={f.leanMassKg} onChange={set('leanMassKg')} /></Field>
+        <BcField label="Body mass (kg)" k="massKg" f={f} set={set} imported={imported} />
+        <BcField label="Body fat (%)" k="bodyFatPct" f={f} set={set} imported={imported} />
+        <BcField label="Lean mass (kg)" k="leanMassKg" f={f} set={set} imported={imported} />
       </div>
       <div className="row3">
-        <Field label="Skeletal muscle (kg)"><input type="number" step="0.1" value={f.skeletalMuscleKg} onChange={set('skeletalMuscleKg')} /></Field>
-        <Field label="Visceral fat"><input type="number" step="1" value={f.visceralFat} onChange={set('visceralFat')} /></Field>
-        <Field label="Total body water (L)"><input type="number" step="0.1" value={f.hydrationL} onChange={set('hydrationL')} /></Field>
+        <BcField label="Skeletal muscle (kg)" k="skeletalMuscleKg" f={f} set={set} imported={imported} />
+        <BcField label="Visceral fat" k="visceralFat" f={f} set={set} imported={imported} step="1" />
+        <BcField label="Total body water (L)" k="hydrationL" f={f} set={set} imported={imported} />
       </div>
       <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Device, hydration state, time of day…" /></Field>
     </ModalShell>
