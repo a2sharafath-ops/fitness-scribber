@@ -10,9 +10,6 @@
 // Kept separate from the PDF reading itself (see pdfText.js) so the matching
 // logic can be unit-tested against plain strings.
 
-// Accepts "12.3", "12,3" (EU decimal comma) and thin/nbsp-padded numbers.
-const NUM = String.raw`(-?\d{1,3}(?:[.,]\d{1,2})?)`
-
 const toNum = (s) => {
   const n = Number(String(s).replace(',', '.'))
   return Number.isFinite(n) ? n : null
@@ -114,17 +111,113 @@ const labelPattern = (label) =>
     .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .join(String.raw`\s*`)
 
-// Finds `label` followed by a number, tolerating the separators reports use
-// between a label and its value: colons, dots/leader dots, parenthesised units,
-// and plain whitespace/newlines. Returns { value, unit } or null.
-function matchLabel(text, label) {
-  // Between label and number allow: separators, an optional unit-in-parens like
-  // "(kg)" or "(%)", and up to ~40 chars of leader dots/spaces.
-  const sep = String.raw`(?:\s*[:=]\s*|\s*\([^)]{0,12}\)\s*|[\s.]{0,40})`
-  const re = new RegExp(labelPattern(label) + sep + NUM + String.raw`\s*(kg|lbs?|%|l\b|cm2|cm²)?`, 'i')
-  const m = re.exec(text)
-  if (!m) return null
-  return { value: toNum(m[1]), unit: (m[2] || '').toLowerCase() }
+// Words that turn a label into a *different* measurement. InBody's "Weight
+// Control" panel prints "Target Weight 96.8 kg" right next to the real weight,
+// and matching it silently fills the form with the wrong number — worse than
+// filling nothing. Any label preceded by one of these is skipped.
+const QUALIFIER = /(target|ideal|goal|desirable|recommended?|standard|control|normal|min|max|range|per|based)\W{0,3}$/
+
+// InBody prints a "Weight Control" panel — Target Weight, Weight Control, Fat
+// Control — immediately beside the real measurements. Those are goals, not
+// readings, and sit close enough that any nearby-number strategy will pick them
+// up. Blanking the number that follows a goal word removes the trap entirely,
+// which matters more than the missed field: a silently wrong weight is worse
+// than an empty one.
+const maskGoals = (t) =>
+  t.replace(/\b(target|ideal|goal|desirable|recommended?)\b[^\d\n]{0,25}-?\d+(?:\.\d+)?/gi, '$1 ')
+
+// Reference ranges — "(46.1~56.3)", "( 1~9 )", "(kg)" — are not values.
+// Stripping them before reading numbers stops a range bound being mistaken for
+// the measurement.
+const stripRanges = (line) =>
+  line
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/-?\d[\d.]*\s*[~∼]\s*-?\d[\d.]*/g, ' ')
+
+// Pulls the numbers out of a line, in order, each with any unit written
+// directly after it. Carrying the unit per number (rather than sniffing near
+// the label) is what keeps "Weight ....... 165.3 lb" convertible — the leader
+// dots can put the value far from its label, but never from its own unit.
+function numbersIn(line) {
+  const re = /(-?\d+(?:\.\d+)?)\s*(kgs?|lbs?|%|l)?\b/gi
+  const out = []
+  let m
+  while ((m = re.exec(stripRanges(line))) !== null) {
+    const value = toNum(m[1])
+    if (value != null) out.push({ value, unit: (m[2] || '').toLowerCase() })
+  }
+  return out
+}
+
+// InBody and DEXA print bar-chart scales ("0.0 5.0 10.0 … 50.0") between a label
+// and its value. Such a run is evenly spaced and ascending; the real reading is
+// whatever follows it. Detecting and dropping the run is what lets the value be
+// found at all on chart rows.
+function dropAxisRuns(toks) {
+  const out = []
+  let i = 0
+  while (i < toks.length) {
+    let j = i + 1
+    while (j < toks.length && toks[j].value > toks[j - 1].value) j++
+    const run = toks.slice(i, j)
+    // A scale is a long ascending run whose steps are near-constant.
+    let isAxis = false
+    if (run.length >= 4) {
+      const steps = run.slice(1).map((t, k) => t.value - run[k].value)
+      const avg = steps.reduce((a, b) => a + b, 0) / steps.length
+      isAxis = avg > 0 && steps.every((s) => Math.abs(s - avg) <= Math.max(avg * 0.45, 0.6))
+    }
+    if (!isAxis) out.push(...run)
+    i = j
+  }
+  return out
+}
+
+/**
+ * Find a field's value by scanning line by line.
+ *
+ * Flat whole-document regexes fail on real report layouts, where the value can
+ * be separated from its label by a chart scale or pushed onto the next line.
+ * Working per line keeps the label and its value associated, and lets us fall
+ * through to the following line when the label's own line holds only a scale.
+ */
+function findField(lines, field) {
+  for (let i = 0; i < lines.length; i++) {
+    for (const label of field.labels) {
+      // A label must start at a word boundary, or "weight" matches inside the
+      // run-together words OCR produces ("oncurrentweightmemmm") and picks up a
+      // neighbouring chart figure. No trailing boundary: OCR routinely fuses a
+      // label with its unit ("Body Fat Mass (kg)" → "body fat masstkg").
+      const re = new RegExp('(?:^|[^a-z0-9])' + labelPattern(label), 'gi')
+      let m
+      while ((m = re.exec(lines[i])) !== null) {
+        const before = lines[i].slice(0, m.index)
+        if (QUALIFIER.test(before)) continue          // "target weight", "weight control"…
+        const after = lines[i].slice(m.index + m[0].length)
+
+        const here = dropAxisRuns(numbersIn(after))
+        for (const tok of here) {
+          const v = canonical(field, tok)
+          if (v != null) return v
+        }
+        // Fall to the next line only when this label carried no number of its
+        // own — i.e. it is a heading sitting above its value, as chart rows are.
+        // Without this guard a section header ("Body Water Analysis") would
+        // swallow whatever number happened to follow it.
+        if (here.length === 0) {
+          const next = dropAxisRuns(numbersIn(lines[i + 1] || ''))
+          // A dense line is someone else's data, not this label's value.
+          if (next.length > 0 && next.length <= 3) {
+            for (const tok of next) {
+              const v = canonical(field, tok)
+              if (v != null) return v
+            }
+          }
+        }
+      }
+    }
+  }
+  return null
 }
 
 // Converts a raw match into the field's canonical unit, or null if implausible.
@@ -149,27 +242,83 @@ function canonical(field, hit) {
  *   UI can flag which inputs came from the PDF rather than the coach.
  */
 export function parseBodyComp(text, opts = {}) {
-  const t = normalize(opts.ocr ? repairOcrText(text) : text)
+  const t = maskGoals(normalize(opts.ocr ? repairOcrText(text) : text))
   const values = {}
   const found = []
   if (!t.trim()) return { values, found, method: null, date: null }
 
+  const lines = t.split('\n')
   for (const field of FIELDS) {
-    for (const label of field.labels) {
-      const v = canonical(field, matchLabel(t, label))
-      if (v != null) { values[field.key] = v; found.push(field.key); break }
-    }
+    const v = findField(lines, field)
+    if (v != null) { values[field.key] = v; found.push(field.key) }
   }
 
-  // Derive lean mass when the report gave weight + body fat % but no explicit
-  // FFM line (common on minimal BIA printouts). Marked as found so the coach
-  // sees it was filled from the PDF, but it is arithmetic, not a reading.
-  if (values.leanMassKg == null && values.massKg != null && values.bodyFatPct != null) {
-    const lean = Math.round(values.massKg * (1 - values.bodyFatPct / 100) * 10) / 10
-    if (lean >= 10 && lean <= 200) { values.leanMassKg = lean; found.push('leanMassKg') }
-  }
+  // Helper measurements we don't store, but which reconstruct the ones we do.
+  // On a dense InBody sheet these read far more reliably than the headline
+  // numbers, because they sit in plain label-value panels rather than charts.
+  const extra = Object.fromEntries(HELPERS.map((h) => [h.key, findField(lines, h)]))
+  derive(values, found, extra)
 
   return { values, found, method: detectMethod(t), date: detectDate(t) }
+}
+
+// Measurements used only to reconstruct missing fields.
+const HELPERS = [
+  { key: 'fatMassKg', unit: 'kg', range: [1, 150], labels: ['body fat mass', 'fat mass'] },
+  { key: 'icwL', unit: 'L', range: [3, 60], labels: ['intracellular water', 'icw'] },
+  { key: 'ecwL', unit: 'L', range: [2, 40], labels: ['extracellular water', 'ecw'] },
+]
+
+const inRange = (v, lo, hi) => v != null && Number.isFinite(v) && v >= lo && v <= hi
+const r1 = (v) => Math.round(v * 10) / 10
+
+/**
+ * Fill gaps by arithmetic on values the report itself printed.
+ *
+ * Every relation here is an identity, not an estimate: fat-free mass really is
+ * weight minus fat mass. Derivation only ever fills a field left empty by
+ * matching, never overrides a direct reading, and each result must land in a
+ * plausible range to be accepted.
+ */
+function derive(values, found, extra = {}) {
+  // Fills an empty field, or sharpens one whose decimal OCR dropped. These
+  // reports print weights to one decimal, so a direct read that came back a
+  // whole number lost its point ("97.4" → "97"); when an exact identity agrees
+  // to within a unit, that identity is the better-preserved value. The number
+  // never changes materially — this only restores precision.
+  const add = (key, v) => {
+    if (v == null) return
+    const cur = values[key]
+    if (cur == null) { values[key] = v; found.push(key); return }
+    if (Number.isInteger(cur) && !Number.isInteger(v) && Math.abs(v - cur) < 1) values[key] = v
+  }
+  const { fatMassKg, icwL, ecwL } = extra
+
+  // Total body water = intracellular + extracellular.
+  if (inRange(icwL, 3, 60) && inRange(ecwL, 2, 40)) {
+    const tbw = r1(icwL + ecwL)
+    if (inRange(tbw, 5, 100)) add('hydrationL', tbw)
+  }
+  // Body fat % from fat mass and weight.
+  if (inRange(fatMassKg, 1, 150) && inRange(values.massKg, 20, 350)) {
+    const pct = r1((fatMassKg / values.massKg) * 100)
+    if (inRange(pct, 1, 75)) add('bodyFatPct', pct)
+  }
+  // Weight back out of fat mass and fat % — recovers the headline number when
+  // it is buried in a chart, as it is on the InBody 570 sheet.
+  if (inRange(fatMassKg, 1, 150) && inRange(values.bodyFatPct, 1, 75)) {
+    const mass = r1(fatMassKg / (values.bodyFatPct / 100))
+    if (inRange(mass, 20, 350)) add('massKg', mass)
+  }
+  // Lean (fat-free) mass = weight − fat mass, else weight × (1 − fat%).
+  if (inRange(fatMassKg, 1, 150) && inRange(values.massKg, 20, 350)) {
+    const lean = r1(values.massKg - fatMassKg)
+    if (inRange(lean, 10, 200)) add('leanMassKg', lean)
+  }
+  if (inRange(values.massKg, 20, 350) && inRange(values.bodyFatPct, 1, 75)) {
+    const lean = r1(values.massKg * (1 - values.bodyFatPct / 100))
+    if (inRange(lean, 10, 200)) add('leanMassKg', lean)
+  }
 }
 
 // Identifies the device so the form's Method dropdown can be preset. Returns one
