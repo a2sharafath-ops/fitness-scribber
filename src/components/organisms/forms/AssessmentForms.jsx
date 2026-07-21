@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
@@ -74,25 +74,35 @@ export function MovementScreenForm({ clientId, record, defaultPhase }) {
   )
 }
 
-// Upload control for a device report (InBody / DEXA / BIA printout). Reading the
-// PDF only pre-fills the form — nothing is stored until the coach saves.
+// Upload control for a device report (InBody / DEXA / BIA printout, or a scan
+// or photo of one). Reading the file only pre-fills the form — nothing is
+// stored until the coach saves.
 function PdfImport({ pdf, imported, onPick }) {
   const filled = imported.map((k) => FIELD_LABELS[k]).filter(Boolean)
   return (
     <div className="bc-import">
       <label className={'bc-drop' + (pdf.busy ? ' busy' : '')}>
-        <input type="file" accept="application/pdf,.pdf" disabled={pdf.busy}
+        <input type="file" accept="application/pdf,.pdf,image/*" disabled={pdf.busy}
           onChange={(e) => { onPick(e.target.files?.[0]); e.target.value = '' }} />
         <span className="bc-drop-ic"><Icon name={pdf.busy ? 'activity' : 'clipboard'} size={18} /></span>
         <span className="bc-drop-txt">
-          <b>{pdf.busy ? 'Reading report…' : 'Upload device report (PDF)'}</b>
-          <em>{pdf.busy ? pdf.name : 'InBody, DEXA or BIA printout — fields fill in automatically'}</em>
+          <b>{pdf.busy ? (pdf.step || 'Reading report…') : 'Upload device report (PDF, scan or photo)'}</b>
+          <em>{pdf.busy ? pdf.name : 'InBody, DEXA or BIA — scanned reports are read automatically'}</em>
+          {pdf.busy && pdf.pct > 0 && (
+            <span className="bc-prog"><span className="bc-prog-fill" style={{ width: Math.round(pdf.pct * 100) + '%' }} /></span>
+          )}
         </span>
       </label>
       {pdf.error && <div className="bc-import-msg err" role="alert"><Icon name="alert" size={13} /> {pdf.error}</div>}
       {!pdf.error && filled.length > 0 && (
-        <div className="bc-import-msg ok" role="status">
-          <Icon name="check" size={13} /> Filled {filled.length} field{filled.length === 1 ? '' : 's'} from <b>{pdf.name}</b>: {filled.join(', ')}. Check them before saving.
+        <div className={'bc-import-msg ' + (pdf.ocr ? 'warn' : 'ok')} role="status">
+          <Icon name={pdf.ocr ? 'alert' : 'check'} size={13} />
+          <span>
+            Filled {filled.length} field{filled.length === 1 ? '' : 's'} from <b>{pdf.name}</b>: {filled.join(', ')}.
+            {pdf.ocr
+              ? ' Read from a scan by text recognition, so digits can be misread — please check every value against the report before saving.'
+              : ' Check them before saving.'}
+          </span>
         </div>
       )}
     </div>
@@ -125,20 +135,61 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
     setF({ ...f, [k]: e.target.value })
     setImported((prev) => prev.filter((x) => x !== k))
   }
-  const [pdf, setPdf] = useState({ busy: false, name: '', error: '' })
+  const [pdf, setPdf] = useState({ busy: false, name: '', error: '', step: '', pct: 0, ocr: false })
+
+  // The OCR worker holds a few hundred MB of WASM heap; drop it with the modal.
+  useEffect(() => () => { import('../../../lib/ocr').then((m) => m.releaseOcr()).catch(() => {}) }, [])
 
   // Read a device report and pre-fill the form. Values are never saved
   // automatically — the coach reviews them and presses Save as usual.
+  //
+  // Two paths: a normal PDF export carries a text layer, which is exact and
+  // instant. A scan or phone photo has none, so we rasterise and OCR it —
+  // slower and fallible, hence the explicit "check these" warning afterwards.
   const onPdf = async (file) => {
     if (!file) return
-    setPdf({ busy: true, name: file.name, error: '' })
+    const busy = (step, pct = 0, ocr = false) => setPdf({ busy: true, name: file.name, error: '', step, pct, ocr })
+    busy('Opening file…')
     try {
-      // pdf.js is ~330 kB, so it loads only when a report is actually uploaded.
-      const { extractPdfText } = await import('../../../lib/pdfText')
-      const { values, found, method, date } = parseBodyComp(await extractPdfText(file))
+      const { isImageFile, imagesToText } = await import('../../../lib/ocr')
+      const image = isImageFile(file)
+      let text = ''
+      let viaOcr = false
+
+      if (!image) {
+        // pdf.js is ~330 kB, so it loads only when a report is actually uploaded.
+        const { extractPdfText } = await import('../../../lib/pdfText')
+        busy('Reading PDF…')
+        text = await extractPdfText(file)
+      }
+
+      // No text layer (scan/photo) → OCR.
+      if (!text) {
+        viaOcr = true
+        let sources
+        if (image) {
+          sources = [file]
+        } else {
+          const { renderPdfPages } = await import('../../../lib/pdfText')
+          busy('Rendering scanned pages…', 0, true)
+          sources = await renderPdfPages(file, (done, total) => busy(`Rendering page ${done} of ${total}…`, done / total, true))
+        }
+        text = await imagesToText(sources, (phase, progress, page, total) => {
+          if (phase === 'loading') busy('Loading text recognition…', progress || 0, true)
+          else if (phase === 'page') busy(total > 1 ? `Scanning page ${page} of ${total}…` : 'Scanning report…', 0, true)
+          else busy('Reading text…', progress || 0, true)
+        })
+      }
+
+      const { values, found, method, date } = parseBodyComp(text, { ocr: viaOcr })
       if (!found.length) {
-        setPdf({ busy: false, name: file.name, error: "Couldn't find any body-composition values in that report. Enter them manually below." })
         setImported([])
+        setPdf({
+          busy: false, name: file.name, step: '', pct: 0, ocr: viaOcr,
+          error: viaOcr
+            ? "Couldn't read any values from that scan. Try a sharper, straight-on image, or enter the values manually below."
+            : "Couldn't find any body-composition values in that report. Enter them manually below.",
+        })
         return
       }
       setF((prev) => ({
@@ -148,10 +199,10 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
         ...(date && !record ? { date } : {}),
       }))
       setImported(found)
-      setPdf({ busy: false, name: file.name, error: '' })
+      setPdf({ busy: false, name: file.name, error: '', step: '', pct: 0, ocr: viaOcr })
     } catch (err) {
       setImported([])
-      setPdf({ busy: false, name: file.name, error: err?.message || 'That PDF could not be read.' })
+      setPdf({ busy: false, name: file.name, step: '', pct: 0, ocr: false, error: err?.message || 'That file could not be read.' })
     }
   }
   const data = () => ({

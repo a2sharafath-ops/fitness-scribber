@@ -384,9 +384,13 @@ canvas{max-width:100%}
 .bc-drop-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
 .bc-drop-txt b{font-size:13px;font-weight:700}
 .bc-drop-txt em{font-size:12px;font-style:normal;color:var(--muted)}
+.bc-prog{display:block;height:4px;margin-top:7px;border-radius:999px;background:var(--border);overflow:hidden}
+.bc-prog-fill{display:block;height:100%;border-radius:999px;background:var(--blue);transition:width .2s ease}
 .bc-import-msg{display:flex;align-items:flex-start;gap:7px;margin-top:9px;padding:9px 11px;border-radius:9px;font-size:12px;line-height:1.45}
 .bc-import-msg.ok{background:var(--tint-green);color:var(--green)}
+.bc-import-msg.warn{background:var(--tint-amber);color:var(--accent2)}
 .bc-import-msg.err{background:var(--tint-amber);color:var(--accent2)}
+.bc-import-msg svg{flex:none;margin-top:2px}
 .bc-import-msg b{font-weight:800}
 .bc-tag{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:4px;background:var(--tint-green);color:var(--green);font-size:9px;font-weight:800;letter-spacing:.4px;vertical-align:middle}
 input.bc-filled{border-color:var(--green);background:var(--tint-green)}

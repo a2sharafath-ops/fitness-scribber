@@ -76,6 +76,36 @@ export function normalize(text) {
     .toLowerCase()
 }
 
+// ---- OCR repair -------------------------------------------------------------
+// Tesseract reliably confuses a handful of glyph pairs. Applied ONLY to OCR
+// output (never to a real text layer), and only inside numeric contexts, so a
+// letter that is genuinely part of a word is never touched.
+const OCR_DIGIT = { o: '0', q: '0', l: '1', i: '1', '|': '1', s: '5', b: '8', z: '2', g: '9' }
+
+// A token counts as "numeric" when digits outnumber letters — e.g. "8o.4",
+// "l9.2", "5s.1". Words like "kg", "male" or "bia" are left untouched.
+function repairNumericToken(tok) {
+  const digits = (tok.match(/\d/g) || []).length
+  const letters = (tok.match(/[a-z|]/g) || []).length
+  if (digits === 0 || letters === 0 || digits < letters) return tok
+  return tok.replace(/[a-z|]/g, (ch) => OCR_DIGIT[ch] ?? ch)
+}
+
+/**
+ * Repair OCR text before parsing.
+ *
+ * Fixes glyph confusions inside numbers and the spaced-out decimal separators
+ * Tesseract invents. Never applied to a real PDF text layer, which is exact.
+ */
+export function repairOcrText(text) {
+  return String(text || '')
+    // "19 . 2" / "19 ,2" / "19'2" → "19.2"
+    .replace(/(\d)\s*[.,'`´]\s*(\d)/g, '$1.$2')
+    .split(/(\s+)/)
+    .map((tok) => (/\s/.test(tok) ? tok : repairNumericToken(tok.toLowerCase())))
+    .join('')
+}
+
 // Escapes a label for use inside a RegExp, and allows any run of whitespace
 // wherever the label has a space (PDF extraction often inserts line breaks).
 const labelPattern = (label) =>
@@ -112,12 +142,14 @@ function canonical(field, hit) {
  * Parse body-composition values out of report text.
  *
  * @param {string} text  Text extracted from the PDF (any layout).
+ * @param {{ ocr?: boolean }} [opts]  Set `ocr` when the text came from OCR, which
+ *   enables glyph-confusion repair. Never enable it for a real text layer.
  * @returns {{ values: Object, found: string[], method: string|null, date: string|null }}
  *   `values` holds only the fields that matched; `found` lists their keys so the
  *   UI can flag which inputs came from the PDF rather than the coach.
  */
-export function parseBodyComp(text) {
-  const t = normalize(text)
+export function parseBodyComp(text, opts = {}) {
+  const t = normalize(opts.ocr ? repairOcrText(text) : text)
   const values = {}
   const found = []
   if (!t.trim()) return { values, found, method: null, date: null }
@@ -142,9 +174,11 @@ export function parseBodyComp(text) {
 
 // Identifies the device so the form's Method dropdown can be preset. Returns one
 // of the dropdown's exact option values, or null when nothing is recognisable.
+// Brand names are matched loosely because OCR mangles their capitals — "InBody"
+// commonly comes back as "lnBody" or "1nBody" (capital I → l / 1).
 export function detectMethod(text) {
   const t = normalize(text)
-  if (/\binbody\b/.test(t)) return 'InBody'
+  if (/\b[il1|]nbody\b/.test(t)) return 'InBody'
   if (/\b(dexa|dxa|densitometry|hologic|lunar)\b/.test(t)) return 'DEXA'
   if (/\b(caliper|skinfold|jackson|pollock)\b/.test(t)) return 'Calipers'
   if (/\b(bioelectrical|impedance|bia|tanita|omron)\b/.test(t)) return 'BIA'

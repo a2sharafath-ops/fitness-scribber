@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Tesseract language data — cached at runtime, ~5 MB each, never source
+*.traineddata
+
 # Local env / secrets (never commit your Supabase keys)
 .env
 .env.*
