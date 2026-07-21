@@ -406,7 +406,10 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .menu-wrap{position:relative;display:inline-flex}
 .menu-btn{width:26px;height:26px;border-radius:7px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
 .menu-btn:hover{background:var(--surface2);color:var(--text)}
-.menu-pop{position:absolute;top:calc(100% + 4px);right:0;z-index:60;min-width:132px;padding:5px;background:var(--surface);border:1px solid rgba(0,0,0,.12);border-radius:10px;box-shadow:0 10px 28px rgba(21,22,26,.18)}
+/* Portalled to <body> and positioned in JS, so no ancestor's overflow can clip
+   it. Sits above the modal (100) and the client side-panel (201) so it stays
+   usable when triggered from inside either; below toasts (400). */
+.menu-pop{position:fixed;z-index:210;min-width:132px;padding:5px;background:var(--surface);border:1px solid rgba(0,0,0,.12);border-radius:10px;box-shadow:0 10px 28px rgba(21,22,26,.18)}
 .menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 9px;border:none;background:none;border-radius:7px;font:inherit;font-size:13px;color:var(--text);cursor:pointer;text-align:left}
 .menu-item:hover{background:var(--surface2)}
 .menu-item.danger{color:var(--accent)}
