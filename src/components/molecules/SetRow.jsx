@@ -3,7 +3,7 @@
 // (spec 2.2); values arrive via props and edits are raised through
 // onChange / onRemove. Performance/completion is logged in the Today's Workout
 // flow (Start → check-in → Complete → RPE), never here.
-import { targetKg, hrZone, subjectiveEffort, subjectiveTargetBand } from '../../lib/program'
+import { targetKg, hrZone, subjectiveEffort, subjectiveTargetBand, subjectivePctFromReps, subjectiveTargetFromReps } from '../../lib/program'
 
 // Exact prescribing scales from NSCA Table 18.10.
 // RPE carries the table's half-point ratings (9.5, 8.5, 7.5, 6.5); RIR is the
@@ -14,21 +14,34 @@ const RIR_SCALE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispToKg, unitName, onChange, onRemove }) {
   const num = (k) => (e) => onChange(k, e.target.value === '' ? null : +e.target.value)
   const kg = (k) => (e) => onChange(k, dispToKg(e.target.value))
-  // RPE/RIR map to their exact %1RM band (NSCA Table 18.10) so they, like %1RM,
-  // resolve a suggested working-load band against the Training Max.
+  // RPE/RIR resolve to a %1RM. When the set also carries a rep target we use the
+  // rep-aware value (NSCA Table 18.8): reps-to-failure = prescribed reps + reps
+  // in reserve → an exact %1RM and single target load, just like a %1RM entry.
+  // With no rep target we fall back to the Table 18.10 effort band.
   const subjective = intensityType === 'RPE' || intensityType === 'RIR'
   const effort = subjective ? subjectiveEffort(intensityType, set.prescribedIntensityValue) : null
+  const repAware = subjective ? subjectivePctFromReps(intensityType, set.prescribedIntensityValue, set.prescribedReps) : null
   const pctCalc = intensityType === '%1RM' ? targetKg(tmKg, set.prescribedIntensityValue) : null
-  const loadBand = subjective ? subjectiveTargetBand(tmKg, intensityType, set.prescribedIntensityValue) : null
-  // Placeholder / hint for the working-load field: a single number for %1RM,
-  // the exact kg band for RPE/RIR.
+  const targetExact = repAware ? subjectiveTargetFromReps(tmKg, intensityType, set.prescribedIntensityValue, set.prescribedReps) : null
+  // Only need the Table 18.10 band when there's no rep target to be precise with.
+  const loadBand = subjective && !repAware ? subjectiveTargetBand(tmKg, intensityType, set.prescribedIntensityValue) : null
+  // The %1RM readout shown next to RPE/RIR: an exact percentage when reps are
+  // known, else the effort band.
+  const subjPctText = repAware ? `${repAware.pct}%` : effort?.band
+  const subjTitle = repAware
+    ? `${repAware.reps} reps + ${repAware.reserve} in reserve = ${repAware.toFailure} to failure → ${repAware.pct}% of 1RM (NSCA Table 18.8)`
+    : effort ? `${effort.label} — ${effort.band} of 1RM (NSCA Table 18.10) · set a rep target for an exact %` : ''
+  // Placeholder / hint for the working-load field: a single number for %1RM or a
+  // rep-aware RPE/RIR set, else the Table 18.10 kg band.
   const loadHint = intensityType === '%1RM'
     ? (pctCalc != null ? String(toDisp(pctCalc)) : '')
-    : loadBand
-      ? (loadBand.open ? `≤ ${toDisp(loadBand.high)}`
-        : loadBand.low === loadBand.high ? String(toDisp(loadBand.high))
-          : `${toDisp(loadBand.low)}–${toDisp(loadBand.high)}`)
-      : ''
+    : targetExact != null
+      ? String(toDisp(targetExact))
+      : loadBand
+        ? (loadBand.open ? `≤ ${toDisp(loadBand.high)}`
+          : loadBand.low === loadBand.high ? String(toDisp(loadBand.high))
+            : `${toDisp(loadBand.low)}–${toDisp(loadBand.high)}`)
+        : ''
 
   return (
     <div className="set-row">
@@ -51,9 +64,9 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
               {RPE_SCALE.map((r) => <option key={r} value={r}>{r}</option>)}
             </select></label>
           {effort && (
-            <label className="sf sf-calc" title={`${effort.label} — ${effort.band} of 1RM (NSCA Table 18.10)`}>
+            <label className={'sf sf-calc' + (repAware ? ' sf-exact' : '')} title={subjTitle}>
               <span>%1RM</span>
-              <input readOnly tabIndex={-1} aria-label="Percent of 1RM from RPE (Table 18.10)" value={effort.band} /></label>
+              <input readOnly tabIndex={-1} aria-label="Percent of 1RM from RPE" value={subjPctText} /></label>
           )}
         </>
       )}
@@ -65,9 +78,9 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
               {RIR_SCALE.map((r) => <option key={r} value={r}>{r}</option>)}
             </select></label>
           {effort && (
-            <label className="sf sf-calc" title={`${effort.label} — ${effort.band} of 1RM (NSCA Table 18.10)`}>
+            <label className={'sf sf-calc' + (repAware ? ' sf-exact' : '')} title={subjTitle}>
               <span>%1RM</span>
-              <input readOnly tabIndex={-1} aria-label="Percent of 1RM from RIR (Table 18.10)" value={effort.band} /></label>
+              <input readOnly tabIndex={-1} aria-label="Percent of 1RM from RIR" value={subjPctText} /></label>
           )}
         </>
       )}

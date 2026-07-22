@@ -221,6 +221,69 @@ export function subjectiveTargetBand(tmKg, intensityType, value) {
   }
 }
 
+// ---- %1RM–repetition relationship (NSCA Table 18.8) -------------------------
+// Maximum reps achievable at a given %1RM (Hoeger et al. 1987, 1990; Mayhew et
+// al. 1992), taken verbatim from Table 18.8. This is what makes an RIR/RPE
+// prescription rep-aware: the reps a client leaves in reserve, added to the
+// reps they're told to perform, give the reps-to-failure the load allows — and
+// this table maps that rep count straight back to its %1RM. Two prescriptions
+// at the same RIR but different rep targets therefore resolve to different
+// loads, which the single-column Table 18.10 could not express.
+// [reps, %1RM]:
+const REP_PCT = [
+  [1, 100], [2, 95], [3, 93], [4, 90], [5, 87], [6, 85], [7, 83],
+  [8, 80], [9, 77], [10, 75], [11, 70], [12, 67], [15, 65],
+]
+
+// %1RM a load permits for `reps` reps to failure. Exact at every tabulated rep
+// count; linearly interpolated across the gaps the table skips (13, 14) and for
+// the fractional rep counts RPE half-points produce. Clamped to the table's
+// ends — 1 rep → 100%, ≥15 reps → 65% — since it doesn't extend further.
+export function repMaxPct(reps) {
+  const r = +reps
+  if (!(r > 0)) return null
+  if (r <= REP_PCT[0][0]) return REP_PCT[0][1]
+  const last = REP_PCT[REP_PCT.length - 1]
+  if (r >= last[0]) return last[1]
+  for (let i = 1; i < REP_PCT.length; i++) {
+    const [hr, hp] = REP_PCT[i]
+    if (r <= hr) {
+      const [lr, lp] = REP_PCT[i - 1]
+      return Math.round((lp + (hp - lp) * ((r - lr) / (hr - lr))) * 10) / 10
+    }
+  }
+  return last[1]
+}
+
+// Reps held in reserve implied by a subjective prescription: the RIR value
+// itself, or 10 − RPE for RPE (RPE 10 = 0 in reserve, RPE 8.5 = 1.5, …).
+export function reserveReps(intensityType, value) {
+  const v = +value
+  if (value == null || value === '' || Number.isNaN(v)) return null
+  if (intensityType === 'RIR') return Math.max(0, v)
+  if (intensityType === 'RPE') return Math.max(0, 10 - v)
+  return null
+}
+
+// Exact %1RM for a subjective (RIR/RPE) prescription that also carries a rep
+// target, via Table 18.8: reps-to-failure = prescribed reps + reps in reserve.
+// Returns { pct, reps, reserve, toFailure } or null when reps or the effort
+// value are missing. More precise than the Table 18.10 band, which ignores reps.
+export function subjectivePctFromReps(intensityType, value, prescribedReps) {
+  const reserve = reserveReps(intensityType, value)
+  const reps = +prescribedReps
+  if (reserve == null || !(reps > 0)) return null
+  const toFailure = reps + reserve
+  const pct = repMaxPct(toFailure)
+  return pct == null ? null : { pct, reps, reserve, toFailure }
+}
+
+// The exact target working load (kg) for such a prescription against the TM.
+export function subjectiveTargetFromReps(tmKg, intensityType, value, prescribedReps) {
+  const r = subjectivePctFromReps(intensityType, value, prescribedReps)
+  return r ? targetKg(tmKg, r.pct) : null
+}
+
 // Aerobic zone indicator for Target HR entries. Values ≤ 100 read as %MaxHR,
 // larger values as bpm against the supplied max HR.
 export function hrZone(value, maxHr = 190) {

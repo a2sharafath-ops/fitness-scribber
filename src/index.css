@@ -513,6 +513,9 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .sf input,.sf select{width:100%;padding:6px 7px;font-size:12px}
 .sf-sm{width:64px}
 .sf-calc input{color:var(--accent2);font-weight:700;background:var(--surface2);border-style:dashed}
+/* An exact rep-aware %1RM (Table 18.8) rather than an effort band — solid, in
+   the accent green, to signal it's a precise figure the reps produced. */
+.sf-exact input{color:var(--green);border-style:solid;border-color:var(--green)}
 .sf-zone{font-size:11px;color:var(--blue);align-self:center;white-space:nowrap}
 .set-status{width:26px;height:26px;border-radius:50%;border:1px solid rgba(0,0,0,.12);background:var(--surface);color:var(--muted);font-weight:800;cursor:pointer;align-self:center}
 .set-status.s-completed{border-color:var(--green);color:var(--green)}
