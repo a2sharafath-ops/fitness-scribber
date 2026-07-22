@@ -2,6 +2,8 @@
 // the exercises it holds. Presentational — state lives in the builder modal.
 import ExerciseCard from './ExerciseCard'
 import Button from '../../atoms/Button'
+import useDragReorder from '../../../hooks/useDragReorder'
+import { moveOrdered } from '../../../lib/arrange'
 import { BLOCK_TYPES, newProgExercise } from '../../../lib/program'
 
 const BLOCK_HINT = {
@@ -16,6 +18,7 @@ export default function BlockCard({
   block, exercises, tmInfo, maxHr,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
+  dragProps, dragHandleProps, isOver, isDragging,
 }) {
   const updEx = (ei) => (patch) =>
     onChange({ exercises: block.exercises.map((e, j) => (j === ei ? { ...e, ...patch } : e)) })
@@ -24,9 +27,14 @@ export default function BlockCard({
   const rmEx = (ei) => () =>
     onChange({ exercises: block.exercises.filter((_, j) => j !== ei).map((e, j) => ({ ...e, order: j + 1 })) })
 
+  // Reordering exercises within this block. `order` is rewritten alongside the
+  // array so the new sequence survives a save and reload.
+  const exDrag = useDragReorder((from, to) => onChange({ exercises: moveOrdered(block.exercises, from, to) }))
+
   return (
-    <div className="block-card">
+    <div className={'block-card' + (isOver ? ' drag-over' : '') + (isDragging ? ' dragging' : '')} {...dragProps}>
       <div className="block-head">
+        <span className="drag-grip" title="Drag to reorder this block" aria-label="Reorder block" {...dragHandleProps}>⠿</span>
         <select className="block-type" value={block.blockType} aria-label="Block type"
           onChange={(e) => onChange({ blockType: e.target.value, autoCalculate1RM: e.target.value === 'Main Lifts' })}>
           {BLOCK_TYPES.map((t) => <option key={t}>{t}</option>)}
@@ -47,7 +55,9 @@ export default function BlockCard({
           <ExerciseCard key={e.exerciseId} ex={e} exercises={exercises}
             tmKg={info.kg} tmInfo={info} maxHr={maxHr}
             toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
-            onChange={updEx(ei)} onRemove={rmEx(ei)} />
+            onChange={updEx(ei)} onRemove={rmEx(ei)}
+            dragProps={exDrag.itemProps(ei)} dragHandleProps={exDrag.handleProps(ei)}
+            isOver={exDrag.over === ei && exDrag.src !== ei} isDragging={exDrag.src === ei} />
         )
       })}
       <Button variant="ghost" size="sm" onClick={addEx}>＋ Add exercise</Button>

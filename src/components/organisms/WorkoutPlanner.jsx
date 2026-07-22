@@ -10,7 +10,7 @@ import { useClipboard } from '../../store/ClipboardContext'
 import { useFormat } from '../../hooks/useFormat'
 import { dailySum, dayMetrics } from '../../lib/calc'
 import { programStats } from '../../lib/program'
-import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession } from '../../lib/planner'
+import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession, deleteSpan } from '../../lib/planner'
 import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths, datesBetween } from '../../lib/dates'
 import { toast, confirmDialog } from '../../lib/toast'
 import { cloneBlocksFresh, itemsToBlocks } from '../../lib/program'
@@ -79,6 +79,22 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
     setClip(c)
     setSel(null)
     toast(`Copied ${c.days.length} session${c.days.length === 1 ? '' : 's'} — click a day to paste.`, 'info')
+  }
+
+  // Clearing a span is destructive and can span weeks, so the confirmation
+  // names the count and the range rather than asking a generic "are you sure".
+  const doDelete = async () => {
+    if (!selSessions) return
+    const span = `${fmtDay(selDates[0])} – ${fmtDay(selDates[selDates.length - 1])}`
+    if (!await confirmDialog({
+      title: 'Delete sessions',
+      message: `Delete ${selSessions} prescribed session${selSessions === 1 ? '' : 's'} between ${span}? This can't be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })) return
+    commit((d) => deleteSpan(d, client.id, selDates))
+    setSel(null)
+    toast(`Deleted ${selSessions} session${selSessions === 1 ? '' : 's'}.`)
   }
 
   // ---- Paste ---------------------------------------------------------------
@@ -200,6 +216,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
           <span><b>{selDates.length}</b> days selected · <b>{selSessions}</b> session{selSessions === 1 ? '' : 's'}</span>
           <div className="nav-spacer" />
           <Button size="sm" disabled={!selSessions} onClick={doCopy}>Copy</Button>
+          <Button variant="ghost" size="sm" className="plan-del" disabled={!selSessions} onClick={doDelete}>Delete</Button>
           <Button variant="ghost" size="sm" onClick={() => setSel(null)}>Clear</Button>
         </div>
       )}

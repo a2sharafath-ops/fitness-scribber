@@ -59,6 +59,24 @@ export function writePrescription(draft, clientId, date, blocks, notes = '') {
   else draft.prescriptions.push({ id: uid(), clientId, date, notes, blocks, items })
 }
 
+// How many of `dates` actually hold a session for this client — what a delete
+// would remove, which is what the confirmation needs to state.
+export const sessionsIn = (db, clientId, dates) =>
+  (dates || []).filter((date) =>
+    isSession(db.prescriptions.find((p) => p.clientId === clientId && p.date === date)))
+
+// Remove every prescription this client has across `dates`. Draft mutator, so
+// it runs inside commit() alongside the other planner writes. Days without a
+// session are simply left alone. Returns the dates cleared.
+export function deleteSpan(draft, clientId, dates) {
+  const wanted = new Set(dates || [])
+  const cleared = draft.prescriptions
+    .filter((p) => p.clientId === clientId && wanted.has(p.date))
+    .map((p) => p.date)
+  draft.prescriptions = draft.prescriptions.filter((p) => !(p.clientId === clientId && wanted.has(p.date)))
+  return cleared
+}
+
 // Paste a clip onto `clientId`, anchored at `startDate`. Every day gets its own
 // deep copy with brand-new block/exercise/set ids, so the pasted sessions are
 // independent of the source. Returns the dates written.

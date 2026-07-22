@@ -10,6 +10,7 @@ export default function ExerciseCard({
   ex, exercises, tmKg, tmInfo, maxHr,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
+  dragProps, dragHandleProps, isOver, isDragging,
 }) {
   const liftNames = [...exercises.map((e) => e.name)].sort((a, b) => a.localeCompare(b))
   // Set 1 acts as the template row: edits to its prescription fields
@@ -33,8 +34,9 @@ export default function ExerciseCard({
     onChange({ sets: ex.sets.filter((_, j) => j !== si).map((s, j) => ({ ...s, setNumber: j + 1 })) })
 
   return (
-    <div className={'ex-card' + (ex.unmapped ? ' ex-unmapped' : '')}>
+    <div className={'ex-card' + (ex.unmapped ? ' ex-unmapped' : '') + (isOver ? ' drag-over' : '') + (isDragging ? ' dragging' : '')} {...dragProps}>
       <div className="ex-head">
+        <span className="drag-grip" title="Drag to reorder this exercise" aria-label="Reorder exercise" {...dragHandleProps}>⠿</span>
         <Autocomplete
           className="ac-grow" inputClassName="presc-ex"
           value={ex.exerciseName}

@@ -258,6 +258,9 @@ canvas{max-width:100%}
 .plan-bar b{font-weight:800}
 .plan-bar.sel{background:var(--tint-red);color:var(--accent)}
 .plan-bar.clip{background:var(--tint-blue);color:var(--blue)}
+/* Destructive action in the selection bar — marked out from Copy/Clear. */
+.plan-bar .plan-del:not(:disabled){color:var(--accent);border-color:rgba(0,0,0,.10)}
+.plan-bar .plan-del:not(:disabled):hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .plan-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .plan-cell{background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-height:88px;min-width:0;padding:6px;cursor:pointer;transition:.12s;overflow:hidden}
 .plan-cell:hover{border-color:var(--accent)}
@@ -487,6 +490,15 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .ex-card.ex-unmapped{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2) inset}
 .ex-head{display:flex;align-items:flex-end;gap:10px;margin-bottom:8px;flex-wrap:wrap}
 .ex-head .presc-ex{min-width:160px}
+/* Drag-to-reorder: the grip is the only draggable part, so the inputs inside a
+   block or exercise keep normal text selection. */
+.drag-grip{flex:none;cursor:grab;user-select:none;color:var(--muted);font-size:15px;line-height:1;padding:4px 2px;border-radius:6px;letter-spacing:-1px}
+.drag-grip:hover{color:var(--text);background:var(--surface2)}
+.drag-grip:active{cursor:grabbing}
+.ex-head .drag-grip{align-self:center;margin-bottom:2px}
+.block-card.dragging,.ex-card.dragging{opacity:.45}
+/* Drop indicator — a bar on the edge the row would land against. */
+.block-card.drag-over,.ex-card.drag-over{box-shadow:0 -3px 0 -1px var(--blue) inset,0 0 0 1px var(--blue)}
 .ex-tm{font-size:11px;white-space:nowrap;align-self:center}
 /* Derived Training Max (library %-of-reference) badge */
 .ex-tm-rel{color:var(--accent2);font-weight:700}

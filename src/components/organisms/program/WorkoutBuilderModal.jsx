@@ -13,6 +13,8 @@ import Field from '../../atoms/Field'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { useFormat } from '../../../hooks/useFormat'
+import useDragReorder from '../../../hooks/useDragReorder'
+import { moveOrdered } from '../../../lib/arrange'
 import { uid } from '../../../lib/format'
 import { fmtDay, addDays } from '../../../lib/dates'
 import {
@@ -47,6 +49,9 @@ export default function WorkoutBuilderModal({ clientId, date }) {
   const updBlock = (bi) => (patch) => setBlocks(blocks.map((b, j) => (j === bi ? { ...b, ...patch } : b)))
   const rmBlock = (bi) => () => setBlocks(blocks.filter((_, j) => j !== bi).map((b, j) => ({ ...b, order: j + 1 })))
   const addBlock = () => setBlocks([...blocks, newBlock(blocks.length ? 'Assisted' : 'Main Lifts', blocks.length + 1)])
+  // Reordering blocks. `order` is rewritten with the array so the sequence the
+  // coach sees is the sequence that gets saved.
+  const blockDrag = useDragReorder((from, to) => setBlocks((cur) => moveOrdered(cur, from, to)))
 
   const copyLast = () => {
     const prev = db.prescriptions.filter((p) => p.clientId === clientId && p.date < date).sort((a, b) => b.date.localeCompare(a.date))[0]
@@ -234,11 +239,18 @@ export default function WorkoutBuilderModal({ clientId, date }) {
             <Button variant="ghost" size="sm" onClick={copyLast}>↩ Copy last session</Button>
           </div>
 
+          {blocks.length > 1 && (
+            <div className="muted" style={{ fontSize: 11, margin: '2px 0 6px' }}>
+              Drag the ⠿ grip to reorder blocks, or exercises within a block.
+            </div>
+          )}
           {blocks.map((b, bi) => (
             <BlockCard key={b.blockId} block={b} exercises={db.exercises}
               tmInfo={tmInfo} maxHr={maxHr}
               toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
-              onChange={updBlock(bi)} onRemove={rmBlock(bi)} />
+              onChange={updBlock(bi)} onRemove={rmBlock(bi)}
+              dragProps={blockDrag.itemProps(bi)} dragHandleProps={blockDrag.handleProps(bi)}
+              isOver={blockDrag.over === bi && blockDrag.src !== bi} isDragging={blockDrag.src === bi} />
           ))}
           {!blocks.length && <div className="muted" style={{ fontSize: 12, padding: '6px 0' }}>No blocks yet — add one below or dictate the session.</div>}
           <Button variant="ghost" size="sm" onClick={addBlock} style={{ margin: '6px 0' }}>＋ Add block</Button>
