@@ -17,7 +17,7 @@ import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
 import { screeningsFor, finalizeScreening } from '../lib/screening'
-import { workoutPeaks } from '../lib/program'
+import { workoutPeaks, resolveTrainingMax } from '../lib/program'
 
 export default function AthletePortal() {
   const { user, signOut } = useAuth()
@@ -204,7 +204,8 @@ export default function AthletePortal() {
         <div style={{ marginTop: 16 }}>
           <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
             units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
-            athlete onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
+            athlete resolveTm={(name) => resolveTrainingMax(state, client.id, name, today).kg}
+            onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
         </div>
 
         {checkinW && (

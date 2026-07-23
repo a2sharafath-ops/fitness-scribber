@@ -21,7 +21,7 @@ import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { calcSRPETL } from '../lib/calc'
-import { applyWorkoutStrength, removeWorkoutStrength } from '../lib/program'
+import { applyWorkoutStrength, removeWorkoutStrength, resolveTrainingMax } from '../lib/program'
 import { baseOptions } from '../lib/chartSetup'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
@@ -312,6 +312,7 @@ export default function ClientDetailPage() {
           <PlannerWidget client={c} size="medium" todayProps={{
             client: c, today, workout: todayW, prescription: todayP, plans: db.plans, exercises: db.exercises,
             units, context: { readiness: rScore, acwr }, restingHr, age, bodyMassKg: c.anthro?.massKg ?? null,
+            resolveTm: (name) => resolveTrainingMax(db, c.id, name, today).kg,
             onStart: startWorkout, onSave: saveWorkout, onComplete: requestComplete, onClear: clearWorkout, onTemplate: saveTemplate,
             onAddSession: () => openModal(<WorkoutBuilderModal clientId={c.id} date={today} />, 'xl'),
           }} />

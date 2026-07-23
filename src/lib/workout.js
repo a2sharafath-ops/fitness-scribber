@@ -2,7 +2,24 @@
 // React-free: components import these and render the result (no fabricated
 // data lives in the UI — the structure is generated here from real inputs).
 import { uid } from './format'
-import { itemsToBlocks } from './program'
+import { itemsToBlocks, targetKg, subjectiveTargetFromReps, subjectiveTargetBand } from './program'
+
+// The concrete target load (kg) a prescribed set implies against the client's
+// Training Max — so the session's Load column is pre-filled even when the coach
+// prescribed by %1RM or RIR/RPE rather than typing a weight. An explicit
+// prescribed load always wins. Returns null when there's nothing to base it on.
+export function targetLoadKg(intensityType, s = {}, tmKg = null) {
+  if (s.prescribedLoadKg != null) return s.prescribedLoadKg
+  if (!(tmKg > 0)) return null
+  if (intensityType === '%1RM') return targetKg(tmKg, s.prescribedIntensityValue)
+  if (intensityType === 'RIR' || intensityType === 'RPE') {
+    const exact = subjectiveTargetFromReps(tmKg, intensityType, s.prescribedIntensityValue, s.prescribedReps)
+    if (exact != null) return exact
+    const band = subjectiveTargetBand(tmKg, intensityType, s.prescribedIntensityValue)
+    return band ? band.high : null
+  }
+  return null
+}
 
 // "60s" / "3m" / "90" → seconds. Numbers pass through.
 export const restToSec = (r) => {
@@ -39,19 +56,25 @@ const item = (name, o = {}) => ({
 
 // A logging row from a prescribed set. `effortType` is the metric the athlete
 // records (matches an RPE prescription, else defaults to RIR).
-export const setRowFromPrescribed = (s = {}, i = 0, intensityType = null) => ({
-  n: i + 1,
-  pReps: s.prescribedReps ?? null,
-  pIntensityType: intensityType,
-  pIntensityValue: s.prescribedIntensityValue ?? null,
-  pLoadKg: s.prescribedLoadKg ?? null,
-  pTempo: s.prescribedTempo || '',
-  pRest: s.prescribedRestSeconds ?? null,
-  load: null, reps: null,
-  effortType: intensityType === 'RPE' ? 'RPE' : 'RIR',
-  effort: null,
-  done: false,
-})
+export const setRowFromPrescribed = (s = {}, i = 0, intensityType = null, tmKg = null) => {
+  const target = targetLoadKg(intensityType, s, tmKg)
+  return {
+    n: i + 1,
+    pReps: s.prescribedReps ?? null,
+    pIntensityType: intensityType,
+    pIntensityValue: s.prescribedIntensityValue ?? null,
+    pLoadKg: target,           // target working load (from explicit load, %1RM, or RIR/RPE)
+    pTempo: s.prescribedTempo || '',
+    pRest: s.prescribedRestSeconds ?? null,
+    // Pre-fill the editable Load column with the target so it's visible up front;
+    // the athlete edits it only if the real load differed. Reps/effort stay blank.
+    load: target,
+    reps: null,
+    effortType: intensityType === 'RPE' ? 'RPE' : 'RIR',
+    effort: null,
+    done: false,
+  }
+}
 
 // The set rows for an item, synthesising them from a legacy count-based item
 // (plans / manual / older sessions) when none are stored yet.
@@ -141,17 +164,20 @@ export function buildFromPlan(plan, exercises, { clientId, date }) {
 // editable session. Warm-up / Cool-down blocks feed their sections; every
 // other block feeds the main set. Legacy item-shaped rows are migrated first.
 // Loads stay in kg (set 1 is the template row, matching blocksToItems).
-export function buildFromPrescription(presc, { clientId, date }) {
+export function buildFromPrescription(presc, { clientId, date, resolveTm }) {
   const blocks = presc?.blocks?.length ? presc.blocks : itemsToBlocks(presc?.items)
   const toItem = (e, blockType) => {
     const s = e.sets?.[0] || {}
+    // Training Max for this lift, used to turn %1RM / RIR / RPE prescriptions
+    // into a concrete target load in the session's Load column.
+    const tmKg = resolveTm ? resolveTm(e.exerciseName) : null
     return {
       id: uid(),
       name: e.exerciseName || 'Exercise',
       blockType,                 // preserves the builder block so the runner can group by it
       note: '',                  // per-exercise reflection, filled during the session
       // Per-set logging rows carry each prescribed set + the athlete's actuals.
-      setRows: (e.sets?.length ? e.sets : [s]).map((row, i) => setRowFromPrescribed(row, i, e.intensityType)),
+      setRows: (e.sets?.length ? e.sets : [s]).map((row, i) => setRowFromPrescribed(row, i, e.intensityType, tmKg)),
       // Legacy count-based fields kept for back-compat displays / fallbacks.
       sets: e.sets?.length || 1,
       reps: String(s.prescribedReps ?? '10'),
