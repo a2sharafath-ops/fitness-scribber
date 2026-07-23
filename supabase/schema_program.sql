@@ -22,8 +22,13 @@ create table if not exists maxes (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
   "clientId" text, "exercise" text, "date" text,
-  "kind" text, "valueKg" numeric, "source" text
+  "kind" text, "valueKg" numeric, "source" text,
+  -- Set on auto peaks so deleting a completed session can remove the 1RM it
+  -- produced (see removeWorkoutStrength). Null for manual entries.
+  "sourceWorkoutId" text
 );
+-- Idempotent for databases created before the column existed.
+alter table maxes add column if not exists "sourceWorkoutId" text;
 create index if not exists maxes_coach_idx  on maxes ("coachId");
 create index if not exists maxes_client_idx on maxes ("clientId", "exercise", "date");
 

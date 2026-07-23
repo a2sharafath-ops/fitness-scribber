@@ -171,6 +171,7 @@ export default function AthletePortal() {
       const { error: e3 } = await supabase.from('maxes').insert(peaks.map((p) => ({
         id: uid(), clientId: client.id, coachId: client.coachId,
         exercise: p.exercise, date: w.date, kind: 'e1rm', valueKg: p.valueKg, source: 'auto',
+        sourceWorkoutId: w.id,
       })))
       if (e3) console.error('maxes', e3.message)
     }

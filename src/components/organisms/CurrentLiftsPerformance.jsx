@@ -10,19 +10,34 @@ import Icon from '../atoms/Icon'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { todayISO, fmtDate } from '../../lib/dates'
-import { absolute1RM, trainingMaxKg, recordLiftMax } from '../../lib/program'
+import { absolute1RM, trainingMaxKg, recordLiftMax, deleteLiftMax } from '../../lib/program'
+import { confirmDialog } from '../../lib/toast'
 
 export default function CurrentLiftsPerformance({ client }) {
   const { db, commit, tz } = useData()
   const { toDisp, dispToKg, unitName } = useFormat()
   const [pick, setPick] = useState('')
   const [entry, setEntry] = useState({})
+  const [openLift, setOpenLift] = useState(null)   // lift whose history is expanded
   const today = todayISO(tz)
   const tracked = client.trackedLifts || []
 
-  const lastEvent = (lift) => db.maxes
+  // Every e1RM ledger event for a lift, newest first — the expandable history.
+  const historyFor = (lift) => db.maxes
     .filter((m) => m.clientId === client.id && m.kind === 'e1rm' && m.exercise.toLowerCase() === lift.toLowerCase())
-    .sort((a, b) => b.date.localeCompare(a.date))[0]
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  // Remove one recorded 1RM (and any auto-assessment it created). This is how a
+  // wrong reading — e.g. a peak from a session that never really happened — is
+  // corrected, since it can outlive the plan it came from.
+  const removeEntry = async (m) => {
+    if (!await confirmDialog({
+      title: 'Delete 1RM entry',
+      message: `Delete the ${toDisp(m.valueKg)} ${unitName()} ${m.exercise} 1RM from ${fmtDate(m.date)}? It will no longer feed this client's Training Max or assessment. This can't be undone.`,
+      confirmLabel: 'Delete', danger: true,
+    })) return
+    commit((d) => deleteLiftMax(d, m.id))
+  }
 
   const addLift = () => {
     const name = pick.trim()
@@ -57,22 +72,46 @@ export default function CurrentLiftsPerformance({ client }) {
           {tracked.map((lift) => {
             const abs = absolute1RM(db.maxes, client.id, lift, today)
             const tm = trainingMaxKg(db.maxes, client.id, lift, today)
-            const ev = lastEvent(lift)
+            const hist = historyFor(lift)
+            const ev = hist[0]
+            const isOpen = openLift === lift
             return (
-              <div className="clp-row" key={lift}>
-                <span style={{ fontWeight: 600 }}>{lift}</span>
-                <span className="clp-val">{abs != null ? `${toDisp(abs)} ${unitName()}` : '—'}</span>
-                <span>{tm != null ? `${toDisp(tm)} ${unitName()}` : '—'}</span>
-                <span className="muted" style={{ fontSize: 11 }}>
-                  {ev ? `${fmtDate(ev.date)} · ${ev.source === 'auto' ? 'auto (Epley)' : 'manual'}` : 'no data yet'}
-                </span>
-                <span className="clp-entry">
-                  <input type="number" placeholder={unitName()} aria-label={`Record 1RM for ${lift}`}
-                    value={entry[lift] ?? ''} onChange={(e) => setEntry((x) => ({ ...x, [lift]: e.target.value }))}
-                    onKeyDown={onEntryKey(lift)} />
-                  <Button size="sm" variant="ghost" onClick={() => record(lift)} disabled={!entry[lift]}>Set</Button>
-                </span>
-                <button className="x" aria-label={`Stop tracking ${lift}`} onClick={() => removeLift(lift)}>×</button>
+              <div key={lift}>
+                <div className="clp-row">
+                  <span style={{ fontWeight: 600 }}>{lift}</span>
+                  <span className="clp-val">{abs != null ? `${toDisp(abs)} ${unitName()}` : '—'}</span>
+                  <span>{tm != null ? `${toDisp(tm)} ${unitName()}` : '—'}</span>
+                  <button className="clp-histbtn" aria-expanded={isOpen}
+                    disabled={!hist.length} onClick={() => setOpenLift(isOpen ? null : lift)}
+                    title={hist.length ? 'Show recorded 1RM history' : 'No entries yet'}>
+                    {ev ? <>{fmtDate(ev.date)} · {ev.source === 'auto' ? 'auto (Epley)' : 'manual'}</> : 'no data yet'}
+                    {hist.length > 1 && <span className="clp-count">{hist.length}</span>}
+                    {hist.length ? <span className="clp-caret" aria-hidden="true">{isOpen ? '▾' : '▸'}</span> : null}
+                  </button>
+                  <span className="clp-entry">
+                    <input type="number" placeholder={unitName()} aria-label={`Record 1RM for ${lift}`}
+                      value={entry[lift] ?? ''} onChange={(e) => setEntry((x) => ({ ...x, [lift]: e.target.value }))}
+                      onKeyDown={onEntryKey(lift)} />
+                    <Button size="sm" variant="ghost" onClick={() => record(lift)} disabled={!entry[lift]}>Set</Button>
+                  </span>
+                  <button className="x" aria-label={`Stop tracking ${lift}`} onClick={() => removeLift(lift)}>×</button>
+                </div>
+                {isOpen && (
+                  <div className="clp-history">
+                    {hist.map((m) => (
+                      <div className="clp-hrow" key={m.id}>
+                        <span className="clp-hval">{toDisp(m.valueKg)} {unitName()}</span>
+                        <span className="muted">{fmtDate(m.date)}</span>
+                        <span className={'clp-htag ' + (m.source === 'auto' ? 'auto' : 'manual')}>
+                          {m.source === 'auto' ? 'auto (Epley)' : 'manual'}
+                        </span>
+                        <button className="clp-hdel" aria-label={`Delete this ${m.exercise} 1RM entry`} onClick={() => removeEntry(m)}>
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           })}

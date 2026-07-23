@@ -534,11 +534,34 @@ export function workoutPeaks(maxes, workout) {
 // for toasts. This is the ONLY automatic strength path now — the workout builder
 // only prescribes; completion is logged through the session flow.
 export function applyWorkoutStrength(draft, workout) {
-  const { clientId, date } = workout || {}
+  const { clientId, date, id } = workout || {}
   return workoutPeaks(draft.maxes, workout).map((p) => ({
     type: 'peak', exercise: p.exercise, valueKg: p.valueKg,
-    tracked: recordLiftMax(draft, clientId, p.exercise, p.valueKg, date, 'auto'),
+    // Stamp the source workout so deleting that session can later remove the
+    // peak it produced (see removeWorkoutStrength).
+    tracked: recordLiftMax(draft, clientId, p.exercise, p.valueKg, date, 'auto', id),
   }))
+}
+
+// Remove a single 1RM ledger entry and any auto fitness-assessment it spawned.
+// Used by the Current Lifts Performance history to correct a wrong reading. The
+// assessment link lives in its jsonb `data` (no dedicated column needed there).
+export function deleteLiftMax(draft, maxId) {
+  if (!maxId) return
+  draft.maxes = (draft.maxes || []).filter((m) => m.id !== maxId)
+  draft.assessments = (draft.assessments || []).filter((a) => a.data?.sourceMaxId !== maxId)
+}
+
+// Cascade: strip every 1RM peak (and its auto-assessment) a completed session
+// produced, so deleting that session also undoes its effect on the strength
+// ledger. Only auto-sourced, workout-linked records are touched — manual
+// entries and peaks from other sessions are left alone.
+export function removeWorkoutStrength(draft, workoutId) {
+  if (!workoutId) return []
+  const removed = (draft.maxes || []).filter((m) => m.sourceWorkoutId === workoutId).map((m) => m.exercise)
+  draft.maxes = (draft.maxes || []).filter((m) => m.sourceWorkoutId !== workoutId)
+  draft.assessments = (draft.assessments || []).filter((a) => a.data?.sourceWorkoutId !== workoutId)
+  return removed
 }
 
 // Is this lift on the client's "Current Lifts Performance" watch list?
@@ -549,21 +572,29 @@ export const isTrackedLift = (client, lift) =>
 // entry). Appends the e1rm ledger event; if the lift is one the trainer
 // chose to track, also pushes the fitness-assessment auto-update.
 // Returns whether the assessment was updated.
-export function recordLiftMax(draft, clientId, lift, valueKg, date, source = 'manual') {
-  draft.maxes.push({ id: uid(), clientId, exercise: lift, date, kind: 'e1rm', valueKg, source })
+export function recordLiftMax(draft, clientId, lift, valueKg, date, source = 'manual', sourceWorkoutId = null) {
+  const maxId = uid()
+  draft.maxes.push({ id: maxId, clientId, exercise: lift, date, kind: 'e1rm', valueKg, source, ...(sourceWorkoutId ? { sourceWorkoutId } : {}) })
   const client = (draft.clients || []).find((c) => c.id === clientId)
   if (!isTrackedLift(client, lift)) return false
-  autoUpdateAssessment(draft, clientId, lift, valueKg, date, source)
+  autoUpdateAssessment(draft, clientId, lift, valueKg, date, source, maxId, sourceWorkoutId)
   return true
 }
 
 // Spec 6.2 — push a fresh e1RM peak straight onto the athlete's central
-// metrics board (a new auto-sourced fitness assessment record).
-function autoUpdateAssessment(draft, clientId, lift, valueKg, date, source) {
+// metrics board (a new auto-sourced fitness assessment record). Carries the
+// ids of the ledger entry (sourceMaxId) and, for auto peaks, the session
+// (sourceWorkoutId) so both can be undone together when either is deleted.
+function autoUpdateAssessment(draft, clientId, lift, valueKg, date, source, sourceMaxId, sourceWorkoutId) {
   if (!draft.assessments) draft.assessments = []
   draft.assessments.push({
     id: uid(), clientId, type: 'fitness', date, phase: 'progress',
-    data: { strength: [{ lift, valueKg }] },
+    // Links live inside `data` (jsonb) so no new assessments column is needed.
+    data: {
+      strength: [{ lift, valueKg }],
+      ...(sourceMaxId ? { sourceMaxId } : {}),
+      ...(sourceWorkoutId ? { sourceWorkoutId } : {}),
+    },
     notes: source === 'auto'
       ? `Auto-update: new estimated 1RM peak (${valueKg}kg) from a completed top set.`
       : `Trainer-recorded 1RM: ${valueKg}kg (Current Lifts Performance).`,

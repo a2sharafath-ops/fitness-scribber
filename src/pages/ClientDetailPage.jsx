@@ -21,7 +21,7 @@ import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { calcSRPETL } from '../lib/calc'
-import { applyWorkoutStrength } from '../lib/program'
+import { applyWorkoutStrength, removeWorkoutStrength } from '../lib/program'
 import { baseOptions } from '../lib/chartSetup'
 import { fmtDate } from '../lib/dates'
 import { lastNDates, todayISO } from '../lib/dates'
@@ -133,7 +133,15 @@ export default function ClientDetailPage() {
   const age = c.anthro?.age ?? null
   const saveWorkout = (w) => commit((d) => { d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w] })
   const saveTemplate = (plan) => commit((d) => { d.plans = [...d.plans, plan] })
-  const clearWorkout = () => { if (!todayW) return; commit((d) => { d.workouts = (d.workouts || []).filter((x) => x.id !== todayW.id) }) }
+  const clearWorkout = () => {
+    if (!todayW) return
+    // Deleting a session also undoes the auto 1RM peaks it fed into the ledger
+    // (no-op for a session that was never completed).
+    commit((d) => {
+      d.workouts = (d.workouts || []).filter((x) => x.id !== todayW.id)
+      removeWorkoutStrength(d, todayW.id)
+    })
+  }
 
   // Same flow as the athlete portal: ▶ Start pops the morning check-in (unless
   // already logged today); ✓ Complete pops the RPE + duration form.
