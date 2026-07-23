@@ -542,20 +542,16 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .dictate textarea{width:100%;resize:vertical;background:var(--surface);border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:9px 11px;color:inherit;font:inherit;font-size:13px}
 .dictate-preview{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-top:8px}
 .dp-unmapped{color:var(--accent2)}
-.clp-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.clp-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.1fr auto auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .clp-row.clp-head{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);padding:10px 0 4px}
 .clp-val{font-weight:800;color:var(--green)}
 .clp-entry{display:flex;gap:6px;align-items:center}
 .clp-entry input{width:76px;padding:6px 7px;font-size:12px}
-/* Last-update cell doubles as the history toggle. */
-.clp-histbtn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;padding:2px 4px;margin:-2px -4px;border-radius:6px;font:inherit;font-size:11px;color:var(--muted);cursor:pointer;text-align:left}
-.clp-histbtn:hover:not(:disabled){background:var(--surface2);color:var(--text)}
-.clp-histbtn:disabled{cursor:default}
-.clp-count{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:800}
-.clp-caret{font-size:9px}
-/* Expanded per-lift 1RM history. */
-.clp-history{margin:2px 0 8px;padding:6px 10px;background:var(--surface2);border-radius:10px}
-.clp-hrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:5px 2px;font-size:12px;border-bottom:1px dashed var(--border)}
+/* "View" button — opens the lift detail modal (chart + full entry log). */
+.clp-detail{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font:inherit;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;white-space:nowrap}
+.clp-detail:hover{border-color:var(--blue);color:var(--blue)}
+/* Per-lift 1RM history rows (used inside the detail modal). */
+.clp-hrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:7px 2px;font-size:12px;border-bottom:1px dashed var(--border)}
 .clp-hrow:last-child{border-bottom:none}
 .clp-hval{font-weight:800;color:var(--green)}
 .clp-htag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px}
@@ -563,7 +559,21 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .clp-htag.manual{background:var(--tint-amber);color:var(--accent2)}
 .clp-hdel{background:none;border:none;color:var(--accent);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:2px 6px;border-radius:6px}
 .clp-hdel:hover{background:var(--tint-red)}
-@media(max-width:900px){.clp-row{grid-template-columns:1fr 1fr 1fr;row-gap:4px}.clp-row.clp-head{display:none}}
+@media(max-width:900px){.clp-row{grid-template-columns:1fr 1fr 1fr;row-gap:6px}.clp-row.clp-head{display:none}}
+/* Lift detail modal — headline stats, progression chart, entry log. */
+.lift-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 16px}
+.lift-stats>div{background:var(--surface2);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.lift-stats span{font-size:11px;color:var(--muted);font-weight:600}
+.lift-stats b{font-size:18px;font-weight:800}
+.lift-stats b{color:var(--text)}
+.lift-stats>div:first-child b{color:var(--green)}
+.lift-chart{height:260px;margin-bottom:8px}
+.lift-legend{display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:var(--muted);margin-bottom:16px}
+.lift-legend span{display:inline-flex;align-items:center;gap:6px}
+.lift-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.lift-record{display:flex;gap:8px;align-items:center;margin-bottom:16px}
+.lift-record input{flex:1;padding:8px 10px;font-size:13px}
+.lift-log-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:4px}
 .prog-all{font-size:11px;font-weight:700;align-self:flex-end;padding-bottom:8px}
 .prog-ex-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:4px 0;border-bottom:1px dashed var(--border)}
 .prog-ex-row.off{opacity:.55}
