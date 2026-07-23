@@ -91,6 +91,23 @@ export function ensureSetRows(it) {
   }))
 }
 
+// Prepare one exercise for the live runner: guarantee set rows and a note, and
+// backfill each set's target load from the current Training Max when the coach
+// prescribed by %1RM / RIR / RPE without a literal weight. Runs every time the
+// player opens, so sessions built before target loads existed still get them,
+// and an updated Training Max is reflected — without touching loads already
+// logged. `resolveTm(name) => kg | null`.
+export function normalizeRunItem(it, resolveTm) {
+  const rows = ensureSetRows(it)
+  const tmKg = resolveTm ? resolveTm(it.name) : null
+  const setRows = rows.map((r) => {
+    const target = targetLoadKg(r.pIntensityType, { prescribedIntensityValue: r.pIntensityValue, prescribedReps: r.pReps, prescribedLoadKg: r.pLoadKg }, tmKg)
+    if (target == null) return r
+    return { ...r, pLoadKg: r.pLoadKg ?? target, load: r.load ?? target }
+  })
+  return { ...it, note: it.note || '', setRows }
+}
+
 // Ordered blocks for the block-by-block stepper: warm-up, then the main set
 // grouped by its builder block type (Main Lifts / Assisted / Core…) preserving
 // order, then cool-down. Empty sections are dropped.

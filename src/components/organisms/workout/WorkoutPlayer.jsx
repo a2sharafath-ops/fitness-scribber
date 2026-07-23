@@ -3,7 +3,7 @@ import Button from '../../atoms/Button'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import SetLogRow from '../../molecules/SetLogRow'
 import HeartRateTile from '../../molecules/HeartRateTile'
-import { newExercise, secToClock, workoutVolume, runBlocks, ensureSetRows } from '../../../lib/workout'
+import { newExercise, secToClock, workoutVolume, runBlocks, normalizeRunItem } from '../../../lib/workout'
 import { fmtVL } from '../../../lib/units'
 
 // The live/edit surface for a Today's Workout.
@@ -12,7 +12,7 @@ import { fmtVL } from '../../../lib/units'
 //                   …) where every set is logged with load, reps and RIR/RPE,
 //                   plus a per-exercise note. Used by both the coach's in-app
 //                   runner and the athlete portal (locked only affects editing).
-export default function WorkoutPlayer({ workout, units, restingHr, age, running, locked, onSave, onComplete, onCancel }) {
+export default function WorkoutPlayer({ workout, units, restingHr, age, running, locked, resolveTm, onSave, onComplete, onCancel }) {
   const [w, setW] = useState(workout)
   const [now, setNow] = useState(Date.now())
   const [step, setStep] = useState(0)
@@ -25,7 +25,7 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
   // plan/manual builds get rows synthesised from their set count).
   useEffect(() => {
     if (!running) { setW(workout); return }
-    const withRows = (arr) => (arr || []).map((it) => ({ ...it, note: it.note || '', setRows: ensureSetRows(it) }))
+    const withRows = (arr) => (arr || []).map((it) => normalizeRunItem(it, resolveTm))
     setW({ ...workout, warmup: withRows(workout.warmup), main: withRows(workout.main), cooldown: withRows(workout.cooldown) })
     setStep(0)
     // Re-normalise only when the session identity or run state changes.

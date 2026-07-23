@@ -97,7 +97,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   if (workout.status === 'in_progress') {
     return (
       <Shell bare={bare} extra={headerExtra}>
-        <WorkoutPlayer workout={workout} units={units} running locked={locked} restingHr={restingHr} age={age}
+        <WorkoutPlayer workout={workout} units={units} running locked={locked} restingHr={restingHr} age={age} resolveTm={resolveTm}
           onSave={onSave} onComplete={onComplete} />
       </Shell>
     )
