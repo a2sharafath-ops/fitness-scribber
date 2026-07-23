@@ -135,6 +135,46 @@ export function goalHeadline(screening) {
   return (g.smart || '').trim()
 }
 
+// Seed a first Goals assessment from the intake screening, so the client's
+// stated goals flow into trackable ones without re-entry. Returns
+// { shortTerm, longTerm, why } shaped exactly like the goals assessment `data`.
+// Every value comes from what the client actually entered — nothing invented;
+// the coach reviews before saving. Bucketing: a goal whose target date is within
+// ~90 days is short-term, otherwise long-term.
+export function goalsFromScreening(screening, today) {
+  const g = screening?.goals || {}
+  const shortTerm = []
+  const longTerm = []
+  const seen = new Set()
+  const bucket = (date) => {
+    if (!date) return longTerm
+    const days = (Date.parse(date) - Date.parse(today)) / 86400000
+    return days >= 0 && days <= 90 ? shortTerm : longTerm
+  }
+  const add = (list, text, target = '', by = '') => {
+    const t = String(text || '').trim()
+    if (!t || seen.has(t.toLowerCase())) return
+    seen.add(t.toLowerCase())
+    list.push({ text: t, target: String(target || '').trim(), by: by || '' })
+  }
+
+  const targetVal = (g.target?.value || '').trim()
+  const targetDate = (g.target?.date || '').trim()
+  const smart = (g.smart || '').trim()
+  const primary = (g.primary || '').trim()
+  // Flagship goal: the SMART statement (with its target), else the primary goal.
+  const flagship = smart || primary
+  if (flagship) add(bucket(targetDate), flagship, targetVal, targetDate)
+  // Keep the chosen primary category too when the SMART line was the flagship.
+  if (smart && primary) add(longTerm, primary)
+  // A named event/deadline is its own goal.
+  if ((g.event || '').trim()) add(longTerm, g.event)
+  // Secondary goals become additional long-term rows.
+  for (const s of (g.secondary || [])) add(longTerm, s)
+
+  return { shortTerm, longTerm, why: '' }
+}
+
 // ---- Computed profile fields (populate, don't ask again) ----
 export const bmiOf = (heightCm, massKg) =>
   heightCm && massKg ? +(massKg / (heightCm / 100) ** 2).toFixed(1) : null

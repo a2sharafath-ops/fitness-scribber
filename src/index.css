@@ -195,6 +195,12 @@ canvas{max-width:100%}
 .sumex-n{width:18px;text-align:center;font-weight:800;color:var(--muted);font-size:11px}
 .sumex-note{margin-top:6px;font-size:12px;color:var(--text);background:var(--surface2);border-radius:8px;padding:6px 9px}
 .sumex-note span{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:2px}
+/* Goals assessment — "seeded from screening" banner */
+.goal-seed{display:flex;align-items:center;gap:9px;margin:2px 0 12px;padding:9px 12px;background:var(--tint-blue);border-radius:10px;font-size:12px;color:var(--blue);line-height:1.4}
+.goal-seed-ic{flex:none;display:inline-flex}
+.goal-seed>span:nth-child(2){flex:1}
+.goal-seed-btn{flex:none;background:var(--surface);border:1px solid var(--blue);color:var(--blue);font:inherit;font-size:11px;font-weight:700;border-radius:7px;padding:4px 9px;cursor:pointer}
+.goal-seed-btn:hover{background:var(--blue);color:#fff}
 /* Per-set logging row */
 .slog-head{display:grid;grid-template-columns:24px 1.4fr 1fr 1fr 1fr 28px;gap:8px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:0 2px 3px}
 .slog{display:grid;grid-template-columns:24px 1.4fr 1fr 1fr 1fr 28px;gap:8px;align-items:center;padding:4px 2px}

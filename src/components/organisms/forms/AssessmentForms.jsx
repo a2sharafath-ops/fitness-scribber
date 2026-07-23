@@ -9,6 +9,7 @@ import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
 import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax } from '../../../lib/assessment'
 import { FIELD_LABELS, parseBodyComp } from '../../../lib/bodyCompPdf'
+import { screeningsFor, goalsFromScreening } from '../../../lib/screening'
 import Icon from '../../atoms/Icon'
 import Autocomplete from '../../molecules/Autocomplete'
 
@@ -391,12 +392,24 @@ export function LifestyleForm({ clientId, record, defaultPhase }) {
 
 // ---- Goals (short-term & long-term) ----
 export function GoalForm({ clientId, record, defaultPhase }) {
+  const { db } = useData()
   const { closeModal } = useModal()
   const d0 = record?.data || {}
   const mapGoals = (l) => (l?.length ? l.map((r) => ({ text: r.text || '', target: r.target || '', by: r.by || '' })) : [{ text: '', target: '', by: '' }])
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', why: d0.why || '' })
-  const [shortTerm, setShort] = useState(mapGoals(d0.shortTerm))
-  const [longTerm, setLong] = useState(mapGoals(d0.longTerm))
+
+  // Seed a brand-new baseline Goals record from the intake screening — but only
+  // when this client has no goals assessment yet, so tracked goals are never
+  // overwritten. The coach reviews the pre-filled rows before saving.
+  const hasGoalsAlready = (db.assessments || []).some((a) => a.clientId === clientId && a.type === 'goals')
+  const scr = !record && !hasGoalsAlready ? (screeningsFor(db.screenings, clientId).complete || screeningsFor(db.screenings, clientId).draft) : null
+  const seed = scr ? goalsFromScreening(scr, todayISO()) : null
+  const seeded = !!seed && (seed.shortTerm.length > 0 || seed.longTerm.length > 0)
+
+  const [fromScreening, setFromScreening] = useState(seeded)
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', why: d0.why || (seed?.why || '') })
+  const [shortTerm, setShort] = useState(mapGoals(record ? d0.shortTerm : seed?.shortTerm))
+  const [longTerm, setLong] = useState(mapGoals(record ? d0.longTerm : seed?.longTerm))
+  const reimport = () => { if (!seed) return; setShort(mapGoals(seed.shortTerm)); setLong(mapGoals(seed.longTerm)); setFromScreening(true) }
   const updList = (setter, list) => (i, k, v) => setter(list.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
   const clean = (list) => list.filter((r) => r.text.trim()).map((r) => ({ text: r.text.trim(), target: r.target.trim(), by: r.by }))
   const data = () => ({ shortTerm: clean(shortTerm), longTerm: clean(longTerm), why: f.why.trim() })
@@ -419,6 +432,17 @@ export function GoalForm({ clientId, record, defaultPhase }) {
     <ModalShell title={<><Icon name="like" size={16} /> Goal setting</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
+      {seed && (
+        <div className="goal-seed">
+          <span className="goal-seed-ic" aria-hidden="true"><Icon name="sparkles" size={14} /></span>
+          <span>
+            {fromScreening
+              ? <>Pre-filled from the intake screening — review &amp; edit before saving.</>
+              : <>This client stated goals at intake.</>}
+          </span>
+          <button className="goal-seed-btn" onClick={reimport}>{fromScreening ? 'Re-import' : 'Fill from screening'}</button>
+        </div>
+      )}
       {rows(shortTerm, setShort, 'Short-term goals')}
       {rows(longTerm, setLong, 'Long-term goals')}
       <div style={{ marginTop: 10 }}><Field label="Why it matters"><input value={f.why} onChange={(e) => setF({ ...f, why: e.target.value })} placeholder="The deeper motivation…" /></Field></div>
