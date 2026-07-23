@@ -170,6 +170,48 @@ canvas{max-width:100%}
 .wp-section-title{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin:16px 0 2px}
 .wp-collapse{margin:12px 0}
 .wp-collapse-h{width:100%;text-align:left;background:none;border:none;color:var(--text);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;padding:4px 0}
+/* ---- Block-by-block session stepper ---- */
+.wp-steps{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.wp-step{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.wp-step.past{color:var(--green);border-color:var(--green)}
+.wp-step.cur{background:var(--accent);border-color:var(--accent);color:#fff}
+.wp-block{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.wp-block-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.wp-block-title{font-size:16px;font-weight:800}
+.wp-block-sub{font-size:12px;color:var(--muted);font-weight:600}
+.wp-ex{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.wp-ex-name{font-weight:700;font-size:14px;margin-bottom:8px}
+.wp-ex-note{display:block;margin-top:8px}
+.wp-ex-note span{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.wp-ex-note textarea{width:100%;min-height:36px;padding:7px 9px;font:inherit;font-size:12px;border:1px solid var(--border);border-radius:8px;resize:vertical}
+.wp-nav{justify-content:space-between}
+/* Completed-session per-exercise set log */
+.sumex{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.sumex-head{display:flex;align-items:center;gap:8px;font-size:14px}
+.sumex-sets{margin:6px 0 0}
+.sumex-set{display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--border)}
+.sumex-set:last-child{border-bottom:none}
+.sumex-set.skip{opacity:.6}
+.sumex-n{width:18px;text-align:center;font-weight:800;color:var(--muted);font-size:11px}
+.sumex-note{margin-top:6px;font-size:12px;color:var(--text);background:var(--surface2);border-radius:8px;padding:6px 9px}
+.sumex-note span{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:2px}
+/* Per-set logging row */
+.slog-head{display:grid;grid-template-columns:24px 1.4fr 1fr 1fr 1fr 28px;gap:8px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:0 2px 3px}
+.slog{display:grid;grid-template-columns:24px 1.4fr 1fr 1fr 1fr 28px;gap:8px;align-items:center;padding:4px 2px}
+.slog.done{background:var(--tint-green);border-radius:8px}
+.slog-n{font-weight:800;font-size:12px;color:var(--muted);text-align:center}
+.slog-target{font-size:11px;color:var(--muted);line-height:1.25}
+.slog-f{display:flex;flex-direction:column;gap:2px;min-width:0}
+.slog-f>span{display:none}
+.slog-f input,.slog-f select{width:100%;padding:5px 6px;font-size:12px}
+.slog-done{display:flex;align-items:center;justify-content:center}
+.slog-done input{width:17px;height:17px}
+@media(max-width:640px){
+  .slog-head{display:none}
+  .slog{grid-template-columns:20px 1fr 1fr 1fr 24px;gap:6px}
+  .slog-target{grid-column:1 / -1;order:-1;padding-bottom:2px}
+  .slog-f>span{display:block;font-size:9px;font-weight:700;color:var(--muted)}
+}
 .hr-tile{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px}
 .hr-bpm{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .hr-demo{font-size:9px;font-weight:800;letter-spacing:.6px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 6px}

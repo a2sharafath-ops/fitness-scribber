@@ -517,10 +517,19 @@ export function workoutPeaks(maxes, workout) {
   const { clientId, date } = workout
   const peaks = []
   for (const m of workout.main) {
-    if (!m.done) continue
-    const weight = +(m.doneWeight ?? m.weight) || 0
-    const reps = parseInt(m.doneReps ?? m.reps, 10) || 0
-    const est = epley1RM(weight, reps)
+    // Best estimated 1RM the athlete produced on this lift. With per-set logging
+    // that's the strongest completed set (max Epley across done rows); older
+    // sessions fall back to the single per-exercise done weight × reps.
+    let est = 0
+    if (Array.isArray(m.setRows) && m.setRows.length) {
+      for (const r of m.setRows) {
+        if (!r.done) continue
+        const e = epley1RM(+(r.load ?? r.pLoadKg) || 0, parseInt(r.reps ?? r.pReps, 10) || 0)
+        if (e > est) est = e
+      }
+    } else if (m.done) {
+      est = epley1RM(+(m.doneWeight ?? m.weight) || 0, parseInt(m.doneReps ?? m.reps, 10) || 0)
+    }
     if (!est) continue
     const abs = absolute1RM(maxes, clientId, m.name, date)
     if (!abs || est > abs) peaks.push({ exercise: m.name, valueKg: est })

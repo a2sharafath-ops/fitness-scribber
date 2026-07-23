@@ -107,12 +107,37 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
         </div>
       </div>
 
-      <div className="section-title">Prescribed vs done</div>
+      <div className="section-title">Logged sets</div>
       {main.map((m) => {
+        const rows = Array.isArray(m.setRows) && m.setRows.length ? m.setRows : null
+        const anyDone = rows ? rows.some((r) => r.done) : !!m.done
+        if (rows) {
+          return (
+            <div key={m.id} className="sumex">
+              <div className="sumex-head">
+                <span style={{ color: anyDone ? 'var(--green)' : 'var(--accent2)', width: 16 }} aria-hidden="true">{anyDone ? '✓' : '⚠'}</span>
+                <strong>{m.name}</strong>
+                {!anyDone && <Tag color="orange">Not logged</Tag>}
+              </div>
+              <div className="sumex-sets">
+                {rows.map((r, i) => (
+                  <div key={i} className={'sumex-set' + (r.done ? '' : ' skip')}>
+                    <span className="sumex-n">{r.n}</span>
+                    {r.done
+                      ? <span>{r.reps ?? r.pReps ?? '—'} reps{(r.load ?? r.pLoadKg) != null ? ` · ${toDisp(r.load ?? r.pLoadKg, units)} ${unitName(units)}` : ''}{r.effort != null ? ` · ${r.effort} ${r.effortType}` : ''}</span>
+                      : <span className="muted">skipped · target {r.pReps ?? '—'}{r.pLoadKg != null ? ` @ ${toDisp(r.pLoadKg, units)} ${unitName(units)}` : ''}</span>}
+                  </div>
+                ))}
+              </div>
+              {m.note && <div className="sumex-note"><span>Note</span>{m.note}</div>}
+            </div>
+          )
+        }
+        // Legacy per-exercise fallback (older sessions without per-set rows).
         const logged = m.doneSets != null || m.doneReps != null || m.doneWeight != null
         return (
           <div key={m.id} className="ex-row" style={m.done ? undefined : { opacity: .75 }}>
-            <span style={{ color: m.done ? 'var(--green)' : 'var(--amber, #e8850c)', flex: 'none', width: 18 }} aria-hidden="true">{m.done ? '✓' : '⚠'}</span>
+            <span style={{ color: m.done ? 'var(--green)' : 'var(--accent2)', flex: 'none', width: 18 }} aria-hidden="true">{m.done ? '✓' : '⚠'}</span>
             <div style={{ flex: 1 }}>
               <div className="flex gap" style={{ alignItems: 'center' }}>
                 <strong>{m.name}</strong>
