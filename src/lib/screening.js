@@ -122,6 +122,19 @@ export function screeningsFor(list = [], clientId) {
   return { complete, draft }
 }
 
+// A concise headline for the client record's single `goal` string, derived from
+// the screening's goals: the chosen primary goal (with its target value when
+// set), falling back to the client's own SMART wording. Empty when the goals
+// step hasn't been filled — callers should not overwrite an existing goal with
+// an empty headline.
+export function goalHeadline(screening) {
+  const g = screening?.goals || {}
+  const primary = (g.primary || '').trim()
+  const target = (g.target?.value || '').trim()
+  if (primary) return target ? `${primary} · ${target}` : primary
+  return (g.smart || '').trim()
+}
+
 // ---- Computed profile fields (populate, don't ask again) ----
 export const bmiOf = (heightCm, massKg) =>
   heightCm && massKg ? +(massKg / (heightCm / 100) ** 2).toFixed(1) : null
