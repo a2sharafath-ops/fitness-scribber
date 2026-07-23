@@ -45,8 +45,14 @@ export default function CurrentLiftsPerformance({ client }) {
     commit((d) => { const c = d.clients.find((x) => x.id === client.id); c.trackedLifts = [...(c.trackedLifts || []), name] })
     setPick('')
   }
-  const removeLift = (lift) =>
+  const removeLift = async (lift) => {
+    if (!await confirmDialog({
+      title: 'Stop tracking lift',
+      message: `Stop tracking ${lift}? It will be removed from this list. Recorded 1RM history is kept — re-add the lift to see it again.`,
+      confirmLabel: 'Stop tracking', danger: true,
+    })) return
     commit((d) => { const c = d.clients.find((x) => x.id === client.id); c.trackedLifts = (c.trackedLifts || []).filter((l) => l !== lift) })
+  }
   const record = (lift) => {
     const kg = dispToKg(entry[lift])
     if (!kg || kg <= 0) return
