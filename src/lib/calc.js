@@ -69,78 +69,90 @@ export function acwrSeries(loadMap, dates) {
   })
 }
 
-// 0–100 composite of wellness + HRV deviation for a given day
-export function readinessScore(db, clientId, date) {
-  const w = db.wellness.find((x) => x.clientId === clientId && x.date === date)
-  const hr = db.wearable.find((x) => x.clientId === clientId && x.date === date)
-  const parts = []
-  if (w) parts.push(((w.score - 4) / 24) * 100)
-  if (hr) {
-    const b = rolling30Baseline(db, clientId, 'hrv', date)
-    if (b) parts.push(Math.max(0, Math.min(100, 50 + deviationPct(hr.hrv, b) * 2.5)))
-  }
-  return parts.length ? Math.round(mean(parts)) : null
+const clamp100 = (v) => Math.max(0, Math.min(100, v))
+
+// The two component parts are UNCHANGED from the original design — only the way
+// they are combined into the final score is new.
+//   • Subjective (Hooper) part: (score − 4) / 24 × 100.
+//   • Objective (HRV) part: 50 + (% deviation from the 30-day baseline) × 2.5.
+const wellnessPartOf = (w) => (w ? Math.round(clamp100(((w.score - 4) / 24) * 100)) : null)
+function hrvPartOf(db, clientId, date, hr) {
+  if (!hr) return { part: null, dev: null, baseline: null }
+  const baseline = rolling30Baseline(db, clientId, 'hrv', date)
+  if (!baseline) return { part: null, dev: null, baseline: null }
+  const dev = deviationPct(hr.hrv, baseline)
+  return { part: Math.round(clamp100(50 + dev * 2.5)), dev, baseline }
 }
 
-// Component breakdown behind the readiness composite for one day.
-// Returns the wellness (Hooper) and HRV-deviation parts plus the blended score.
-export function readinessParts(db, clientId, date) {
+// Full readiness for one day. The component parts are the originals; the CHANGES
+// live only in the COMBINE step: a red-flag-dominant blend instead of a plain
+// mean, an R/Y/G taken from that same number (so score and light can't
+// disagree), and a data-confidence level.
+export function computeReadiness(db, clientId, date) {
   const w = db.wellness.find((x) => x.clientId === clientId && x.date === date)
   const hr = db.wearable.find((x) => x.clientId === clientId && x.date === date)
-  let wellnessPart = null,
-    hrvPart = null,
-    hrvDev = null,
-    hrvBaseline = null
-  if (w) wellnessPart = Math.round(((w.score - 4) / 24) * 100)
-  if (hr) {
-    hrvBaseline = rolling30Baseline(db, clientId, 'hrv', date)
-    if (hrvBaseline) {
-      hrvDev = deviationPct(hr.hrv, hrvBaseline)
-      hrvPart = Math.round(Math.max(0, Math.min(100, 50 + hrvDev * 2.5)))
-    }
-  }
+  const wellnessPart = wellnessPartOf(w)
+  const { part: hrvPart, dev: hrvDev, baseline: hrvBaseline } = hrvPartOf(db, clientId, date, hr)
   const parts = [wellnessPart, hrvPart].filter((v) => v != null)
+
+  let score = null
+  if (parts.length === 1) score = parts[0]
+  else if (parts.length === 2) {
+    // Soft worst-of: 60% weight on the lower signal, so a poor reading in one
+    // system is not cancelled by a good reading in the other (a plain mean was).
+    const lo = Math.min(...parts)
+    score = Math.round(lo + (mean(parts) - lo) * 0.4)
+  }
+
+  const confidence = parts.length >= 2 ? 'high' : parts.length === 1 ? 'low' : 'none'
+  let color = 'gray', label = 'No data'
+  if (score != null) {
+    if (score < 45) { color = 'red'; label = 'Red — At risk' }
+    else if (score >= 67) { color = 'green'; label = 'Green — Ready' }
+    else { color = 'yellow'; label = 'Yellow — Monitor' }
+  }
+
   return {
-    wellnessPart,
-    hrvPart,
-    hrvDev,
-    hrvBaseline,
-    hrv: hr ? hr.hrv : null,
-    wellness: w || null,
-    score: parts.length ? Math.round(mean(parts)) : null,
+    score, color, label, confidence,
+    wellnessPart, hrvPart, hrvDev, hrvBaseline,
+    hrv: hr ? hr.hrv : null, wellness: w || null,
   }
 }
 
-// R/Y/G readiness classification (latest subjective + objective)
+// 0–100 composite of wellness + HRV for a given day.
+export const readinessScore = (db, clientId, date) => computeReadiness(db, clientId, date).score
+
+// Component breakdown behind the composite for one day (superset of the score:
+// both parts, deviation/z, baseline, confidence and the red-flag).
+export const readinessParts = (db, clientId, date) => computeReadiness(db, clientId, date)
+
+// R/Y/G classification for the client's most recent day that has ANY data —
+// keeping subjective and objective on the SAME date (the old version took each
+// from its own latest row, which could mix a check-in with 3-day-old HRV).
 export function readinessFor(db, clientId) {
-  const w = latestOf(db.wellness, clientId)
-  const hr = latestOf(db.wearable, clientId)
-  let dev = null
-  if (hr) {
-    const base = rolling30Baseline(db, clientId, 'hrv', hr.date)
-    dev = base ? deviationPct(hr.hrv, base) : null
-  }
-  const subjGood = w ? w.score >= 20 : null
-  const objGood = dev === null ? null : dev >= -5
-  let label = 'No data',
-    color = 'gray'
-  if (subjGood !== null || objGood !== null) {
-    if (subjGood && (objGood || objGood === null)) {
-      label = 'Green — Ready'
-      color = 'green'
-    } else if (subjGood === false && objGood === false) {
-      label = 'Red — At risk'
-      color = 'red'
-    } else {
-      label = 'Yellow — Monitor'
-      color = 'yellow'
-    }
-    if (subjGood === false && objGood === null) {
-      label = 'Yellow — Monitor'
-      color = 'yellow'
-    }
-  }
-  return { label, color, wellness: w ? w.score : null, hrvDev: dev }
+  const dates = [
+    ...db.wellness.filter((x) => x.clientId === clientId).map((x) => x.date),
+    ...db.wearable.filter((x) => x.clientId === clientId).map((x) => x.date),
+  ]
+  if (!dates.length) return { label: 'No data', color: 'gray', wellness: null, hrvDev: null, score: null, confidence: 'none' }
+  const date = dates.sort((a, b) => b.localeCompare(a))[0]
+  const r = computeReadiness(db, clientId, date)
+  return { label: r.label, color: r.color, wellness: r.wellness ? r.wellness.score : null, hrvDev: r.hrvDev, score: r.score, confidence: r.confidence }
+}
+
+// Smoothed readiness + trend over a window (default 5 days vs the prior 5), to
+// damp single-day noise and show direction instead of a one-off reading.
+export function readinessTrend(db, clientId, endDate, win = 5) {
+  const days = []
+  for (let i = win * 2 - 1; i >= 0; i--) days.push(addDays(endDate, -i))
+  const scores = days.map((d) => readinessScore(db, clientId, d))
+  const recent = scores.slice(-win).filter((v) => v != null)
+  const prior = scores.slice(0, win).filter((v) => v != null)
+  const smoothed = recent.length ? Math.round(mean(recent)) : null
+  const priorAvg = prior.length ? mean(prior) : null
+  const delta = smoothed != null && priorAvg != null ? Math.round(smoothed - priorAvg) : null
+  const trend = delta == null ? 'flat' : delta >= 3 ? 'up' : delta <= -3 ? 'down' : 'flat'
+  return { smoothed, trend, delta }
 }
 
 // Per-day snapshot of the four headline load-response metrics, all ending on `date`.

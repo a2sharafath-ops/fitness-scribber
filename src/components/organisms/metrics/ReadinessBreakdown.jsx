@@ -3,7 +3,10 @@ import Kpi from '../../atoms/Kpi'
 import { useData } from '../../../store/DataContext'
 import { baseOptions, COLORS, shortLabel } from '../../../lib/chartSetup'
 import { lastNDates } from '../../../lib/dates'
-import { readinessParts, rollingAvg } from '../../../lib/calc'
+import { readinessParts, readinessTrend, rollingAvg } from '../../../lib/calc'
+
+const TREND_ICON = { up: '▲', down: '▼', flat: '→' }
+const CONF_LABEL = { high: 'High confidence · check-in + HRV', low: 'Low confidence · one signal only', none: '' }
 
 // Detailed breakdown of the readiness composite: how the wellness (Hooper) and
 // HRV-deviation components combine, plus the subjective sub-scores driving it.
@@ -24,6 +27,8 @@ export default function ReadinessBreakdown({ client, range }) {
   const latest = lastIdx != null ? parts[lastIdx] : null
   const w = latest?.wellness || null
   const logged = score.filter((v) => v != null).length
+  // 5-day smoothed trend ending on the latest logged day.
+  const tinfo = lastIdx != null ? readinessTrend(db, client.id, D[lastIdx], 5) : null
 
   const tOpts = {
     ...baseOptions(),
@@ -43,11 +48,12 @@ export default function ReadinessBreakdown({ client, range }) {
   return (
     <>
       <div className="kpi-strip">
-        <Kpi label="Readiness (latest)" value={latest?.score ?? '—'} delta="composite /100"
-          deltaColor={latest ? (latest.score >= 67 ? 'var(--green)' : latest.score >= 34 ? 'var(--amber)' : 'var(--accent)') : 'var(--muted)'} />
+        <Kpi label="Readiness (latest)" value={latest?.score ?? '—'}
+          delta={tinfo?.smoothed != null ? `${TREND_ICON[tinfo.trend]} 5-day avg ${tinfo.smoothed}${tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}` : 'composite /100'}
+          deltaColor={latest ? (latest.color === 'green' ? 'var(--green)' : latest.color === 'yellow' ? 'var(--amber)' : 'var(--accent)') : 'var(--muted)'} />
         <Kpi label="Wellness part" value={latest?.wellnessPart ?? '—'} delta={w ? `Hooper ${w.score}/28` : 'no check-in'} />
         <Kpi label="HRV part" value={latest?.hrvPart ?? '—'} delta={latest?.hrvDev != null ? `${latest.hrvDev > 0 ? '+' : ''}${latest.hrvDev.toFixed(1)}% vs base` : 'no wearable'} />
-        <Kpi label="Days logged" value={logged} delta={`of last ${range}`} />
+        <Kpi label="Confidence" value={latest ? (latest.confidence === 'high' ? 'High' : 'Low') : '—'} delta={latest ? CONF_LABEL[latest.confidence] : `${logged} of ${range} logged`} />
       </div>
 
       <div className="card">
@@ -71,7 +77,7 @@ export default function ReadinessBreakdown({ client, range }) {
       <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <div className="card">
           <div className="section-title" style={{ margin: 0 }}>Component contribution</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>The composite is the mean of the two parts present each day.</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>The composite is a red-flag-weighted blend — the weaker signal counts ~60%, so one alarmed system isn't averaged away.</div>
           <div style={{ height: 200 }}>
             <Line
               data={{
@@ -127,8 +133,12 @@ export default function ReadinessBreakdown({ client, range }) {
         <p className="muted" style={{ fontSize: 13, lineHeight: 1.6 }}>
           Readiness blends a subjective and an objective signal into a 0–100 score. The <strong>wellness part</strong> maps
           the Hooper index (sleep + inverted stress, fatigue and soreness, range 4–28) onto 0–100. The <strong>HRV part</strong> compares
-          the day's heart-rate variability to a rolling 30-day baseline — readings above baseline push the score up, below pull it down.
-          When both signals exist the composite is their mean; with only one, that one stands alone. Roughly 67+ is green, 34–66 amber, below 34 a flag.
+          the day's heart-rate variability to a rolling 30-day baseline — above baseline pushes up, below pulls down. Both parts are
+          unchanged; what's new is how they <em>combine</em>: instead of a plain mean, the composite is a
+          <strong> red-flag-weighted blend</strong> where the weaker signal carries ~60%, so one poor reading isn't cancelled by a good
+          one in the other system. The traffic light comes from that same number, so they always agree: 67+ green, 45–66 amber, below 45
+          a flag. <strong>Confidence</strong> is high only when both a check-in and HRV are present; the headline also shows a 5-day
+          smoothed trend, since a single day — especially HRV — is noisy.
         </p>
       </div>
     </>

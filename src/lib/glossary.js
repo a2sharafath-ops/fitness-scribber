@@ -6,7 +6,7 @@ export const GLOSSARY = {
   monotony: { term: 'Monotony', text: 'How similar the daily loads are across the week (Foster). Above ~2 means little day-to-day variation — a fatigue / overtraining risk.' },
   strain: { term: 'Strain', text: 'Weekly load × monotony (Foster). Climbs when total load and day-to-day sameness are both high.' },
   srpeTl: { term: 'sRPE-TL', text: 'Session load = session RPE (0–10) × minutes, in arbitrary units (AU). The core “internal load” measure.' },
-  readiness: { term: 'Readiness', text: 'Composite score /100 from wellness (sleep, soreness, stress, fatigue) and HRV vs baseline. Higher = more recovered.' },
+  readiness: { term: 'Readiness', text: 'Score /100 combining the wellness check-in (Hooper) and HRV vs a 30-day baseline. The two parts are combined with a red-flag-weighted blend — the weaker signal counts more, so a poor reading isn’t averaged away. Higher = more recovered.' },
   wellness: { term: 'Wellness (Hooper)', text: 'Daily self-report of sleep, stress, fatigue and soreness (each rated /7). Tracked out of 28; lower total = better.' },
   trimp: { term: 'TRIMP', text: 'Training Impulse — cardio load from heart-rate zones × duration.' },
   tiz: { term: 'TiZ', text: 'Time-in-Zone — minutes spent in each heart-rate zone during a session.' },
