@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Line, Bar } from 'react-chartjs-2'
 import Kpi from '../../atoms/Kpi'
 import { useData } from '../../../store/DataContext'
@@ -12,6 +13,7 @@ const CONF_LABEL = { high: 'High confidence · check-in + HRV', low: 'Low confid
 // HRV-deviation components combine, plus the subjective sub-scores driving it.
 export default function ReadinessBreakdown({ client, range }) {
   const { db, tz } = useData()
+  const [view, setView] = useState('combined')
   const D = lastNDates(range, tz)
   const labels = D.map(shortLabel)
 
@@ -19,8 +21,16 @@ export default function ReadinessBreakdown({ client, range }) {
   const score = parts.map((p) => p.score)
   const wellnessPart = parts.map((p) => p.wellnessPart)
   const hrvPart = parts.map((p) => p.hrvPart)
-  const trend = rollingAvg(score, 7)
-  const baseline = rollingAvg(score, 28)
+
+  // The trend chart can show the combined score or either component on its own.
+  const VIEW = {
+    combined: { series: score, color: COLORS.green, fill: 'rgba(61,220,151,.10)', label: 'Readiness', sub: 'Combined score — the red-flag-weighted blend of both parts.' },
+    subjective: { series: wellnessPart, color: COLORS.purple, fill: 'rgba(167,139,250,.12)', label: 'Wellness (subjective)', sub: 'Hooper check-in mapped to 0–100 — the subjective part only.' },
+    objective: { series: hrvPart, color: COLORS.amber, fill: 'rgba(245,177,76,.10)', label: 'HRV (objective)', sub: 'HRV vs the 30-day baseline mapped to 0–100 — the objective part only.' },
+  }
+  const v = VIEW[view]
+  const vTrend = rollingAvg(v.series, 7)
+  const vBase = rollingAvg(v.series, 28)
 
   // Latest day that actually has a composite, for the KPI strip + Hooper bars.
   const lastIdx = [...score.keys()].reverse().find((i) => score[i] != null)
@@ -57,16 +67,24 @@ export default function ReadinessBreakdown({ client, range }) {
       </div>
 
       <div className="card">
-        <div className="section-title" style={{ margin: 0 }}>Readiness trend</div>
-        <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>Daily composite with 7-day smoothing against the 28-day baseline.</div>
+        <div className="flex between" style={{ alignItems: 'center', gap: 8 }}>
+          <div className="section-title" style={{ margin: 0 }}>Readiness trend</div>
+          <select value={view} onChange={(e) => setView(e.target.value)} aria-label="Readiness view"
+            style={{ fontSize: 12, padding: '5px 8px' }}>
+            <option value="combined">Combined</option>
+            <option value="subjective">Subjective (wellness)</option>
+            <option value="objective">Objective (HRV)</option>
+          </select>
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>{v.sub} 7-day smoothing against the 28-day baseline.</div>
         <div style={{ height: 220 }}>
           <Line
             data={{
               labels,
               datasets: [
-                { label: 'Readiness (daily)', data: score, borderColor: COLORS.green, backgroundColor: 'rgba(61,220,151,.10)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 2 },
-                { label: '7-day avg', data: trend, borderColor: COLORS.blue, borderWidth: 2, pointRadius: 0, spanGaps: true, tension: 0.3 },
-                { label: 'Baseline (28d)', data: baseline, borderColor: COLORS.muted, borderDash: [5, 4], pointRadius: 0, spanGaps: true },
+                { label: `${v.label} (daily)`, data: v.series, borderColor: v.color, backgroundColor: v.fill, fill: true, tension: 0.3, spanGaps: true, pointRadius: 2 },
+                { label: '7-day avg', data: vTrend, borderColor: COLORS.blue, borderWidth: 2, pointRadius: 0, spanGaps: true, tension: 0.3 },
+                { label: 'Baseline (28d)', data: vBase, borderColor: COLORS.muted, borderDash: [5, 4], pointRadius: 0, spanGaps: true },
               ],
             }}
             options={tOpts}
