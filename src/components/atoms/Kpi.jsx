@@ -14,10 +14,14 @@ export default function Kpi({ label, value, delta, deltaColor, onClick }) {
     </>
   )
   if (interactive) {
+    // A div (not a <button>) so the tile can safely contain its own interactive
+    // controls — e.g. an InfoTip button or a view <select> in the label — which
+    // a nested <button> would make invalid. Keyboard access is preserved.
     return (
-      <button type="button" className="kpi link" onClick={onClick}>
+      <div className="kpi link" role="button" tabIndex={0} onClick={onClick}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e) } }}>
         {body}
-      </button>
+      </div>
     )
   }
   return <div className="kpi">{body}</div>

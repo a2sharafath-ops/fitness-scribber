@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Chart, Scatter } from 'react-chartjs-2'
 import Kpi from '../atoms/Kpi'
 import InfoTip from '../atoms/InfoTip'
@@ -13,6 +14,8 @@ const shortLabel = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 
 export default function LoadResponseDashboard({ client, win, range }) {
   const { db, tz, units } = useData()
+  const nav = useNavigate()
+  const openMetric = (key) => nav(`/clients/${client.id}/metric/${key}`)
   const [x, setX] = useState('time')
   const [y1, setY1] = useState('vl')
   const [y2, setY2] = useState('srpetl')
@@ -91,19 +94,22 @@ export default function LoadResponseDashboard({ client, win, range }) {
   return (
     <div className="card">
       <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
+      <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>Tap any card for its full component breakdown.</div>
       <div className="kpi-strip" style={{ marginTop: 12 }}>
-        <Kpi
+        <Kpi onClick={() => openMetric('readiness')}
           label={<>Readiness
-            <select className="lr-rview" value={rView} onChange={(e) => setRView(e.target.value)} aria-label="Readiness view">
+            <select className="lr-rview" value={rView} aria-label="Readiness view"
+              onChange={(e) => setRView(e.target.value)}
+              onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
               <option value="combined">Combined</option>
               <option value="subjective">Subjective</option>
               <option value="objective">Objective</option>
             </select>
             <InfoTip {...GLOSSARY.readiness} /></>}
           value={rVal ?? '—'} delta={rDelta} />
-        <Kpi label={<>ACWR <InfoTip {...GLOSSARY.acwr} /></>} value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
-        <Kpi label={<>Monotony (7d) <InfoTip {...GLOSSARY.monotony} /></>} value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} />
-        <Kpi label={<>Strain (7d) <InfoTip {...GLOSSARY.strain} /></>} value={strain.toLocaleString()} delta="load × monotony" />
+        <Kpi onClick={() => openMetric('acwr')} label={<>ACWR <InfoTip {...GLOSSARY.acwr} /></>} value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
+        <Kpi onClick={() => openMetric('monotony')} label={<>Monotony (7d) <InfoTip {...GLOSSARY.monotony} /></>} value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} />
+        <Kpi onClick={() => openMetric('strain')} label={<>Strain (7d) <InfoTip {...GLOSSARY.strain} /></>} value={strain.toLocaleString()} delta="load × monotony" />
       </div>
       <div className="toggle-bar">
         <div className="tg"><label>X axis</label>

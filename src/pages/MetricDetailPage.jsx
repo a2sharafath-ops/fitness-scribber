@@ -35,7 +35,7 @@ export default function MetricDetailPage() {
   const { Comp } = m
   return (
     <>
-      <button className="back" onClick={() => nav('/clients/' + c.id)}>← Back to Load-Response snapshot</button>
+      <button className="back" onClick={() => nav('/command/' + c.id)}>← Back to Load &amp; Strength</button>
       <div className="topbar">
         <div className="flex gap">
           <Avatar name={c.name} size={44} />
