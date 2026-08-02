@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Chart, Scatter } from 'react-chartjs-2'
 import Kpi from '../atoms/Kpi'
 import InfoTip from '../atoms/InfoTip'
@@ -13,6 +14,8 @@ const shortLabel = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 
 export default function LoadResponseDashboard({ client, win, range }) {
   const { db, tz, units } = useData()
+  const nav = useNavigate()
+  const openMetric = (key) => nav(`/clients/${client.id}/metric/${key}`)
   const [x, setX] = useState('time')
   const [y1, setY1] = useState('vl')
   const [y2, setY2] = useState('srpetl')
@@ -84,7 +87,16 @@ export default function LoadResponseDashboard({ client, win, range }) {
 
   return (
     <div className="card">
-      <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
+      <div className="flex between" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
+        <div className="lr-detail-links">
+          <span className="muted" style={{ fontSize: 11 }}>Full breakdown:</span>
+          <button className="lr-detail-link" onClick={() => openMetric('readiness')}>Readiness →</button>
+          <button className="lr-detail-link" onClick={() => openMetric('acwr')}>ACWR →</button>
+          <button className="lr-detail-link" onClick={() => openMetric('monotony')}>Monotony →</button>
+          <button className="lr-detail-link" onClick={() => openMetric('strain')}>Strain →</button>
+        </div>
+      </div>
       <div className="kpi-strip" style={{ marginTop: 12 }}>
         <Kpi label={<>Readiness <InfoTip {...GLOSSARY.readiness} /></>} value={rNow ?? '—'} delta="composite /100" />
         <Kpi label={<>ACWR <InfoTip {...GLOSSARY.acwr} /></>} value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
