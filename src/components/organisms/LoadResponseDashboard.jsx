@@ -26,6 +26,7 @@ export default function LoadResponseDashboard({ client, win, range }) {
   const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
   const mono = trainingMonotony(last7)
   const strain = trainingStrain(last7)
+  const weekLoad = Math.round(last7.reduce((a, b) => a + b, 0)) // 7-day training load (Σ sRPE-TL)
   const acwrNow = acwrSeries(intMap, D).filter((v) => v != null).slice(-1)[0]
   // Latest day that has a readiness score, and its parts — so the Readiness card
   // can show the combined score or either component on its own.
@@ -95,7 +96,7 @@ export default function LoadResponseDashboard({ client, win, range }) {
     <div className="card">
       <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
       <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>Tap any card for its full component breakdown.</div>
-      <div className="kpi-strip" style={{ marginTop: 12 }}>
+      <div className="kpi-strip five" style={{ marginTop: 12 }}>
         <Kpi onClick={() => openMetric('readiness')}
           label={<>Readiness
             <select className="lr-rview" value={rView} aria-label="Readiness view"
@@ -107,6 +108,7 @@ export default function LoadResponseDashboard({ client, win, range }) {
             </select>
             <InfoTip {...GLOSSARY.readiness} /></>}
           value={rVal ?? '—'} delta={rDelta} />
+        <Kpi onClick={() => openMetric('srpetl')} label={<>sRPE-TL (7d) <InfoTip {...GLOSSARY.srpeTl} /></>} value={weekLoad.toLocaleString()} delta="Σ session load · AU" />
         <Kpi onClick={() => openMetric('acwr')} label={<>ACWR <InfoTip {...GLOSSARY.acwr} /></>} value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
         <Kpi onClick={() => openMetric('monotony')} label={<>Monotony (7d) <InfoTip {...GLOSSARY.monotony} /></>} value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} />
         <Kpi onClick={() => openMetric('strain')} label={<>Strain (7d) <InfoTip {...GLOSSARY.strain} /></>} value={strain.toLocaleString()} delta="load × monotony" />

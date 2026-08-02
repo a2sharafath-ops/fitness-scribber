@@ -7,10 +7,12 @@ import ReadinessBreakdown from '../components/organisms/metrics/ReadinessBreakdo
 import AcwrBreakdown from '../components/organisms/metrics/AcwrBreakdown'
 import MonotonyBreakdown from '../components/organisms/metrics/MonotonyBreakdown'
 import StrainBreakdown from '../components/organisms/metrics/StrainBreakdown'
+import SrpeTlBreakdown from '../components/organisms/metrics/SrpeTlBreakdown'
 import { useData } from '../store/DataContext'
 
 const METRICS = {
   readiness: { title: 'Readiness', icon: '🟢', sub: 'Composite of subjective wellness and HRV deviation', Comp: ReadinessBreakdown },
+  srpetl: { title: 'sRPE-TL', icon: '🎚️', sub: 'Session load — RPE × duration (AU)', Comp: SrpeTlBreakdown },
   acwr: { title: 'ACWR', icon: '⚖️', sub: 'Acute : chronic workload ratio', Comp: AcwrBreakdown },
   monotony: { title: 'Monotony', icon: '📉', sub: 'Day-to-day sameness of training load', Comp: MonotonyBreakdown },
   strain: { title: 'Strain', icon: '🔥', sub: 'Weekly load amplified by monotony', Comp: StrainBreakdown },

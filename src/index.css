@@ -135,6 +135,8 @@ canvas{max-width:100%}
 .toggle-bar label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700}
 .toggle-bar select{width:auto;padding:7px 10px;font-size:12px}
 .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi-strip.five{grid-template-columns:repeat(5,1fr)}
+@media(max-width:900px){.kpi-strip.five{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
 .kpi .k-l{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700}
 .kpi .k-v{font-size:20px;font-weight:700;margin-top:3px}
