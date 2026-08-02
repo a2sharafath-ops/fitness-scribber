@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { Chart } from 'react-chartjs-2'
 import Icon from '../atoms/Icon'
+import SegToggle from '../molecules/SegToggle'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { baseOptions, COLORS, GRID, TEXT, shortLabel } from '../../lib/chartSetup'
@@ -30,11 +31,14 @@ const acwrBands = {
   },
 }
 
-export default function StrengthDashboard({ client, range = 90 }) {
+const SPAN = [[28, '4wk'], [56, '8wk'], [90, '12wk']]
+
+export default function StrengthDashboard({ client }) {
   const { db, tz } = useData()
   const { toDisp, unitName } = useFormat()
   const lifts = [...new Set(db.maxes.filter((m) => m.clientId === client.id).map((m) => m.exercise))].sort()
   const [lift, setLift] = useState(lifts[0] || '')
+  const [range, setRange] = useState(90) // this chart's own date range
 
   if (!lifts.length) {
     return (
@@ -63,11 +67,14 @@ export default function StrengthDashboard({ client, range = 90 }) {
 
   return (
     <div className="card">
-      <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
+      <div className="flex between" style={{ flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         <div className="section-title" style={{ margin: 0 }}>Strength — Absolute 1RM vs Training Max</div>
-        <select value={lift} aria-label="Lift" onChange={(e) => setLift(e.target.value)} style={{ width: 'auto' }}>
-          {lifts.map((l) => <option key={l}>{l}</option>)}
-        </select>
+        <div className="flex gap" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+          <SegToggle options={SPAN} value={range} onChange={setRange} ariaLabel="Strength date range" />
+          <select value={lift} aria-label="Lift" onChange={(e) => setLift(e.target.value)} style={{ width: 'auto' }}>
+            {lifts.map((l) => <option key={l}>{l}</option>)}
+          </select>
+        </div>
       </div>
       <div className="muted" style={{ fontSize: 12, margin: '6px 0' }}>
         Absolute 1RM {latestAbs != null ? `${latestAbs} ${unitName()}` : '—'} · Training Max {latestTm != null ? `${latestTm} ${unitName()}` : '—'} ·

@@ -534,6 +534,8 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .block-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 /* View selector inside the Readiness KPI card (combined / subjective / objective) */
 .lr-rview{font-size:10px;font-weight:700;padding:1px 4px;margin:0 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);cursor:pointer;vertical-align:middle}
+/* Per-chart filter cluster (rolling + range toggles beside a chart heading) */
+.lr-chart-filter{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .block-type{width:auto;font-weight:700;font-size:14px}
 .block-hint{flex:1;font-size:11px;min-width:120px}
 .block-auto{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Chart, Scatter } from 'react-chartjs-2'
 import Kpi from '../atoms/Kpi'
+import SegToggle from '../molecules/SegToggle'
 import InfoTip from '../atoms/InfoTip'
 import { useData } from '../../store/DataContext'
 import { GLOSSARY } from '../../lib/glossary'
@@ -12,7 +13,11 @@ import { dailySum, acwrSeries, trainingMonotony, trainingStrain, rollingAvg, rea
 
 const shortLabel = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 
-export default function LoadResponseDashboard({ client, win, range }) {
+// Per-chart filter options (rolling window + date span).
+const ROLL = [[1, 'Raw'], [7, '7d'], [28, '28d']]
+const SPAN = [[28, '4wk'], [56, '8wk'], [90, '12wk']]
+
+export default function LoadResponseDashboard({ client }) {
   const { db, tz, units } = useData()
   const nav = useNavigate()
   const openMetric = (key) => nav(`/clients/${client.id}/metric/${key}`)
@@ -20,23 +25,29 @@ export default function LoadResponseDashboard({ client, win, range }) {
   const [y1, setY1] = useState('vl')
   const [y2, setY2] = useState('srpetl')
   const [rView, setRView] = useState('combined') // Readiness card: combined | subjective | objective
+  // Each chart carries its own rolling window + date range, filtered independently.
+  const [win1, setWin1] = useState(7)
+  const [range1, setRange1] = useState(28)
+  const [win2, setWin2] = useState(7)
+  const [range2, setRange2] = useState(28)
 
-  const D = lastNDates(range, tz)
   const intMap = dailySum(db.srpe, client.id, 'tl')
   const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
   const mono = trainingMonotony(last7)
   const strain = trainingStrain(last7)
   const weekLoad = Math.round(last7.reduce((a, b) => a + b, 0)) // 7-day training load (Σ sRPE-TL)
-  const acwrNow = acwrSeries(intMap, D).filter((v) => v != null).slice(-1)[0]
-  // Latest day that has a readiness score, and its parts — so the Readiness card
-  // can show the combined score or either component on its own.
-  const rDate = [...D].reverse().find((d) => readinessScore(db, client.id, d) != null) || D[D.length - 1]
+  // The KPI snapshot uses a fixed 28-day window, independent of the chart filters.
+  const D28 = lastNDates(28, tz)
+  const acwrNow = acwrSeries(intMap, D28).filter((v) => v != null).slice(-1)[0]
+  const rDate = [...D28].reverse().find((d) => readinessScore(db, client.id, d) != null) || D28[D28.length - 1]
   const rParts = readinessParts(db, client.id, rDate)
   const rVal = { combined: rParts.score, subjective: rParts.wellnessPart, objective: rParts.hrvPart }[rView]
   const rDelta = { combined: 'composite /100', subjective: 'wellness /100', objective: 'HRV /100' }[rView]
 
-  const apply = (arr) => (win > 1 ? rollingAvg(arr, win) : arr)
-  const labels = D.map(shortLabel)
+  // Chart 1 (Load-Response) window/range.
+  const D1 = lastNDates(range1, tz)
+  const apply = (arr) => (win1 > 1 ? rollingAvg(arr, win1) : arr)
+  const labels = D1.map(shortLabel)
   const opts = Object.entries(METRICS).map(([v, m]) => (
     <option key={v} value={v}>{m.label(units)}</option>
   ))
@@ -44,8 +55,8 @@ export default function LoadResponseDashboard({ client, win, range }) {
   let chart1
   if (x === 'time') {
     const m1 = METRICS[y1], m2 = METRICS[y2]
-    const d1 = apply(m1.series(db, client.id, D, units))
-    const d2 = apply(m2.series(db, client.id, D, units))
+    const d1 = apply(m1.series(db, client.id, D1, units))
+    const d2 = apply(m2.series(db, client.id, D1, units))
     chart1 = (
       <Chart
         type="bar"
@@ -69,9 +80,9 @@ export default function LoadResponseDashboard({ client, win, range }) {
       />
     )
   } else {
-    const xs = METRICS[x].series(db, client.id, D, units)
-    const ys = METRICS[y1].series(db, client.id, D, units)
-    const pts = D.map((d, i) => ({ x: xs[i], y: ys[i], date: d })).filter((p) => p.x != null && p.y != null && !(p.x === 0 && p.y === 0))
+    const xs = METRICS[x].series(db, client.id, D1, units)
+    const ys = METRICS[y1].series(db, client.id, D1, units)
+    const pts = D1.map((d, i) => ({ x: xs[i], y: ys[i], date: d })).filter((p) => p.x != null && p.y != null && !(p.x === 0 && p.y === 0))
     chart1 = (
       <Scatter
         height={120}
@@ -88,8 +99,11 @@ export default function LoadResponseDashboard({ client, win, range }) {
     )
   }
 
-  const rRaw = D.map((d) => readinessScore(db, client.id, d))
-  const rTrend = rollingAvg(rRaw, Math.min(7, win > 1 ? win : 7))
+  // Chart 2 (Readiness trend) window/range.
+  const D2 = lastNDates(range2, tz)
+  const labels2 = D2.map(shortLabel)
+  const rRaw = D2.map((d) => readinessScore(db, client.id, d))
+  const rTrend = rollingAvg(rRaw, win2 > 1 ? win2 : 7)
   const rBase = rollingAvg(rRaw, 28)
 
   return (
@@ -119,17 +133,25 @@ export default function LoadResponseDashboard({ client, win, range }) {
         </div>
         <div className="tg"><label>Y — primary</label><select value={y1} onChange={(e) => setY1(e.target.value)}>{opts}</select></div>
         <div className="tg"><label>{x === 'time' ? 'Y — secondary' : 'Y axis'}</label><select value={y2} onChange={(e) => setY2(e.target.value)}>{opts}</select></div>
+        <div className="tg"><label>Rolling</label><SegToggle options={ROLL} value={win1} onChange={setWin1} ariaLabel="Chart 1 rolling window" /></div>
+        <div className="tg"><label>Range</label><SegToggle options={SPAN} value={range1} onChange={setRange1} ariaLabel="Chart 1 date range" /></div>
       </div>
       <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
-        Chart 1 — Load-Response {x === 'time' ? `(${win > 1 ? win + '-day rolling avg' : 'raw daily'})` : '(correlation)'}
+        Chart 1 — Load-Response {x === 'time' ? `(${win1 > 1 ? win1 + '-day rolling avg' : 'raw daily'})` : '(correlation)'}
       </div>
       <div style={{ height: 200 }}>{chart1}</div>
-      <div style={{ fontSize: 12, color: 'var(--muted)', margin: '18px 0 6px' }}>Chart 2 — Baseline-adjusted readiness trend</div>
+      <div className="flex between" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '18px 0 6px' }}>
+        <span style={{ fontSize: 12, color: 'var(--muted)' }}>Chart 2 — Baseline-adjusted readiness trend</span>
+        <div className="lr-chart-filter">
+          <SegToggle options={ROLL} value={win2} onChange={setWin2} ariaLabel="Chart 2 rolling window" />
+          <SegToggle options={SPAN} value={range2} onChange={setRange2} ariaLabel="Chart 2 date range" />
+        </div>
+      </div>
       <div style={{ height: 160 }}>
         <Chart
           type="line"
           data={{
-            labels,
+            labels: labels2,
             datasets: [
               { type: 'line', label: 'Readiness (rolling)', data: rTrend, borderColor: '#34c759', backgroundColor: 'rgba(61,220,151,.12)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
               { type: 'line', label: 'Baseline (28d)', data: rBase, borderColor: '#6e6f76', borderDash: [5, 4], pointRadius: 0, spanGaps: true },
