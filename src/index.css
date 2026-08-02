@@ -530,9 +530,8 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 /* ===== Advanced Programming Platform (block builder, progression, voice) ===== */
 .block-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:12px}
 .block-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-.lr-detail-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.lr-detail-link{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;font:inherit;font-size:11px;font-weight:700;color:var(--text);cursor:pointer}
-.lr-detail-link:hover{border-color:var(--blue);color:var(--blue)}
+/* View selector inside the Readiness KPI card (combined / subjective / objective) */
+.lr-rview{font-size:10px;font-weight:700;padding:1px 4px;margin:0 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);cursor:pointer;vertical-align:middle}
 .block-type{width:auto;font-weight:700;font-size:14px}
 .block-hint{flex:1;font-size:11px;min-width:120px}
 .block-auto{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer}

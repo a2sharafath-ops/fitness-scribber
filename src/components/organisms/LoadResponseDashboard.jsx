@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Chart, Scatter } from 'react-chartjs-2'
 import Kpi from '../atoms/Kpi'
 import InfoTip from '../atoms/InfoTip'
@@ -8,17 +7,16 @@ import { GLOSSARY } from '../../lib/glossary'
 import { baseOptions } from '../../lib/chartSetup'
 import { METRICS } from '../../lib/metrics'
 import { lastNDates, fmtDate } from '../../lib/dates'
-import { dailySum, acwrSeries, trainingMonotony, trainingStrain, rollingAvg, readinessScore } from '../../lib/calc'
+import { dailySum, acwrSeries, trainingMonotony, trainingStrain, rollingAvg, readinessScore, readinessParts } from '../../lib/calc'
 
 const shortLabel = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 
 export default function LoadResponseDashboard({ client, win, range }) {
   const { db, tz, units } = useData()
-  const nav = useNavigate()
-  const openMetric = (key) => nav(`/clients/${client.id}/metric/${key}`)
   const [x, setX] = useState('time')
   const [y1, setY1] = useState('vl')
   const [y2, setY2] = useState('srpetl')
+  const [rView, setRView] = useState('combined') // Readiness card: combined | subjective | objective
 
   const D = lastNDates(range, tz)
   const intMap = dailySum(db.srpe, client.id, 'tl')
@@ -26,7 +24,12 @@ export default function LoadResponseDashboard({ client, win, range }) {
   const mono = trainingMonotony(last7)
   const strain = trainingStrain(last7)
   const acwrNow = acwrSeries(intMap, D).filter((v) => v != null).slice(-1)[0]
-  const rNow = readinessScore(db, client.id, [...D].reverse().find((d) => readinessScore(db, client.id, d) != null) || D[D.length - 1])
+  // Latest day that has a readiness score, and its parts — so the Readiness card
+  // can show the combined score or either component on its own.
+  const rDate = [...D].reverse().find((d) => readinessScore(db, client.id, d) != null) || D[D.length - 1]
+  const rParts = readinessParts(db, client.id, rDate)
+  const rVal = { combined: rParts.score, subjective: rParts.wellnessPart, objective: rParts.hrvPart }[rView]
+  const rDelta = { combined: 'composite /100', subjective: 'wellness /100', objective: 'HRV /100' }[rView]
 
   const apply = (arr) => (win > 1 ? rollingAvg(arr, win) : arr)
   const labels = D.map(shortLabel)
@@ -87,18 +90,17 @@ export default function LoadResponseDashboard({ client, win, range }) {
 
   return (
     <div className="card">
-      <div className="flex between" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
-        <div className="lr-detail-links">
-          <span className="muted" style={{ fontSize: 11 }}>Full breakdown:</span>
-          <button className="lr-detail-link" onClick={() => openMetric('readiness')}>Readiness →</button>
-          <button className="lr-detail-link" onClick={() => openMetric('acwr')}>ACWR →</button>
-          <button className="lr-detail-link" onClick={() => openMetric('monotony')}>Monotony →</button>
-          <button className="lr-detail-link" onClick={() => openMetric('strain')}>Strain →</button>
-        </div>
-      </div>
+      <div className="section-title" style={{ margin: 0 }}>Load-Response Dashboard</div>
       <div className="kpi-strip" style={{ marginTop: 12 }}>
-        <Kpi label={<>Readiness <InfoTip {...GLOSSARY.readiness} /></>} value={rNow ?? '—'} delta="composite /100" />
+        <Kpi
+          label={<>Readiness
+            <select className="lr-rview" value={rView} onChange={(e) => setRView(e.target.value)} aria-label="Readiness view">
+              <option value="combined">Combined</option>
+              <option value="subjective">Subjective</option>
+              <option value="objective">Objective</option>
+            </select>
+            <InfoTip {...GLOSSARY.readiness} /></>}
+          value={rVal ?? '—'} delta={rDelta} />
         <Kpi label={<>ACWR <InfoTip {...GLOSSARY.acwr} /></>} value={acwrNow ? acwrNow.toFixed(2) : '—'} delta={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'sweet spot' : acwrNow > 1.3 ? 'elevated' : 'low') : ''} deltaColor={acwrNow ? (acwrNow >= 0.8 && acwrNow <= 1.3 ? 'var(--green)' : 'var(--accent)') : 'var(--muted)'} />
         <Kpi label={<>Monotony (7d) <InfoTip {...GLOSSARY.monotony} /></>} value={mono} delta={mono > 2 ? 'high — vary load' : 'healthy'} deltaColor={mono > 2 ? 'var(--accent)' : 'var(--green)'} />
         <Kpi label={<>Strain (7d) <InfoTip {...GLOSSARY.strain} /></>} value={strain.toLocaleString()} delta="load × monotony" />
