@@ -9,7 +9,7 @@ import { GLOSSARY } from '../../lib/glossary'
 import { baseOptions } from '../../lib/chartSetup'
 import { METRICS } from '../../lib/metrics'
 import { lastNDates, fmtDate } from '../../lib/dates'
-import { dailySum, acwrSeries, trainingMonotony, trainingStrain, rollingAvg, readinessScore, readinessParts } from '../../lib/calc'
+import { dailySum, acwrSeries, trainingMonotony, trainingStrain, rollingAvg, readinessScore, readinessParts, binPoints } from '../../lib/calc'
 
 const shortLabel = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 
@@ -20,6 +20,9 @@ const SPAN = [[28, '4wk'], [56, '8wk'], [90, '12wk']]
 // registry (e.g. Volume Load as columns), so the default view is unchanged.
 const TYPE = [['auto', 'Auto'], ['line', 'Line'], ['bar', 'Column']]
 const resolveKind = (choice, metric) => (choice === 'auto' ? metric.kind : choice)
+// Correlation mode (X = a metric): how to draw the relationship. Columns bin the
+// continuous x into bands and average y within each.
+const XTYPE = [['scatter', 'Scatter'], ['line', 'Line'], ['bar', 'Column']]
 
 export default function LoadResponseDashboard({ client }) {
   const { db, tz, units } = useData()
@@ -31,6 +34,7 @@ export default function LoadResponseDashboard({ client }) {
   const [rView, setRView] = useState('combined') // Readiness card: combined | subjective | objective
   const [t1, setT1] = useState('auto')  // primary series render type
   const [t2, setT2] = useState('auto')  // secondary series render type
+  const [xt, setXt] = useState('scatter') // correlation-mode render type
   // Each chart carries its own rolling window + date range, filtered independently.
   const [win1, setWin1] = useState(7)
   const [range1, setRange1] = useState(28)
@@ -95,10 +99,34 @@ export default function LoadResponseDashboard({ client }) {
     const xs = METRICS[x].series(db, client.id, D1, units)
     const ys = METRICS[y1].series(db, client.id, D1, units)
     const pts = D1.map((d, i) => ({ x: xs[i], y: ys[i], date: d })).filter((p) => p.x != null && p.y != null && !(p.x === 0 && p.y === 0))
+    const relLabel = `${METRICS[y1].label(units)} vs ${METRICS[x].label(units)}`
+    const sorted = xt === 'line' ? [...pts].sort((a, b) => a.x - b.x) : pts
+    if (xt === 'bar') {
+      // Columns need categories, so bin the continuous x and average y per band.
+      const bins = binPoints(pts, 8)
+      chart1 = (
+        <Chart
+          type="bar"
+          height={120}
+          data={{ labels: bins.map((b) => b.label), datasets: [{ type: 'bar', label: `Mean ${METRICS[y1].label(units)}`, data: bins.map((b) => b.y), backgroundColor: 'rgba(175,82,222,.45)' }] }}
+          options={{
+            ...baseOptions(),
+            plugins: {
+              legend: { labels: { color: '#6e6f76', boxWidth: 12 } },
+              tooltip: { callbacks: { afterLabel: (o) => `${bins[o.dataIndex]?.n ?? 0} day(s) in band` } },
+            },
+            scales: {
+              x: { title: { display: true, text: `${METRICS[x].label(units)} (banded)`, color: '#6e6f76' }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', font: { size: 9 } } },
+              y: { title: { display: true, text: METRICS[y1].label(units), color: '#6e6f76' }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
+            },
+          }}
+        />
+      )
+    } else {
     chart1 = (
       <Scatter
         height={120}
-        data={{ datasets: [{ label: `${METRICS[y1].label(units)} vs ${METRICS[x].label(units)}`, data: pts, pointBackgroundColor: '#af52de', pointRadius: 5 }] }}
+        data={{ datasets: [{ label: relLabel, data: sorted, pointBackgroundColor: '#af52de', borderColor: '#af52de', pointRadius: xt === 'line' ? 3 : 5, showLine: xt === 'line', tension: 0 }] }}
         options={{
           ...baseOptions(),
           plugins: { legend: { labels: { color: '#6e6f76', boxWidth: 12 } }, tooltip: { callbacks: { label: (o) => `${fmtDate(o.raw.date)}: (${o.raw.x}, ${o.raw.y})` } } },
@@ -109,6 +137,7 @@ export default function LoadResponseDashboard({ client }) {
         }}
       />
     )
+    }
   }
 
   // Chart 2 (Readiness trend) window/range.
@@ -143,6 +172,7 @@ export default function LoadResponseDashboard({ client }) {
         <div className="tg"><label>X axis</label>
           <select value={x} onChange={(e) => setX(e.target.value)}><option value="time">Time (trend)</option>{opts}</select>
         </div>
+        {x !== 'time' && <div className="tg"><label>— as</label><SegToggle options={XTYPE} value={xt} onChange={setXt} ariaLabel="Correlation chart type" /></div>}
         <div className="tg"><label>Y — primary</label><select value={y1} onChange={(e) => setY1(e.target.value)}>{opts}</select></div>
         {x === 'time' && <div className="tg"><label>— as</label><SegToggle options={TYPE} value={t1} onChange={setT1} ariaLabel="Primary series chart type" /></div>}
         <div className="tg"><label>{x === 'time' ? 'Y — secondary' : 'Y axis'}</label><select value={y2} onChange={(e) => setY2(e.target.value)}>{opts}</select></div>

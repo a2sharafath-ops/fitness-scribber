@@ -42,6 +42,26 @@ export const latestOf = (arr, clientId) =>
 
 export const deviationPct = (value, base) => (base ? ((value - base) / base) * 100 : 0)
 
+// Bin correlation points into equal-width x buckets, averaging y in each. A
+// continuous x has no natural categories, so this is what lets a correlation
+// view be drawn as columns ("mean readiness per ACWR band") instead of dots.
+export function binPoints(pts, bins = 8) {
+  if (!pts?.length) return []
+  const xs = pts.map((p) => p.x)
+  const lo = Math.min(...xs), hi = Math.max(...xs)
+  const r1 = (v) => Math.round(v * 10) / 10
+  if (!(hi > lo)) return [{ label: String(r1(lo)), y: r1(mean(pts.map((p) => p.y))), n: pts.length }]
+  const w = (hi - lo) / bins
+  const out = []
+  for (let i = 0; i < bins; i++) {
+    const a = lo + i * w
+    const b = i === bins - 1 ? hi : a + w
+    const inBin = pts.filter((p) => (i === bins - 1 ? p.x >= a && p.x <= b : p.x >= a && p.x < b))
+    out.push({ label: `${r1(a)}–${r1(b)}`, y: inBin.length ? r1(mean(inBin.map((p) => p.y))) : null, n: inBin.length })
+  }
+  return out
+}
+
 export function rolling30Baseline(db, clientId, field, beforeDate) {
   const cutoff = new Date(beforeDate)
   const lo = new Date(cutoff)
