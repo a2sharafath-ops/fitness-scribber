@@ -16,6 +16,10 @@ const shortLabel = (iso) => fmtDate(iso).replace(/, \d+$/, '')
 // Per-chart filter options (rolling window + date span).
 const ROLL = [[1, 'Raw'], [7, '7d'], [28, '28d']]
 const SPAN = [[28, '4wk'], [56, '8wk'], [90, '12wk']]
+// Per-series render type. 'auto' keeps the metric's own natural kind from the
+// registry (e.g. Volume Load as columns), so the default view is unchanged.
+const TYPE = [['auto', 'Auto'], ['line', 'Line'], ['bar', 'Column']]
+const resolveKind = (choice, metric) => (choice === 'auto' ? metric.kind : choice)
 
 export default function LoadResponseDashboard({ client }) {
   const { db, tz, units } = useData()
@@ -25,6 +29,8 @@ export default function LoadResponseDashboard({ client }) {
   const [y1, setY1] = useState('vl')
   const [y2, setY2] = useState('srpetl')
   const [rView, setRView] = useState('combined') // Readiness card: combined | subjective | objective
+  const [t1, setT1] = useState('auto')  // primary series render type
+  const [t2, setT2] = useState('auto')  // secondary series render type
   // Each chart carries its own rolling window + date range, filtered independently.
   const [win1, setWin1] = useState(7)
   const [range1, setRange1] = useState(28)
@@ -57,6 +63,12 @@ export default function LoadResponseDashboard({ client }) {
     const m1 = METRICS[y1], m2 = METRICS[y2]
     const d1 = apply(m1.series(db, client.id, D1, units))
     const d2 = apply(m2.series(db, client.id, D1, units))
+    const k1 = resolveKind(t1, m1)
+    const k2 = resolveKind(t2, m2)
+    // Two column series sit on different axes, so overlaying them would invite a
+    // false height comparison — draw them side by side instead.
+    const bothBars = k1 === 'bar' && k2 === 'bar'
+    const barCfg = bothBars ? { barPercentage: 0.9, categoryPercentage: 0.45 } : {}
     chart1 = (
       <Chart
         type="bar"
@@ -64,15 +76,15 @@ export default function LoadResponseDashboard({ client }) {
         data={{
           labels,
           datasets: [
-            { type: m1.kind, label: m1.label(units), data: d1, yAxisID: 'y', order: 2, borderColor: '#0b87c9', backgroundColor: m1.kind === 'bar' ? 'rgba(74,168,255,.45)' : 'rgba(74,168,255,.12)', tension: 0.3, spanGaps: true },
-            { type: m2.kind === 'bar' ? 'line' : m2.kind, label: m2.label(units), data: d2, yAxisID: 'y1', order: 1, borderColor: '#fb404a', backgroundColor: 'rgba(251,64,74,.1)', tension: 0.3, spanGaps: true, pointRadius: 2 },
+            { type: k1, label: m1.label(units), data: d1, yAxisID: 'y', order: 2, borderColor: '#0b87c9', backgroundColor: k1 === 'bar' ? 'rgba(74,168,255,.45)' : 'rgba(74,168,255,.12)', tension: 0.3, spanGaps: true, pointRadius: k1 === 'line' ? 0 : undefined, ...(k1 === 'bar' ? barCfg : {}) },
+            { type: k2, label: m2.label(units), data: d2, yAxisID: 'y1', order: 1, borderColor: '#fb404a', backgroundColor: k2 === 'bar' ? 'rgba(251,64,74,.40)' : 'rgba(251,64,74,.1)', tension: 0.3, spanGaps: true, pointRadius: k2 === 'line' ? 2 : undefined, ...(k2 === 'bar' ? barCfg : {}) },
           ],
         }}
         options={{
           ...baseOptions(),
           interaction: { mode: 'index', intersect: false },
           scales: {
-            x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 8, font: { size: 9 } } },
+            x: { grid: { color: '#eceae7' }, ticks: { color: '#6e6f76', maxTicksLimit: 8, font: { size: 9 } }, ...(bothBars ? {} : { stacked: false }) },
             y: { position: 'left', title: { display: true, text: m1.label(units), color: '#0b87c9', font: { size: 10 } }, grid: { color: '#eceae7' }, ticks: { color: '#6e6f76' } },
             y1: { position: 'right', title: { display: true, text: m2.label(units), color: '#fb404a', font: { size: 10 } }, grid: { drawOnChartArea: false }, ticks: { color: '#6e6f76' } },
           },
@@ -132,7 +144,9 @@ export default function LoadResponseDashboard({ client }) {
           <select value={x} onChange={(e) => setX(e.target.value)}><option value="time">Time (trend)</option>{opts}</select>
         </div>
         <div className="tg"><label>Y — primary</label><select value={y1} onChange={(e) => setY1(e.target.value)}>{opts}</select></div>
+        {x === 'time' && <div className="tg"><label>— as</label><SegToggle options={TYPE} value={t1} onChange={setT1} ariaLabel="Primary series chart type" /></div>}
         <div className="tg"><label>{x === 'time' ? 'Y — secondary' : 'Y axis'}</label><select value={y2} onChange={(e) => setY2(e.target.value)}>{opts}</select></div>
+        {x === 'time' && <div className="tg"><label>— as</label><SegToggle options={TYPE} value={t2} onChange={setT2} ariaLabel="Secondary series chart type" /></div>}
         <div className="tg"><label>Rolling</label><SegToggle options={ROLL} value={win1} onChange={setWin1} ariaLabel="Chart 1 rolling window" /></div>
         <div className="tg"><label>Range</label><SegToggle options={SPAN} value={range1} onChange={setRange1} ariaLabel="Chart 1 date range" /></div>
       </div>
