@@ -37,9 +37,16 @@ export function AuthProvider({ children }) {
 
   useEffect(() => { loadProfile() }, [loadProfile])
 
+  // Coach accounts are invite-only: the security-definer RPC only grants the
+  // role when an admin invite matches this user's email.
   const becomeCoach = async () => {
-    await supabase.from('profiles').upsert({ id: session.user.id, role: 'coach' })
+    const { data, error } = await supabase.rpc('become_coach')
+    if (error) return { error }
+    if (data === 'not_invited') {
+      return { error: { message: 'Coach accounts are invite-only. Ask your admin to send you an invite.' } }
+    }
     await loadProfile()
+    return {}
   }
   const redeemInvite = async (code) => {
     const { data, error } = await supabase.rpc('redeem_invite', { code: code.trim() })

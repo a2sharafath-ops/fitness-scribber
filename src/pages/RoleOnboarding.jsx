@@ -19,6 +19,13 @@ export default function RoleOnboarding() {
     if (error) setErr(error.message)
   }
 
+  const coach = async () => {
+    setBusy(true); setErr(null)
+    const { error } = await becomeCoach()
+    setBusy(false)
+    if (error) setErr(error.message)
+  }
+
   return (
     <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div className="card" style={{ width: 400, maxWidth: '92vw' }}>
@@ -28,9 +35,10 @@ export default function RoleOnboarding() {
             <h2 style={{ fontSize: 18, marginBottom: 4 }}>Welcome — how will you use Fitness Partner?</h2>
             <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Pick one to set up your account.</p>
             <div className="grid" style={{ gap: 10 }}>
-              <Button onClick={becomeCoach}>🏋️ I'm a coach — manage athletes</Button>
+              <Button onClick={coach} disabled={busy}>{busy ? 'Checking…' : "🏋️ I'm a coach — manage athletes"}</Button>
               <Button variant="ghost" onClick={() => setMode('athlete')}>🎟️ I have an invite code (athlete)</Button>
             </div>
+            {err && <div style={{ fontSize: 12, color: '#fb404a', marginTop: 10 }}>{err}</div>}
           </>
         )}
         {mode === 'athlete' && (

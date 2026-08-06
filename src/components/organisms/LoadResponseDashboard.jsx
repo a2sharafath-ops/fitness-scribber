@@ -40,6 +40,7 @@ export default function LoadResponseDashboard({ client }) {
   const [range1, setRange1] = useState(28)
   const [win2, setWin2] = useState(7)
   const [range2, setRange2] = useState(28)
+  const [rView2, setRView2] = useState('combined') // Chart 2's own readiness view
 
   const intMap = dailySum(db.srpe, client.id, 'tl')
   const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
@@ -143,9 +144,15 @@ export default function LoadResponseDashboard({ client }) {
   // Chart 2 (Readiness trend) window/range.
   const D2 = lastNDates(range2, tz)
   const labels2 = D2.map(shortLabel)
-  const rRaw = D2.map((d) => readinessScore(db, client.id, d))
+  // Chart 2 plots whichever readiness view it is set to — combined composite,
+  // or either component on its own — independent of the KPI card's selector.
+  const rPick = { combined: 'score', subjective: 'wellnessPart', objective: 'hrvPart' }[rView2]
+  const rRaw = D2.map((d) => readinessParts(db, client.id, d)[rPick])
   const rTrend = rollingAvg(rRaw, win2 > 1 ? win2 : 7)
   const rBase = rollingAvg(rRaw, 28)
+  const rLabel = { combined: 'Readiness', subjective: 'Wellness (subjective)', objective: 'HRV (objective)' }[rView2]
+  const rColor = { combined: '#34c759', subjective: '#af52de', objective: '#e8850c' }[rView2]
+  const rFill = { combined: 'rgba(61,220,151,.12)', subjective: 'rgba(175,82,222,.12)', objective: 'rgba(232,133,12,.12)' }[rView2]
 
   return (
     <div className="card">
@@ -187,6 +194,11 @@ export default function LoadResponseDashboard({ client }) {
       <div className="flex between" style={{ alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '18px 0 6px' }}>
         <span style={{ fontSize: 12, color: 'var(--muted)' }}>Chart 2 — Baseline-adjusted readiness trend</span>
         <div className="lr-chart-filter">
+          <select className="lr-rview" value={rView2} onChange={(e) => setRView2(e.target.value)} aria-label="Chart 2 readiness view">
+            <option value="combined">Combined</option>
+            <option value="subjective">Subjective</option>
+            <option value="objective">Objective</option>
+          </select>
           <SegToggle options={ROLL} value={win2} onChange={setWin2} ariaLabel="Chart 2 rolling window" />
           <SegToggle options={SPAN} value={range2} onChange={setRange2} ariaLabel="Chart 2 date range" />
         </div>
@@ -197,7 +209,7 @@ export default function LoadResponseDashboard({ client }) {
           data={{
             labels: labels2,
             datasets: [
-              { type: 'line', label: 'Readiness (rolling)', data: rTrend, borderColor: '#34c759', backgroundColor: 'rgba(61,220,151,.12)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
+              { type: 'line', label: `${rLabel} (rolling)`, data: rTrend, borderColor: rColor, backgroundColor: rFill, fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
               { type: 'line', label: 'Baseline (28d)', data: rBase, borderColor: '#6e6f76', borderDash: [5, 4], pointRadius: 0, spanGaps: true },
             ],
           }}

@@ -8,6 +8,7 @@ import AuthPage from './pages/AuthPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleOnboarding from './pages/RoleOnboarding'
 import AthletePortal from './pages/AthletePortal'
+import AdminPortal from './pages/AdminPortal'
 import AppLayout from './components/templates/AppLayout'
 import DashboardPage from './pages/DashboardPage'
 import ClientsPage from './pages/ClientsPage'
@@ -70,7 +71,8 @@ function Gate() {
   if (recovery) return <ResetPasswordPage />
   if (!session) return <AuthPage />
   if (!profileReady) return loading
-  if (!role) return <RoleOnboarding />
+  if (!role || role === 'pending') return <RoleOnboarding />
+  if (role === 'admin') return <AdminPortal />
   if (role === 'athlete') return <AthletePortal />
   return <Shell />
 }

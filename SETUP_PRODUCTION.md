@@ -16,6 +16,32 @@ No deployment needed — it's all app + database.
    today's prescribed session, and their readiness — all scoped to just them by row-level security.
    Their submissions flow straight into your coach views.
 
+## B2. Admin portal (manage coaches, platform oversight)
+
+Coach signup is **invite-only** once this is set up — only admins create coach accounts.
+
+1. Run `supabase/schema_admin.sql` in the SQL Editor (after `schema_athlete.sql`).
+2. Promote the first admin (yourself) in the SQL Editor:
+   ```sql
+   insert into profiles(id, role)
+     select id, 'admin' from auth.users where email = 'admin@cureo.city'
+   on conflict (id) do update set role = 'admin';
+   ```
+3. Deploy the user-management function:
+   ```bash
+   supabase functions deploy admin-users
+   supabase secrets set APP_URL=https://your-app-domain   # used in invite emails
+   ```
+4. Sign in — admins land in the **Admin portal**: create/invite coaches, deactivate or
+   delete accounts, send password resets, promote admins, see platform-wide stats, and
+   browse any coach's client roster read-only (RLS grants admins select-only access).
+
+Notes:
+- Existing coach accounts keep working; new self-signups can only proceed as athletes
+  (invite code) or wait for an admin coach invite.
+- "Deactivate" bans the auth user (they can't sign in) without deleting any data.
+- Admins can also add users from the Supabase dashboard, but the portal keeps roles consistent.
+
 ## C. Wearables (Oura / Whoop / Fitbit)
 Needs the Supabase CLI and a developer app per vendor.
 

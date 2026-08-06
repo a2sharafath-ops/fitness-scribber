@@ -8,7 +8,7 @@ import { toast } from '../lib/toast'
 // adapted for the three auth flows the backend supports.
 const COPY = {
   signin: { h: 'Welcome back', sub: 'Sign in to your trainer studio', cta: 'Sign in' },
-  signup: { h: 'Create your account', sub: 'Start your trainer studio', cta: 'Create account' },
+  signup: { h: 'Create your account', sub: 'Athletes join with an invite code · coach accounts are set up by your admin', cta: 'Create account' },
   reset: { h: 'Reset your password', sub: "We'll email you a reset link", cta: 'Send reset link' },
 }
 

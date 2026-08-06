@@ -1,0 +1,29 @@
+/* #app is a flex container app-wide; the id selector outranks a lone class,
+   so scope with the id to actually win. */
+#app.adm-portal { display: block; align-items: stretch; justify-content: flex-start; }
+.adm-bar {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 10px 22px; border-bottom: 1px solid var(--border);
+  background: var(--surface); position: sticky; top: 0; z-index: 5;
+}
+.adm-bar .seg, .adm-main .seg { border-radius: 12px; }
+.adm-main { max-width: 1080px; margin: 0 auto; padding: 22px; display: grid; gap: 16px; }
+.adm-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+
+.adm-table { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.adm-cols { display: grid; grid-template-columns: minmax(200px, 2fr) 90px 70px 110px 110px minmax(280px, 3fr); gap: 10px; align-items: center; }
+.adm-cols-ath { display: grid; grid-template-columns: minmax(200px, 2fr) 1fr 1fr 110px 110px minmax(220px, 2fr); gap: 10px; align-items: center; }
+.adm-cols-cli { display: grid; grid-template-columns: minmax(200px, 2fr) 110px 130px 110px; gap: 10px; align-items: center; }
+.adm-head { padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border-bottom: 1px solid var(--border); }
+.adm-row { padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.adm-row:last-child { border-bottom: none; }
+.adm-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.adm-id { display: grid; min-width: 0; }
+.adm-id .n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-id .e { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-actions { flex-wrap: wrap; justify-content: flex-end; }
+
+@media (max-width: 860px) {
+  .adm-cols, .adm-cols-ath { grid-template-columns: 1fr; gap: 6px; }
+  .adm-head { display: none; }
+}
