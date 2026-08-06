@@ -1,7 +1,8 @@
 // Admin user management — create/invite coaches, deactivate, delete, set roles.
 // Every action verifies the caller is an admin (profiles.role = 'admin') before
 // touching the service-role client. Deploy: `supabase functions deploy admin-users`.
-import { admin, userFromRequest, cors, json } from '../_shared/supa.ts'
+import { admin, userFromRequest } from '../_shared/supa.ts'
+import { cors, json } from '../_shared/cors.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
