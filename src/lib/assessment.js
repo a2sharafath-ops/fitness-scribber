@@ -1,6 +1,7 @@
 import { addDays } from './dates'
 import { screeningsFor } from './screening'
 import { epley1RM } from './program'
+import { postureFindings, SEVERITY_WEIGHT } from './posture'
 
 // Pure helpers for the Assessment module — no React, no I/O.
 // One record shape: { id, clientId, type, date, phase, data, notes }.
@@ -40,7 +41,11 @@ export function estOneRepMax(weightKg, reps) {
   if (!r || r <= 1) return +w.toFixed(1)
   return epley1RM(w, r)
 }
-const byDateDesc = (a, b) => (b.date || '').localeCompare(a.date || '')
+// Assessments can be recorded more than once on the same day. Prefer the full
+// creation timestamp when present so "latest" really is the newest entry;
+// legacy records without one still sort correctly by their assessment date.
+const recordStamp = (a) => a.createdAt || a.date || ''
+const byDateDesc = (a, b) => recordStamp(b).localeCompare(recordStamp(a))
 
 export const forClient = (assessments, clientId) =>
   (assessments || []).filter((a) => a.clientId === clientId)
@@ -77,18 +82,54 @@ export function resolveAnthro(db, client) {
   return merged
 }
 
+// Movement/posture score. Two protocols share this entry point:
+//   • legacy — 5 patterns rated 0–3 (+ pain), score out of 15;
+//   • nasm   — postural/OHSA compensations, a 0–100 movement-quality score
+//     (100 = clean), plus asymmetry and pain counts.
+// Both return a normalised `pct` (0–100) so trends chart on one scale.
 export function movementScore(data) {
+  if (data?.protocol === 'nasm') {
+    const found = postureFindings(data)
+    const load = found.reduce((s, f) => s + SEVERITY_WEIGHT[f.severity] * f.sides.length, 0)
+    const quality = Math.max(0, Math.min(100, Math.round(100 - load * 5)))
+    const asymmetry = found.filter((f) => f.item.kind !== 'midline' && f.sides.length === 1).length
+    return { protocol: 'nasm', score: quality, max: 100, pct: quality, findings: found.length, asymmetry, pain: found.filter((f) => f.pain).length }
+  }
   const screens = data?.screens || []
   const score = screens.reduce((s, x) => s + (num(x.score) || 0), 0)
   const pain = screens.filter((x) => x.pain).length
-  return { score, pain, max: MOVEMENT_MAX }
+  return { protocol: 'legacy', score, max: MOVEMENT_MAX, pct: Math.round((score / MOVEMENT_MAX) * 100), pain }
+}
+
+// Legacy screens with a score < 2 count as a "compensation" for rough parity
+// when comparing an old record against a new NASM one.
+const countLegacyFlags = (d) => (d?.screens || []).filter((s) => (num(s.score) ?? 3) < 2).length
+
+// Reassessment diff between two NASM records: which compensations resolved,
+// which persist, and which are new. `sideLabel` describes where each sits.
+export function movementDiff(baseData, latestData) {
+  const key = (f) => f.id
+  const bMap = new Map(postureFindings(baseData).map((f) => [key(f), f]))
+  const lMap = new Map(postureFindings(latestData).map((f) => [key(f), f]))
+  const sideLabel = (f) => (f.item.kind === 'midline' ? 'present' : f.sides.join(' & '))
+  const resolved = [], persisting = [], added = []
+  for (const [id, f] of bMap) if (!lMap.has(id)) resolved.push({ id, label: f.item.label, view: f.item.view, was: sideLabel(f) })
+  for (const [id, f] of lMap) {
+    if (bMap.has(id)) persisting.push({ id, label: f.item.label, view: f.item.view, now: sideLabel(f), was: sideLabel(bMap.get(id)) })
+    else added.push({ id, label: f.item.label, view: f.item.view, now: sideLabel(f) })
+  }
+  return { resolved, persisting, added }
 }
 
 // One-line summary of a record for list rows.
 export function summarize(rec) {
   const d = rec?.data || {}
   switch (rec?.type) {
-    case 'movement': { const m = movementScore(d); return `Score ${m.score}/${m.max}${m.pain ? ` · ${m.pain} pain flag${m.pain === 1 ? '' : 's'}` : ''}` }
+    case 'movement': {
+      const m = movementScore(d)
+      if (m.protocol === 'nasm') return `Quality ${m.score}/100 · ${m.findings} compensation${m.findings === 1 ? '' : 's'}${m.asymmetry ? ` · ${m.asymmetry} asymmetric` : ''}${m.pain ? ` · ${m.pain} pain` : ''}`
+      return `Score ${m.score}/${m.max}${m.pain ? ` · ${m.pain} pain flag${m.pain === 1 ? '' : 's'}` : ''}`
+    }
     case 'body_comp': return [d.method, d.massKg != null ? `${d.massKg} kg` : null, d.bodyFatPct != null ? `${d.bodyFatPct}% BF` : null].filter(Boolean).join(' · ') || '—'
     case 'fitness': return [(d.strength?.length ? `${d.strength.length} lift${d.strength.length === 1 ? '' : 's'}` : null), d.endurance?.result].filter(Boolean).join(' · ') || '—'
     case 'pain': return `${d.sites?.length || 0} site${(d.sites?.length || 0) === 1 ? '' : 's'}`
@@ -115,6 +156,16 @@ export function describe(rec) {
       return out
     }
     case 'movement':
+      if (d.protocol === 'nasm') {
+        const m = movementScore(d)
+        return [
+          { label: 'Movement quality', value: `${m.score}/100` },
+          ...postureFindings(d).map((f) => ({
+            label: `${f.item.view} · ${f.item.label}`,
+            value: `${f.item.kind === 'midline' ? 'present' : f.sides.join(' & ')} · ${f.severity}${f.pain ? ' · pain' : ''}${f.note ? ' — ' + f.note : ''}`,
+          })),
+        ]
+      }
       return (d.screens || []).map((s) => ({ label: s.pattern[0].toUpperCase() + s.pattern.slice(1), value: `${s.score}/3${s.pain ? ' · pain' : ''}` }))
     case 'body_comp':
       return kv([['Method', d.method], ['Body mass', d.massKg != null ? d.massKg + ' kg' : null], ['Body fat', d.bodyFatPct != null ? d.bodyFatPct + '%' : null],
@@ -146,6 +197,17 @@ const row = (label, from, to, dir = 'up', unit = '') => {
 export function compare(type, b, l) {
   const bd = b?.data || {}, ld = l?.data || {}
   if (type === 'movement') {
+    // If either record is NASM, compare on the 0–100 quality plus counts (the
+    // per-compensation resolved/persisting/new diff lives in the detail view).
+    if (bd.protocol === 'nasm' || ld.protocol === 'nasm') {
+      const mb = movementScore(bd), ml = movementScore(ld)
+      return [
+        row('Movement quality', mb.pct, ml.pct, 'up', '/100'),
+        row('Compensations', mb.findings ?? countLegacyFlags(bd), ml.findings ?? countLegacyFlags(ld), 'down', ''),
+        row('Asymmetries', mb.asymmetry ?? 0, ml.asymmetry ?? 0, 'down', ''),
+        row('Pain flags', mb.pain, ml.pain, 'down', ''),
+      ]
+    }
     const rows = MOVEMENT_PATTERNS.map((p) => {
       const bp = (bd.screens || []).find((s) => s.pattern === p)
       const lp = (ld.screens || []).find((s) => s.pattern === p)

@@ -5,10 +5,12 @@ import Icon from '../components/atoms/Icon'
 import Menu from '../components/molecules/Menu'
 import ClientSubnav from '../components/templates/ClientSubnav'
 import { assessmentForm } from '../components/organisms/forms/AssessmentForms'
+import WorkoutBuilderModal from '../components/organisms/program/WorkoutBuilderModal'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
-import { ACTIVE_TYPES, forClient, latest, baseline, summarize, describe, compare, typeMeta } from '../lib/assessment'
-import { fmtDate, fmtDateTime } from '../lib/dates'
+import { ACTIVE_TYPES, forClient, latest, baseline, summarize, describe, compare, movementDiff, typeMeta } from '../lib/assessment'
+import { correctivePlan } from '../lib/program'
+import { fmtDate, fmtDateTime, todayISO } from '../lib/dates'
 import { toast, confirmDialog } from '../lib/toast'
 
 function DeltaRow({ r }) {
@@ -59,10 +61,77 @@ function EntryRow({ rec, onEdit, onDelete }) {
   )
 }
 
+function MovementChanges({ changes, previous, current }) {
+  const groups = [
+    ['Resolved', changes.resolved, 'resolved', (x) => x.was],
+    ['Persisting', changes.persisting, 'persisting', (x) => x.was === x.now ? x.now : `${x.was} → ${x.now}`],
+    ['New', changes.added, 'added', (x) => x.now],
+  ]
+  return (
+    <div className="card" style={{ marginBottom: 16 }}>
+      <div className="section-title" style={{ margin: '0 0 3px' }}>Reassessment findings</div>
+      <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        Compensation-level change from {fmtDateTime(previous.createdAt) || fmtDate(previous.date)} to {fmtDateTime(current.createdAt) || fmtDate(current.date)} (the two latest NASM screens).
+      </div>
+      <div className="mv-diff-grid">
+        {groups.map(([label, items, tone, side]) => (
+          <div className={'mv-diff ' + tone} key={label}>
+            <div className="mv-diff-head"><span>{label}</span><b>{items.length}</b></div>
+            {items.length ? items.map((x) => (
+              <div className="mv-diff-item" key={x.id}>
+                <span>{x.label}</span>
+                <small>{x.view} · {side(x)}</small>
+              </div>
+            )) : <div className="muted" style={{ fontSize: 11 }}>None</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CorrectivePlan({ plan, assessment, onReview }) {
+  if (!plan.findings.length) return null
+  const pain = plan.findings.filter((f) => f.pain).length
+  const modes = ['SMR', 'Stretch', 'Activation']
+  return (
+    <div className="card mv-corrective" style={{ marginBottom: 16 }}>
+      <div className="flex between gap" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div>
+          <div className="section-title" style={{ margin: '0 0 3px' }}>Corrective starting point</div>
+          <div className="muted" style={{ fontSize: 12 }}>Generated from the latest movement screen ({fmtDate(assessment.date)}); review before prescribing.</div>
+        </div>
+        {plan.block && <Button size="sm" onClick={onReview}>Review in workout builder →</Button>}
+      </div>
+      {pain > 0 && (
+        <div className="mv-pain"><Icon name="alert" size={14} /> {pain} pain flag{pain === 1 ? '' : 's'} recorded — assess scope and refer when appropriate before loading.</div>
+      )}
+      {plan.suggestions.length ? (
+        <div className="mv-corrective-grid">
+          {modes.map((mode) => {
+            const items = plan.suggestions.filter((x) => x.mode === mode)
+            return (
+              <div key={mode}>
+                <div className="mv-mode">{mode}</div>
+                {items.map((x) => (
+                  <div className="mv-exercise" key={x.name}>
+                    <span>{x.name}</span>
+                    <small>{x.matchedTargets.join(' · ')}</small>
+                  </div>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+      ) : <div className="muted" style={{ fontSize: 12, marginTop: 10 }}>No library exercises matched these findings.</div>}
+    </div>
+  )
+}
+
 export default function AssessmentDetailPage() {
   const { id, type } = useParams()
   const nav = useNavigate()
-  const { db, commit } = useData()
+  const { db, commit, tz } = useData()
   const { openModal } = useModal()
   const c = db.clients.find((x) => x.id === id)
   const meta = typeMeta(type)
@@ -73,9 +142,27 @@ export default function AssessmentDetailPage() {
   const b = baseline(list, type)
   const l = latest(list, type)
   const rows = b && l && b.id !== l.id ? compare(type, b, l) : []
+  const nasmRecs = type === 'movement'
+    ? recs.filter((r) => r.data?.protocol === 'nasm').sort((a, z) => (a.createdAt || a.date).localeCompare(z.createdAt || z.date))
+    : []
+  const currentMovement = nasmRecs.at(-1)
+  const previousMovement = nasmRecs.at(-2)
+  const movementChanges = previousMovement && currentMovement
+    ? movementDiff(previousMovement.data, currentMovement.data) : null
+  const corrective = type === 'movement' && l?.data?.protocol === 'nasm'
+    ? correctivePlan(l.data, db.exercises) : null
   const canAdd = ACTIVE_TYPES.includes(type)
   const add = (phase) => openModal(assessmentForm(type, id, undefined, phase))
   const editRec = (rec) => openModal(assessmentForm(rec.type, id, rec))
+  const reviewCorrective = () => {
+    if (!corrective?.block || !l) return
+    const block = { ...corrective.block, correctiveAssessmentId: l.id }
+    openModal(
+      <WorkoutBuilderModal clientId={id} date={todayISO(tz)} seedBlocks={[block]}
+        seedNotes={`Corrective warm-up from movement screen ${fmtDate(l.date)}`} />,
+      'xl',
+    )
+  }
   const del = async (rec) => {
     const fedBuilder = rec.type === 'fitness' && (rec.data?.strength?.length || 0) > 0
     if (!await confirmDialog({
@@ -113,6 +200,9 @@ export default function AssessmentDetailPage() {
           </div>
         </div>
       ) : null}
+
+      {movementChanges && <MovementChanges changes={movementChanges} previous={previousMovement} current={currentMovement} />}
+      {corrective && <CorrectivePlan plan={corrective} assessment={l} onReview={reviewCorrective} />}
 
       <div className="card">
         <div className="section-title" style={{ margin: '0 0 6px' }}>Entries</div>

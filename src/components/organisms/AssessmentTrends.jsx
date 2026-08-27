@@ -1,6 +1,6 @@
 import { Line } from 'react-chartjs-2'
 import { baseOptions, COLORS, shortLabel, TEXT } from '../../lib/chartSetup'
-import { movementScore, MOVEMENT_MAX } from '../../lib/assessment'
+import { movementScore } from '../../lib/assessment'
 import Icon from '../atoms/Icon'
 
 // Progress-over-time charts built from assessment history. Renders a chart
@@ -16,12 +16,14 @@ export default function AssessmentTrends({ list }) {
     label, data, borderColor: color, backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, spanGaps: true, yAxisID,
   })
 
+  // Normalised movement quality (0–100) so legacy 0–15 and NASM records share
+  // one axis.
   const mvData = {
     labels: mv.map((a) => shortLabel(a.date)),
-    datasets: [line(`Score /${MOVEMENT_MAX}`, mv.map((a) => movementScore(a.data).score), COLORS.purple)],
+    datasets: [line('Movement quality /100', mv.map((a) => movementScore(a.data).pct), COLORS.purple)],
   }
   const mvOpts = baseOptions()
-  mvOpts.scales = { ...mvOpts.scales, y: { ...mvOpts.scales.y, min: 0, max: MOVEMENT_MAX } }
+  mvOpts.scales = { ...mvOpts.scales, y: { ...mvOpts.scales.y, min: 0, max: 100 } }
 
   const val = (a, k) => (a.data?.[k] == null ? null : a.data[k])
   const bcData = {
@@ -43,7 +45,7 @@ export default function AssessmentTrends({ list }) {
     <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
       {hasMv && (
         <div className="card">
-          <div className="section-title" style={{ margin: '0 0 8px' }}><Icon name="treadmill" size={15} /> Movement score trend</div>
+          <div className="section-title" style={{ margin: '0 0 8px' }}><Icon name="treadmill" size={15} /> Movement quality trend</div>
           <div style={{ height: 220 }}><Line data={mvData} options={mvOpts} /></div>
         </div>
       )}

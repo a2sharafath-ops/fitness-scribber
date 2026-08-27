@@ -6,6 +6,8 @@
 import { uid } from './format'
 import { addDays } from './dates'
 import { EXERCISE_LIBRARY } from './exerciseLibrary'
+import { CORRECTIVE_LIBRARY } from './correctiveLibrary'
+import { postureFindings, SEVERITY_WEIGHT } from './posture'
 
 // ---- Vocabulary -----------------------------------------------------------
 export const BLOCK_TYPES = ['Warm-up', 'Main Lifts', 'Assisted', 'Core/Others', 'Cool-down']
@@ -390,7 +392,7 @@ export function ensureProgramShape(db) {
 // Runs on every load via ensureProgramShape.
 export function mergeExerciseLibrary(db) {
   if (!db.exercises) db.exercises = []
-  const libNames = new Set(EXERCISE_LIBRARY.map((x) => x.name.toLowerCase()))
+  const libNames = new Set([...EXERCISE_LIBRARY, ...CORRECTIVE_LIBRARY].map((x) => x.name.toLowerCase()))
   // Keep the extras (names not in the library); library-named rows are the
   // duplicates and get replaced by the canonical versions added below.
   db.exercises = db.exercises.filter((e) => !libNames.has(String(e.name).toLowerCase()))
@@ -404,7 +406,76 @@ export function mergeExerciseLibrary(db) {
       thumb: '', source: 'stm-library',
     })
   }
+  // Corrective exercises carry `mode` (SMR/Stretch/Activation) and `target`
+  // muscles so the movement screen can generate a corrective block.
+  for (const x of CORRECTIVE_LIBRARY) {
+    db.exercises.push({
+      id: uid(),
+      name: x.name, muscle: x.muscle, equip: x.equip, difficulty: x.difficulty,
+      category: 'Corrective', pattern: 'Corrective',
+      mode: x.mode, target: x.target, relPct: null, relTo: null,
+      video: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + ' exercise how to'),
+      thumb: '', source: 'corrective-library',
+    })
+  }
   return db
+}
+
+// ---- Movement screen → coach-reviewed corrective block --------------------
+// Rank corrective exercises by how many of the recorded compensations they
+// address, weighted by finding severity and laterality. The result is kept
+// deliberately small: it is a starting point for the coach, not an automatic
+// diagnosis or a complete rehabilitation plan.
+const CORRECTIVE_LIMITS = { SMR: 2, Stretch: 2, Activation: 3 }
+
+export function correctivePlan(data, exercises = []) {
+  const findings = postureFindings(data)
+  const overactive = new Map(), underactive = new Map()
+  const addWeight = (map, muscle, weight) => map.set(muscle, (map.get(muscle) || 0) + weight)
+
+  for (const f of findings) {
+    const weight = (SEVERITY_WEIGHT[f.severity] || 2) * Math.max(1, f.sides.length)
+    f.item.overactive.forEach((m) => addWeight(overactive, m, weight))
+    f.item.underactive.forEach((m) => addWeight(underactive, m, weight))
+  }
+
+  const byName = new Map((exercises || []).map((e) => [String(e.name).toLowerCase(), e]))
+  const ranked = CORRECTIVE_LIBRARY.map((item) => {
+    const targets = item.mode === 'Activation' ? underactive : overactive
+    const matchedTargets = item.target.filter((m) => targets.has(m))
+    const score = matchedTargets.reduce((sum, m) => sum + targets.get(m), 0)
+    return { ...item, dbRef: byName.get(item.name.toLowerCase())?.id || null, matchedTargets, score }
+  }).filter((x) => x.score > 0)
+
+  const suggestions = Object.keys(CORRECTIVE_LIMITS).flatMap((mode) =>
+    ranked
+      .filter((x) => x.mode === mode)
+      .sort((a, b) => b.score - a.score || b.matchedTargets.length - a.matchedTargets.length || a.name.localeCompare(b.name))
+      .slice(0, CORRECTIVE_LIMITS[mode]))
+
+  if (!suggestions.length) return { block: null, suggestions: [], findings }
+
+  const block = newBlock('Warm-up', 1)
+  block.correctiveSource = 'movement-assessment'
+  block.exercises = suggestions.map((x, i) => {
+    const timed = x.mode === 'SMR' || x.mode === 'Stretch'
+    const count = timed ? 1 : 2
+    const sets = Array.from({ length: count }, (_, j) => newSet(j + 1, timed
+      ? { reps: 1, intensity: 30, rest: 15 }
+      : { reps: 12, intensity: 3, rest: 45 }))
+    return {
+      ...newProgExercise(x.name, {
+        dbRef: x.dbRef,
+        order: i + 1,
+        intensityType: timed ? 'Seconds' : 'RIR',
+        sets,
+      }),
+      correctiveMode: x.mode,
+      correctiveTargets: x.matchedTargets,
+    }
+  })
+
+  return { block, suggestions, findings }
 }
 
 // ---- Cloning & progression ---------------------------------------------------

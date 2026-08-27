@@ -24,16 +24,39 @@ import {
 import { toast, confirmDialog } from '../../../lib/toast'
 
 // Existing sessions load as saved; a fresh day opens with the standard
-// three-block scaffold (Warm-up / Main Lifts / Core/Others).
-const fromExisting = (p) => (p?.blocks?.length ? structuredClone(p.blocks) : p?.items?.length ? itemsToBlocks(p.items) : defaultBlocks())
+// three-block scaffold (Warm-up / Main Lifts / Core/Others). Optional seeded
+// blocks (for example, movement-screen correctives) merge into the matching
+// block without duplicating an exercise already prescribed that day.
+const fromExisting = (p, seedBlocks = []) => {
+  const base = p?.blocks?.length ? structuredClone(p.blocks) : p?.items?.length ? itemsToBlocks(p.items) : defaultBlocks()
+  if (!seedBlocks.length) return base
+  const seen = new Set(base.flatMap((b) => b.exercises.map((e) => e.exerciseName.toLowerCase())))
+  for (const incoming of cloneBlocksFresh(seedBlocks)) {
+    const fresh = incoming.exercises.filter((e) => !seen.has(e.exerciseName.toLowerCase()))
+    fresh.forEach((e) => seen.add(e.exerciseName.toLowerCase()))
+    if (!fresh.length) continue
+    const host = base.find((b) => b.blockType === incoming.blockType)
+    if (host) {
+      host.exercises = [...host.exercises, ...fresh].map((e, i) => ({ ...e, order: i + 1 }))
+      if (incoming.correctiveSource) host.correctiveSource = incoming.correctiveSource
+    } else {
+      base.push({ ...incoming, exercises: fresh, order: base.length + 1 })
+    }
+  }
+  return base
+}
 
-export default function WorkoutBuilderModal({ clientId, date }) {
+export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '' }) {
   const { db, commit } = useData()
   const { closeModal } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
-  const [blocks, setBlocks] = useState(() => fromExisting(existing))
-  const [notes, setNotes] = useState(existing?.notes || '')
+  const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
+  const [notes, setNotes] = useState(() => {
+    const current = existing?.notes || ''
+    if (!seedNotes || current.includes(seedNotes)) return current
+    return [current, seedNotes].filter(Boolean).join(' · ')
+  })
   const [blockStart, setBlockStart] = useState(false)
   const [step, setStep] = useState('edit') // edit | dates | progress | dictate | clients
   const [targets, setTargets] = useState(new Set())

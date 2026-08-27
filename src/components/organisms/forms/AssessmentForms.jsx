@@ -7,7 +7,8 @@ import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { todayISO } from '../../../lib/dates'
-import { MOVEMENT_PATTERNS, ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax } from '../../../lib/assessment'
+import { ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax, movementScore } from '../../../lib/assessment'
+import { SECTIONS, SEVERITY, itemsInSection, isPresent } from '../../../lib/posture'
 import { FIELD_LABELS, parseBodyComp } from '../../../lib/bodyCompPdf'
 import { screeningsFor, goalsFromScreening } from '../../../lib/screening'
 import Icon from '../../atoms/Icon'
@@ -49,15 +50,99 @@ function useSave(clientId, type, buildData, extra, record) {
   }
 }
 
-// ---- Movement screen (squat / hinge / lunge / push / pull, 0–3 + pain) ----
+// ---- Movement screen — NASM static posture + OHSA + special tests ----------
+// Legacy 0–3 records still open in the old pattern editor; everything new is
+// captured as postural compensations (see lib/posture.js). One collapsible
+// section per assessment area; OHSA is open by default (highest yield).
 export function MovementScreenForm({ clientId, record, defaultPhase }) {
+  // Historical 0–3 records open in the legacy editor; everything else is NASM.
+  const isLegacy = record?.data && record.data.protocol !== 'nasm' && Array.isArray(record.data.screens)
+  return isLegacy
+    ? <LegacyMovementForm clientId={clientId} record={record} defaultPhase={defaultPhase} />
+    : <NasmMovementForm clientId={clientId} record={record} defaultPhase={defaultPhase} />
+}
+
+function NasmMovementForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '' })
-  const [screens, setScreens] = useState(record?.data?.screens?.length ? record.data.screens.map((s) => ({ ...s })) : MOVEMENT_PATTERNS.map((pattern) => ({ pattern, score: 2, pain: false })))
+  const [findings, setFindings] = useState(() => ({ ...(record?.data?.findings || {}) }))
+  const [open, setOpen] = useState({ ohsa: true, static: false, special: false })
+
+  const setItem = (id, patch) => setFindings((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), ...patch } }))
+  const data = () => ({ protocol: 'nasm', findings })
+  const save = useSave(clientId, 'movement', data, undefined, record)
+
+  const live = movementScore(data())
+
+  return (
+    <ModalShell title={<><Icon name="treadmill" size={16} /> Movement screen</>} onClose={closeModal}
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
+      <MetaRow f={f} setF={setF} />
+      <div className="pos-score">
+        <span>Movement quality <b>{live.score}/100</b></span>
+        <span className="muted">{live.findings} compensation{live.findings === 1 ? '' : 's'}{live.asymmetry ? ` · ${live.asymmetry} asymmetric` : ''}{live.pain ? ` · ${live.pain} pain` : ''}</span>
+      </div>
+
+      {SECTIONS.map(([key, title]) => (
+        <div className="pos-sec" key={key}>
+          <button type="button" className="pos-sec-h" aria-expanded={open[key]} onClick={() => setOpen((o) => ({ ...o, [key]: !o[key] }))}>
+            <span>{open[key] ? '▾' : '▸'} {title}</span>
+            <span className="muted">{itemsInSection(key).filter((it) => isPresent(findings[it.id], it)).length} flagged</span>
+          </button>
+          {open[key] && (
+            <div className="pos-rows">
+              {itemsInSection(key).map((it) => (
+                <PostureRow key={it.id} item={it} f={findings[it.id]} onChange={(p) => setItem(it.id, p)} />
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Overall observations, cues, limitations…" /></Field>
+    </ModalShell>
+  )
+}
+
+// One compensation row: side toggles (L/R or present), severity, pain, note.
+function PostureRow({ item, f = {}, onChange }) {
+  const on = isPresent(f, item)
+  const chip = (label, active, patch) => (
+    <button type="button" className={'pos-chip' + (active ? ' on' : '')} aria-pressed={active} onClick={() => onChange(patch)}>{label}</button>
+  )
+  return (
+    <div className={'pos-row' + (on ? ' on' : '')}>
+      <div className="pos-row-top">
+        <span className="pos-cp">{item.group}</span>
+        <span className="pos-label">{item.label}</span>
+        <span className="pos-sides">
+          {item.kind === 'midline'
+            ? chip('Present', !!f.mid, { mid: !f.mid })
+            : <>{chip('L', !!f.l, { l: !f.l })}{chip('R', !!f.r, { r: !f.r })}</>}
+        </span>
+      </div>
+      {on && (
+        <div className="pos-row-detail">
+          <select value={f.severity || 'moderate'} onChange={(e) => onChange({ severity: e.target.value })} aria-label={item.label + ' severity'}>
+            {SEVERITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+          <label className="pos-pain"><input type="checkbox" checked={!!f.pain} onChange={(e) => onChange({ pain: e.target.checked })} /> pain</label>
+          <input className="pos-note" value={f.note || ''} onChange={(e) => onChange({ note: e.target.value })} placeholder="note…" aria-label={item.label + ' note'} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Kept so historical 0–3 records stay editable exactly as before.
+function LegacyMovementForm({ clientId, record, defaultPhase }) {
+  const { closeModal } = useModal()
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '' })
+  const [screens, setScreens] = useState(record.data.screens.map((s) => ({ ...s })))
   const upd = (i, k, v) => setScreens(screens.map((s, j) => (j === i ? { ...s, [k]: v } : s)))
   const save = useSave(clientId, 'movement', () => ({ screens }), undefined, record)
   return (
-    <ModalShell title={<><Icon name="treadmill" size={16} /> Movement screen</>} onClose={closeModal}
+    <ModalShell title={<><Icon name="treadmill" size={16} /> Movement screen (legacy)</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       <div className="asr-head"><span>Pattern</span><span>Score /3</span><span>Pain</span></div>

@@ -427,6 +427,44 @@ canvas{max-width:100%}
 .asf-1rm-row{margin-bottom:6px}
 .asf-1rm-head{font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#9a9ba2;margin-bottom:4px}
 .asf-1rm-est{font-size:13px;font-weight:800;color:var(--accent2);text-align:right;white-space:nowrap}
+/* NASM movement screen — postural / OHSA compensations */
+.pos-score{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--surface2);border-radius:10px;padding:9px 12px;margin:2px 0 10px;font-size:13px}
+.pos-score b{font-size:16px;color:var(--green)}
+.pos-score .muted{font-size:11px}
+.pos-sec{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.pos-sec-h{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border:none;font:inherit;font-size:13px;font-weight:700;padding:9px 12px;cursor:pointer;color:var(--text)}
+.pos-sec-h .muted{font-size:11px;font-weight:600}
+.pos-rows{padding:4px 10px 8px}
+.pos-row{padding:7px 2px;border-bottom:1px dashed var(--border)}
+.pos-row:last-child{border-bottom:none}
+.pos-row.on{background:var(--tint-amber);border-radius:8px;padding:7px 8px;border-bottom:none;margin:2px 0}
+.pos-row-top{display:flex;align-items:center;gap:8px}
+.pos-cp{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);flex:none;min-width:78px}
+.pos-label{flex:1;font-size:12.5px}
+.pos-sides{display:flex;gap:5px;flex:none}
+.pos-chip{min-width:30px;padding:3px 8px;border:1px solid var(--border);border-radius:7px;background:var(--surface);font:inherit;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer}
+.pos-chip.on{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.pos-row-detail{display:flex;align-items:center;gap:8px;margin-top:6px;padding-left:86px;flex-wrap:wrap}
+.pos-row-detail select{width:auto;font-size:12px;padding:4px 6px}
+.pos-pain{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.pos-note{flex:1;min-width:120px;font-size:12px;padding:4px 7px}
+@media(max-width:560px){.pos-row-detail{padding-left:0}.pos-cp{min-width:0}}
+/* Movement reassessment changes + corrective starting point */
+.mv-diff-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mv-diff{border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--surface2)}
+.mv-diff.resolved{border-top:3px solid var(--green)}
+.mv-diff.persisting{border-top:3px solid var(--accent2)}
+.mv-diff.added{border-top:3px solid var(--accent)}
+.mv-diff-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:12px;font-weight:800}
+.mv-diff-head b{font-size:15px}
+.mv-diff-item{display:flex;flex-direction:column;gap:2px;padding:6px 0;border-top:1px dashed var(--border);font-size:12px}
+.mv-diff-item small,.mv-exercise small{color:var(--muted);font-size:10.5px}
+.mv-corrective{border-left:3px solid var(--accent2)}
+.mv-pain{display:flex;align-items:center;gap:7px;background:var(--tint-red);color:var(--accent);border-radius:8px;padding:8px 10px;margin-top:10px;font-size:11.5px;font-weight:650}
+.mv-corrective-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.mv-mode{font-size:10px;font-weight:800;letter-spacing:.45px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.mv-exercise{display:flex;flex-direction:column;gap:2px;padding:6px 0;border-top:1px dashed var(--border);font-size:12px;font-weight:650}
+@media(max-width:760px){.mv-diff-grid,.mv-corrective-grid{grid-template-columns:1fr}}
 /* Body-composition PDF import (InBody / DEXA / BIA report upload) */
 .bc-import{margin-bottom:14px}
 .bc-drop{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px dashed var(--border);border-radius:12px;background:var(--surface2);cursor:pointer;transition:border-color .15s,background .15s}
