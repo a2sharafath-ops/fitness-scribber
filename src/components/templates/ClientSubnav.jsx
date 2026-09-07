@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { poolingConfig } from '../../lib/pooling/config'
 
 // Shared breadcrumb + tab bar for every per-client screen, so the five client
 // views (Overview, Profile, Assessments, Load & Strength, Monitoring) read as
@@ -7,6 +8,7 @@ const tabsFor = (id) => [
   { to: `/clients/${id}`, label: 'Overview', end: true },
   { to: `/clients/${id}/profile`, label: 'Profile' },
   { to: `/clients/${id}/assessments`, label: 'Assessments' },
+  ...(poolingConfig().r1 ? [{ to: `/clients/${id}/pool`, label: 'Exercise Pool' }] : []),
   { to: `/command/${id}`, label: 'Load & Strength' },
   { to: `/monitor/${id}`, label: 'Monitoring' },
 ]

@@ -1,12 +1,12 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
   "version": "backup-build-approval-v0.5",
-  "status": "local-backup-build-approved-preflight-in-progress",
-  "currentSprint": "SB",
+  "status": "local-implementation-in-progress",
+  "currentSprint": "S3",
   "executionMode": "local-backup-recovery-and-r1-r3-engineering",
   "implementationAuthorized": true,
   "productionChangesAuthorized": false,
-  "completedScope": "R1 S1/S2 preparation plus authorized early P05/C09, P06/C10, extension data/API/UX/test specifications and release/support/maintenance drafts complete. All actual acceptance, build, executed application tests and release remain pending.",
+  "completedScope": "Preparation and local Classic preflight complete as scoped in LOCAL_EXECUTION_LOG.md. R1-R3 implementation and full verification pending; no live release authorized.",
   "priorityDefinitions": {
     "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",
     "P1": "Core R1 functionality and usability.",
@@ -1242,7 +1242,7 @@
         "A11",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Authorized codex/ branch preserves existing changes; runnable tests and pooling-off default established. No remote push or package purchase.",
       "preparationOutputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -1252,7 +1252,8 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "in-progress"
     },
     {
       "id": "FP-302",
@@ -2511,8 +2512,11 @@
       "approvalRefs": [
         "A22"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Record exact commit, tracked/untracked changes, app/build/runtime versions, safe file inventory and disk capacity; do not expose secrets."
+      "status": "done",
+      "acceptance": "Record exact commit, tracked/untracked changes, app/build/runtime versions, safe file inventory and disk capacity; do not expose secrets.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B02",
@@ -2529,8 +2533,11 @@
         "A22",
         "A17"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Inspect for secrets and sensitive exports before staging; commit scoped source/docs and create a non-moving Classic tag; preserve all user changes. No remote push."
+      "status": "done",
+      "acceptance": "Inspect for secrets and sensitive exports before staging; commit scoped source/docs and create a non-moving Classic tag; preserve all user changes. No remote push.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B03",
@@ -2546,8 +2553,11 @@
       "approvalRefs": [
         "A22"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Create source/docs archive plus Git bundle outside the implementation checkout in an ignored recovery directory; manifest/checksums verified. Exclude secrets, client exports, dependencies and generated caches. Same-device copy is not off-device disaster protection."
+      "status": "done",
+      "acceptance": "Create source/docs archive plus Git bundle outside the implementation checkout in an ignored recovery directory; manifest/checksums verified. Exclude secrets, client exports, dependencies and generated caches. Same-device copy is not off-device disaster protection.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B04",
@@ -2564,8 +2574,11 @@
         "A22",
         "A28"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Record environment-variable names only, ignored-file categories, assets, local browser-storage use and hosted dependencies; identify gaps. No secret or real-client-data export. Document secure owner-managed configuration recovery."
+      "status": "done",
+      "acceptance": "Record environment-variable names only, ignored-file categories, assets, local browser-storage use and hosted dependencies; identify gaps. No secret or real-client-data export. Document secure owner-managed configuration recovery.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B05",
@@ -2583,8 +2596,11 @@
         "A24",
         "A26"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Run existing build/lint and record existing failures; exercise critical workflows only in a synthetic isolated profile with hosted connections disabled."
+      "status": "done",
+      "acceptance": "Run existing build/lint and record existing failures; exercise critical workflows only in a synthetic isolated profile with hosted connections disabled.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B06",
@@ -2602,8 +2618,11 @@
         "A24",
         "A27"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Restore verified archive/bundle to a new exact directory, reconstruct dependencies, compare manifest and run baseline checks without overwriting the working project."
+      "status": "done",
+      "acceptance": "Restore verified archive/bundle to a new exact directory, reconstruct dependencies, compare manifest and run baseline checks without overwriting the working project.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B07",
@@ -2619,8 +2638,11 @@
       "approvalRefs": [
         "A28"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Document database, storage objects, auth/config and browser-local-data coverage, destinations, retention and post-backup-write reconciliation. No hosted backup executed under local permission; live recovery remains unverified until separately authorized."
+      "status": "done",
+      "acceptance": "Document database, storage objects, auth/config and browser-local-data coverage, destinations, retention and post-backup-write reconciliation. No hosted backup executed under local permission; live recovery remains unverified until separately authorized.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B08",
@@ -2638,8 +2660,11 @@
         "A25",
         "A26"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Use approved local database/runtime; test owning coach/client permissions and synthetic backup/restore. Failure or unavailable backend leaves backend verification incomplete, never substitutes a mocked permission test."
+      "status": "done",
+      "acceptance": "Use approved local database/runtime; test owning coach/client permissions and synthetic backup/restore. Failure or unavailable backend leaves backend verification incomplete, never substitutes a mocked permission test.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B09",
@@ -2657,8 +2682,11 @@
         "A23",
         "A28"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Map all changed entry points, R1/R2/R3 off defaults, schema compatibility and preservation of new records when disabled. Record explicit no-destructive-restore boundaries."
+      "status": "done",
+      "acceptance": "Map all changed entry points, R1/R2/R3 off defaults, schema compatibility and preservation of new records when disabled. Record explicit no-destructive-restore boundaries.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B10",
@@ -2681,8 +2709,11 @@
         "A27",
         "A28"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Code archive and restore rehearsal pass; adequate storage/config coverage known; exact local runtime access resolved; sign-off gaps remain disabled. Record go/no-go for local implementation only."
+      "status": "done",
+      "acceptance": "Code archive and restore rehearsal pass; adequate storage/config coverage known; exact local runtime access resolved; sign-off gaps remain disabled. Record go/no-go for local implementation only.",
+      "evidence": [
+        "operations/LOCAL_EXECUTION_LOG.md"
+      ]
     },
     {
       "id": "FP-B11",

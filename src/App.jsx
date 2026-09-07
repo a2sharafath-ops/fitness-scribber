@@ -14,6 +14,7 @@ import DashboardPage from './pages/DashboardPage'
 import ClientsPage from './pages/ClientsPage'
 import ClientDetailPage from './pages/ClientDetailPage'
 import ClientProfilePage from './pages/ClientProfilePage'
+import ExercisePoolPage from './pages/ExercisePoolPage'
 import AssessmentsPage from './pages/AssessmentsPage'
 import AssessmentDetailPage from './pages/AssessmentDetailPage'
 import MetricDetailPage from './pages/MetricDetailPage'
@@ -41,6 +42,7 @@ function Shell() {
               <Route path="/clients" element={<ClientsPage />} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
+              <Route path="/clients/:id/pool" element={<ExercisePoolPage />} />
               <Route path="/clients/:id/assessments" element={<AssessmentsPage />} />
               <Route path="/clients/:id/assessments/:type" element={<AssessmentDetailPage />} />
               <Route path="/clients/:id/metric/:metric" element={<MetricDetailPage />} />
