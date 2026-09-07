@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useData } from '../store/DataContext'
-import { readCatalogueDrafts, readPooling, readBuilderDrafts, submitPoolingReport } from '../api/pooling'
+import { readCatalogueDrafts, readPooling, readBuilderDrafts, submitPoolingReport, readExtensionPolicies, readExtensionRequests, saveExtensionRequest } from '../api/pooling'
 import { useModal } from '../store/ModalContext'
 import WorkoutBuilderModal from '../components/organisms/program/WorkoutBuilderModal'
 import { todayISO } from '../lib/dates'
+import PoolingExtensionReview from '../components/organisms/program/PoolingExtensionReview'
 import { hasBackend } from '../lib/supabase'
 import { poolingConfig } from '../lib/pooling/config'
 
@@ -22,6 +23,8 @@ export default function ExercisePoolPage() {
   const [healthChange, setHealthChange] = useState('')
   const [saveStatus, setSaveStatus] = useState('unsaved')
   const [pending, setPending] = useState(null)
+  const [policies,setPolicies]=useState(null)
+  const [requests,setRequests]=useState({daily:[],progression:[]})
   useEffect(() => {
     let active = true
     async function load() {
@@ -31,7 +34,10 @@ export default function ExercisePoolPage() {
       try {
         const records = await readCatalogueDrafts()
         const data = hasBackend ? await readPooling(id) : { context: null, drafts: await readBuilderDrafts(id) }
-        if (active) { setCatalogue(records); setState(data) }
+        const flags=poolingConfig()
+        const extensionPolicies=flags.r2 || flags.r3 ? await readExtensionPolicies() : null
+        const extensionRequests={daily:!hasBackend && flags.r2 ? await readExtensionRequests(id,'daily'):[],progression:!hasBackend && flags.r3 ? await readExtensionRequests(id,'progression'):[]}
+        if (active) { setCatalogue(records); setState(data);setPolicies(extensionPolicies);setRequests(extensionRequests) }
       } catch (failure) { if (active) setError(failure.message) }
       finally { if (active) setLoading(false) }
     }
@@ -59,6 +65,10 @@ export default function ExercisePoolPage() {
     }
   }
   const filtered = catalogue.filter(row => `${row.name} ${row.roles.join(' ')} ${row.pattern}`.toLowerCase().includes(filter.toLowerCase()))
+  async function requestReview(kind,operation) {
+    await saveExtensionRequest({clientId:id,kind,...operation})
+    setRequests(previous=>({...previous,[kind]:[...previous[kind],{...operation,clientId:id}]}))
+  }
   return <>
     <div className="topbar"><div><h1>Exercise Pool · {client.name}</h1><p className="sub">Coach review workspace · never automatic assignment</p></div><Link className="btn ghost" to={`/clients/${id}`}>Back to client</Link></div>
     <section className="card" aria-labelledby="pool-status"><h2 id="pool-status">Review and availability</h2>
@@ -84,6 +94,8 @@ export default function ExercisePoolPage() {
       <button className="btn" disabled={!hasBackend || !healthChange || saveStatus === 'saving'} onClick={report}>{pending ? 'Retry same report' : 'Save attributed report'}</button>
       <p role="status">Report status: {saveStatus.replaceAll('_',' ')}</p>
     </section>
+    {policies && poolingConfig().r2 && <PoolingExtensionReview kind="daily" policy={policies.daily} requests={requests.daily} online={hasBackend} onRequest={operation=>requestReview('daily',operation)} />}
+    {policies && poolingConfig().r3 && <PoolingExtensionReview kind="progression" policy={policies.progression} requests={requests.progression} online={hasBackend} onRequest={operation=>requestReview('progression',operation)} />}
     <section className="card" aria-labelledby="candidate-review"><h2 id="candidate-review">Candidate catalogue review</h2>
       <label htmlFor="pool-filter">Filter by name, role or movement pattern</label><input id="pool-filter" value={filter} onChange={event => setFilter(event.target.value)} />
       <p>{filtered.length} candidate records. Eligibility: review required.</p>

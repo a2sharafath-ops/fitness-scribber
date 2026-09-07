@@ -50,13 +50,23 @@ try {
   }
   const waitFor = async expression => {
     for (let attempt = 0; attempt < 100; attempt++) {
-      if (await evaluate(expression)) return
+      try { if (await evaluate(expression)) return } catch { /* navigation may replace the execution context */ }
       await new Promise(resolve => setTimeout(resolve, 100))
     }
     throw new Error('Browser condition timed out')
   }
+  const navigate = async url => {
+    await evaluate('window.__fitnessSmokeLeaving = true')
+    await page('Page.navigate',{url})
+    await waitFor(`window.__fitnessSmokeLeaving !== true && document.readyState === 'complete' && location.href === ${JSON.stringify(new URL(url).href)}`)
+  }
+  const reload = async () => {
+    await evaluate('window.__fitnessSmokeLeaving = true')
+    await page('Page.reload')
+    await waitFor("window.__fitnessSmokeLeaving !== true && document.readyState === 'complete'")
+  }
   for (const path of ['/', '/clients', '/workouts', '/schedule']) {
-    await page('Page.navigate', { url: origin + path })
+    await navigate(origin + path)
     await waitFor('!!document.querySelector("#main h1")')
     assert(await evaluate('document.querySelector("#root").innerText.length > 100'))
     console.log(`PASS Classic route ${path}`)
@@ -67,13 +77,13 @@ try {
     db.settings.businessName = 'Synthetic recovery persistence'
     saveDB(db)
   })()`)
-  await page('Page.reload')
+  await reload()
   await waitFor('!!document.querySelector("#main h1")')
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("fitscribe_v1")).settings.businessName'), 'Synthetic recovery persistence')
   console.log('PASS synthetic local persistence survives reload')
   if (process.env.POOL_SMOKE === 'true') {
     const clientId = await evaluate('JSON.parse(localStorage.getItem("fitscribe_v1")).clients[0].id')
-    await page('Page.navigate', { url: `${origin}/clients/${encodeURIComponent(clientId)}/pool` })
+    await navigate(`${origin}/clients/${encodeURIComponent(clientId)}/pool`)
     await waitFor('document.body.innerText.includes("48 candidate records")')
     assert(await evaluate('document.body.innerText.includes("Local preview only")'))
     assert(await evaluate('Array.from(document.querySelectorAll("button")).find(b => b.innerText.includes("Save attributed report")).disabled'))
@@ -123,6 +133,60 @@ try {
     await waitFor('document.body.innerText.includes("Draft status: saved")')
     assert.equal(await evaluate('localStorage.getItem("fitscribe_v1")'), classicBefore)
     console.log('PASS quota failure shown honestly and original request retry recovers')
+    if (process.env.EXTENSION_SMOKE === 'true') {
+      await evaluate('Array.from(document.querySelectorAll("button")).find(b => b.innerText === "Close").click()')
+      await waitFor('!!document.querySelector("#daily-date")')
+      for (const kind of ['daily','progression']) {
+        await evaluate(`(() => {
+          const element=document.querySelector('#${kind}-date')
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(element,'2026-09-07')
+          element.dispatchEvent(new Event('input',{bubbles:true}))
+          element.dispatchEvent(new Event('change',{bubbles:true}))
+          document.querySelector('#${kind}-request').focus()
+        })()`)
+        await page('Input.insertText',{text:'Synthetic review request; no numeric policy approval'})
+        await waitFor(`Array.from(document.querySelectorAll('button')).some(button=>button.innerText==='Save ${kind} review request' && !button.disabled)`)
+        await evaluate(`Array.from(document.querySelectorAll('button')).find(button=>button.innerText==='Save ${kind} review request').click()`)
+        await waitFor(`!!localStorage.getItem('fitscribe_pooling_${kind}_v1')`)
+        assert.equal(await evaluate(`JSON.parse(localStorage.getItem('fitscribe_pooling_${kind}_v1')).records[0].authority`),'none')
+      }
+      assert.equal(await evaluate('localStorage.getItem("fitscribe_v1")'),classicBefore)
+      console.log('PASS R2/R3 local review requests preserve original targets and have no authority')
+      await navigate(`${origin}/clients/${encodeURIComponent(clientId)}`)
+      await waitFor('Array.from(document.querySelectorAll("button")).some(button=>button.innerText==="Open day")')
+      await evaluate('Array.from(document.querySelectorAll("button")).find(button=>button.innerText==="Open day").click()')
+      await waitFor('document.body.innerText.includes("assignment, start and resume are disabled")')
+      assert(await evaluate('!Array.from(document.querySelectorAll("button")).some(button=>button.innerText.includes("▶ Start"))'))
+      await evaluate(`(async()=>{
+        const {loadDB,saveDB}=await import('/src/lib/storage.js')
+        const {todayISO}=await import('/src/lib/dates.js')
+        const db=loadDB(),date=todayISO(db.settings.tz)
+        db.workouts=(db.workouts || []).filter(row=>!(row.clientId===${JSON.stringify(clientId)} && row.date===date))
+        db.workouts.push({id:'synthetic-stop-test',clientId:${JSON.stringify(clientId)},date,status:'in_progress',title:'Synthetic active session',main:[{target:10,actual:5}],warmup:[],cooldown:[],blocks:[]})
+        saveDB(db)
+      })()`)
+      await reload()
+      await waitFor('Array.from(document.querySelectorAll("button")).some(button=>button.innerText==="Open day")')
+      await evaluate('Array.from(document.querySelectorAll("button")).find(button=>button.innerText==="Open day").click()')
+      await waitFor('Array.from(document.querySelectorAll("button")).some(button=>button.innerText==="Stop and preserve recorded work")')
+      await evaluate('Array.from(document.querySelectorAll("button")).find(button=>button.innerText==="Stop and preserve recorded work").click()')
+      await waitFor('JSON.parse(localStorage.getItem("fitscribe_v1")).workouts.find(row=>row.id==="synthetic-stop-test").status==="stopped"')
+      assert.equal(await evaluate('JSON.parse(localStorage.getItem("fitscribe_v1")).workouts.find(row=>row.id==="synthetic-stop-test").main[0].actual'),5)
+      console.log('PASS runner start blocked and synthetic stop preserves recorded actuals')
+      if (process.env.RECOVERY_SMOKE === 'true') {
+        const recoveryData=await evaluate('Object.fromEntries(Object.keys(localStorage).filter(key=>key.startsWith("fitscribe_")).map(key=>[key,localStorage.getItem(key)]))')
+        await navigate('http://127.0.0.1:4178/')
+        await waitFor('!!document.querySelector("#main h1")')
+        await evaluate(`Object.entries(${JSON.stringify(recoveryData)}).forEach(([key,value])=>localStorage.setItem(key,value))`)
+        await reload()
+        await waitFor('!!document.querySelector("#main h1")')
+        for (const [key,value] of Object.entries(recoveryData)) {
+          if (key!=='fitscribe_v1') assert.equal(await evaluate(`localStorage.getItem(${JSON.stringify(key)})`),value)
+        }
+        assert.equal(await evaluate('JSON.parse(localStorage.getItem("fitscribe_v1")).workouts.find(row=>row.id==="synthetic-stop-test").main[0].actual'),5)
+        console.log('PASS restored Classic retains new synthetic sidecars and recorded actuals; backend rollback not certified')
+      }
+    }
   }
   socket.close()
 } finally {

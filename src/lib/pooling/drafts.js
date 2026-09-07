@@ -14,8 +14,8 @@ export function builderDraft({ date, blocks, notes = '', crossClient = false }) 
     })) })) }
 }
 
-export function readLocalDrafts(storage) {
-  const raw = storage.getItem(LOCAL_DRAFT_KEY)
+export function readLocalDrafts(storage, key = LOCAL_DRAFT_KEY) {
+  const raw = storage.getItem(key)
   if (raw === null) return { schemaVersion: 1, records: [] }
   let data
   try { data = JSON.parse(raw) } catch { throw new Error('local_drafts_corrupt') }
@@ -25,9 +25,9 @@ export function readLocalDrafts(storage) {
 }
 
 // Caller holds a browser Web Lock when available. Local storage is never authority.
-export function saveLocalDraft(storage, { clientId, operationKey, expectedRevision, proposal, recordedAt }) {
+export function saveLocalDraft(storage, { clientId, operationKey, expectedRevision, proposal, recordedAt }, key = LOCAL_DRAFT_KEY) {
   if (!clientId || !operationKey || !Number.isFinite(Date.parse(recordedAt)) || !proposal || typeof proposal !== 'object') throw new Error('invalid_draft')
-  const db = readLocalDrafts(storage)
+  const db = readLocalDrafts(storage,key)
   const previousOperation = db.records.find(row => row.clientId === clientId && row.operationKey === operationKey)
   if (previousOperation) {
     if (canonical(previousOperation.proposal) !== canonical(proposal)) throw new Error('idempotency_conflict')
@@ -38,7 +38,7 @@ export function saveLocalDraft(storage, { clientId, operationKey, expectedRevisi
   const record = { clientId, operationKey, revision: currentRevision + 1, proposal: structuredClone(proposal), recordedAt, state: 'local_draft', authority: 'none' }
   db.records.push(record)
   const encoded = JSON.stringify(db)
-  storage.setItem(LOCAL_DRAFT_KEY, encoded)
-  if (storage.getItem(LOCAL_DRAFT_KEY) !== encoded) throw new Error('outcome_unknown')
+  storage.setItem(key, encoded)
+  if (storage.getItem(key) !== encoded) throw new Error('outcome_unknown')
   return structuredClone(record)
 }

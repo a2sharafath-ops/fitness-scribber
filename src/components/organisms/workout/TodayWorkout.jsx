@@ -8,6 +8,9 @@ import WorkoutSummary from './WorkoutSummary'
 import { buildFromPlan, buildFromPrescription, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
 import { programStats } from '../../../lib/program'
 import { fmtVL } from '../../../lib/units'
+import { poolingConfig } from '../../../lib/pooling/config'
+import PoolingExecutionNotice from './PoolingExecutionNotice'
+import { executionAvailability } from '../../../lib/pooling/execution'
 
 const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'green' }
 
@@ -28,6 +31,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
 
   const ctx = { clientId: client.id, date: today, readiness: context.readiness, acwr: context.acwr, resolveTm }
   const locked = !!athlete && workout?.source === 'prescribed'
+  if (!executionAvailability({enabled:poolingConfig().r1,operation:'start'}).allowed) return <Shell bare={bare} extra={headerExtra}><PoolingExecutionNotice workout={workout} units={units} exercises={exercises} onSave={onSave} onAddSession={onAddSession} /></Shell>
 
   // ---- No workout yet → prescribed session, or a rest day ------------
   if (!workout) {

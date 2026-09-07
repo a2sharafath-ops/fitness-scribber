@@ -12,6 +12,8 @@ import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
 import { useAuth } from '../store/AuthContext'
 import { supabase } from '../lib/supabase'
+import { poolingConfig } from '../lib/pooling/config'
+import { toast } from '../lib/toast'
 import { callFunction } from '../api/functions'
 import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
@@ -130,10 +132,12 @@ export default function AthletePortal() {
   // Start flow: pressing ▶ Start first pops the morning check-in (skipped if
   // already done today), then the session actually starts.
   const startWorkout = (w) => {
+    if (poolingConfig().r1) return toast('Start is disabled pending verified pooling authority.', 'info')
     if (checkedIn) { saveWorkout(w); return }
     setCheckinW(w)
   }
   const submitCheckin = async (v) => {
+    if (poolingConfig().r1) { setCheckinW(null); return toast('Wellness cannot authorize a pooling session start.', 'info') }
     const ok = await insert('wellness', v)
     if (!ok) return
     const w = checkinW
@@ -143,6 +147,7 @@ export default function AthletePortal() {
   const skipCheckin = async () => {
     const w = checkinW
     setCheckinW(null)
+    if (poolingConfig().r1) return
     if (w) await saveWorkout(w)
   }
 
@@ -289,4 +294,3 @@ function WearableSection({ clientId, tokens, latest, onChange }) {
     </Card>
   )
 }
-

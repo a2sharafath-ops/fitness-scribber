@@ -16,6 +16,7 @@ import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { hasBackend } from '../lib/supabase'
+import { poolingConfig } from '../lib/pooling/config'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
@@ -146,8 +147,9 @@ export default function ClientDetailPage() {
   // Same flow as the athlete portal: ▶ Start pops the morning check-in (unless
   // already logged today); ✓ Complete pops the RPE + duration form.
   const checkedIn = db.wellness.some((w) => w.clientId === c.id && w.date === today)
-  const startWorkout = (w) => { if (checkedIn) saveWorkout(w); else setCheckinW(w) }
+  const startWorkout = (w) => { if (poolingConfig().r1) return toast('Start is disabled pending verified pooling authority.', 'info'); if (checkedIn) saveWorkout(w); else setCheckinW(w) }
   const submitCheckin = (v) => {
+    if (poolingConfig().r1) { setCheckinW(null); return toast('Wellness cannot authorize a pooling session start.', 'info') }
     const w = checkinW
     setCheckinW(null)
     commit((d) => {
@@ -155,7 +157,7 @@ export default function ClientDetailPage() {
       if (w) d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w]
     })
   }
-  const skipCheckin = () => { const w = checkinW; setCheckinW(null); if (w) saveWorkout(w) }
+  const skipCheckin = () => { const w = checkinW; setCheckinW(null); if (poolingConfig().r1) return; if (w) saveWorkout(w) }
   const requestComplete = (w) => setRpeW(w)
   const finishWorkout = (w, rpe, minutes) => {
     const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec

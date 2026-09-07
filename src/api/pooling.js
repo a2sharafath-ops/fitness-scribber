@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
+import { builderDraft, readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
 
 export class PoolingError extends Error {
   constructor(code, message, operationKey = null) { super(message); this.name = 'PoolingError'; this.code = code; this.operationKey = operationKey }
@@ -9,6 +9,35 @@ const known = ['forbidden','feature_disabled','stale_context','draft_conflict','
 export async function readCatalogueDrafts() {
   const { default: candidateCatalogue } = await import('../../docs/exercise-pooling/catalogues/exercises.draft.json')
   return structuredClone(candidateCatalogue.exercises)
+}
+export async function readExtensionPolicies() {
+  const [{default:daily},{default:progression}]=await Promise.all([
+    import('../../docs/exercise-pooling/catalogues/daily-adjustment.draft.json'),
+    import('../../docs/exercise-pooling/catalogues/progression-planning.draft.json'),
+  ])
+  return structuredClone({daily,progression})
+}
+const extensionKey = kind => {
+  if (!['daily','progression'].includes(kind)) throw new PoolingError('invalid_request','Unknown review request kind.')
+  return `fitscribe_pooling_${kind}_v1`
+}
+export async function readExtensionRequests(clientId,kind) {
+  if (supabase) throw new PoolingError('unavailable','Extension persistence is not enabled on the backend; no hosted data was changed.')
+  try { return readLocalDrafts(localStorage,extensionKey(kind)).records.filter(row=>row.clientId===clientId) }
+  catch { throw new PoolingError('source_unavailable','Local review requests could not be read; existing data is preserved.') }
+}
+export async function saveExtensionRequest({clientId,kind,operationKey,proposal}) {
+  if (supabase) throw new PoolingError('unavailable','Backend extension verification is pending. No request was submitted.')
+  const key=extensionKey(kind)
+  if (!proposal || Object.keys(proposal).some(key=>!['kind','date','requestedChange','blocks','authority','state'].includes(key)) || proposal.kind!==kind || typeof proposal.requestedChange!=='string' || !proposal.requestedChange.trim() || proposal.requestedChange.length>4000 || !Array.isArray(proposal.blocks) || proposal.blocks.length || proposal.authority!=='none' || proposal.state!=='review_requested') throw new PoolingError('invalid_request','Review requests cannot contain assignments or invalid fields.')
+  builderDraft({date:proposal.date,blocks:[]})
+  const write=()=>{
+    const records=readLocalDrafts(localStorage,key).records.filter(row=>row.clientId===clientId && row.proposal.date===proposal.date)
+    const expectedRevision=Math.max(0,...records.map(row=>row.revision))
+    try { return saveLocalDraft(localStorage,{clientId,operationKey,proposal,expectedRevision,recordedAt:new Date().toISOString()},key) }
+    catch { throw new PoolingError('failed_save','Review request was not confirmed saved. Retry keeps the original operation key.',operationKey) }
+  }
+  return navigator.locks ? navigator.locks.request(key,write) : write()
 }
 function connection() {
   if (!supabase || (typeof navigator !== 'undefined' && navigator.onLine === false)) throw new PoolingError('unavailable', 'An online backend connection is required. No approval or assignment was made.')

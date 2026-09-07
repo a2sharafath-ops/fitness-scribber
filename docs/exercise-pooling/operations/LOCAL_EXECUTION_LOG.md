@@ -81,3 +81,21 @@ Actual results after these changes:
 - Catalogue JSON is dynamically imported; all 48 records remain unpublished/nonassignable. No assignment, professional publication, remote push or deployment occurred.
 
 Still incomplete: PostgreSQL authority and concurrency tests, trusted server decision generation, end-to-end coach assignment/start/resume, all runner/template/assessment invalidation paths, complete R2/R3 UI/workflows, content admission/revocation, final post-build migration/Classic recovery rehearsal and external acceptance. The independent workaround advances implementation but does not complete or certify the whole pooling plan.
+
+## Continued remaining-work pass
+
+The owner requested a remaining checklist and further no-install local implementation. See [REMAINING_WORK.md](./REMAINING_WORK.md) for the current separation of implementation, PostgreSQL verification and external gates.
+
+Added exact-selection validation instead of silently substituting a freshly generated workout. Added server orchestration, a Supabase gateway adapter, an Edge entrypoint and proposed private source-snapshot/read/store SQL. Requests cannot supply their own catalogue/context/actor; ownership is checked before private source reads. Published module requirements, source generation, held state and a source fingerprint participate in the proposed write check. Anonymous and authenticated browser roles are explicitly denied the service-only gateway RPCs, including possible direct default grants. **This SQL has not run. The Edge entrypoint passed a TypeScript syntax parse only, not Deno/runtime/authentication verification.** Gateway unit substitutes exercise orchestration, not PostgreSQL permissions or races.
+
+Added a shared runner preview boundary for coach/client screens: no new start/resume while authority is unverified; existing completed history remains viewable. Local stop snapshots preserve targets and actuals. Stale check-in/skip callbacks do not grant starts. Full authoritative runner logging and all backend entry-point guards remain pending.
+
+Added R2/R3 local review-request forms with separate storage namespaces and unresolved-policy notices. They do not generate an approved numerical adjustment, rewrite targets, edit actuals or assign a week. Those fuller workflows remain unfinished.
+
+Verification:
+
+- **67 unit tests pass**, plus lint. Current UI build passes with the existing large-chunk warning.
+- Extended isolated browser suite passes request persistence for both extensions, blocked runner start and preservation of actuals on stop, in addition to prior draft/copy/quota checks.
+- Added a restored-Classic fallback check with synthetic new draft/daily/progression sidecars and stopped-workout actuals. Sidecars and actual values remained intact. This does not prove authorization behavior or live/post-migration backend rollback compatibility.
+- Fixed a browser-harness navigation race discovered during the recovery test; it now waits for a new document, not a stale pre-reload view. The rerun passed.
+- No new installs, runtime downloads, disk cleanup, Docker reset, Care changes, publishing, real assignments or deployment.
