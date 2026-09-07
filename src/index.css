@@ -1060,3 +1060,18 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .pw-body{margin-top:2px}
 .pw-sublabel{font-size:10px;font-weight:800;letter-spacing:.5px;color:#9a9ba2}
 .pw-planner-bare .plan-week{gap:8px}
+
+/* Scoped pooling styles belong in this imported stylesheet, not App.css. */
+.pooling-workspace { display:grid; gap:18px; min-width:0; overflow-wrap:anywhere; }
+.pooling-workspace .card, .pooling-workspace article { min-width:0; }
+.pooling-workspace fieldset { display:grid; gap:10px; margin:14px 0; padding:16px; min-width:0; border:1px solid var(--border, #ddd); border-radius:12px; }
+.pooling-workspace label { display:grid; gap:5px; }
+.pooling-workspace label:has(input[type="checkbox"]) { display:flex; align-items:flex-start; gap:10px; margin:12px 0; }
+.pooling-workspace input[type="checkbox"] { flex:none; margin-top:3px; }
+.pooling-workspace input:not([type="checkbox"]), .pooling-workspace select, .pooling-workspace textarea { width:100%; min-width:0; min-height:44px; box-sizing:border-box; }
+.pooling-workspace details { min-width:0; margin:12px 0; }
+.pooling-workspace summary { cursor:pointer; font-weight:600; padding:10px 0; }
+.pooling-workspace button:disabled { opacity:.42; cursor:not-allowed; }
+.pooling-workspace :is(button,input,select,textarea,summary):focus-visible { outline:3px solid var(--accent, #a32b35); outline-offset:3px; }
+.pooling-workspace pre { max-height:420px; overflow:auto; background:var(--surface2, #f7f7f7); padding:12px; border-radius:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.pooling-workspace .btn { margin:4px 6px 4px 0; min-height:44px; max-width:100%; white-space:normal; }

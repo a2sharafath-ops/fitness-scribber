@@ -2,6 +2,9 @@ import {admission,resolveDose} from './selection.js'
 
 // Validation does not supply missing professional evidence or publish anything.
 export function validateRelease(document){
+ try{return validateDocument(document)}catch{return {valid:false,errors:['malformed_release_document']}}
+}
+function validateDocument(document){
  const errors=[]
  if(!document || typeof document!=='object')return {valid:false,errors:['release_document_required']}
  const {manifest,modulePolicy,catalogue,doses,extensionPolicies=[]}=document
@@ -13,6 +16,13 @@ export function validateRelease(document){
  if(new Set((manifest?.records || []).map(row=>`${row.id}@${row.revision}`)).size!==(manifest?.records || []).length)errors.push('duplicate_manifest_entry')
  if((manifest?.records || []).some(row=>!keys.includes(`${row.id}@${row.revision}`)))errors.push('manifest_references_missing_record')
  for(const record of records)if(!record.id || !Number.isSafeInteger(record.revision) || record.revision<1 || !admission(record,manifest))errors.push(`${record.id || 'unknown'}:accepted_version_evidence_required`)
+ for(const policy of extensionPolicies){
+  if(!['daily','progression','weekly'].includes(policy.kind))errors.push(`${policy.id}:unsupported_extension_kind`)
+  if(policy.kind==='daily' && (!Array.isArray(policy.signalRules) || !policy.signalRules.length || policy.signalRules.some(r=>!r.id || !r.key || !['gte','lte','equals'].includes(r.operator) || r.threshold===undefined || !Number.isFinite(r.delta) || !Array.isArray(r.roles) || !r.roles.length || !policy.fields?.[r.field])))errors.push(`${policy.id}:daily_parameters_incomplete`)
+  if(policy.kind==='progression' && (!Number.isSafeInteger(policy.minimumPerformances) || policy.minimumPerformances<1 || !Number.isFinite(policy.windowSeconds) || policy.windowSeconds<0 || !['gte','lte'].includes(policy.operator) || !Number.isFinite(policy.comparisonThreshold) || !Number.isFinite(policy.progressionDelta) || !policy.fields?.[policy.field] || policy.performanceUnit!=='completed_occurrence' || !['minimum_actual','maximum_actual'].includes(policy.aggregation)))errors.push(`${policy.id}:progression_parameters_incomplete`)
+  if(['daily','progression'].includes(policy.kind) && (!policy.fields || Object.values(policy.fields).some(f=>!f || ![f.min,f.max,f.increment,f.maxChange].every(Number.isFinite) || f.min>f.max || f.increment<=0 || f.maxChange<0)))errors.push(`${policy.id}:reviewed_effect_bounds_required`)
+if(policy.kind==='weekly' && (!policy.supportKey || !Array.isArray(policy.goals) || !policy.goals.length || !Array.isArray(policy.splits) || !policy.splits.length || !Number.isSafeInteger(policy.minSessions) || policy.minSessions<1 || !Number.isSafeInteger(policy.maxSessions) || policy.maxSessions<policy.minSessions || policy.maxSessions>31 || !Number.isFinite(policy.maxWeeklySeconds) || policy.maxWeeklySeconds<=0 || !Array.isArray(policy.patternRules) || !policy.patternRules.length || policy.patternRules.some(r=>!r.pattern || !Number.isSafeInteger(r.minSessions) || r.minSessions<0 || !Number.isSafeInteger(r.maxSessions) || r.maxSessions<r.minSessions || !Number.isFinite(r.recoverySeconds) || r.recoverySeconds<0)))errors.push(`${policy.id}:weekly_parameters_incomplete`)
+ }
  if(!modulePolicy || !Array.isArray(modulePolicy.requirements) || !Array.isArray(modulePolicy.requiredRoles) || !modulePolicy.requiredRoles.length || !Number.isFinite(modulePolicy.decisionValiditySeconds) || modulePolicy.decisionValiditySeconds<=0 || modulePolicy.decisionValiditySeconds>86400)errors.push('complete_module_policy_required')
  for(const requirement of modulePolicy?.requirements || [])if(!requirement.key || !requirement.source || !requirement.unit || !requirement.protocol || !Number.isFinite(requirement.maxAgeSeconds) || requirement.maxAgeSeconds<0)errors.push(`${requirement.key}:source_contract_incomplete`)
  for(const key of ['adult','purpose','health','equipment'])if(!modulePolicy?.requirements?.some(row=>row.key===modulePolicy.authorityKeys?.[key] && row.required===true))errors.push(`${key}:required_authority_mapping_missing`)

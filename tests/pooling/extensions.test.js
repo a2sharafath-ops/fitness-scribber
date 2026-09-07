@@ -24,7 +24,7 @@ function progressionFixture() {
   input.policy={...input.policy,windowSeconds:86400,minimumPerformances:1,operator:'gte',comparisonThreshold:10,field:'load',progressionDelta:1}
   input.sessionAt='2026-09-07T12:00:00Z'
   input.knowledgeCutoff=input.sessionAt
-  input.reference={occurrenceId:'test',variantId:'synthetic-variant',side:'left',range:'synthetic-range',equipment:[],unit:'synthetic-unit',method:'synthetic-method',assistance:'none'}
+  input.reference={occurrenceId:'test',variantId:'synthetic-variant',variantRevision:1,side:'left',range:'synthetic-range',equipment:[],unit:'synthetic-unit',method:'synthetic-method',assistance:'none',loadBasis:'no_external_load'}
   input.performances=[{...input.reference,id:'performance1',actual:10,quality:'confirmed',complete:true,effortConfirmed:true,lineageId:'event1',effectiveAt:input.sessionAt,recordedAt:input.sessionAt}]
   return input
 }

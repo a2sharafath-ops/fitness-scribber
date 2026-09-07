@@ -72,7 +72,7 @@ end $$;
 
 create or replace function public.pooling_source_bundle(verified_actor uuid,target_client text,target_draft bigint)
 returns jsonb language plpgsql security definer set search_path='' as $$
-declare inventory jsonb; d public.pooling_drafts%rowtype; m public.pooling_manifests%rowtype; ctx public.pooling_contexts%rowtype; result jsonb;
+declare inventory jsonb; d public.pooling_drafts%rowtype; m public.pooling_manifests%rowtype; ctx public.pooling_contexts%rowtype; result jsonb; governance jsonb;
 begin
  if (select r1 from public.pooling_runtime where singleton) is distinct from true then raise exception 'feature_disabled'; end if;
  inventory:=public.pooling_source_inventory(verified_actor,target_client);
@@ -81,12 +81,13 @@ begin
  if not found or ctx.generation is null or d.context_generation<>ctx.generation then raise exception 'stale_context'; end if;
  select * into m from public.pooling_manifests where id=d.proposal->>'manifestId' for share;
  if not found or m.state<>'published' then raise exception 'content_revoked'; end if;
+ governance:=public.pooling_governance_bundle(verified_actor,target_client,m.document->'modulePolicy'->>'scope',(d.proposal->'session'->>'sessionAt')::timestamptz);
  result:=jsonb_build_object('clientId',target_client,'generation',ctx.generation,'held',ctx.held,'draftId',d.id,'sources',inventory,
    'confirmations',(select coalesce(jsonb_agg(jsonb_build_object('id',p.id,'clientId',p.client_id,'observation',p.observation,'confirmedBy',p.actor_id,'confirmedAt',p.confirmed_at,'recordedAt',p.confirmed_at) order by p.id),'[]') from public.pooling_confirmations p where p.client_id=target_client),
-   'restrictions','[]'::jsonb,'session',d.proposal->'session','modulePolicy',m.document->'modulePolicy',
+   'restrictions',governance->'restrictions','purposeAuthority',governance->'purposeAuthority','authorityValidUntil',governance->'authorityValidUntil','session',d.proposal->'session','modulePolicy',m.document->'modulePolicy',
    'manifest',(m.document->'manifest')||jsonb_build_object('id',m.id,'state',m.state));
- -- Context.held remains the fail-closed restriction boundary. No legacy clearance
- -- text or confirmation can clear it. Scoped restriction adjudication is separate.
+ -- Governance ledger is server-owned; neither client input nor a source
+ -- confirmation can manufacture consent, scope grants or a restriction resolution.
  return result||jsonb_build_object('sourceBundleToken',encode(sha256(convert_to(result::text,'UTF8')),'hex'),'cutoff',clock_timestamp());
 end $$;
 

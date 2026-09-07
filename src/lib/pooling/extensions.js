@@ -46,7 +46,7 @@ export function comparePerformances({ reference, performances, knowledgeCutoff, 
   if (!Number.isFinite(Date.parse(knowledgeCutoff)) || !Number.isFinite(Date.parse(sessionAt))) throw new Error('invalid_session')
   if (!admission(policy || {}, manifest) || !Number.isFinite(policy.windowSeconds) || policy.windowSeconds < 0 ||
       !Number.isInteger(policy.minimumPerformances) || policy.minimumPerformances < 1) return { state: 'unsupported_policy', included: [], excluded: [] }
-  const compatibleFields = ['variantId', 'side', 'range', 'equipment', 'unit', 'method', 'assistance']
+  const compatibleFields = ['variantId', 'variantRevision', 'side', 'range', 'equipment', 'unit', 'method', 'assistance', 'loadBasis']
   const included = [], excluded = [], lineage = new Set()
   const signatures = new Map()
   for (const row of performances) {

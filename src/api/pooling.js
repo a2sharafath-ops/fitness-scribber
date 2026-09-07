@@ -2,13 +2,15 @@ import { supabase } from '../lib/supabase'
 import { builderDraft, readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
 import {canonical} from '../lib/pooling/context'
 import {validateConfirmation} from '../lib/pooling/sources'
-import {OPERATION_KEY,pendingOperations,prepareOperation,settleOperation,rejectOperation} from '../lib/pooling/operations'
+import {OPERATION_KEY,DEFINITIVE_CODES,pendingOperations,prepareOperation,settleOperation,rejectOperation} from '../lib/pooling/operations'
+import {createJournalIdentity} from '../lib/pooling/journal-identity'
+const journalActor=supabase?createJournalIdentity(supabase.auth):null
 
 export class PoolingError extends Error {
   constructor(code, message, operationKey = null) { super(message); this.name = 'PoolingError'; this.code = code; this.operationKey = operationKey }
 }
 
-const known = ['forbidden','feature_disabled','stale_context','draft_conflict','idempotency_conflict','protected_field','invalid_proposal','invalid_report','invalid_field','invalid_health_change','invalid_wellness','invalid_budget','invalid_equipment','invalid_parent','invalid_operation_key','source_changed','invalid_confirmation','context_held','stale_draft','decision_unavailable','content_revoked','required_gap','invalid_event','invalid_actual','invalid_transition','health_check_required']
+const known = DEFINITIVE_CODES
 export async function readCatalogueDrafts() {
   const { default: candidateCatalogue } = await import('../../docs/exercise-pooling/catalogues/exercises.draft.json')
   return structuredClone(candidateCatalogue.exercises)
@@ -102,9 +104,7 @@ export async function saveBuilderDraft({ clientId, operationKey, proposal, expec
 
 async function journalScope(clientId){
  if(!supabase)return `local:${clientId}`
- const {data,error}=await supabase.auth.getUser()
- if(error || !data?.user?.id)throw new PoolingError('forbidden','Sign in again before reconciling the operation.')
- return `${data.user.id}:${clientId}`
+ try{return `${await journalActor()}:${clientId}`}catch{throw new PoolingError('forbidden','Sign in again before reconciling the operation.')}
 }
 const journalWrite=write=>typeof navigator!=='undefined' && navigator.locks?navigator.locks.request(OPERATION_KEY,write):Promise.reject(new PoolingError('unavailable','Durable operation recovery requires a browser with Web Locks on a secure origin. No new request was sent.'))
 export async function readPendingBuilderOperations(clientId){
@@ -155,7 +155,7 @@ async function recoverable(kind,clientId,request,send){
  try{const row=await journalWrite(()=>prepareOperation(localStorage,{scope,kind,request}));if(row.receipt)return row.receipt}catch(error){throw new PoolingError(known.includes(error.message)?error.message:'failed_save','The recovery record could not be prepared. No new request was sent by this attempt; any earlier pending request is preserved.',request.operationKey)}
  let receipt
  try{receipt=await send()}catch(error){
-   if(known.includes(error.code)){try{await journalWrite(()=>rejectOperation(localStorage,scope,request.operationKey,error.code))}catch{/* Keep original journal entry when rejection cannot be recorded. */}}
+   if(known.includes(error.code)){try{await journalWrite(()=>rejectOperation(localStorage,scope,request.operationKey,error.code))}catch{throw new PoolingError('outcome_unknown','The rejection could not be recorded locally. Reconcile the original operation before submitting another.',request.operationKey)}}
    throw error
  }
  try{await journalWrite(()=>settleOperation(localStorage,scope,request.operationKey,receipt))}catch{throw new PoolingError('outcome_unknown','Server response received, but its local receipt was not saved. Retry the same operation.',request.operationKey)}
@@ -170,7 +170,7 @@ export const readReviewWorkspace=clientId=>supabase?rpc('pooling_review_workspac
 export const approveBatch=request=>recoverable('batch',request.clientId,request,()=>rpc('pooling_approve_batch',{target_client:request.clientId,expected_generation:request.generation,operation_key:request.operationKey,selection:request.selection}))
 export const reviewExtension=request=>recoverable('extension_review',request.clientId,request,()=>rpc('pooling_review_extension',{target_client:request.clientId,request_id:request.requestId,expected_generation:request.generation,operation_key:request.operationKey,action:request.action,reason:request.reason,proposal_id:request.proposalId || null,amended_draft:request.amendedDraft || null}))
 export async function retryPendingOperation(row){
- const handlers={draft:saveRecoverableBuilderDraft,confirmation:confirmPoolingSource,report:submitPoolingReport,execution:recordExecution,approve:approveDraft,batch:approveBatch,extension:saveExtensionRequest,extension_review:reviewExtension}
+const handlers={draft:saveRecoverableBuilderDraft,confirmation:confirmPoolingSource,report:submitPoolingReport,execution:recordExecution,approve:approveDraft,batch:approveBatch,extension:saveExtensionRequest,extension_review:reviewExtension,legacy_stop:stopLegacy,consent:recordConsent,context_review:reviewContext,weekly:generateWeek,week_approve:approveWeek,suggestion:generateSuggestion,reassessment:requestReassessment,catalogue_submission:submitCatalogue,publication:applyPublication}
  if(!handlers[row.kind])throw new PoolingError('unavailable','This operation requires a supported recovery handler. Its saved request is preserved.')
  return handlers[row.kind](row.request)
 }
@@ -179,3 +179,53 @@ export async function generateExtension(request){
  if(error || !data?.receipt?.id)throw new PoolingError('unavailable','Numerical proposal could not be verified. No assignment or target change was made.')
  return data
 }
+export const readClientHome=clientId=>rpc('pooling_client_home',{target_client:clientId})
+export const readWeeks=clientId=>rpc('pooling_read_weeks',{target_client:clientId})
+export const readSuggestions=clientId=>rpc('pooling_read_suggestions',{target_client:clientId})
+export const readCatalogueAdmin=clientId=>rpc('pooling_read_catalogue_admin',{target_client:clientId})
+export const submitCatalogue=request=>recoverable('catalogue_submission',request.clientId,request,()=>rpc('pooling_submit_catalogue',{target_client:request.clientId,operation_key:request.operationKey,release_document:request.document,review_note:request.note}))
+export const applyPublication=request=>recoverable('publication',request.clientId,request,async()=>{
+ const {operationKey:_,...body}=request
+ const {data,error}=await connection().functions.invoke('pooling-publication',{body})
+ if(error || !data?.receipt){
+  let code
+  try{const result=await error?.context?.clone().json();if(known.includes(result?.error))code=result.error}catch{/* Preserve the exact release request. */}
+  throw new PoolingError(code || 'outcome_unknown',code?.replaceAll('_',' ') || 'Release action outcome unknown. Reconcile the original request.',request.operationKey)
+ }
+ return data.receipt
+})
+export const readReassessments=clientId=>rpc('pooling_read_reassessments',{target_client:clientId})
+export const requestReassessment=request=>recoverable('reassessment',request.clientId,request,()=>rpc('pooling_request_reassessment',{target_client:request.clientId,operation_key:request.operationKey,review_request:request.review}))
+export const generateSuggestion=request=>recoverable('suggestion',request.clientId,request,async()=>{
+ const {generation,...body}=request
+ const {data,error}=await connection().functions.invoke('pooling-suggestion',{body:{...body,expectedGeneration:generation}})
+ if(error || !data?.receipt){
+  let code
+  try{const result=await error?.context?.clone().json();if(known.includes(result?.error))code=result.error}catch{/* Keep unknown operation pending. */}
+  throw new PoolingError(code || 'outcome_unknown',code?.replaceAll('_',' ') || 'Suggestion outcome unknown. Reconcile the original request.',request.operationKey)
+ }
+ return data.receipt
+})
+export const approveWeek=request=>recoverable('week_approve',request.clientId,request,()=>rpc('pooling_approve_week',{target_client:request.clientId,target_week:request.weekId,expected_generation:request.generation,operation_key:request.operationKey}))
+export const generateWeek=request=>recoverable('weekly',request.clientId,request,async()=>{
+ const {data,error}=await connection().functions.invoke('pooling-weekly',{body:{clientId:request.clientId,expectedGeneration:request.generation,operationKey:request.operationKey,week:request.week}})
+ if(error || !data?.receipt){
+  let code
+  try{const body=await error?.context?.clone().json();if(known.includes(body?.error))code=body.error}catch{/* Preserve unknown outcomes. */}
+  throw new PoolingError(code || 'outcome_unknown',code?.replaceAll('_',' ') || 'Weekly review outcome unknown. Reconcile the original request.',request.operationKey)
+ }
+ return data.receipt
+})
+export const stopLegacy=request=>recoverable('legacy_stop',request.clientId,request,()=>rpc('pooling_stop_legacy',{target_client:request.clientId,target_workout:request.workoutId}))
+export const readGovernance=clientId=>rpc('pooling_read_governance',{target_client:clientId})
+export const recordConsent=request=>recoverable('consent',request.clientId,request,()=>rpc('pooling_record_consent',{target_client:request.clientId,target_document:request.documentId,decision:request.decision,operation_key:request.operationKey}))
+export const reviewContext=request=>recoverable('context_review',request.clientId,request,async()=>{
+ const {data,error}=await connection().functions.invoke('pooling-context-review',{body:{clientId:request.clientId,draftId:request.draftId,expectedGeneration:request.generation,operationKey:request.operationKey,reference:request.reference}})
+ if(error || !data?.receipt){
+  let code
+  try{const body=await error?.context?.clone().json();if(known.includes(body?.error))code=body.error}catch{/* Keep unknown outcomes pending. */}
+  if(code)throw new PoolingError(code,code.replaceAll('_',' '),request.operationKey)
+  throw new PoolingError('outcome_unknown','Context review outcome is not confirmed. Reconcile this same request; no assignment is implied.',request.operationKey)
+ }
+ return data.receipt
+})

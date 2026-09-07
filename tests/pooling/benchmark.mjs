@@ -7,7 +7,7 @@ const at='2026-09-07T12:00:00Z'
 const approved=(id,extra={})=>({id,revision:1,reviewStatus:'published',automationEligible:true,rightsStatus:'accepted',
   approvalEvidence:['content','rights','scope'].map(kind=>({kind,decision:'accepted',reviewerId:'fictional',reference:'synthetic-only',revision:1})),...extra})
 const requirements=Array.from({length:500},(_,i)=>({key:`synthetic-${i}`,source:'synthetic',unit:'boolean',protocol:'synthetic',maxAgeSeconds:1,required:true}))
-const observations=requirements.map(row=>({id:row.key,clientId:'synthetic',key:row.key,value:true,unit:row.unit,protocol:row.protocol,state:'reported',quality:'confirmed',confirmedBy:'fictional',confirmedAt:at,effectiveAt:at,recordedAt:at}))
+const observations=requirements.map(row=>({id:row.key,clientId:'synthetic',source:row.source,key:row.key,value:true,unit:row.unit,protocol:row.protocol,state:'reported',quality:'confirmed',confirmedBy:'fictional',confirmedAt:at,effectiveAt:at,recordedAt:at}))
 const contextInput={clientId:'synthetic',generation:1,sessionAt:at,knowledgeCutoff:at,timeZone:'UTC',requirements,observations,sourceStatus:{synthetic:'loaded'},healthChange:'no_change',adultConfirmed:true,purposePermitted:true,scope:'adult_general_fitness'}
 const catalogue=Array.from({length:2000},(_,i)=>approved(`synthetic-ex-${String(i).padStart(4,'0')}`,{scopes:['adult_general_fitness'],settings:['home'],levels:['beginner'],equipment:[],prerequisites:[],demands:[],roles:['main'],doseRefs:['synthetic-dose']}))
 const doses=[approved('synthetic-dose',{sets:1,workSeconds:1,restSeconds:0,setupSeconds:0,transitionSeconds:0,sideMultiplier:1})]

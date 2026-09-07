@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {approveDraft,approveBatch,decideDraft,readPendingOperations,readBuilderDraftState,saveRecoverableBuilderDraft} from '../../../api/pooling'
+import {approveDraft,approveBatch,decideDraft,readPendingOperations,readBuilderDraftState,saveRecoverableBuilderDraft,reviewContext} from '../../../api/pooling'
 import {canonicalProposal,selectionDiff} from '../../../lib/pooling/review'
 
 function CanonicalEditor({clientId,context,manifests,onSaved}){
@@ -13,7 +13,7 @@ function CanonicalEditor({clientId,context,manifests,onSaved}){
   try{
    let request=pending
    if(!request){
-    const proposal=canonicalProposal({date,sessionAt:instant,timeZone:zone,manifestId:release,request:{setting,level,budgetSeconds:Number(budget)*60,goalPriority:goals.split(',').map(v=>v.trim()).filter(Boolean),roles:roles.map(id=>({id,required:true}))},selection})
+    const proposal=canonicalProposal({date,sessionAt:instant,timeZone:zone,manifestId:release,request:{setting,level,budgetSeconds:Number(budget)*60,goalPriority:goals.split(',').map(v=>v.trim()).filter(Boolean),roles:roles.map(id=>({id,required:true}))},selection,allowEmpty:true})
     const current=await readBuilderDraftState(clientId,date)
     request={clientId,operationKey:crypto.randomUUID(),proposal,...current,generation:context?.generation || current.generation}
     // A canonical review is a new exact revision, not an edit of saved authority.
@@ -47,13 +47,15 @@ function CanonicalEditor({clientId,context,manifests,onSaved}){
    })}
    <button className="btn ghost" disabled={!document} onClick={()=>setSelection(rows=>[...rows,{occurrenceId:crypto.randomUUID(),role:'',exerciseId:'',doseId:''}])}>Add canonical occurrence</button>
   </fieldset>
-  <button className="btn" disabled={status==='saving' || (!pending && (!release || !selection.length))} onClick={save}>{pending?'Retry original canonical draft':'Save canonical draft'}</button>
+  <p>With no occurrences selected, this saves session inputs for source-checked pool generation. Empty inputs cannot be approved as a workout.</p>
+  <button className="btn" disabled={status==='saving' || (!pending && !release)} onClick={save}>{pending?'Retry original canonical draft':'Save canonical draft or session inputs'}</button>
   <p role="status">Canonical draft: {status}. Saving never assigns.</p>{error && <p role="alert">{error}</p>}
  </details>
 }
 
 export default function PoolingApprovalReview({clientId,context,drafts,workspace,online,onRefresh}){
  const [checked,setChecked]=useState([]),[status,setStatus]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[pending,setPending]=useState(null)
+ const [contextReference,setContextReference]=useState('')
  const decisions=workspace.decisions || [],assignments=workspace.assignments || []
  async function run(action){setBusy(true);setError('');try{await action();setChecked([]);onRefresh()}catch(failure){setError(failure.message)}finally{setBusy(false)}}
  async function approve(rows){
@@ -74,13 +76,15 @@ export default function PoolingApprovalReview({clientId,context,drafts,workspace
  return <section className="card" aria-labelledby="pool-exact-title"><h2 id="pool-exact-title">Exact-revision review and assignment</h2>
   <CanonicalEditor clientId={clientId} context={context} manifests={workspace.manifests || []} onSaved={onRefresh}/>
   <p>Only the owning coach can assign a currently valid decision. Selecting several reviewed revisions uses one transaction: all succeed, or none do.</p>
+  {context?.held && <><label htmlFor="context-review-reference">Current coach review reference</label><input id="context-review-reference" value={contextReference} onChange={e=>setContextReference(e.target.value)}/><p>Context review requires recorded scope/consent and complete current observations. Unresolved concerns or restrictions remain held. A successful review creates a new unassigned revision, not an assignment.</p></>}
   {drafts.map(row=>{
    const key=row.id || row.operationKey,decision=decisions.find(v=>v.draftId===row.id),parent=drafts.find(p=>p.id===row.parent_id),diff=selectionDiff(parent?.proposal.selection,row.proposal.selection)
    return <details key={key}><summary>{row.proposal.date} · draft {row.id || 'local'} · revision {row.revision}{assignments.some(a=>a.draftId===row.id)?' · assigned':''}</summary>
     <p>{row.proposal.session?.timeZone || 'Timezone not yet confirmed'} · {row.proposal.session?.request?.budgetSeconds ?? 'Unknown'} seconds budget · goals: {row.proposal.session?.request?.goalPriority?.join(', ') || 'not specified'}</p>
     <p>{diff.length} canonical occurrence changes relative to the previous revision.</p>
     <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(diff,null,2)}</pre>
-    {!row.proposal.selection?.length && <p>Map the legacy structure to canonical variants and doses before requesting a decision.</p>}
+    {!row.proposal.selection?.length && <p>Use source-checked generation or map canonical variants and doses before requesting an assignment decision.</p>}
+    {context?.held && <button className="btn ghost" disabled={!online || !row.id || !row.proposal.session || !row.proposal.manifestId || !contextReference.trim() || busy || !!pending} onClick={()=>run(async()=>{if((await readPendingOperations(clientId)).some(op=>op.kind==='context_review'))throw Error('Reconcile the saved context review in operation recovery before requesting another.');const receipt=await reviewContext({clientId,draftId:row.id,generation:context.generation,reference:contextReference,operationKey:crypto.randomUUID()});setStatus(`Context review recorded; inspect new unassigned draft ${receipt.draftId}.`)})}>Request source-bound context review</button>}
     <button className="btn ghost" disabled={!online || !row.id || !row.proposal.selection?.length || busy || !!pending} onClick={()=>run(async()=>{const result=await decideDraft({clientId,draftId:row.id,generation:context?.generation});setStatus(`Decision ${result.receipt.decisionId}: ${result.result.completeness}.`)})}>Validate exact draft {row.id || 'local'}</button>
     {decision && <><p>Decision {decision.id} · {decision.result.completeness} · expires {decision.validUntil}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify({blocks:decision.result.blocks,gaps:decision.result.gaps,durationSeconds:decision.result.durationSeconds},null,2)}</pre></>}
     <label><input type="checkbox" disabled={!ready(row) || busy || !!pending} checked={checked.includes(key)} onChange={e=>setChecked(ids=>e.target.checked?[...ids,key]:ids.filter(id=>id!==key))}/>I reviewed this exact client/date, full dose, source gaps and revision changes.</label>

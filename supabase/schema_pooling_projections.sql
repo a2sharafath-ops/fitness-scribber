@@ -21,7 +21,7 @@ begin
    'status',coalesce((select e.kind from public.pooling_execution_events e where e.assignment_id=a.id and e.kind<>'actual' order by e.id desc limit 1),'assigned'),
    'blocks',(select coalesce(jsonb_agg(jsonb_build_object('occurrenceId',b->>'occurrenceId','role',b->>'role','exerciseId',b->>'exerciseId','exerciseRevision',b->'exerciseRevision',
        'prescription',b->'dose'->'prescription') order by ord),'[]') from jsonb_array_elements(v.result->'blocks') with ordinality as x(b,ord)),
-   'actuals',(select coalesce(jsonb_agg(jsonb_build_object('id',e.id,'recordedAt',e.recorded_at,'occurrenceId',e.payload->>'occurrenceId','setIndex',e.payload->'setIndex','actual',e.payload->'actual','unit',e.payload->>'unit') order by e.id),'[]') from public.pooling_execution_events e where e.assignment_id=a.id and e.kind='actual')
+   'actuals',(select coalesce(jsonb_agg(jsonb_build_object('id',e.id,'recordedAt',e.recorded_at,'performedAt',e.payload->>'performedAt','occurrenceId',e.payload->>'occurrenceId','setIndex',e.payload->'setIndex','actual',e.payload->'actual','unit',e.payload->>'unit','side',coalesce(e.payload->>'side','not_applicable'),'loadKg',e.payload->'loadKg','effort',e.payload->'effort','effortMethod',e.payload->>'effortMethod','supersedes',e.payload->'supersedes') order by e.id),'[]') from public.pooling_execution_events e where e.assignment_id=a.id and e.kind='actual')
  ) order by a.id desc),'[]') into result
  from public.pooling_assignments a join public.pooling_drafts d on d.id=a.draft_id join public.pooling_decisions v on v.id=a.decision_id
  join public.pooling_manifests m on m.id=v.manifest_id join public.pooling_contexts ctx on ctx.client_id=a.client_id where a.client_id=target_client;

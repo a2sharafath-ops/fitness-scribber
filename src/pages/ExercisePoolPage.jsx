@@ -9,6 +9,11 @@ import PoolingExtensionReview from '../components/organisms/program/PoolingExten
 import PoolingSourceReview from '../components/organisms/program/PoolingSourceReview'
 import PoolingApprovalReview from '../components/organisms/program/PoolingApprovalReview'
 import PoolingOperationRecovery from '../components/organisms/program/PoolingOperationRecovery'
+import PoolingGovernance from '../components/organisms/program/PoolingGovernance'
+import PoolingWeeklyReview from '../components/organisms/program/PoolingWeeklyReview'
+import PoolingSuggestions from '../components/organisms/program/PoolingSuggestions'
+import PoolingReassessment from '../components/organisms/program/PoolingReassessment'
+import PoolingCatalogueAdmin from '../components/organisms/program/PoolingCatalogueAdmin'
 import { hasBackend } from '../lib/supabase'
 import { poolingConfig } from '../lib/pooling/config'
 
@@ -86,6 +91,7 @@ export default function ExercisePoolPage() {
       {!loading && hasBackend && <p>Context: {state?.context ? `generation ${state.context.generation} · ${state.context.held ? 'review hold' : 'requires current checks'}` : 'not yet collected; not assumed normal'}</p>}
     </section>
     <PoolingOperationRecovery clientId={id} refreshKey={refresh} onReconciled={()=>setRefresh(value=>value+1)}/>
+    {hasBackend && <PoolingGovernance clientId={id} onChanged={()=>setRefresh(value=>value+1)}/>}
     <section className="card" aria-labelledby="review-drafts"><h2 id="review-drafts">Unassigned review drafts</h2>
       <button className="btn" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={todayISO()} />, 'xl')}>Create review draft</button>
       <button className="btn ghost" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh drafts</button>
@@ -93,7 +99,8 @@ export default function ExercisePoolPage() {
       {(state?.drafts || []).map(row => <p key={row.id || row.operationKey}>{row.proposal.date} · revision {row.revision} · unassigned draft</p>)}
       {!state?.drafts?.length && <p>No saved review drafts.</p>}
     </section>
-    {!loading && <PoolingApprovalReview key={`${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
+    {!loading && <PoolingApprovalReview key={`PoolingApprovalReview:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
+    <PoolingSuggestions key={`PoolingSuggestions:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>
     <section className="card" aria-labelledby="health-review"><h2 id="health-review">Current health change</h2>
       <p>This is separate from optional daily wellness. A no-change answer does not clear an existing restriction.</p>
       <label htmlFor="pool-health">Client-reported change</label>
@@ -105,9 +112,12 @@ export default function ExercisePoolPage() {
     </section>
     {policies && poolingConfig().r2 && <PoolingExtensionReview kind="daily" policy={policies.daily} requests={requests.daily} online={hasBackend} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts} onRefresh={()=>setRefresh(value=>value+1)} onRequest={operation=>requestReview('daily',operation)} onReview={async operation=>{await reviewExtension({clientId:id,generation:state?.context?.generation,...operation});setRefresh(value=>value+1)}}/>}
     {policies && poolingConfig().r3 && <PoolingExtensionReview kind="progression" policy={policies.progression} requests={requests.progression} online={hasBackend} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts} onRefresh={()=>setRefresh(value=>value+1)} onRequest={operation=>requestReview('progression',operation)} onReview={async operation=>{await reviewExtension({clientId:id,generation:state?.context?.generation,...operation});setRefresh(value=>value+1)}}/>}
-    <PoolingSourceReview key={id} sources={sourceReview.sources.filter(row=>row.id)} confirmations={sourceReview.confirmations} online={hasBackend} onConfirm={async operation=>{
+    <PoolingSourceReview key={`PoolingSourceReview:${id}`} sources={sourceReview.sources.filter(row=>row.id)} confirmations={sourceReview.confirmations} online={hasBackend} onConfirm={async operation=>{
       await confirmPoolingSource({clientId:id,generation:state?.context?.generation || 1,...operation});setRefresh(value=>value+1)
     }} />
+    {poolingConfig().r3 && <PoolingWeeklyReview key={`PoolingWeeklyReview:${id}:${refresh}`} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts || []} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
+    {poolingConfig().r3 && <PoolingReassessment key={`PoolingReassessment:${id}`} clientId={id} online={hasBackend}/>}
+    <PoolingCatalogueAdmin key={`PoolingCatalogueAdmin:${id}`} clientId={id} online={hasBackend}/>
     <section className="card" aria-labelledby="candidate-review"><h2 id="candidate-review">Candidate catalogue review</h2>
       <label htmlFor="pool-filter">Filter by name, role or movement pattern</label><input id="pool-filter" value={filter} onChange={event => setFilter(event.target.value)} />
       <p>{filtered.length} candidate records. Eligibility: review required.</p>

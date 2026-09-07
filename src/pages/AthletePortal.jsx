@@ -22,6 +22,9 @@ import { screeningsFor, finalizeScreening } from '../lib/screening'
 import { workoutPeaks, resolveTrainingMax } from '../lib/program'
 import useGovernedWorkout from '../hooks/useGovernedWorkout'
 import GovernedWorkoutPanel from '../components/organisms/workout/GovernedWorkoutPanel'
+import PoolingClientReports from '../components/organisms/workout/PoolingClientReports'
+import PoolingGovernance from '../components/organisms/program/PoolingGovernance'
+import PoolingReassessment from '../components/organisms/program/PoolingReassessment'
 
 export default function AthletePortal() {
   const { user, signOut } = useAuth()
@@ -85,7 +88,7 @@ export default function AthletePortal() {
   }
 
   const { client } = state
-  if(poolingConfig().r1)return <main style={{maxWidth:960,margin:'auto',padding:24}}><h1>{client.name}</h1><p>{state.message}</p><GovernedWorkoutPanel workflow={poolingWorkflow} /><Button variant="ghost" onClick={signOut}>Sign out</Button></main>
+  if(poolingConfig().r1)return <main className="pooling-workspace" style={{maxWidth:960,margin:'auto',padding:24}}><h1>{client.name}</h1><p>{state.message}</p><GovernedWorkoutPanel workflow={poolingWorkflow} /><PoolingClientReports clientId={client.id} onChanged={poolingWorkflow.refresh}/><PoolingGovernance clientId={client.id} clientView onChanged={poolingWorkflow.refresh}/>{poolingConfig().r3 && <PoolingReassessment clientId={client.id}/>}<Button variant="ghost" onClick={signOut}>Sign out</Button></main>
   const readiness = readinessFor({ wellness: state.wellness, wearable: state.wearable }, client.id)
   const checkedIn = state.wellness.some((w) => w.date === today)
   const recent = [...state.wellness].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7)

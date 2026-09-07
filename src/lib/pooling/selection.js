@@ -104,7 +104,7 @@ export function selectPool({ context, catalogue, doses, manifest, request }) {
 
 export function compatibleAlternatives(input, exerciseId) {
   const original = input.catalogue.find(record => record.id === exerciseId)
-  if (!original) return []
+  if (!original || !original.familyId || !original.laterality) return []
   return selectPool(input).candidates.filter(candidate => {
     const record = input.catalogue.find(row => row.id === candidate.id)
     return candidate.id !== exerciseId && candidate.eligibility === 'eligible' && record.familyId === original.familyId && record.laterality === original.laterality

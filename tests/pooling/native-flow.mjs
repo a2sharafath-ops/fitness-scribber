@@ -4,7 +4,13 @@ import {sql,jsonSQL,literal,asActor,serviceRPC,coach,athlete} from './native-con
 import {bundle} from './source-fixture.js'
 import {createSupabaseDecisionGateway} from '../../supabase/functions/_shared/pooling-gateway.js'
 import {createDecisionService} from '../../supabase/functions/_shared/pooling-decision.js'
-const client='recovery-client-a',at=new Date().toISOString(),run=crypto.randomUUID()
+import {syntheticGovernance} from './native-governance-fixture.mjs'
+const client=process.env.FITNESS_POOLING_FLOW_CLIENT || 'recovery-client-a',at=new Date().toISOString(),run=crypto.randomUUID()
+if(client!=='recovery-client-a'){
+ if(!/^context-test-[a-f0-9-]{36}$/.test(client))throw Error('Synthetic context-test client ID required')
+ sql(`insert into public.clients(id,"coachId","userId",name) values(${literal(client)},${literal(coach)},${literal(athlete)},'Fictional context review only')`)
+}
+syntheticGovernance(client)
 const policy=bundle().modulePolicy
 const accepted=(id,extra)=>({...structuredClone(policy),id,...extra})
 const exercise=accepted('synthetic-ex',{scopes:['adult_general_fitness'],settings:['home'],levels:['beginner'],equipment:[],prerequisites:[],demands:[],roles:['main'],doseRefs:['synthetic-dose']})
@@ -33,3 +39,4 @@ assert.throws(()=>jsonSQL(asActor(`select public.pooling_execution(${assignment.
 jsonSQL(asActor(`select public.pooling_execution(${assignment.assignmentId},${generation},${literal(run+'actual')},'actual','{"occurrenceId":"synthetic-occ1","setIndex":1,"actual":0,"unit":"seconds"}')`,athlete))
 jsonSQL(asActor(`select public.pooling_execution(${assignment.assignmentId},${generation},${literal(run+'stop')},'stop','{}')`,athlete))
 console.log(JSON.stringify({test:'native source → confirmation → gateway → exact coach approval → client start/actual/stop',passed:true,draftId:draft.id,assignmentId:assignment.assignmentId,authScope:'Synthetic identity, not hosted JWT verification'}))
+export const nativeFixture={client,manifest,proposal,generation,gateway,coach,athlete,assignment}

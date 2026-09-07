@@ -49,7 +49,7 @@ do $$ declare a bigint:=current_setting('test.assignment')::bigint; begin
   raise exception 'TEST: stale resume accepted';
  exception when raise_exception then if SQLERRM<>'stale_context' then raise; end if; end;
  -- Recording performed work and stop remains possible under the new hold.
- perform public.pooling_execution(a,2,'actual-check-01','actual','{"occurrenceId":"synthetic","setIndex":1,"actual":0,"unit":"repetitions"}');
+ perform public.pooling_execution(a,2,'actual-check-01','actual','{"occurrenceId":"synthetic","setIndex":1,"actual":0,"unit":"seconds"}');
  perform public.pooling_execution(a,2,'stop-check-01','stop','{}');
 end $$;
 rollback;

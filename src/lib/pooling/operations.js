@@ -1,5 +1,6 @@
 import {canonical} from './context.js'
 export const OPERATION_KEY='fitscribe_pooling_operations_v1'
+export const DEFINITIVE_CODES=['draft_conflict','stale_context','idempotency_conflict','protected_field','invalid_proposal','invalid_parent','invalid_operation_key','forbidden','feature_disabled','source_changed','invalid_confirmation','context_held','stale_draft','decision_unavailable','content_revoked','required_gap','invalid_event','invalid_actual','invalid_transition','health_check_required','invalid_report','invalid_field','invalid_health_change','invalid_wellness','invalid_budget','invalid_equipment','correction_required','invalid_request','invalid_batch','session_expired','session_mismatch','unsupported_policy','baseline_review_required','dose_review_required','invalid_week','invalid_resolution','acceptance_required','acceptance_mismatch','invalid_release','record_not_admitted','immutable_release']
 const read=storage=>{
  const raw=storage.getItem(OPERATION_KEY)
  if(raw===null)return {schemaVersion:1,operations:[]}
@@ -25,7 +26,7 @@ export function settleOperation(storage,scope,key,receipt){
  row.receipt=structuredClone(receipt);write(storage,db)
 }
 export function rejectOperation(storage,scope,key,code){
- if(!['draft_conflict','stale_context','idempotency_conflict','protected_field','invalid_proposal','invalid_parent','invalid_operation_key','forbidden','feature_disabled','source_changed','invalid_confirmation','context_held','stale_draft','decision_unavailable','content_revoked','required_gap','invalid_event','invalid_actual','invalid_transition','health_check_required','invalid_report','invalid_field','invalid_health_change','invalid_wellness','invalid_budget','invalid_equipment'].includes(code))throw new Error('not_definitive_rejection')
+ if(!DEFINITIVE_CODES.includes(code))throw new Error('not_definitive_rejection')
  const db=read(storage),row=db.operations.find(row=>row.scope===scope && row.request.operationKey===key)
  if(!row || row.receipt)throw new Error('operation_not_pending')
  row.rejection=code;write(storage,db)

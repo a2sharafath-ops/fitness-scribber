@@ -1,6 +1,7 @@
 import {canonical,resolveContext} from './context.js'
 import {admission,resolveDose} from './selection.js'
 import {reconcileEffects,proposeProgression,reassessmentRequests} from './extensions.js'
+import {aggregatePerformances} from './performance-history.js'
 
 // Called with server-owned inputs. Browser answers never become policy constants.
 export function numericalProposal(input){
@@ -24,11 +25,13 @@ export function numericalProposal(input){
   }
   result=missing.length?{state:'information_required',effects:[],missing}:reconcileEffects({...common,signals})
  }else if(kind==='progression'){
+  const history=aggregatePerformances({performances,policy,sessionAt:context.sessionAt,knowledgeCutoff:context.knowledgeCutoff})
+  if(history.state==='unsupported_policy')return {state:'unsupported_policy',effects:[],suggestedDraft:null,assignment:null,policyId:policy.id,policyRevision:policy.revision}
   const results=baselineBlocks.map(block=>{
-   const reference={...block.dose.prescription.comparison,occurrenceId:block.occurrenceId,variantId:block.exerciseId}
-   return proposeProgression({...common,reference,performances,sessionAt:context.sessionAt,knowledgeCutoff:context.knowledgeCutoff})
+   const reference={...block.dose.prescription.comparison,occurrenceId:block.occurrenceId,variantId:block.exerciseId,variantRevision:block.exerciseRevision}
+   return proposeProgression({...common,reference,performances:history.performances,sessionAt:context.sessionAt,knowledgeCutoff:context.knowledgeCutoff})
   })
-  result={state:results.some(row=>row.state==='hold')?'hold':results.some(row=>row.state==='review_required')?'review_required':results.some(row=>row.state==='proposal')?'proposal':results.some(row=>row.state==='insufficient_evidence')?'insufficient_evidence':'no_change',effects:results.flatMap(row=>row.effects || []),comparisons:results.map((row,i)=>({occurrenceId:baselineBlocks[i].occurrenceId,...row.comparison || {state:row.state,included:row.included,excluded:row.excluded}}))}
+  result={state:results.some(row=>row.state==='hold')?'hold':results.some(row=>row.state==='unsupported_policy')?'unsupported_policy':results.some(row=>row.state==='review_required')?'review_required':results.some(row=>row.state==='proposal')?'proposal':results.some(row=>row.state==='insufficient_evidence')?'insufficient_evidence':'no_change',effects:results.flatMap(row=>row.effects || []),comparisons:results.map((row,i)=>({occurrenceId:baselineBlocks[i].occurrenceId,...row.comparison || {state:row.state,included:row.included,excluded:row.excluded}}))}
  }else throw new Error('invalid_request')
  result={...result,reassessmentRequests:reassessmentRequests(context),suggestedDraft:null,assignment:null,policyId:policy.id,policyRevision:policy.revision,baselineAssignmentId:input.baselineAssignmentId}
  if(result.state!=='proposal')return result

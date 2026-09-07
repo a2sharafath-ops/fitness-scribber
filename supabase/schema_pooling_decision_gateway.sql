@@ -24,11 +24,12 @@ declare c public.clients%rowtype; ctx public.pooling_contexts%rowtype; d public.
 begin
  select * into c from public.clients where id=target_client for update;
  if not found or verified_actor is null or c."coachId" is distinct from verified_actor then raise exception 'forbidden'; end if;
- if not (select r1 from public.pooling_runtime where singleton) then raise exception 'feature_disabled'; end if;
+ if (select r1 from public.pooling_runtime where singleton) is distinct from true then raise exception 'feature_disabled'; end if;
  select * into ctx from public.pooling_contexts where client_id=target_client for update;
  if not found then raise exception 'source_unavailable'; end if;
  select * into d from public.pooling_drafts where id=target_draft and client_id=target_client;
  if not found or d.context_generation<>ctx.generation then raise exception 'stale_context'; end if;
+ if exists(select 1 from public.pooling_drafts child where child.parent_id=d.id) then raise exception 'stale_draft';end if;
  select * into s from public.pooling_source_snapshots where draft_id=target_draft and client_id=target_client for share;
  if not found or not s.verified or s.generation<>ctx.generation or s.valid_until<=clock_timestamp() then raise exception 'source_unavailable'; end if;
  select * into m from public.pooling_manifests where id=s.manifest_id for share;

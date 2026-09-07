@@ -26,15 +26,17 @@ begin
    'targetProposal',(select proposal from public.pooling_drafts where id=target_draft),'catalogue',snapshot->'catalogue','doses',snapshot->'doses',
    'baselineBlocks',v.result->'blocks','baselineRevision',a.draft_id,'baselineAssignmentId',a.id,
    'completedOccurrences',(select coalesce(jsonb_agg(distinct e.payload->>'occurrenceId'),'[]') from public.pooling_execution_events e where e.assignment_id=a.id and e.kind='actual'),
-   'performances',(select coalesce(jsonb_agg(jsonb_build_object('id',e.id::text,'lineageId',e.id::text,'variantId',b->>'exerciseId','side',coalesce(e.payload->>'side','not_applicable'),
+   'performances',(select coalesce(jsonb_agg(jsonb_build_object('id',e.id::text,'lineageId',e.id::text,'assignmentId',aa.id,'occurrenceId',e.payload->>'occurrenceId','setIndex',e.payload->'setIndex','expectedSets',b->'dose'->'prescription'->'sets',
+      'variantId',b->>'exerciseId','variantRevision',b->'exerciseRevision','side',coalesce(e.payload->>'side','not_applicable'),'loadBasis',case when b->'dose'->'prescription'->'loadKg'='null'::jsonb then '"no_external_load"'::jsonb else jsonb_build_object('unit','kg','value',e.payload->'loadKg') end,
       'range',b->'dose'->'prescription'->'comparison'->'range','equipment',b->'dose'->'prescription'->'comparison'->'equipment','unit',e.payload->>'unit',
       'method',b->'dose'->'prescription'->'comparison'->'method','assistance',b->'dose'->'prescription'->'comparison'->'assistance',
-      'actual',e.payload->'actual','quality','confirmed','effortConfirmed',e.payload ?& array['effort','effortMethod'],
-      'complete',exists(select 1 from public.pooling_execution_events done where done.assignment_id=aa.id and done.kind='complete'),
+      'actual',e.payload->'actual','quality','confirmed','effortConfirmed',e.payload ?& array['effort','effortMethod'] and nullif(b->'dose'->'prescription'->'comparison'->>'effortMethod','') is not null and e.payload->>'effortMethod'=b->'dose'->'prescription'->'comparison'->>'effortMethod',
+      'complete',exists(select 1 from public.pooling_execution_events done where done.assignment_id=aa.id and done.kind='complete' and done.recorded_at<=(snapshot->'contextInput'->>'knowledgeCutoff')::timestamptz),
       'effectiveAt',coalesce(e.payload->>'performedAt',e.recorded_at::text),'recordedAt',e.recorded_at)),'[]')
     from public.pooling_assignments aa join public.pooling_decisions vv on vv.id=aa.decision_id join public.pooling_execution_events e on e.assignment_id=aa.id
     cross join lateral jsonb_array_elements(vv.result->'blocks') b where aa.client_id=target_client and e.kind='actual' and b->>'occurrenceId'=e.payload->>'occurrenceId'
-     and not exists(select 1 from public.pooling_execution_events correction where correction.assignment_id=aa.id and correction.payload->>'supersedes'=e.id::text)),
+     and e.recorded_at<=(snapshot->'contextInput'->>'knowledgeCutoff')::timestamptz
+     and not exists(select 1 from public.pooling_execution_events correction where correction.assignment_id=aa.id and correction.payload->>'supersedes'=e.id::text and correction.recorded_at<=(snapshot->'contextInput'->>'knowledgeCutoff')::timestamptz)),
    'sourceToken',snapshot->>'sourceToken');
  return result||jsonb_build_object('extensionToken',encode(sha256(convert_to(result::text,'UTF8')),'hex'));
 end $$;

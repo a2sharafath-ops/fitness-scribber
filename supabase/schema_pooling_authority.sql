@@ -71,6 +71,11 @@ begin
    if a.draft_id is distinct from pooling_approve.draft_id or a.decision_id is distinct from pooling_approve.decision_id or a.context_generation is distinct from expected_generation then raise exception 'idempotency_conflict'; end if;
    return jsonb_build_object('assignmentId',a.id,'draftId',a.draft_id,'approvedAt',a.approved_at,'status','committed');
  end if;
+ select * into a from public.pooling_assignments x where x.coach_id=actor and x.client_id=target_client and x.draft_id=pooling_approve.draft_id;
+ if found then
+   if a.decision_id is distinct from pooling_approve.decision_id or a.context_generation is distinct from expected_generation then raise exception 'draft_conflict';end if;
+   return jsonb_build_object('assignmentId',a.id,'draftId',a.draft_id,'approvedAt',a.approved_at,'status','committed');
+ end if;
  if (select r1 from public.pooling_runtime where singleton) is distinct from true then raise exception 'feature_disabled'; end if;
  select * into ctx from public.pooling_contexts where client_id=target_client for update;
  if not found or ctx.generation is distinct from expected_generation then raise exception 'stale_context'; end if;
@@ -96,7 +101,7 @@ create or replace function public.pooling_execution(
 ) returns jsonb language plpgsql security definer set search_path='' as $$
 declare a public.pooling_assignments%rowtype; c public.clients%rowtype; ctx public.pooling_contexts%rowtype;
  v public.pooling_decisions%rowtype; m public.pooling_manifests%rowtype; prior public.pooling_execution_events%rowtype;
- last_kind text; event_id bigint; actor uuid:=auth.uid(); session_source public.pooling_source_snapshots%rowtype; target_block jsonb;
+ last_kind text; event_id bigint; actor uuid:=auth.uid(); session_source record; target_block jsonb;
 begin
  if actor is null then raise exception 'forbidden'; end if;
  select * into a from public.pooling_assignments x where x.id=pooling_execution.assignment_id;
@@ -116,7 +121,7 @@ begin
      or event_payload->>'unit' not in ('repetitions','seconds') or event_payload->>'unit' is null then raise exception 'invalid_actual'; end if;
    if event_payload ? 'loadKg' and (jsonb_typeof(event_payload->'loadKg') is distinct from 'number' or (event_payload->>'loadKg')::numeric<0) then raise exception 'invalid_actual'; end if;
    if event_payload ?| array['effort','effortMethod'] and (jsonb_typeof(event_payload->'effort') is distinct from 'number' or jsonb_typeof(event_payload->'effortMethod') is distinct from 'string' or length(trim(event_payload->>'effortMethod')) not between 1 and 100) then raise exception 'invalid_actual'; end if;
-   if event_payload ? 'performedAt' and ((event_payload->>'performedAt')::timestamptz>clock_timestamp() or not isfinite((event_payload->>'performedAt')::timestamptz)) then raise exception 'invalid_actual'; end if;
+   if event_payload ? 'performedAt' and (jsonb_typeof(event_payload->'performedAt') is distinct from 'string' or (event_payload->>'performedAt')::timestamptz>clock_timestamp() or not isfinite((event_payload->>'performedAt')::timestamptz)) then raise exception 'invalid_actual'; end if;
  else
    if event_payload<>'{}'::jsonb then raise exception 'protected_field'; end if;
  end if;
@@ -155,10 +160,13 @@ begin
    if event_payload ? 'performedAt' and ((event_payload->>'performedAt')::timestamptz < (select min(recorded_at) from public.pooling_execution_events e where e.assignment_id=a.id and e.kind='start')
      or (last_kind in ('stop','complete') and (event_payload->>'performedAt')::timestamptz > (select max(recorded_at) from public.pooling_execution_events e where e.assignment_id=a.id and e.kind in ('stop','complete')))) then raise exception 'invalid_actual'; end if;
    if event_payload ? 'supersedes' then
-     if jsonb_typeof(event_payload->'supersedes') is distinct from 'number' or jsonb_typeof(event_payload->'correctionReason') is distinct from 'string' or length(trim(event_payload->>'correctionReason')) not between 1 and 1000 then raise exception 'invalid_actual'; end if;
+     if jsonb_typeof(event_payload->'supersedes') is distinct from 'number' or (event_payload->>'supersedes')::numeric<1 or (event_payload->>'supersedes')::numeric<>trunc((event_payload->>'supersedes')::numeric)
+       or jsonb_typeof(event_payload->'correctionReason') is distinct from 'string' or length(trim(event_payload->>'correctionReason')) not between 1 and 1000 then raise exception 'invalid_actual'; end if;
      if not exists(select 1 from public.pooling_execution_events e where e.id=(event_payload->>'supersedes')::bigint and e.assignment_id=a.id and e.kind='actual'
         and e.payload->>'occurrenceId'=event_payload->>'occurrenceId' and e.payload->>'setIndex'=event_payload->>'setIndex' and coalesce(e.payload->>'side','not_applicable')=coalesce(event_payload->>'side','not_applicable'))
         or exists(select 1 from public.pooling_execution_events e where e.assignment_id=a.id and e.payload->>'supersedes'=event_payload->>'supersedes') then raise exception 'invalid_actual'; end if;
+   elsif exists(select 1 from public.pooling_execution_events e where e.assignment_id=a.id and e.kind='actual' and e.payload->>'occurrenceId'=event_payload->>'occurrenceId'
+     and e.payload->>'setIndex'=event_payload->>'setIndex' and coalesce(e.payload->>'side','not_applicable')=coalesce(event_payload->>'side','not_applicable')) then raise exception 'correction_required';
    end if;
  end if;
  insert into public.pooling_execution_events(assignment_id,actor_id,kind,payload,operation_key)

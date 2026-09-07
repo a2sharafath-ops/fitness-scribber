@@ -72,18 +72,22 @@ declare
   prior public.pooling_reports%rowtype; report_id bigint; actor uuid := auth.uid();
 begin
   if actor is null then raise exception 'forbidden'; end if;
-  if not (select r1 from public.pooling_runtime where singleton) then raise exception 'feature_disabled'; end if;
+  if (select r1 from public.pooling_runtime where singleton) is distinct from true then raise exception 'feature_disabled'; end if;
   select * into c from public.clients where id=target_client for update;
   if not found or (c."coachId" is distinct from actor and c."userId" is distinct from actor) then raise exception 'forbidden'; end if;
   if length(operation_key) not between 8 and 200 or operation_key is null then raise exception 'invalid_operation_key'; end if;
   if report_field is null or report_field not in ('healthChange','sleep','stress','fatigue','soreness','equipment','budgetSeconds') then raise exception 'invalid_field'; end if;
-  if report_value is null or report_value='null'::jsonb or effective_at is null or effective_at > clock_timestamp() then raise exception 'invalid_report'; end if;
+  if report_value is null or report_value='null'::jsonb or octet_length(report_value::text)>16384 or effective_at is null or not isfinite(effective_at) or effective_at > clock_timestamp() then raise exception 'invalid_report'; end if;
   if report_field='healthChange' and report_value not in ('"changed"'::jsonb,'"no_change"'::jsonb,'"declined"'::jsonb) then raise exception 'invalid_health_change'; end if;
   if report_field in ('sleep','stress','fatigue','soreness') and
     (jsonb_typeof(report_value)<>'number' or report_value::text::numeric < 1 or report_value::text::numeric > 7 or trunc(report_value::text::numeric) <> report_value::text::numeric)
     then raise exception 'invalid_wellness'; end if;
   if report_field='budgetSeconds' and (jsonb_typeof(report_value)<>'number' or report_value::text::numeric <= 0) then raise exception 'invalid_budget'; end if;
   if report_field='equipment' and jsonb_typeof(report_value)<>'array' then raise exception 'invalid_equipment'; end if;
+  if report_field='equipment' then
+   if exists(select 1 from jsonb_array_elements(report_value) v where jsonb_typeof(v)<>'string' or length(trim(v #>> '{}')) not between 1 and 100)
+      or (select count(distinct v) from jsonb_array_elements(report_value) v)<>jsonb_array_length(report_value) then raise exception 'invalid_equipment';end if;
+  end if;
   select * into prior from public.pooling_reports r where r.client_id=target_client and r.actor_id=actor and r.operation_key=pooling_submit_report.operation_key;
   if found then
     if prior.field<>report_field or prior.value<>report_value or prior.effective_at<>pooling_submit_report.effective_at then raise exception 'idempotency_conflict'; end if;
@@ -110,7 +114,7 @@ declare
   parent public.pooling_drafts%rowtype; draft_id bigint; actor uuid := auth.uid(); next_revision bigint := 1;
 begin
   if actor is null then raise exception 'forbidden'; end if;
-  if not (select r1 from public.pooling_runtime where singleton) then raise exception 'feature_disabled'; end if;
+  if (select r1 from public.pooling_runtime where singleton) is distinct from true then raise exception 'feature_disabled'; end if;
   select * into c from public.clients where id=target_client for update;
   if not found or c."coachId" is distinct from actor then raise exception 'forbidden'; end if;
   if operation_key is null or length(operation_key) not between 8 and 200 then raise exception 'invalid_operation_key'; end if;

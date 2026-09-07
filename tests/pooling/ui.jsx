@@ -1,0 +1,12 @@
+// DEV-only component fixture: not an authentication or database integration test.
+import React,{useState} from 'react'
+import GovernedWorkoutPanel from '../../src/components/organisms/workout/GovernedWorkoutPanel'
+import '../../src/index.css'
+export function Preview(){const [width,setWidth]=useState(390);return <main><h1>Synthetic component viewport checks</h1><p>No real data, backend connection or clinical values.</p><button onClick={()=>setWidth(390)}>Phone viewport (390px)</button><button onClick={()=>setWidth(1280)}>Desktop viewport (1280px)</button><iframe title="Synthetic client runner" src="/tests/pooling/ui.html?frame=1" style={{display:'block',width,height:1000,maxWidth:'100%',border:'1px solid #777'}}/></main>}
+export function Fixture(){
+ const [status,setStatus]=useState('ready'),[sessionStatus,setSessionStatus]=useState('assigned'),[actuals,setActuals]=useState([]),[stopped,setStopped]=useState([]),[pending,setPending]=useState(null),[last,setLast]=useState('None'),[fail,setFail]=useState(false)
+ const assignment={id:1,date:'Fictional test date',draftId:1,contextGeneration:1,status:sessionStatus,stale:false,held:false,actuals,blocks:[{occurrenceId:'fictional-only',role:'fictional test',exerciseId:'not-an-exercise',prescription:{sets:1,workSeconds:1,restSeconds:0,sideMultiplier:2,mode:'timed',loadKg:null}}]}
+ function execute(a,kind,payload){setLast(JSON.stringify({kind,payload}));if(kind==='stop'){setStopped([a.id]);setSessionStatus('stop');setStatus('ready');return}if(fail){setStatus('outcome_unknown');setPending({kind,payload});return}if(kind==='actual')setActuals(rows=>[...rows,{id:rows.length+1,...payload,recordedAt:new Date().toISOString()}]);else setSessionStatus(kind);setStatus('ready')}
+ const workflow={assignments:[assignment],status,stopped,pending,error:pending?'Synthetic response-loss fixture — reconcile before continuing.':'',refresh:()=>setLast('Synthetic refresh'),execute,reportHealth:(_,value)=>{setStopped([1]);setLast('Synthetic report: '+value)},retry:()=>{setPending(null);setStatus('ready');setLast('Synthetic retry reconciled')}}
+ return <main className="pooling-workspace" style={{padding:16,maxWidth:960,margin:'auto'}}><h1>Synthetic runner only</h1><p>Engineering fixture — no live authority, actual workout or exercise guidance.</p><label><input type="checkbox" checked={fail} onChange={e=>setFail(e.target.checked)}/>Simulate unknown save outcome</label><GovernedWorkoutPanel workflow={workflow}/><output aria-label="Synthetic last operation">{last}</output></main>
+}

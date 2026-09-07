@@ -2,6 +2,13 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createSupabaseDecisionGateway } from '../../supabase/functions/_shared/pooling-gateway.js'
 import {bundle} from './source-fixture.js'
+test('definitive superseded draft is distinct from a private-source outage',async()=>{
+ for(const code of ['stale_draft','PRIVATE_CONNECTION_DETAIL']){
+  const serviceClient={rpc:async(name)=>name==='pooling_source_bundle'?{data:{...bundle(),sourceBundleToken:'fictional-token'}}:name==='pooling_store_source_snapshot'?{data:{}}:{error:{message:code}}}
+  const gateway=createSupabaseDecisionGateway({userClient:{auth:{getUser:async()=>({data:{user:{id:'coach'}}})}},serviceClient})
+  await gateway.authenticatedActor();await assert.rejects(()=>gateway.loadSnapshot('c',1),new RegExp(code==='stale_draft'?'stale_draft':'source_unavailable'))
+ }
+})
 test('gateway does not trust a cached/unverified session',async()=>{
  const gateway=createSupabaseDecisionGateway({userClient:{auth:{getUser:async()=>({data:{user:{id:'x'}},error:{message:'expired'}})}},serviceClient:{}})
  assert.equal(await gateway.authenticatedActor(),null);assert.equal(await gateway.ownsClient('x','c'),false)

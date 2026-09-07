@@ -43,13 +43,14 @@ export function buildSourceSnapshot(bundle) {
   const relianceExpiries=requirements.filter(row=>row.required).flatMap(requirement=>
     (preliminary.facts[requirement.key]?.refs || []).map(id=>observations.find(row=>row.id===id)).filter(Boolean)
       .map(row=>Date.parse(row.effectiveAt)+requirement.maxAgeSeconds*1000)).filter(Number.isFinite)
+  if(Number.isFinite(Date.parse(bundle.authorityValidUntil)))relianceExpiries.push(Date.parse(bundle.authorityValidUntil))
   contextInput.relianceExpiresAt=relianceExpiries.length?new Date(Math.min(...relianceExpiries)).toISOString():null
   const authorityValue=key=>{
     const fact=preliminary.facts[modulePolicy.authorityKeys[key]]
     return fact?.state==='usable'?fact.value:null
   }
   contextInput.adultConfirmed=authorityValue('adult')===true
-  contextInput.purposePermitted=authorityValue('purpose')===true
+  contextInput.purposePermitted=authorityValue('purpose')===true && bundle.purposeAuthority===true
   contextInput.healthChange=authorityValue('health')
   const equipment=authorityValue('equipment')
   const sessionRequest={...structuredClone(session.request),scope:modulePolicy.scope,equipmentConfirmed:Array.isArray(equipment),equipment:Array.isArray(equipment)?equipment:[]}

@@ -5,7 +5,9 @@ import {bundle} from './source-fixture.js'
 import {createSupabaseDecisionGateway} from '../../supabase/functions/_shared/pooling-gateway.js'
 import {createDecisionService} from '../../supabase/functions/_shared/pooling-decision.js'
 import {createNumericalService} from '../../supabase/functions/_shared/pooling-numerical.js'
+import {syntheticGovernance} from './native-governance-fixture.mjs'
 const client='recovery-client-a',at=new Date().toISOString(),run=crypto.randomUUID(),modulePolicy=bundle().modulePolicy
+syntheticGovernance(client)
 modulePolicy.requiredFields.push('fictional-signal');modulePolicy.requirements.push({key:'fictional-signal',source:'clients',required:true,unit:'fixture',protocol:'explicit-v1',maxAgeSeconds:60})
 const accepted=(id,extra)=>({...structuredClone(modulePolicy),id,...extra})
 const exercise=accepted('synthetic-extension-ex',{scopes:['adult_general_fitness'],settings:['home'],levels:['beginner'],equipment:[],prerequisites:[],demands:[],roles:['main'],doseRefs:['synthetic-extension-dose','synthetic-extension-dose-two']})

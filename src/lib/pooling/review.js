@@ -1,7 +1,7 @@
 import {canonical} from './context.js'
 
 // A canonical proposal is still untrusted. Only a server decision can authorize it.
-export function canonicalProposal({date,sessionAt,timeZone,manifestId,request,selection,notes=''}) {
+export function canonicalProposal({date,sessionAt,timeZone,manifestId,request,selection,notes='',allowEmpty=false}) {
   const at=Date.parse(sessionAt)
   if(!Number.isFinite(at) || !/(Z|[+-]\d{2}:\d{2})$/.test(sessionAt) || !/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('An explicit session date and time with UTC offset are required.')
   let localDate
@@ -9,7 +9,7 @@ export function canonicalProposal({date,sessionAt,timeZone,manifestId,request,se
   if(localDate!==date)throw new Error('Session time and date must agree in the selected timezone.')
   if(typeof manifestId!=='string' || !manifestId)throw new Error('Select a catalogue release.')
   if(!request || !['gym','home','travel'].includes(request.setting) || !['beginner','intermediate','advanced'].includes(request.level) || !Number.isFinite(request.budgetSeconds) || request.budgetSeconds<=0 || !Array.isArray(request.roles) || !request.roles.length || new Set(request.roles.map(row=>row.id)).size!==request.roles.length)throw new Error('Complete the setting, level, time budget and required roles.')
-  if(!Array.isArray(selection) || !selection.length || new Set(selection.map(row=>row.occurrenceId)).size!==selection.length)throw new Error('Add distinct exercise occurrences.')
+  if(!Array.isArray(selection) || (!selection.length && !allowEmpty) || new Set(selection.map(row=>row.occurrenceId)).size!==selection.length)throw new Error('Add distinct exercise occurrences.')
   for(const row of selection){
     if(!row.occurrenceId || !row.exerciseId || !Number.isSafeInteger(row.exerciseRevision) || row.exerciseRevision<1 || !row.doseId || !Number.isSafeInteger(row.doseRevision) || row.doseRevision<1 || !request.roles.some(role=>role.id===row.role))throw new Error('Every exercise needs an exact variant, dose revision and role.')
   }
