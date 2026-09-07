@@ -1,0 +1,366 @@
+{
+  "packageId": "FS-POOL-S1S2-0.2",
+  "productionEnabled": false,
+  "mappings": [
+    {
+      "id": "MAP-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-03",
+      "observation": "Squat observation present on recorded side",
+      "needRefs": [
+        "NEED-09"
+      ],
+      "outcome": "hypothesis",
+      "confirmation": "Coach confirms functional squat goal/task limitation and comparable assessment; do not infer muscle pathology.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-03",
+      "observation": "Knee/foot alignment observation",
+      "needRefs": [
+        "NEED-03",
+        "NEED-08",
+        "NEED-09"
+      ],
+      "outcome": "hypothesis",
+      "confirmation": "Assess relevant task/range/support and confirm only needed targets; one observation does not mandate three drills.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-03",
+      "observation": "Trunk position/control observation",
+      "needRefs": [
+        "NEED-06",
+        "NEED-10"
+      ],
+      "outcome": "hypothesis",
+      "confirmation": "Confirm task-specific control or hinge practice need; no diagnosis of weak core or shortened tissue.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-03",
+      "observation": "Arm elevation/shoulder observation",
+      "needRefs": [
+        "NEED-05"
+      ],
+      "outcome": "hypothesis",
+      "confirmation": "Confirm overhead task goal, permitted range and skill before matching; no universal lat/pectoral release.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-04",
+      "observation": "Legacy pattern score entered",
+      "needRefs": [
+        "NEED-09",
+        "NEED-10",
+        "NEED-11",
+        "NEED-12",
+        "NEED-13"
+      ],
+      "outcome": "context_only",
+      "confirmation": "Coach identifies corresponding pattern and confirms target; do not activate all listed needs or translate score to new protocol.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-06",
+      "observation": "Measured ankle range with side and unit",
+      "needRefs": [
+        "NEED-03"
+      ],
+      "outcome": "confirmation_required",
+      "confirmation": "Comparable protocol and task relevance required; no universal normal cutoff adopted.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-06",
+      "observation": "Measured overhead range with side and unit",
+      "needRefs": [
+        "NEED-05"
+      ],
+      "outcome": "confirmation_required",
+      "confirmation": "Range alone does not prove loading tolerance; confirm task goal and restrictions.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-08",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-08",
+      "observation": "New/worsening pain or functional concern",
+      "needRefs": [],
+      "outcome": "review_only",
+      "confirmation": "Route POL-005; no pain severity-to-exercise or dose mapping.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-09",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-09",
+      "observation": "Short sleep/high reported stress/inactivity",
+      "needRefs": [],
+      "outcome": "coach_context",
+      "confirmation": "Discuss schedule/preferences and sustainable planning; no R1 dosage multiplier or inferred clearance.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-10",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-10",
+      "observation": "Coach confirms strength/general-fitness goal",
+      "needRefs": [
+        "NEED-09",
+        "NEED-10",
+        "NEED-12",
+        "NEED-13"
+      ],
+      "outcome": "coach_selected_subset",
+      "confirmation": "Use GOAL-01/02 and chosen session patterns; these are not mandatory for every individual.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-11",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-14",
+      "observation": "Confirmed chair-rise task goal",
+      "needRefs": [
+        "NEED-02",
+        "NEED-09"
+      ],
+      "outcome": "confirmed_task",
+      "confirmation": "Share source lineage and avoid double-counting the same task; preserve support requirement.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-12",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-14",
+      "observation": "Confirmed step/lateral task goal",
+      "needRefs": [
+        "NEED-08",
+        "NEED-11"
+      ],
+      "outcome": "confirmed_task",
+      "confirmation": "Choose specific target/side; confirm step height, rail and transfer access.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-13",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-14",
+      "observation": "Confirmed seated reach goal",
+      "needRefs": [
+        "NEED-20"
+      ],
+      "outcome": "confirmed_task",
+      "confirmation": "Record balance boundary and required support; no assumption all seated clients share it.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-14",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-15",
+      "observation": "Clinician-defined permitted task",
+      "needRefs": [],
+      "outcome": "clinical_review_only",
+      "confirmation": "Translate only accepted scoped instructions after authority/ambiguity review; no generic diagnosis lookup.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-15",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-03",
+      "observation": "Finding explicitly absent on comparable reassessment",
+      "needRefs": [],
+      "outcome": "scoped_resolution",
+      "confirmation": "Resolve only the same finding/side/lineage when source policy permits; never an unrelated clinical restriction.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-16",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-03",
+      "observation": "Finding omitted, unchecked, invalid or different protocol",
+      "needRefs": [],
+      "outcome": "no_resolution",
+      "confirmation": "Retain prior unresolved evidence as appropriate; missing is not assessed absence.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-17",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-05",
+      "observation": "Current same-variant strength reference",
+      "needRefs": [],
+      "outcome": "dose_context_only",
+      "confirmation": "Link to DOSE-02/03 after method/date/effort validation; cannot create a clinical permission or transfer percentages.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    },
+    {
+      "id": "MAP-18",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "protocolRef": "PRO-10",
+      "observation": "Client opts for SMR or stretching",
+      "needRefs": [
+        "NEED-18"
+      ],
+      "outcome": "preference_requires_review",
+      "confirmation": "Confirm reviewed site, pressure/range and permission; preference alone does not admit the candidate.",
+      "sideRule": "Carry original side; clinician/coach must explicitly establish target and execution side.",
+      "confidenceRule": "No numeric certainty inferred; hypothesis and confirmed task remain different states."
+    }
+  ]
+}

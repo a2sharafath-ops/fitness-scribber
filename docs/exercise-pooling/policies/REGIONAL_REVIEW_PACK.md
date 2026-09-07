@@ -1,0 +1,44 @@
+# Regional privacy and service-scope review pack
+
+FP-117 / FP-214 · v0.2 · research and review dossiers, not approved client notices or launch clearance. Sources checked 2026-09-05; verify again for actual activation. Primary references and verification limitations are in C12. Operator establishment and exact launch markets remain unknown.
+
+## Recommended activation approach
+
+Design for all requested markets; activate one well-defined country/service/cohort first after the operator's actual establishment, competence, insurance, provider arrangements and local review are known. Do not choose India merely from a timezone or the market list. GCC is six distinct jurisdictions; Europe is not one legal regime; the USA requires state-specific scope. This preparation supplies the country dossiers and a procedure for unspecified markets, not a claim that all possible European countries or US states have been legally cleared.
+
+No initial rehabilitation launch is assumed. Review whether the actual service constitutes ordinary fitness coaching, regulated clinical activity, telehealth or medical-device-related functionality in the relevant locations. The app's proposed claims stay coaching decision support. A disclaimer or consent form does not expand professional authority.
+
+## Country dossiers — all acceptance pending
+
+| Market | Primary reference | Review questions / release blockers |
+|---|---|---|
+| India | [MeitY DPDP Rules publication index](https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa?pageTitle=Digital-Personal-Data-Protection-Rules-2025) | Verify phased commencement, corrigendum and any operative IT/SPDI requirements at launch. Determine operator role, notice/consent/rights process, grievance contact, security/incident duties, processors/transfers and applicable service/professional obligations. Do not treat the 2025 publication date as proof all provisions are effective. |
+| UAE | [Government data-protection overview](https://u.ae/en/about-the-uae/digital-uae/data/data-protection-laws) | Identify mainland, DIFC, ADGM or other relevant regime and client/service location; assess whether health-sector ICT rules apply. Verify professional/service permissions, hosting/localization and transfer constraints before selecting deployment regions. General consent does not settle health-sector classification. |
+| Saudi Arabia | [SDAIA knowledge centre](https://dgp.sdaia.gov.sa/wps/portal/pdp/knowledgecenter/) | Obtain current PDPL, implementing and transfer regulations; confirm territorial reach, health-data processing duties, relevant registration/representative requirements if applicable, service authority, notice/rights and incident procedure. Record actual hosting and subprocessors. |
+| Bahrain | [Official Law 30/2018 publication](https://www.pdp.gov.bh/en/assets/pdf/regulations.pdf) | Review sensitive health information, consent/other permitted grounds, any applicable authorization/notification requirements, implementing decisions, transfers and service scope. Verify current authoritative-language text and required complaint/contact arrangements. |
+| Kuwait | [CITRA decision 26/2024](https://www.citra.gov.kw/sites/ar/Pages/DecisionsDetails.aspx?id=6) | Determine scope of the current regulation for this app/operator and its ICT providers. Decision 26/2024 replaces 42/2021 and amendments; do not rely on the older publicly available English PDF alone. Obtain current text/translation review and resolve consent, processors/transfers and professional-service obligations. |
+| Oman | [MTCIT personal-data governance](https://www.mtcit.gov.om/sectors/governance/personal) | Check Law 6/2022 and regulation 34/2024, including Article 5 health-data permit applicability/exceptions and transfer assessment. Resolve operator/recipient duties, permitted service scope and complaints/rights arrangements. A policy draft is not a permit. |
+| Qatar | [NCSA special-nature processing guidance](https://assurance.ncsa.gov.qa/sites/default/files/library/2022-12/Special%20Nature%20Processing%20-%20Guideline%20for%20Regulated%20Entities.pdf) | Review health-data/special-nature permission under the applicable regime, mainland/QFC context and international processing. Confirm authoritative Arabic law against unofficial English translations and obtain current regulator guidance; identify professional-service authority and rights/contact disclosures. |
+| USA | [HHS health-app resources](https://www.hhs.gov/hipaa/for-professionals/special-topics/health-apps/index.html), [FTC breach guidance](https://www.ftc.gov/business-guidance/resources/complying-ftcs-health-breach-notification-rule-0), [Washington example](https://www.atg.wa.gov/protecting-washingtonians-personal-health-data-and-privacy) | Determine actual HIPAA entity/business-associate relationships; assess FTC and applicable state consumer-health/privacy duties separately. Name states served, including remote-client locations; review service/licensing and claims. No HIPAA/GDPR-style universal US consent form or one incident deadline is assumed. Washington is an example, not a full state inventory. |
+| UK | [ICO special-category guidance](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/a-guide-to-lawful-basis/special-category-data/) | Record the general lawful basis and health-data condition separately. Check current guidance and relevant Data (Use and Access) Act 2025 commencement changes; determine transfer arrangements, representative/DPO/impact-assessment obligations if applicable and professional-service scope. |
+| EU/EEA | [GDPR official text](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng) | Identify exact countries and territorial reach; assign purposes/bases and health-data condition; resolve controller/processor relationships, rights, safeguards, impact-assessment and transfer requirements. Check national health/professional/consumer rules and any representative/DPO obligations. Do not assume a solo coach qualifies for every healthcare exception. |
+| Other Europe | Country not yet chosen | For each proposed country, obtain regulator/statute anchors, scope and professional-service review, health-data condition, cross-border requirements, rights/complaints and accessible language. Examples such as Switzerland or Türkiye are not silently included or approved; select exact markets first. |
+
+## Regional notice addendum — completed review structure, facts pending
+
+Create one approved addendum per enabled jurisdiction/service, linked to the shared core notice. Required fields:
+
+1. Country/service scope; controller/operator name, establishment, address and monitored contact; local representative or complaint contact only if applicable and actually appointed.
+2. Necessary/optional data and purpose table, with the selected lawful basis and additional health-data condition where required. State consequences of declining without coercing optional sharing.
+3. Recipient/processor schedule with actual regions and any applicable approved transfer/localization arrangement; identify professional recipients separately.
+4. Applicable rights, request route, identity-verification method, legal response timing/exceptions and regulator complaint link. Do not promise a universal deadline.
+5. Approved retention periods/triggers/exceptions and incident-response process; accessible language/version and actual consent evidence mechanism where applicable.
+6. Service/professional boundaries and remote-client location procedure; market enablement decision and exact build/content/policy versions.
+
+Proposed client-facing skeleton (not for publication): “For clients receiving [SERVICE] in [JURISDICTION], [LEGAL OPERATOR] processes [DATA] for [PURPOSES] under [REVIEWED BASES/CONDITIONS]. [NAMED PROVIDERS/RECIPIENTS] process it in [VERIFIED LOCATIONS] under [APPLICABLE ARRANGEMENTS]. You can make [APPLICABLE RIGHTS] requests at [MONITORED ROUTE] and complain to [REGULATOR]. See [APPROVED RETENTION] and [CHOICE/WITHDRAWAL ROUTE].” Every bracket is a blocking fact, not hidden boilerplate.
+
+## Review handback per market
+
+Record named qualified reviewer and scope; source versions/language; applicability conclusion with reasons; service authority/insurance evidence where relevant; processing/transfer decisions; approved notice/form versions; incident/rights procedure; unresolved conditions; accepted or rejected activation; date and triggers for re-review. No decisions or signatures have been supplied. Client location changes require an applicability check before offering newly regulated services; the app must not silently make a worldwide legal promise.
+
+This pack completes S2 research preparation for the named design markets, with exact-state/country research explicitly scoped to the future activation decision. It does not complete professional legal review or certify current-app compliance.

@@ -1,0 +1,368 @@
+{
+  "packageId": "FS-POOL-FULL-PREP-0.3",
+  "artifact": "C10",
+  "release": "R3",
+  "version": "0.1",
+  "productionEnabled": false,
+  "implementationAuthorized": false,
+  "reviewStatus": "draft",
+  "approvalEvidence": [],
+  "sourceBasis": "Original procedural proposals grounded in existing P01–P04 contracts and C12 reference limitations. No new validated medical threshold or condition-specific dose is claimed.",
+  "parameters": [
+    {
+      "name": "comparabilityPolicy",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "evidenceWindow",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "minimumComparableEvidence",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "successCriteria",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "permittedFields",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "progressionBounds",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "difficultyCriteria",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "regressionBounds",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "adjustmentComparisonPolicy",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "roundingPolicy",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "reassessmentTriggers",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "weeklyStructure",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "distributionLimits",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "recoveryConstraints",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    },
+    {
+      "name": "conflictPolicy",
+      "value": null,
+      "status": "professional/product-review-required",
+      "scope": "Must be defined by accepted population/task policy before dependent numerical or clinical behavior; no default is inferred."
+    }
+  ],
+  "rules": [
+    {
+      "id": "PG-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Comparable history",
+      "when": "variant/side/range/equipment/method differs",
+      "result": "incompatible_history",
+      "action": "Exclude incompatible comparison; preserve original evidence and explain difference.",
+      "parameterRefs": [
+        "comparabilityPolicy"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Evidence sufficiency",
+      "when": "too little confirmed comparable history under accepted policy",
+      "result": "insufficient_evidence",
+      "action": "No invented performance window or progression; request appropriate evidence.",
+      "parameterRefs": [
+        "evidenceWindow",
+        "minimumComparableEvidence"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Successful performance",
+      "when": "accepted success criteria met and current eligibility usable",
+      "result": "bounded_progression",
+      "action": "Propose only permitted field/increment within bounds; coach may retain current plan.",
+      "parameterRefs": [
+        "successCriteria",
+        "permittedFields",
+        "progressionBounds"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Task difficulty",
+      "when": "confirmed non-symptom difficulty under accepted ordinary-training policy",
+      "result": "bounded_regression_or_review",
+      "action": "Differentiate skill/load issue from logistics; no automatic diagnosis.",
+      "parameterRefs": [
+        "difficultyCriteria",
+        "regressionBounds"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Symptoms or new restriction",
+      "when": "new/worsening report or active clinical restriction",
+      "result": "hold_or_review",
+      "action": "No progression or lighter-load workaround replaces appropriate clinical review.",
+      "parameterRefs": [],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Logistical non-completion",
+      "when": "travel, time, equipment or scheduling skip reported",
+      "result": "logistics_context",
+      "action": "Not evidence of inability; no accumulated catch-up volume.",
+      "parameterRefs": [],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Adjusted-session history",
+      "when": "R2 changed session target",
+      "result": "comparison_requires_policy",
+      "action": "Separate original target, temporary adjustment and actuals; no automatic permanent baseline change.",
+      "parameterRefs": [
+        "adjustmentComparisonPolicy"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-08",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Increment feasibility",
+      "when": "desired load conflicts with available increment or allowed limit",
+      "result": "bounded_proposal_or_gap",
+      "action": "Do not round beyond limit or transfer another lift's maximum.",
+      "parameterRefs": [
+        "roundingPolicy",
+        "progressionBounds"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-09",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Reassessment trigger",
+      "when": "accepted task/source review trigger occurs",
+      "result": "reassessment_proposal",
+      "action": "Specify task, side, protocol and rationale; do not claim resolution.",
+      "parameterRefs": [
+        "reassessmentTriggers"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-10",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Partial reassessment",
+      "when": "only subset of findings/sides explicitly reassessed",
+      "result": "scoped_resolution_only",
+      "action": "Leave omitted or incomparable findings unresolved; cannot clear independent restrictions.",
+      "parameterRefs": [],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-11",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Weekly constraints",
+      "when": "coach confirms goals/days/budgets/kit/support and reviewed structure",
+      "result": "weekly_draft",
+      "action": "Compose only permitted slots with required patterns, full time and visible unmet needs.",
+      "parameterRefs": [
+        "weeklyStructure",
+        "distributionLimits",
+        "recoveryConstraints"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-12",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Infeasible week",
+      "when": "required work cannot fit accepted constraints",
+      "result": "required_gap",
+      "action": "No extra day, invented equipment or unreviewed candidate inserted to hide shortfall.",
+      "parameterRefs": [],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-13",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Concurrent proposals",
+      "when": "R2 and R3 target same future occurrence",
+      "result": "reconcile_or_conflict",
+      "action": "Produce one explicitly reviewed revision; do not stack independent changes.",
+      "parameterRefs": [
+        "conflictPolicy"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    },
+    {
+      "id": "PG-14",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "automationEligible": false,
+      "approvalEvidence": [],
+      "name": "Approval freshness",
+      "when": "plan/context/content version differs or server unavailable",
+      "result": "stale_or_unavailable",
+      "action": "Block authority mutation; preserve history; same-key operation reconciliation.",
+      "parameterRefs": [],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "scope": "adult supported task only; accepted clinical/content policy and coach approval remain required",
+      "precedence": "Clinical/session authority, source validity and hard constraints precede numerical/relevance proposals."
+    }
+  ]
+}

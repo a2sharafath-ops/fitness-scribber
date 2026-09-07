@@ -1,0 +1,59 @@
+{
+  "packageId": "FS-POOL-FULL-PREP-0.3",
+  "status": "passed-document-checks",
+  "checks": 780,
+  "errors": [],
+  "prdDrafts": 6,
+  "catalogueArtifacts": 12,
+  "extensionRules": 28,
+  "extensionCases": 40,
+  "totalTestSpecifications": 110,
+  "parameterCounts": {
+    "C09": 7,
+    "C10": 15
+  },
+  "artifactCount": 40,
+  "completePreparationTaskPortions": 34,
+  "applicationTestsExecuted": false,
+  "professionalAcceptanceRecorded": false,
+  "implementationAuthorized": false,
+  "checkedOn": "2026-09-05",
+  "commands": [
+    "node docs/exercise-pooling/quality/validate-preparation.mjs",
+    "node docs/exercise-pooling/quality/validate-full-preparation.mjs"
+  ],
+  "r1DocumentCheck": {
+    "packageId": "FS-POOL-S1S2-0.2",
+    "status": "passed-document-checks",
+    "assertions": 38611,
+    "errors": [],
+    "counts": {
+      "exercises": 48,
+      "protocols": 15,
+      "needs": 20,
+      "mappings": 18,
+      "policies": 20,
+      "goals": 7,
+      "doses": 10,
+      "families": 20,
+      "sessions": 8,
+      "reasons": 32,
+      "sources": 24,
+      "equipmentIds": 35,
+      "coverageRows": 63,
+      "accessScenarios": 7,
+      "tcSpecifications": 46,
+      "catSpecifications": 24,
+      "productionApprovedExercises": 0
+    },
+    "taskCount": 70,
+    "preparationCompleteTasks": 31,
+    "artifactCount": 40,
+    "applicationTestsExecuted": false,
+    "professionalAcceptanceRecorded": false,
+    "implementationAuthorized": false
+  },
+  "trackedDiffReported": false,
+  "gitStatus": "?? docs/",
+  "scope": "Local documentation and draft data checks only. No app behavior, real-client data or professional acceptance tested."
+}

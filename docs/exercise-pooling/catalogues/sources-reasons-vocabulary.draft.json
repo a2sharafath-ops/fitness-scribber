@@ -1,0 +1,896 @@
+{
+  "packageId": "FS-POOL-S1S2-0.2",
+  "productionEnabled": false,
+  "sources": [
+    {
+      "id": "SRC-ORIGINAL",
+      "title": "Original S1–S2 draft authoring",
+      "url": "local:preparation/APPROVAL_RECORD.md",
+      "version": "2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Original descriptions and engineering/product hypotheses. Not evidence that an exercise or dose is clinically appropriate.",
+      "rights": "Original text; ownership/publication and professional review pending.",
+      "verification": "local authoring",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-LOCAL-ASSESSMENT",
+      "title": "Local assessment implementation",
+      "url": "local:src/lib/assessment.js",
+      "version": "workspace snapshot 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Current fields/legacy behavior only, not scientific validation.",
+      "rights": "Repository provenance/licensing not verified for every inherited association.",
+      "verification": "source inspected",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-LOCAL-PARQ",
+      "title": "Local PAR-Q-labelled implementation",
+      "url": "local:src/lib/parq.js",
+      "version": "label PAR-Q+ 2024",
+      "accessedAt": "2026-09-05",
+      "applicability": "Audit only: no questionnaire wording copied into this package.",
+      "rights": "Instrument commercial rights and edition unverified; quarantine from new publication.",
+      "verification": "source inspected",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-LOCAL-EXERCISE",
+      "title": "Local exercise libraries",
+      "url": "local:src/lib/exerciseLibrary.js + src/lib/correctiveLibrary.js",
+      "version": "workspace snapshot 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "209 strength and 42 corrective records; metadata and stable-ID gaps.",
+      "rights": "Import/source/media rights unverified; not auto-admitted.",
+      "verification": "source inspected",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-WHO",
+      "title": "WHO guidelines on physical activity and sedentary behaviour",
+      "url": "https://www.who.int/publications/i/item/9789240015128",
+      "version": "2020",
+      "accessedAt": "2026-09-05",
+      "applicability": "Population-level guidance includes adults living with disability/chronic conditions; not individual eligibility or rehab instruction.",
+      "rights": "Reference link/paraphrase only; no images or copied tables.",
+      "verification": "official page opened",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-ACSM",
+      "title": "ACSM position stands: resistance training in healthy adults",
+      "url": "https://acsm.org/education-resources/pronouncements-scientific-communications/position-stands/",
+      "version": "current listing checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Healthy-adult evidence review anchor. Full paper linked by ACSM could not be retrieved in this check; no exact dose range derived here.",
+      "rights": "Reference only; figures/text not imported.",
+      "verification": "official index opened; linked full paper unavailable",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-PARQ",
+      "title": "PAR-Q+/ePARmed-X+ terms and citation guidance",
+      "url": "https://eparmedx.com/?page_id=746",
+      "version": "terms search checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Search-visible official terms restrict sale/commercial incorporation without written permission; citation guidance is not a licence.",
+      "rights": "Commercial permission unresolved. Full terms fetch returned 403; exact scope/version must be obtained by rights reviewer.",
+      "verification": "official indexed terms; full page blocked",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-PARQ-CITE",
+      "title": "PAR-Q+ citation hub",
+      "url": "https://eparmedx.com/how-to-cite/",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Identify exact author/version after instrument choice.",
+      "rights": "Citation does not establish incorporation, translation or media rights.",
+      "verification": "official source searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-INDIA",
+      "title": "MeitY DPDP Rules 2025 publication index",
+      "url": "https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa?pageTitle=Digital-Personal-Data-Protection-Rules-2025",
+      "version": "Rules 14 Nov 2025; corrigendum 16 Dec 2025",
+      "accessedAt": "2026-09-05",
+      "applicability": "Counsel must check staged commencement and operative requirements at launch, not assume every provision is effective.",
+      "rights": "Regulatory research link, not adopted policy.",
+      "verification": "official index/search checked",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-UAE",
+      "title": "UAE government data protection overview",
+      "url": "https://u.ae/en/about-the-uae/digital-uae/data/data-protection-laws",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Review federal regime, health-sector ICT classification and mainland/free-zone differences.",
+      "rights": "Reference only; legal applicability unresolved.",
+      "verification": "official source searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-SA",
+      "title": "SDAIA personal data protection knowledge centre",
+      "url": "https://dgp.sdaia.gov.sa/wps/portal/pdp/knowledgecenter/",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Obtain current PDPL, implementing and transfer regulations; assess health-data duties and establishment/territorial scope.",
+      "rights": "Reference only; no transfer approval inferred.",
+      "verification": "official source searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-BH",
+      "title": "Bahrain Law 30 of 2018 English publication",
+      "url": "https://www.pdp.gov.bh/en/assets/pdf/regulations.pdf",
+      "version": "Law 30/2018; checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Review sensitive health-data processing, permissions and transfers with current implementing decisions; authoritative language review needed.",
+      "rights": "Regulatory research only.",
+      "verification": "official source searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-KW",
+      "title": "CITRA decision 26/2024",
+      "url": "https://www.citra.gov.kw/sites/ar/Pages/DecisionsDetails.aspx?id=6",
+      "version": "7 Feb 2024",
+      "accessedAt": "2026-09-05",
+      "applicability": "Current decision replaces 42/2021 and amendments. Review current Arabic regulation and whether provider/app falls in scope; do not rely on stale 2021 English PDF.",
+      "rights": "Regulatory research only; current text/applicability review pending.",
+      "verification": "official decision searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-OM",
+      "title": "Oman MTCIT personal data governance",
+      "url": "https://www.mtcit.gov.om/sectors/governance/personal",
+      "version": "Law 6/2022; executive regulation 34/2024",
+      "accessedAt": "2026-09-05",
+      "applicability": "Review permit requirements for Article 5 data including health, applicable exceptions and transfer assessment.",
+      "rights": "Regulatory research only; permit applicability unresolved.",
+      "verification": "official source searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-QA",
+      "title": "Qatar NCSA special-nature processing guidance",
+      "url": "https://assurance.ncsa.gov.qa/sites/default/files/library/2022-12/Special%20Nature%20Processing%20-%20Guideline%20for%20Regulated%20Entities.pdf",
+      "version": "v2; checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Review health/special-nature processing permission and exact mainland/QFC regime; Arabic legal text controls over unofficial English translation.",
+      "rights": "Regulatory research only; permission unresolved.",
+      "verification": "official guidance searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-US-HHS",
+      "title": "HHS resources for mobile health app developers",
+      "url": "https://www.hhs.gov/hipaa/for-professionals/special-topics/health-apps/index.html",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Determine covered-entity/business-associate relationships; not every health app is automatically HIPAA-covered.",
+      "rights": "Reference only; no compliance attestation.",
+      "verification": "official page opened",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-US-FTC",
+      "title": "FTC health breach notification rule guidance",
+      "url": "https://www.ftc.gov/business-guidance/resources/complying-ftcs-health-breach-notification-rule-0",
+      "version": "2024 amendments; checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Assess health-app/business model applicability, including potential multiple-source capability and incident duties outside HIPAA.",
+      "rights": "Reference only; no universal incident deadline adopted.",
+      "verification": "official guidance searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-US-TOOL",
+      "title": "FTC mobile health apps interactive tool",
+      "url": "https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Regulatory issue-spotting including service claims and medical-device considerations, not a clearance certificate.",
+      "rights": "Reference only.",
+      "verification": "official source searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-WA",
+      "title": "Washington Attorney General consumer health privacy overview",
+      "url": "https://www.atg.wa.gov/protecting-washingtonians-personal-health-data-and-privacy",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "State consumer-health-data review is separate from HIPAA; states served still unspecified.",
+      "rights": "Reference only; full state-law inventory pending market selection.",
+      "verification": "official reference anchor",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-UK",
+      "title": "ICO special-category data guidance",
+      "url": "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/a-guide-to-lawful-basis/special-category-data/",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Identify both general lawful basis and special-category condition. Recheck guidance/commencement affected by Data (Use and Access) Act 2025.",
+      "rights": "Reference only; no chosen legal basis.",
+      "verification": "official guidance searched",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-EU",
+      "title": "EU General Data Protection Regulation",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng",
+      "version": "Regulation 2016/679; current page checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Review territorial scope, purposes/bases and health-data condition, processors, safeguards, rights, impact assessment and transfers; member-state specifics remain separate.",
+      "rights": "Legal reference only; no compliance or representative determination.",
+      "verification": "official regulation opened",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-RLS",
+      "title": "Supabase row-level security",
+      "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Owner/link-scoped database policies; a frontend filter is not access enforcement. Privileged keys require a separate boundary.",
+      "rights": "Technical reference only; deployed policies not inspected.",
+      "verification": "official documentation opened",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-COLUMN",
+      "title": "Supabase column-level security",
+      "url": "https://supabase.com/docs/guides/database/postgres/column-level-security",
+      "version": "checked 2026-09-05",
+      "accessedAt": "2026-09-05",
+      "applicability": "Sensitive write-field restrictions need explicit enforcement in addition to row ownership.",
+      "rights": "Technical reference only; future implementation tests required.",
+      "verification": "official reference anchor",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    },
+    {
+      "id": "SRC-WCAG",
+      "title": "W3C WCAG 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "version": "W3C Recommendation 12 Dec 2024",
+      "accessedAt": "2026-09-05",
+      "applicability": "Proposed AA target with keyboard, focus, labels, errors, reflow and accessible authentication tests; no conformance claim.",
+      "rights": "Reference only; no copied standard text.",
+      "verification": "official standard opened",
+      "approvalEvidence": [],
+      "adoptionStatus": "reference-only-not-content-approval"
+    }
+  ],
+  "reasons": [
+    {
+      "id": "RSN-ADULT",
+      "state": "review_required",
+      "coachText": "Adult eligibility has not been established.",
+      "clientText": "Please confirm the required eligibility information.",
+      "nextAction": "Confirm adult status without inventing age.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-SOURCE",
+      "state": "review_required",
+      "coachText": "Required context is missing, conflicting or not current for this action.",
+      "clientText": "Your coach needs some information before this can continue.",
+      "nextAction": "Inspect the named field and source, not optional wellness by default.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-HEALTH",
+      "state": "review_required",
+      "coachText": "A required health-change check or follow-up needs review.",
+      "clientText": "This session needs review before you continue. If you feel unwell, stop and seek appropriate help.",
+      "nextAction": "Use the accepted policy; do not diagnose from the pool.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-RESTRICTION",
+      "state": "excluded",
+      "coachText": "An active scoped restriction conflicts with this candidate.",
+      "clientText": "This option is not available in your current plan.",
+      "nextAction": "Inspect restriction evidence with appropriate authority.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-CLINICAL",
+      "state": "unsupported",
+      "coachText": "No accepted clinical pathway or sufficiently scoped instruction.",
+      "clientText": "Your coach needs the appropriate professional guidance before planning this activity.",
+      "nextAction": "Obtain a qualified scoped handoff; uploading a file is not clearance.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-CONTENT",
+      "state": "excluded",
+      "coachText": "Content or a dependency is not accepted for this scope.",
+      "clientText": "This option is not available yet.",
+      "nextAction": "Review exact variant, source rights, dose and policy versions.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-EQUIPMENT",
+      "state": "excluded",
+      "coachText": "Required equipment/support is not confirmed available.",
+      "clientText": "This option needs equipment or support that has not been confirmed.",
+      "nextAction": "Confirm exact kit, fit, anchoring and quantities.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-SKILL",
+      "state": "review_required",
+      "coachText": "Task prerequisite has not been demonstrated or confirmed.",
+      "clientText": "Your coach needs to check the setup or movement first.",
+      "nextAction": "Record task-specific evidence; level is insufficient.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-REFUSAL",
+      "state": "excluded",
+      "coachText": "A confirmed hard refusal applies.",
+      "clientText": "This option is outside your recorded preferences.",
+      "nextAction": "Discuss alternatives; client can revise preference explicitly.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-DOSE",
+      "state": "review_required",
+      "coachText": "Dose has missing or incompatible evidence.",
+      "clientText": "Your coach still needs to set the instructions for this exercise.",
+      "nextAction": "Resolve load, effort, side and range source.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-TIME",
+      "state": "gap",
+      "coachText": "Required content does not fit the session budget.",
+      "clientText": "Your coach needs to adjust the session to the available time.",
+      "nextAction": "Show exact time shortfall; no hidden shortening.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-STALE",
+      "state": "stale",
+      "coachText": "Approved context or content revision has changed.",
+      "clientText": "This plan needs your coach's review before use.",
+      "nextAction": "Compare revisions and revalidate before reapproval.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-OFFLINE",
+      "state": "unavailable",
+      "coachText": "Required server verification is unavailable.",
+      "clientText": "We cannot verify this session right now. You cannot start or resume it here.",
+      "nextAction": "Retry verification; do not imply locally cached authority.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-ACCESS",
+      "state": "excluded",
+      "coachText": "Required access/support/assistance is not satisfied.",
+      "clientText": "This setup needs an accessibility or support change.",
+      "nextAction": "Resolve the individual requirement, not a diagnostic label.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-SIDE",
+      "state": "review_required",
+      "coachText": "Target/execution side or dose basis is ambiguous.",
+      "clientText": "Your coach needs to confirm which side and how much to do.",
+      "nextAction": "Preserve three separate side fields.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-CONSENT",
+      "state": "review_required",
+      "coachText": "Required processing authority for this purpose is unresolved.",
+      "clientText": "Please review the information and available choices, or contact your coach.",
+      "nextAction": "Do not block privacy rights or coerce optional sharing.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-RIGHTS",
+      "state": "unsupported",
+      "coachText": "Instrument or content usage rights are unverified.",
+      "clientText": "This feature is not available yet.",
+      "nextAction": "Rights reviewer must approve exact use/version.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-STOP",
+      "state": "stopped",
+      "coachText": "Execution stopped locally; report save status shown separately.",
+      "clientText": "You have stopped this session. This app is not an emergency or live-monitoring service.",
+      "nextAction": "Show local stop immediately; do not claim the coach received an unsaved report.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-WELLNESS",
+      "state": "display_only",
+      "coachText": "Optional wellness missing/default/simulated; no R1 dose change.",
+      "clientText": "You can skip wellness. The health-change check is separate.",
+      "nextAction": "Display provenance; do not infer readiness.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-SELECTED",
+      "state": "eligible",
+      "coachText": "Fits confirmed need and current candidate constraints in the reviewed scope.",
+      "clientText": "Included in your coach-approved plan.",
+      "nextAction": "Show incremental need coverage, not a medical safety guarantee.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-REDUNDANT",
+      "state": "not_selected",
+      "coachText": "Already-covered need offers no additional required coverage.",
+      "clientText": "Another option covers this session's goal.",
+      "nextAction": "Recalculate remaining coverage after every pick.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-OPTIONAL-EMPTY",
+      "state": "omitted",
+      "coachText": "No eligible option for an optional block.",
+      "clientText": "This optional block is not included.",
+      "nextAction": "Required gaps stay separate.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-SAVE-FAILED",
+      "state": "failed",
+      "coachText": "Write failed; no authoritative save confirmed.",
+      "clientText": "Your changes were not saved. Please retry.",
+      "nextAction": "Preserve draft and show known failure.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-SAVE-UNKNOWN",
+      "state": "unknown_outcome",
+      "coachText": "Response lost; operation may have committed.",
+      "clientText": "We are checking whether your changes were saved. Do not submit them again.",
+      "nextAction": "Query same operation ID; retry same idempotency key only.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-CONFLICT",
+      "state": "conflict",
+      "coachText": "Expected version does not match.",
+      "clientText": "This plan changed elsewhere. Review the latest version.",
+      "nextAction": "Preserve local draft; show diff, never last-write-wins.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-FORBIDDEN",
+      "state": "forbidden",
+      "coachText": "Actor lacks access to this operation or projection.",
+      "clientText": "You do not have access to this action.",
+      "nextAction": "Return generic resource response to avoid client enumeration.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-REVOKED",
+      "state": "revoked",
+      "coachText": "A previously accepted dependency was revoked.",
+      "clientText": "This plan needs review before further use.",
+      "nextAction": "Invalidate future authority without deleting actuals.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-UNSUPPORTED",
+      "state": "unsupported",
+      "coachText": "No accepted candidate covers a required need in this context.",
+      "clientText": "Your coach needs to choose a different supported plan.",
+      "nextAction": "Never fall back to unreviewed generic exercises.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-HYPOTHESIS",
+      "state": "unconfirmed",
+      "coachText": "Observed finding suggests a question, not a confirmed need.",
+      "clientText": "Your coach may review this observation with you.",
+      "nextAction": "Do not expose inferred muscle pathology or generate treatment.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-LOAD-UNRESOLVED",
+      "state": "review_required",
+      "coachText": "Library or historical load does not establish current prescribed load.",
+      "clientText": "The load still needs your coach's confirmation.",
+      "nextAction": "No percentage transfer between variants.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-REPORT-SAVED",
+      "state": "saved",
+      "coachText": "Server confirmed the report revision.",
+      "clientText": "Your report was saved. This does not mean it has been reviewed.",
+      "nextAction": "Require receipt evidence before this message.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    },
+    {
+      "id": "RSN-NO-CHANGE",
+      "state": "reported",
+      "coachText": "Client reported no change for this session.",
+      "clientText": "Your response was saved.",
+      "nextAction": "Not a clinical clearance, and does not resolve earlier restrictions.",
+      "interpolation": "Only whitelisted exercise/field labels and dates; no free-text medical notes, credentials or identifiers.",
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "revision": 1,
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ]
+    }
+  ],
+  "vocabulary": {
+    "roles": [
+      "general_warmup",
+      "mobility_lengthening",
+      "smr",
+      "activation",
+      "integration",
+      "main_accessory",
+      "conditioning",
+      "cooldown"
+    ],
+    "executionSide": [
+      "left",
+      "right",
+      "bilateral",
+      "midline",
+      "alternating",
+      "unspecified",
+      "not_applicable"
+    ],
+    "catalogueLaterality": [
+      "unilateral",
+      "bilateral",
+      "alternating",
+      "not_applicable"
+    ],
+    "equipment": [
+      "adjustable_bench",
+      "arm_ergometer",
+      "back_supported_bench",
+      "barbell",
+      "bench_press_rack",
+      "cable_row_machine",
+      "clear_floor",
+      "clear_route",
+      "clear_wall",
+      "collars",
+      "dowel",
+      "dumbbell",
+      "dumbbell_pair",
+      "fixed_bench",
+      "fixed_rail",
+      "fixed_support",
+      "foam_roller",
+      "lat_pulldown_machine",
+      "lifting_area",
+      "long_band",
+      "loop_band",
+      "low_step",
+      "mat",
+      "plates",
+      "rack",
+      "rated_anchor",
+      "rated_high_anchor",
+      "rated_pullup_bar",
+      "recumbent_cycle",
+      "safe_access_step",
+      "safety_arms",
+      "stable_box",
+      "stable_chair",
+      "stationary_cycle",
+      "stretch_strap"
+    ],
+    "levels": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "settings": [
+      "gym",
+      "home",
+      "travel"
+    ],
+    "patternIds": [
+      "ankle_control",
+      "carry",
+      "cyclic",
+      "elbow_extension",
+      "elbow_flexion",
+      "hinge",
+      "hip_abduction",
+      "hip_extension",
+      "horizontal_pull",
+      "horizontal_push",
+      "locomotion",
+      "lunge",
+      "reach",
+      "recovery",
+      "self_massage",
+      "squat",
+      "step",
+      "trunk_control",
+      "vertical_pull",
+      "vertical_push"
+    ],
+    "unitRules": [
+      "kg and lb require explicit conversion with original preserved",
+      "per_side versus total is mandatory for unilateral dose",
+      "sleep_h versus fluid_l_per_day versus body_water_l are distinct",
+      "duration is seconds internally; display minutes rounded only after exact summation"
+    ],
+    "aliases": [
+      {
+        "legacy": "Barbell on Goblet Squat",
+        "resolution": "ambiguous; no automatic canonical-equipment mapping"
+      },
+      {
+        "legacy": "Intermediate",
+        "resolution": "experience metadata only, not confirmed prerequisites"
+      },
+      {
+        "legacy": "NASM / corrective",
+        "resolution": "legacy source label, not evidence of approval"
+      },
+      {
+        "legacy": "full gym / hotel",
+        "resolution": "setting only; exact inventory unconfirmed"
+      }
+    ]
+  }
+}

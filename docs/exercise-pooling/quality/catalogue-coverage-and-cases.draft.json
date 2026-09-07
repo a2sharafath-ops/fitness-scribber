@@ -1,0 +1,2089 @@
+{
+  "packageId": "FS-POOL-S1S2-0.2",
+  "productionEnabled": false,
+  "coverage": [
+    {
+      "id": "COV-001",
+      "goalRef": "GOAL-01",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-002",
+      "goalRef": "GOAL-01",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-003",
+      "goalRef": "GOAL-01",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-004",
+      "goalRef": "GOAL-01",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-005",
+      "goalRef": "GOAL-01",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-006",
+      "goalRef": "GOAL-01",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-007",
+      "goalRef": "GOAL-01",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-008",
+      "goalRef": "GOAL-01",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-009",
+      "goalRef": "GOAL-01",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-010",
+      "goalRef": "GOAL-02",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [
+        "NEED-14"
+      ],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-011",
+      "goalRef": "GOAL-02",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-032",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-012",
+      "goalRef": "GOAL-02",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-032",
+        "EX-033",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-013",
+      "goalRef": "GOAL-02",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [
+        "NEED-14"
+      ],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-014",
+      "goalRef": "GOAL-02",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-032",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-015",
+      "goalRef": "GOAL-02",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-032",
+        "EX-033",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-016",
+      "goalRef": "GOAL-02",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [
+        "NEED-14"
+      ],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-017",
+      "goalRef": "GOAL-02",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [
+        "NEED-14"
+      ],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-018",
+      "goalRef": "GOAL-02",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [
+        "NEED-14"
+      ],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-019",
+      "goalRef": "GOAL-03",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-020",
+      "goalRef": "GOAL-03",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-021",
+      "goalRef": "GOAL-03",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-022",
+      "goalRef": "GOAL-03",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-023",
+      "goalRef": "GOAL-03",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-024",
+      "goalRef": "GOAL-03",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-025",
+      "goalRef": "GOAL-03",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-026",
+      "goalRef": "GOAL-03",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-027",
+      "goalRef": "GOAL-03",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-039",
+        "EX-040",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-028",
+      "goalRef": "GOAL-04",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-029",
+      "goalRef": "GOAL-04",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-030",
+      "goalRef": "GOAL-04",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-031",
+      "goalRef": "GOAL-04",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-032",
+      "goalRef": "GOAL-04",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-033",
+      "goalRef": "GOAL-04",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-034",
+      "goalRef": "GOAL-04",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-035",
+      "goalRef": "GOAL-04",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-036",
+      "goalRef": "GOAL-04",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-037",
+      "goalRef": "GOAL-05",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-038",
+      "goalRef": "GOAL-05",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-039",
+      "goalRef": "GOAL-05",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-040",
+      "goalRef": "GOAL-05",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-041",
+      "goalRef": "GOAL-05",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-042",
+      "goalRef": "GOAL-05",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-043",
+      "goalRef": "GOAL-05",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-044",
+      "goalRef": "GOAL-05",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-045",
+      "goalRef": "GOAL-05",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036",
+        "EX-038",
+        "EX-045"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-046",
+      "goalRef": "GOAL-06",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-047",
+      "goalRef": "GOAL-06",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-048",
+      "goalRef": "GOAL-06",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-049",
+      "goalRef": "GOAL-06",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-050",
+      "goalRef": "GOAL-06",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-051",
+      "goalRef": "GOAL-06",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-003",
+        "EX-004",
+        "EX-005",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018",
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027",
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-052",
+      "goalRef": "GOAL-06",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-015",
+        "EX-016",
+        "EX-019",
+        "EX-024",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-053",
+      "goalRef": "GOAL-06",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-054",
+      "goalRef": "GOAL-06",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [
+        "EX-001",
+        "EX-002",
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-019",
+        "EX-020",
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-028",
+        "EX-029",
+        "EX-047"
+      ],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "draft-candidate-coverage-only",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-055",
+      "goalRef": "GOAL-07",
+      "setting": "gym",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-056",
+      "goalRef": "GOAL-07",
+      "setting": "gym",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-057",
+      "goalRef": "GOAL-07",
+      "setting": "gym",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-058",
+      "goalRef": "GOAL-07",
+      "setting": "home",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-059",
+      "goalRef": "GOAL-07",
+      "setting": "home",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-060",
+      "goalRef": "GOAL-07",
+      "setting": "home",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-061",
+      "goalRef": "GOAL-07",
+      "setting": "travel",
+      "level": "beginner",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-062",
+      "goalRef": "GOAL-07",
+      "setting": "travel",
+      "level": "intermediate",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    },
+    {
+      "id": "COV-063",
+      "goalRef": "GOAL-07",
+      "setting": "travel",
+      "level": "advanced",
+      "scope": "ordinary adult task eligibility still requires individual checks",
+      "candidateRefs": [],
+      "uncoveredNeedRefs": [],
+      "productionCoverage": "none-approved",
+      "result": "unsupported-clinical-module",
+      "limits": "Listing candidates does not establish equipment, prerequisites, rights, clinical scope or an individual dose."
+    }
+  ],
+  "accessCases": [
+    {
+      "id": "ACCESS-01",
+      "scenario": "No floor transfers; standing with support confirmed",
+      "considerRefs": [
+        "EX-006",
+        "EX-014",
+        "EX-015",
+        "EX-028",
+        "EX-038",
+        "EX-044"
+      ],
+      "excludeRefs": [
+        "EX-011",
+        "EX-012",
+        "EX-013",
+        "EX-026",
+        "EX-041",
+        "EX-042",
+        "EX-047"
+      ],
+      "expected": "Non-floor candidates remain hypotheses; standing/hand-support prerequisites still required.",
+      "productionCoverage": "none-approved"
+    },
+    {
+      "id": "ACCESS-02",
+      "scenario": "Seated only; stable seat and verified band anchor",
+      "considerRefs": [
+        "EX-002",
+        "EX-007",
+        "EX-009",
+        "EX-029",
+        "EX-036",
+        "EX-043",
+        "EX-045"
+      ],
+      "excludeRefs": [
+        "EX-024",
+        "EX-028",
+        "EX-037"
+      ],
+      "expected": "No complete seated horizontal-push resistance candidate in this subset; do not claim whole-body coverage.",
+      "productionCoverage": "none-approved"
+    },
+    {
+      "id": "ACCESS-03",
+      "scenario": "No effective grip for pulling",
+      "considerRefs": [],
+      "excludeRefs": [
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031",
+        "EX-032",
+        "EX-033"
+      ],
+      "expected": "Unsupported required pulling need without separately reviewed equipment/attachment and variant; never improvise straps.",
+      "productionCoverage": "none-approved"
+    },
+    {
+      "id": "ACCESS-04",
+      "scenario": "Needs assisted transfer; assistant unavailable",
+      "considerRefs": [],
+      "excludeRefs": [
+        "EX-003",
+        "EX-004",
+        "EX-011",
+        "EX-030"
+      ],
+      "expected": "Exclude candidates requiring that transfer; recorded help preference is not proof of available competent assistance.",
+      "productionCoverage": "none-approved"
+    },
+    {
+      "id": "ACCESS-05",
+      "scenario": "Needs visual/audio/communication adaptation",
+      "considerRefs": [
+        "EX-015",
+        "EX-029"
+      ],
+      "excludeRefs": [],
+      "expected": "UI/instruction-format accommodation must be individualized; no diagnosis-to-exercise exclusion. Accessible content still requires review.",
+      "productionCoverage": "none-approved"
+    },
+    {
+      "id": "ACCESS-06",
+      "scenario": "Advanced general fitness with restriction on axial loading",
+      "considerRefs": [
+        "EX-031",
+        "EX-039"
+      ],
+      "excludeRefs": [
+        "EX-018"
+      ],
+      "expected": "Actual allowed set depends on other restrictions, not advanced label. No sport/power/postoperative module inferred.",
+      "productionCoverage": "none-approved"
+    },
+    {
+      "id": "ACCESS-07",
+      "scenario": "Postoperative/neurological/cardiac/pregnancy-specific rehabilitation request",
+      "considerRefs": [],
+      "excludeRefs": [],
+      "expected": "Condition-specific automated prescription unsupported. Prepare handoff and reviewer scope only; no generic substitution fills this gap.",
+      "productionCoverage": "none-approved"
+    }
+  ],
+  "fixtureDefaults": {
+    "synthetic": true,
+    "clientId": "fictional-client-A",
+    "coachId": "fictional-coach",
+    "serverState": "available",
+    "adultState": "confirmed-adult",
+    "sourceState": "usable",
+    "healthChange": "reported-no-change-for-this-session",
+    "restrictions": [],
+    "consentState": "fictional-required-purpose-valid",
+    "catalogueMode": "TEST-ONLY-assumed-review-in-isolated-fixture",
+    "explanation": "Assumed review is an input to future logic tests, not a real approval or production manifest; unchanged actual candidate records are all draft. Unspecified task inputs remain unknown."
+  },
+  "cases": [
+    {
+      "id": "CAT-001",
+      "requirements": [
+        "REQ-006",
+        "REQ-018"
+      ],
+      "candidateRefs": [
+        "EX-015"
+      ],
+      "input": {
+        "catalogueMode": "actual-draft-package"
+      },
+      "expectedReasonRefs": [
+        "RSN-CONTENT"
+      ],
+      "expected": "No eligible candidates; 0 live admissions.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-002",
+      "requirements": [
+        "REQ-008"
+      ],
+      "candidateRefs": [
+        "EX-028"
+      ],
+      "input": {
+        "equipment": [
+          "long_band"
+        ],
+        "prerequisites": {
+          "anchor_verified": false
+        }
+      },
+      "expectedReasonRefs": [
+        "RSN-EQUIPMENT"
+      ],
+      "expected": "Exclude: a band without a rated confirmed anchor is insufficient.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-003",
+      "requirements": [
+        "REQ-002",
+        "REQ-010"
+      ],
+      "candidateRefs": [
+        "EX-029",
+        "EX-028"
+      ],
+      "input": {
+        "position": "seated_only",
+        "equipment": [
+          "long_band",
+          "rated_anchor",
+          "stable_chair"
+        ],
+        "prerequisites": {
+          "seated_control": true,
+          "anchor_verified": true,
+          "band_fit": true
+        }
+      },
+      "expectedReasonRefs": [
+        "RSN-ACCESS"
+      ],
+      "expected": "EX-029 remains a possible task candidate; EX-028 excluded for standing; diagnosis not an exclusion input.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-004",
+      "requirements": [
+        "REQ-005"
+      ],
+      "candidateRefs": [
+        "EX-018",
+        "EX-031"
+      ],
+      "input": {
+        "level": "advanced",
+        "restrictions": [
+          {
+            "forbiddenDemand": "axial_load"
+          }
+        ]
+      },
+      "expectedReasonRefs": [
+        "RSN-RESTRICTION"
+      ],
+      "expected": "EX-018 excluded regardless of priority; EX-031 not admitted until its own prerequisites/dose are confirmed.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-005",
+      "requirements": [
+        "REQ-007"
+      ],
+      "candidateRefs": [
+        "EX-006"
+      ],
+      "input": {
+        "observationSide": "left",
+        "targetSide": "left",
+        "executionSide": "right",
+        "doseBasis": "per_side"
+      },
+      "expectedReasonRefs": [
+        "RSN-SIDE"
+      ],
+      "expected": "No automatic right-side or bilateral substitution; unresolved side mismatch.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-006",
+      "requirements": [
+        "REQ-007"
+      ],
+      "candidateRefs": [
+        "EX-015",
+        "EX-016",
+        "EX-019"
+      ],
+      "input": {
+        "requiredNeeds": [
+          "NEED-09",
+          "NEED-10"
+        ],
+        "coveredByFirstPick": [
+          "NEED-09"
+        ]
+      },
+      "expectedReasonRefs": [
+        "RSN-REDUNDANT"
+      ],
+      "expected": "After EX-015, EX-016 receives no incremental NEED-09 coverage; eligible EX-019 may cover NEED-10.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-007",
+      "requirements": [
+        "REQ-009"
+      ],
+      "candidateRefs": [
+        "EX-021"
+      ],
+      "input": {
+        "loadSource": {
+          "kind": "legacy_relPct",
+          "relTo": "Squat",
+          "percent": 80
+        }
+      },
+      "expectedReasonRefs": [
+        "RSN-LOAD-UNRESOLVED"
+      ],
+      "expected": "No computed deadlift load and no approval with unresolved required dose.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-008",
+      "requirements": [
+        "REQ-003"
+      ],
+      "candidateRefs": [
+        "EX-015"
+      ],
+      "input": {
+        "level": "beginner",
+        "prerequisites": {
+          "chair_height_fit": "unknown",
+          "sit_stand_tolerance": "unknown"
+        }
+      },
+      "expectedReasonRefs": [
+        "RSN-SKILL"
+      ],
+      "expected": "Beginner is not proof of prerequisites.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-009",
+      "requirements": [
+        "REQ-010"
+      ],
+      "candidateRefs": [
+        "EX-012"
+      ],
+      "input": {
+        "goal": "GOAL-07",
+        "clinicalEvidence": {
+          "kind": "uploaded-file",
+          "verifiedAuthor": false,
+          "scope": null
+        }
+      },
+      "expectedReasonRefs": [
+        "RSN-CLINICAL"
+      ],
+      "expected": "No clinical admission from uploaded file or general exercise name.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-010",
+      "requirements": [
+        "REQ-008"
+      ],
+      "candidateRefs": [
+        "EX-029",
+        "EX-024"
+      ],
+      "input": {
+        "setting": "travel",
+        "equipment": [
+          "clear_wall"
+        ],
+        "requiredNeeds": [
+          "NEED-12",
+          "NEED-13"
+        ]
+      },
+      "expectedReasonRefs": [
+        "RSN-EQUIPMENT",
+        "RSN-UNSUPPORTED"
+      ],
+      "expected": "Potential push does not cover required pull; required pull gap remains visible.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-011",
+      "requirements": [
+        "REQ-008"
+      ],
+      "candidateRefs": [
+        "EX-041"
+      ],
+      "input": {
+        "role": "smr",
+        "optional": true,
+        "equipment": []
+      },
+      "expectedReasonRefs": [
+        "RSN-OPTIONAL-EMPTY"
+      ],
+      "expected": "Omit optional SMR; do not block session solely for this omitted role.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-012",
+      "requirements": [
+        "REQ-008"
+      ],
+      "candidateRefs": [
+        "EX-037"
+      ],
+      "input": {
+        "dose": {
+          "sets": 1,
+          "workSeconds": 30,
+          "doseBasis": "per_side",
+          "sideCount": 2,
+          "sideTransitionSeconds": 15,
+          "setupSeconds": 20
+        }
+      },
+      "expectedReasonRefs": [],
+      "expected": "Total 95 seconds: 2 × 30 + 15 + 20; not 65 or 190.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-013",
+      "requirements": [
+        "REQ-008"
+      ],
+      "candidateRefs": [
+        "EX-015"
+      ],
+      "input": {
+        "dose": {
+          "sets": 2,
+          "reps": 8,
+          "secondsPerRep": 3,
+          "restBetweenSetsSeconds": 60,
+          "setupSeconds": 30,
+          "sideCount": 1
+        }
+      },
+      "expectedReasonRefs": [],
+      "expected": "Total 138 seconds: 2 × 8 × 3 + 1 × 60 + 30.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-014",
+      "requirements": [
+        "REQ-008"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "budgetSeconds": 1800,
+        "requiredWorkSeconds": 1600,
+        "requiredRestSetupSeconds": 300,
+        "optionalWorkSeconds": 60
+      },
+      "expectedReasonRefs": [
+        "RSN-TIME"
+      ],
+      "expected": "Even after optional omission, required time is 1900 seconds: visible 100-second shortfall.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-015",
+      "requirements": [
+        "REQ-011",
+        "REQ-012"
+      ],
+      "candidateRefs": [
+        "EX-015"
+      ],
+      "input": {
+        "requestExpectedContext": 7,
+        "serverContext": 8,
+        "newHealthReport": true
+      },
+      "expectedReasonRefs": [
+        "RSN-STALE"
+      ],
+      "expected": "Atomic approve/assign fails stale; no partial assignment. Client must not start against generation 7.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-016",
+      "requirements": [
+        "REQ-016"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "save": "response-lost-after-commit",
+        "operationKey": "fictional-key-01"
+      },
+      "expectedReasonRefs": [
+        "RSN-SAVE-UNKNOWN"
+      ],
+      "expected": "Query/retry same key; one logical operation, no duplicate assignment and no success claim until receipt.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-017",
+      "requirements": [
+        "REQ-014"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "sharingConsent": false,
+        "requiredCoreAuthority": "valid"
+      },
+      "expectedReasonRefs": [],
+      "expected": "Optional clinician sharing disabled; no automatic claim that core processing is withdrawn.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-018",
+      "requirements": [
+        "REQ-014",
+        "REQ-015"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "requiredCoreAuthority": "withdrawn",
+        "request": "new-pool-generation"
+      },
+      "expectedReasonRefs": [
+        "RSN-CONSENT"
+      ],
+      "expected": "Affected processing blocked; privacy requests and required account/support access remain available.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-019",
+      "requirements": [
+        "REQ-003",
+        "REQ-011"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "wellness": "skipped",
+        "healthChange": "not_answered"
+      },
+      "expectedReasonRefs": [
+        "RSN-HEALTH",
+        "RSN-WELLNESS"
+      ],
+      "expected": "Health check still required; skipped wellness creates no automatic readiness dose.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-020",
+      "requirements": [
+        "REQ-016"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "serverState": "unavailable",
+        "request": "resume",
+        "actuals": "locally-entered"
+      },
+      "expectedReasonRefs": [
+        "RSN-OFFLINE"
+      ],
+      "expected": "Resume prohibited; preserved actuals clearly pending sync, not server saved.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-021",
+      "requirements": [
+        "REQ-013"
+      ],
+      "candidateRefs": [
+        "EX-015"
+      ],
+      "input": {
+        "restrictionNote": "FICTIONAL_PRIVATE_NOTE_DO_NOT_PROJECT",
+        "audience": "client"
+      },
+      "expectedReasonRefs": [
+        "RSN-RESTRICTION"
+      ],
+      "expected": "Client response contains code and approved neutral text, not private note or reviewer document.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-022",
+      "requirements": [
+        "REQ-006",
+        "REQ-012"
+      ],
+      "candidateRefs": [
+        "EX-015"
+      ],
+      "input": {
+        "catalogueMode": "revoked",
+        "completedActuals": {
+          "sets": 1,
+          "reps": 8
+        }
+      },
+      "expectedReasonRefs": [
+        "RSN-REVOKED"
+      ],
+      "expected": "Future use invalidated; completed actuals and historical variant revision unchanged.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-023",
+      "requirements": [
+        "REQ-003",
+        "REQ-004"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "observation": "knee moves inward",
+        "confirmedFunctionalNeed": false
+      },
+      "expectedReasonRefs": [
+        "RSN-HYPOTHESIS"
+      ],
+      "expected": "No diagnosis of weak/tight muscle and no automatic SMR or strengthening mapping.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    },
+    {
+      "id": "CAT-024",
+      "requirements": [
+        "REQ-017"
+      ],
+      "candidateRefs": [],
+      "input": {
+        "legacyName": "Goblet Squat",
+        "legacyEquipment": "Barbell",
+        "legacyId": "fictional-legacy-42",
+        "customInstructions": "FICTIONAL_CUSTOM"
+      },
+      "expectedReasonRefs": [
+        "RSN-CONTENT"
+      ],
+      "expected": "Quarantine ambiguous mapping; preserve legacy ID/reference and custom instructions, no name-only overwrite.",
+      "status": "specification-not-executed",
+      "reviewEvidence": []
+    }
+  ]
+}

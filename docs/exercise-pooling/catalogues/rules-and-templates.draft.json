@@ -1,0 +1,2058 @@
+{
+  "packageId": "FS-POOL-S1S2-0.2",
+  "version": "0.2",
+  "date": "2026-09-05",
+  "purpose": "non-executable preparation dataset; not a runtime seed",
+  "productionEnabled": false,
+  "reviewStatus": "draft",
+  "approvalEvidence": [],
+  "protocols": [
+    {
+      "id": "PRO-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-LOCAL-PARQ",
+        "SRC-PARQ"
+      ],
+      "name": "Screening instrument",
+      "sourcePath": "intake.screening.parq",
+      "measurement": "instrument-specific signed version",
+      "state": "reported",
+      "comparability": "no cross-version scoring",
+      "limitations": "Exact adopted edition, commercial permission, population and clinical policy unverified; no questionnaire text reproduced."
+    },
+    {
+      "id": "PRO-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Health history",
+      "sourcePath": "intake.screening.hhq",
+      "measurement": "field-specific units and source",
+      "state": "reported",
+      "comparability": "field-specific only",
+      "limitations": "An unchecked/default No is unknown. Separate coach interpretation from client response."
+    },
+    {
+      "id": "PRO-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Movement observation",
+      "sourcePath": "assessments[type=movement].data.findings",
+      "measurement": "item + side + observed state + severity label",
+      "state": "observed_present/assessed_absent/not_assessed",
+      "comparability": "same item/protocol/side only",
+      "limitations": "Legacy NASM-labelled associations and normalized scores are not diagnoses or validated risk scores."
+    },
+    {
+      "id": "PRO-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Legacy movement screen",
+      "sourcePath": "assessments[type=movement].data.screens",
+      "measurement": "pattern-specific ordinal 0–3",
+      "state": "measured",
+      "comparability": "same protocol only",
+      "limitations": "No conversion into the newer observation protocol or clearance."
+    },
+    {
+      "id": "PRO-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Strength performance",
+      "sourcePath": "assessments[type=fitness].data.strength",
+      "measurement": "variant + kg + reps + technique + effort + date",
+      "state": "measured",
+      "comparability": "same variant/method and compatible conditions",
+      "limitations": "Default one rep is not proof of a tested maximum. Estimated and measured values stay separate."
+    },
+    {
+      "id": "PRO-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Range-of-motion assessment",
+      "sourcePath": "assessments[type=fitness].data.mobility",
+      "measurement": "joint/action + side + unit + instrument",
+      "state": "measured",
+      "comparability": "same method/side/unit",
+      "limitations": "Unspecified unit or procedure is unusable for quantitative change; no universal cut-offs."
+    },
+    {
+      "id": "PRO-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Endurance assessment",
+      "sourcePath": "assessments[type=fitness].data.endurance",
+      "measurement": "named test + distance/time/work + conditions",
+      "state": "measured",
+      "comparability": "same named protocol/conditions",
+      "limitations": "Free text may be context only; do not normalize unlike tests."
+    },
+    {
+      "id": "PRO-08",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Pain/functional report",
+      "sourcePath": "assessments[type=pain].data",
+      "measurement": "body region + side + report + severity scale version + activity",
+      "state": "reported",
+      "comparability": "same report scale; not diagnosis",
+      "limitations": "New/worsening concern routes to the reviewed policy; default severity is not a report."
+    },
+    {
+      "id": "PRO-09",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Baseline lifestyle",
+      "sourcePath": "assessments[type=lifestyle].data",
+      "measurement": "sleep h; sleep quality 1–7 good-high; stress 1–7 bad-high; fluids L/day; steps/day",
+      "state": "reported",
+      "comparability": "preserve source scale/direction",
+      "limitations": "HHQ categorical stress/sleep and body-composition water litres are not interchangeable."
+    },
+    {
+      "id": "PRO-10",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Goals and preferences",
+      "sourcePath": "assessments[type=goals].data + intake goals/environment",
+      "measurement": "coach-confirmed priority; target metric/unit/date; explicit inventory",
+      "state": "reported",
+      "comparability": "versioned priorities and availability",
+      "limitations": "No inferred target order, equipment quantity, hard refusal or assistant availability."
+    },
+    {
+      "id": "PRO-11",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Body composition",
+      "sourcePath": "assessments[type=body_comp].data",
+      "measurement": "method + kg/%/score/L with device and conditions",
+      "state": "measured",
+      "comparability": "same method and meaning only",
+      "limitations": "Optional for ordinary pooling; do not require weight-loss data or infer medical status."
+    },
+    {
+      "id": "PRO-12",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Session health-change check",
+      "sourcePath": "proposed health_change_report",
+      "measurement": "assignment/session ID + changed/no_change/unsure + effective time",
+      "state": "reported",
+      "comparability": "per session/context generation",
+      "limitations": "Separate required check from optional wellness. Exact triage prompts need clinical review."
+    },
+    {
+      "id": "PRO-13",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Session wellness",
+      "sourcePath": "wellness sleep/stress/fatigue/soreness",
+      "measurement": "each 1–7 with confirmed flag and scale direction",
+      "state": "reported",
+      "comparability": "same instrument only",
+      "limitations": "Optional in R1; skipped is not failed health screening; untouched defaults unavailable."
+    },
+    {
+      "id": "PRO-14",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Functional access and skill review",
+      "sourcePath": "proposed coach observation + client access needs",
+      "measurement": "task + support + assistance + environment + demonstrated prerequisite",
+      "state": "observed_present/reported",
+      "comparability": "task-specific context",
+      "limitations": "An experience label is not evidence of skill; disability is not a blanket contraindication."
+    },
+    {
+      "id": "PRO-15",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-LOCAL-ASSESSMENT"
+      ],
+      "name": "Clinician handoff",
+      "sourcePath": "proposed clinical evidence revision",
+      "measurement": "verified author, scope, restrictions, permitted tasks/dose, review trigger, received/effective dates",
+      "state": "reported",
+      "comparability": "exact scope and revision only",
+      "limitations": "An upload or expiration is not resolution. Sharing permission and clinical authority differ."
+    }
+  ],
+  "needs": [
+    {
+      "id": "NEED-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "General preparation or conditioning",
+      "confirmation": "confirmed session goal and modality access",
+      "protocolRef": "PRO-10",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Sit-to-stand task practice",
+      "confirmation": "coach-confirmed task goal and permitted support/range",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Ankle motion/control practice",
+      "confirmation": "side-specific ankle task observation or goal",
+      "protocolRef": "PRO-06",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Trunk rotation practice",
+      "confirmation": "confirmed rotation task goal and permitted range",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Overhead task practice",
+      "confirmation": "confirmed overhead goal, skill and permitted range",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Trunk control practice",
+      "confirmation": "observed task difficulty plus coach confirmation of suitable control strategy",
+      "protocolRef": "PRO-03",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Hip extension practice",
+      "confirmation": "confirmed hip-extension task goal",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-08",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Lateral hip/stepping practice",
+      "confirmation": "confirmed lateral-task need, support and side",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-09",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Squat-pattern training",
+      "confirmation": "coach-confirmed goal or squat task observation",
+      "protocolRef": "PRO-03",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-10",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Hinge-pattern training",
+      "confirmation": "coach-confirmed goal or hinge task observation",
+      "protocolRef": "PRO-03",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-11",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Split stance or step task practice",
+      "confirmation": "confirmed task goal, side, support and prerequisite",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-12",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Horizontal push or arm-work goal",
+      "confirmation": "coach-confirmed upper-limb task goal and mode",
+      "protocolRef": "PRO-10",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-13",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Horizontal pull training",
+      "confirmation": "coach-confirmed pulling goal",
+      "protocolRef": "PRO-10",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-14",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Vertical pull training",
+      "confirmation": "coach-confirmed vertical-pull goal and prerequisite",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-15",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Carry task training",
+      "confirmation": "confirmed carry goal, side and route access",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-16",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Elbow flexion accessory goal",
+      "confirmation": "coach-selected accessory goal",
+      "protocolRef": "PRO-10",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-17",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Elbow extension accessory goal",
+      "confirmation": "coach-selected accessory goal",
+      "protocolRef": "PRO-10",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-18",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Optional self-massage preference",
+      "confirmation": "client preference plus site-specific pressure review",
+      "protocolRef": "PRO-08",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-19",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Session recovery pause",
+      "confirmation": "coach-selected transition goal",
+      "protocolRef": "PRO-10",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    },
+    {
+      "id": "NEED-20",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Seated reaching task",
+      "confirmation": "confirmed seated reach goal and balance limit",
+      "protocolRef": "PRO-14",
+      "mappingType": "confirmed-functional-need-not-diagnosis",
+      "sideRule": "Preserve observed/target/execution side separately; do not infer contralateral treatment.",
+      "deduplicationKey": "client + needId + targetSide + taskContext + sourceLineage",
+      "resolution": "Only a comparable explicit reassessment or authorized scoped decision resolves the relevant need; omitted items remain unknown.",
+      "exclusion": "Pain, clinician restrictions and unknown required prerequisites are handled before relevance."
+    }
+  ],
+  "policies": [
+    {
+      "id": "POL-001",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Unknown adult status",
+      "trigger": "adult status absent, ambiguous or under 18",
+      "result": "review_required",
+      "action": "No adult-module assignment until verified; minors outside R1.",
+      "reasonRef": "RSN-ADULT",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-002",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Required source not usable",
+      "trigger": "required source missing/stale/conflict/unavailable",
+      "result": "review_required",
+      "action": "Block affected action/module; explain exact source, not all optional sources.",
+      "reasonRef": "RSN-SOURCE",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-003",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Health change check",
+      "trigger": "per-session required check missing, unsure or changed",
+      "result": "review_required",
+      "action": "No start/resume until the reviewed pathway resolves required review; draft save remains available.",
+      "reasonRef": "RSN-HEALTH",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-004",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Active restriction",
+      "trigger": "candidate demand intersects applicable prohibited activity",
+      "result": "excluded",
+      "action": "No coach pin or rank score overrides it; only authorized scoped restriction revision can resolve.",
+      "reasonRef": "RSN-RESTRICTION",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-005",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "New concerning report",
+      "trigger": "new pain, symptom, injury or health change requires review under adopted policy",
+      "result": "review_required",
+      "action": "Preserve actuals; pause affected future execution and route to appropriate reviewer; no automated diagnosis.",
+      "reasonRef": "RSN-HEALTH",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-006",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Individual scope",
+      "trigger": "clinical instructions missing/ambiguous or module outside reviewed clinical scope",
+      "result": "unsupported",
+      "action": "Do not generate condition-specific rehabilitation; request a scoped clinician handoff.",
+      "reasonRef": "RSN-CLINICAL",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-007",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Content admission",
+      "trigger": "candidate or dependency lacks approved metadata, source rights or scoped review",
+      "result": "excluded",
+      "action": "Only a published accepted revision manifest can enter live pooling.",
+      "reasonRef": "RSN-CONTENT",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-008",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Equipment",
+      "trigger": "required equipment/support/access not explicitly available and fitted",
+      "result": "excluded",
+      "action": "Setting label or a similarly named item is insufficient.",
+      "reasonRef": "RSN-EQUIPMENT",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-009",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Prerequisite",
+      "trigger": "required task skill, position tolerance or support unconfirmed",
+      "result": "review_required",
+      "action": "Training level alone cannot prove the prerequisite.",
+      "reasonRef": "RSN-SKILL",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-010",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Explicit refusal",
+      "trigger": "client confirmed hard refusal applies to this variant/task",
+      "result": "excluded",
+      "action": "Do not relabel a refusal as low preference; discuss alternatives.",
+      "reasonRef": "RSN-REFUSAL",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-011",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Dose basis",
+      "trigger": "load/range/effort source missing or incompatible with variant/side/date",
+      "result": "review_required",
+      "action": "Leave affected dose unresolved; no library percentage or cross-lift conversion.",
+      "reasonRef": "RSN-DOSE",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-012",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Time budget",
+      "trigger": "required content with all work/rest/setup/side/transfer time exceeds budget",
+      "result": "gap",
+      "action": "Omit optional work, try compatible alternatives, then show required gap; no silent truncation.",
+      "reasonRef": "RSN-TIME",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-013",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Approval freshness",
+      "trigger": "context/catalogue/prescription generation differs from approved revision",
+      "result": "stale",
+      "action": "Invalidate affected future authority, retain immutable history and ask coach to review.",
+      "reasonRef": "RSN-STALE",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-014",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Server availability",
+      "trigger": "required authoritative validation unavailable",
+      "result": "unavailable",
+      "action": "No assignment/start/resume; label local draft or pending actuals accurately.",
+      "reasonRef": "RSN-OFFLINE",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-015",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Accommodation",
+      "trigger": "individual support/assistance/access requirement not satisfied",
+      "result": "excluded",
+      "action": "Resolve the specific requirement; do not exclude on disability label.",
+      "reasonRef": "RSN-ACCESS",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-016",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Side semantics",
+      "trigger": "observation side, target side or dose per-side basis ambiguous",
+      "result": "review_required",
+      "action": "Ask coach to specify; bilateral is not an automatic substitute for unilateral.",
+      "reasonRef": "RSN-SIDE",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-017",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Consent and purpose",
+      "trigger": "required lawful processing authority/evidence missing or withdrawn for affected purpose",
+      "result": "review_required",
+      "action": "Suspend affected processing, preserve applicable rights/support access; optional sharing is separate.",
+      "reasonRef": "RSN-CONSENT",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-018",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Instrument rights",
+      "trigger": "screening instrument version/use permission unverified",
+      "result": "unsupported",
+      "action": "Do not publish or embed questionnaire; use only a separately reviewed lawful workflow.",
+      "reasonRef": "RSN-RIGHTS",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-019",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Immediate stop action",
+      "trigger": "client requests to stop or reports concern during session",
+      "result": "stopped",
+      "action": "Allow stop/report even when other operations fail; do not imply live monitoring or clinical response.",
+      "reasonRef": "RSN-STOP",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    },
+    {
+      "id": "POL-020",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Optional wellness",
+      "trigger": "wellness declined/missing/default or simulated wearable value",
+      "result": "display_only",
+      "action": "No automatic R1 dose adjustment; keep required health check independent.",
+      "reasonRef": "RSN-WELLNESS",
+      "scope": "procedural proposal; clinical classification/triage criteria require separate qualified review",
+      "numericClinicalThresholds": []
+    }
+  ],
+  "doses": [
+    {
+      "id": "DOSE-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "General preparation",
+      "mode": "time",
+      "selection": "Coach selects duration, modality, pace/resistance and transition; 3 minutes is an arithmetic fixture, not a universal prescription.",
+      "requiredFields": [
+        "durationSeconds",
+        "paceOrResistance",
+        "setupSeconds"
+      ],
+      "limits": "No fixed heart-rate threshold or symptom clearance.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-ACSM"
+      ],
+      "name": "General resistance",
+      "mode": "repetitions",
+      "selection": "Coach selects sets, repetitions, effort and load after task review; fixture: 2 sets × 8 reps at 3 seconds/rep, 60 seconds between sets.",
+      "requiredFields": [
+        "sets",
+        "reps",
+        "secondsPerRep",
+        "load",
+        "effort",
+        "restBetweenSetsSeconds",
+        "setupSeconds"
+      ],
+      "limits": "No automatic failure training or mapping from experience label to dose.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL",
+        "SRC-ACSM"
+      ],
+      "name": "Strength-focused resistance",
+      "mode": "repetitions",
+      "selection": "Coach selects current same-variant load basis, sets, reps, rest and technique; fixture: 3 × 5 at 4 seconds/rep with 120-second inter-set rest.",
+      "requiredFields": [
+        "sets",
+        "reps",
+        "secondsPerRep",
+        "loadBasisRevision",
+        "load",
+        "effort",
+        "restBetweenSetsSeconds",
+        "setupSeconds"
+      ],
+      "limits": "Library relPct/relTo is not an accepted basis; no tested max assumed.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Task/control practice",
+      "mode": "repetitions",
+      "selection": "Coach chooses range, support, side and controlled repetitions; fixture: 1 × 6 per side at 5 seconds/rep.",
+      "requiredFields": [
+        "sets",
+        "reps",
+        "secondsPerRep",
+        "side",
+        "doseBasis",
+        "range",
+        "support",
+        "setupSeconds",
+        "sideTransitionSeconds"
+      ],
+      "limits": "No finding-to-corrective dose inference.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Conditioning",
+      "mode": "time",
+      "selection": "Coach chooses mode, work duration, intensity and breaks; fixture: 300 seconds continuous plus 30 seconds setup.",
+      "requiredFields": [
+        "durationSeconds",
+        "intensityMethod",
+        "targetEffort",
+        "restSeconds",
+        "setupSeconds"
+      ],
+      "limits": "No automated interval prescription or wellness multiplier in R1.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Optional sustained stretch",
+      "mode": "hold",
+      "selection": "Coach chooses site, side, position, hold duration, repetitions and intensity; no universal corrective dose.",
+      "requiredFields": [
+        "holdSeconds",
+        "repeats",
+        "side",
+        "doseBasis",
+        "range",
+        "restSeconds",
+        "setupSeconds",
+        "sideTransitionSeconds"
+      ],
+      "limits": "Optional; observed posture does not prove tissue shortness.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Carry",
+      "mode": "time_or_distance",
+      "selection": "Coach selects distance or time, side, load, route and recovery; distance additionally requires an explicit speed estimate for time planning.",
+      "requiredFields": [
+        "mode",
+        "workTarget",
+        "unit",
+        "load",
+        "side",
+        "doseBasis",
+        "restSeconds",
+        "setupSeconds"
+      ],
+      "limits": "Do not mix metres, seconds and repetitions; no automatic bilateral substitution.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-08",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Optional SMR",
+      "mode": "time",
+      "selection": "Coach selects reviewed site, side, tool, pressure, exposure and transitions; duration remains unresolved until confirmed.",
+      "requiredFields": [
+        "durationSeconds",
+        "side",
+        "doseBasis",
+        "pressureInstruction",
+        "site",
+        "setupSeconds",
+        "sideTransitionSeconds"
+      ],
+      "limits": "Does not diagnose or treat a tissue disorder; no neck or condition-specific protocol in this subset.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-09",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Recovery pause",
+      "mode": "time",
+      "selection": "Coach chooses supported position and time for a normal unforced recovery pause.",
+      "requiredFields": [
+        "durationSeconds",
+        "position",
+        "setupSeconds"
+      ],
+      "limits": "Not treatment or reassurance for concerning symptoms.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    },
+    {
+      "id": "DOSE-10",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Clinician-defined task",
+      "mode": "clinician_defined",
+      "selection": "Transcribe the specifically authorized dose/range/support and review trigger with source evidence; no generic condition defaults.",
+      "requiredFields": [
+        "clinicalEvidenceRevision",
+        "task",
+        "dose",
+        "range",
+        "support",
+        "supervision",
+        "reviewTrigger"
+      ],
+      "limits": "Workflow placeholder only: no exercise dependency admits this clinical module.",
+      "valueStatus": "coach-selected-before-use; illustrative numbers are synthetic arithmetic only"
+    }
+  ],
+  "goals": [
+    {
+      "id": "GOAL-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "General fitness",
+      "needRefs": [
+        "NEED-09",
+        "NEED-10",
+        "NEED-12",
+        "NEED-13",
+        "NEED-01"
+      ],
+      "sessionRefs": [
+        "SESSION-01",
+        "SESSION-02"
+      ],
+      "limits": "Coach confirms task balance and realistic schedule; no promise of health outcomes.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    },
+    {
+      "id": "GOAL-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Strength",
+      "needRefs": [
+        "NEED-09",
+        "NEED-10",
+        "NEED-12",
+        "NEED-13",
+        "NEED-14"
+      ],
+      "sessionRefs": [
+        "SESSION-03",
+        "SESSION-04"
+      ],
+      "limits": "Use demonstrated task skill and current load basis; no automatic maximum testing.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    },
+    {
+      "id": "GOAL-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Muscle development",
+      "needRefs": [
+        "NEED-09",
+        "NEED-10",
+        "NEED-12",
+        "NEED-13",
+        "NEED-16",
+        "NEED-17"
+      ],
+      "sessionRefs": [
+        "SESSION-01",
+        "SESSION-04"
+      ],
+      "limits": "Coach chooses weekly distribution and volume; no fixed volume inherited from a label.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    },
+    {
+      "id": "GOAL-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Conditioning",
+      "needRefs": [
+        "NEED-01"
+      ],
+      "sessionRefs": [
+        "SESSION-05"
+      ],
+      "limits": "Coach chooses accessible modality, intensity and progression outside R1 automation.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    },
+    {
+      "id": "GOAL-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Mobility and control",
+      "needRefs": [
+        "NEED-03",
+        "NEED-04",
+        "NEED-06",
+        "NEED-20"
+      ],
+      "sessionRefs": [
+        "SESSION-06"
+      ],
+      "limits": "Only confirmed task needs; assessment findings are not mandatory stretching or SMR.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    },
+    {
+      "id": "GOAL-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Body-composition support",
+      "needRefs": [
+        "NEED-09",
+        "NEED-10",
+        "NEED-12",
+        "NEED-13",
+        "NEED-01"
+      ],
+      "sessionRefs": [
+        "SESSION-01",
+        "SESSION-02"
+      ],
+      "limits": "Support agreed activity goals; no spot-reduction or guaranteed weight-loss claim; body composition optional.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    },
+    {
+      "id": "GOAL-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Clinician-defined return-to-function",
+      "needRefs": [],
+      "sessionRefs": [
+        "SESSION-08"
+      ],
+      "limits": "Unsupported as an automated clinical prescription until a specifically reviewed module and individual handoff exist.",
+      "priority": "client preference plus coach-approved order; never inferred from array order",
+      "weeklyStructure": "Coach chooses days, split, rest and session purpose explicitly; R1 generates only one selected session, not a whole week."
+    }
+  ],
+  "families": [
+    {
+      "id": "FAM-locomotion",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "locomotion",
+      "members": [
+        "EX-001",
+        "EX-002",
+        "EX-048"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-cyclic",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "cyclic",
+      "members": [
+        "EX-003",
+        "EX-004",
+        "EX-005"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-ankle_control",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "ankle_control",
+      "members": [
+        "EX-006",
+        "EX-007",
+        "EX-008",
+        "EX-038"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-trunk_control",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "trunk_control",
+      "members": [
+        "EX-009",
+        "EX-011",
+        "EX-035",
+        "EX-036"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-vertical_push",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "vertical_push",
+      "members": [
+        "EX-010",
+        "EX-034"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-hip_extension",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "hip_extension",
+      "members": [
+        "EX-012",
+        "EX-044"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-hip_abduction",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "hip_abduction",
+      "members": [
+        "EX-013",
+        "EX-014"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-squat",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "squat",
+      "members": [
+        "EX-015",
+        "EX-016",
+        "EX-017",
+        "EX-018"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-hinge",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "hinge",
+      "members": [
+        "EX-019",
+        "EX-020",
+        "EX-021",
+        "EX-047"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-lunge",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "lunge",
+      "members": [
+        "EX-022"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-step",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "step",
+      "members": [
+        "EX-023"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-horizontal_push",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "horizontal_push",
+      "members": [
+        "EX-024",
+        "EX-025",
+        "EX-026",
+        "EX-027"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-horizontal_pull",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "horizontal_pull",
+      "members": [
+        "EX-028",
+        "EX-029",
+        "EX-030",
+        "EX-031"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-vertical_pull",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "vertical_pull",
+      "members": [
+        "EX-032",
+        "EX-033"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-carry",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "carry",
+      "members": [
+        "EX-037",
+        "EX-046"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-elbow_flexion",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "elbow_flexion",
+      "members": [
+        "EX-039"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-elbow_extension",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "elbow_extension",
+      "members": [
+        "EX-040"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-self_massage",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "self_massage",
+      "members": [
+        "EX-041",
+        "EX-042"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-recovery",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "recovery",
+      "members": [
+        "EX-043"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    },
+    {
+      "id": "FAM-reach",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "reach",
+      "members": [
+        "EX-045"
+      ],
+      "swapRule": "Shared family is discovery only, not equivalence. Recheck required need, target/execution side, position, support, equipment, restrictions, skill, load basis, effort and total time. Coach approves a new material prescription revision.",
+      "loadTransfer": "none-by-default"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "SESSION-01",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Full-body resistance plus preparation",
+      "purpose": "general fitness or muscle-development session",
+      "requiredRoles": [
+        "general_warmup",
+        "main_accessory"
+      ],
+      "optionalRoles": [
+        "mobility_lengthening",
+        "activation",
+        "integration",
+        "conditioning",
+        "cooldown"
+      ],
+      "requiredPatterns": [
+        "squat",
+        "hinge",
+        "horizontal_push",
+        "horizontal_pull"
+      ],
+      "composition": "Choose one eligible option for each coach-required pattern; optional patterns are coach-marked. Do not silently omit a required pull in an equipment-free setting.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-02",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Travel constrained full-body",
+      "purpose": "session-specific available kit",
+      "requiredRoles": [
+        "general_warmup",
+        "main_accessory"
+      ],
+      "optionalRoles": [
+        "integration",
+        "conditioning",
+        "cooldown"
+      ],
+      "requiredPatterns": [
+        "squat",
+        "horizontal_push",
+        "horizontal_pull"
+      ],
+      "composition": "Inventory precedes template. No safe anchor/no pulling option returns a gap or coach-changed session purpose, never an improvised anchor.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-03",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Strength-priority session",
+      "purpose": "one coach-selected principal lift",
+      "requiredRoles": [
+        "general_warmup",
+        "main_accessory"
+      ],
+      "optionalRoles": [
+        "integration",
+        "main_accessory",
+        "cooldown"
+      ],
+      "requiredPatterns": [],
+      "composition": "Coach names principal variant and compatible accessories. Warm-up sets and all rest require explicit dose/time, not a generic percentage.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-04",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Upper/lower split slot",
+      "purpose": "coach-selected existing weekly structure",
+      "requiredRoles": [
+        "general_warmup",
+        "main_accessory"
+      ],
+      "optionalRoles": [
+        "activation",
+        "conditioning",
+        "cooldown"
+      ],
+      "requiredPatterns": [],
+      "composition": "Coach selects upper or lower slot and required patterns before composition; do not infer next day or weekly progression.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-05",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Conditioning-focused session",
+      "purpose": "accessible modality",
+      "requiredRoles": [
+        "general_warmup",
+        "conditioning"
+      ],
+      "optionalRoles": [
+        "cooldown"
+      ],
+      "requiredPatterns": [
+        "cyclic"
+      ],
+      "composition": "Walking may substitute only if coach permits locomotion and relevant access/dose checks pass; no automatic cross-modality intensity conversion.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-06",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Task/mobility practice",
+      "purpose": "confirmed functional needs",
+      "requiredRoles": [
+        "integration"
+      ],
+      "optionalRoles": [
+        "general_warmup",
+        "mobility_lengthening",
+        "activation",
+        "cooldown"
+      ],
+      "requiredPatterns": [],
+      "composition": "Choose confirmed side-specific task needs; SMR is separately opted in after review, not mandatory.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-07",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Seated-access session",
+      "purpose": "individually reviewed support needs",
+      "requiredRoles": [
+        "general_warmup",
+        "main_accessory"
+      ],
+      "optionalRoles": [
+        "integration",
+        "cooldown"
+      ],
+      "requiredPatterns": [
+        "horizontal_pull"
+      ],
+      "composition": "Seated alternatives may be considered only when their own trunk control, transfer, anchoring and arm demands are met; this is not a diagnosis-specific protocol.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    },
+    {
+      "id": "SESSION-08",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "name": "Clinician handoff session",
+      "purpose": "documented permitted tasks only",
+      "requiredRoles": [],
+      "optionalRoles": [],
+      "requiredPatterns": [],
+      "composition": "Blocked clinical template: requires accepted pathway, qualified reviewer, client-specific instructions and limits. No general catalogue exercise is automatically clinical-approved.",
+      "timeBudgetChoicesMinutes": [
+        30,
+        45,
+        60,
+        90
+      ],
+      "budgetRule": "Choice is an upper limit, not a promise to fill it. Sum explicit dose, inter-set/block rest, setup, side and transfer time; show unused time and unresolved estimates.",
+      "roleOrdering": [
+        "general_warmup",
+        "mobility_lengthening",
+        "smr",
+        "activation",
+        "integration",
+        "main_accessory",
+        "conditioning",
+        "cooldown"
+      ],
+      "optionalSmr": "off unless coach selects reviewed need and candidate; ordering is a proposal that the coach may revise with revalidation."
+    }
+  ]
+}

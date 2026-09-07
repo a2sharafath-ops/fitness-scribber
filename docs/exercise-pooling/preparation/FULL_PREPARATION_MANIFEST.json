@@ -1,0 +1,875 @@
+{
+  "packageId": "FS-POOL-FULL-PREP-0.3",
+  "version": "0.3",
+  "preparedAt": "2026-09-05",
+  "status": "preparation-complete-acceptance-pending",
+  "scopeApproval": "preparation/FULL_PREPARATION_APPROVAL.md",
+  "entryPoint": "preparation/FULL_PREPARATION_HANDOFF.md",
+  "productionEnabled": false,
+  "implementationAuthorized": false,
+  "gateStatus": {
+    "G1": "pending",
+    "G2": "pending",
+    "A12": "not-authorized",
+    "G3": "pending",
+    "G4": "pending",
+    "G5_R2": "pending",
+    "G5_R3": "pending"
+  },
+  "artifacts": [
+    {
+      "id": "P01",
+      "files": [
+        "prd/MASTER_PRD.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "P02",
+      "files": [
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "P03",
+      "files": [
+        "prd/POOL_SELECTION_PRD.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "P04",
+      "files": [
+        "prd/DRAFT_AND_APPROVAL_PRD.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "P05",
+      "files": [
+        "prd/DAILY_ADJUSTMENT_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "P06",
+      "files": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "D01",
+      "files": [
+        "data/FIELD_DICTIONARY.md",
+        "data/SOURCE_AND_PRIVACY_INVENTORY.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "D02",
+      "files": [
+        "data/CONTEXT_RESOLUTION.md",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "D03",
+      "files": [
+        "data/VOCABULARY.md",
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "D04",
+      "files": [
+        "data/STATES_AND_AUTHORITY.md",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C01",
+      "files": [
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C02",
+      "files": [
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/PROTOCOL_ADMINISTRATION.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C03",
+      "files": [
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/finding-mappings.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C04",
+      "files": [
+        "catalogues/rules-and-templates.draft.json",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C05",
+      "files": [
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C06",
+      "files": [
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C07",
+      "files": [
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C08",
+      "files": [
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C09",
+      "files": [
+        "catalogues/daily-adjustment.draft.json",
+        "catalogues/EXTENSION_POLICY_REVIEW.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C10",
+      "files": [
+        "catalogues/progression-planning.draft.json",
+        "catalogues/EXTENSION_POLICY_REVIEW.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C11",
+      "files": [
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "C12",
+      "files": [
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "E01",
+      "files": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "E02",
+      "files": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "E03",
+      "files": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "E04",
+      "files": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "E05",
+      "files": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "U01",
+      "files": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "U02",
+      "files": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "U03",
+      "files": [
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "catalogues/SCHEMA_AND_VALIDATION.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "Q01",
+      "files": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "Q02",
+      "files": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "Q03",
+      "files": [
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "preparationStatus": "review-test-specifications-prepared-evidence-pending",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "Q04",
+      "files": [
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationStatus": "review-test-specifications-prepared-evidence-pending",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "Q05",
+      "files": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationStatus": "review-test-specifications-prepared-evidence-pending",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "Q06",
+      "files": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md"
+      ],
+      "preparationStatus": "review-test-specifications-prepared-evidence-pending",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "O01",
+      "files": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "O02",
+      "files": [
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "O03",
+      "files": [
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    },
+    {
+      "id": "O04",
+      "files": [
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "preparationStatus": "draft-prepared",
+      "acceptanceStatus": "pending",
+      "notes": "Preparation draft/specification only. Actual product/professional acceptance, implemented tests and operational execution remain pending as applicable."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "FP-101",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/MASTER_PRD.md"
+      ]
+    },
+    {
+      "id": "FP-102",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "data/SOURCE_AND_PRIVACY_INVENTORY.md",
+        "data/FIELD_DICTIONARY.md"
+      ]
+    },
+    {
+      "id": "FP-103",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/CONTEXT_RESOLUTION.md",
+        "data/MODULE_REQUIREMENTS.md"
+      ]
+    },
+    {
+      "id": "FP-104",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "data/VOCABULARY.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "data/MODULE_REQUIREMENTS.md"
+      ]
+    },
+    {
+      "id": "FP-105",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/POOL_SELECTION_PRD.md"
+      ]
+    },
+    {
+      "id": "FP-106",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/DRAFT_AND_APPROVAL_PRD.md"
+      ]
+    },
+    {
+      "id": "FP-107",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ]
+    },
+    {
+      "id": "FP-108",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ]
+    },
+    {
+      "id": "FP-109",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ]
+    },
+    {
+      "id": "FP-110",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ]
+    },
+    {
+      "id": "FP-111",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ]
+    },
+    {
+      "id": "FP-112",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/TRACEABILITY_AND_VERIFICATION.md"
+      ]
+    },
+    {
+      "id": "FP-113",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
+      ]
+    },
+    {
+      "id": "FP-114",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "preparation/S1_REVIEW_PACK.md",
+        "prd/MASTER_PRD.md",
+        "data/FIELD_DICTIONARY.md",
+        "data/SOURCE_AND_PRIVACY_INVENTORY.md",
+        "data/CONTEXT_RESOLUTION.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "quality/DOMAIN_REVIEW_PACKET.md"
+      ]
+    },
+    {
+      "id": "FP-115",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "preparation/APPROVAL_RECORD.md",
+        "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
+        "prd/MASTER_PRD.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json"
+      ]
+    },
+    {
+      "id": "FP-116",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "policies/README.md",
+        "policies/PRIVACY_NOTICE_DRAFT.md",
+        "policies/PARTICIPATION_AND_HEALTH_DATA_CONSENT_DRAFT.md",
+        "policies/CLINICIAN_INFORMATION_SHARING_DRAFT.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ]
+    },
+    {
+      "id": "FP-117",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "policies/REGIONAL_REVIEW_MATRIX.md",
+        "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
+        "prd/MASTER_PRD.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ]
+    },
+    {
+      "id": "FP-201",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
+        "policies/REGIONAL_REVIEW_MATRIX.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ]
+    },
+    {
+      "id": "FP-202",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md"
+      ]
+    },
+    {
+      "id": "FP-203",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/PROTOCOL_ADMINISTRATION.md"
+      ]
+    },
+    {
+      "id": "FP-204",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/finding-mappings.draft.json"
+      ]
+    },
+    {
+      "id": "FP-205",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "data/MODULE_REQUIREMENTS.md"
+      ]
+    },
+    {
+      "id": "FP-206",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json"
+      ]
+    },
+    {
+      "id": "FP-207",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json"
+      ]
+    },
+    {
+      "id": "FP-208",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "ux/SCREEN_SPECIFICATIONS.md"
+      ]
+    },
+    {
+      "id": "FP-209",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/PROTOCOL_ADMINISTRATION.md",
+        "catalogues/finding-mappings.draft.json",
+        "data/MODULE_REQUIREMENTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ]
+    },
+    {
+      "id": "FP-210",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "catalogues/SCHEMA_AND_VALIDATION.md"
+      ]
+    },
+    {
+      "id": "FP-211",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/MASTER_PRD.md",
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "prd/POOL_SELECTION_PRD.md",
+        "prd/DRAFT_AND_APPROVAL_PRD.md",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "preparation/S2_HANDOFF.md",
+        "preparation/OPEN_DECISIONS.md",
+        "preparation/PACKAGE_MANIFEST.json"
+      ]
+    },
+    {
+      "id": "FP-212",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/COVERAGE_DRAFT.md",
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/finding-mappings.draft.json",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "review/CATALOGUE_REVIEW_DIGEST.md"
+      ]
+    },
+    {
+      "id": "FP-213",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/COVERAGE_DRAFT.md",
+        "policies/CLINICIAN_INFORMATION_SHARING_DRAFT.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "catalogues/rules-and-templates.draft.json",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json"
+      ]
+    },
+    {
+      "id": "FP-214",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md"
+      ]
+    },
+    {
+      "id": "FP-605",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ]
+    },
+    {
+      "id": "FP-701",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/DAILY_ADJUSTMENT_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/daily-adjustment.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ]
+    },
+    {
+      "id": "FP-801",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/progression-planning.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ]
+    }
+  ],
+  "draftCounts": {
+    "exercises": 48,
+    "protocols": 15,
+    "needs": 20,
+    "mappings": 18,
+    "policies": 20,
+    "goals": 7,
+    "doses": 10,
+    "families": 20,
+    "sessions": 8,
+    "reasons": 32,
+    "sources": 24,
+    "equipmentIds": 35,
+    "coverageRows": 63,
+    "accessScenarios": 7,
+    "tcSpecifications": 46,
+    "catSpecifications": 24,
+    "productionApprovedExercises": 0
+  },
+  "externalReviewEvidence": [],
+  "exclusions": [
+    "No app implementation or executable prototype",
+    "No live client data or hosted account access",
+    "No installation, spend, reviewer contact or external messaging",
+    "No git commit/push, migration, deployment or publication"
+  ],
+  "olderSnapshot": {
+    "path": "review/Fitness_Scribber_PRDs_P01-P04_Review_v0.1.docx",
+    "status": "preserved-earlier-PRD-snapshot-not-current-S2-package"
+  },
+  "extensionCounts": {
+    "dailyRules": 14,
+    "progressionRules": 14,
+    "dailyRequirements": 12,
+    "progressionRequirements": 12,
+    "dailyTestSpecifications": 20,
+    "progressionTestSpecifications": 20,
+    "totalTestSpecifications": 110,
+    "prdDrafts": 6,
+    "catalogueArtifacts": 12
+  },
+  "notes": [
+    "Earlier S1-S2 manifest/archive is a preserved scope snapshot, not the current full-preparation inventory.",
+    "Early P05/P06 drafting does not waive R1/R2 evidence dependencies for acceptance/build/enablement.",
+    "Null clinical/numeric parameters are genuine pending professional decisions; none are production defaults."
+  ]
+}

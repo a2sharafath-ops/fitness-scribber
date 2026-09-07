@@ -1,0 +1,41 @@
+{
+  "packageId": "FS-POOL-S1S2-0.2",
+  "status": "passed-document-checks",
+  "assertions": 38563,
+  "errors": [],
+  "counts": {
+    "exercises": 48,
+    "protocols": 15,
+    "needs": 20,
+    "mappings": 18,
+    "policies": 20,
+    "goals": 7,
+    "doses": 10,
+    "families": 20,
+    "sessions": 8,
+    "reasons": 32,
+    "sources": 24,
+    "equipmentIds": 35,
+    "coverageRows": 63,
+    "accessScenarios": 7,
+    "tcSpecifications": 46,
+    "catSpecifications": 24,
+    "productionApprovedExercises": 0
+  },
+  "taskCount": 70,
+  "preparationCompleteTasks": 31,
+  "artifactCount": 40,
+  "applicationTestsExecuted": false,
+  "professionalAcceptanceRecorded": false,
+  "implementationAuthorized": false,
+  "checkedOn": "2026-09-05",
+  "command": "node docs/exercise-pooling/quality/validate-preparation.mjs",
+  "scope": "document-only; tailored structural schema/reference/link/backlog checks, not application behavior or clinical/legal acceptance",
+  "trackedApplicationChangesObserved": false,
+  "gitStatusObserved": "?? docs/",
+  "notes": [
+    "No tracked diff was reported; only docs/ is untracked.",
+    "All candidate records remain draft; approved production count is zero.",
+    "Old v0.1 Word snapshot is preserved; current source is FS-POOL-S1S2-0.2."
+  ]
+}

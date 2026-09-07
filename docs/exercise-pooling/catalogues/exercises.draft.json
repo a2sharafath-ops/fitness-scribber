@@ -1,0 +1,3206 @@
+{
+  "packageId": "FS-POOL-S1S2-0.2",
+  "reviewStatus": "draft",
+  "productionEnabled": false,
+  "exercises": [
+    {
+      "id": "EX-001",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Level walking",
+      "familyId": "FAM-locomotion",
+      "pattern": "locomotion",
+      "roles": [
+        "general_warmup",
+        "conditioning",
+        "cooldown"
+      ],
+      "equipment": [],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "alternating",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "walking_tolerance",
+        "level_clear_route"
+      ],
+      "demands": [
+        "weight_bearing",
+        "balance"
+      ],
+      "instructions": [
+        "Walk along a clear level route at the pace agreed with the coach; stop and report a new concern.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-01",
+        "DOSE-05"
+      ],
+      "needRefs": [
+        "NEED-01"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-002",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated marching",
+      "familyId": "FAM-locomotion",
+      "pattern": "locomotion",
+      "roles": [
+        "general_warmup",
+        "integration"
+      ],
+      "equipment": [
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "alternating",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control",
+        "chair_access"
+      ],
+      "demands": [
+        "hip_flexion",
+        "seated_balance"
+      ],
+      "instructions": [
+        "Sit on the confirmed stable seat and alternately lift each foot within the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-01",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-01",
+        "NEED-02"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-003",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Stationary cycling",
+      "familyId": "FAM-cyclic",
+      "pattern": "cyclic",
+      "roles": [
+        "general_warmup",
+        "conditioning",
+        "cooldown"
+      ],
+      "equipment": [
+        "stationary_cycle"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "seated",
+      "laterality": "alternating",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "cycle_mount_access",
+        "cycle_fit"
+      ],
+      "demands": [
+        "cyclic_leg_work",
+        "transfer"
+      ],
+      "instructions": [
+        "Use the fitted stationary cycle; coach records resistance, duration and how to mount and dismount.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-01",
+        "DOSE-05"
+      ],
+      "needRefs": [
+        "NEED-01"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-004",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Recumbent cycling",
+      "familyId": "FAM-cyclic",
+      "pattern": "cyclic",
+      "roles": [
+        "general_warmup",
+        "conditioning",
+        "cooldown"
+      ],
+      "equipment": [
+        "recumbent_cycle"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "supported_seated",
+      "laterality": "alternating",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "recumbent_transfer_access",
+        "cycle_fit"
+      ],
+      "demands": [
+        "cyclic_leg_work",
+        "transfer"
+      ],
+      "instructions": [
+        "Adjust the supported seat and pedal within the agreed range and resistance.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-01",
+        "DOSE-05"
+      ],
+      "needRefs": [
+        "NEED-01"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-005",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Arm ergometer",
+      "familyId": "FAM-cyclic",
+      "pattern": "cyclic",
+      "roles": [
+        "general_warmup",
+        "conditioning",
+        "cooldown"
+      ],
+      "equipment": [
+        "arm_ergometer",
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "seated",
+      "laterality": "alternating",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control",
+        "arm_ergometer_fit"
+      ],
+      "demands": [
+        "repetitive_upper_limb",
+        "grip"
+      ],
+      "instructions": [
+        "Use the fitted arm ergometer with the agreed seat support, resistance and direction.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-01",
+        "DOSE-05"
+      ],
+      "needRefs": [
+        "NEED-01",
+        "NEED-12"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-006",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Standing ankle rock with support",
+      "familyId": "FAM-ankle_control",
+      "pattern": "ankle_control",
+      "roles": [
+        "mobility_lengthening",
+        "integration"
+      ],
+      "equipment": [
+        "fixed_support"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_support_access"
+      ],
+      "demands": [
+        "weight_bearing",
+        "ankle_range"
+      ],
+      "instructions": [
+        "Hold the fixed support and move the knee forward over the foot through the individually agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-03"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-007",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated ankle motion",
+      "familyId": "FAM-ankle_control",
+      "pattern": "ankle_control",
+      "roles": [
+        "mobility_lengthening",
+        "activation"
+      ],
+      "equipment": [
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control"
+      ],
+      "demands": [
+        "ankle_range"
+      ],
+      "instructions": [
+        "While seated, move one ankle through the coach-agreed directions without forcing the range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-03"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-008",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Supported calf stretch",
+      "familyId": "FAM-ankle_control",
+      "pattern": "ankle_control",
+      "roles": [
+        "mobility_lengthening",
+        "cooldown"
+      ],
+      "equipment": [
+        "fixed_support"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_support_access"
+      ],
+      "demands": [
+        "weight_bearing",
+        "sustained_stretch"
+      ],
+      "instructions": [
+        "Use fixed support and the agreed staggered stance; hold the selected position without bouncing.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-06"
+      ],
+      "needRefs": [
+        "NEED-03"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-009",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated trunk rotation practice",
+      "familyId": "FAM-trunk_control",
+      "pattern": "trunk_control",
+      "roles": [
+        "mobility_lengthening",
+        "integration"
+      ],
+      "equipment": [
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control",
+        "rotation_permitted"
+      ],
+      "demands": [
+        "trunk_rotation"
+      ],
+      "instructions": [
+        "Sit securely and turn the trunk within the agreed range; keep the movement controlled.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-04"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-010",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Wall slide",
+      "familyId": "FAM-vertical_push",
+      "pattern": "vertical_push",
+      "roles": [
+        "mobility_lengthening",
+        "activation"
+      ],
+      "equipment": [
+        "clear_wall"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control",
+        "overhead_range_permitted"
+      ],
+      "demands": [
+        "arm_elevation"
+      ],
+      "instructions": [
+        "Face the agreed direction at the wall and slide the arms only through the reviewed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-05"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-011",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Supine heel slide",
+      "familyId": "FAM-trunk_control",
+      "pattern": "trunk_control",
+      "roles": [
+        "activation",
+        "integration"
+      ],
+      "equipment": [
+        "mat"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "supine",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "supine_tolerance"
+      ],
+      "demands": [
+        "floor_transfer",
+        "hip_knee_motion"
+      ],
+      "instructions": [
+        "Lie in the agreed supported position and slide one heel away and back while maintaining the chosen trunk position.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-06"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-012",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Bridge",
+      "familyId": "FAM-hip_extension",
+      "pattern": "hip_extension",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "mat"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "supine",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "supine_tolerance"
+      ],
+      "demands": [
+        "floor_transfer",
+        "hip_extension"
+      ],
+      "instructions": [
+        "From the agreed lying position, lift and lower the pelvis through the coach-selected range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-07"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-013",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Side-lying hip abduction",
+      "familyId": "FAM-hip_abduction",
+      "pattern": "hip_abduction",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "mat"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "side_lying",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "side_lying_tolerance"
+      ],
+      "demands": [
+        "floor_transfer",
+        "hip_abduction"
+      ],
+      "instructions": [
+        "Lie on the agreed side and lift and lower the upper leg without changing the chosen trunk position.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-08"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-014",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Standing band hip abduction with support",
+      "familyId": "FAM-hip_abduction",
+      "pattern": "hip_abduction",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "loop_band",
+        "fixed_support"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_support_access",
+        "band_fit"
+      ],
+      "demands": [
+        "single_leg_support",
+        "hip_abduction"
+      ],
+      "instructions": [
+        "Hold fixed support and move the selected leg sideways against the fitted loop band.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-08"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-015",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Chair sit-to-stand",
+      "familyId": "FAM-squat",
+      "pattern": "squat",
+      "roles": [
+        "integration",
+        "main_accessory"
+      ],
+      "equipment": [
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "chair_height_fit",
+        "sit_stand_tolerance"
+      ],
+      "demands": [
+        "weight_bearing",
+        "knee_hip_flexion"
+      ],
+      "instructions": [
+        "Stand from and return to the confirmed chair using the support arrangement chosen by the coach.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-02",
+        "NEED-09"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-016",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Bodyweight squat to box",
+      "familyId": "FAM-squat",
+      "pattern": "squat",
+      "roles": [
+        "integration",
+        "main_accessory"
+      ],
+      "equipment": [
+        "stable_box"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "squat_pattern_confirmed",
+        "box_height_fit"
+      ],
+      "demands": [
+        "weight_bearing",
+        "knee_hip_flexion"
+      ],
+      "instructions": [
+        "Lower toward the confirmed box and stand through the agreed range with controlled contact.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02"
+      ],
+      "needRefs": [
+        "NEED-09"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-017",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Dumbbell goblet squat",
+      "familyId": "FAM-squat",
+      "pattern": "squat",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell",
+        "clear_floor"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "squat_pattern_confirmed",
+        "front_load_hold"
+      ],
+      "demands": [
+        "external_load",
+        "knee_hip_flexion",
+        "grip"
+      ],
+      "instructions": [
+        "Hold the chosen dumbbell at the front of the torso and squat through the coach-approved range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-09"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-018",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Barbell back squat",
+      "familyId": "FAM-squat",
+      "pattern": "squat",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "barbell",
+        "plates",
+        "rack",
+        "safety_arms",
+        "collars"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "advanced"
+      ],
+      "prerequisites": [
+        "barbell_squat_skill",
+        "rack_safety_setup",
+        "load_reference_current"
+      ],
+      "demands": [
+        "axial_load",
+        "external_load",
+        "knee_hip_flexion"
+      ],
+      "instructions": [
+        "Use the reviewed rack and safety arrangement; follow the coach's variant-specific setup and range cues.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-09"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-019",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Hip hinge with dowel",
+      "familyId": "FAM-hinge",
+      "pattern": "hinge",
+      "roles": [
+        "integration",
+        "general_warmup"
+      ],
+      "equipment": [
+        "dowel"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control"
+      ],
+      "demands": [
+        "hip_flexion"
+      ],
+      "instructions": [
+        "Hold the dowel in the demonstrated position and practise moving the hips back within the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-10"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-020",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Dumbbell Romanian deadlift",
+      "familyId": "FAM-hinge",
+      "pattern": "hinge",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell_pair",
+        "clear_floor"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "hinge_pattern_confirmed",
+        "grip_load_tolerance"
+      ],
+      "demands": [
+        "external_load",
+        "hip_flexion",
+        "grip"
+      ],
+      "instructions": [
+        "Hold the selected dumbbells and hinge at the hips through the coach-agreed range before returning upright.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-10"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-021",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Barbell deadlift from floor",
+      "familyId": "FAM-hinge",
+      "pattern": "hinge",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "barbell",
+        "plates",
+        "collars",
+        "lifting_area"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "advanced"
+      ],
+      "prerequisites": [
+        "barbell_deadlift_skill",
+        "floor_start_range",
+        "load_reference_current"
+      ],
+      "demands": [
+        "external_load",
+        "hip_flexion",
+        "grip"
+      ],
+      "instructions": [
+        "Use the reviewed starting height and setup; follow the specific coach-approved lifting and lowering cues.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-10"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-022",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Supported split squat",
+      "familyId": "FAM-lunge",
+      "pattern": "lunge",
+      "roles": [
+        "integration",
+        "main_accessory"
+      ],
+      "equipment": [
+        "fixed_support"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "split_stance_tolerance",
+        "standing_support_access"
+      ],
+      "demands": [
+        "asymmetric_weight_bearing",
+        "knee_hip_flexion"
+      ],
+      "instructions": [
+        "Use fixed support and lower and rise in the selected split stance through the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-11"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-023",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Low step-up with rail",
+      "familyId": "FAM-step",
+      "pattern": "step",
+      "roles": [
+        "integration",
+        "main_accessory"
+      ],
+      "equipment": [
+        "low_step",
+        "fixed_rail"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "step_height_fit",
+        "rail_access"
+      ],
+      "demands": [
+        "single_leg_support",
+        "step_transfer"
+      ],
+      "instructions": [
+        "Use the confirmed rail and step height to step up and return with the chosen lead leg.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-11"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-024",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Wall push-up",
+      "familyId": "FAM-horizontal_push",
+      "pattern": "horizontal_push",
+      "roles": [
+        "integration",
+        "main_accessory"
+      ],
+      "equipment": [
+        "clear_wall"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control",
+        "hand_loading_tolerance"
+      ],
+      "demands": [
+        "upper_limb_weight_bearing",
+        "wrist_extension"
+      ],
+      "instructions": [
+        "Place hands at the agreed wall position and bend and straighten the arms while maintaining the selected body line.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02"
+      ],
+      "needRefs": [
+        "NEED-12"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-025",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Incline push-up on fixed bench",
+      "familyId": "FAM-horizontal_push",
+      "pattern": "horizontal_push",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "fixed_bench"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "inclined",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "incline_push_skill",
+        "hand_loading_tolerance"
+      ],
+      "demands": [
+        "upper_limb_weight_bearing",
+        "wrist_extension"
+      ],
+      "instructions": [
+        "Use the confirmed non-moving bench and the coach-selected hand position and range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02"
+      ],
+      "needRefs": [
+        "NEED-12"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-026",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Dumbbell floor press",
+      "familyId": "FAM-horizontal_push",
+      "pattern": "horizontal_push",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell_pair",
+        "mat"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "supine",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "supine_tolerance",
+        "load_handling_skill"
+      ],
+      "demands": [
+        "floor_transfer",
+        "external_load",
+        "grip"
+      ],
+      "instructions": [
+        "Position the selected dumbbells using the agreed entry method; press and lower through the reviewed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-12"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-027",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Barbell bench press",
+      "familyId": "FAM-horizontal_push",
+      "pattern": "horizontal_push",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "barbell",
+        "plates",
+        "collars",
+        "bench_press_rack",
+        "safety_arms"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "supine",
+      "laterality": "bilateral",
+      "levels": [
+        "advanced"
+      ],
+      "prerequisites": [
+        "bench_press_skill",
+        "rack_safety_setup",
+        "load_reference_current"
+      ],
+      "demands": [
+        "external_load",
+        "supine_position",
+        "grip"
+      ],
+      "instructions": [
+        "Use the reviewed bench and safety arrangement and the coach-approved handling, range and exit procedure.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-12"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-028",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Standing band row",
+      "familyId": "FAM-horizontal_pull",
+      "pattern": "horizontal_pull",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "long_band",
+        "rated_anchor"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control",
+        "anchor_verified",
+        "band_fit"
+      ],
+      "demands": [
+        "grip",
+        "horizontal_pull"
+      ],
+      "instructions": [
+        "Use the verified anchor and fitted band; pull toward the torso and return with control.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-13"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-029",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated band row",
+      "familyId": "FAM-horizontal_pull",
+      "pattern": "horizontal_pull",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "long_band",
+        "rated_anchor",
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control",
+        "anchor_verified",
+        "band_fit"
+      ],
+      "demands": [
+        "grip",
+        "horizontal_pull"
+      ],
+      "instructions": [
+        "Sit in the confirmed support arrangement and row the anchored band through the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-13"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-030",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Chest-supported dumbbell row",
+      "familyId": "FAM-horizontal_pull",
+      "pattern": "horizontal_pull",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell_pair",
+        "adjustable_bench"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "chest_supported",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "bench_transfer_access",
+        "chest_support_tolerance"
+      ],
+      "demands": [
+        "external_load",
+        "chest_support",
+        "grip"
+      ],
+      "instructions": [
+        "Use the fitted bench support and row the selected dumbbells through the reviewed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-13"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-031",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Cable seated row",
+      "familyId": "FAM-horizontal_pull",
+      "pattern": "horizontal_pull",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "cable_row_machine"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "seated",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "machine_fit",
+        "machine_transfer_access"
+      ],
+      "demands": [
+        "external_load",
+        "grip"
+      ],
+      "instructions": [
+        "Set the seat, handle and resistance as agreed; row and return without changing the selected trunk position.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-13"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-032",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Lat pulldown",
+      "familyId": "FAM-vertical_pull",
+      "pattern": "vertical_pull",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "lat_pulldown_machine"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "seated",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "machine_fit",
+        "overhead_range_permitted"
+      ],
+      "demands": [
+        "external_load",
+        "arm_elevation",
+        "grip"
+      ],
+      "instructions": [
+        "Use the fitted seat and selected handle; pull and return through the coach-reviewed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-14"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-033",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Strict pull-up",
+      "familyId": "FAM-vertical_pull",
+      "pattern": "vertical_pull",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "rated_pullup_bar",
+        "safe_access_step"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "hanging",
+      "laterality": "bilateral",
+      "levels": [
+        "advanced"
+      ],
+      "prerequisites": [
+        "pullup_skill",
+        "hanging_tolerance",
+        "bar_access_verified"
+      ],
+      "demands": [
+        "suspended_bodyweight",
+        "arm_elevation",
+        "grip"
+      ],
+      "instructions": [
+        "Use the verified bar and access arrangement for the coach-approved strict variation and range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02"
+      ],
+      "needRefs": [
+        "NEED-14"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-034",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated dumbbell overhead press",
+      "familyId": "FAM-vertical_push",
+      "pattern": "vertical_push",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell_pair",
+        "back_supported_bench"
+      ],
+      "settings": [
+        "gym",
+        "home"
+      ],
+      "position": "supported_seated",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "overhead_range_permitted",
+        "load_handling_skill",
+        "seated_control"
+      ],
+      "demands": [
+        "external_load",
+        "arm_elevation",
+        "grip"
+      ],
+      "instructions": [
+        "Use the fitted back support and selected dumbbells; press and return in the reviewed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-03"
+      ],
+      "needRefs": [
+        "NEED-05"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-035",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Standing Pallof press",
+      "familyId": "FAM-trunk_control",
+      "pattern": "trunk_control",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "long_band",
+        "rated_anchor"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control",
+        "anchor_verified",
+        "trunk_resistance_tolerance"
+      ],
+      "demands": [
+        "anti_rotation",
+        "grip"
+      ],
+      "instructions": [
+        "Stand in the selected orientation to the anchor and move the hands away and back while holding the agreed trunk position.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-06"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-036",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated Pallof press",
+      "familyId": "FAM-trunk_control",
+      "pattern": "trunk_control",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "long_band",
+        "rated_anchor",
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control",
+        "anchor_verified",
+        "trunk_resistance_tolerance"
+      ],
+      "demands": [
+        "anti_rotation",
+        "grip"
+      ],
+      "instructions": [
+        "Sit securely in the selected orientation and press the band away and back within the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-06"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-037",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Suitcase carry",
+      "familyId": "FAM-carry",
+      "pattern": "carry",
+      "roles": [
+        "integration",
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell",
+        "clear_route"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "walking_tolerance",
+        "grip_load_tolerance",
+        "carry_route_verified"
+      ],
+      "demands": [
+        "asymmetric_load",
+        "walking_balance",
+        "grip"
+      ],
+      "instructions": [
+        "Carry the selected dumbbell on the specified side along the confirmed route, then set it down using the reviewed method.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-07"
+      ],
+      "needRefs": [
+        "NEED-15"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-038",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Supported calf raise",
+      "familyId": "FAM-ankle_control",
+      "pattern": "ankle_control",
+      "roles": [
+        "activation",
+        "main_accessory"
+      ],
+      "equipment": [
+        "fixed_support"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_support_access",
+        "forefoot_loading_tolerance"
+      ],
+      "demands": [
+        "weight_bearing",
+        "ankle_motion"
+      ],
+      "instructions": [
+        "Hold fixed support and lift and lower the heels through the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-03"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-039",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Dumbbell curl",
+      "familyId": "FAM-elbow_flexion",
+      "pattern": "elbow_flexion",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell_pair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control",
+        "grip_load_tolerance"
+      ],
+      "demands": [
+        "external_load",
+        "elbow_flexion"
+      ],
+      "instructions": [
+        "Bend and straighten the elbows with the selected dumbbells while maintaining the chosen upper-arm position.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02"
+      ],
+      "needRefs": [
+        "NEED-16"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-040",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Band triceps pressdown",
+      "familyId": "FAM-elbow_extension",
+      "pattern": "elbow_extension",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "long_band",
+        "rated_high_anchor"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_control",
+        "high_anchor_verified"
+      ],
+      "demands": [
+        "external_load",
+        "elbow_extension"
+      ],
+      "instructions": [
+        "Use the verified high anchor; straighten and bend the elbows through the agreed range.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-02"
+      ],
+      "needRefs": [
+        "NEED-17"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-041",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Calf foam rolling",
+      "familyId": "FAM-self_massage",
+      "pattern": "self_massage",
+      "roles": [
+        "smr"
+      ],
+      "equipment": [
+        "foam_roller",
+        "mat"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "floor_seated",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "local_pressure_review"
+      ],
+      "demands": [
+        "local_pressure",
+        "upper_limb_support",
+        "floor_transfer"
+      ],
+      "instructions": [
+        "Position the roller under the reviewed calf region and apply only the coach-agreed pressure; avoid unreviewed painful or injured areas.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-08"
+      ],
+      "needRefs": [
+        "NEED-18"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-042",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Quadriceps foam rolling",
+      "familyId": "FAM-self_massage",
+      "pattern": "self_massage",
+      "roles": [
+        "smr"
+      ],
+      "equipment": [
+        "foam_roller",
+        "mat"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "prone",
+      "laterality": "unilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "prone_tolerance",
+        "local_pressure_review"
+      ],
+      "demands": [
+        "local_pressure",
+        "upper_limb_support",
+        "floor_transfer"
+      ],
+      "instructions": [
+        "Use the demonstrated supported position to roll only the reviewed front-thigh region with the agreed pressure.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-08"
+      ],
+      "needRefs": [
+        "NEED-18"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-043",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated quiet breathing pause",
+      "familyId": "FAM-recovery",
+      "pattern": "recovery",
+      "roles": [
+        "cooldown"
+      ],
+      "equipment": [
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "not_applicable",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control"
+      ],
+      "demands": [
+        "seated_position"
+      ],
+      "instructions": [
+        "Sit comfortably and allow normal unforced breathing during the agreed recovery pause; this is not treatment for symptoms.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-09"
+      ],
+      "needRefs": [
+        "NEED-19"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-044",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Supported standing hip extension",
+      "familyId": "FAM-hip_extension",
+      "pattern": "hip_extension",
+      "roles": [
+        "activation",
+        "integration"
+      ],
+      "equipment": [
+        "fixed_support"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_support_access"
+      ],
+      "demands": [
+        "single_leg_support",
+        "hip_extension"
+      ],
+      "instructions": [
+        "Hold the fixed support and move the chosen leg behind within the agreed range while keeping the selected trunk position.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-07"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-045",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Seated forward reach practice",
+      "familyId": "FAM-reach",
+      "pattern": "reach",
+      "roles": [
+        "integration"
+      ],
+      "equipment": [
+        "stable_chair"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "seated",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "seated_control",
+        "reach_limit_confirmed"
+      ],
+      "demands": [
+        "seated_balance",
+        "arm_reach"
+      ],
+      "instructions": [
+        "From the confirmed stable seat, reach to the agreed target and return without exceeding the reviewed balance limit.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-20"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-046",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Bilateral dumbbell farmer carry",
+      "familyId": "FAM-carry",
+      "pattern": "carry",
+      "roles": [
+        "main_accessory"
+      ],
+      "equipment": [
+        "dumbbell_pair",
+        "clear_route"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "bilateral",
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "walking_tolerance",
+        "grip_load_tolerance",
+        "carry_route_verified"
+      ],
+      "demands": [
+        "external_load",
+        "walking_balance",
+        "grip"
+      ],
+      "instructions": [
+        "Carry the selected pair along the verified route, using the coach-reviewed pickup and set-down method.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-07"
+      ],
+      "needRefs": [
+        "NEED-15"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-047",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Supine hamstring stretch with strap",
+      "familyId": "FAM-hinge",
+      "pattern": "hinge",
+      "roles": [
+        "mobility_lengthening",
+        "cooldown"
+      ],
+      "equipment": [
+        "mat",
+        "stretch_strap"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "supine",
+      "laterality": "unilateral",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "floor_transfer_access",
+        "supine_tolerance",
+        "stretch_range_reviewed"
+      ],
+      "demands": [
+        "sustained_stretch",
+        "floor_transfer"
+      ],
+      "instructions": [
+        "Use the strap and agreed leg position to hold only the reviewed range without forcing the movement.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-06"
+      ],
+      "needRefs": [
+        "NEED-10"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    },
+    {
+      "id": "EX-048",
+      "revision": 1,
+      "reviewStatus": "draft",
+      "approvalEvidence": [],
+      "automationEligible": false,
+      "name": "Side-step with fixed support",
+      "familyId": "FAM-locomotion",
+      "pattern": "locomotion",
+      "roles": [
+        "general_warmup",
+        "integration"
+      ],
+      "equipment": [
+        "fixed_rail",
+        "clear_floor"
+      ],
+      "settings": [
+        "gym",
+        "home",
+        "travel"
+      ],
+      "position": "standing",
+      "laterality": "alternating",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "prerequisites": [
+        "standing_support_access",
+        "lateral_step_tolerance"
+      ],
+      "demands": [
+        "weight_bearing",
+        "lateral_balance"
+      ],
+      "instructions": [
+        "Move sideways along the confirmed rail using the step size and support agreed with the coach.",
+        "Coach must specify side, range, support, load or effort and dose before use; stop/report handling follows the reviewed policy."
+      ],
+      "doseRefs": [
+        "DOSE-01",
+        "DOSE-04"
+      ],
+      "needRefs": [
+        "NEED-08",
+        "NEED-11"
+      ],
+      "sourceRefs": [
+        "SRC-ORIGINAL"
+      ],
+      "rightsStatus": "original-draft-review-pending",
+      "populationScope": "adult-general-fitness-candidate; individualized accommodations require review; no condition-specific rehabilitation approval",
+      "assistance": "not assumed; if needed, record task, availability and competence before selection",
+      "restrictionPolicyRefs": [
+        "POL-004",
+        "POL-005",
+        "POL-006",
+        "POL-009",
+        "POL-015"
+      ],
+      "reviewQuestions": [
+        "Confirm variant setup, demands, prerequisites and side/dose compatibility.",
+        "Accept or amend instructions and population scope; nominate compatible alternatives.",
+        "Identify missing contraindication or modification metadata for the approved scope."
+      ],
+      "media": []
+    }
+  ]
+}

@@ -1,0 +1,2797 @@
+{
+  "name": "Fitness Scribber — Client Exercise Pooling",
+  "version": "backup-build-approval-v0.5",
+  "status": "local-backup-build-approved-preflight-in-progress",
+  "currentSprint": "SB",
+  "executionMode": "local-backup-recovery-and-r1-r3-engineering",
+  "implementationAuthorized": true,
+  "productionChangesAuthorized": false,
+  "completedScope": "R1 S1/S2 preparation plus authorized early P05/C09, P06/C10, extension data/API/UX/test specifications and release/support/maintenance drafts complete. All actual acceptance, build, executed application tests and release remain pending.",
+  "priorityDefinitions": {
+    "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",
+    "P1": "Core R1 functionality and usability.",
+    "P2": "R2 extension after approval and R1 evidence.",
+    "P3": "R3 extension after approval; not in first release."
+  },
+  "sprintScheduling": "Dependency-ordered milestones. Calendar dates/capacity/estimates are not assigned until scope and reviewer/environment availability are confirmed. A later-sprint P0 never jumps its prerequisites.",
+  "taskStatusDefinitions": {
+    "done": "Mapped output verified; any required task-specific review recorded. FP-001 completion is planning only, not implementation approval.",
+    "in-review": "Mapping work being checked; not implementation.",
+    "awaiting-user-input": "Needs initial facts/approval.",
+    "awaiting-scope-approval": "Mapped but not authorized to execute yet.",
+    "future-gated": "Later action requiring explicit milestone/action approval.",
+    "planned": "Authorized preparation phase; dependencies/reviews still apply.",
+    "in-progress": "Authorized preparation started; output incomplete.",
+    "draft-awaiting-review": "Preparation output complete; acceptance is pending. Not approved for implementation or live use.",
+    "awaiting-external-acceptance": "Review dossier prepared; actual required feedback/sign-off or build decision is pending. Task is not accepted/done."
+  },
+  "approvalSemantics": "approvalRefs identify inputs, reviews and permissions touched by a task. Inputs/reviews may be delivered at task completion; permissions for consequential actions must precede that action. A06 precedes S1–S2, G2 plus A12 precedes S3–S5. A13–A19 require exact scope as applicable. A20/A21 separate preparation/build/enablement checkpoints.",
+  "sprints": [
+    {
+      "id": "S0",
+      "title": "Project setup and your decisions",
+      "release": "Planning",
+      "entry": "Mapping complete; actual user instructions/A06 recorded.",
+      "exit": "Initial facts/unknowns recorded; A06 approved. Remaining facts are preparation decisions."
+    },
+    {
+      "id": "S1",
+      "title": "Requirements and technical design",
+      "release": "R0",
+      "entry": "A06 preparation approval; unresolved facts are labelled, not invented.",
+      "exit": "G1 scope accepted; R1 PRDs, contracts, UX and verification plans drafted. No application build."
+    },
+    {
+      "id": "S2",
+      "title": "Catalogue preparation and implementation approval",
+      "release": "R0",
+      "entry": "S1 vocabulary/state inputs available; approved preparation scope only.",
+      "exit": "Reviewed R1 content and design package; G2 approval and A12 explicit build permission. No application build."
+    },
+    {
+      "id": "SB",
+      "title": "Classic backup recovery and full-build preflight",
+      "release": "Local preparation and final recovery",
+      "entry": "Owner approves consolidated local execution scope; storage and runtime prerequisites resolved.",
+      "exit": "Before coding: FP-B10 passes. After local R1-R3 coding/testing: FP-B11 and FP-B12 verified; no live enablement implied."
+    },
+    {
+      "id": "S3",
+      "title": "Data foundation and backend protections",
+      "release": "R1",
+      "entry": "G2 passed and A12 approved; A13 before hosted non-production actions.",
+      "exit": "Stable identity, preserved data, source resolution and tested authoritative permissions."
+    },
+    {
+      "id": "S4",
+      "title": "Selection and workout-drafting engine",
+      "release": "R1",
+      "entry": "S3 contracts implemented; only reviewed catalogue/rules admitted.",
+      "exit": "Deterministic, explainable drafts pass rule and coverage tests."
+    },
+    {
+      "id": "S5",
+      "title": "Coach and client workflow integration",
+      "release": "R1",
+      "entry": "S4 engine and S3 persistence/permissions ready.",
+      "exit": "Usable end-to-end local/staging workflow with checks at every entry point."
+    },
+    {
+      "id": "S6",
+      "title": "Verification, pilot and R1 rollout",
+      "release": "R1",
+      "entry": "R1 build ready for independent review; explicit external-action approvals remain required.",
+      "exit": "G3 limited pilot, then evidence-based G4 wider-rollout decision. No automatic deployment."
+    },
+    {
+      "id": "S7",
+      "title": "Daily adjustment suggestions",
+      "release": "R2",
+      "entry": "R1 evidence reviewed; A20 preparation permission, followed by separate G5 build approval.",
+      "exit": "Reviewed bounded daily suggestions pass tests/pilot and receive explicit enablement approval."
+    },
+    {
+      "id": "S8",
+      "title": "Progression and weekly-planning suggestions",
+      "release": "R3",
+      "entry": "A21 preparation permission and stable prior contracts; separate G5 build approval.",
+      "exit": "Reviewed progression/planning suggestions, pilot acceptance, approved release and maintenance handoff."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "FP-001",
+      "sprint": "S0",
+      "priority": "P0",
+      "title": "Convert the readiness map into a traceable sprint backlog and approval checklist",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [],
+      "approvalRefs": [],
+      "status": "done",
+      "acceptance": "Backlog covers all 40 artifacts; task IDs/dependencies and approval references validate; planning files only."
+    },
+    {
+      "id": "FP-002",
+      "sprint": "S0",
+      "priority": "P0",
+      "title": "Record your initial scope, operating facts, reviewers and preparation permission",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [
+        "P01"
+      ],
+      "dependsOn": [
+        "FP-001"
+      ],
+      "approvalRefs": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06"
+      ],
+      "status": "done",
+      "acceptance": "Record actual answers, unknowns and A06 scope. Do not mark missing reviewers or unresolved facts as approved.",
+      "outputs": [
+        "preparation/APPROVAL_RECORD.md"
+      ]
+    },
+    {
+      "id": "FP-101",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Draft master PRD, R1 boundary and requirement IDs",
+      "owner": "Assistant",
+      "reviewer": "Product / engineering",
+      "artifacts": [
+        "P01"
+      ],
+      "dependsOn": [
+        "FP-002"
+      ],
+      "approvalRefs": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "PRD defines users, supported scope, non-goals, authority and measurable acceptance; traces to decisions.",
+      "outputs": [
+        "prd/MASTER_PRD.md"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-102",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Inventory fields and reconcile architectural documentation",
+      "owner": "Assistant",
+      "reviewer": "Product / engineering",
+      "artifacts": [
+        "D01"
+      ],
+      "dependsOn": [
+        "FP-101"
+      ],
+      "approvalRefs": [
+        "A06"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Every in-scope field maps to source/form/type/scale/default/owner/date; current Supabase/local mode documented; no live data accessed.",
+      "outputs": [
+        "data/SOURCE_AND_PRIVACY_INVENTORY.md",
+        "data/FIELD_DICTIONARY.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-103",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Specify assessment reliability and context resolution",
+      "owner": "Assistant",
+      "reviewer": "Product / domain / engineering",
+      "artifacts": [
+        "P02",
+        "D02"
+      ],
+      "dependsOn": [
+        "FP-102"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A09"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Worked cases define unknown/absent, source precedence, effective dates, conflicting/old findings and minimal health-change flow.",
+      "outputs": [
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/CONTEXT_RESOLUTION.md",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-104",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Define stable vocabulary, lifecycle and authority contracts",
+      "owner": "Assistant",
+      "reviewer": "Product / domain / security",
+      "artifacts": [
+        "D03",
+        "D04"
+      ],
+      "dependsOn": [
+        "FP-102"
+      ],
+      "approvalRefs": [
+        "A02",
+        "A06",
+        "A09",
+        "A10"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Canonical IDs/sides/units and transition matrix cover draft, review, assignment, start, resume, invalidation and authorized actors.",
+      "outputs": [
+        "data/VOCABULARY.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-105",
+      "sprint": "S1",
+      "priority": "P1",
+      "title": "Draft pool eligibility, ranking and explanation PRD",
+      "owner": "Assistant",
+      "reviewer": "Product / exercise reviewer",
+      "artifacts": [
+        "P03"
+      ],
+      "dependsOn": [
+        "FP-103",
+        "FP-104",
+        "FP-114"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A09"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Defines session status separately from eligibility, all eight roles, hard versus soft rules, coverage, tie-breaks and no-candidate behaviour.",
+      "outputs": [
+        "prd/POOL_SELECTION_PRD.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-106",
+      "sprint": "S1",
+      "priority": "P1",
+      "title": "Draft session generation, substitution and approval PRD",
+      "owner": "Assistant",
+      "reviewer": "Product / engineering",
+      "artifacts": [
+        "P04"
+      ],
+      "dependsOn": [
+        "FP-103",
+        "FP-104",
+        "FP-114"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A10"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Defines time/rest/setup/side accounting, coach-selected weekly structure, dosage references and every edit/copy approval path.",
+      "outputs": [
+        "prd/DRAFT_AND_APPROVAL_PRD.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-107",
+      "sprint": "S1",
+      "priority": "P1",
+      "title": "Prepare coach/client wireframes and accessible copy specification",
+      "owner": "Assistant",
+      "reviewer": "Product / representative coaches / accessibility",
+      "artifacts": [
+        "U01",
+        "U02"
+      ],
+      "dependsOn": [
+        "FP-105",
+        "FP-106"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A10"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Non-executable specifications cover desktop/mobile, missing/held/stale/unsaved states, keyboard/focus and privacy-safe explanations.",
+      "outputs": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-108",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Specify deterministic engine contract and reason traceability",
+      "owner": "Assistant",
+      "reviewer": "Product / engineering",
+      "artifacts": [
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-105",
+        "FP-106"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A11"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Input/output/error contracts, versioned sources, ranking/coverage boundaries and stable ordering can be tested without JSX.",
+      "outputs": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-109",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Specify backend persistence, permissions and atomic approval",
+      "owner": "Assistant",
+      "reviewer": "Engineering / security / privacy",
+      "artifacts": [
+        "E02"
+      ],
+      "dependsOn": [
+        "FP-108",
+        "FP-104"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A10",
+        "A11"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Tables/API contracts map roles and sensitive fields; direct-write bypass, transaction consistency and local-mode limits are addressed.",
+      "outputs": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-110",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Design migration, identity preservation and rollback",
+      "owner": "Assistant",
+      "reviewer": "Product / engineering",
+      "artifacts": [
+        "E03"
+      ],
+      "dependsOn": [
+        "FP-102",
+        "FP-104",
+        "FP-109"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A09",
+        "A11"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Plan maps old exercise refs/overrides, legacy ambiguity, historical blocks, schema preconditions and measurable backup/restore checks. No migration executed.",
+      "outputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-111",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Map integration entry points, configuration and failure behaviour",
+      "owner": "Assistant",
+      "reviewer": "Product / engineering",
+      "artifacts": [
+        "E04",
+        "E05"
+      ],
+      "dependsOn": [
+        "FP-108",
+        "FP-109"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A10",
+        "A11"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Matrix covers manual/voice/template/copy/athlete flows; defines invalidation, concurrency, failed save, offline, feature flags and performance budgets.",
+      "outputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-112",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Draft synthetic reference cases, test coverage and CI strategy",
+      "owner": "Assistant",
+      "reviewer": "QA / exercise reviewer",
+      "artifacts": [
+        "Q01",
+        "Q02"
+      ],
+      "dependsOn": [
+        "FP-105",
+        "FP-106",
+        "FP-108"
+      ],
+      "approvalRefs": [
+        "A06"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Required behavioural cases link to requirement IDs; domain-dependent expected selections remain draft pending reviewed content.",
+      "outputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/TRACEABILITY_AND_VERIFICATION.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-113",
+      "sprint": "S1",
+      "priority": "P1",
+      "title": "Draft pilot measures and privacy/security acceptance criteria",
+      "owner": "Assistant",
+      "reviewer": "Product / privacy / security",
+      "artifacts": [
+        "O01",
+        "Q05"
+      ],
+      "dependsOn": [
+        "FP-101",
+        "FP-109",
+        "FP-111"
+      ],
+      "approvalRefs": [
+        "A05",
+        "A06",
+        "A14",
+        "A15",
+        "A16"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Propose measurable quality/stop criteria and minimized telemetry; record jurisdiction/consent/reviewer questions. No pilot or client contact.",
+      "outputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-114",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Prepare and record the G1 scope review",
+      "owner": "Assistant",
+      "reviewer": "Project owner / relevant domain reviewer",
+      "artifacts": [
+        "P01",
+        "D01",
+        "D02",
+        "D04"
+      ],
+      "dependsOn": [
+        "FP-101",
+        "FP-102",
+        "FP-103",
+        "FP-104",
+        "FP-115",
+        "FP-117"
+      ],
+      "approvalRefs": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06"
+      ],
+      "status": "awaiting-external-acceptance",
+      "acceptance": "Actual scope/definition feedback is resolved and authorized G1 acceptance recorded; this does not authorize application code.",
+      "outputs": [
+        "preparation/S1_REVIEW_PACK.md",
+        "prd/MASTER_PRD.md",
+        "data/FIELD_DICTIONARY.md",
+        "data/SOURCE_AND_PRIVACY_INVENTORY.md",
+        "data/CONTEXT_RESOLUTION.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "quality/DOMAIN_REVIEW_PACKET.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-115",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Define expanded adult/advanced/adaptive/rehabilitation scope and reviewer authority",
+      "owner": "Assistant",
+      "reviewer": "Project owner / exercise and clinical reviewers",
+      "artifacts": [
+        "P01",
+        "D04",
+        "Q03"
+      ],
+      "dependsOn": [
+        "FP-101"
+      ],
+      "approvalRefs": [
+        "A01",
+        "A02",
+        "A04",
+        "A06",
+        "A07"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Distinguish product/content, individual clinical and coach assignment approvals; define reviewer roles without assuming credentials or blanket specialty coverage.",
+      "outputs": [
+        "preparation/APPROVAL_RECORD.md",
+        "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
+        "prd/MASTER_PRD.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-116",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Draft client-app privacy, participation, health-data and clinician-sharing documents",
+      "owner": "Assistant",
+      "reviewer": "Project owner / privacy and clinical advisers",
+      "artifacts": [
+        "Q05",
+        "U02",
+        "O03"
+      ],
+      "dependsOn": [
+        "FP-102",
+        "FP-115"
+      ],
+      "approvalRefs": [
+        "A05",
+        "A06",
+        "A07",
+        "A10",
+        "A16"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Separate original drafts preserve specific consent, actual client evidence, withdrawal, recipient limits and publication blockers; no compliance claim or live insertion.",
+      "outputs": [
+        "policies/README.md",
+        "policies/PRIVACY_NOTICE_DRAFT.md",
+        "policies/PARTICIPATION_AND_HEALTH_DATA_CONSENT_DRAFT.md",
+        "policies/CLINICIAN_INFORMATION_SHARING_DRAFT.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-117",
+      "sprint": "S1",
+      "priority": "P0",
+      "title": "Map intended international markets and country-specific launch reviews",
+      "owner": "Assistant",
+      "reviewer": "Project owner / regional advisers",
+      "artifacts": [
+        "P01",
+        "Q05",
+        "O01",
+        "C12"
+      ],
+      "dependsOn": [
+        "FP-101",
+        "FP-115"
+      ],
+      "approvalRefs": [
+        "A05",
+        "A06",
+        "A16",
+        "A19"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Retain all requested market targets; distinguish establishment and client markets; identify country/state privacy/clinical/transfer gaps and staged activation decisions.",
+      "outputs": [
+        "policies/REGIONAL_REVIEW_MATRIX.md",
+        "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
+        "prd/MASTER_PRD.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-201",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Audit evidence, source provenance and content permissions",
+      "owner": "Assistant",
+      "reviewer": "Content / rights / domain reviewer",
+      "artifacts": [
+        "C12"
+      ],
+      "dependsOn": [
+        "FP-101",
+        "FP-102"
+      ],
+      "approvalRefs": [
+        "A03",
+        "A04",
+        "A06",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Every candidate source has applicability, version, attribution and rights status; uncertain rights stay unresolved/quarantined.",
+      "outputs": [
+        "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
+        "policies/REGIONAL_REVIEW_MATRIX.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-202",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Draft catalogue schemas and populate the candidate exercise subset",
+      "owner": "Assistant",
+      "reviewer": "Qualified exercise reviewer",
+      "artifacts": [
+        "C01",
+        "U03"
+      ],
+      "dependsOn": [
+        "FP-104",
+        "FP-201"
+      ],
+      "approvalRefs": [
+        "A03",
+        "A06",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Structured candidate records cover agreed scenarios with stable IDs, complete equipment/roles/requirements and draft status. No live publish.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-203",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Draft the assessment/protocol catalogue",
+      "owner": "Assistant",
+      "reviewer": "Qualified assessment reviewer",
+      "artifacts": [
+        "C02"
+      ],
+      "dependsOn": [
+        "FP-103",
+        "FP-104",
+        "FP-201"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Each protocol describes administration, competence, scales, side, missingness, limitations and comparable reassessment criteria.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/PROTOCOL_ADMINISTRATION.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-204",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Draft finding-to-need mappings with confirmation requirements",
+      "owner": "Assistant",
+      "reviewer": "Exercise / appropriate clinical reviewer",
+      "artifacts": [
+        "C03"
+      ],
+      "dependsOn": [
+        "FP-203",
+        "FP-104"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Mappings preserve laterality, label hypotheses, deduplicate needs and identify contradictory/unsupported inferences.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/finding-mappings.draft.json"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-205",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Draft screening, restriction, clearance and referral rules",
+      "owner": "Assistant",
+      "reviewer": "Appropriate clinical-policy reviewer",
+      "artifacts": [
+        "C04"
+      ],
+      "dependsOn": [
+        "FP-103",
+        "FP-104",
+        "FP-201"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A06",
+        "A07"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Rules reference the proposed instrument/version and competent authority; explicit hold/modify/review paths cover changed health and old clearance. Remain unapproved until reviewed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-206",
+      "sprint": "S2",
+      "priority": "P1",
+      "title": "Draft goal structures and dosage/loading templates",
+      "owner": "Assistant",
+      "reviewer": "Qualified exercise reviewer",
+      "artifacts": [
+        "C05",
+        "C06"
+      ],
+      "dependsOn": [
+        "FP-202",
+        "FP-201",
+        "FP-106"
+      ],
+      "approvalRefs": [
+        "A03",
+        "A06",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Coach-selected structures and dose bounds fit supported goals/ability; no invented maxima, age or loads; lifestyle context is distinct from daily adaptation.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-207",
+      "sprint": "S2",
+      "priority": "P1",
+      "title": "Draft substitution families and session/preparation templates",
+      "owner": "Assistant",
+      "reviewer": "Qualified exercise reviewer",
+      "artifacts": [
+        "C07",
+        "C08"
+      ],
+      "dependsOn": [
+        "FP-202",
+        "FP-205",
+        "FP-206"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Alternatives retain relevant needs/side and require fresh checks; session templates count rest/setup and return explicit time/coverage gaps.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-208",
+      "sprint": "S2",
+      "priority": "P1",
+      "title": "Finalize reason codes and coach/client explanations",
+      "owner": "Assistant",
+      "reviewer": "Product / domain / privacy",
+      "artifacts": [
+        "C11",
+        "U02"
+      ],
+      "dependsOn": [
+        "FP-204",
+        "FP-205",
+        "FP-107"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A10",
+        "A16"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Each status/action has a stable code, source reference and plain-language audience variant without raw medical notes or unsupported claims.",
+      "outputs": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "ux/SCREEN_SPECIFICATIONS.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-209",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Prepare review cases and record qualified content/policy feedback",
+      "owner": "Assistant",
+      "reviewer": "Qualified exercise / clinical-policy / rights reviewers",
+      "artifacts": [
+        "Q01",
+        "Q03",
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C12"
+      ],
+      "dependsOn": [
+        "FP-112",
+        "FP-201",
+        "FP-202",
+        "FP-203",
+        "FP-204",
+        "FP-205",
+        "FP-206",
+        "FP-207",
+        "FP-208",
+        "FP-212",
+        "FP-213"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A07",
+        "A08"
+      ],
+      "status": "awaiting-external-acceptance",
+      "acceptance": "Named competent reviewers accept/reject scoped records and expected cases; resolve blockers, quarantine unsupported content and preserve actual sign-off evidence.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/PROTOCOL_ADMINISTRATION.md",
+        "catalogues/finding-mappings.draft.json",
+        "data/MODULE_REQUIREMENTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-210",
+      "sprint": "S2",
+      "priority": "P1",
+      "title": "Define catalogue publishing, retirement and maintenance workflow",
+      "owner": "Assistant",
+      "reviewer": "Content owner / engineering / domain reviewer",
+      "artifacts": [
+        "U03",
+        "O04"
+      ],
+      "dependsOn": [
+        "FP-104",
+        "FP-201",
+        "FP-202",
+        "FP-205"
+      ],
+      "approvalRefs": [
+        "A06",
+        "A08",
+        "A10"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Controlled review/version/publish/retire workflow has change owners and reapproval triggers; full admin CMS not required.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "catalogues/SCHEMA_AND_VALIDATION.md"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-211",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Assemble G2 implementation package and request explicit build approval",
+      "owner": "Assistant",
+      "reviewer": "Project owner / domain / security / privacy / rights",
+      "artifacts": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "E01",
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "U01",
+        "U02",
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q05"
+      ],
+      "dependsOn": [
+        "FP-107",
+        "FP-108",
+        "FP-109",
+        "FP-110",
+        "FP-111",
+        "FP-113",
+        "FP-209",
+        "FP-210",
+        "FP-116",
+        "FP-214"
+      ],
+      "approvalRefs": [
+        "A07",
+        "A08",
+        "A09",
+        "A10",
+        "A11",
+        "A12",
+        "A13",
+        "A14"
+      ],
+      "status": "awaiting-external-acceptance",
+      "acceptance": "Versioned R1 requirements/content/design/tests and open-risk disposition accepted. Record A12 scope before S3; specify whether any staging access is permitted.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/MASTER_PRD.md",
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "prd/POOL_SELECTION_PRD.md",
+        "prd/DRAFT_AND_APPROVAL_PRD.md",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "preparation/S2_HANDOFF.md",
+        "preparation/OPEN_DECISIONS.md",
+        "preparation/PACKAGE_MANIFEST.json"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-212",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Extend catalogue coverage for advanced and individual adaptive/clinical contexts",
+      "owner": "Assistant",
+      "reviewer": "Exercise / appropriate clinical reviewers",
+      "artifacts": [
+        "C01",
+        "C03",
+        "C05",
+        "C06",
+        "C07",
+        "C08"
+      ],
+      "dependsOn": [
+        "FP-104",
+        "FP-115",
+        "FP-202",
+        "FP-203"
+      ],
+      "approvalRefs": [
+        "A01",
+        "A03",
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Coverage includes all levels and scoped clinical/adaptive modules; unsupported cells explicit; draft mappings not approved prescriptions; specialist evidence traceable.",
+      "outputs": [
+        "catalogues/COVERAGE_DRAFT.md",
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/finding-mappings.draft.json",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "review/CATALOGUE_REVIEW_DIGEST.md"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-213",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Specify clinician handoff, instruction provenance and client-sharing evidence",
+      "owner": "Assistant",
+      "reviewer": "Clinical / privacy reviewer",
+      "artifacts": [
+        "P02",
+        "D04",
+        "C04",
+        "Q03"
+      ],
+      "dependsOn": [
+        "FP-104",
+        "FP-115",
+        "FP-116",
+        "FP-205"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A06",
+        "A07",
+        "A10",
+        "A16"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Define scoped instructions, supervision/review limits and meaningful coach interpretation; sharing consent separate from clearance; representative authority verified where applicable.",
+      "outputs": [
+        "catalogues/COVERAGE_DRAFT.md",
+        "policies/CLINICIAN_INFORMATION_SHARING_DRAFT.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "catalogues/rules-and-templates.draft.json",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json"
+      ],
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending"
+    },
+    {
+      "id": "FP-214",
+      "sprint": "S2",
+      "priority": "P0",
+      "title": "Complete market policy review packs and record applicable professional acceptance",
+      "owner": "Assistant",
+      "reviewer": "Project owner / regional privacy and service-scope advisers",
+      "artifacts": [
+        "Q05",
+        "C12",
+        "U02"
+      ],
+      "dependsOn": [
+        "FP-116",
+        "FP-117",
+        "FP-109"
+      ],
+      "approvalRefs": [
+        "A05",
+        "A06",
+        "A08",
+        "A10",
+        "A16"
+      ],
+      "status": "awaiting-external-acceptance",
+      "acceptance": "Resolve operator, providers/regions, purposes/grounds, consent/rights/retention and enabled-market addenda; record real reviewer acceptance; unreviewed markets remain unapproved for activation.",
+      "outputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md"
+      ],
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+    },
+    {
+      "id": "FP-301",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Set up isolated implementation branch, test harness and disabled feature flag",
+      "owner": "Assistant",
+      "reviewer": "Engineering",
+      "artifacts": [
+        "Q02",
+        "E05"
+      ],
+      "dependsOn": [
+        "FP-211",
+        "FP-B10"
+      ],
+      "approvalRefs": [
+        "A11",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Authorized codex/ branch preserves existing changes; runnable tests and pooling-off default established. No remote push or package purchase.",
+      "preparationOutputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-302",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Implement stable catalogue identity and legacy-reference mapping",
+      "owner": "Assistant",
+      "reviewer": "Engineering / content owner",
+      "artifacts": [
+        "C01",
+        "D03",
+        "E03"
+      ],
+      "dependsOn": [
+        "FP-301"
+      ],
+      "approvalRefs": [
+        "A09",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Existing exercise refs, names, custom overrides and media survive reload/migration; approved vs draft/retired records behave correctly; regression tests pass.",
+      "preparationOutputs": [
+        "catalogues/exercises.draft.json",
+        "catalogues/catalogue.schema.json",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "data/VOCABULARY.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-303",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Implement additive local schema and versioned persistence contracts",
+      "owner": "Assistant",
+      "reviewer": "Engineering / security",
+      "artifacts": [
+        "E02",
+        "D04"
+      ],
+      "dependsOn": [
+        "FP-301"
+      ],
+      "approvalRefs": [
+        "A10",
+        "A12",
+        "A13"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Catalogue/restriction/context/decision/approval records persist in the authorized test environment with documented ownership and compatible old data.",
+      "preparationOutputs": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "data/MODULE_REQUIREMENTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-304",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Implement explicit assessment/source states and input confirmation",
+      "owner": "Assistant",
+      "reviewer": "QA / domain",
+      "artifacts": [
+        "P02",
+        "D01",
+        "D04"
+      ],
+      "dependsOn": [
+        "FP-302",
+        "FP-303"
+      ],
+      "approvalRefs": [
+        "A09",
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Forms/persistence distinguish unknown, unassessed and absent; preserve side/date/source and legacy originals; untouched defaults are not asserted as confirmed.",
+      "preparationOutputs": [
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "data/FIELD_DICTIONARY.md",
+        "data/SOURCE_AND_PRIVACY_INVENTORY.md",
+        "data/STATES_AND_AUTHORITY.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-305",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Implement deterministic client-context resolver",
+      "owner": "Assistant",
+      "reviewer": "QA / domain",
+      "artifacts": [
+        "D02",
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-302",
+        "FP-303",
+        "FP-304"
+      ],
+      "approvalRefs": [
+        "A09",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Date/source/conflict/staleness/side cases pass; unresolved restrictions persist; historical resolution excludes future evidence.",
+      "preparationOutputs": [
+        "data/CONTEXT_RESOLUTION.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-306",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Implement authoritative permissions and approval transactions",
+      "owner": "Assistant",
+      "reviewer": "Security / QA",
+      "artifacts": [
+        "E02",
+        "D04",
+        "C04"
+      ],
+      "dependsOn": [
+        "FP-303",
+        "FP-305"
+      ],
+      "approvalRefs": [
+        "A07",
+        "A10",
+        "A12",
+        "A13"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Authorized test backend rejects cross-tenant and unauthorized athlete writes, bypassed holds and inconsistent approvals; local-mode limitations remain explicit.",
+      "preparationOutputs": [
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "data/STATES_AND_AUTHORITY.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "catalogues/rules-and-templates.draft.json"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-307",
+      "sprint": "S3",
+      "priority": "P0",
+      "title": "Run synthetic migration and preservation tests",
+      "owner": "Assistant",
+      "reviewer": "QA / data owner",
+      "artifacts": [
+        "E03",
+        "Q06"
+      ],
+      "dependsOn": [
+        "FP-302",
+        "FP-303",
+        "FP-304",
+        "FP-306"
+      ],
+      "approvalRefs": [
+        "A09",
+        "A12",
+        "A13"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Dry-run and restore evidence preserve counts/references/overrides/history in local or expressly authorized staging; no production changes.",
+      "preparationOutputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-401",
+      "sprint": "S4",
+      "priority": "P0",
+      "title": "Implement session eligibility and per-exercise filtering",
+      "owner": "Assistant",
+      "reviewer": "QA / domain",
+      "artifacts": [
+        "P03",
+        "C04",
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-305",
+        "FP-306"
+      ],
+      "approvalRefs": [
+        "A07",
+        "A08",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Reviewed rules return session hold/review plus exercise eligible/modified/review/excluded statuses and reason codes; ranking cannot bypass them.",
+      "preparationOutputs": [
+        "prd/POOL_SELECTION_PRD.md",
+        "catalogues/rules-and-templates.draft.json",
+        "data/MODULE_REQUIREMENTS.md",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-402",
+      "sprint": "S4",
+      "priority": "P1",
+      "title": "Implement role-specific ranking, coverage and redundancy handling",
+      "owner": "Assistant",
+      "reviewer": "QA / exercise reviewer",
+      "artifacts": [
+        "P03",
+        "C03",
+        "C05",
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-401"
+      ],
+      "approvalRefs": [
+        "A08",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Stable ranking selects only eligible reviewed records, preserves side, reduces redundant need coverage and exposes unsupported cells.",
+      "preparationOutputs": [
+        "prd/POOL_SELECTION_PRD.md",
+        "catalogues/rules-and-templates.draft.json",
+        "catalogues/finding-mappings.draft.json",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-403",
+      "sprint": "S4",
+      "priority": "P0",
+      "title": "Implement reviewed dosage and loading resolution",
+      "owner": "Assistant",
+      "reviewer": "QA / exercise reviewer",
+      "artifacts": [
+        "C06",
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-305",
+        "FP-401"
+      ],
+      "approvalRefs": [
+        "A08",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Tests cover measured/estimated references, no-max/bodyweight/timed work, units and limits; no fabricated load or silent unsafe fallbacks.",
+      "preparationOutputs": [
+        "catalogues/rules-and-templates.draft.json",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-404",
+      "sprint": "S4",
+      "priority": "P1",
+      "title": "Implement time-budgeted session composer and compatible alternatives",
+      "owner": "Assistant",
+      "reviewer": "QA / coaching reviewer",
+      "artifacts": [
+        "P04",
+        "C07",
+        "C08",
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-402",
+        "FP-403"
+      ],
+      "approvalRefs": [
+        "A08",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Draft respects selected weekly structure, session duration including setup/rest/sides, optional blocks and swap rechecks; insufficient coverage is explicit.",
+      "preparationOutputs": [
+        "prd/DRAFT_AND_APPROVAL_PRD.md",
+        "catalogues/rules-and-templates.draft.json",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-405",
+      "sprint": "S4",
+      "priority": "P0",
+      "title": "Implement rationale snapshots, versions and engine replay tests",
+      "owner": "Assistant",
+      "reviewer": "QA / privacy",
+      "artifacts": [
+        "C11",
+        "E01",
+        "E02",
+        "Q02"
+      ],
+      "dependsOn": [
+        "FP-401",
+        "FP-402",
+        "FP-403",
+        "FP-404"
+      ],
+      "approvalRefs": [
+        "A10",
+        "A12",
+        "A16"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Outputs retain only necessary source references/reasons, engine/catalogue versions and repeatable results; private notes excluded from athlete output/telemetry.",
+      "preparationOutputs": [
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-501",
+      "sprint": "S5",
+      "priority": "P1",
+      "title": "Add the client Exercise Pool view",
+      "owner": "Assistant",
+      "reviewer": "Product / coach / accessibility",
+      "artifacts": [
+        "P03",
+        "U01",
+        "U02"
+      ],
+      "dependsOn": [
+        "FP-402",
+        "FP-405"
+      ],
+      "approvalRefs": [
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Coach can inspect categories/statuses, source dates, why/why-not, missing data and candidates; role/side meaning accessible beyond colour.",
+      "preparationOutputs": [
+        "prd/POOL_SELECTION_PRD.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-502",
+      "sprint": "S5",
+      "priority": "P1",
+      "title": "Integrate draft generation, compatible swaps and approval in builder",
+      "owner": "Assistant",
+      "reviewer": "Product / QA",
+      "artifacts": [
+        "P04",
+        "U01",
+        "E04"
+      ],
+      "dependsOn": [
+        "FP-404",
+        "FP-405",
+        "FP-501"
+      ],
+      "approvalRefs": [
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Draft-review-edit-approve flow preserves existing workouts, shows changed dosage/time, rechecks substitutions and stores actual approval only after successful validation/save.",
+      "preparationOutputs": [
+        "prd/DRAFT_AND_APPROVAL_PRD.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-503",
+      "sprint": "S5",
+      "priority": "P0",
+      "title": "Integrate minimal health-change reporting at workout start",
+      "owner": "Assistant",
+      "reviewer": "Domain / QA / accessibility",
+      "artifacts": [
+        "P02",
+        "C04",
+        "U01",
+        "E04"
+      ],
+      "dependsOn": [
+        "FP-304",
+        "FP-401",
+        "FP-405"
+      ],
+      "approvalRefs": [
+        "A07",
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Coach/athlete health-change paths distinguish unknown/current report and applicable review/hold without implementing R2 wellness dosage logic.",
+      "preparationOutputs": [
+        "prd/CLIENT_CONTEXT_PRD.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "catalogues/rules-and-templates.draft.json",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-504",
+      "sprint": "S5",
+      "priority": "P0",
+      "title": "Enforce checks across copies, templates, manual/voice and athlete flows",
+      "owner": "Assistant",
+      "reviewer": "QA / security",
+      "artifacts": [
+        "E04",
+        "P04"
+      ],
+      "dependsOn": [
+        "FP-502",
+        "FP-503",
+        "FP-306"
+      ],
+      "approvalRefs": [
+        "A07",
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Each entry-point case re-evaluates target client/date/role and relevant restriction; no inherited source-client approval or hidden bypass.",
+      "preparationOutputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "prd/DRAFT_AND_APPROVAL_PRD.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-505",
+      "sprint": "S5",
+      "priority": "P0",
+      "title": "Implement stale-plan, conflict, failed-save and offline handling",
+      "owner": "Assistant",
+      "reviewer": "QA / engineering",
+      "artifacts": [
+        "D04",
+        "E05",
+        "E04"
+      ],
+      "dependsOn": [
+        "FP-502",
+        "FP-503",
+        "FP-504"
+      ],
+      "approvalRefs": [
+        "A09",
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Changed sources trigger appropriate review, concurrent edits cannot silently overwrite, unsaved changes are labelled and retryable, and network loss obeys approved policy.",
+      "preparationOutputs": [
+        "data/STATES_AND_AUTHORITY.md",
+        "data/MODULE_REQUIREMENTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-506",
+      "sprint": "S5",
+      "priority": "P1",
+      "title": "Finish mobile, keyboard and client-facing explanation QA",
+      "owner": "Assistant",
+      "reviewer": "Accessibility / pilot representatives",
+      "artifacts": [
+        "U01",
+        "U02",
+        "Q04"
+      ],
+      "dependsOn": [
+        "FP-501",
+        "FP-502",
+        "FP-503",
+        "FP-505"
+      ],
+      "approvalRefs": [
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Core journeys function on target sizes with keyboard/focus/error cues; clients understand unknown/review states without exposed clinical notes.",
+      "preparationOutputs": [
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/sources-reasons-vocabulary.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-507",
+      "sprint": "S5",
+      "priority": "P1",
+      "title": "Implement controlled catalogue validation and version promotion tooling",
+      "owner": "Assistant",
+      "reviewer": "Content owner / engineering",
+      "artifacts": [
+        "U03",
+        "O04",
+        "E05"
+      ],
+      "dependsOn": [
+        "FP-302",
+        "FP-306",
+        "FP-210"
+      ],
+      "approvalRefs": [
+        "A08",
+        "A10",
+        "A12"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Only actually approved records can be promoted; validation, retirement, change audit and rollback are testable without a new CMS; live promotion still needs release approval.",
+      "preparationOutputs": [
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "catalogues/SCHEMA_AND_VALIDATION.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-601",
+      "sprint": "S6",
+      "priority": "P0",
+      "title": "Run complete regression, permissions, failure and performance suite",
+      "owner": "Assistant",
+      "reviewer": "QA / security / privacy",
+      "artifacts": [
+        "Q02",
+        "Q05"
+      ],
+      "dependsOn": [
+        "FP-405",
+        "FP-504",
+        "FP-505",
+        "FP-506",
+        "FP-507"
+      ],
+      "approvalRefs": [
+        "A12",
+        "A13",
+        "A16"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Mandatory requirement-linked tests pass; cross-tenant/bypass/failure checks and agreed latency budgets meet criteria; unresolved release blockers listed honestly.",
+      "preparationOutputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-602",
+      "sprint": "S6",
+      "priority": "P0",
+      "title": "Obtain domain acceptance of generated R1 cases",
+      "owner": "Assistant",
+      "reviewer": "Exercise / clinical-policy reviewers",
+      "artifacts": [
+        "Q03"
+      ],
+      "dependsOn": [
+        "FP-601",
+        "FP-209"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A07",
+        "A08"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Reviewers assess actual versioned outputs, confirm or reject intended scope and resolve blocking rule/content defects; assistant does not fabricate acceptance.",
+      "preparationOutputs": [
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-603",
+      "sprint": "S6",
+      "priority": "P0",
+      "title": "Rehearse deployed-schema migration and recovery in authorized staging",
+      "owner": "Assistant",
+      "reviewer": "QA / engineering / data owner",
+      "artifacts": [
+        "Q06",
+        "E03"
+      ],
+      "dependsOn": [
+        "FP-601",
+        "FP-307"
+      ],
+      "approvalRefs": [
+        "A09",
+        "A13"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Target-compatible staging migration, save/reload, reference preservation and restore results recorded; production execution remains unapproved.",
+      "preparationOutputs": [
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/EXTENSION_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-604",
+      "sprint": "S6",
+      "priority": "P1",
+      "title": "Run authorized coach/client acceptance sessions",
+      "owner": "Assistant",
+      "reviewer": "Product / participating users",
+      "artifacts": [
+        "Q04"
+      ],
+      "dependsOn": [
+        "FP-601",
+        "FP-506"
+      ],
+      "approvalRefs": [
+        "A15",
+        "A16"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Authorized participants complete scripts; approval time, confusion, overrides and accessibility findings recorded; no contact or real-data use without permission.",
+      "preparationOutputs": [
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-605",
+      "sprint": "S6",
+      "priority": "P0",
+      "title": "Prepare release runbooks, help and maintenance handoff",
+      "owner": "Assistant",
+      "reviewer": "Operations / product / domain",
+      "artifacts": [
+        "O02",
+        "O03",
+        "O04"
+      ],
+      "dependsOn": [
+        "FP-505",
+        "FP-507",
+        "FP-113"
+      ],
+      "approvalRefs": [
+        "A12",
+        "A15",
+        "A16"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "Runbooks specify versioned release, backup/rollback, feature pause, support escalation, review ownership and coach/client guidance.",
+      "preparationOutputs": [
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed."
+    },
+    {
+      "id": "FP-606",
+      "sprint": "S6",
+      "priority": "P0",
+      "title": "Prepare G3 pilot-readiness evidence and request external-action approvals",
+      "owner": "Assistant",
+      "reviewer": "Project owner / relevant reviewers",
+      "artifacts": [
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "O01",
+        "O02"
+      ],
+      "dependsOn": [
+        "FP-602",
+        "FP-603",
+        "FP-604",
+        "FP-605"
+      ],
+      "approvalRefs": [
+        "A15",
+        "A16",
+        "A17",
+        "A18",
+        "A19"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Gate records identify exact targets/versions, actual approvals and no unresolved blocking findings; no production action is included in merely assembling the pack.",
+      "preparationOutputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-607",
+      "sprint": "S6",
+      "priority": "P0",
+      "title": "Execute explicitly authorized version-control, migration and limited pilot release",
+      "owner": "Assistant",
+      "reviewer": "Project owner / release owner",
+      "artifacts": [
+        "O01",
+        "O02",
+        "Q06"
+      ],
+      "dependsOn": [
+        "FP-606"
+      ],
+      "approvalRefs": [
+        "A17",
+        "A18",
+        "A19"
+      ],
+      "status": "future-gated",
+      "acceptance": "Perform only the separately approved branch/PR/merge, target migration and pilot steps; verify health/permissions; log effects and stop at any missing permission.",
+      "preparationOutputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-608",
+      "sprint": "S6",
+      "priority": "P1",
+      "title": "Review pilot results and request/execute scoped G4 rollout",
+      "owner": "Assistant",
+      "reviewer": "Project owner / pilot owner / domain",
+      "artifacts": [
+        "O01",
+        "Q04",
+        "O04"
+      ],
+      "dependsOn": [
+        "FP-607"
+      ],
+      "approvalRefs": [
+        "A15",
+        "A16",
+        "A19"
+      ],
+      "status": "future-gated",
+      "acceptance": "Compare results with pre-agreed thresholds, investigate overrides/incidents and record explicit wider-rollout decision; execute only approved scope and hand off R1.",
+      "preparationOutputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-701",
+      "sprint": "S7",
+      "priority": "P2",
+      "title": "Draft daily-adjustment PRD, reviewed source rules and test cases",
+      "owner": "Assistant",
+      "reviewer": "Product / appropriate domain reviewer",
+      "artifacts": [
+        "P05",
+        "C09",
+        "Q01"
+      ],
+      "dependsOn": [
+        "FP-608"
+      ],
+      "approvalRefs": [
+        "A20"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "After R2 preparation permission, distinguish today/baseline and optional wearables, missingness, bounded suggestions and no compounded reductions; no build yet.",
+      "preparationOutputs": [
+        "prd/DAILY_ADJUSTMENT_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/daily-adjustment.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/DAILY_ADJUSTMENT_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/daily-adjustment.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed."
+    },
+    {
+      "id": "FP-702",
+      "sprint": "S7",
+      "priority": "P0",
+      "title": "Obtain R2 policy review and G5 implementation approval",
+      "owner": "Assistant",
+      "reviewer": "Project owner / domain / privacy",
+      "artifacts": [
+        "P05",
+        "C09",
+        "Q03",
+        "Q05"
+      ],
+      "dependsOn": [
+        "FP-701"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A16",
+        "A20"
+      ],
+      "status": "future-gated",
+      "acceptance": "Specific threshold/policy versions and privacy scope reviewed; record separate R2 build authorization and allowed environments.",
+      "preparationOutputs": [
+        "prd/DAILY_ADJUSTMENT_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/daily-adjustment.draft.json",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-703",
+      "sprint": "S7",
+      "priority": "P2",
+      "title": "Implement bounded daily suggestions and approval workflow",
+      "owner": "Assistant",
+      "reviewer": "QA / domain",
+      "artifacts": [
+        "P05",
+        "C09",
+        "E01",
+        "E04",
+        "U01"
+      ],
+      "dependsOn": [
+        "FP-702"
+      ],
+      "approvalRefs": [
+        "A13",
+        "A20"
+      ],
+      "status": "future-gated",
+      "acceptance": "Current-context changes yield explainable proposals within approved limits, never clearance or silent assigned-workout changes; unit and integration tests added.",
+      "preparationOutputs": [
+        "prd/DAILY_ADJUSTMENT_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/daily-adjustment.draft.json",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-704",
+      "sprint": "S7",
+      "priority": "P0",
+      "title": "Validate R2 failure, privacy, domain and usability cases",
+      "owner": "Assistant",
+      "reviewer": "QA / domain / privacy / authorized users",
+      "artifacts": [
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05"
+      ],
+      "dependsOn": [
+        "FP-703"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A13",
+        "A15",
+        "A16",
+        "A20"
+      ],
+      "status": "future-gated",
+      "acceptance": "Missing/skipped/default wellness and unreliable wearables behave as specified; reviewed output and consent/access checks pass; remaining risks recorded.",
+      "preparationOutputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-705",
+      "sprint": "S7",
+      "priority": "P2",
+      "title": "Pilot and release R2 only after separate enablement approval",
+      "owner": "Assistant",
+      "reviewer": "Project owner / release owner",
+      "artifacts": [
+        "O01",
+        "O02",
+        "O03",
+        "O04",
+        "Q06"
+      ],
+      "dependsOn": [
+        "FP-704"
+      ],
+      "approvalRefs": [
+        "A17",
+        "A18",
+        "A19",
+        "A20"
+      ],
+      "status": "future-gated",
+      "acceptance": "Approved stage/pilot evidence precedes production enablement; apply relevant exact-target Git/database/deployment approvals; update support and governance.",
+      "preparationOutputs": [
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-801",
+      "sprint": "S8",
+      "priority": "P3",
+      "title": "Draft progression, reassessment and weekly-planning requirements",
+      "owner": "Assistant",
+      "reviewer": "Product / qualified exercise reviewer",
+      "artifacts": [
+        "P06",
+        "C10",
+        "Q01"
+      ],
+      "dependsOn": [
+        "FP-705"
+      ],
+      "approvalRefs": [
+        "A21"
+      ],
+      "status": "draft-awaiting-review",
+      "acceptance": "After R3 preparation permission, define comparable history, tolerance evidence, skip reasons, explicit finding resolution, weekly constraints and preservation rules.",
+      "preparationOutputs": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/progression-planning.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "preparationStatus": "complete",
+      "acceptanceStatus": "pending",
+      "outputs": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/progression-planning.draft.json",
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md"
+      ],
+      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed."
+    },
+    {
+      "id": "FP-802",
+      "sprint": "S8",
+      "priority": "P0",
+      "title": "Obtain R3 domain review and G5 implementation approval",
+      "owner": "Assistant",
+      "reviewer": "Project owner / domain reviewer",
+      "artifacts": [
+        "P06",
+        "C10",
+        "Q03"
+      ],
+      "dependsOn": [
+        "FP-801"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A21"
+      ],
+      "status": "future-gated",
+      "acceptance": "Reviewed rule versions and expected cases accepted for stated populations; separate R3 build scope authorized before coding.",
+      "preparationOutputs": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/progression-planning.draft.json",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-803",
+      "sprint": "S8",
+      "priority": "P3",
+      "title": "Implement progression/regression suggestion engine",
+      "owner": "Assistant",
+      "reviewer": "QA / exercise reviewer",
+      "artifacts": [
+        "P06",
+        "C10",
+        "E01"
+      ],
+      "dependsOn": [
+        "FP-802"
+      ],
+      "approvalRefs": [
+        "A13",
+        "A21"
+      ],
+      "status": "future-gated",
+      "acceptance": "Comparable performance produces bounded proposals with reason/history references; skips and symptoms are not inferred as incapacity/diagnosis; tests cover counterexamples.",
+      "preparationOutputs": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/progression-planning.draft.json",
+        "engineering/ENGINE_AND_API_CONTRACT.md",
+        "engineering/DETAILED_CONTRACTS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-804",
+      "sprint": "S8",
+      "priority": "P3",
+      "title": "Integrate weekly planning and reassessment proposals",
+      "owner": "Assistant",
+      "reviewer": "Product / QA / domain",
+      "artifacts": [
+        "P06",
+        "C10",
+        "C05",
+        "E04",
+        "U01"
+      ],
+      "dependsOn": [
+        "FP-803"
+      ],
+      "approvalRefs": [
+        "A13",
+        "A21"
+      ],
+      "status": "future-gated",
+      "acceptance": "Weekly/time/goal constraints and explicit reassessment evidence drive reviewable revisions; incomplete findings do not resolve; completed/approved history preserved.",
+      "preparationOutputs": [
+        "prd/PROGRESSION_PLANNING_PRD.md",
+        "engineering/EXTENSION_CONTRACTS.md",
+        "catalogues/progression-planning.draft.json",
+        "catalogues/rules-and-templates.draft.json",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "engineering/DETAILED_CONTRACTS.md",
+        "ux/WORKFLOWS_AND_COPY.md",
+        "ux/SCREEN_SPECIFICATIONS.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-805",
+      "sprint": "S8",
+      "priority": "P0",
+      "title": "Validate, pilot and obtain final scoped R3 release acceptance",
+      "owner": "Assistant",
+      "reviewer": "Project owner / relevant reviewers / release owner",
+      "artifacts": [
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "O01",
+        "O02",
+        "O03",
+        "O04"
+      ],
+      "dependsOn": [
+        "FP-804"
+      ],
+      "approvalRefs": [
+        "A04",
+        "A13",
+        "A15",
+        "A16",
+        "A17",
+        "A18",
+        "A19",
+        "A21"
+      ],
+      "status": "future-gated",
+      "acceptance": "Domain/security/migration/usability tests and approved pilot criteria pass; separately approved release actions verified; all accepted scope reconciled and maintenance ownership handed off.",
+      "preparationOutputs": [
+        "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
+        "quality/catalogue-coverage-and-cases.draft.json",
+        "quality/EXTENSION_TEST_SPECIFICATIONS.md",
+        "quality/TRACEABILITY_AND_VERIFICATION.md",
+        "quality/DOMAIN_REVIEW_PACKET.md",
+        "operations/MAINTENANCE_AND_REVIEW_PLAN.md",
+        "ux/SCREEN_SPECIFICATIONS.md",
+        "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
+        "policies/README.md",
+        "policies/REGIONAL_REVIEW_PACK.md",
+        "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
+        "engineering/MIGRATION_INTEGRATION_FAILURES.md",
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
+        "catalogues/REVIEW_AND_MAINTENANCE.md"
+      ],
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+    },
+    {
+      "id": "FP-B01",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Inventory and freeze Fitness Scribber Classic",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [],
+      "approvalRefs": [
+        "A22"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Record exact commit, tracked/untracked changes, app/build/runtime versions, safe file inventory and disk capacity; do not expose secrets."
+    },
+    {
+      "id": "FP-B02",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Create named local Git checkpoint",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B01"
+      ],
+      "approvalRefs": [
+        "A22",
+        "A17"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Inspect for secrets and sensitive exports before staging; commit scoped source/docs and create a non-moving Classic tag; preserve all user changes. No remote push."
+    },
+    {
+      "id": "FP-B03",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Create and verify independent local recovery archive",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B02"
+      ],
+      "approvalRefs": [
+        "A22"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Create source/docs archive plus Git bundle outside the implementation checkout in an ignored recovery directory; manifest/checksums verified. Exclude secrets, client exports, dependencies and generated caches. Same-device copy is not off-device disaster protection."
+    },
+    {
+      "id": "FP-B04",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Inventory configuration and data recovery coverage",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B01"
+      ],
+      "approvalRefs": [
+        "A22",
+        "A28"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Record environment-variable names only, ignored-file categories, assets, local browser-storage use and hosted dependencies; identify gaps. No secret or real-client-data export. Document secure owner-managed configuration recovery."
+    },
+    {
+      "id": "FP-B05",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Establish Classic build and workflow baseline",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B02",
+        "FP-B04"
+      ],
+      "approvalRefs": [
+        "A24",
+        "A26"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Run existing build/lint and record existing failures; exercise critical workflows only in a synthetic isolated profile with hosted connections disabled."
+    },
+    {
+      "id": "FP-B06",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Rehearse code restore in a separate checkout",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B03",
+        "FP-B05"
+      ],
+      "approvalRefs": [
+        "A24",
+        "A27"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Restore verified archive/bundle to a new exact directory, reconstruct dependencies, compare manifest and run baseline checks without overwriting the working project."
+    },
+    {
+      "id": "FP-B07",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Prepare real-data backup and recovery prerequisites",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B04"
+      ],
+      "approvalRefs": [
+        "A28"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Document database, storage objects, auth/config and browser-local-data coverage, destinations, retention and post-backup-write reconciliation. No hosted backup executed under local permission; live recovery remains unverified until separately authorized."
+    },
+    {
+      "id": "FP-B08",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Verify isolated synthetic database and recovery harness",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B05"
+      ],
+      "approvalRefs": [
+        "A24",
+        "A25",
+        "A26"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Use approved local database/runtime; test owning coach/client permissions and synthetic backup/restore. Failure or unavailable backend leaves backend verification incomplete, never substitutes a mocked permission test."
+    },
+    {
+      "id": "FP-B09",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Specify Classic fallback and independent feature controls",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B01",
+        "FP-B04"
+      ],
+      "approvalRefs": [
+        "A23",
+        "A28"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Map all changed entry points, R1/R2/R3 off defaults, schema compatibility and preservation of new records when disabled. Record explicit no-destructive-restore boundaries."
+    },
+    {
+      "id": "FP-B10",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Accept local backup and build preflight",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B06",
+        "FP-B07",
+        "FP-B08",
+        "FP-B09"
+      ],
+      "approvalRefs": [
+        "A22",
+        "A23",
+        "A25",
+        "A27",
+        "A28"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Code archive and restore rehearsal pass; adequate storage/config coverage known; exact local runtime access resolved; sign-off gaps remain disabled. Record go/no-go for local implementation only."
+    },
+    {
+      "id": "FP-B11",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Rehearse Classic fallback after the whole local build",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B10",
+        "FP-307",
+        "FP-601",
+        "FP-703",
+        "FP-804"
+      ],
+      "approvalRefs": [
+        "A23",
+        "A25",
+        "A27"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Test all new features off; test Classic code against additive synthetic schema and records written after migration; verify counts/references/actuals and failure containment. Diagnose incompatibility instead of claiming guaranteed rollback."
+    },
+    {
+      "id": "FP-B12",
+      "sprint": "SB",
+      "priority": "P0",
+      "title": "Deliver final local build and recovery evidence",
+      "owner": "Assistant",
+      "reviewer": "Project owner",
+      "artifacts": [],
+      "dependsOn": [
+        "FP-B11",
+        "FP-704"
+      ],
+      "approvalRefs": [
+        "A23",
+        "A28"
+      ],
+      "status": "awaiting-scope-approval",
+      "acceptance": "Deliver runnable local R1-R3 engineering scope, actual test/build/lint results, comparison with Classic, recovery instructions and remaining specialist/hosted/pilot gates. Never report live release or professional acceptance from local tests."
+    }
+  ],
+  "preparationAuthorized": true,
+  "approvalsSummary": {
+    "A01": "Confirmed adults at all three levels, general fitness, special needs and rehabilitation; exact clinical coverage/authority pending.",
+    "A02": "Confirmed staged delivery and coach approval before assignment.",
+    "A03": "Context dimensions confirmed; actual goal priorities, durations, equipment and frameworks pending.",
+    "A04": "Recommendations requested/drafted; no professional appointment/sign-off.",
+    "A05": "Single coach plus client app; target India/GCC/USA/UK/Europe. Establishment/name/email and exact market activation pending.",
+    "A06": "Explicit S1–S2 local preparation approval in user six-point reply.",
+    "remaining": "A07–A21 unapproved; no build, external writes, spending, live data access or deployment."
+  },
+  "lastPreparationBatch": {
+    "version": "s1-foundation-draft-v0.1",
+    "recordedOn": "2026-09-05",
+    "index": "preparation/S1_REVIEW_PACK.md",
+    "syntheticTestSpecifications": 46,
+    "applicationCodeChanged": false,
+    "reviewGatesPassed": [],
+    "nextPreparation": "S2 candidate schemas/content, source/rights register and rule/template review pack; resolve G1 feedback without claiming acceptance."
+  },
+  "packageId": "FS-POOL-FULL-PREP-0.3",
+  "preparationComplete": true,
+  "gateStatus": {
+    "G1": "pending",
+    "G2": "pending",
+    "A12": "not-authorized"
+  },
+  "preparationStatusDefinition": "Complete refers only to independently authorable local S1/S2 preparation; acceptanceStatus separately preserves actual review/gate requirements.",
+  "currentPhase": "cross-sprint-preparation-complete",
+  "extendedPreparationApproval": {
+    "record": "preparation/FULL_PREPARATION_APPROVAL.md",
+    "A20_preparation": true,
+    "A21_preparation": true,
+    "A20_build": true,
+    "A21_build": true,
+    "externalActions": false
+  },
+  "earlyPreparationException": "Owner authorized drafting FP-701/801 and operational preparation before pilot evidence. Original execution/acceptance dependencies remain; no build or release gate waived.",
+  "implementationAuthorizationDetail": {
+    "priorOwnerR1LocalBuildDirection": true,
+    "executionPausedForRequestedBackupAndConsolidatedApproval": false,
+    "fullR1R3Scope": "approved-local-only-preflight-in-progress",
+    "professionalSignoffVerified": false,
+    "reference": "preparation/BACKUP_TO_BUILD_APPROVAL.md"
+  },
+  "ownerReviewUpdate": {
+    "date": "2026-09-07",
+    "scope": "Six PRDs and twelve catalogue artifacts",
+    "outcome": "Owner reports review good with no requested changes; owner accepts as-is. No reviewer identities, clinical parameters, rights evidence or specialist signatures supplied."
+  },
+  "consolidatedPlan": "preparation/BACKUP_TO_BUILD_APPROVAL.md",
+  "localOnlyProposal": {
+    "status": "owner-approved-local-only",
+    "approval": "A23",
+    "meaning": "Permit local engineering portions of R1-R3 before real-client pilots only after consolidated approval and backup preflight. Existing professional, pilot and release dependency chains remain unchanged for full task acceptance; unapproved policies stay disabled outside synthetic fixtures.",
+    "order": [
+      "FP-B01–FP-B10",
+      "S3 local implementation",
+      "S4 local implementation",
+      "S5 local integration",
+      "S6 local automated verification only",
+      "S7 local engine/UI/tests with unapproved numerical policies disabled",
+      "S8 local engine/UI/tests with unapproved numerical policies disabled",
+      "FP-B11",
+      "FP-B12"
+    ],
+    "completionRule": "Track localImplementationStatus/localVerificationStatus separately from original task acceptance. Do not mark tasks requiring domain acceptance, staging, pilot or release wholly done."
+  }
+}

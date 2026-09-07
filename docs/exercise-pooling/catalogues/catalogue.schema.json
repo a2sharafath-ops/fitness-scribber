@@ -1,0 +1,1444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fitness Scribber S1-S2 draft document schemas, not runtime published-content schemas",
+  "description": "Validate the indicated document against its definition. Semantic reference checks are additional. Fixture input payloads are deliberately heterogeneous.",
+  "$defs": {
+    "exercises.draft.json": {
+      "type": "object",
+      "properties": {
+        "packageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewStatus": {
+          "const": "draft"
+        },
+        "productionEnabled": {
+          "const": false
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "familyId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pattern": {
+                "type": "string",
+                "minLength": 1
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "enum": [
+                    "general_warmup",
+                    "mobility_lengthening",
+                    "smr",
+                    "activation",
+                    "integration",
+                    "main_accessory",
+                    "conditioning",
+                    "cooldown"
+                  ]
+                }
+              },
+              "equipment": {
+                "type": "array",
+                "items": {}
+              },
+              "settings": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "position": {
+                "type": "string",
+                "minLength": 1
+              },
+              "laterality": {
+                "type": "string",
+                "minLength": 1
+              },
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "prerequisites": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "demands": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "instructions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "doseRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "needRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "rightsStatus": {
+                "type": "string",
+                "minLength": 1
+              },
+              "populationScope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "assistance": {
+                "type": "string",
+                "minLength": 1
+              },
+              "restrictionPolicyRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "reviewQuestions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "media": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "name",
+              "familyId",
+              "pattern",
+              "roles",
+              "equipment",
+              "settings",
+              "position",
+              "laterality",
+              "levels",
+              "prerequisites",
+              "demands",
+              "instructions",
+              "doseRefs",
+              "needRefs",
+              "sourceRefs",
+              "rightsStatus",
+              "populationScope",
+              "assistance",
+              "restrictionPolicyRefs",
+              "reviewQuestions",
+              "media"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "packageId",
+        "reviewStatus",
+        "productionEnabled",
+        "exercises"
+      ],
+      "additionalProperties": false
+    },
+    "rules-and-templates.draft.json": {
+      "type": "object",
+      "properties": {
+        "packageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "date": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "productionEnabled": {
+          "const": false
+        },
+        "reviewStatus": {
+          "const": "draft"
+        },
+        "approvalEvidence": {
+          "type": "array",
+          "const": []
+        },
+        "protocols": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sourcePath": {
+                "type": "string",
+                "minLength": 1
+              },
+              "measurement": {
+                "type": "string",
+                "minLength": 1
+              },
+              "state": {
+                "type": "string",
+                "minLength": 1
+              },
+              "comparability": {
+                "type": "string",
+                "minLength": 1
+              },
+              "limitations": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "sourcePath",
+              "measurement",
+              "state",
+              "comparability",
+              "limitations"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "needs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confirmation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "protocolRef": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mappingType": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sideRule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "deduplicationKey": {
+                "type": "string",
+                "minLength": 1
+              },
+              "resolution": {
+                "type": "string",
+                "minLength": 1
+              },
+              "exclusion": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "confirmation",
+              "protocolRef",
+              "mappingType",
+              "sideRule",
+              "deduplicationKey",
+              "resolution",
+              "exclusion"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "trigger": {
+                "type": "string",
+                "minLength": 1
+              },
+              "result": {
+                "type": "string",
+                "minLength": 1
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reasonRef": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "numericClinicalThresholds": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "trigger",
+              "result",
+              "action",
+              "reasonRef",
+              "scope",
+              "numericClinicalThresholds"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "doses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mode": {
+                "type": "string",
+                "minLength": 1
+              },
+              "selection": {
+                "type": "string",
+                "minLength": 1
+              },
+              "requiredFields": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "limits": {
+                "type": "string",
+                "minLength": 1
+              },
+              "valueStatus": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "mode",
+              "selection",
+              "requiredFields",
+              "limits",
+              "valueStatus"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "needRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "sessionRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "limits": {
+                "type": "string",
+                "minLength": 1
+              },
+              "priority": {
+                "type": "string",
+                "minLength": 1
+              },
+              "weeklyStructure": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "needRefs",
+              "sessionRefs",
+              "limits",
+              "priority",
+              "weeklyStructure"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "families": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "members": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "swapRule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "loadTransfer": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "members",
+              "swapRule",
+              "loadTransfer"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1
+              },
+              "requiredRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "optionalRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "requiredPatterns": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "composition": {
+                "type": "string",
+                "minLength": 1
+              },
+              "timeBudgetChoicesMinutes": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "budgetRule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "roleOrdering": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "optionalSmr": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "name",
+              "purpose",
+              "requiredRoles",
+              "optionalRoles",
+              "requiredPatterns",
+              "composition",
+              "timeBudgetChoicesMinutes",
+              "budgetRule",
+              "roleOrdering",
+              "optionalSmr"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "packageId",
+        "version",
+        "date",
+        "purpose",
+        "productionEnabled",
+        "reviewStatus",
+        "approvalEvidence",
+        "protocols",
+        "needs",
+        "policies",
+        "doses",
+        "goals",
+        "families",
+        "sessions"
+      ],
+      "additionalProperties": false
+    },
+    "sources-reasons-vocabulary.draft.json": {
+      "type": "object",
+      "properties": {
+        "packageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "productionEnabled": {
+          "const": false
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "url": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "accessedAt": {
+                "type": "string",
+                "minLength": 1
+              },
+              "applicability": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rights": {
+                "type": "string",
+                "minLength": 1
+              },
+              "verification": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "adoptionStatus": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "url",
+              "version",
+              "accessedAt",
+              "applicability",
+              "rights",
+              "verification",
+              "approvalEvidence",
+              "adoptionStatus"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "state": {
+                "type": "string",
+                "minLength": 1
+              },
+              "coachText": {
+                "type": "string",
+                "minLength": 1
+              },
+              "clientText": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nextAction": {
+                "type": "string",
+                "minLength": 1
+              },
+              "interpolation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [
+              "id",
+              "state",
+              "coachText",
+              "clientText",
+              "nextAction",
+              "interpolation",
+              "reviewStatus",
+              "approvalEvidence",
+              "revision",
+              "automationEligible",
+              "sourceRefs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "vocabulary": {
+          "type": "object",
+          "properties": {
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "general_warmup",
+                  "mobility_lengthening",
+                  "smr",
+                  "activation",
+                  "integration",
+                  "main_accessory",
+                  "conditioning",
+                  "cooldown"
+                ]
+              }
+            },
+            "executionSide": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "catalogueLaterality": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "equipment": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "adjustable_bench",
+                  "arm_ergometer",
+                  "back_supported_bench",
+                  "barbell",
+                  "bench_press_rack",
+                  "cable_row_machine",
+                  "clear_floor",
+                  "clear_route",
+                  "clear_wall",
+                  "collars",
+                  "dowel",
+                  "dumbbell",
+                  "dumbbell_pair",
+                  "fixed_bench",
+                  "fixed_rail",
+                  "fixed_support",
+                  "foam_roller",
+                  "lat_pulldown_machine",
+                  "lifting_area",
+                  "long_band",
+                  "loop_band",
+                  "low_step",
+                  "mat",
+                  "plates",
+                  "rack",
+                  "rated_anchor",
+                  "rated_high_anchor",
+                  "rated_pullup_bar",
+                  "recumbent_cycle",
+                  "safe_access_step",
+                  "safety_arms",
+                  "stable_box",
+                  "stable_chair",
+                  "stationary_cycle",
+                  "stretch_strap"
+                ]
+              }
+            },
+            "levels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "settings": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "patternIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "unitRules": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "aliases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "legacy": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "resolution": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "legacy",
+                  "resolution"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "roles",
+            "executionSide",
+            "catalogueLaterality",
+            "equipment",
+            "levels",
+            "settings",
+            "patternIds",
+            "unitRules",
+            "aliases"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "packageId",
+        "productionEnabled",
+        "sources",
+        "reasons",
+        "vocabulary"
+      ],
+      "additionalProperties": false
+    },
+    "finding-mappings.draft.json": {
+      "type": "object",
+      "properties": {
+        "packageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "productionEnabled": {
+          "const": false
+        },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "integer"
+              },
+              "reviewStatus": {
+                "const": "draft"
+              },
+              "approvalEvidence": {
+                "type": "array",
+                "const": []
+              },
+              "automationEligible": {
+                "const": false
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "protocolRef": {
+                "type": "string",
+                "minLength": 1
+              },
+              "observation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "needRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confirmation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sideRule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confidenceRule": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "revision",
+              "reviewStatus",
+              "approvalEvidence",
+              "automationEligible",
+              "sourceRefs",
+              "protocolRef",
+              "observation",
+              "needRefs",
+              "outcome",
+              "confirmation",
+              "sideRule",
+              "confidenceRule"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "packageId",
+        "productionEnabled",
+        "mappings"
+      ],
+      "additionalProperties": false
+    },
+    "../quality/catalogue-coverage-and-cases.draft.json": {
+      "type": "object",
+      "properties": {
+        "packageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "productionEnabled": {
+          "const": false
+        },
+        "coverage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "goalRef": {
+                "type": "string",
+                "minLength": 1
+              },
+              "setting": {
+                "type": "string",
+                "minLength": 1
+              },
+              "level": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "candidateRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "uncoveredNeedRefs": {
+                "type": "array",
+                "items": {}
+              },
+              "productionCoverage": {
+                "type": "string",
+                "minLength": 1
+              },
+              "result": {
+                "type": "string",
+                "minLength": 1
+              },
+              "limits": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "goalRef",
+              "setting",
+              "level",
+              "scope",
+              "candidateRefs",
+              "uncoveredNeedRefs",
+              "productionCoverage",
+              "result",
+              "limits"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "accessCases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scenario": {
+                "type": "string",
+                "minLength": 1
+              },
+              "considerRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "excludeRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "expected": {
+                "type": "string",
+                "minLength": 1
+              },
+              "productionCoverage": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "scenario",
+              "considerRefs",
+              "excludeRefs",
+              "expected",
+              "productionCoverage"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "fixtureDefaults": {
+          "type": "object",
+          "properties": {
+            "synthetic": {
+              "type": "boolean"
+            },
+            "clientId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "coachId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "serverState": {
+              "type": "string",
+              "minLength": 1
+            },
+            "adultState": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sourceState": {
+              "type": "string",
+              "minLength": 1
+            },
+            "healthChange": {
+              "type": "string",
+              "minLength": 1
+            },
+            "restrictions": {
+              "type": "array",
+              "items": {}
+            },
+            "consentState": {
+              "type": "string",
+              "minLength": 1
+            },
+            "catalogueMode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "explanation": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "synthetic",
+            "clientId",
+            "coachId",
+            "serverState",
+            "adultState",
+            "sourceState",
+            "healthChange",
+            "restrictions",
+            "consentState",
+            "catalogueMode",
+            "explanation"
+          ],
+          "additionalProperties": false
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "candidateRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "input": {
+                "type": "object"
+              },
+              "expectedReasonRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "expected": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reviewEvidence": {
+                "type": "array",
+                "const": []
+              }
+            },
+            "required": [
+              "id",
+              "requirements",
+              "candidateRefs",
+              "input",
+              "expectedReasonRefs",
+              "expected",
+              "status",
+              "reviewEvidence"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "packageId",
+        "productionEnabled",
+        "coverage",
+        "accessCases",
+        "fixtureDefaults",
+        "cases"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
