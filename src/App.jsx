@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
@@ -14,7 +15,6 @@ import DashboardPage from './pages/DashboardPage'
 import ClientsPage from './pages/ClientsPage'
 import ClientDetailPage from './pages/ClientDetailPage'
 import ClientProfilePage from './pages/ClientProfilePage'
-import ExercisePoolPage from './pages/ExercisePoolPage'
 import AssessmentsPage from './pages/AssessmentsPage'
 import AssessmentDetailPage from './pages/AssessmentDetailPage'
 import MetricDetailPage from './pages/MetricDetailPage'
@@ -30,6 +30,8 @@ import ReportPage from './pages/ReportPage'
 import Toaster from './components/organisms/Toaster'
 import './lib/chartSetup'
 
+const ExercisePoolPage = lazy(() => import('./pages/ExercisePoolPage'))
+
 function Shell() {
   return (
     <DataProvider>
@@ -42,7 +44,7 @@ function Shell() {
               <Route path="/clients" element={<ClientsPage />} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
-              <Route path="/clients/:id/pool" element={<ExercisePoolPage />} />
+              <Route path="/clients/:id/pool" element={<Suspense fallback={<p role="status">Loading exercise pool…</p>}><ExercisePoolPage /></Suspense>} />
               <Route path="/clients/:id/assessments" element={<AssessmentsPage />} />
               <Route path="/clients/:id/assessments/:type" element={<AssessmentDetailPage />} />
               <Route path="/clients/:id/metric/:metric" element={<MetricDetailPage />} />

@@ -55,3 +55,11 @@ Implementation branch: `codex/exercise-pooling-local`. Main and Classic tag rema
 - No feature enablement, migration, push or deployment outside the synthetic local environment.
 
 Remaining substantial work: authoritative reviewed-context/content admission and atomic approval/start/resume, integration of every builder/copy/template/voice/client path, report/assessment invalidation, R2/R3 full proposal/UI workflows, secure publication/revocation, failure/concurrency/performance/security coverage, full migration/fallback rehearsal and final evidence. Do not treat these initial primitives as completion of S3–S8.
+
+## Recovery after connection interruption
+
+Rechecked the working tree: foundation commit `12217e2` is preserved, with unfinished `supabase/schema_pooling_authority.sql` and `tests/pooling/authority.sql` retained. The interrupted authority test has no recoverable successful result and is NOT counted as passed. Both Classic archive/bundle checksums still pass. All 35 Node tests and lint were rerun successfully.
+
+Docker inspection and database queries hung. A bounded direct local socket health check returned `Docker Desktop is unable to start`. Backend processes exist, but that is not proof the engine or database is usable. No Docker restart, pruning, container deletion or other-project mutation was attempted. Restoring Docker availability is the current dependency for further SQL authority verification. Free disk at recovery check was approximately 2,464 MiB; this is not an assertion that storage caused the startup failure.
+
+The candidate-review route was made lazy-loaded during recovery so its draft catalogue does not inflate the initial Classic bundle. Full builder/approval wiring remains pending. Resume by confirming Docker health, inspecting the task-owned synthetic database, applying the two additive pooling schemas as needed and running the foundation/authority SQL tests before relying on their new guards.

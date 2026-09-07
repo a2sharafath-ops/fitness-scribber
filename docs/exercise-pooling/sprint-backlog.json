@@ -1,7 +1,7 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
   "version": "backup-build-approval-v0.5",
-  "status": "local-implementation-in-progress",
+  "status": "local-implementation-incomplete-docker-startup-blocked",
   "currentSprint": "S3",
   "executionMode": "local-backup-recovery-and-r1-r3-engineering",
   "implementationAuthorized": true,
