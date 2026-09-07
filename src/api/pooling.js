@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import candidateCatalogue from '../../docs/exercise-pooling/catalogues/exercises.draft.json'
+import { readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
 
 export class PoolingError extends Error {
   constructor(code, message, operationKey = null) { super(message); this.name = 'PoolingError'; this.code = code; this.operationKey = operationKey }
@@ -7,6 +7,7 @@ export class PoolingError extends Error {
 
 const known = ['forbidden','feature_disabled','stale_context','draft_conflict','idempotency_conflict','protected_field','invalid_proposal','invalid_report','invalid_field','invalid_health_change','invalid_wellness','invalid_budget','invalid_equipment','invalid_parent','invalid_operation_key']
 export async function readCatalogueDrafts() {
+  const { default: candidateCatalogue } = await import('../../docs/exercise-pooling/catalogues/exercises.draft.json')
   return structuredClone(candidateCatalogue.exercises)
 }
 function connection() {
@@ -40,4 +41,28 @@ export function submitPoolingReport({ clientId, generation, operationKey, field,
 }
 export function savePoolingDraft({ clientId, generation, operationKey, proposal, parentId = null }) {
   return rpc('pooling_save_draft', { target_client: clientId, expected_generation: generation, operation_key: operationKey, proposal, parent_id: parentId })
+}
+
+export async function readBuilderDrafts(clientId) {
+  if (supabase) return (await readPooling(clientId)).drafts
+  try { return readLocalDrafts(localStorage).records.filter(record => record.clientId === clientId) }
+  catch { throw new PoolingError('source_unavailable', 'Local drafts could not be read. Existing storage has not been replaced.') }
+}
+
+export async function readBuilderDraftState(clientId, date) {
+  const data = supabase ? await readPooling(clientId) : { drafts: await readBuilderDrafts(clientId), context: null }
+  const latest = data.drafts.filter(row => row.proposal.date === date).sort((a,b) => b.revision-a.revision)[0]
+  return { expectedRevision: latest?.revision || 0, generation: data.context?.generation || 1, parentId: latest?.id || null, initialProposal: latest?.proposal || null }
+}
+
+export async function saveBuilderDraft({ clientId, operationKey, proposal, expectedRevision, generation, parentId }) {
+  if (supabase) return savePoolingDraft({ clientId, operationKey, proposal, generation, parentId })
+  const write = () => {
+    try { return saveLocalDraft(localStorage, { clientId, operationKey, proposal, expectedRevision, recordedAt: new Date().toISOString() }) }
+    catch (error) {
+      const code = ['draft_conflict','idempotency_conflict','outcome_unknown'].includes(error.message) ? error.message : 'failed_save'
+      throw new PoolingError(code, code === 'failed_save' ? 'Draft was not durably saved. Keep this window open and check local storage availability.' : error.message.replaceAll('_',' '), operationKey)
+    }
+  }
+  return navigator.locks ? navigator.locks.request('fitscribe-pooling-drafts', write) : write()
 }

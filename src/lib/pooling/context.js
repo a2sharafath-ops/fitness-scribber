@@ -52,8 +52,9 @@ export function resolveContext(input) {
       facts[key] = { state: 'usable', value: latest[0].value, unit, protocol, refs }
     }
   }
-  const activeRestrictions = restrictions.filter(row => Date.parse(row.recordedAt) <= cutoff &&
-    Date.parse(row.effectiveAt) <= session && !(row.state === 'resolved' && row.resolutionEvidence && row.resolvedBy))
+  const activeRestrictions = restrictions.filter(row =>
+    !Number.isFinite(Date.parse(row.recordedAt)) || !Number.isFinite(Date.parse(row.effectiveAt)) ||
+    (Date.parse(row.recordedAt) <= cutoff && Date.parse(row.effectiveAt) <= session && !(row.state === 'resolved' && row.resolutionEvidence && row.resolvedBy)))
     .sort((a, b) => compare(a.id, b.id))
   if (activeRestrictions.length) reasons.push({ code: 'restriction_review_required', refs: activeRestrictions.map(row => row.id) })
   if (input.healthChange !== 'no_change') reasons.push({ code: input.healthChange === 'changed' ? 'health_change_hold' : 'health_check_required' })

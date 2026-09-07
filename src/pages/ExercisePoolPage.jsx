@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useData } from '../store/DataContext'
-import { readCatalogueDrafts, readPooling, submitPoolingReport } from '../api/pooling'
+import { readCatalogueDrafts, readPooling, readBuilderDrafts, submitPoolingReport } from '../api/pooling'
+import { useModal } from '../store/ModalContext'
+import WorkoutBuilderModal from '../components/organisms/program/WorkoutBuilderModal'
+import { todayISO } from '../lib/dates'
 import { hasBackend } from '../lib/supabase'
 import { poolingConfig } from '../lib/pooling/config'
 
 export default function ExercisePoolPage() {
   const { id } = useParams()
   const { db } = useData()
+  const { openModal } = useModal()
+  const [refresh, setRefresh] = useState(0)
   const client = db.clients.find(row => row.id === id)
   const [catalogue, setCatalogue] = useState([])
   const [state, setState] = useState(null)
@@ -25,14 +30,14 @@ export default function ExercisePoolPage() {
       setError('')
       try {
         const records = await readCatalogueDrafts()
-        const data = hasBackend ? await readPooling(id) : null
+        const data = hasBackend ? await readPooling(id) : { context: null, drafts: await readBuilderDrafts(id) }
         if (active) { setCatalogue(records); setState(data) }
       } catch (failure) { if (active) setError(failure.message) }
       finally { if (active) setLoading(false) }
     }
     load()
     return () => { active = false }
-  }, [id])
+  }, [id,refresh])
   if (!poolingConfig().r1) return <div className="empty"><h1>Exercise pooling is disabled</h1><p>The Classic workflow is unchanged.</p><Link to={`/clients/${id}`}>Back to client</Link></div>
   if (!client) return <div className="empty">Client not found.</div>
   async function report() {
@@ -62,6 +67,13 @@ export default function ExercisePoolPage() {
       {loading && <p role="status">Loading review data…</p>}
       {error && <p role="alert">{error}</p>}
       {!loading && hasBackend && <p>Context: {state?.context ? `generation ${state.context.generation} · ${state.context.held ? 'review hold' : 'requires current checks'}` : 'not yet collected; not assumed normal'}</p>}
+    </section>
+    <section className="card" aria-labelledby="review-drafts"><h2 id="review-drafts">Unassigned review drafts</h2>
+      <button className="btn" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={todayISO()} />, 'xl')}>Create review draft</button>
+      <button className="btn ghost" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh drafts</button>
+      <p>No draft can be assigned from this workspace yet. {hasBackend ? 'Backend authority verification is pending.' : 'Local drafts are stored separately from Classic prescriptions and have no server authority.'}</p>
+      {(state?.drafts || []).map(row => <p key={row.id || row.operationKey}>{row.proposal.date} · revision {row.revision} · unassigned draft</p>)}
+      {!state?.drafts?.length && <p>No saved review drafts.</p>}
     </section>
     <section className="card" aria-labelledby="health-review"><h2 id="health-review">Current health change</h2>
       <p>This is separate from optional daily wellness. A no-change answer does not clear an existing restriction.</p>

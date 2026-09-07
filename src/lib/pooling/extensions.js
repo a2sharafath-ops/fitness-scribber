@@ -48,6 +48,13 @@ export function comparePerformances({ reference, performances, knowledgeCutoff, 
       !Number.isInteger(policy.minimumPerformances) || policy.minimumPerformances < 1) return { state: 'unsupported_policy', included: [], excluded: [] }
   const compatibleFields = ['variantId', 'side', 'range', 'equipment', 'unit', 'method', 'assistance']
   const included = [], excluded = [], lineage = new Set()
+  const signatures = new Map()
+  for (const row of performances) {
+    if (!row.lineageId || Date.parse(row.recordedAt) > Date.parse(knowledgeCutoff)) continue
+    const set = signatures.get(row.lineageId) || new Set()
+    set.add(canonical({ actual: row.actual ?? null, fields: compatibleFields.map(key => row[key] ?? null) }))
+    signatures.set(row.lineageId,set)
+  }
   for (const performance of [...performances].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)) {
     const reasons = []
     if (performance.quality !== 'confirmed' || performance.complete !== true || performance.effortConfirmed !== true || !Number.isFinite(performance.actual)) reasons.push('incomplete_evidence')
@@ -56,11 +63,35 @@ export function comparePerformances({ reference, performances, knowledgeCutoff, 
     if (Date.parse(sessionAt) - effective > policy.windowSeconds * 1000) reasons.push('outside_evidence_window')
     for (const key of compatibleFields) if (reference[key] === undefined || performance[key] === undefined || canonical(reference[key]) !== canonical(performance[key])) reasons.push(`incompatible_${key}`)
     if (!performance.lineageId) reasons.push('unknown_lineage')
+    else if (signatures.get(performance.lineageId)?.size > 1) reasons.push('conflicting_lineage')
     else if (lineage.has(performance.lineageId)) reasons.push('duplicate_lineage')
     if (reasons.length) excluded.push({ id: performance.id, reasons })
     else { included.push({ id: performance.id, actual: performance.actual, lineageId: performance.lineageId }); lineage.add(performance.lineageId) }
   }
   return { state: included.length >= policy.minimumPerformances ? 'sufficient_evidence' : 'insufficient_evidence', included, excluded }
+}
+
+export function proposeProgression(input) {
+  if (input.context.state !== 'eligible_for_coach_review') return { state: 'hold', effects: [], assignment: null }
+  const comparison = comparePerformances(input)
+  if (comparison.state !== 'sufficient_evidence') return { ...comparison, effects: [], assignment: null }
+  const { policy } = input
+  if (!['gte','lte'].includes(policy.operator) || !Number.isFinite(policy.comparisonThreshold) || !Number.isFinite(policy.progressionDelta) || !policy.field) {
+    return { state: 'unsupported_policy', comparison, effects: [], assignment: null }
+  }
+  const supportsChange = comparison.included.every(row => policy.operator === 'gte' ? row.actual >= policy.comparisonThreshold : row.actual <= policy.comparisonThreshold)
+  if (!supportsChange) return { state: 'no_change', comparison, effects: [], assignment: null }
+  const reconciliation = reconcileEffects({ ...input, signals: comparison.included.map(row => ({
+    id: row.id, lineageId: row.lineageId, quality: 'confirmed', occurrenceId: input.reference.occurrenceId,
+    field: policy.field, delta: policy.progressionDelta,
+  })) })
+  return { ...reconciliation, comparison }
+}
+
+export function reassessmentRequests(context) {
+  return Object.entries(context.facts).filter(([,fact]) => ['stale','conflict','unsupported'].includes(fact.state))
+    .sort(([a],[b]) => a < b ? -1 : a > b ? 1 : 0)
+    .map(([field,fact]) => ({ field, state: 'review_requested', reason: fact.state, sourceRefs: fact.refs, resolvesRestriction: false }))
 }
 
 export function composeWeek({ slots, requiredPatterns, catalogue, doses, manifest }) {

@@ -18,6 +18,8 @@ test('unilateral fields cannot clear the other side', () => { const input = base
 test('a dated restriction does not silently expire', () => { const input = base(); input.restrictions = [{ id: 'r1', effectiveAt: '2026-01-01', recordedAt: '2026-01-01', expiresAt: '2026-02-01', state: 'active' }]; assert.equal(resolveContext(input).state, 'review_required') })
 test('good optional wellness cannot clear reported health change', () => { const input = base(); input.healthChange = 'changed'; input.wellness = 7; assert.equal(resolveContext(input).state, 'held') })
 test('null policy cannot set freshness', () => { const input = base(); input.requirements[0].maxAgeSeconds = null; assert.equal(resolveContext(input).facts.left.state, 'unsupported') })
+test('missing restriction dates cannot erase an unresolved restriction', () => { const input=base(); input.restrictions=[{id:'r-unknown',state:'active'}]; assert.equal(resolveContext(input).state,'review_required') })
+test('optional source outage does not block unrelated core scope', () => { const input=base(); input.requirements.push({key:'wearable',source:'optional',required:false}); assert.equal(resolveContext(input).state,'eligible_for_coach_review') })
 test('all feature controls default off', () => assert.deepEqual(poolingConfig({}), { r1: false, r2: false, r3: false, synthetic: false }))
 test('extensions cannot enable without R1', () => assert.equal(poolingConfig({ VITE_POOLING_R2: 'true' }).r2, false))
 test('synthetic mode cannot coexist with hosted configuration', () => assert.equal(poolingConfig({ DEV: true, VITE_POOLING_SYNTHETIC: 'true', VITE_SUPABASE_URL: 'https://example.invalid' }).synthetic, false))

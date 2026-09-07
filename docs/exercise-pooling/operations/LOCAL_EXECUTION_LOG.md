@@ -63,3 +63,21 @@ Rechecked the working tree: foundation commit `12217e2` is preserved, with unfin
 Docker inspection and database queries hung. A bounded direct local socket health check returned `Docker Desktop is unable to start`. Backend processes exist, but that is not proof the engine or database is usable. No Docker restart, pruning, container deletion or other-project mutation was attempted. Restoring Docker availability is the current dependency for further SQL authority verification. Free disk at recovery check was approximately 2,464 MiB; this is not an assertion that storage caused the startup failure.
 
 The candidate-review route was made lazy-loaded during recovery so its draft catalogue does not inflate the initial Classic bundle. Full builder/approval wiring remains pending. Resume by confirming Docker health, inspecting the task-owned synthetic database, applying the two additive pooling schemas as needed and running the foundation/authority SQL tests before relying on their new guards.
+
+## Authorized Docker alternative and independent implementation
+
+Owner authorized the quickest safe local alternative without cleanup, purchases, shared-container resets or Care database access. Searched PATH, Homebrew, Applications, local runtime/cache directories and Spotlight: no installed native PostgreSQL server/initdb found. No separately authorized non-Docker disposable database was identified. Existing linked Supabase metadata was not treated as permission to access a hosted database. No new runtime was installed; SQLite/mocks were not used to certify PostgreSQL behavior.
+
+Chosen route: continue independent builder, local persistence and pure-engine tests with existing Node/Bun/Chromium. Zero installation delay; a runtime-recovery completion estimate remains unknown. Native PostgreSQL would require finding/installing a compatible runtime, and hosted testing would require an exact authorized disposable target. Neither is silently substituted.
+
+Implemented local-only unassigned draft persistence in its own versioned browser key, separate from Classic data. Added expected-revision conflicts, idempotent operation keys, quota/corrupt-storage failures, browser write locking where supported and original-request retries. Builder save, tomorrow-copy, cross-client-copy and unchanged bulk-copy routes use this draft path when R1 is enabled; Classic remains the feature-off path. Cross-client notes, completed actuals and approval fields are not copied. Existing prescriptions and Training Max records are untouched. Saved drafts reopen with their contents. Legacy auto-progression UI is disabled in the new draft path; no unreviewed numeric policy is substituted.
+
+Actual results after these changes:
+
+- **51 Node tests pass**; lint passes without new warnings; feature-off production build passes (existing large-chunk warning retained).
+- Isolated Chromium: four existing routes, reload persistence, candidate preview, disabled local authority, keyboard focus/mobile DOM, builder draft save/list refresh, next-day copies, cross-client copies and injected quota-failure/retry all pass. Browser assertions compare the Classic local database before/after and find no change. This is not a full visual/accessibility audit.
+- Synthetic progression tests cover opposite-side incompatibility, missing actuals, conflicting lineage, later-known evidence, health holds and side-specific non-resolving reassessment requests.
+- Pure-engine benchmark: Apple M1, macOS arm64, 500 observations + 2,000 variants, 20 measured iterations after 2 warm-ups; p95 **90.77 ms**, within the proposed 250 ms budget on this run. No backend/concurrency or production performance claim.
+- Catalogue JSON is dynamically imported; all 48 records remain unpublished/nonassignable. No assignment, professional publication, remote push or deployment occurred.
+
+Still incomplete: PostgreSQL authority and concurrency tests, trusted server decision generation, end-to-end coach assignment/start/resume, all runner/template/assessment invalidation paths, complete R2/R3 UI/workflows, content admission/revocation, final post-build migration/Classic recovery rehearsal and external acceptance. The independent workaround advances implementation but does not complete or certify the whole pooling plan.

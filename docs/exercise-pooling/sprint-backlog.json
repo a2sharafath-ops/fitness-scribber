@@ -1,7 +1,7 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
   "version": "backup-build-approval-v0.5",
-  "status": "local-implementation-incomplete-docker-startup-blocked",
+  "status": "local-independent-build-progress-postgres-verification-blocked",
   "currentSprint": "S3",
   "executionMode": "local-backup-recovery-and-r1-r3-engineering",
   "implementationAuthorized": true,
@@ -21,7 +21,7 @@
     "awaiting-scope-approval": "Mapped but not authorized to execute yet.",
     "future-gated": "Later action requiring explicit milestone/action approval.",
     "planned": "Authorized preparation phase; dependencies/reviews still apply.",
-    "in-progress": "Authorized preparation started; output incomplete.",
+    "in-progress": "Authorized local preparation or engineering is underway; task-specific verification and external gates may remain.",
     "draft-awaiting-review": "Preparation output complete; acceptance is pending. Not approved for implementation or live use.",
     "awaiting-external-acceptance": "Review dossier prepared; actual required feedback/sign-off or build decision is pending. Task is not accepted/done."
   },
@@ -1274,7 +1274,7 @@
         "A09",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Existing exercise refs, names, custom overrides and media survive reload/migration; approved vs draft/retired records behave correctly; regression tests pass.",
       "preparationOutputs": [
         "catalogues/exercises.draft.json",
@@ -1286,7 +1286,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-303",
@@ -1307,7 +1309,7 @@
         "A12",
         "A13"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Catalogue/restriction/context/decision/approval records persist in the authorized test environment with documented ownership and compatible old data.",
       "preparationOutputs": [
         "engineering/ENGINE_AND_API_CONTRACT.md",
@@ -1316,7 +1318,9 @@
         "data/STATES_AND_AUTHORITY.md",
         "data/MODULE_REQUIREMENTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-304",
@@ -1339,7 +1343,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Forms/persistence distinguish unknown, unassessed and absent; preserve side/date/source and legacy originals; untouched defaults are not asserted as confirmed.",
       "preparationOutputs": [
         "prd/CLIENT_CONTEXT_PRD.md",
@@ -1348,7 +1352,9 @@
         "data/SOURCE_AND_PRIVACY_INVENTORY.md",
         "data/STATES_AND_AUTHORITY.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-305",
@@ -1370,7 +1376,7 @@
         "A09",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Date/source/conflict/staleness/side cases pass; unresolved restrictions persist; historical resolution excludes future evidence.",
       "preparationOutputs": [
         "data/CONTEXT_RESOLUTION.md",
@@ -1379,7 +1385,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-306",
@@ -1469,7 +1477,7 @@
         "A08",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Reviewed rules return session hold/review plus exercise eligible/modified/review/excluded statuses and reason codes; ranking cannot bypass them.",
       "preparationOutputs": [
         "prd/POOL_SELECTION_PRD.md",
@@ -1479,7 +1487,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-402",
@@ -1501,7 +1511,7 @@
         "A08",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Stable ranking selects only eligible reviewed records, preserves side, reduces redundant need coverage and exposes unsupported cells.",
       "preparationOutputs": [
         "prd/POOL_SELECTION_PRD.md",
@@ -1511,7 +1521,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-403",
@@ -1532,7 +1544,7 @@
         "A08",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Tests cover measured/estimated references, no-max/bodyweight/timed work, units and limits; no fabricated load or silent unsafe fallbacks.",
       "preparationOutputs": [
         "catalogues/rules-and-templates.draft.json",
@@ -1540,7 +1552,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-404",
@@ -1563,7 +1577,7 @@
         "A08",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Draft respects selected weekly structure, session duration including setup/rest/sides, optional blocks and swap rechecks; insufficient coverage is explicit.",
       "preparationOutputs": [
         "prd/DRAFT_AND_APPROVAL_PRD.md",
@@ -1572,7 +1586,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-405",
@@ -1598,7 +1614,7 @@
         "A12",
         "A16"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Outputs retain only necessary source references/reasons, engine/catalogue versions and repeatable results; private notes excluded from athlete output/telemetry.",
       "preparationOutputs": [
         "catalogues/sources-reasons-vocabulary.draft.json",
@@ -1609,7 +1625,9 @@
         "quality/TRACEABILITY_AND_VERIFICATION.md",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-501",
@@ -1631,7 +1649,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Coach can inspect categories/statuses, source dates, why/why-not, missing data and candidates; role/side meaning accessible beyond colour.",
       "preparationOutputs": [
         "prd/POOL_SELECTION_PRD.md",
@@ -1640,7 +1658,9 @@
         "engineering/EXTENSION_CONTRACTS.md",
         "catalogues/sources-reasons-vocabulary.draft.json"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-502",
@@ -1663,7 +1683,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Draft-review-edit-approve flow preserves existing workouts, shows changed dosage/time, rechecks substitutions and stores actual approval only after successful validation/save.",
       "preparationOutputs": [
         "prd/DRAFT_AND_APPROVAL_PRD.md",
@@ -1673,7 +1693,9 @@
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
         "engineering/DETAILED_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-503",
@@ -1765,7 +1787,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Changed sources trigger appropriate review, concurrent edits cannot silently overwrite, unsaved changes are labelled and retryable, and network loss obeys approved policy.",
       "preparationOutputs": [
         "data/STATES_AND_AUTHORITY.md",
@@ -1774,7 +1796,9 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-506",
@@ -1798,7 +1822,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Core journeys function on target sizes with keyboard/focus/error cues; clients understand unknown/review states without exposed clinical notes.",
       "preparationOutputs": [
         "ux/WORKFLOWS_AND_COPY.md",
@@ -1807,7 +1831,9 @@
         "catalogues/sources-reasons-vocabulary.draft.json",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-507",
@@ -1866,7 +1892,7 @@
         "A13",
         "A16"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Mandatory requirement-linked tests pass; cross-tenant/bypass/failure checks and agreed latency budgets meet criteria; unresolved release blockers listed honestly.",
       "preparationOutputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -1877,7 +1903,9 @@
         "policies/REGIONAL_REVIEW_PACK.md",
         "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-602",
@@ -2229,7 +2257,9 @@
         "ux/WORKFLOWS_AND_COPY.md",
         "ux/SCREEN_SPECIFICATIONS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-704",
@@ -2410,7 +2440,9 @@
         "engineering/ENGINE_AND_API_CONTRACT.md",
         "engineering/DETAILED_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-804",
@@ -2445,7 +2477,9 @@
         "ux/WORKFLOWS_AND_COPY.md",
         "ux/SCREEN_SPECIFICATIONS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "partial",
+      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
     },
     {
       "id": "FP-805",

@@ -2,7 +2,7 @@
 // calendar paste + progression rules (spec 3), voice dictation (spec 5) and
 // the completion feedback loop (spec 4) applied on save. This page-tier modal
 // owns state and data access; the cards below it stay presentational.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import MultiDatePicker from '../../molecules/MultiDatePicker'
 import BlockCard from './BlockCard'
@@ -22,6 +22,8 @@ import {
   applyProgression, resolveTrainingMax, hasUnmapped, resetTrainingMaxes, programStats,
 } from '../../../lib/program'
 import { toast, confirmDialog } from '../../../lib/toast'
+import { poolingConfig } from '../../../lib/pooling/config'
+import usePoolingBuilder from '../../../hooks/usePoolingBuilder'
 
 // Existing sessions load as saved; a fresh day opens with the standard
 // three-block scaffold (Warm-up / Main Lifts / Core/Others). Optional seeded
@@ -49,6 +51,9 @@ const fromExisting = (p, seedBlocks = []) => {
 export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '' }) {
   const { db, commit } = useData()
   const { closeModal } = useModal()
+  const pooling = poolingConfig().r1
+  const draftSave = usePoolingBuilder({ enabled: pooling, clientId, date })
+  const { initialProposal, markDirty } = draftSave
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
   const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
@@ -61,6 +66,13 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const [step, setStep] = useState('edit') // edit | dates | progress | dictate | clients
   const [targets, setTargets] = useState(new Set())
   const [clientTargets, setClientTargets] = useState(new Set())
+  useEffect(() => {
+    if (pooling && initialProposal) {
+      setBlocks(structuredClone(initialProposal.blocks))
+      setNotes(initialProposal.notes || '')
+    }
+  }, [pooling,initialProposal])
+  useEffect(() => { if (pooling) markDirty() }, [pooling,blocks,notes,markDirty])
 
   const client = db.clients.find((c) => c.id === clientId)
   const maxHr = 220 - (client?.anthro?.age || 30)
@@ -111,6 +123,10 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const copyToClients = async () => {
     const ids = [...clientTargets]
     if (!ids.length) return
+    if (pooling) {
+      await draftSave.saveTargets(ids.map(cid => ({ clientId: cid, date, blocks: cloneBlocksFresh(blocks), notes: '', crossClient: true })))
+      return
+    }
     const clash = ids.filter(hasSession)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',
@@ -128,6 +144,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   // with brand-new ids, no progression.
   const quickClone = async (offset) => {
     const dt = addDays(date, offset)
+    if (pooling) { await draftSave.saveTargets([{ clientId, date: dt, blocks: cloneBlocksFresh(blocks), notes }]); return }
     if (db.prescriptions.some((p) => p.clientId === clientId && p.date === dt) &&
       !await confirmDialog({ title: 'Overwrite session', message: `${fmtDay(dt)} already has a session — overwrite it?`, confirmLabel: 'Overwrite' })) return
     commit((d) => writeTo(d, dt, cloneBlocksFresh(blocks)))
@@ -135,8 +152,14 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   }
 
   // Spec 3.2 — calendar duplication is gated behind the Progression Rule Window.
-  const bulkApply = (rules) => {
+  const bulkApply = async (rules) => {
     const dates = [...targets].sort()
+    if (pooling) {
+      // Legacy automatic progression is not an approved R3 policy.
+      if (rules && rules.type && rules.type !== 'none') return toast('Automatic progression is unavailable here. Save unchanged drafts and review progression separately.', 'error')
+      await draftSave.saveTargets(dates.map(dt => ({ clientId, date: dt, blocks: cloneBlocksFresh(blocks), notes })))
+      return
+    }
     const progressed = applyProgression(blocks, rules, resolveTm)
     commit((d) => dates.forEach((dt) => writeTo(d, dt, cloneBlocksFresh(progressed))))
     setStep('edit')
@@ -157,9 +180,10 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     setStep('edit')
   }
 
-  const save = () => {
+  const save = async () => {
     if (hasUnmapped(blocks)) return toast('Some dictated exercises are unvalidated (orange) — pick their standard library term first.', 'error')
     const payload = blocks.map((b, i) => ({ ...b, order: i + 1 }))
+    if (pooling) { await draftSave.saveTargets([{ clientId, date, blocks: payload, notes }]); return }
     const events = []
     commit((d) => {
       const ex = d.prescriptions.find((p) => p.clientId === clientId && p.date === date)
@@ -180,6 +204,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     if (events.length) events.forEach((e, i) => setTimeout(() => toast(e, 'info', 6000), i * 350))
   }
   const del = async () => {
+    if (pooling) return toast('Classic prescriptions and performed history are preserved. Pooling saves new draft revisions instead.', 'info')
     if (!await confirmDialog({ title: 'Delete workout', message: 'Delete this prescribed workout?', confirmLabel: 'Delete', danger: true })) return
     commit((d) => { d.prescriptions = d.prescriptions.filter((p) => !(p.clientId === clientId && p.date === date)) })
     closeModal()
@@ -187,15 +212,29 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   }
 
   const total = blocksVolume(blocks)
+  const closeBuilder = async () => {
+    if (pooling && (draftSave.busy || draftSave.hasUnknown)) return toast('Resolve the pending draft save before closing; the retry retains its original request.', 'info')
+    if (pooling && draftSave.pending && !await confirmDialog({ title: 'Leave unsaved draft?', message: 'Some drafts were not saved. Closing discards the unsaved edits in this window; already saved drafts remain.', confirmLabel: 'Discard unsaved edits' })) return
+    closeModal()
+  }
 
   return (
-    <ModalShell title={'Workout — ' + fmtDay(date)} onClose={closeModal}
+    <ModalShell title={'Workout — ' + fmtDay(date)} onClose={closeBuilder}
       footer={step === 'edit' && <>
-        {existing && <Button variant="danger" onClick={del}>Delete</Button>}
-        <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-        <Button onClick={save}>Save Workout</Button>
+        {existing && !pooling && <Button variant="danger" onClick={del}>Delete</Button>}
+        <Button variant="ghost" onClick={closeBuilder}>{pooling && draftSave.status === 'saved' ? 'Close' : 'Cancel'}</Button>
+        <Button onClick={save} disabled={pooling && (draftSave.busy || draftSave.status === 'loading' || draftSave.pending)}>{pooling ? 'Save Review Draft' : 'Save Workout'}</Button>
+        {pooling && draftSave.pending && <Button onClick={draftSave.retry} disabled={draftSave.busy}>Retry original draft save</Button>}
       </>}>
 
+      {pooling && <section aria-label="Draft save status">
+        <p>Pooling review mode: saves create unassigned drafts. No approval, Training Max reset or Classic prescription change is made.</p>
+        <p role="status">Draft status: {draftSave.status.replaceAll('_',' ')}</p>
+        {draftSave.error && <p role="alert">{draftSave.error}</p>}
+        {draftSave.outcomes.length > 0 && <p>Last save attempt: {draftSave.outcomes.filter(row => row.saved).length} of {draftSave.outcomes.length} drafts saved; none assigned. Later edits require another save.</p>}
+        {draftSave.outcomes.map(row => <p key={`${row.clientId}:${row.date}`}>{db.clients.find(item => item.id === row.clientId)?.name || 'Client'} · {row.date}: {row.saved ? 'draft saved, unassigned' : row.error}</p>)}
+      </section>}
+      <div inert={pooling && (draftSave.status === 'loading' || draftSave.busy || draftSave.pending) ? true : undefined}>
       {step === 'dates' && (
         <>
           <div className="section-title" style={{ marginTop: 0 }}>Bulk paste — select target dates</div>
@@ -203,7 +242,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
             onToggle={(dt) => setTargets((s) => { const n = new Set(s); if (n.has(dt)) n.delete(dt); else n.add(dt); return n })} />
           <div className="flex gap" style={{ marginTop: 10, justifyContent: 'flex-end' }}>
             <Button variant="ghost" onClick={() => setStep('edit')}>Cancel</Button>
-            <Button disabled={!targets.size} onClick={() => setStep('progress')}>Next — progression rules →</Button>
+            <Button disabled={!targets.size} onClick={() => setStep('progress')}>{pooling ? 'Next — review draft copies →' : 'Next — progression rules →'}</Button>
           </div>
         </>
       )}
@@ -211,8 +250,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         <>
           <div className="section-title" style={{ marginTop: 0 }}>Copy this workout to other clients</div>
           <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
-            The same blocks, exercises and sets are prescribed for <strong>{fmtDay(date)}</strong>. Loads copy across as-is;
-            %1RM / RPE / RIR targets re-resolve against each client's own Training Max.
+            {pooling ? 'Creates recipient-specific, unassigned drafts. Private notes and completed actuals are not copied; identity and doses require review.' : <>The same blocks, exercises and sets are prescribed for <strong>{fmtDay(date)}</strong>. Loads copy across as-is; %1RM / RPE / RIR targets re-resolve against each client's own Training Max.</>}
           </p>
           {others.length ? (
             <>
@@ -229,7 +267,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
                     <span className="pick-name">{o.name}</span>
                     <span className="muted" style={{ fontSize: 11 }}>{o.level} · {o.status}</span>
                     <div className="nav-spacer" />
-                    {hasSession(o.id) && <span className="pick-warn">has a session — will overwrite</span>}
+                    {hasSession(o.id) && <span className="pick-warn">{pooling ? 'existing session preserved' : 'has a session — will overwrite'}</span>}
                   </label>
                 ))}
               </div>
@@ -246,7 +284,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         </>
       )}
       {step === 'progress' && (
-        <ProgressionPanel blocks={blocks} dates={[...targets].sort()} onConfirm={bulkApply} onBack={() => setStep('dates')} />
+        pooling ? <section><p>Legacy progression defaults are disabled in pooling mode. Copies remain unchanged drafts for separate dose and progression review.</p><Button onClick={() => bulkApply(null)}>Save unchanged review drafts</Button><Button variant="ghost" onClick={() => setStep('dates')}>Back to dates</Button></section> : <ProgressionPanel blocks={blocks} dates={[...targets].sort()} onConfirm={bulkApply} onBack={() => setStep('dates')} />
       )}
       {step === 'dictate' && (
         <DictationPanel synonyms={db.synonyms} exercises={db.exercises} onInsert={insertDictated} onBack={() => setStep('edit')} />
@@ -279,16 +317,17 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
           <Button variant="ghost" size="sm" onClick={addBlock} style={{ margin: '6px 0' }}>＋ Add block</Button>
 
           <Field label="Session notes"><input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. knee-friendly, deload" /></Field>
-          <label className="block-auto" style={{ margin: '4px 0 10px', display: 'inline-flex' }}>
+          {!pooling && <label className="block-auto" style={{ margin: '4px 0 10px', display: 'inline-flex' }}>
             <input type="checkbox" checked={blockStart} onChange={(e) => setBlockStart(e.target.checked)} />
             Start of a new programming block — reset Training Max up to the rolling 30-day Absolute 1RM on save
-          </label>
+          </label>}
           <div className="card" style={{ textAlign: 'center', padding: 12 }}>
             <div className="muted" style={{ fontSize: 11 }}>SESSION VOLUME LOAD (Σ Reps×Load across blocks)</div>
             <div style={{ fontSize: 26, fontWeight: 800 }}>{fmtVL(total)}</div>
           </div>
         </>
       )}
+      </div>
     </ModalShell>
   )
 }
