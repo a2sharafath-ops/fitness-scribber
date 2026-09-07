@@ -1,10 +1,12 @@
-# Exercise pooling — whole-system preparation
+# Exercise pooling — local build and preparation
 
-Current package: FS-POOL-FULL-PREP-0.3. **All independently authorable preparation is complete; reviews, building and release remain pending.**
+Current local code checkpoint: **`3b779d9`**, 7 September 2026. The owner approved local R1–R3 implementation and isolated runtime testing. The local build and substantial synthetic verification are saved; **full acceptance and release remain pending**. Start with the [current verification report](./operations/LOCAL_BUILD_VERIFICATION.md), [pending work and next approvals](./operations/REMAINING_WORK.md), and [sprint tracker](./sprint-backlog.json).
+
+The preparation package FS-POOL-FULL-PREP-0.3 and the historical documents below are preserved. Their “build not authorized” statements describe the preparation stage and are superseded only by the [v0.6 local approval](./preparation/LOCAL_COMPLETION_APPROVAL.md). No hosted/remote/production permission or professional acceptance is implied.
 
 Start with the [full preparation handoff](./preparation/FULL_PREPARATION_HANDOFF.md). All six PRD drafts and twelve catalogue artifacts now have preparation content, including daily adjustments and progression/planning. The full package has 110 synthetic test specifications, not executed app tests.
 
-The owner approved bringing forward the remaining preparation in the [expanded approval record](./preparation/FULL_PREPARATION_APPROVAL.md). No app build, hosted action, commit/push or deployment is authorized. Earlier S1–S2 documents/archives remain scope snapshots; their statements that P05/P06/C09/C10 were deferred are superseded for drafting only.
+The earlier [expanded preparation approval](./preparation/FULL_PREPARATION_APPROVAL.md) brought forward all six PRDs and twelve catalogue artifacts. Local building/commits were subsequently approved under A22–A29. Push, merge, hosted action and deployment remain excluded. Earlier S1–S2 documents/archives remain scope snapshots, not current execution status.
 
 Use the [full artifact manifest](./preparation/FULL_PREPARATION_MANIFEST.json), [sprint backlog](./sprint-backlog.json) and [remaining approvals](./preparation/OPEN_DECISIONS.md). Actual professional acceptance, numerical policy limits and business/provider facts remain pending. Existing implementation dependencies are unchanged.
 

@@ -1,0 +1,93 @@
+{
+  "version": "local-resources-2026-09-07",
+  "scope": "Task-owned synthetic local verification only",
+  "codeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+  "approval": "A29 / preparation/LOCAL_COMPLETION_APPROVAL.md",
+  "postgres": {
+    "provider": "Postgres.app",
+    "providerVersion": "2.9.6",
+    "serverVersion": "16.15",
+    "source": "https://github.com/PostgresApp/PostgresApp/releases/download/v2.9.6/Postgres-2.9.6-16.dmg",
+    "archive": ".local-test-runtime/pg16.n2ATXM/Postgres-2.9.6-16.dmg",
+    "archiveBytes": 112949293,
+    "archiveSha256": "2689dc64d6a02e0a66e4585616919060d8fbf5bb06886fccc05b7f87638bf081",
+    "mount": ".local-test-runtime/pg16.n2ATXM/mounted",
+    "mountMode": "read-only; /dev/disk4 when mounted",
+    "bin": "/Users/sharafathathimannil/Claude/Projects/Fitness Scribber/.local-test-runtime/pg16.n2ATXM/mounted/Postgres.app/Contents/Versions/16/bin",
+    "cluster": ".local-test-runtime/pg16.n2ATXM/data",
+    "log": ".local-test-runtime/pg16.n2ATXM/server.log",
+    "socket": "/private/tmp/fitness-pg-socket.mnRSCa",
+    "port": 55439,
+    "tcp": false,
+    "authentication": "local peer; fictional SQL claims, not hosted JWT",
+    "signature": "Valid Developer ID and notarization verified; no security bypass",
+    "databases": [
+      "fitness_pooling_20260907",
+      "fitness_pooling_rehearsal_1788794266110",
+      "fitness_pooling_rehearsal_1788794282572",
+      "fitness_pooling_rehearsal_1788795185444",
+      "fitness_pooling_rehearsal_1788798249631",
+      "fitness_pooling_rehearsal_1788799246396",
+      "fitness_pooling_rehearsal_1788799325180",
+      "fitness_pooling_restored_1788794282572",
+      "fitness_pooling_restored_1788795185444",
+      "fitness_pooling_restored_1788798249631",
+      "fitness_pooling_restored_1788799325180"
+    ],
+    "failedRehearsalsRetained": [
+      "fitness_pooling_rehearsal_1788794266110",
+      "fitness_pooling_rehearsal_1788799246396"
+    ],
+    "latestPassedSource": "fitness_pooling_rehearsal_1788799325180",
+    "latestPassedRestore": "fitness_pooling_restored_1788799325180",
+    "latestDump": ".local-test-runtime/recovery-Lk9gaU/synthetic-post-build.dump",
+    "dumpSha256": "c5396b23d18c5774a17c9090c0833cf51e9cc34dfaa910e121ec9d4d2dfd801c"
+  },
+  "deno": {
+    "version": "2.9.6",
+    "source": "https://github.com/denoland/deno/releases/download/v2.9.6/deno-aarch64-apple-darwin.zip",
+    "archive": ".local-test-runtime/deno.iIGMIr/deno-aarch64-apple-darwin.zip",
+    "archiveBytes": 38446106,
+    "archiveSha256": "213a2f304f04d3c9cb5220669afad138f60a5aab1fe80962abdeb8f35807a472",
+    "binary": ".local-test-runtime/deno.iIGMIr/deno",
+    "binaryBytes": 80915104,
+    "cache": ".local-test-runtime/deno.iIGMIr/cache",
+    "dependencyMapping": "tests/pooling/deno.json maps to installed @supabase/supabase-js@2.108.2; no remote resolution",
+    "signature": "Valid code signature; MIT license reviewed"
+  },
+  "previews": [
+    {
+      "origin": "http://127.0.0.1:4179",
+      "pidAtCheck": 47971,
+      "purpose": "No-backend development review; R1/R2/R3 UI flags on"
+    },
+    {
+      "origin": "http://127.0.0.1:4180",
+      "pidAtCheck": 48452,
+      "purpose": "Compiled no-backend feature-off Classic route checks"
+    }
+  ],
+  "classic": {
+    "tag": "fitness-scribber-classic-2026-09-07",
+    "commit": "08ac0673d6e1d67ccd9fee2ffc5995074bcbf162",
+    "directory": ".recovery/fitness-scribber-classic",
+    "restoredCheckout": "/private/tmp/fitness-classic-restore.xzcgOG/bundle",
+    "checksumsReverified": true,
+    "offDeviceCopy": false
+  },
+  "capacity": {
+    "runtimeDirectoryAtCheck": "764 MiB",
+    "recoveryDirectoryAtCheck": "17 MiB",
+    "freeSpaceLastCheck": "3.4 GiB",
+    "minimumFreeGuardGiB": 1,
+    "cleanupPerformed": false
+  },
+  "safety": [
+    "No hosted databases or real client data accessed",
+    "No shared Docker/Care changes",
+    "No automatic deletion; failed fixtures retained",
+    "Verify process command/cwd and endpoint before stopping any PID; recorded PIDs may be reused",
+    "Do not unmount PostgreSQL while its server is running",
+    "Runtime directories are ignored by Git and denied by Vite file serving"
+  ]
+}

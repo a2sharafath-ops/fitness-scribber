@@ -2,6 +2,8 @@
 
 FS-POOL-S1S2-0.2 · v0.2 · 2026-09-05. This record distinguishes document checks from future application tests and professional review.
 
+**Historical preparation snapshot.** For the 7 September local build, see [current application evidence](../operations/LOCAL_BUILD_VERIFICATION.md) and [requirement-to-engineering-test coverage](./local-build-verification.json). The older results below are not current claims that no code/tests/build approval exist. Domain expected-result specifications and actual professional acceptance remain distinct from executed synthetic engineering tests.
+
 ## Requirement traceability
 
 | Requirement | Source/design contract | Catalogue/rule examples | Expected-result specifications |

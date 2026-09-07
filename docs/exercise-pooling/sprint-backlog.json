@@ -1,12 +1,12 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
-  "version": "local-completion-approval-v0.6",
-  "status": "local-build-in-progress-native-postgres-verification-resumed",
-  "currentSprint": "S3",
+  "version": "local-verification-2026-09-07",
+  "status": "local-implementation-checkpoint-verified-release-gates-open",
+  "currentSprint": "S6",
   "executionMode": "local-backup-recovery-and-r1-r3-engineering",
   "implementationAuthorized": true,
   "productionChangesAuthorized": false,
-  "completedScope": "Preparation and local Classic preflight complete as scoped in LOCAL_EXECUTION_LOG.md. R1-R3 implementation and full verification pending; no live release authorized.",
+  "completedScope": "Preparation and owner product review recorded; Classic checkpoint preserved; local R1-R3 code saved at 3b779d9 with 120 unit tests, native core-schema integration/restore, Deno and scoped UI evidence. Full hosted/frontend integration, device/domain acceptance and release remain open.",
   "priorityDefinitions": {
     "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",
     "P1": "Core R1 functionality and usability.",
@@ -1242,7 +1242,7 @@
         "A11",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "done",
       "acceptance": "Authorized codex/ branch preserves existing changes; runnable tests and pooling-off default established. No remote push or package purchase.",
       "preparationOutputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -1253,7 +1253,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "in-progress"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Isolated branch, off-by-default flags, native PostgreSQL/Deno and synthetic harness verified.",
+      "remainingWork": [
+        "No production enablement implied."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-302",
@@ -1274,7 +1288,7 @@
         "A09",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Existing exercise refs, names, custom overrides and media survive reload/migration; approved vs draft/retired records behave correctly; regression tests pass.",
       "preparationOutputs": [
         "catalogues/exercises.draft.json",
@@ -1287,8 +1301,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Stable IDs/revisions, preserved legacy sidecar, publication manifest and exact mapping contracts implemented.",
+      "remainingWork": [
+        "Actual accepted candidate mappings and content coverage required."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-303",
@@ -1319,8 +1346,21 @@
         "data/MODULE_REQUIREMENTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "18 additive pooling schemas, immutable/versioned ledgers and fresh relational restore verified.",
+      "remainingWork": [
+        "Hosted schema/API/auth compatibility unverified."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-304",
@@ -1343,7 +1383,7 @@
         "A10",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Forms/persistence distinguish unknown, unassessed and absent; preserve side/date/source and legacy originals; untouched defaults are not asserted as confirmed.",
       "preparationOutputs": [
         "prd/CLIENT_CONTEXT_PRD.md",
@@ -1353,8 +1393,21 @@
         "data/STATES_AND_AUTHORITY.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Dated unit/side/protocol/source-token confirmation with explicit unknown/zero/false and source-change invalidation.",
+      "remainingWork": [
+        "Accepted instrument mappings and actual client onboarding scope not certified."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-305",
@@ -1376,7 +1429,7 @@
         "A09",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Date/source/conflict/staleness/side cases pass; unresolved restrictions persist; historical resolution excludes future evidence.",
       "preparationOutputs": [
         "data/CONTEXT_RESOLUTION.md",
@@ -1386,8 +1439,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Deterministic resolver v2, purpose/scope/consent admission, scoped restrictions and evidence cutoff.",
+      "remainingWork": [
+        "Domain expected outcomes and unsupported population modules need acceptance."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-306",
@@ -1411,7 +1477,7 @@
         "A12",
         "A13"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Authorized test backend rejects cross-tenant and unauthorized athlete writes, bypassed holds and inconsistent approvals; local-mode limitations remain explicit.",
       "preparationOutputs": [
         "engineering/ENGINE_AND_API_CONTRACT.md",
@@ -1421,7 +1487,22 @@
         "data/MODULE_REQUIREMENTS.md",
         "catalogues/rules-and-templates.draft.json"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-native-and-injected-http",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Coach-only exact transaction authority, narrow clients, legacy bypass protection, generation locks and token checks.",
+      "remainingWork": [
+        "Real JWT/REST/storage/Edge integration and complete cross-role UI testing remain."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-307",
@@ -1445,7 +1526,7 @@
         "A12",
         "A13"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "done",
       "acceptance": "Dry-run and restore evidence preserve counts/references/overrides/history in local or expressly authorized staging; no production changes.",
       "preparationOutputs": [
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
@@ -1454,7 +1535,22 @@
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
         "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-core-synthetic",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Fresh additive migration and all-public-table fingerprint restore passed; targets/events retained.",
+      "remainingWork": [
+        "This task result is synthetic core-schema only; hosted target work is FP-603."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-401",
@@ -1477,7 +1573,7 @@
         "A08",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Reviewed rules return session hold/review plus exercise eligible/modified/review/excluded statuses and reason codes; ranking cannot bypass them.",
       "preparationOutputs": [
         "prd/POOL_SELECTION_PRD.md",
@@ -1488,8 +1584,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Eligibility/holds before ranking, unpublished scope/content rejection and reasoned gaps.",
+      "remainingWork": [
+        "Actual accepted clinical/content rules pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-402",
@@ -1511,7 +1620,7 @@
         "A08",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Stable ranking selects only eligible reviewed records, preserves side, reduces redundant need coverage and exposes unsupported cells.",
       "preparationOutputs": [
         "prd/POOL_SELECTION_PRD.md",
@@ -1522,8 +1631,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Stable ranking, required roles/needs and redundancy handling implemented.",
+      "remainingWork": [
+        "Accepted coverage matrices and domain review pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-403",
@@ -1544,7 +1666,7 @@
         "A08",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Tests cover measured/estimated references, no-max/bodyweight/timed work, units and limits; no fabricated load or silent unsafe fallbacks.",
       "preparationOutputs": [
         "catalogues/rules-and-templates.draft.json",
@@ -1553,8 +1675,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Explicit dose/load/time accounting and exact reviewed-dose matching; no parameter fabrication.",
+      "remainingWork": [
+        "Real dose/loading parameters and reviewed coverage pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-404",
@@ -1577,7 +1712,7 @@
         "A08",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Draft respects selected weekly structure, session duration including setup/rest/sides, optional blocks and swap rechecks; insufficient coverage is explicit.",
       "preparationOutputs": [
         "prd/DRAFT_AND_APPROVAL_PRD.md",
@@ -1587,8 +1722,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Session composition, duration and compatible swap child revisions; weekly explicit constraints.",
+      "remainingWork": [
+        "No automatic invented schedule; domain coverage/recipe acceptance pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-405",
@@ -1614,7 +1762,7 @@
         "A12",
         "A16"
       ],
-      "status": "in-progress",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Outputs retain only necessary source references/reasons, engine/catalogue versions and repeatable results; private notes excluded from athlete output/telemetry.",
       "preparationOutputs": [
         "catalogues/sources-reasons-vocabulary.draft.json",
@@ -1626,8 +1774,21 @@
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-synthetic-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Versioned rationale/replay and private/public projections implemented.",
+      "remainingWork": [
+        "Accepted real outputs/privacy audience review pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-501",
@@ -1659,8 +1820,21 @@
         "catalogues/sources-reasons-vocabulary.draft.json"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-scoped-browser",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Coach pool/source/candidate view, explicit status/reasons, labels and unique controls.",
+      "remainingWork": [
+        "Complete supported-device/keyboard/screen-reader and integrated real-auth UX remain."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-502",
@@ -1694,8 +1868,21 @@
         "engineering/DETAILED_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-native-and-scoped-browser",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Canonical inputs, generation/swap, exact diff/decision and single/batch approval implemented.",
+      "remainingWork": [
+        "Actual frontend-to-Supabase end-to-end flow remains unverified."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-503",
@@ -1720,7 +1907,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Coach/athlete health-change paths distinguish unknown/current report and applicable review/hold without implementing R2 wellness dosage logic.",
       "preparationOutputs": [
         "prd/CLIENT_CONTEXT_PRD.md",
@@ -1732,7 +1919,22 @@
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
         "engineering/DETAILED_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-native-and-component-fixture",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Explicit current health response, hold/report and guarded start/resume plus stop implemented.",
+      "remainingWork": [
+        "Full hook/backend/offline/account-switch end-to-end tests remain."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-504",
@@ -1755,7 +1957,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Each entry-point case re-evaluates target client/date/role and relevant restriction; no inherited source-client approval or hidden bypass.",
       "preparationOutputs": [
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
@@ -1763,7 +1965,22 @@
         "engineering/EXTENSION_CONTRACTS.md",
         "prd/DRAFT_AND_APPROVAL_PRD.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-native-partial-ui",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Legacy R1 read/write protections and draft routing for copies/templates/manual/voice/client paths.",
+      "remainingWork": [
+        "Current full UI journey matrix and client-portal launch parity assessment remain."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-505",
@@ -1797,8 +2014,21 @@
         "engineering/EXTENSION_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-unit-native-partial-ui",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Durable original-operation journal, rejection/unknown separation, client scope guards, stop isolation.",
+      "remainingWork": [
+        "Actual cross-tab/auth/network-loss end-to-end integration remains."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-506",
@@ -1832,8 +2062,21 @@
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "partial",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "390px/1280px runner visual checks, disabled/focus styles, labels, unique IDs and desktop no-overflow checks.",
+      "remainingWork": [
+        "Full keyboard/focus/device/screen-reader and participant acceptance remain."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-507",
@@ -1857,7 +2100,7 @@
         "A10",
         "A12"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Only actually approved records can be promoted; validation, retirement, change audit and rollback are testable without a new CMS; live promotion still needs release approval.",
       "preparationOutputs": [
         "catalogues/REVIEW_AND_MAINTENANCE.md",
@@ -1867,7 +2110,22 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-unit-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Immutable submission/validation, separate operator plus exact hash admission, publication/revocation/audit.",
+      "remainingWork": [
+        "No actual release content accepted or published; withdrawal uses revocation, not soft retirement."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-601",
@@ -1904,8 +2162,14 @@
         "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "test-harness-implemented",
+      "localVerificationStatus": "passed-listed-tests-not-complete-acceptance-suite",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "remainingWork": [
+        "Integrated auth/API/UI, full requirement-linked accepted fixtures, accessibility and end-to-end performance/load evidence remain."
+      ]
     },
     {
       "id": "FP-602",
@@ -1926,14 +2190,18 @@
         "A07",
         "A08"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Reviewers assess actual versioned outputs, confirm or reject intended scope and resolve blocking rule/content defects; assistant does not fabricate acceptance.",
       "preparationOutputs": [
         "quality/DOMAIN_REVIEW_PACKET.md",
         "quality/catalogue-coverage-and-cases.draft.json",
         "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationPermission": "approved-under-A23",
+      "remainingWork": [
+        "Actual task-specific professional/policy/output acceptance remains; local build approval is already recorded."
+      ]
     },
     {
       "id": "FP-603",
@@ -2034,7 +2302,17 @@
         "catalogues/REVIEW_AND_MAINTENANCE.md",
         "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
       ],
-      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed."
+      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed.",
+      "localImplementationStatus": "handoff-and-runbooks-updated",
+      "localVerificationStatus": "evidence-linked",
+      "localEvidence": [
+        "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md",
+        "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "remainingWork": [
+        "Real support/operator/privacy facts and release acceptance remain."
+      ]
     },
     {
       "id": "FP-606",
@@ -2065,7 +2343,7 @@
         "A18",
         "A19"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Gate records identify exact targets/versions, actual approvals and no unresolved blocking findings; no production action is included in merely assembling the pack.",
       "preparationOutputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -2082,7 +2360,15 @@
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
         "operations/RELEASE_AND_ROLLBACK_RUNBOOK.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationStatus": "local-no-go-release-pack-prepared",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md",
+        "operations/REMAINING_WORK.md"
+      ],
+      "remainingWork": [
+        "G3 cannot pass until FP-602/603/604 and exact release permissions have evidence."
+      ]
     },
     {
       "id": "FP-607",
@@ -2207,7 +2493,7 @@
         "A16",
         "A20"
       ],
-      "status": "future-gated",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Specific threshold/policy versions and privacy scope reviewed; record separate R2 build authorization and allowed environments.",
       "preparationOutputs": [
         "prd/DAILY_ADJUSTMENT_PRD.md",
@@ -2222,7 +2508,11 @@
         "policies/PROCESSING_RETENTION_AND_RIGHTS.md",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationPermission": "approved-under-A23",
+      "remainingWork": [
+        "Actual task-specific professional/policy/output acceptance remains; local build approval is already recorded."
+      ]
     },
     {
       "id": "FP-703",
@@ -2245,7 +2535,7 @@
         "A13",
         "A20"
       ],
-      "status": "future-gated",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Current-context changes yield explainable proposals within approved limits, never clearance or silent assigned-workout changes; unit and integration tests added.",
       "preparationOutputs": [
         "prd/DAILY_ADJUSTMENT_PRD.md",
@@ -2258,8 +2548,21 @@
         "ux/SCREEN_SPECIFICATIONS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-unit-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Daily source-backed bounded effects and exact reviewed-dose proposal, accept/amend/reject as draft.",
+      "remainingWork": [
+        "Actual R2 policy/clinical/privacy/usability acceptance and release pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-704",
@@ -2285,7 +2588,7 @@
         "A16",
         "A20"
       ],
-      "status": "future-gated",
+      "status": "in-progress",
       "acceptance": "Missing/skipped/default wellness and unreliable wearables behave as specified; reviewed output and consent/access checks pass; remaining risks recorded.",
       "preparationOutputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -2300,7 +2603,14 @@
         "policies/REGIONAL_REVIEW_PACK.md",
         "policies/PROCESSING_RETENTION_AND_RIGHTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localVerificationStatus": "passed-synthetic-native-portions",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "remainingWork": [
+        "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+      ]
     },
     {
       "id": "FP-705",
@@ -2400,7 +2710,7 @@
         "A04",
         "A21"
       ],
-      "status": "future-gated",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Reviewed rule versions and expected cases accepted for stated populations; separate R3 build scope authorized before coding.",
       "preparationOutputs": [
         "prd/PROGRESSION_PLANNING_PRD.md",
@@ -2410,7 +2720,11 @@
         "quality/catalogue-coverage-and-cases.draft.json",
         "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localImplementationPermission": "approved-under-A23",
+      "remainingWork": [
+        "Actual task-specific professional/policy/output acceptance remains; local build approval is already recorded."
+      ]
     },
     {
       "id": "FP-803",
@@ -2431,7 +2745,7 @@
         "A13",
         "A21"
       ],
-      "status": "future-gated",
+      "status": "awaiting-external-acceptance",
       "acceptance": "Comparable performance produces bounded proposals with reason/history references; skips and symptoms are not inferred as incapacity/diagnosis; tests cover counterexamples.",
       "preparationOutputs": [
         "prd/PROGRESSION_PLANNING_PRD.md",
@@ -2441,8 +2755,21 @@
         "engineering/DETAILED_CONTRACTS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-unit-and-native",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Complete-occurrence comparable history, method/side/revision/load basis, correction-aware exact-dose progression proposals.",
+      "remainingWork": [
+        "Actual R3 parameters and domain expected outcomes pending."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-804",
@@ -2465,7 +2792,7 @@
         "A13",
         "A21"
       ],
-      "status": "future-gated",
+      "status": "in-progress",
       "acceptance": "Weekly/time/goal constraints and explicit reassessment evidence drive reviewable revisions; incomplete findings do not resolve; completed/approved history preserved.",
       "preparationOutputs": [
         "prd/PROGRESSION_PLANNING_PRD.md",
@@ -2478,8 +2805,21 @@
         "ux/SCREEN_SPECIFICATIONS.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "localImplementationStatus": "partial",
-      "localVerificationStatus": "see-LOCAL_EXECUTION_LOG-not-full-acceptance"
+      "localImplementationStatus": "implemented",
+      "localVerificationStatus": "passed-unit-native-partial-ui",
+      "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "localCompletionSummary": "Constraint-aware weekly persistence/atomic approval/supersession and scope-specific authorized reassessment recording.",
+      "remainingWork": [
+        "Full frontend integration, professional evidence provisioning and accepted weekly coverage remain."
+      ],
+      "localAuthorizationRefs": [
+        "A23",
+        "A28",
+        "A29"
+      ]
     },
     {
       "id": "FP-805",
@@ -2513,7 +2853,7 @@
         "A19",
         "A21"
       ],
-      "status": "future-gated",
+      "status": "in-progress",
       "acceptance": "Domain/security/migration/usability tests and approved pilot criteria pass; separately approved release actions verified; all accepted scope reconciled and maintenance ownership handed off.",
       "preparationOutputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -2532,7 +2872,14 @@
         "operations/COACH_CLIENT_AND_SUPPORT_GUIDE.md",
         "catalogues/REVIEW_AND_MAINTENANCE.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "localVerificationStatus": "passed-synthetic-native-portions",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "remainingWork": [
+        "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+      ]
     },
     {
       "id": "FP-B01",
@@ -2769,8 +3116,16 @@
         "A25",
         "A27"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Test all new features off; test Classic code against additive synthetic schema and records written after migration; verify counts/references/actuals and failure containment. Diagnose incompatibility instead of claiming guaranteed rollback."
+      "status": "in-progress",
+      "acceptance": "Test all new features off; test Classic code against additive synthetic schema and records written after migration; verify counts/references/actuals and failure containment. Diagnose incompatibility instead of claiming guaranteed rollback.",
+      "localImplementationStatus": "fallback-and-rehearsal-implemented",
+      "localVerificationStatus": "passed-native-and-feature-off-ui-separately",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md"
+      ],
+      "remainingWork": [
+        "Integrated Classic code against actual migrated Supabase auth/REST/storage target remains unverified; no live rollback certificate."
+      ]
     },
     {
       "id": "FP-B12",
@@ -2788,8 +3143,18 @@
         "A23",
         "A28"
       ],
-      "status": "awaiting-scope-approval",
-      "acceptance": "Deliver runnable local R1-R3 engineering scope, actual test/build/lint results, comparison with Classic, recovery instructions and remaining specialist/hosted/pilot gates. Never report live release or professional acceptance from local tests."
+      "status": "done",
+      "acceptance": "Deliver runnable local R1-R3 engineering scope, actual test/build/lint results, comparison with Classic, recovery instructions and remaining specialist/hosted/pilot gates. Never report live release or professional acceptance from local tests.",
+      "localImplementationStatus": "local-evidence-handoff-complete",
+      "localVerificationStatus": "limits-and-open-gates-explicit",
+      "localEvidence": [
+        "operations/LOCAL_BUILD_VERIFICATION.md",
+        "operations/REMAINING_WORK.md",
+        "operations/LOCAL_RESOURCE_MANIFEST.json"
+      ],
+      "remainingWork": [
+        "Whole-system release is not marked complete; see unresolved task-specific gates."
+      ]
     }
   ],
   "preparationAuthorized": true,
@@ -2819,7 +3184,7 @@
     "A12": "local-build-authorized-under-A23-professional-release-gates-pending"
   },
   "preparationStatusDefinition": "Complete refers only to independently authorable local S1/S2 preparation; acceptanceStatus separately preserves actual review/gate requirements.",
-  "currentPhase": "local-r1-r3-build-and-verification",
+  "currentPhase": "local-verification-handoff-r1-r2-r3",
   "extendedPreparationApproval": {
     "record": "preparation/FULL_PREPARATION_APPROVAL.md",
     "A20_preparation": true,
@@ -2832,9 +3197,9 @@
   "implementationAuthorizationDetail": {
     "priorOwnerR1LocalBuildDirection": true,
     "executionPausedForRequestedBackupAndConsolidatedApproval": false,
-    "fullR1R3Scope": "approved-local-only-build-in-progress",
+    "fullR1R3Scope": "approved-local-only-implementation-checkpoint-saved",
     "professionalSignoffVerified": false,
-    "reference": "preparation/BACKUP_TO_BUILD_APPROVAL.md"
+    "reference": "preparation/LOCAL_COMPLETION_APPROVAL.md"
   },
   "ownerReviewUpdate": {
     "date": "2026-09-07",
@@ -2858,5 +3223,22 @@
       "FP-B12"
     ],
     "completionRule": "Track localImplementationStatus/localVerificationStatus separately from original task acceptance. Do not mark tasks requiring domain acceptance, staging, pilot or release wholly done."
+  },
+  "localVerificationReport": "operations/LOCAL_BUILD_VERIFICATION.md",
+  "remainingWorkReport": "operations/REMAINING_WORK.md",
+  "localCodeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847",
+  "localVerificationSummary": {
+    "nodeTests": 120,
+    "nodePassed": 120,
+    "denoHttpTests": 6,
+    "denoEntrypointsTypechecked": 6,
+    "poolingSchemaFiles": 18,
+    "sqlTestFiles": 5,
+    "nativeIntegrationScripts": 11,
+    "syntheticRestore": "passed",
+    "browserScope": "partial/component and feature-off route checks",
+    "hostedIntegration": "unverified",
+    "productionEnabled": false,
+    "codeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847"
   }
 }

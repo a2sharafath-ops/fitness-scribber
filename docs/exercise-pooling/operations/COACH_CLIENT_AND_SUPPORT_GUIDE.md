@@ -2,6 +2,16 @@
 
 O03 / U02 · version 0.1. Proposed future product behavior, not confirmation that these controls exist in the current app. Adapt final help to the verified build before publication.
 
+## Local build labels and limits — 7 September 2026
+
+The controls below exist in the local pooling workflow; this guide is not yet approved public help. Open a client's Exercise Pool. Review source availability and exact confirmations; choose **Canonical exercise and dose editor** to save dated session inputs or exact variants/doses. When the context is held, **Request source-bound context review** requires real recorded scope/consent and resolved applicable evidence. It creates a new unassigned revision. **Generate a pool draft or compatible swap** also creates a draft, never an assignment.
+
+Inspect the exact proposal, source gaps and changes, choose **Validate exact draft**, then explicitly acknowledge review before **Approve & assign**. Several checked revisions use one atomic transaction. Weekly constraints and the separate weekly review/approval are not automatic schedule generation. R2/R3 numerical proposals require admitted policies; unresolved draft parameters remain visibly unsupported.
+
+In the client view, **Start approved session** and **Resume** require an explicit current response and fresh server checks. **Stop now** remains separate from slow result saves. Record actual performed sets, including side and time; do not copy targets into actuals. **Save attributed correction** requires a reason and preserves the older record. For an unknown save, **Reconcile original pending operation** retries the original request; it does not invent a new assignment. If a health report cannot save because another operation is pending, stop exercising and reconcile, then submit the concern; the UI does not claim it has reached the coach.
+
+Client reports, scoped reassessment requests and policy accept/withdraw actions do not grant clearance. No actual policy/catalogue is published in this local preview; no real client should use these fixtures as exercise instructions. Hosted sign-in/end-to-end behavior and published service contacts remain unverified. See [current limits and pending gates](./REMAINING_WORK.md).
+
 ## Coach workflow
 
 Review current client context and required issues first. Confirm actual goal order, session time/kit/support and task prerequisites. Use the pool to inspect eligible options and reasons; a draft candidate or score does not grant clinical clearance. Select a session purpose, review side/dose/source/time and required gaps, then approve the exact current revision. Manual/copy/template/voice content follows the same checks.
