@@ -1,4 +1,4 @@
-export const RESOLVER_VERSION = 'pool-context-1'
+export const RESOLVER_VERSION = 'pool-context-2'
 const OBSERVED = new Set(['observed_present', 'assessed_absent', 'measured', 'reported'])
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0
 
@@ -22,7 +22,8 @@ export function resolveContext(input) {
       if (requirement.required) reasons.push({ code: 'source_unavailable', key })
       continue
     }
-    const rows = observations.filter(row => row.key === key && row.clientId === input.clientId &&
+    const rows = observations.filter(row => row.key === key && row.clientId === input.clientId && row.source === source &&
+      (!requirement.side || row.side===requirement.side) &&
       Date.parse(row.effectiveAt) <= session && Date.parse(row.recordedAt) <= cutoff)
     // Corrections exclude a prior revision only when the correction itself was known.
     const superseded = new Set(rows.map(row => row.supersedes).filter(Boolean))
@@ -54,7 +55,8 @@ export function resolveContext(input) {
   }
   const activeRestrictions = restrictions.filter(row =>
     !Number.isFinite(Date.parse(row.recordedAt)) || !Number.isFinite(Date.parse(row.effectiveAt)) ||
-    (Date.parse(row.recordedAt) <= cutoff && Date.parse(row.effectiveAt) <= session && !(row.state === 'resolved' && row.resolutionEvidence && row.resolvedBy)))
+    (Date.parse(row.recordedAt) <= cutoff && Date.parse(row.effectiveAt) <= session && !(row.state === 'resolved' && row.resolutionEvidence && row.resolvedBy &&
+      Number.isFinite(Date.parse(row.resolvedAt)) && Date.parse(row.resolvedAt)<=session && Date.parse(row.resolvedAt)<=cutoff)))
     .sort((a, b) => compare(a.id, b.id))
   if (activeRestrictions.length) reasons.push({ code: 'restriction_review_required', refs: activeRestrictions.map(row => row.id) })
   if (input.healthChange !== 'no_change') reasons.push({ code: input.healthChange === 'changed' ? 'health_change_hold' : 'health_check_required' })

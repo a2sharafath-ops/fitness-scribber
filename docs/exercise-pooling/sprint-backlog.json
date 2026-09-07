@@ -1,7 +1,7 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
-  "version": "backup-build-approval-v0.5",
-  "status": "local-independent-build-progress-postgres-verification-blocked",
+  "version": "local-completion-approval-v0.6",
+  "status": "local-build-in-progress-native-postgres-verification-resumed",
   "currentSprint": "S3",
   "executionMode": "local-backup-recovery-and-r1-r3-engineering",
   "implementationAuthorized": true,
@@ -2800,7 +2800,7 @@
     "A04": "Recommendations requested/drafted; no professional appointment/sign-off.",
     "A05": "Single coach plus client app; target India/GCC/USA/UK/Europe. Establishment/name/email and exact market activation pending.",
     "A06": "Explicit S1–S2 local preparation approval in user six-point reply.",
-    "remaining": "A07–A21 unapproved; no build, external writes, spending, live data access or deployment."
+    "remaining": "Owner product review and local R1–R3 build authorized under A22–A28; A29 isolated native testing runtime authorized by version 0.6. Required professional evidence and exact hosted/remote/live release actions remain pending. No deployment or real-client enablement."
   },
   "lastPreparationBatch": {
     "version": "s1-foundation-draft-v0.1",
@@ -2816,10 +2816,10 @@
   "gateStatus": {
     "G1": "pending",
     "G2": "pending",
-    "A12": "not-authorized"
+    "A12": "local-build-authorized-under-A23-professional-release-gates-pending"
   },
   "preparationStatusDefinition": "Complete refers only to independently authorable local S1/S2 preparation; acceptanceStatus separately preserves actual review/gate requirements.",
-  "currentPhase": "cross-sprint-preparation-complete",
+  "currentPhase": "local-r1-r3-build-and-verification",
   "extendedPreparationApproval": {
     "record": "preparation/FULL_PREPARATION_APPROVAL.md",
     "A20_preparation": true,
@@ -2832,7 +2832,7 @@
   "implementationAuthorizationDetail": {
     "priorOwnerR1LocalBuildDirection": true,
     "executionPausedForRequestedBackupAndConsolidatedApproval": false,
-    "fullR1R3Scope": "approved-local-only-preflight-in-progress",
+    "fullR1R3Scope": "approved-local-only-build-in-progress",
     "professionalSignoffVerified": false,
     "reference": "preparation/BACKUP_TO_BUILD_APPROVAL.md"
   },
@@ -2841,7 +2841,7 @@
     "scope": "Six PRDs and twelve catalogue artifacts",
     "outcome": "Owner reports review good with no requested changes; owner accepts as-is. No reviewer identities, clinical parameters, rights evidence or specialist signatures supplied."
   },
-  "consolidatedPlan": "preparation/BACKUP_TO_BUILD_APPROVAL.md",
+  "consolidatedPlan": "preparation/LOCAL_COMPLETION_APPROVAL.md",
   "localOnlyProposal": {
     "status": "owner-approved-local-only",
     "approval": "A23",

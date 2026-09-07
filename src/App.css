@@ -1,2 +1,13 @@
 /* Intentionally empty. Leftover Vite starter styles removed; app styles live in index.css.
    This file is not imported anywhere and can be deleted from the repo. */
+/* Pooling is a separate review workflow; disabled controls must look disabled. */
+.pooling-workspace { display: grid; gap: 18px; }
+.pooling-workspace .card { min-width: 0; }
+.pooling-workspace fieldset { display: grid; gap: 10px; margin: 14px 0; padding: 16px; min-width: 0; border: 1px solid var(--border, #ddd); border-radius: 12px; }
+.pooling-workspace label { display: grid; gap: 5px; }
+.pooling-workspace input:not([type="checkbox"]), .pooling-workspace select, .pooling-workspace textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+.pooling-workspace details { margin: 12px 0; }
+.pooling-workspace summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+.pooling-workspace button:disabled { opacity: .42; cursor: not-allowed; }
+.pooling-workspace pre { max-height: 420px; overflow: auto; background: #f7f7f7; padding: 12px; border-radius: 10px; }
+.pooling-workspace .btn { margin: 4px 6px 4px 0; }

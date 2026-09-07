@@ -17,7 +17,7 @@ export function evaluateDraft({ context, request, catalogue, doses, manifest, se
     if (usedExercises.has(record.id)) { gaps.push({occurrenceId:item.occurrenceId,reason:'repeated_exercise_requires_reviewed_policy'}); continue }
     usedExercises.add(record.id)
     const eligibility=evaluateCandidate(record,context,request,manifest)
-    const resolvedDose=resolveDose(record,dose,manifest)
+    const resolvedDose=resolveDose(record,dose,manifest,context)
     if (eligibility.eligibility!=='eligible' || resolvedDose.state!=='resolved') {
       gaps.push({occurrenceId:item.occurrenceId,reason:'item_not_ready',details:[...eligibility.reasons,...(resolvedDose.reasons || [])]}); continue
     }

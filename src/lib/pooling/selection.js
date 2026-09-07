@@ -1,5 +1,5 @@
 import { canonical } from './context.js'
-export const ENGINE_VERSION = 'pool-selection-1'
+export const ENGINE_VERSION = 'pool-selection-2'
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0
 const unique = values => [...new Set(values)].sort(compare)
 
@@ -28,7 +28,7 @@ export function evaluateCandidate(record, context, request, manifest) {
   return { id: record.id, revision: record.revision, eligibility: reasons.length ? 'excluded' : 'eligible', reasons, matchedNeeds }
 }
 
-export function resolveDose(record, dose, manifest) {
+export function resolveDose(record, dose, manifest, context = null) {
   if (!dose || !record.doseRefs?.includes(dose.id) || !admission(dose, manifest)) return { state: 'unresolved', reasons: ['dose_not_admitted'] }
   const { sets, workSeconds, restSeconds, setupSeconds, transitionSeconds, sideMultiplier } = dose
   if (!Number.isInteger(sets) || sets < 1 || ![1, 2].includes(sideMultiplier) ||
@@ -37,8 +37,20 @@ export function resolveDose(record, dose, manifest) {
   }
   const seconds = sets * workSeconds * sideMultiplier + Math.max(0, sets * sideMultiplier - 1) * restSeconds + setupSeconds + transitionSeconds
   if (!Number.isFinite(seconds)) return { state: 'unresolved', reasons: ['dose_invalid_or_incomplete'] }
+  const mode=dose.mode || 'timed'
+  if(!['timed','repetitions'].includes(mode) || (mode==='repetitions' && (!Number.isSafeInteger(dose.reps) || dose.reps<1))) return {state:'unresolved',reasons:['dose_invalid_or_incomplete']}
+  let loadKg=null
+  if(dose.loadMethod==='absolute') loadKg=dose.loadKg
+  else if(dose.loadMethod==='percentage'){
+    const reference=context?.facts[dose.loadReferenceKey]
+    const value=reference?.value
+    if(reference?.state!=='usable' || value?.variantId!==record.id || value?.unit!=='kg' || !dose.allowedReferenceKinds?.includes(value?.kind) || value?.method!==dose.referenceMethod || !Number.isFinite(value?.valueKg) || value.valueKg<=0 || !Number.isFinite(dose.percentage) || dose.percentage<=0 || !Number.isFinite(dose.incrementKg) || dose.incrementKg<=0) return {state:'unresolved',reasons:['load_reference_unavailable']}
+    loadKg=Math.round(value.valueKg*dose.percentage/100/dose.incrementKg)*dose.incrementKg
+  }else if(dose.loadMethod && dose.loadMethod!=='none')return {state:'unresolved',reasons:['loading_method_unsupported']}
+  if(['absolute','percentage'].includes(dose.loadMethod) && (!Number.isFinite(loadKg) || !Number.isFinite(dose.minimumLoadKg) || !Number.isFinite(dose.maximumLoadKg) || loadKg<dose.minimumLoadKg || loadKg>dose.maximumLoadKg || loadKg<0))return {state:'unresolved',reasons:['load_outside_reviewed_bounds']}
   return { state: 'resolved', id: dose.id, revision: dose.revision, seconds,
-    prescription: { sets, workSeconds, restSeconds, setupSeconds, transitionSeconds, sideMultiplier } }
+    prescription: { sets, workSeconds, restSeconds, setupSeconds, transitionSeconds, sideMultiplier,mode,reps:mode==='repetitions'?dose.reps:null,loadKg,
+      ...(dose.comparison?{comparison:structuredClone(dose.comparison)}:{}) } }
 }
 
 export function selectPool({ context, catalogue, doses, manifest, request }) {
@@ -68,7 +80,7 @@ export function selectPool({ context, catalogue, doses, manifest, request }) {
     for (const option of options) {
       const possibleDoses = doses.filter(dose => option.record.doseRefs?.includes(dose.id)).sort((a, b) => compare(a.id, b.id))
       for (const rawDose of possibleDoses) {
-        const dose = resolveDose(option.record, rawDose, manifest)
+        const dose = resolveDose(option.record, rawDose, manifest,context)
         if (dose.state === 'resolved' && durationSeconds + dose.seconds <= request.budgetSeconds) { selected = { ...option, dose }; break }
       }
       if (selected) break

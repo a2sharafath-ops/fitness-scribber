@@ -1,11 +1,14 @@
 import { supabase } from '../lib/supabase'
 import { builderDraft, readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
+import {canonical} from '../lib/pooling/context'
+import {validateConfirmation} from '../lib/pooling/sources'
+import {OPERATION_KEY,pendingOperations,prepareOperation,settleOperation,rejectOperation} from '../lib/pooling/operations'
 
 export class PoolingError extends Error {
   constructor(code, message, operationKey = null) { super(message); this.name = 'PoolingError'; this.code = code; this.operationKey = operationKey }
 }
 
-const known = ['forbidden','feature_disabled','stale_context','draft_conflict','idempotency_conflict','protected_field','invalid_proposal','invalid_report','invalid_field','invalid_health_change','invalid_wellness','invalid_budget','invalid_equipment','invalid_parent','invalid_operation_key']
+const known = ['forbidden','feature_disabled','stale_context','draft_conflict','idempotency_conflict','protected_field','invalid_proposal','invalid_report','invalid_field','invalid_health_change','invalid_wellness','invalid_budget','invalid_equipment','invalid_parent','invalid_operation_key','source_changed','invalid_confirmation','context_held','stale_draft','decision_unavailable','content_revoked','required_gap','invalid_event','invalid_actual','invalid_transition','health_check_required']
 export async function readCatalogueDrafts() {
   const { default: candidateCatalogue } = await import('../../docs/exercise-pooling/catalogues/exercises.draft.json')
   return structuredClone(candidateCatalogue.exercises)
@@ -22,12 +25,12 @@ const extensionKey = kind => {
   return `fitscribe_pooling_${kind}_v1`
 }
 export async function readExtensionRequests(clientId,kind) {
-  if (supabase) throw new PoolingError('unavailable','Extension persistence is not enabled on the backend; no hosted data was changed.')
+  if (supabase) return rpc('pooling_read_extensions',{target_client:clientId,request_kind:kind})
   try { return readLocalDrafts(localStorage,extensionKey(kind)).records.filter(row=>row.clientId===clientId) }
   catch { throw new PoolingError('source_unavailable','Local review requests could not be read; existing data is preserved.') }
 }
-export async function saveExtensionRequest({clientId,kind,operationKey,proposal}) {
-  if (supabase) throw new PoolingError('unavailable','Backend extension verification is pending. No request was submitted.')
+export async function saveExtensionRequest({clientId,kind,operationKey,proposal,generation}) {
+  if (supabase) return recoverable('extension',clientId,{clientId,kind,operationKey,proposal,generation},()=>rpc('pooling_request_extension',{target_client:clientId,expected_generation:generation,operation_key:operationKey,proposal}))
   const key=extensionKey(kind)
   if (!proposal || Object.keys(proposal).some(key=>!['kind','date','requestedChange','blocks','authority','state'].includes(key)) || proposal.kind!==kind || typeof proposal.requestedChange!=='string' || !proposal.requestedChange.trim() || proposal.requestedChange.length>4000 || !Array.isArray(proposal.blocks) || proposal.blocks.length || proposal.authority!=='none' || proposal.state!=='review_requested') throw new PoolingError('invalid_request','Review requests cannot contain assignments or invalid fields.')
   builderDraft({date:proposal.date,blocks:[]})
@@ -66,7 +69,8 @@ export async function readPooling(clientId) {
   return { context: queries[0].data, reports: queries[1].data, drafts: queries[2].data }
 }
 export function submitPoolingReport({ clientId, generation, operationKey, field, value, effectiveAt }) {
-  return rpc('pooling_submit_report', { target_client: clientId, expected_generation: generation, operation_key: operationKey, report_field: field, report_value: value, effective_at: effectiveAt })
+  const request={clientId,generation,operationKey,field,value,effectiveAt}
+  return recoverable('report',clientId,request,()=>rpc('pooling_submit_report', { target_client: clientId, expected_generation: generation, operation_key: operationKey, report_field: field, report_value: value, effective_at: effectiveAt }))
 }
 export function savePoolingDraft({ clientId, generation, operationKey, proposal, parentId = null }) {
   return rpc('pooling_save_draft', { target_client: clientId, expected_generation: generation, operation_key: operationKey, proposal, parent_id: parentId })
@@ -94,4 +98,84 @@ export async function saveBuilderDraft({ clientId, operationKey, proposal, expec
     }
   }
   return navigator.locks ? navigator.locks.request('fitscribe-pooling-drafts', write) : write()
+}
+
+async function journalScope(clientId){
+ if(!supabase)return `local:${clientId}`
+ const {data,error}=await supabase.auth.getUser()
+ if(error || !data?.user?.id)throw new PoolingError('forbidden','Sign in again before reconciling the operation.')
+ return `${data.user.id}:${clientId}`
+}
+const journalWrite=write=>typeof navigator!=='undefined' && navigator.locks?navigator.locks.request(OPERATION_KEY,write):Promise.reject(new PoolingError('unavailable','Durable operation recovery requires a browser with Web Locks on a secure origin. No new request was sent.'))
+export async function readPendingBuilderOperations(clientId){
+ try{return pendingOperations(localStorage,await journalScope(clientId)).filter(row=>row.kind==='draft')}
+ catch(error){throw new PoolingError('source_unavailable',error.message)}
+}
+export async function saveRecoverableBuilderDraft(request){
+ const scope=await journalScope(request.clientId)
+ try{const row=await journalWrite(()=>prepareOperation(localStorage,{scope,kind:'draft',request}));if(row.receipt)return row.receipt}
+ catch{throw new PoolingError('failed_save','Recovery record could not be saved. No new draft request was sent.',request.operationKey)}
+ let receipt
+ try{receipt=await saveBuilderDraft(request)}catch(error){
+   if(['draft_conflict','stale_context','idempotency_conflict','protected_field','invalid_proposal','invalid_parent','invalid_operation_key'].includes(error.code)){
+     try{await journalWrite(()=>rejectOperation(localStorage,scope,request.operationKey,error.code))}catch{throw new PoolingError('outcome_unknown','Rejection receipt could not be recorded. Keep the original request for reconciliation.',request.operationKey)}
+   }
+   throw error
+ }
+ try{await journalWrite(()=>settleOperation(localStorage,scope,request.operationKey,{...receipt,status:receipt.status || 'saved'}))}
+ catch{throw new PoolingError('outcome_unknown','The draft may be saved, but its local receipt could not be recorded. Retry the same operation.',request.operationKey)}
+ return receipt
+}
+
+export async function readSourceReview(db,clientId){
+ if(supabase)return rpc('pooling_read_source_review',{target_client:clientId})
+ const sources=[]
+ for(const source of ['clients','assessments','screenings','wellness','wearable','concerns','maxes','workouts']){
+   for(const row of (db[source] || []).filter(row=>source==='clients'?row.id===clientId:row.clientId===clientId)){
+     const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(row)))
+     sources.push({source,id:row.id,status:'loaded',token:Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')})
+   }
+ }
+ return {sources,confirmations:readLocalDrafts(localStorage,'fitscribe_pooling_sources_v1').records.filter(row=>row.clientId===clientId)}
+}
+export async function confirmPoolingSource({clientId,generation,operationKey,observation}){
+ const normalized=validateConfirmation(observation)
+ if(supabase)return recoverable('confirmation',clientId,{clientId,generation,operationKey,observation:normalized},()=>rpc('pooling_confirm_source',{target_client:clientId,expected_generation:generation,operation_key:operationKey,observation:normalized}))
+ const key='fitscribe_pooling_sources_v1',proposal={date:normalized.effectiveAt.slice(0,10),observation:normalized}
+ const write=()=>{const rows=readLocalDrafts(localStorage,key).records.filter(row=>row.clientId===clientId && row.proposal.date===proposal.date);return saveLocalDraft(localStorage,{clientId,operationKey,proposal,expectedRevision:Math.max(0,...rows.map(row=>row.revision)),recordedAt:new Date().toISOString()},key)}
+ return navigator.locks?navigator.locks.request(key,write):write()
+}
+export const readAssignments=clientId=>rpc('pooling_read_assignments',{target_client:clientId})
+export const approveDraft=request=>recoverable('approve',request.clientId,request,()=>rpc('pooling_approve',{target_client:request.clientId,draft_id:request.draftId,decision_id:request.decisionId,expected_generation:request.generation,operation_key:request.operationKey}))
+export const recordExecution=request=>recoverable('execution',request.clientId,request,()=>rpc('pooling_execution',{assignment_id:request.assignmentId,expected_generation:request.generation,operation_key:request.operationKey,event_kind:request.kind,event_payload:request.payload}))
+export async function readPendingOperations(clientId){return pendingOperations(localStorage,await journalScope(clientId))}
+async function recoverable(kind,clientId,request,send){
+ if(!clientId)throw new PoolingError('invalid_request','Client context is required.')
+ const scope=await journalScope(clientId)
+ try{const row=await journalWrite(()=>prepareOperation(localStorage,{scope,kind,request}));if(row.receipt)return row.receipt}catch(error){throw new PoolingError(known.includes(error.message)?error.message:'failed_save','The recovery record could not be prepared. No new request was sent by this attempt; any earlier pending request is preserved.',request.operationKey)}
+ let receipt
+ try{receipt=await send()}catch(error){
+   if(known.includes(error.code)){try{await journalWrite(()=>rejectOperation(localStorage,scope,request.operationKey,error.code))}catch{/* Keep original journal entry when rejection cannot be recorded. */}}
+   throw error
+ }
+ try{await journalWrite(()=>settleOperation(localStorage,scope,request.operationKey,receipt))}catch{throw new PoolingError('outcome_unknown','Server response received, but its local receipt was not saved. Retry the same operation.',request.operationKey)}
+ return receipt
+}
+export async function decideDraft({clientId,draftId,generation}){
+ const {data,error}=await connection().functions.invoke('pooling-decision',{body:{clientId,draftId,expectedGeneration:generation}})
+ if(error || !data?.receipt?.decisionId)throw new PoolingError('unavailable','Decision could not be verified. No assignment was made.')
+ return data
+}
+export const readReviewWorkspace=clientId=>supabase?rpc('pooling_review_workspace',{target_client:clientId}):Promise.resolve({manifests:[],decisions:[],assignments:[]})
+export const approveBatch=request=>recoverable('batch',request.clientId,request,()=>rpc('pooling_approve_batch',{target_client:request.clientId,expected_generation:request.generation,operation_key:request.operationKey,selection:request.selection}))
+export const reviewExtension=request=>recoverable('extension_review',request.clientId,request,()=>rpc('pooling_review_extension',{target_client:request.clientId,request_id:request.requestId,expected_generation:request.generation,operation_key:request.operationKey,action:request.action,reason:request.reason,proposal_id:request.proposalId || null,amended_draft:request.amendedDraft || null}))
+export async function retryPendingOperation(row){
+ const handlers={draft:saveRecoverableBuilderDraft,confirmation:confirmPoolingSource,report:submitPoolingReport,execution:recordExecution,approve:approveDraft,batch:approveBatch,extension:saveExtensionRequest,extension_review:reviewExtension}
+ if(!handlers[row.kind])throw new PoolingError('unavailable','This operation requires a supported recovery handler. Its saved request is preserved.')
+ return handlers[row.kind](row.request)
+}
+export async function generateExtension(request){
+ const {data,error}=await connection().functions.invoke('pooling-extension',{body:request})
+ if(error || !data?.receipt?.id)throw new PoolingError('unavailable','Numerical proposal could not be verified. No assignment or target change was made.')
+ return data
 }

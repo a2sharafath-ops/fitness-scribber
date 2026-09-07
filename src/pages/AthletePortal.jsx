@@ -20,10 +20,14 @@ import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
 import { screeningsFor, finalizeScreening } from '../lib/screening'
 import { workoutPeaks, resolveTrainingMax } from '../lib/program'
+import useGovernedWorkout from '../hooks/useGovernedWorkout'
+import GovernedWorkoutPanel from '../components/organisms/workout/GovernedWorkoutPanel'
 
 export default function AthletePortal() {
   const { user, signOut } = useAuth()
   const [state, setState] = useState(null)
+  const [loadError,setLoadError]=useState('')
+  const poolingWorkflow=useGovernedWorkout(state?.client?.id,poolingConfig().r1)
   const [busy, setBusy] = useState(false)
   const [checkinW, setCheckinW] = useState(null) // workout waiting to start until the check-in popup resolves
   const [rpeW, setRpeW] = useState(null)         // completed workout waiting for the RPE popup
@@ -31,6 +35,11 @@ export default function AthletePortal() {
 
   const load = useCallback(async () => {
     if (!user) return
+    if(poolingConfig().r1){
+      const {data,error}=await supabase.rpc('pooling_athlete_snapshot')
+      if(error){setLoadError('Protected client data could not be loaded. No normal assessment or clearance is assumed.');return}
+      setLoadError('');setState(data);return
+    }
     const { data: clients } = await supabase.from('clients').select('*').eq('userId', user.id)
     const client = clients?.[0]
     if (!client) { setState({ client: null }); return }
@@ -60,6 +69,7 @@ export default function AthletePortal() {
     }
   }, [])
 
+  if(loadError)return <div className="empty"><p role="alert">{loadError}</p><Button onClick={load}>Retry</Button></div>
   if (!state) return <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading…</div>
   if (!state.client) {
     return (
@@ -75,6 +85,7 @@ export default function AthletePortal() {
   }
 
   const { client } = state
+  if(poolingConfig().r1)return <main style={{maxWidth:960,margin:'auto',padding:24}}><h1>{client.name}</h1><p>{state.message}</p><GovernedWorkoutPanel workflow={poolingWorkflow} /><Button variant="ghost" onClick={signOut}>Sign out</Button></main>
   const readiness = readinessFor({ wellness: state.wellness, wearable: state.wearable }, client.id)
   const checkedIn = state.wellness.some((w) => w.date === today)
   const recent = [...state.wellness].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7)

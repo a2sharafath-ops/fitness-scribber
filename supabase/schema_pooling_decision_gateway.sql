@@ -70,4 +70,13 @@ revoke all on function public.pooling_record_decision(uuid,text,bigint,bigint,te
 -- necessary even when platform default privileges grant it direct EXECUTE.
 grant execute on function public.pooling_decision_input(uuid,text,bigint) to service_role;
 grant execute on function public.pooling_record_decision(uuid,text,bigint,bigint,text,text,jsonb) to service_role;
+create or replace function public.pooling_assert_decision_current(verified_actor uuid,target_client text,target_draft bigint,target_decision bigint)
+returns void language plpgsql security definer set search_path='' as $$
+declare snapshot jsonb; d public.pooling_decisions%rowtype;
+begin
+ snapshot:=public.pooling_decision_input(verified_actor,target_client,target_draft);
+ select * into d from public.pooling_decisions where id=target_decision and draft_id=target_draft;
+ if not found or d.source_token is null or d.source_token is distinct from snapshot->>'sourceToken' then raise exception 'source_changed'; end if;
+end $$;
+revoke all on function public.pooling_assert_decision_current(uuid,text,bigint,bigint) from public,anon,authenticated;
 commit;

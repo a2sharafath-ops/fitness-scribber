@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { readBuilderDraftState, saveBuilderDraft } from '../api/pooling'
+import { readBuilderDraftState, saveRecoverableBuilderDraft, readPendingBuilderOperations } from '../api/pooling'
 import { builderDraft } from '../lib/pooling/drafts'
 
 // UI save lifecycle only. Neither local nor server draft saving grants assignment.
@@ -15,8 +15,14 @@ export default function usePoolingBuilder({ enabled, clientId, date }) {
     if (!enabled) return
     let active = true
     setStatus('loading')
-    readBuilderDraftState(clientId,date).then(value => {
-      if (active) { expected.current.set(`${clientId}:${date}`,value); setInitialProposal(value.initialProposal); setStatus('ready') }
+    Promise.all([readBuilderDraftState(clientId,date),readPendingBuilderOperations(clientId)]).then(([value,operations]) => {
+      if (active) {
+        expected.current.set(`${clientId}:${date}`,value); setInitialProposal(value.initialProposal)
+        const recovered=operations.filter(row=>row.request.proposal.date===date)
+        pending.current=recovered.length?recovered.map(row=>({clientId,date,request:row.request,code:'outcome_unknown'})):null
+        setStatus(recovered.length?'outcome_unknown':'ready')
+        if(recovered.length)setError('An unfinished save was recovered. Retry uses its original content and operation key.')
+      }
     }).catch(failure => { if (active) { setError(failure.message); setStatus('failed') } })
     return () => { active = false }
   }, [enabled,clientId,date])
@@ -35,7 +41,7 @@ export default function usePoolingBuilder({ enabled, clientId, date }) {
             const version = expected.current.get(key) || await readBuilderDraftState(entry.clientId,entry.date)
             entry.request = { clientId: entry.clientId, operationKey: crypto.randomUUID(), proposal: builderDraft(entry), ...version }
           }
-          entry.receipt = await saveBuilderDraft(entry.request)
+          entry.receipt = await saveRecoverableBuilderDraft(entry.request)
           expected.current.set(`${entry.clientId}:${entry.date}`, { expectedRevision: entry.receipt.revision, generation: entry.request.generation, parentId: entry.receipt.id || null })
           entry.error = null
         } catch (failure) {

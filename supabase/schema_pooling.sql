@@ -10,7 +10,7 @@ create table if not exists public.pooling_runtime (
 );
 insert into public.pooling_runtime(singleton) values(true) on conflict do nothing;
 alter table public.pooling_runtime enable row level security;
-revoke all on public.pooling_runtime from public, authenticated;
+revoke all on public.pooling_runtime from public, anon, authenticated;
 create table if not exists public.pooling_contexts (
   client_id text primary key references public.clients(id),
   generation bigint not null default 1 check (generation > 0),
@@ -47,7 +47,7 @@ create table if not exists public.pooling_drafts (
 alter table public.pooling_contexts enable row level security;
 alter table public.pooling_reports enable row level security;
 alter table public.pooling_drafts enable row level security;
-revoke all on public.pooling_contexts, public.pooling_reports, public.pooling_drafts from public, authenticated;
+revoke all on public.pooling_contexts, public.pooling_reports, public.pooling_drafts from public, anon, authenticated;
 grant select on public.pooling_contexts, public.pooling_reports, public.pooling_drafts to authenticated;
 
 drop policy if exists pool_context_read on public.pooling_contexts;
@@ -135,8 +135,8 @@ begin
     returning id into draft_id;
   return jsonb_build_object('id',draft_id,'revision',next_revision,'status','saved','state','draft');
 end $$;
-revoke all on function public.pooling_submit_report(text,bigint,text,text,jsonb,timestamptz) from public;
-revoke all on function public.pooling_save_draft(text,bigint,text,jsonb,bigint) from public;
+revoke all on function public.pooling_submit_report(text,bigint,text,text,jsonb,timestamptz) from public, anon;
+revoke all on function public.pooling_save_draft(text,bigint,text,jsonb,bigint) from public, anon;
 grant execute on function public.pooling_submit_report(text,bigint,text,text,jsonb,timestamptz) to authenticated;
 grant execute on function public.pooling_save_draft(text,bigint,text,jsonb,bigint) to authenticated;
 commit;

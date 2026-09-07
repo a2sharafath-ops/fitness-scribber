@@ -23,3 +23,11 @@ test('duration includes unilateral work and inter-set rest', () => { const data 
 test('over budget produces a required gap', () => { const data = input(); data.request.budgetSeconds = 29; assert.equal(selectPool(data).completeness, 'blocked') })
 test('optional role absent is an omission not a mandatory gap', () => { const data = input(); data.request.roles.push({ id: 'cooldown', required: false }); const result = selectPool(data); assert.equal(result.gaps.length, 0); assert.equal(result.omissions.length, 1) })
 test('canonical replay is stable', () => assert.equal(selectPool(input()).replay, selectPool(input()).replay))
+test('reviewed percentage requires exact variant and comparable load source',()=>{
+ const data=input();Object.assign(data.doses[0],{mode:'repetitions',reps:3,loadMethod:'percentage',loadReferenceKey:'load',percentage:50,incrementKg:1,minimumLoadKg:1,maximumLoadKg:100,allowedReferenceKinds:['measured'],referenceMethod:'synthetic-test'})
+ assert.equal(selectPool(data).completeness,'blocked')
+ data.context.facts.load={state:'usable',value:{variantId:'synthetic-ex',unit:'kg',kind:'measured',method:'synthetic-test',valueKg:20}}
+ assert.equal(selectPool(data).blocks[0].dose.prescription.loadKg,10)
+ data.context.facts.load.value.variantId='other-lift';assert.equal(selectPool(data).completeness,'blocked')
+})
+test('explicit bodyweight/no-load work does not acquire a max or invented load',()=>{const data=input();data.doses[0].loadMethod='none';assert.equal(selectPool(data).blocks[0].dose.prescription.loadKg,null)})

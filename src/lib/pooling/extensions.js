@@ -61,7 +61,7 @@ export function comparePerformances({ reference, performances, knowledgeCutoff, 
     const effective = Date.parse(performance.effectiveAt), recorded = Date.parse(performance.recordedAt)
     if (!Number.isFinite(effective) || !Number.isFinite(recorded) || effective > Date.parse(sessionAt) || recorded > Date.parse(knowledgeCutoff)) reasons.push('outside_knowledge_scope')
     if (Date.parse(sessionAt) - effective > policy.windowSeconds * 1000) reasons.push('outside_evidence_window')
-    for (const key of compatibleFields) if (reference[key] === undefined || performance[key] === undefined || canonical(reference[key]) !== canonical(performance[key])) reasons.push(`incompatible_${key}`)
+    for (const key of compatibleFields) if (reference[key] == null || performance[key] == null || canonical(reference[key]) !== canonical(performance[key])) reasons.push(`incompatible_${key}`)
     if (!performance.lineageId) reasons.push('unknown_lineage')
     else if (signatures.get(performance.lineageId)?.size > 1) reasons.push('conflicting_lineage')
     else if (lineage.has(performance.lineageId)) reasons.push('duplicate_lineage')

@@ -2,12 +2,17 @@
 begin;
 update public.pooling_runtime set r1=true where singleton;
 insert into public.pooling_contexts(client_id,held) values('recovery-client-a',false) on conflict(client_id) do update set held=false;
-insert into public.pooling_manifests(id,state,document) values('synthetic-only','published','{}');
+insert into public.pooling_manifests(id,state,document) values('synthetic-only','published','{"manifest":{"id":"synthetic-only"}}');
 insert into public.pooling_drafts(client_id,actor_id,revision,context_generation,proposal,operation_key)
- values('recovery-client-a','00000000-0000-4000-8000-000000000001',1,1,'{}','authority-fixture-draft');
-insert into public.pooling_decisions(draft_id,context_generation,manifest_id,result,valid_until)
- select id,1,'synthetic-only','{"completeness":"ready_for_coach_review","sessionState":"eligible_for_coach_review","blocks":[{"synthetic":true}]}',now()+interval '1 hour'
+ values('recovery-client-a','00000000-0000-4000-8000-000000000001',1,1,jsonb_build_object('date',to_char(now() at time zone 'UTC','YYYY-MM-DD')),'authority-fixture-draft');
+insert into public.pooling_source_snapshots(draft_id,client_id,generation,manifest_id,context_input,session_request,verified,valid_until)
+ select id,'recovery-client-a',1,'synthetic-only',jsonb_build_object('sessionAt',now(),'timeZone','UTC'),'{}',true,now()+interval '1 hour'
  from public.pooling_drafts where operation_key='authority-fixture-draft';
+insert into public.pooling_decisions(draft_id,context_generation,manifest_id,result,valid_until)
+ select id,1,'synthetic-only','{"completeness":"ready_for_coach_review","sessionState":"eligible_for_coach_review","blocks":[{"occurrenceId":"synthetic","dose":{"prescription":{"sets":1}}}]}',now()+interval '1 hour'
+ from public.pooling_drafts where operation_key='authority-fixture-draft';
+update public.pooling_decisions d set source_token=public.pooling_decision_input('00000000-0000-4000-8000-000000000001','recovery-client-a',d.draft_id)->>'sourceToken'
+ where manifest_id='synthetic-only';
 -- Fixed fixture handles copied to session settings before ordinary-role checks.
 select set_config('test.draft',(select id::text from public.pooling_drafts where operation_key='authority-fixture-draft'),true);
 select set_config('test.decision',(select id::text from public.pooling_decisions where manifest_id='synthetic-only'),true);
@@ -44,7 +49,7 @@ do $$ declare a bigint:=current_setting('test.assignment')::bigint; begin
   raise exception 'TEST: stale resume accepted';
  exception when raise_exception then if SQLERRM<>'stale_context' then raise; end if; end;
  -- Recording performed work and stop remains possible under the new hold.
- perform public.pooling_execution(a,2,'actual-check-01','actual','{"occurrenceId":"synthetic","actual":0}');
+ perform public.pooling_execution(a,2,'actual-check-01','actual','{"occurrenceId":"synthetic","setIndex":1,"actual":0,"unit":"repetitions"}');
  perform public.pooling_execution(a,2,'stop-check-01','stop','{}');
 end $$;
 rollback;

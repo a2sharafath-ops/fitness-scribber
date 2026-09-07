@@ -29,6 +29,8 @@ import { lastNDates, todayISO } from '../lib/dates'
 import { readinessFor, readinessScore, dailySum, acwrSeries, latestOf, rolling30Baseline, deviationPct } from '../lib/calc'
 import { forClient, baselineProgress } from '../lib/assessment'
 import Icon from '../components/atoms/Icon'
+import useGovernedWorkout from '../hooks/useGovernedWorkout'
+import GovernedWorkoutPanel from '../components/organisms/workout/GovernedWorkoutPanel'
 
 // Compact health metric card (Figma: Client Detail metrics row).
 function MetricCard({ label, value, unit, state, color }) {
@@ -45,6 +47,7 @@ export default function ClientDetailPage() {
   const { id } = useParams()
   const nav = useNavigate()
   const { db, commit, tz, units } = useData()
+  const poolingWorkflow=useGovernedWorkout(id,poolingConfig().r1)
   const { openModal } = useModal()
   const [profileOpen, setProfileOpen] = useState(false)
   const [trendKey, setTrendKey] = useState('stress') // which 30-day trend the chart shows
@@ -311,6 +314,7 @@ export default function ClientDetailPage() {
           planner from the same card, with the AI coach beside it as a chat */}
       <div className="cc-wrap" style={{ marginTop: 16 }}>
         <div className="cc-main">
+          {poolingConfig().r1 && <GovernedWorkoutPanel workflow={poolingWorkflow} />}
           <PlannerWidget client={c} size="medium" todayProps={{
             client: c, today, workout: todayW, prescription: todayP, plans: db.plans, exercises: db.exercises,
             units, context: { readiness: rScore, acwr }, restingHr, age, bodyMassKg: c.anthro?.massKg ?? null,
@@ -319,7 +323,7 @@ export default function ClientDetailPage() {
             onAddSession: () => openModal(<WorkoutBuilderModal clientId={c.id} date={today} />, 'xl'),
           }} />
         </div>
-        <div className="cc-side"><AICoach client={c} /></div>
+        <div className="cc-side">{poolingConfig().r1?<section className="card"><h2>Coaching review</h2><p>Classic readiness metrics are informational. Pooling changes require current evidence, accepted policy and explicit coach approval; legacy numerical progression suggestions are paused in this mode.</p></section>:<AICoach client={c} />}</div>
       </div>
 
       {/* Recent activity — sessions, check-ins and PBs in one feed (Figma: Client Detail) */}

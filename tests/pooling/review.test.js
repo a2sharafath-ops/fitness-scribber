@@ -1,0 +1,18 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {canonicalProposal,selectionDiff} from '../../src/lib/pooling/review.js'
+const input=()=>({date:'2026-09-07',sessionAt:'2026-09-07T10:00:00+05:30',timeZone:'Asia/Kolkata',manifestId:'fictional',request:{setting:'home',level:'beginner',budgetSeconds:300,roles:[{id:'main',required:true}]},selection:[{occurrenceId:'one',role:'main',exerciseId:'fictional-exercise',exerciseRevision:1,doseId:'fictional-dose',doseRevision:1}]})
+test('canonical editor retains exact revisions and never claims approval',()=>{
+ const value=canonicalProposal(input());assert.equal(value.selection[0].doseRevision,1);assert.equal(value.session.sessionAt,'2026-09-07T04:30:00.000Z');assert.equal(value.assignment,undefined)
+})
+test('timezone date mismatch is not silently moved to another day',()=>{
+ const value=input();value.sessionAt='2026-09-07T23:00:00Z';assert.throws(()=>canonicalProposal(value),/must agree/)
+})
+test('missing dose and duplicate occurrences cannot form canonical proposals',()=>{
+ const value=input();value.selection[0].doseRevision=null;assert.throws(()=>canonicalProposal(value),/exact variant/)
+ const duplicate=input();duplicate.selection.push({...duplicate.selection[0]});assert.throws(()=>canonicalProposal(duplicate),/distinct exercise/)
+})
+test('revision changes are visible even when exercise names are unchanged',()=>{
+ const before=input().selection,after=structuredClone(before);after[0].doseRevision=2
+ assert.equal(selectionDiff(before,after)[0].kind,'changed');assert.deepEqual(selectionDiff(before,structuredClone(before)),[])
+})

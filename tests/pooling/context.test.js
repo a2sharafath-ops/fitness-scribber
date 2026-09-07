@@ -7,10 +7,11 @@ const base = () => ({ clientId: 'synthetic-a', generation: 1, sessionAt: '2026-0
   knowledgeCutoff: '2026-09-07T10:00:00Z', timeZone: 'Asia/Kolkata', adultConfirmed: true,
   purposePermitted: true, scope: 'adult_general_fitness', healthChange: 'no_change',
   sourceStatus: { assessment: 'loaded' }, requirements: [{ key: 'left', source: 'assessment', unit: 'boolean', protocol: 'synthetic-1', maxAgeSeconds: 100, required: true }],
-  observations: [{ id: 'o1', clientId: 'synthetic-a', key: 'left', value: false, unit: 'boolean', protocol: 'synthetic-1', state: 'assessed_absent', quality: 'confirmed', confirmedBy: 'synthetic-coach', confirmedAt: '2026-09-07T10:00:00Z', effectiveAt: '2026-09-07T10:00:00Z', recordedAt: '2026-09-07T10:00:00Z' }] })
+  observations: [{ id: 'o1', clientId: 'synthetic-a', source:'assessment', key: 'left', value: false, unit: 'boolean', protocol: 'synthetic-1', state: 'assessed_absent', quality: 'confirmed', confirmedBy: 'synthetic-coach', confirmedAt: '2026-09-07T10:00:00Z', effectiveAt: '2026-09-07T10:00:00Z', recordedAt: '2026-09-07T10:00:00Z' }] })
 test('false is a confirmed value, not missing', () => assert.equal(resolveContext(base()).facts.left.value, false))
 test('canonical object keys do not depend on insertion order', () => assert.equal(canonical({ b: 1, a: 0 }), canonical({ a: 0, b: 1 })))
 test('unknown observation is never assessed absent', () => { const input = base(); input.observations[0].quality = 'legacy_ambiguous'; assert.equal(resolveContext(input).state, 'information_required') })
+test('an observation from another source cannot satisfy a requirement',()=>{const input=base();input.observations[0].source='different';assert.equal(resolveContext(input).state,'information_required')})
 test('failed query is unavailable, not empty', () => { const input = base(); input.sourceStatus.assessment = 'failed'; assert.equal(resolveContext(input).state, 'unavailable') })
 test('later known backdated correction excluded from replay', () => { const input = base(); input.observations.push({ ...input.observations[0], id: 'o2', supersedes: 'o1', value: true, recordedAt: '2026-09-08T10:00:00Z' }); assert.equal(resolveContext(input).facts.left.value, false) })
 test('contradictory equal-time observations require review', () => { const input = base(); input.observations.push({ ...input.observations[0], id: 'o2', value: true }); assert.equal(resolveContext(input).state, 'review_required') })
