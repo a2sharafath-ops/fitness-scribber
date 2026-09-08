@@ -1,0 +1,4 @@
+import {readFileSync} from 'node:fs'
+import {createHash} from 'node:crypto'
+export const schemas=['schema_pooling.sql','schema_pooling_authority.sql','schema_pooling_decision_gateway.sql','schema_pooling_sources.sql','schema_pooling_projections.sql','schema_pooling_legacy_boundary.sql','schema_pooling_batches.sql','schema_pooling_review.sql','schema_pooling_extensions.sql','schema_pooling_extension_gateway.sql','schema_pooling_catalogue.sql','schema_pooling_client_home.sql','schema_pooling_governance.sql','schema_pooling_context_review.sql','schema_pooling_weekly.sql','schema_pooling_suggestions.sql','schema_pooling_reassessment.sql','schema_pooling_catalogue_admin.sql']
+export function migrationPlan(){return schemas.map(name=>{const sql=readFileSync('supabase/'+name,'utf8');return {name,sql,sha256:createHash('sha256').update(sql).digest('hex')}})}

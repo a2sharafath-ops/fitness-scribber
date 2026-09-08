@@ -6,6 +6,23 @@
   "executionMode": "local-backup-recovery-and-r1-r3-engineering",
   "implementationAuthorized": true,
   "productionChangesAuthorized": false,
+  "hostedTestProposal": {
+    "version": "0.7",
+    "date": "2026-09-08",
+    "status": "approved-hosted-migration-applied-integration-in-progress",
+    "artifact": "preparation/EXISTING_TEST_STACK_APPROVAL.md",
+    "ownerReportedUse": "Existing local, Vercel-labelled Production and Supabase environments are pre-launch testing only, without real-client data or staff/client handover; not independently verified from records.",
+    "vercelProject": "cureocity1/fitness-scribber-kq6i",
+    "supabaseProjectRef": "haxxetirrcrwzwdzsdui",
+    "supabaseRegion": "ap-southeast-2",
+    "targetPostgresVersion": "17.6",
+    "proposedBranch": "codex/exercise-pooling-local",
+    "remoteWritesAuthorized": true,
+    "mainPromotionAuthorized": false,
+    "additionalSpendingLimitINR": 0,
+    "sharedDatabaseWarning": "Preview does not isolate schema, RLS, functions or the global pooling_runtime row from the existing app.",
+    "nextGate": "Backup/52-table restore and 18 additive hosted migrations verified with flags off; six Edge Functions deployed. Verify protected Preview and hosted fictional journeys, then containment. Coach access/UAT are owner-managed."
+  },
   "completedScope": "Preparation and owner product review recorded; Classic checkpoint preserved; local R1-R3 code saved at 3b779d9 with 120 unit tests, native core-schema integration/restore, Deno and scoped UI evidence. Full hosted/frontend integration, device/domain acceptance and release remain open.",
   "priorityDefinitions": {
     "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",

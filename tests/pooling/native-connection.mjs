@@ -1,12 +1,15 @@
 import {execFileSync,spawn} from 'node:child_process'
 import {resolve,join} from 'node:path'
+import {localRuntime} from '../../scripts/pooling/hosted-local.mjs'
 const root=resolve('.local-test-runtime')
-const bin=resolve(process.env.FITNESS_POOLING_PG_BIN || '')
-const socket=process.env.FITNESS_POOLING_PG_SOCKET
+const restored=process.env.FITNESS_POOLING_RESTORED_RUNTIME?localRuntime(process.env.FITNESS_POOLING_RESTORED_RUNTIME):null
+const bin=restored?.bin || resolve(process.env.FITNESS_POOLING_PG_BIN || '')
+const socket=restored?.socket || process.env.FITNESS_POOLING_PG_SOCKET
 const database=process.env.FITNESS_POOLING_PG_DATABASE || 'fitness_pooling_20260907'
-if(!bin.startsWith(root+'/') || !/^\/private\/tmp\/fitness-pg-socket\.[a-zA-Z0-9]+$/.test(socket || '') || !/^fitness_pooling_[a-z0-9_]+$/.test(database)) throw new Error('Exact task-owned binary/socket/database required')
-const env=Object.fromEntries(Object.entries(process.env).filter(([key])=>!key.startsWith('PG')))
-const args=['-X','-q','-A','-t','-h',socket,'-p','55439','-d',database,'-v','ON_ERROR_STOP=1']
+if(restored ? !/^fitness_hosted_migration_\d+$/.test(database) : (!bin.startsWith(root+'/') || !/^\/private\/tmp\/fitness-pg-socket\.[a-zA-Z0-9]+$/.test(socket || '') || !/^fitness_pooling_[a-z0-9_]+$/.test(database))) throw new Error('Exact task-owned binary/socket/database required')
+const env=restored?.env || Object.fromEntries(Object.entries(process.env).filter(([key])=>!key.startsWith('PG')))
+env.PGTZ='UTC'
+const args=['-X','-q','-A','-t','-h',socket,'-p',String(restored?.port || 55439),'-d',database,'-v','ON_ERROR_STOP=1']
 export const runtime={bin,socket,database,env}
 export const literal=value=>value===null?'NULL':typeof value==='number'?String(value):`'${String(typeof value==='object'?JSON.stringify(value):value).replaceAll("'","''")}'`
 export function sql(query) { return execFileSync(join(bin,'psql'),[...args,'-c',query],{encoding:'utf8',env,timeout:15000,stdio:['ignore','pipe','pipe']}).trim() }

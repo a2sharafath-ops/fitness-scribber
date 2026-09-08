@@ -2,7 +2,9 @@
 
 Updated 7 September 2026 after local implementation checkpoint `3b779d9`. The original 82-task sprint remains the scope; local implementation, verification and external acceptance are tracked separately.
 
-The owner has already approved ordinary local work and A29. **Do not ask again for the same backup/build approval.** The code is committed on `codex/exercise-pooling-local`; main and Fitness Scribber Classic are preserved. No push/deployment occurred.
+**8 September execution update:** the owner approved the [v0.7 existing-stack package](../preparation/EXISTING_TEST_STACK_APPROVAL.md), including the shared-database testing window, implementation-branch push and protected Preview. The full private export restored with all 52 table fingerprints matching. All 18 additive migrations were rehearsed and applied with flags off, preserving every baseline table; six pooling functions were deployed. Preview/auth/UI integration and final containment remain in progress. See the [execution log](./HOSTED_EXECUTION_LOG.md) for evidence and recovery limitations. Data being fictional remains owner-reported; existing records are preserved regardless.
+
+The owner has already approved ordinary local work, A29 and A30. **Do not ask again for the same backup/build/testing approval.** Work remains on `codex/exercise-pooling-local`; main and Fitness Scribber Classic are preserved. Coach access and human acceptance testing are owner-managed, not reasons to wait for a coach identity or change account access.
 
 ## Completed local checkpoint
 
@@ -30,14 +32,14 @@ No clinician portal, autonomous clinical clearance, unattended assignment, inven
 
 These are **next-stage gates**, not a request to approve the completed local work again. An approval can authorize actions; it cannot replace evidence or another person's signature.
 
-1. **Integration environment:** identify one exact disposable staging Supabase project/stack and region, provide secure authorized access, and approve synthetic migrations, auth/REST/storage/Edge testing plus any costs (default: no spend). Do not send passwords in chat. A local full-stack alternative also needs an exact scoped runtime plan; shared Docker resets remain excluded.
+1. **Integration environment — approved:** exact v0.7 Vercel/Supabase targets, shared test window and ₹0 additional spend. Recovery gate passed; execute remaining tests within A30 limits, without another owner approval. A material target/cost/data-scope expansion would require a new decision.
 2. **Actual review evidence:** name the content/domain/clinical/rights reviewers as applicable and provide their accepted exact catalogue/policy versions and parameters. Owner product review is recorded; it is not a substitute for these separate professional decisions. Rehabilitation/special-needs enablement remains closed.
 3. **Business/privacy facts:** business/coach name, contact/support route, establishment and specific launch countries, qualified coaching/clinical scope, providers/regions, retention/rights/incident ownership and final published notices/consent. India/GCC/USA/UK/Europe were target intentions, not universal legal clearance.
 4. **Usability/pilot permission:** authorize specific coach/client test participants, contact/data scope and criteria. No real person has been contacted or real client assigned by this work.
-5. **Release/version-control permission:** exact branch/PR/push/merge and Vercel/Supabase targets, automatic-deployment consequences, release window/cohort and rollback operator. Current default remains no remote changes and all production features disabled.
+5. **Release/version-control permission:** implementation-branch push and protected Preview are approved. Main merge/push, Production promotion, real-client rollout and broader release authority remain pending.
 6. **Off-device/live recovery:** select an approved backup destination, access/encryption/retention and authorize the exact live/staging backup and restore rehearsal. Local same-disk archives do not protect against losing the computer.
 
-Approve only the next environment/scope when ready. Production, clinical and privacy activation must still wait for successful evidence; a blanket “go ahead” does not manufacture it.
+The consolidated v0.7 scope is approved; do not repeat its approval request. The provider's “Production” label is not proof of a real-client launch. A30 preserves that alias while testing shared-backend changes. Actual client use, clinical/privacy acceptance and later promotion still require their own evidence and decision.
 
 ## Current safe stopping point
 
