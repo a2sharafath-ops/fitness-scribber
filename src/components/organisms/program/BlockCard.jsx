@@ -15,7 +15,7 @@ const BLOCK_HINT = {
 }
 
 export default function BlockCard({
-  block, exercises, tmInfo, maxHr,
+  block, exercises, tmInfo, maxHr, reviewOnly=false,
   toDisp, dispToKg, unitName,
   onChange, onRemove,
   dragProps, dragHandleProps, isOver, isDragging,
@@ -39,8 +39,8 @@ export default function BlockCard({
           onChange={(e) => onChange({ blockType: e.target.value, autoCalculate1RM: e.target.value === 'Main Lifts' })}>
           {BLOCK_TYPES.map((t) => <option key={t}>{t}</option>)}
         </select>
-        <span className="muted block-hint">{BLOCK_HINT[block.blockType]}</span>
-        {block.blockType === 'Main Lifts' && (
+        <span className="muted block-hint">{reviewOnly?'Unassigned imported block — exact identity and dose review required':BLOCK_HINT[block.blockType]}</span>
+        {!reviewOnly && block.blockType === 'Main Lifts' && (
           <label className="block-auto">
             <input type="checkbox" checked={!!block.autoCalculate1RM}
               onChange={(e) => onChange({ autoCalculate1RM: e.target.checked })} />

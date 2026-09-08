@@ -15,6 +15,7 @@ import { useModal } from '../../../store/ModalContext'
 import { useFormat } from '../../../hooks/useFormat'
 import useDragReorder from '../../../hooks/useDragReorder'
 import { moveOrdered } from '../../../lib/arrange'
+import { mergeParsedBlocks } from '../../../lib/merge-parsed-blocks'
 import { uid } from '../../../lib/format'
 import { fmtDay, addDays } from '../../../lib/dates'
 import {
@@ -68,7 +69,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const [targets, setTargets] = useState(new Set())
   const [clientTargets, setClientTargets] = useState(new Set())
   useEffect(() => {
-    if (pooling && initialProposal) {
+    if (pooling && Array.isArray(initialProposal?.blocks)) {
       setBlocks(structuredClone(initialProposal.blocks))
       setNotes(initialProposal.notes || '')
     }
@@ -76,9 +77,9 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   useEffect(() => { if (pooling) markDirty() }, [pooling,blocks,notes,markDirty])
 
   const client = db.clients.find((c) => c.id === clientId)
-  const maxHr = 220 - (client?.anthro?.age || 30)
+  const maxHr = pooling ? null : 220 - (client?.anthro?.age || 30)
   // Full Training-Max info (direct 1RM, or the library's %-of-reference fallback).
-  const tmInfo = (name) => (name ? resolveTrainingMax(db, clientId, name, date) : { kg: null, source: null })
+  const tmInfo = (name) => (name && !pooling ? resolveTrainingMax(db, clientId, name, date) : { kg: null, source: null })
   // Number-only resolver for progression math (applyProgression expects a kg).
   const resolveTm = (name) => tmInfo(name).kg
 
@@ -169,15 +170,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   }
 
   const insertDictated = (parsed) => {
-    setBlocks((cur) => {
-      const merged = [...cur]
-      parsed.forEach((nb) => {
-        const host = merged.find((b) => b.blockType === nb.blockType)
-        if (host) host.exercises = [...host.exercises, ...nb.exercises.map((e, i) => ({ ...e, order: host.exercises.length + i + 1 }))]
-        else merged.push({ ...nb, order: merged.length + 1 })
-      })
-      return merged.map((b, i) => ({ ...b, order: i + 1 }))
-    })
+    setBlocks((cur) => mergeParsedBlocks(cur, parsed))
     setStep('edit')
   }
 
@@ -229,6 +222,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
       </>}>
 
       {pooling && <section aria-label="Draft save status">
+        {draftSave.canonicalParent && <p>The latest revision uses canonical exercise selections. Edit its exact doses in Exercise Pool. This builder creates a separate manual review draft; it does not convert or change that prescription.</p>}
         <p>Pooling review mode: saves create unassigned drafts. No approval, Training Max reset or Classic prescription change is made.</p>
         <p role="status">Draft status: {draftSave.status.replaceAll('_',' ')}</p>
         {draftSave.error && <p role="alert">{draftSave.error}</p>}
@@ -288,7 +282,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         pooling ? <section><p>Legacy progression defaults are disabled in pooling mode. Copies remain unchanged drafts for separate dose and progression review.</p><Button onClick={() => bulkApply(null)}>Save unchanged review drafts</Button><Button variant="ghost" onClick={() => setStep('dates')}>Back to dates</Button></section> : <ProgressionPanel blocks={blocks} dates={[...targets].sort()} onConfirm={bulkApply} onBack={() => setStep('dates')} />
       )}
       {step === 'dictate' && (
-        <DictationPanel synonyms={db.synonyms} exercises={db.exercises} onInsert={insertDictated} onBack={() => setStep('edit')} />
+        <DictationPanel localOnly={pooling} synonyms={db.synonyms} exercises={db.exercises} onInsert={insertDictated} onBack={() => setStep('edit')} />
       )}
 
       {step === 'edit' && (
@@ -307,7 +301,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
             </div>
           )}
           {blocks.map((b, bi) => (
-            <BlockCard key={b.blockId} block={b} exercises={db.exercises}
+            <BlockCard key={b.blockId} block={b} exercises={db.exercises} reviewOnly={pooling}
               tmInfo={tmInfo} maxHr={maxHr}
               toDisp={toDisp} dispToKg={dispToKg} unitName={unitName}
               onChange={updBlock(bi)} onRemove={rmBlock(bi)}

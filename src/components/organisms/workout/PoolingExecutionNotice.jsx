@@ -14,7 +14,7 @@ export default function PoolingExecutionNotice({ workout, units, exercises, onSa
     finally { setBusy(false) }
   }
   return <section aria-label="Pooling execution availability">
-    <p role="status">Pooling preview: assignment, start and resume are disabled until backend authority verification is complete.</p>
+    <p role="status">This legacy planner creates review drafts only. Use Exercise Pool for exact coach approval and the coach-approved sessions panel for permitted starts and resumes.</p>
     <p>Drafts and copied sessions are not approvals. Optional wellness answers cannot authorize a start.</p>
     {onAddSession && <Button onClick={onAddSession}>Create review draft</Button>}
     {workout?.status==='in_progress' && <Button variant="danger" disabled={busy} onClick={stop}>Stop and preserve recorded work</Button>}

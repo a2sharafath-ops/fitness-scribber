@@ -8,6 +8,7 @@ export default function usePoolingBuilder({ enabled, clientId, date }) {
   const [error, setError] = useState('')
   const [outcomes, setOutcomes] = useState([])
   const [initialProposal, setInitialProposal] = useState(null)
+  const [canonicalParent,setCanonicalParent] = useState(false)
   const expected = useRef(new Map())
   const pending = useRef(null)
   const busy = useRef(false)
@@ -17,7 +18,7 @@ export default function usePoolingBuilder({ enabled, clientId, date }) {
     setStatus('loading')
     Promise.all([readBuilderDraftState(clientId,date),readPendingBuilderOperations(clientId)]).then(([value,operations]) => {
       if (active) {
-        expected.current.set(`${clientId}:${date}`,value); setInitialProposal(value.initialProposal)
+        expected.current.set(`${clientId}:${date}`,value); setInitialProposal(value.initialProposal);setCanonicalParent(value.canonicalParent)
         const recovered=operations.filter(row=>row.request.proposal.date===date)
         pending.current=recovered.length?recovered.map(row=>({clientId,date,request:row.request,code:'outcome_unknown'})):null
         setStatus(recovered.length?'outcome_unknown':'ready')
@@ -75,5 +76,5 @@ export default function usePoolingBuilder({ enabled, clientId, date }) {
     return execute(pending.current)
   }, [execute])
   const markDirty = useCallback(() => setStatus(current => current === 'saved' ? 'unsaved' : current), [])
-  return { status, error, outcomes, initialProposal, saveTargets, retry, markDirty, pending: !!pending.current, hasUnknown: pending.current?.some(entry => !entry.receipt && entry.code === 'outcome_unknown') || false, busy: status === 'saving' }
+  return { status, error, outcomes, initialProposal, canonicalParent, saveTargets, retry, markDirty, pending: !!pending.current, hasUnknown: pending.current?.some(entry => !entry.receipt && entry.code === 'outcome_unknown') || false, busy: status === 'saving' }
 }

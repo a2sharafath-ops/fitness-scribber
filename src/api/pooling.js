@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { builderDraft, readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
+import { builderDraft, builderDraftState, readLocalDrafts, saveLocalDraft } from '../lib/pooling/drafts'
 import {canonical} from '../lib/pooling/context'
 import {validateConfirmation} from '../lib/pooling/sources'
 import {OPERATION_KEY,DEFINITIVE_CODES,pendingOperations,prepareOperation,settleOperation,rejectOperation} from '../lib/pooling/operations'
@@ -92,8 +92,7 @@ export async function readBuilderDrafts(clientId) {
 
 export async function readBuilderDraftState(clientId, date) {
   const data = supabase ? await readPooling(clientId) : { drafts: await readBuilderDrafts(clientId), context: null }
-  const latest = data.drafts.filter(row => row.proposal.date === date).sort((a,b) => b.revision-a.revision)[0]
-  return { expectedRevision: latest?.revision || 0, generation: data.context?.generation || 1, parentId: latest?.id || null, initialProposal: latest?.proposal || null }
+  return builderDraftState({...data,date})
 }
 
 export async function saveBuilderDraft({ clientId, operationKey, proposal, expectedRevision, generation, parentId }) {

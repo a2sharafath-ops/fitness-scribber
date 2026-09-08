@@ -1,5 +1,5 @@
 // Private, bounded A30 synthetic-only API harness. Never imported by the app.
-import {readFileSync,writeFileSync,mkdtempSync,statSync} from 'node:fs'
+import {readFileSync,writeFileSync,mkdtempSync,statSync,renameSync,statfsSync} from 'node:fs'
 import {resolve,join} from 'node:path'
 import {parseEnv} from 'node:util'
 import {randomBytes,randomUUID} from 'node:crypto'
@@ -19,9 +19,11 @@ export function harness(file){
   file=join(dir,'ledger.json')
   ledger={runId:'fs_pool_e2e_20260908_'+randomBytes(4).toString('hex'),projectRef:ref,startedAt:new Date().toISOString(),users:[],clientIds:{},rowsReserved:0,apiCalls:0,checks:[],resources:{},state:{},limits:{users:6,rows:1000,previewBuilds:10,storageBytes:10485760},previewBuilds:1}
  }
- const save=()=>writeFileSync(file,JSON.stringify(ledger,null,2)+'\n',{mode:0o600})
+ // Preserve the last valid ledger if disk space disappears mid-write. Never
+ // truncate the only copy of credentials, pending keys or mutation receipts.
+ const save=()=>{const tmp=file+'.pending';writeFileSync(tmp,JSON.stringify(ledger,null,2)+'\n',{mode:0o600,flush:true});renameSync(tmp,file)}
  save()
- const reserve=(rows=0)=>{if(ledger.rowsReserved+rows>900)throw Error('row_budget_guard_reserve_100_for_ui');if(ledger.apiCalls>=800)throw Error('bounded_api_call_guard');ledger.rowsReserved+=rows;ledger.apiCalls++;save()}
+ const reserve=(rows=0)=>{const disk=statfsSync(file);if(disk.bavail*disk.bsize<64*1024*1024)throw Error('local_evidence_disk_headroom_required');if(ledger.rowsReserved+rows>900)throw Error('row_budget_guard_reserve_100_for_ui');if(ledger.apiCalls>=800)throw Error('bounded_api_call_guard');ledger.rowsReserved+=rows;ledger.apiCalls++;save()}
  function check(name,passed,details={}){ledger.checks.push({name,passed,...details,at:new Date().toISOString()});save();console.log(JSON.stringify({name,passed,...details}));if(!passed)throw Error('check_failed:'+name)}
  async function insert(table,rows){if(!Array.isArray(rows))rows=[rows];reserve(rows.length*2);const {data,error}=await admin.from(table).insert(rows).select();if(error)throw Error('fixture_insert_'+table+':'+error.code);ledger.resources[table]??=[];ledger.resources[table].push(...data.map(r=>r.id??r.client_id??r.coachId??r.actor_id));save();return data}
  async function rpc(who,name,args,rows=0){reserve(rows);const {data,error}=await who.rpc(name,args);if(error){const e=Error(error.message);e.code=error.code;throw e}return data}

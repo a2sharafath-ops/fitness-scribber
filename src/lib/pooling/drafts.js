@@ -3,6 +3,15 @@ import { canonical } from './context.js'
 export const LOCAL_DRAFT_KEY = 'fitscribe_pooling_drafts_v1'
 const fields = (object, keys) => Object.fromEntries(keys.filter(key => object[key] !== undefined).map(key => [key, structuredClone(object[key])]))
 
+// Canonical selections and legacy builder blocks are distinct representations.
+// Never pretend a canonical prescription is editable as missing legacy blocks.
+export function builderDraftState({drafts=[],context=null,date}) {
+ const latest=drafts.filter(row=>row.proposal?.date===date).sort((a,b)=>b.revision-a.revision || (b.id || 0)-(a.id || 0))[0]
+ return {expectedRevision:latest?.revision || 0,generation:context?.generation || 1,parentId:latest?.id || null,
+  initialProposal:Array.isArray(latest?.proposal?.blocks)?structuredClone(latest.proposal):null,
+  canonicalParent:Array.isArray(latest?.proposal?.selection)}
+}
+
 export function builderDraft({ date, blocks, notes = '', crossClient = false }) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0,10) !== date) throw new Error('invalid_date')
   if (!Array.isArray(blocks)) throw new Error('invalid_blocks')

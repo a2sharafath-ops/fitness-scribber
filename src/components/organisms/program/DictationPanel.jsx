@@ -9,7 +9,7 @@ import { parseTranscript, normalizeParsed, applySynonyms } from '../../../lib/vo
 
 const SR = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null
 
-export default function DictationPanel({ synonyms, exercises, onInsert, onBack }) {
+export default function DictationPanel({ synonyms, exercises, onInsert, onBack, localOnly=false }) {
   const [listening, setListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [parsed, setParsed] = useState(null)
@@ -20,6 +20,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
   useEffect(() => () => recRef.current?.stop?.(), [])
 
   const start = () => {
+    if(localOnly)return
     if (!SR) { setErr('Speech recognition is not supported in this browser — type or paste the dictation below instead.'); return }
     const rec = new SR()
     rec.continuous = true
@@ -43,7 +44,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
     setBusy(true)
     setErr('')
     let blocks = []
-    if (hasBackend) {
+    if (hasBackend && !localOnly) {
       try {
         const res = await callFunction('parse-workout', { transcript })
         blocks = normalizeParsed(res)
@@ -63,12 +64,13 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
   return (
     <div className="dictate">
       <div className="section-title" style={{ marginTop: 0 }}>🎙️ Dictate workout</div>
+      {localOnly && <p>Pooling review uses typed or pasted text with the local parser only. Microphone and external AI processing are unavailable here. Parsed names and values are untrusted draft inputs, not approved prescriptions.</p>}
       <div className="flex gap" style={{ marginBottom: 8 }}>
         {listening
           ? <Button variant="danger" size="sm" onClick={stop}><span className="rec-dot" /> Stop listening</Button>
-          : <Button size="sm" onClick={start}>Start listening</Button>}
+          : <Button size="sm" onClick={start} disabled={localOnly}>Start listening</Button>}
         <Button variant="ghost" size="sm" onClick={parse} disabled={busy || !transcript.trim()}>
-          {busy ? 'Parsing…' : `Parse transcript${hasBackend ? ' (AI)' : ''}`}
+          {busy ? 'Parsing…' : `Parse transcript${hasBackend && !localOnly ? ' (AI)' : ' (local)'}`}
         </Button>
       </div>
       <textarea
