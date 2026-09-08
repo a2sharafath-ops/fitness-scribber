@@ -1,6 +1,6 @@
 // Rehearse the exported application/auth/storage database on a fresh local DB.
 // Managed Supabase services/vault are not recreated by this native restore.
-import {readFileSync,writeFileSync,statSync,statfsSync} from 'node:fs'
+import {readFileSync,writeFileSync,statSync,statfsSync,existsSync} from 'node:fs'
 import {spawnSync} from 'node:child_process'
 import {join,resolve} from 'node:path'
 import {createHash} from 'node:crypto'
@@ -50,10 +50,12 @@ writeFileSync(preludeFile,prelude,{mode:0o600,flag:'wx'})
 run('pg_restore',['--exit-on-error','--use-list',preludeFile,'--dbname',database,dump])
 run('pg_restore',['--exit-on-error','--schema=public','--schema=auth','--schema=storage','--dbname',database,dump])
 const tables=JSON.parse(sql(database,"select jsonb_agg(jsonb_build_object('schema',schemaname,'table',tablename) order by schemaname,tablename) from pg_tables where schemaname in ('public','auth','storage')"))
-const actual=JSON.parse(sql(database,fingerprintSQL(tables)))
-const expected=JSON.parse(readFileSync(join(backup,'row-fingerprints.json'),'utf8'))
+const canonicalFile=join(backup,'row-fingerprints-canonical.json')
+const portable=manifest.portableFingerprints===true || existsSync(canonicalFile)
+const actual=JSON.parse(sql(database,fingerprintSQL(tables,portable)))
+const expected=JSON.parse(readFileSync(existsSync(canonicalFile)?canonicalFile:join(backup,'row-fingerprints.json'),'utf8'))
 const mismatches=Object.keys({...expected,...actual}).filter(k=>JSON.stringify(actual[k])!==JSON.stringify(expected[k]))
 if(mismatches.length)throw Error('baseline_fingerprint_mismatch: '+mismatches.join(', '))
-const result={passed:true,projectRef:manifest.projectRef,backup,dumpSha256:manifest.dumpSha256,database,runtimeFile,verifiedTables:tables.length,verifiedPublicTables:tables.filter(t=>t.schema==='public').length,allRowFingerprintsMatch:true,rolesRestoredWithoutPasswords:true,limits:'Native public/auth/storage relational restore only; provider Auth/REST/Edge services, internal realtime/vault and provider credentials are not recreated',recordedAt:new Date().toISOString()}
+const result={passed:true,projectRef:manifest.projectRef,backup,dumpSha256:manifest.dumpSha256,database,runtimeFile,verifiedTables:tables.length,verifiedPublicTables:tables.filter(t=>t.schema==='public').length,allRowFingerprintsMatch:true,portableFingerprints:portable,rolesRestoredWithoutPasswords:true,limits:'Native public/auth/storage relational restore only; provider Auth/REST/Edge services, internal realtime/vault and provider credentials are not recreated',recordedAt:new Date().toISOString()}
 writeFileSync(join(rt.directory,'restore-result-'+database+'.json'),JSON.stringify(result,null,2)+'\n',{mode:0o600,flag:'wx'})
 console.log(JSON.stringify(result))

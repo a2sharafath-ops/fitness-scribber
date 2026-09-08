@@ -35,7 +35,7 @@ export function numericalProposal(input){
  }else throw new Error('invalid_request')
  result={...result,reassessmentRequests:reassessmentRequests(context),suggestedDraft:null,assignment:null,policyId:policy.id,policyRevision:policy.revision,baselineAssignmentId:input.baselineAssignmentId}
  if(result.state!=='proposal')return result
- const selection=structuredClone(targetProposal.selection || []),gaps=[]
+ const selection=structuredClone(targetProposal.selection || []),gaps=[],prescriptionChanges=[]
  for(const block of baselineBlocks){
   const effects=result.effects.filter(effect=>effect.occurrenceId===block.occurrenceId)
   if(!effects.length)continue
@@ -45,8 +45,10 @@ export function numericalProposal(input){
   const record=catalogue.find(row=>row.id===item.exerciseId && row.revision===item.exerciseRevision)
   const match=doses.find(dose=>{const resolved=record && resolveDose(record,dose,manifest,context);return resolved?.state==='resolved' && canonical(resolved.prescription)===canonical(expected)})
   if(!match){gaps.push({occurrenceId:block.occurrenceId,reason:'no_matching_reviewed_dose'});continue}
+  const resolved=resolveDose(record,match,manifest,context)
+  prescriptionChanges.push({occurrenceId:block.occurrenceId,from:{...block.dose.prescription,durationSeconds:block.dose.seconds},to:{...resolved.prescription,durationSeconds:resolved.seconds}})
   item.doseId=match.id;item.doseRevision=match.revision
  }
  if(gaps.length)return {...result,state:'dose_review_required',gaps}
- return {...result,suggestedDraft:{...structuredClone(targetProposal),source:`${kind}_review_proposal`,selection}}
+ return {...result,prescriptionChanges,suggestedDraft:{...structuredClone(targetProposal),source:`${kind}_review_proposal`,selection}}
 }

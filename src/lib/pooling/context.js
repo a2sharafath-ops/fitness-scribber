@@ -1,4 +1,4 @@
-export const RESOLVER_VERSION = 'pool-context-2'
+export const RESOLVER_VERSION = 'pool-context-3'
 const OBSERVED = new Set(['observed_present', 'assessed_absent', 'measured', 'reported'])
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0
 
@@ -22,9 +22,11 @@ export function resolveContext(input) {
       if (requirement.required) reasons.push({ code: 'source_unavailable', key })
       continue
     }
-    const rows = observations.filter(row => row.key === key && row.clientId === input.clientId && row.source === source &&
-      (!requirement.side || row.side===requirement.side) &&
-      Date.parse(row.effectiveAt) <= session && Date.parse(row.recordedAt) <= cutoff)
+    // Explain only evidence known at the cutoff; future-recorded evidence must
+    // not leak into an earlier decision's reason trace.
+    const known=observations.filter(row=>row.key===key && row.clientId===input.clientId && row.source===source &&
+      (!requirement.side || row.side===requirement.side) && Date.parse(row.recordedAt)<=cutoff)
+    const rows=known.filter(row=>Date.parse(row.effectiveAt)<=session)
     // Corrections exclude a prior revision only when the correction itself was known.
     const superseded = new Set(rows.map(row => row.supersedes).filter(Boolean))
     const current = rows.filter(row => !superseded.has(row.id))
@@ -33,7 +35,10 @@ export function resolveContext(input) {
       Date.parse(row.confirmedAt) <= cutoff && row.unit === unit && row.protocol === protocol)
     if (!confirmed.length) {
       facts[key] = { state: 'missing', refs: current.map(row => row.id).sort(compare) }
-      if (requirement.required) reasons.push({ code: 'missing_required_source', key })
+      if (requirement.required) {
+        const future=known.filter(row=>Date.parse(row.effectiveAt)>session).map(row=>row.id).sort(compare)
+        reasons.push({ code: future.length?'source_date_mismatch':'missing_required_source', key, ...(future.length?{refs:future}:{}) })
+      }
       continue
     }
     const latestTime = Math.max(...confirmed.map(row => Date.parse(row.effectiveAt)))

@@ -1,4 +1,4 @@
-import {admission,resolveDose} from './selection.js'
+import {admission,doseTiming} from './selection.js'
 
 // Validation does not supply missing professional evidence or publish anything.
 export function validateRelease(document){
@@ -34,8 +34,14 @@ if(policy.kind==='weekly' && (!policy.supportKey || !Array.isArray(policy.goals)
  for(const dose of doses){
   const record=catalogue.find(row=>row.doseRefs?.includes(dose.id))
   if(!record)errors.push(`${dose.id}:unreferenced_dose`)
-  else if(dose.loadMethod!=='percentage' && resolveDose(record,dose,manifest).state!=='resolved')errors.push(`${dose.id}:invalid_dose`)
-  else if(dose.loadMethod==='percentage' && (!dose.loadReferenceKey || !dose.referenceMethod || !dose.allowedReferenceKinds?.length || !Number.isFinite(dose.percentage) || dose.percentage<=0 || !Number.isFinite(dose.incrementKg) || dose.incrementKg<=0 || !Number.isFinite(dose.minimumLoadKg) || !Number.isFinite(dose.maximumLoadKg) || dose.minimumLoadKg>dose.maximumLoadKg))errors.push(`${dose.id}:load_reference_policy_incomplete`)
+  if(doseTiming(dose).state!=='resolved')errors.push(`${dose.id}:invalid_dose`)
+  if(dose.loadMethod && !['none','absolute','percentage'].includes(dose.loadMethod))errors.push(`${dose.id}:unsupported_load_method`)
+  if(['absolute','percentage'].includes(dose.loadMethod)){
+   if(!Number.isFinite(dose.minimumLoadKg)||!Number.isFinite(dose.maximumLoadKg)||dose.minimumLoadKg<0||dose.minimumLoadKg>dose.maximumLoadKg)errors.push(`${dose.id}:load_bounds_incomplete`)
+   if(!modulePolicy?.requirements?.some(r=>r.key===dose.loadInventoryKey && r.required===true && r.sessionSpecific===true))errors.push(`${dose.id}:session_load_inventory_required`)
+  }
+  if(dose.loadMethod==='absolute' && (!Number.isFinite(dose.loadKg)||dose.loadKg<dose.minimumLoadKg||dose.loadKg>dose.maximumLoadKg))errors.push(`${dose.id}:invalid_absolute_load`)
+  if(dose.loadMethod==='percentage' && (!dose.loadReferenceKey || !dose.referenceMethod || !dose.allowedReferenceKinds?.length || !Number.isFinite(dose.percentage) || dose.percentage<=0 || !Number.isFinite(dose.incrementKg) || dose.incrementKg<=0 || !modulePolicy?.requirements?.some(r=>r.key===dose.loadReferenceKey && r.required===true)))errors.push(`${dose.id}:load_reference_policy_incomplete`)
  }
  return {valid:errors.length===0,errors}
 }

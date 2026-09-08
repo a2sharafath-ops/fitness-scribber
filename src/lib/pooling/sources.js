@@ -32,7 +32,8 @@ export function buildSourceSnapshot(bundle) {
   for (const row of confirmations) {
     const value=validateConfirmation(row.observation)
     const source=sources.find(item=>item.source===value.source && item.id===value.sourceId)
-    if ([modulePolicy.authorityKeys.health,modulePolicy.authorityKeys.equipment].includes(value.key) && value.sessionAt!==session.sessionAt) continue
+    const sessionSpecific=requirements.find(requirement=>requirement.key===value.key)?.sessionSpecific===true
+    if ((sessionSpecific || [modulePolicy.authorityKeys.health,modulePolicy.authorityKeys.equipment].includes(value.key)) && value.sessionAt!==session.sessionAt) continue
     // A changed/deleted legacy source cannot retain a confirmation of old data.
     if (row.clientId!==clientId || !source || source.status!=='loaded' || source.token!==value.sourceToken || !row.confirmedBy || !row.confirmedAt) continue
     observations.push({...value,id:String(row.id),clientId,quality:'confirmed',confirmedBy:row.confirmedBy,confirmedAt:row.confirmedAt,recordedAt:row.recordedAt})

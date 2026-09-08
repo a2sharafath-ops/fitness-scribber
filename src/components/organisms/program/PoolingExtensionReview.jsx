@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import {generateExtension} from '../../../api/pooling'
+import PoolingPrescriptionDiff from '../../molecules/PoolingPrescriptionDiff'
+import PoolingBudgetNotice from '../../molecules/PoolingBudgetNotice'
 
 export default function PoolingExtensionReview({kind,policy,requests,onRequest,onReview,online,context,clientId,workspace,drafts,onRefresh}) {
   const [date,setDate]=useState('')
@@ -41,7 +43,7 @@ function ExtensionDisposition({row,onReview,online,context,clientId,workspace,dr
   try{const operation=pending || {operationKey:crypto.randomUUID(),requestId:row.id,action,reason,proposalId:proposal?.id || null,amendedDraft:action==='amend'?JSON.parse(amended):null};setPending(operation);await onReview(operation);setPending(null)}catch(failure){setError(failure.message);if(!['outcome_unknown','unavailable','failed_save'].includes(failure.code))setPending(null)}finally{setBusy(false)}
  }
  return <details><summary>{row.proposal.date} · {row.review?.action || 'review requested'} · no automatic assignment</summary><p>{row.proposal.requestedChange}</p>
-  {proposal && <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(proposal.result,null,2)}</pre>}
+  {proposal && <><PoolingPrescriptionDiff changes={proposal.result?.prescriptionChanges}/><PoolingBudgetNotice result={proposal.result}/><details><summary>Full proposal and evidence</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(proposal.result,null,2)}</pre></details></>}
   {!row.review && online && <><label>Review reason<textarea value={reason} disabled={!!pending} onChange={e=>setReason(e.target.value)}/></label>
    <fieldset disabled={busy || !!pending}><legend>Numerical proposal inputs</legend>
     <label htmlFor={`extension-target-${row.id}`}>Current canonical draft</label><select id={`extension-target-${row.id}`} value={target} onChange={e=>{setTarget(e.target.value);setPolicyId('')}}><option value="">Select exact target revision</option>{(drafts || []).filter(item=>item.id && item.proposal.selection?.length && item.proposal.date===row.proposal.date).map(item=><option key={item.id} value={item.id}>{item.proposal.date} · draft {item.id}, revision {item.revision}</option>)}</select>

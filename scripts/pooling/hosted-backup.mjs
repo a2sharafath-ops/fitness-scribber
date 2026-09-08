@@ -1,7 +1,7 @@
 // A30 backup utility. No hosted DDL or application mutations. Generated CLI shell
 // output is parsed as data, never evaluated. Secret values stay in child env only.
 import {spawnSync} from 'node:child_process'
-import {readFileSync,mkdirSync,mkdtempSync,writeFileSync,chmodSync,statSync,statfsSync} from 'node:fs'
+import {readFileSync,mkdirSync,mkdtempSync,writeFileSync,chmodSync,statSync,statfsSync,existsSync} from 'node:fs'
 import {resolve,join} from 'node:path'
 import {pathToFileURL} from 'node:url'
 import {createHash} from 'node:crypto'
@@ -73,7 +73,7 @@ export async function main(mode){
  if(!['probe','export','complete'].includes(mode))throw Error('use_probe_export_or_complete')
  const bin=resolve(process.env.FITNESS_HOSTED_PG_BIN||'')
  if(!bin.startsWith(resolve('.local-test-runtime')+'/') || !run(bin,'pg_dump',['--version'],process.env).includes('(PostgreSQL) 17.'))throw Error('isolated_postgres17_required')
- const env=connection()
+ let env=connection()
  const server=JSON.parse(query(bin,env,"select json_build_object('version',current_setting('server_version'),'readOnly',current_setting('transaction_read_only'),'databaseBytes',pg_database_size(current_database()))"))
  if(server.readOnly!=='on' || !server.version.startsWith('17.'))throw Error('unexpected_server_state')
  if(mode==='probe'){console.log(JSON.stringify({mode,projectRef,tls:'verify-full',server}));return}
@@ -90,10 +90,17 @@ export async function main(mode){
  if(mode==='export'){
  run(bin,'pg_dump',['--role=postgres','--format=custom','--lock-wait-timeout=10000','--file',dump],env);chmodSync(dump,0o600)
  save(dir,'archive.list',run(bin,'pg_restore',['--list',dump],process.env))
- const schema=run(bin,'pg_dump',['--role=postgres','--schema-only','--lock-wait-timeout=10000'],env)
- save(dir,'database-schema.sql',schema)
- const roles=query(bin,env,"select coalesce(jsonb_agg(to_jsonb(r) order by rolname),'[]') from pg_roles r")
- save(dir,'roles-without-passwords.json',roles+'\n')
+  const schema=run(bin,'pg_dump',['--role=postgres','--schema-only','--lock-wait-timeout=10000'],env)
+  save(dir,'database-schema.sql',schema)
+ }
+ // CLI credentials are short-lived. Refresh only after exports have finished;
+ // never rotate an identity while another dump/connection is in use.
+ env=connection()
+ if(!existsSync(join(dir,'roles-without-passwords.json'))){
+  const roles=query(bin,env,"select coalesce(jsonb_agg(to_jsonb(r) order by rolname),'[]') from pg_roles r")
+  save(dir,'roles-without-passwords.json',roles+'\n')
+ }
+ if(!existsSync(join(dir,'metadata.json'))){
  const metadata=query(bin,env,`select jsonb_build_object(
  'extensions',(select jsonb_agg(jsonb_build_object('name',e.extname,'version',e.extversion,'schema',n.nspname)) from pg_extension e join pg_namespace n on n.oid=e.extnamespace),
  'tables',(select jsonb_agg(jsonb_build_object('schema',n.nspname,'name',c.relname,'rls',c.relrowsecurity)) from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.relkind='r' and n.nspname not in ('pg_catalog','information_schema') and n.nspname not like 'pg_toast%'),
@@ -106,9 +113,9 @@ export async function main(mode){
  for(const required of ['database-schema.sql','archive.list','metadata.json','roles-without-passwords.json'])if(!statSync(join(dir,required)).size)throw Error('incomplete_backup')
  run(bin,'pg_restore',['--list',dump],process.env)
  const tables=JSON.parse(query(bin,env,"select jsonb_agg(jsonb_build_object('schema',schemaname,'table',tablename) order by schemaname,tablename) from pg_tables where schemaname in ('public','auth','storage')"))
- const fingerprint=JSON.parse(query(bin,env,fingerprintSQL(tables)))
+ const fingerprint=JSON.parse(query(bin,env,fingerprintSQL(tables,true)))
  save(dir,'row-fingerprints.json',JSON.stringify(fingerprint,null,2)+'\n')
- const manifest={projectRef,createdAt:new Date().toISOString(),server,toolVersion:run(bin,'pg_dump',['--version'],process.env).trim(),dumpBytes:statSync(dump).size,dumpSha256:createHash('sha256').update(readFileSync(dump)).digest('hex'),directory:dir,restoreVerified:false,storage:JSON.parse(readFileSync(join(dir,'metadata.json'),'utf8')).storageObjects,fingerprintTables:tables.length}
+ const manifest={projectRef,createdAt:new Date().toISOString(),server,toolVersion:run(bin,'pg_dump',['--version'],process.env).trim(),dumpBytes:statSync(dump).size,dumpSha256:createHash('sha256').update(readFileSync(dump)).digest('hex'),directory:dir,restoreVerified:false,portableFingerprints:true,storage:JSON.parse(readFileSync(join(dir,'metadata.json'),'utf8')).storageObjects,fingerprintTables:tables.length}
  save(dir,'manifest.json',JSON.stringify(manifest,null,2)+'\n')
  console.log(JSON.stringify({stage:'export_complete',...manifest}))
 }

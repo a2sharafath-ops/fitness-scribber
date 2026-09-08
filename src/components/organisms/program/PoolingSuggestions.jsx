@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react'
+import PoolingBudgetNotice from '../../molecules/PoolingBudgetNotice'
 import {generateSuggestion,readSuggestions,readPendingOperations} from '../../../api/pooling'
 export default function PoolingSuggestions({clientId,context,drafts,workspace,online,onRefresh}){
  const [rows,setRows]=useState([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState(''),[target,setTarget]=useState(''),[occurrence,setOccurrence]=useState(''),[alternative,setAlternative]=useState('')
@@ -18,7 +19,7 @@ export default function PoolingSuggestions({clientId,context,drafts,workspace,on
    <label htmlFor="suggestion-alternative">Candidate in the same family and laterality</label><select id="suggestion-alternative" value={alternative} disabled={busy || !occurrence} onChange={e=>setAlternative(e.target.value)}><option value="">Choose candidate for server revalidation</option>{alternatives.map(e=><option key={e.id} value={e.id}>{e.name || e.id}</option>)}</select>
    <p>Family similarity is not clearance. The complete replacement dose, session coverage and budget are revalidated.</p><button className="btn ghost" disabled={!online || busy || !alternative} onClick={()=>generate('swap')}>Propose reviewed swap</button>
   </details>
-  {rows.map(r=><details key={r.id}><summary>Suggestion {r.id} · {r.result.completeness} · {r.draft_id?`draft ${r.draft_id}`:'no ready draft'}</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(r.result,null,2)}</pre></details>)}
+  {rows.map(r=><details key={r.id}><summary>Suggestion {r.id} · {r.result.completeness} · {r.draft_id?`draft ${r.draft_id}`:'no ready draft'}</summary><PoolingBudgetNotice result={r.result}/><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(r.result,null,2)}</pre></details>)}
   {status && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
  </section>
 }

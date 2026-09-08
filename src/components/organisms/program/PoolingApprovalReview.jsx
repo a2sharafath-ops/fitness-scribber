@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {approveDraft,approveBatch,decideDraft,readPendingOperations,readBuilderDraftState,saveRecoverableBuilderDraft,reviewContext} from '../../../api/pooling'
 import {canonicalProposal,selectionDiff} from '../../../lib/pooling/review'
+import PoolingBudgetNotice from '../../molecules/PoolingBudgetNotice'
 
 function CanonicalEditor({clientId,context,manifests,onSaved}){
  const [release,setRelease]=useState(''),[date,setDate]=useState(''),[instant,setInstant]=useState(''),[zone,setZone]=useState('UTC')
@@ -86,7 +87,7 @@ export default function PoolingApprovalReview({clientId,context,drafts,workspace
     {!row.proposal.selection?.length && <p>Use source-checked generation or map canonical variants and doses before requesting an assignment decision.</p>}
     {context?.held && <button className="btn ghost" disabled={!online || !row.id || !row.proposal.session || !row.proposal.manifestId || !contextReference.trim() || busy || !!pending} onClick={()=>run(async()=>{if((await readPendingOperations(clientId)).some(op=>op.kind==='context_review'))throw Error('Reconcile the saved context review in operation recovery before requesting another.');const receipt=await reviewContext({clientId,draftId:row.id,generation:context.generation,reference:contextReference,operationKey:crypto.randomUUID()});setStatus(`Context review recorded; inspect new unassigned draft ${receipt.draftId}.`)})}>Request source-bound context review</button>}
     <button className="btn ghost" disabled={!online || !row.id || !row.proposal.selection?.length || busy || !!pending} onClick={()=>run(async()=>{const result=await decideDraft({clientId,draftId:row.id,generation:context?.generation});setStatus(`Decision ${result.receipt.decisionId}: ${result.result.completeness}.`)})}>Validate exact draft {row.id || 'local'}</button>
-    {decision && <><p>Decision {decision.id} · {decision.result.completeness} · expires {decision.validUntil}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify({blocks:decision.result.blocks,gaps:decision.result.gaps,durationSeconds:decision.result.durationSeconds},null,2)}</pre></>}
+    {decision && <><p>Decision {decision.id} · {decision.result.completeness} · expires {decision.validUntil}</p><PoolingBudgetNotice result={decision.result}/><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify({blocks:decision.result.blocks,gaps:decision.result.gaps,durationSeconds:decision.result.durationSeconds},null,2)}</pre></>}
     <label><input type="checkbox" disabled={!ready(row) || busy || !!pending} checked={checked.includes(key)} onChange={e=>setChecked(ids=>e.target.checked?[...ids,key]:ids.filter(id=>id!==key))}/>I reviewed this exact client/date, full dose, source gaps and revision changes.</label>
     <button className="btn" disabled={!ready(row) || !checked.includes(key) || busy || !!pending} onClick={()=>run(()=>approve([row]))}>Approve &amp; assign draft {row.id || 'local'}</button>
    </details>

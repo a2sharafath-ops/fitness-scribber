@@ -8,30 +8,33 @@ import { ClipboardProvider } from './store/ClipboardContext'
 import AuthPage from './pages/AuthPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleOnboarding from './pages/RoleOnboarding'
-import AthletePortal from './pages/AthletePortal'
-import AdminPortal from './pages/AdminPortal'
 import AppLayout from './components/templates/AppLayout'
-import DashboardPage from './pages/DashboardPage'
-import ClientsPage from './pages/ClientsPage'
-import ClientDetailPage from './pages/ClientDetailPage'
-import ClientProfilePage from './pages/ClientProfilePage'
-import AssessmentsPage from './pages/AssessmentsPage'
-import AssessmentDetailPage from './pages/AssessmentDetailPage'
-import MetricDetailPage from './pages/MetricDetailPage'
-import CommandCenterPage from './pages/CommandCenterPage'
-import MonitorPage from './pages/MonitorPage'
-import WorkoutsPage from './pages/WorkoutsPage'
-import SchedulePage from './pages/SchedulePage'
-import ProgressPage from './pages/ProgressPage'
-import ConcernsPage from './pages/ConcernsPage'
-import MessagesPage from './pages/MessagesPage'
-import SettingsPage from './pages/SettingsPage'
-import ReportPage from './pages/ReportPage'
 import Toaster from './components/organisms/Toaster'
-import './lib/chartSetup'
+import PageLoadFailure from './components/molecules/PageLoadFailure'
 
-const ExercisePoolPage = lazy(() => import('./pages/ExercisePoolPage'))
-const PoolingTestPage = lazy(() => import('./pages/PoolingTestPage'))
+// A failed chunk must remain recoverable after a deployment or network loss.
+// Reload never clears the account-scoped pending-operation journal.
+const page = load => lazy(() => load().catch(() => ({ default: PageLoadFailure })))
+const AthletePortal = page(() => import('./pages/AthletePortal'))
+const AdminPortal = page(() => import('./pages/AdminPortal'))
+const DashboardPage = page(() => import('./pages/DashboardPage'))
+const ClientsPage = page(() => import('./pages/ClientsPage'))
+const ClientDetailPage = page(() => import('./pages/ClientDetailPage'))
+const ClientProfilePage = page(() => import('./pages/ClientProfilePage'))
+const AssessmentsPage = page(() => import('./pages/AssessmentsPage'))
+const AssessmentDetailPage = page(() => import('./pages/AssessmentDetailPage'))
+const MetricDetailPage = page(() => import('./pages/MetricDetailPage'))
+const CommandCenterPage = page(() => import('./pages/CommandCenterPage'))
+const MonitorPage = page(() => import('./pages/MonitorPage'))
+const WorkoutsPage = page(() => import('./pages/WorkoutsPage'))
+const SchedulePage = page(() => import('./pages/SchedulePage'))
+const ProgressPage = page(() => import('./pages/ProgressPage'))
+const ConcernsPage = page(() => import('./pages/ConcernsPage'))
+const MessagesPage = page(() => import('./pages/MessagesPage'))
+const SettingsPage = page(() => import('./pages/SettingsPage'))
+const ReportPage = page(() => import('./pages/ReportPage'))
+const ExercisePoolPage = page(() => import('./pages/ExercisePoolPage'))
+const PoolingTestPage = page(() => import('./pages/PoolingTestPage'))
 
 function Shell() {
   return (
@@ -39,6 +42,7 @@ function Shell() {
       <ModalProvider>
         <ClipboardProvider>
         <BrowserRouter>
+          <Suspense fallback={<p role="status">Loading page…</p>}>
           <Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
@@ -61,6 +65,7 @@ function Shell() {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Routes>
+          </Suspense>
         </BrowserRouter>
         </ClipboardProvider>
       </ModalProvider>
@@ -86,7 +91,7 @@ function Gate() {
 export default function App() {
   return (
     <AuthProvider>
-      <Gate />
+      <Suspense fallback={<p role="status">Loading workspace…</p>}><Gate /></Suspense>
       <Toaster />
     </AuthProvider>
   )

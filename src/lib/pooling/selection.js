@@ -1,5 +1,6 @@
 import { canonical } from './context.js'
-export const ENGINE_VERSION = 'pool-selection-2'
+import { budgetGap } from './budget.js'
+export const ENGINE_VERSION = 'pool-selection-3'
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0
 const unique = values => [...new Set(values)].sort(compare)
 
@@ -28,8 +29,7 @@ export function evaluateCandidate(record, context, request, manifest) {
   return { id: record.id, revision: record.revision, eligibility: reasons.length ? 'excluded' : 'eligible', reasons, matchedNeeds }
 }
 
-export function resolveDose(record, dose, manifest, context = null) {
-  if (!dose || !record.doseRefs?.includes(dose.id) || !admission(dose, manifest)) return { state: 'unresolved', reasons: ['dose_not_admitted'] }
+export function doseTiming(dose) {
   const { sets, workSeconds, restSeconds, setupSeconds, transitionSeconds, sideMultiplier } = dose
   if (!Number.isInteger(sets) || sets < 1 || ![1, 2].includes(sideMultiplier) ||
       [workSeconds, restSeconds, setupSeconds, transitionSeconds].some(value => !Number.isFinite(value) || value < 0) || workSeconds === 0) {
@@ -39,6 +39,14 @@ export function resolveDose(record, dose, manifest, context = null) {
   if (!Number.isFinite(seconds)) return { state: 'unresolved', reasons: ['dose_invalid_or_incomplete'] }
   const mode=dose.mode || 'timed'
   if(!['timed','repetitions'].includes(mode) || (mode==='repetitions' && (!Number.isSafeInteger(dose.reps) || dose.reps<1))) return {state:'unresolved',reasons:['dose_invalid_or_incomplete']}
+  return {state:'resolved',seconds,mode}
+}
+
+export function resolveDose(record, dose, manifest, context = null) {
+  if (!dose || !record.doseRefs?.includes(dose.id) || !admission(dose, manifest)) return { state: 'unresolved', reasons: ['dose_not_admitted'] }
+  const timing=doseTiming(dose)
+  if(timing.state!=='resolved')return timing
+  const {seconds,mode}=timing,{sets,workSeconds,restSeconds,setupSeconds,transitionSeconds,sideMultiplier}=dose
   let loadKg=null
   if(dose.loadMethod==='absolute') loadKg=dose.loadKg
   else if(dose.loadMethod==='percentage'){
@@ -48,6 +56,12 @@ export function resolveDose(record, dose, manifest, context = null) {
     loadKg=Math.round(value.valueKg*dose.percentage/100/dose.incrementKg)*dose.incrementKg
   }else if(dose.loadMethod && dose.loadMethod!=='none')return {state:'unresolved',reasons:['loading_method_unsupported']}
   if(['absolute','percentage'].includes(dose.loadMethod) && (!Number.isFinite(loadKg) || !Number.isFinite(dose.minimumLoadKg) || !Number.isFinite(dose.maximumLoadKg) || loadKg<dose.minimumLoadKg || loadKg>dose.maximumLoadKg || loadKg<0))return {state:'unresolved',reasons:['load_outside_reviewed_bounds']}
+  if(['absolute','percentage'].includes(dose.loadMethod)){
+    const inventory=context?.facts[dose.loadInventoryKey]
+    if(!dose.loadInventoryKey || inventory?.state!=='usable' || inventory.value?.unit!=='kg' ||
+      !Array.isArray(inventory.value.loadsKg) || inventory.value.loadsKg.some(load=>!Number.isFinite(load)||load<0))return {state:'unresolved',reasons:['load_inventory_unavailable']}
+    if(!inventory.value.loadsKg.includes(loadKg))return {state:'unresolved',reasons:['load_not_in_confirmed_inventory']}
+  }
   return { state: 'resolved', id: dose.id, revision: dose.revision, seconds,
     prescription: { sets, workSeconds, restSeconds, setupSeconds, transitionSeconds, sideMultiplier,mode,reps:mode==='repetitions'?dose.reps:null,loadKg,
       ...(dose.comparison?{comparison:structuredClone(dose.comparison)}:{}) } }
@@ -76,16 +90,20 @@ export function selectPool({ context, catalogue, doses, manifest, request }) {
         for (let index = 0; index < a.score.length; index++) if (a.score[index] !== b.score[index]) return a.score[index] - b.score[index]
         return compare(a.record.id, b.record.id)
       })
-    let selected
+    let selected, minimumSeconds=Infinity
     for (const option of options) {
       const possibleDoses = doses.filter(dose => option.record.doseRefs?.includes(dose.id)).sort((a, b) => compare(a.id, b.id))
       for (const rawDose of possibleDoses) {
         const dose = resolveDose(option.record, rawDose, manifest,context)
+        if(dose.state==='resolved')minimumSeconds=Math.min(minimumSeconds,dose.seconds)
         if (dose.state === 'resolved' && durationSeconds + dose.seconds <= request.budgetSeconds) { selected = { ...option, dose }; break }
       }
       if (selected) break
     }
-    if (!selected) { (role.required ? gaps : omissions).push({ role: role.id, reason: 'no_eligible_dosed_option_within_budget' }); continue }
+    if (!selected) {
+      const reason=Number.isFinite(minimumSeconds)?budgetGap(durationSeconds+minimumSeconds,request.budgetSeconds,{role:role.id,lowerBound:true}):{role:role.id,reason:'no_eligible_dosed_option_within_budget'}
+      ;(role.required ? gaps : omissions).push(reason);continue
+    }
     const { candidate, record, dose } = selected
     used.add(record.id)
     candidate.matchedNeeds.forEach(id => covered.add(id))

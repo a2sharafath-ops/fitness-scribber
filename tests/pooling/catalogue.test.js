@@ -9,3 +9,10 @@ test('duplicate revisions and missing manifest records are rejected',()=>{const 
 test('missing reviewer identity does not inherit owner approval',()=>{const d=fixture();d.catalogue[0]={...d.catalogue[0],approvalEvidence:[]};assert.equal(validateRelease(d).valid,false)})
 test('unknown dose references and unsupported loading cannot publish',()=>{const d=fixture();d.catalogue[0].doseRefs=['missing'];assert.equal(validateRelease(d).valid,false);const e=fixture();e.doses[0].loadMethod='magic';assert.equal(validateRelease(e).valid,false)})
 test('numerical policy cannot publish with null parameters',()=>{const d=fixture();d.extensionPolicies=[{...d.modulePolicy,id:'progression',kind:'progression',windowSeconds:null}];d.manifest.records.push({id:'progression',revision:1});assert(validateRelease(d).errors.includes('progression:progression_parameters_incomplete'))})
+test('loaded release requires an explicit required session inventory contract',()=>{
+ const d=fixture();Object.assign(d.doses[0],{loadMethod:'absolute',loadKg:42,minimumLoadKg:0,maximumLoadKg:42,loadInventoryKey:'loads'})
+ assert(validateRelease(d).errors.includes('dose:session_load_inventory_required'))
+ d.modulePolicy.requirements.push({key:'loads',source:'clients',required:true,sessionSpecific:true,unit:'load_inventory',protocol:'explicit-v1',maxAgeSeconds:60})
+ assert.equal(validateRelease(d).valid,true)
+ d.modulePolicy.requirements.at(-1).sessionSpecific=false;assert.equal(validateRelease(d).valid,false)
+})

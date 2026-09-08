@@ -1,5 +1,6 @@
 import { canonical } from './context.js'
 import { ENGINE_VERSION, evaluateCandidate, resolveDose } from './selection.js'
+import { budgetGap } from './budget.js'
 
 // Validate the exact proposed revision; never substitute a newly generated plan.
 export function evaluateDraft({ context, request, catalogue, doses, manifest, selection }) {
@@ -24,7 +25,7 @@ export function evaluateDraft({ context, request, catalogue, doses, manifest, se
     blocks.push({occurrenceId:item.occurrenceId,role:item.role,exerciseId:record.id,exerciseRevision:record.revision,dose:resolvedDose,matchedNeeds:eligibility.matchedNeeds})
   }
   const durationSeconds=blocks.reduce((sum,block)=>sum+block.dose.seconds,0)
-  if (durationSeconds>request.budgetSeconds) gaps.push({reason:'budget_exceeded'})
+  if (durationSeconds>request.budgetSeconds) gaps.push(budgetGap(durationSeconds,request.budgetSeconds,{lowerBound:blocks.length!==selection.length}))
   for(const role of request.roles) if(role.required && !blocks.some(block=>block.role===role.id)) gaps.push({role:role.id,reason:'required_role_missing'})
   for(const need of request.requiredNeeds || []) if(!blocks.some(block=>block.matchedNeeds.includes(need))) gaps.push({need,reason:'required_need_missing'})
   const result={engineVersion:ENGINE_VERSION,resolverVersion:context.version,contextGeneration:context.generation,manifestId:manifest?.id || null,
