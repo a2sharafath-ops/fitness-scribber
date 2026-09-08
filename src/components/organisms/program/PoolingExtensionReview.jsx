@@ -17,7 +17,7 @@ export default function PoolingExtensionReview({kind,policy,requests,onRequest,o
   }
   return <section className="card" aria-labelledby={`${kind}-review-title`}>
     <h2 id={`${kind}-review-title`}>{title}</h2>
-    <p>Policy status: {policy.reviewStatus}. {missing.length} parameters have no approved value. Numerical suggestions and assignment remain disabled.</p>
+    <p>Draft catalogue policy status: {policy.reviewStatus}. {missing.length} parameters have no approved value. These draft parameters cannot authorize numerical suggestions. Any numerical proposal below requires a separately admitted policy; assignment always requires separate coach approval.</p>
     <details><summary>Unresolved policy parameters</summary><ul>{missing.map(parameter=><li key={parameter.name}>{parameter.name}: review required</li>)}</ul></details>
     <p>This saves a planning request, not a change to the original target, completed actuals or weekly schedule.</p>
     <label htmlFor={`${kind}-date`}>Session or week-start date</label><input id={`${kind}-date`} type="date" value={date} disabled={!!pending} onChange={event=>{setDate(event.target.value);setStatus('unsaved')}} />

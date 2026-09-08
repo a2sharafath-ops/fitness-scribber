@@ -1,5 +1,9 @@
 import {canonical} from './context.js'
 
+export function currentUnassignedDrafts(drafts=[],assignments=[]) {
+  return drafts.filter(draft=>!assignments.some(row=>row.draftId===draft.id) && !drafts.some(row=>row.parent_id===draft.id && draft.id!=null))
+}
+
 // A canonical proposal is still untrusted. Only a server decision can authorize it.
 export function canonicalProposal({date,sessionAt,timeZone,manifestId,request,selection,notes='',allowEmpty=false}) {
   const at=Date.parse(sessionAt)

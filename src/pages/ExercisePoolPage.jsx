@@ -16,6 +16,7 @@ import PoolingReassessment from '../components/organisms/program/PoolingReassess
 import PoolingCatalogueAdmin from '../components/organisms/program/PoolingCatalogueAdmin'
 import { hasBackend } from '../lib/supabase'
 import { poolingConfig } from '../lib/pooling/config'
+import { currentUnassignedDrafts } from '../lib/pooling/review'
 
 export default function ExercisePoolPage() {
   const { id } = useParams()
@@ -77,6 +78,7 @@ export default function ExercisePoolPage() {
     }
   }
   const filtered = catalogue.filter(row => `${row.name} ${row.roles.join(' ')} ${row.pattern}`.toLowerCase().includes(filter.toLowerCase()))
+  const unassignedDrafts=currentUnassignedDrafts(state?.drafts || [],workspace.assignments)
   async function requestReview(kind,operation) {
     await saveExtensionRequest({clientId:id,kind,generation:state?.context?.generation || 1,...operation})
     setRefresh(value=>value+1)
@@ -96,8 +98,8 @@ export default function ExercisePoolPage() {
       <button className="btn" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={todayISO()} />, 'xl')}>Create review draft</button>
       <button className="btn ghost" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh drafts</button>
       <p>{hasBackend ? 'Canonical drafts require a current server decision and exact coach review below.' : 'Local drafts are stored separately from Classic prescriptions and have no server authority.'}</p>
-      {(state?.drafts || []).map(row => <p key={row.id || row.operationKey}>{row.proposal.date} · revision {row.revision} · unassigned draft</p>)}
-      {!state?.drafts?.length && <p>No saved review drafts.</p>}
+      {unassignedDrafts.map(row => <p key={row.id || row.operationKey}>{row.proposal.date} · revision {row.revision} · unassigned draft</p>)}
+      {!unassignedDrafts.length && <p>No current unassigned review drafts. Assigned and superseded revisions remain in the exact-revision history below.</p>}
     </section>
     {!loading && <PoolingApprovalReview key={`PoolingApprovalReview:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
     <PoolingSuggestions key={`PoolingSuggestions:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>

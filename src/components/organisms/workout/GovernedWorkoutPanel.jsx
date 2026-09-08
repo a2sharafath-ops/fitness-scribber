@@ -29,7 +29,7 @@ export default function GovernedWorkoutPanel({workflow}){
    const active=['start','resume','pause'].includes(assignment.status),localStop=workflow.stopped.includes(assignment.id)
    const allowed=!assignment.stale && !assignment.held && !localStop && workflow.status==='ready' && !workflow.pending
    const superseded=new Set(assignment.actuals.map(row=>row.supersedes).filter(Boolean))
-   return <article key={assignment.id}><h3>{assignment.date} · revision {assignment.draftId}</h3><p>{assignment.status} · {assignment.held?'review hold':assignment.stale?'stale — coach review required':'current checks required'}</p>
+   return <article key={assignment.id}><h3>{assignment.date} · approved draft {assignment.draftId}</h3><p>{assignment.status} · {assignment.held?'review hold':assignment.stale?'stale — coach review required':'current checks required'}</p>
     {localStop && <p role="status">Stop requested. Do not continue; check the server save status above.</p>}
     {['assigned','start','resume','pause'].includes(assignment.status) && <><label htmlFor={`health-${assignment.id}`}>Current health-change response</label><select id={`health-${assignment.id}`} value={health[assignment.id] || ''} onChange={e=>setHealth({...health,[assignment.id]:e.target.value})}><option value="">Choose explicitly for this session</option><option value="no_change">No change reported</option><option value="changed">Something changed — coach review needed</option><option value="declined">Prefer not to answer</option></select>
      {['changed','declined'].includes(health[assignment.id]) && <button className="btn" disabled={workflow.status==='saving'} onClick={()=>workflow.reportHealth(assignment,health[assignment.id])}>Save report for coach review</button>}
