@@ -1,6 +1,6 @@
 # Usable coach-test handoff — exact scope decision
 
-8 September 2026. Status: **A31 approved; implementation and verification in progress, not yet coach-test ready**. This is not another approval of the completed R1–R3 build.
+8 September 2026. Status: **A31 approved and implemented; protected workflow verified, final candidate/retirement checks tracked in [progress](./COACH_TEST_PROGRESS.md)**. This is not another approval of the completed R1–R3 build. The investigation snapshot below predates implementation and is retained as the reason for this scope decision.
 
 ## Why the delivered Preview was disabled
 

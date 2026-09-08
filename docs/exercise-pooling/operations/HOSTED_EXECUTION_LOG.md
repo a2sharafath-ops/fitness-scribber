@@ -73,3 +73,9 @@ Run `fs_pool_e2e_20260908_dd376c33` uses only non-deliverable fictional identiti
 ## Evidence and next gate
 
 See [hosted handoff](./HOSTED_BUILD_HANDOFF.md), [110-case evidence map](../quality/HOSTED_ACCEPTANCE_MATRIX.md), and [remaining work](./REMAINING_WORK.md). Engineering execution is not a clinical, privacy, rights, human UAT or Production-release signature. Main and the Production alias remain on `5de01b4`; Classic remains `08ac0673` at the named local tag. Prefer the tested feature-off candidate for routine fallback involving newly stopped records; never restore an old database merely to select old code.
+
+## A31 follow-up — usable fictional coach testing
+
+The separately approved per-client enrollment replaces A30's feature-off handoff for two existing coaches, without global activation. See [A31 progress and exact recovery evidence](./COACH_TEST_PROGRESS.md) and [the updated walkthrough](./COACH_PREVIEW_TEST_GUIDE.md). A fresh 83-table relational restore and two-pass additive migration rehearsal preceded hosted application. The six lifetime fictional identity cap is reached; no original role/password was changed and no old test user was reactivated.
+
+Normal hosted coach JWT and browser checks now cover creation, source preparation, generate/swap, exact approval, actual zero/correction, pause/fresh-answer resume/completion, daily and comparable-history proposals, and protected Preview weekly batch approval. Current code passes 141 unit tests, lint and build. Latest preservation: all 711 pre-A31 rows across 83 tables unchanged; no Storage objects; no real catalogue published; global flags false. Preview 9 is verified. The final tenth-build smoke/retirement/preservation receipts are written to the private run ledger after this commit and are not pre-claimed here. Remaining 110-case and real-release gates are not automatically closed.

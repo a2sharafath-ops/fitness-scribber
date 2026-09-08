@@ -1,6 +1,6 @@
 # Remaining pooling work and decisions
 
-Current A31 follow-up: the bounded coach-testing scope is approved and being verified. See [current progress](./COACH_TEST_PROGRESS.md). The A30 containment details below are historical, not a request to reapprove A31.
+Current A31 follow-up: the bounded coach-testing scope is approved. Protected Preview 9 has passed normal login and explicit weekly review/assignment; current code passes 141 unit tests, lint and build. See [current progress](./COACH_TEST_PROGRESS.md) for the final-candidate/retirement evidence boundary and [the usable coach guide](./COACH_PREVIEW_TEST_GUIDE.md). The A30 containment details below are historical, not a request to reapprove A31.
 
 8 September 2026 · supersedes the earlier local-only pending list. The original 82-task sprint remains the scope. **A30 is approved and has been executed; do not request the same backup/build/branch-Preview approval again.** Main/Production and real-client enablement are excluded.
 
@@ -37,6 +37,6 @@ These are future gates, **not another approval request for work already done**. 
 
 ## Safe handoff
 
-Use the [protected branch Preview](https://fitness-scribber-kq6i-git-codex-exercise-pool-3bc1c9-cureocity1.vercel.app). Pooling is deliberately off at handoff; run-created test accounts are disabled as recorded in the final verifier. Do not distribute old test credentials or silently turn the flags back on for UAT. No local development URL is promised because no app server is being left running.
+Use the [protected coach-testing entry](https://fitness-scribber-kq6i-git-codex-exercise-pool-3bc1c9-cureocity1.vercel.app/pooling-test) under A31. Global pooling remains off, but the two existing coaches can create one new explicitly fictional workspace each until 15 September 2026, 16:07:56 IST. Browser flags are on only for this implementation-branch Preview. Run-created engineering identities are retired after verification; do not distribute their credentials. This supersedes A30's unusable feature-off endpoint, not its real-release exclusions. No local development URL is promised because no app server is being left running.
 
 **Fitness Scribber Classic** identifies local tag `fitness-scribber-classic-2026-09-07`, commit `08ac0673d6e1d67ccd9fee2ffc5995074bcbf162`. Main/current Production remain `5de01b4e960e03e28d4a8b22527937103de10ad6`. Follow the [rollback runbook](./RELEASE_AND_ROLLBACK_RUNBOOK.md); switching code must not erase newer client data. The newer feature-off candidate is the tested route for handling newly stopped records.

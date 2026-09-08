@@ -38,6 +38,21 @@ if(process.argv[2]==='daily'){
  check('A31 daily acceptance saves a draft without assigning',review.draftId>0&&assigned.data.length===0)
  ledger.a31.daily={requestId:request.id,draftId:review.draftId};h.save()
 }
+if(process.argv[2]==='progression'){
+ const drafts=await admin.from('pooling_drafts').select('id,proposal').eq('client_id',cid).eq('context_generation',generation).order('id',{ascending:false});assert.ifError(drafts.error)
+ const prepared=drafts.data.find(d=>d.proposal.session?.request?.goalPriority?.includes('fictional'))
+ assert(prepared,'Prepare fresh weekly slots through the browser first')
+ const original=await admin.from('pooling_drafts').select('proposal').eq('id',baseline.draftId).single();assert.ifError(original.error)
+ const proposal={...prepared.proposal,selection:original.data.proposal.selection}
+ const target=await h.rpc(coach,'pooling_save_draft',{target_client:cid,expected_generation:generation,operation_key:h.key('a31-comparable-progression-target'),proposal},1)
+ const request=await h.rpc(coach,'pooling_request_extension',{target_client:cid,expected_generation:generation,operation_key:h.key('a31-progression-request'),proposal:{kind:'progression',date:proposal.date,requestedChange:'Fictional comparable-history progression review',blocks:[],authority:'none',state:'review_requested'}},1)
+ const result=await h.edge(coach,'pooling-extension',{clientId:cid,draftId:target.id,expectedGeneration:generation,requestId:request.id,baselineAssignmentId:baseline.id,policyId:'fictional-progression'})
+ check('A31 scoped progression uses completed comparable fictional history',result.status===200&&result.data.result?.state==='proposal'&&result.data.result.effects?.[0]?.to===2,{status:result.status,state:result.data.result?.state,error:result.data.error})
+ const review=await h.rpc(coach,'pooling_review_extension',{target_client:cid,request_id:request.id,expected_generation:generation,operation_key:h.key('a31-progression-review'),action:'accept',reason:'Explicit fictional comparison review; no training.',proposal_id:result.data.receipt.id},2)
+ const assigned=await admin.from('pooling_assignments').select('id').eq('draft_id',review.draftId);assert.ifError(assigned.error)
+ check('A31 progression acceptance remains an unassigned draft',review.draftId>0&&assigned.data.length===0)
+ ledger.a31.progression={requestId:request.id,draftId:review.draftId};h.save()
+}
 const flags=await admin.from('pooling_runtime').select('*').single();assert.ifError(flags.error)
 check('A31 globals still off after hosted checks',!flags.data.r1&&!flags.data.r2&&!flags.data.r3)
 await coach.auth.signOut({scope:'local'})

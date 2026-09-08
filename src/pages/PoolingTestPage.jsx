@@ -13,7 +13,7 @@ export default function PoolingTestPage(){
  async function run(action){setBusy(true);setError('');try{await action();await refresh();await load()}catch(e){setError(e.message)}finally{setBusy(false)}}
  if(!poolingConfig().r1)return <section className="card"><h1>Coach testing is unavailable in this build</h1><p>Use the authorized protected Preview; existing clients remain unchanged.</p></section>
  const active=state?.runtime?.r1,clientId=state?.clientId
- const setup=count=>run(async()=>{const value=await prepareTestDrafts(clientId,count);setResult(`${value.drafts.length} unassigned draft${count===1?'':'s'} prepared for ${value.sessionAt}. Open Exercise Pool, inspect the draft and obtain a current decision before explicit approval.`)})
+ const setup=count=>run(async()=>{const value=await prepareTestDrafts(clientId,count);setResult(`${value.drafts.length} unassigned draft${count===1?'':'s'} prepared: ${value.drafts.map(d=>d.id).join(', ')}. Session time: ${value.sessionAt}. Open Exercise Pool, inspect these exact drafts and obtain a current decision before explicit approval.`)})
  return <div className="pooling-workspace">
   <h1>Fictional coach-testing workspace</h1>
   <p>Try the new pooling workflow with your existing coach login. All exercises here are software placeholders: <strong>do not perform them or enter real client information.</strong></p>
@@ -39,7 +39,7 @@ export default function PoolingTestPage(){
    <li>Open Exercise Pool. Inspect the exact draft and source context. Generate a pool draft or swap the compatible placeholder.</li>
    <li>Validate the current draft, inspect its full dose, check the explicit review box and approve. Nothing is assigned automatically.</li>
    <li>Open the fictional client. In approved sessions, report the explicit health-change answer and start. Record zero or a small fictional seconds value, pause/resume, then stop or complete. Do not exercise.</li>
-   <li>Back in Exercise Pool, try Daily adjustment with policy <code>fictional-daily</code>. Accept/amend/reject is separate from assignment. For progression, record both sets with effort method <code>fictional-effort</code> and review policy <code>fictional-progression</code>.</li>
+   <li>For Daily adjustment, use policy <code>fictional-daily</code> with an approved but unstarted baseline; completed occurrences correctly return no change. Accept/amend/reject is separate from assignment. For progression, finish both baseline sets with effort method <code>fictional-effort</code>, prepare a later fictional draft, and review policy <code>fictional-progression</code>.</li>
    <li>Prepare two weekly slots. In the weekly section choose the fictional release, <code>fictional-weekly</code>, UTC, structure <code>fictional</code>, goal <code>fictional</code>, both new drafts and explicitly no support. Validate, review both sessions and approve the batch explicitly.</li>
   </ol><p>This coach-operated scenario does not certify independent client-role or human usability acceptance. Actual catalogue, clinical, privacy and launch reviews remain separate.</p></section>
   {clientId&&<details><summary>End my testing early</summary><p>Revocation cannot be undone from this screen. New test actions stop; existing results are not deleted.</p><button className="btn ghost" disabled={!active||busy} onClick={()=>run(()=>revokeTestWorkspace(clientId))}>Revoke my test workspace</button></details>}

@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react'
+import {currentWeeklyCandidates} from '../../../lib/pooling/weekly-candidates'
 import {generateWeek,approveWeek,readWeeks,readPendingOperations} from '../../../api/pooling'
 
 export default function PoolingWeeklyReview({clientId,context,workspace,drafts,online,onRefresh}){
@@ -6,7 +7,7 @@ export default function PoolingWeeklyReview({clientId,context,workspace,drafts,o
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState(''),[reviewed,setReviewed]=useState([])
  const manifest=workspace.manifests?.find(m=>m.id===release),policies=(manifest?.document.extensionPolicies || []).filter(p=>p.kind==='weekly'),policy=policies.find(p=>p.id===policyId)
  useEffect(()=>{let active=true;if(online)readWeeks(clientId).then(data=>{if(active)setRows(data)}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[clientId,online,context?.generation])
- const candidates=drafts.filter(d=>d.id && d.proposal.selection?.length && d.proposal.manifestId===release && !drafts.some(c=>c.parent_id===d.id))
+ const candidates=currentWeeklyCandidates(drafts,workspace.assignments,context?.generation,release)
  async function run(action){setBusy(true);setError('');try{
   if((await readPendingOperations(clientId)).some(r=>['weekly','week_approve'].includes(r.kind)))throw Error('Reconcile the saved weekly operation in Operation recovery before creating another.')
   await action();setRows(await readWeeks(clientId));setReviewed([]);onRefresh()
