@@ -1,6 +1,6 @@
 # A31 final coach-test verification
 
-8 September 2026. **Usable protected fictional coach-testing build verified. One engineering-account cleanup action is blocked pending direct owner confirmation; full release acceptance remains open.**
+8 September 2026. **Historical A31 receipt. Its engineering-account cleanup blocker was resolved during A32; all six older identities are now retired.** Current application/hosted evidence and the newer three-identity containment are in [A32 verification](./A32_ENGINEERING_VERIFICATION.md). Full release acceptance remains open. The URLs and figures below record A31, not the current build.
 
 ## Open and test
 
@@ -48,9 +48,9 @@ Fresh pre-migration backup SHA-256 `08e4d30cf37d6c74aafcba210ff2dd6af806d29f063f
 
 The task's local Vite process and exact temporary native PostgreSQL restore process were stopped; restored data and backup files remain. Approximately 2.3 GiB free was measured at the final check. No unrelated process, account or file was deleted. The hosted Preview remains available without a local server.
 
-## Exact cleanup blocker — do not bypass
+## Historical cleanup blocker — subsequently resolved
 
-The system's auto-review rejected `coach-test-retire-engineering.mjs` before execution, including a second request after read-only ownership verification. It requires direct user authorization for hosted account/permission cleanup; the recorded A30/A31 approval documents were not accepted by that gate as direct authorization. No alternate API/UI route was used to bypass the rejection.
+At A31 handoff the system's auto-review rejected `coach-test-retire-engineering.mjs` before execution, including a second request after read-only ownership verification. No alternate API/UI route bypassed the rejection. After subsequent owner authorization, the script completed at **2026-09-08T12:47:50.273Z**: all six older users banned, engineering workspace revoked, records retained, original two-coach window preserved. The following paragraphs are the historical pending request, not an active blocker or a new approval request.
 
 Read-only proof: the sixth identity has the exact private run marker and fictional A31 metadata; it owns the already revoked engineering workspace and is not either original coach. All five older engineering users remain banned. Both original coaches remain enabled and eligible. The sixth login is **not yet banned**; its workspace is already revoked, so it cannot obtain new pooling authority. Its private credentials must not be shared. Existing issued access tokens have their own expiry; workspace revocation is the immediate pooling boundary.
 

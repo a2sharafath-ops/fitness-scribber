@@ -22,7 +22,10 @@ async function prepare(count=1){
   draft:r=>rpc('pooling_save_draft',{target_client:cid,expected_generation:r.generation,operation_key:r.operationKey,proposal:r.proposal},1),
   review:async r=>(await edge('pooling-context-review',{clientId:cid,draftId:r.draftId,expectedGeneration:r.generation,operationKey:r.operationKey,reference:r.reference})).receipt,
  }})
- state.prepared=r;state.proposal=scenario.proposal;h.save();return r
+ // The saved preparation normalizes the provider's microseconds to JS ISO
+ // milliseconds. Reuse that exact session identity, not the raw scenario time.
+ const saved=await admin.from('pooling_drafts').select('proposal').eq('id',r.drafts[0].id).single();assert.ifError(saved.error)
+ state.prepared=r;state.proposal=saved.data.proposal;h.save();return r
 }
 async function draft(s,proposal=state.proposal){return rpc('pooling_save_draft',{target_client:cid,expected_generation:await gen(),operation_key:key(s),proposal})}
 async function decision(id){return edge('pooling-decision',{clientId:cid,draftId:id,expectedGeneration:await gen()})}

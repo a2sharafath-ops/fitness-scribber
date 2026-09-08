@@ -2,6 +2,8 @@
 
 O02 / Q06 · version 0.1 · draft runbook. No release, hosted access, backup, migration or recovery operation is authorized or executed by this file.
 
+Current execution evidence is [A32 hosted verification](./A32_ENGINEERING_VERIFICATION.md): the already authorized shared-backend work, 85-table relational restore, exact preserved baseline and fixture revocation are complete. This file remains a runbook, not new release authority. With test enrollments, global flags alone are not the whole containment boundary: revoke the affected exact workspace lease as well. Preserve Stop, actuals, corrections and history. Old PG16 installer paths in the historical manifest need re-download; current PG17 restored data and all backups remain.
+
 ## Local implementation addendum — 7 September 2026
 
 Code `3b779d9` and [local evidence](./LOCAL_BUILD_VERIFICATION.md) supersede hypothetical local-build statements. Live/staging execution still requires exact-target approval. The native harness lists the authoritative tested schema order: base/athlete/workout/screening/assessment/program schemas, then pooling, authority, decision gateway, sources, projections, legacy boundary, batches, review, extensions, extension gateway, catalogue, client home, governance, context review, weekly, suggestions, reassessment and catalogue admin. Do not blindly reapply this sequence to a hosted schema whose actual state has not been inspected and backed up.

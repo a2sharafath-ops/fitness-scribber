@@ -1,7 +1,7 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
-  "version": "hosted-engineering-2026-09-08",
-  "status": "hosted-engineering-checkpoint-contained-full-acceptance-open",
+  "version": "A32-2026-09-08",
+  "status": "bounded-hosted-verification-contained-full-acceptance-open",
   "currentSprint": "S6",
   "executionMode": "approved-existing-stack-synthetic-r1-r3",
   "implementationAuthorized": true,
@@ -23,7 +23,7 @@
     "sharedDatabaseWarning": "Preview does not isolate schema, RLS, functions or the global pooling_runtime row from the existing app.",
     "nextGate": "Close remaining engineering cases and external acceptance; owner manages UAT. No main/Production promotion or real catalogue publication authorized."
   },
-  "completedScope": "Preparation and owner product review recorded; Classic preserved; local R1-R3 build plus approved existing-stack backup/52-table restore, 18 additive migrations, six functions, protected Preview and listed fictional API/browser journeys. Containment and exact evidence in operations/HOSTED_BUILD_HANDOFF.md; full acceptance remains open.",
+  "completedScope": "Owner preparation/product review; Classic checkpoint; R1-R3 implementation; A32 85-table restore and corrective-migration rehearsal; six v2 Edge functions; final protected Preview and listed fictional API/browser/failure journeys; non-destructive containment. Not all 110 cases or sprint acceptance criteria are complete.",
   "priorityDefinitions": {
     "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",
     "P1": "Core R1 functionality and usability.",
@@ -40,7 +40,9 @@
     "planned": "Authorized preparation phase; dependencies/reviews still apply.",
     "in-progress": "Authorized local preparation or engineering is underway; task-specific verification and external gates may remain.",
     "draft-awaiting-review": "Preparation output complete; acceptance is pending. Not approved for implementation or live use.",
-    "awaiting-external-acceptance": "Review dossier prepared; actual required feedback/sign-off or build decision is pending. Task is not accepted/done."
+    "awaiting-external-acceptance": "Review dossier prepared; actual required feedback/sign-off or build decision is pending. Task is not accepted/done.",
+    "engineering-verified-acceptance-open": "Listed bounded engineering evidence verified; domain, full QA or participant/launch criteria may remain. Not full task acceptance.",
+    "preparation-complete-owner-reviewed": "Preparation output delivered and owner product review accepted; applicable specialist/legal/rights acceptance remains separate."
   },
   "approvalSemantics": "approvalRefs identify inputs, reviews and permissions touched by a task. Inputs/reviews may be delivered at task completion; permissions for consequential actions must precede that action. A06 precedes S1–S2, G2 plus A12 precedes S3–S5. A13–A19 require exact scope as applicable. A20/A21 separate preparation/build/enablement checkpoints.",
   "sprints": [
@@ -127,7 +129,11 @@
       "dependsOn": [],
       "approvalRefs": [],
       "status": "done",
-      "acceptance": "Backlog covers all 40 artifacts; task IDs/dependencies and approval references validate; planning files only."
+      "acceptance": "Backlog covers all 40 artifacts; task IDs/dependencies and approval references validate; planning files only.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      }
     },
     {
       "id": "FP-002",
@@ -154,7 +160,11 @@
       "acceptance": "Record actual answers, unknowns and A06 scope. Do not mark missing reviewers or unresolved facts as approved.",
       "outputs": [
         "preparation/APPROVAL_RECORD.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      }
     },
     {
       "id": "FP-101",
@@ -177,14 +187,19 @@
         "A05",
         "A06"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "PRD defines users, supported scope, non-goals, authority and measurable acceptance; traces to decisions.",
       "outputs": [
         "prd/MASTER_PRD.md"
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-102",
@@ -202,7 +217,7 @@
       "approvalRefs": [
         "A06"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Every in-scope field maps to source/form/type/scale/default/owner/date; current Supabase/local mode documented; no live data accessed.",
       "outputs": [
         "data/SOURCE_AND_PRIVACY_INVENTORY.md",
@@ -210,7 +225,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-103",
@@ -230,7 +250,7 @@
         "A06",
         "A09"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Worked cases define unknown/absent, source precedence, effective dates, conflicting/old findings and minimal health-change flow.",
       "outputs": [
         "prd/CLIENT_CONTEXT_PRD.md",
@@ -239,7 +259,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-104",
@@ -261,7 +286,7 @@
         "A09",
         "A10"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Canonical IDs/sides/units and transition matrix cover draft, review, assignment, start, resume, invalidation and authorized actors.",
       "outputs": [
         "data/VOCABULARY.md",
@@ -271,7 +296,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-105",
@@ -292,14 +322,19 @@
         "A06",
         "A09"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Defines session status separately from eligibility, all eight roles, hard versus soft rules, coverage, tie-breaks and no-candidate behaviour.",
       "outputs": [
         "prd/POOL_SELECTION_PRD.md"
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-106",
@@ -320,14 +355,19 @@
         "A06",
         "A10"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Defines time/rest/setup/side accounting, coach-selected weekly structure, dosage references and every edit/copy approval path.",
       "outputs": [
         "prd/DRAFT_AND_APPROVAL_PRD.md"
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-107",
@@ -348,7 +388,7 @@
         "A06",
         "A10"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Non-executable specifications cover desktop/mobile, missing/held/stale/unsaved states, keyboard/focus and privacy-safe explanations.",
       "outputs": [
         "ux/WORKFLOWS_AND_COPY.md",
@@ -357,7 +397,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-108",
@@ -377,7 +422,7 @@
         "A06",
         "A11"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Input/output/error contracts, versioned sources, ranking/coverage boundaries and stable ordering can be tested without JSX.",
       "outputs": [
         "engineering/ENGINE_AND_API_CONTRACT.md",
@@ -385,7 +430,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-109",
@@ -406,7 +456,7 @@
         "A10",
         "A11"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Tables/API contracts map roles and sensitive fields; direct-write bypass, transaction consistency and local-mode limits are addressed.",
       "outputs": [
         "engineering/ENGINE_AND_API_CONTRACT.md",
@@ -414,7 +464,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-110",
@@ -436,7 +491,7 @@
         "A09",
         "A11"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Plan maps old exercise refs/overrides, legacy ambiguity, historical blocks, schema preconditions and measurable backup/restore checks. No migration executed.",
       "outputs": [
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
@@ -444,7 +499,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-111",
@@ -466,7 +526,7 @@
         "A10",
         "A11"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Matrix covers manual/voice/template/copy/athlete flows; defines invalidation, concurrency, failed save, offline, feature flags and performance budgets.",
       "outputs": [
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
@@ -474,7 +534,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-112",
@@ -495,7 +560,7 @@
       "approvalRefs": [
         "A06"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Required behavioural cases link to requirement IDs; domain-dependent expected selections remain draft pending reviewed content.",
       "outputs": [
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
@@ -504,7 +569,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-113",
@@ -529,7 +599,7 @@
         "A15",
         "A16"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Propose measurable quality/stop criteria and minimized telemetry; record jurisdiction/consent/reviewer questions. No pilot or client contact.",
       "outputs": [
         "quality/PILOT_AND_PRIVACY_ACCEPTANCE.md",
@@ -539,7 +609,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-114",
@@ -584,7 +659,11 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      }
     },
     {
       "id": "FP-115",
@@ -608,7 +687,7 @@
         "A06",
         "A07"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Distinguish product/content, individual clinical and coach assignment approvals; define reviewer roles without assuming credentials or blanket specialty coverage.",
       "outputs": [
         "preparation/APPROVAL_RECORD.md",
@@ -621,7 +700,12 @@
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-116",
@@ -646,7 +730,7 @@
         "A10",
         "A16"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Separate original drafts preserve specific consent, actual client evidence, withdrawal, recipient limits and publication blockers; no compliance claim or live insertion.",
       "outputs": [
         "policies/README.md",
@@ -662,7 +746,12 @@
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-117",
@@ -687,7 +776,7 @@
         "A16",
         "A19"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Retain all requested market targets; distinguish establishment and client markets; identify country/state privacy/clinical/transfer gaps and staged activation decisions.",
       "outputs": [
         "policies/REGIONAL_REVIEW_MATRIX.md",
@@ -702,7 +791,12 @@
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-201",
@@ -724,7 +818,7 @@
         "A06",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Every candidate source has applicability, version, attribution and rights status; uncertain rights stay unresolved/quarantined.",
       "outputs": [
         "preparation/REVIEWERS_AND_LAUNCH_SCOPE.md",
@@ -734,7 +828,12 @@
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-202",
@@ -756,7 +855,7 @@
         "A06",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Structured candidate records cover agreed scenarios with stable IDs, complete equipment/roles/requirements and draft status. No live publish.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
@@ -766,7 +865,12 @@
         "catalogues/SCHEMA_AND_VALIDATION.md",
         "catalogues/REVIEW_AND_MAINTENANCE.md"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-203",
@@ -788,7 +892,7 @@
         "A07",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Each protocol describes administration, competence, scales, side, missingness, limitations and comparable reassessment criteria.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
@@ -796,7 +900,12 @@
         "catalogues/rules-and-templates.draft.json",
         "catalogues/PROTOCOL_ADMINISTRATION.md"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-204",
@@ -817,7 +926,7 @@
         "A07",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Mappings preserve laterality, label hypotheses, deduplicate needs and identify contradictory/unsupported inferences.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
@@ -825,7 +934,12 @@
         "catalogues/rules-and-templates.draft.json",
         "catalogues/finding-mappings.draft.json"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-205",
@@ -847,7 +961,7 @@
         "A06",
         "A07"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Rules reference the proposed instrument/version and competent authority; explicit hold/modify/review paths cover changed health and old clearance. Remain unapproved until reviewed.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
@@ -855,7 +969,12 @@
         "catalogues/rules-and-templates.draft.json",
         "data/MODULE_REQUIREMENTS.md"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-206",
@@ -878,14 +997,19 @@
         "A06",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Coach-selected structures and dose bounds fit supported goals/ability; no invented maxima, age or loads; lifestyle context is distinct from daily adaptation.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
       "outputs": [
         "catalogues/rules-and-templates.draft.json"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-207",
@@ -907,14 +1031,19 @@
         "A06",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Alternatives retain relevant needs/side and require fresh checks; session templates count rest/setup and return explicit time/coverage gaps.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
       "outputs": [
         "catalogues/rules-and-templates.draft.json"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-208",
@@ -937,7 +1066,7 @@
         "A10",
         "A16"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Each status/action has a stable code, source reference and plain-language audience variant without raw medical notes or unsupported claims.",
       "outputs": [
         "ux/WORKFLOWS_AND_COPY.md",
@@ -946,7 +1075,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-209",
@@ -1004,7 +1138,11 @@
         "catalogues/sources-reasons-vocabulary.draft.json",
         "catalogues/SOURCE_RIGHTS_AND_LEGACY_AUDIT.md"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      }
     },
     {
       "id": "FP-210",
@@ -1028,7 +1166,7 @@
         "A08",
         "A10"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Controlled review/version/publish/retire workflow has change owners and reapproval triggers; full admin CMS not required.",
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
@@ -1036,7 +1174,12 @@
         "catalogues/REVIEW_AND_MAINTENANCE.md",
         "catalogues/SCHEMA_AND_VALIDATION.md"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-211",
@@ -1112,7 +1255,11 @@
         "preparation/OPEN_DECISIONS.md",
         "preparation/PACKAGE_MANIFEST.json"
       ],
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      }
     },
     {
       "id": "FP-212",
@@ -1142,7 +1289,7 @@
         "A07",
         "A08"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Coverage includes all levels and scoped clinical/adaptive modules; unsupported cells explicit; draft mappings not approved prescriptions; specialist evidence traceable.",
       "outputs": [
         "catalogues/COVERAGE_DRAFT.md",
@@ -1156,7 +1303,12 @@
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-213",
@@ -1184,7 +1336,7 @@
         "A10",
         "A16"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "Define scoped instructions, supervision/review limits and meaningful coach interpretation; sharing consent separate from clearance; representative authority verified where applicable.",
       "outputs": [
         "catalogues/COVERAGE_DRAFT.md",
@@ -1198,7 +1350,12 @@
       ],
       "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending"
+      "acceptanceStatus": "pending",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      },
+      "productReview": "Owner six-PRD/twelve-catalogue review accepted as-is, 2026-09-07; other exact professional evidence not inferred."
     },
     {
       "id": "FP-214",
@@ -1238,7 +1395,11 @@
       ],
       "preparationStatus": "complete",
       "acceptanceStatus": "pending",
-      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed."
+      "progressNote": "FS-POOL-S1S2-0.2 preparation completed under approved brief. Applicable product/professional acceptance remains pending; no real sign-off or application build is claimed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false
+      }
     },
     {
       "id": "FP-301",
@@ -1284,7 +1445,12 @@
         "A23",
         "A28",
         "A29"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-302",
@@ -1332,7 +1498,12 @@
         "A23",
         "A28",
         "A29"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-303",
@@ -1353,7 +1524,7 @@
         "A12",
         "A13"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Catalogue/restriction/context/decision/approval records persist in the authorized test environment with documented ownership and compatible old data.",
       "preparationOutputs": [
         "engineering/ENGINE_AND_API_CONTRACT.md",
@@ -1382,7 +1553,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-304",
@@ -1434,7 +1610,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-305",
@@ -1485,7 +1666,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-306",
@@ -1509,7 +1695,7 @@
         "A12",
         "A13"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Authorized test backend rejects cross-tenant and unauthorized athlete writes, bypassed holds and inconsistent approvals; local-mode limitations remain explicit.",
       "preparationOutputs": [
         "engineering/ENGINE_AND_API_CONTRACT.md",
@@ -1539,7 +1725,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-307",
@@ -1587,7 +1778,12 @@
         "A23",
         "A28",
         "A29"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-401",
@@ -1640,7 +1836,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-402",
@@ -1692,7 +1893,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-403",
@@ -1741,7 +1947,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-404",
@@ -1793,7 +2004,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-405",
@@ -1850,7 +2066,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-501",
@@ -1872,7 +2093,7 @@
         "A10",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Coach can inspect categories/statuses, source dates, why/why-not, missing data and candidates; role/side meaning accessible beyond colour.",
       "preparationOutputs": [
         "prd/POOL_SELECTION_PRD.md",
@@ -1901,7 +2122,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-502",
@@ -1924,7 +2150,7 @@
         "A10",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Draft-review-edit-approve flow preserves existing workouts, shows changed dosage/time, rechecks substitutions and stores actual approval only after successful validation/save.",
       "preparationOutputs": [
         "prd/DRAFT_AND_APPROVAL_PRD.md",
@@ -1954,7 +2180,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-503",
@@ -1979,7 +2210,7 @@
         "A10",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Coach/athlete health-change paths distinguish unknown/current report and applicable review/hold without implementing R2 wellness dosage logic.",
       "preparationOutputs": [
         "prd/CLIENT_CONTEXT_PRD.md",
@@ -2011,7 +2242,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-504",
@@ -2062,7 +2298,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Positive cross-client/template/copy-last browser variations remain."
+      }
     },
     {
       "id": "FP-505",
@@ -2115,7 +2356,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Browser extension-review loss, forced expiry, quota and account-switch variations remain."
+      }
     },
     {
       "id": "FP-506",
@@ -2168,7 +2414,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Physical-device, OS zoom and real screen-reader/participant checks remain."
+      }
     },
     {
       "id": "FP-507",
@@ -2222,7 +2473,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-601",
@@ -2271,7 +2527,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "14 partial / 10 external cases remain; no complete-suite or UAT certificate."
+      }
     },
     {
       "id": "FP-602",
@@ -2303,7 +2564,12 @@
       "localImplementationPermission": "approved-under-A23",
       "remainingWork": [
         "Actual task-specific professional/policy/output acceptance remains; local build approval is already recorded."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-603",
@@ -2342,7 +2608,12 @@
       "hostedCompletionSummary": "Approved A30 baseline restore matched all 52 tables; two-pass 18-migration rehearsal, atomic hosted application and preservation checks passed. Feature-off and original-app reads plus linked stop passed; new candidate stopped-status defects corrected.",
       "remainingWork": [
         "Broader legacy/client parity and managed Auth/REST/Edge/provider restore beyond native relational recovery; off-device backup destination/authority not provided."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Same-device relational restore verified; full managed-service/off-device disaster recovery not executed."
+      }
     },
     {
       "id": "FP-604",
@@ -2371,7 +2642,12 @@
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
       "remainingWork": [
         "Owner manages coach access and human UAT. Existing Preview protection preserved; no invite, membership change or participant sign-off performed. Coordinate a specific test window and valid fictional authority before feature-on UAT."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-605",
@@ -2431,7 +2707,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-606",
@@ -2487,7 +2768,12 @@
       ],
       "remainingWork": [
         "G3 cannot pass until FP-602/603/604 and exact release permissions have evidence."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-607",
@@ -2518,7 +2804,12 @@
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md"
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
-      "hostedCompletionSummary": "Implementation branch pushed, additive shared-test migration and protected Preview deployed under A30. Main/Production unchanged. This is not the task's pilot release."
+      "hostedCompletionSummary": "Implementation branch pushed, additive shared-test migration and protected Preview deployed under A30. Main/Production unchanged. This is not the task's pilot release.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Pilot/Production action remains excluded."
+      }
     },
     {
       "id": "FP-608",
@@ -2549,7 +2840,12 @@
         "catalogues/REVIEW_AND_MAINTENANCE.md",
         "operations/MAINTENANCE_AND_REVIEW_PLAN.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Pilot/Production action remains excluded."
+      }
     },
     {
       "id": "FP-701",
@@ -2590,7 +2886,12 @@
         "quality/catalogue-coverage-and-cases.draft.json",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed."
+      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-702",
@@ -2632,7 +2933,12 @@
       "localImplementationPermission": "approved-under-A23",
       "remainingWork": [
         "Actual task-specific professional/policy/output acceptance remains; local build approval is already recorded."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-703",
@@ -2687,7 +2993,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-704",
@@ -2740,7 +3051,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "14 partial / 10 external cases remain; no complete-suite or UAT certificate."
+      }
     },
     {
       "id": "FP-705",
@@ -2778,7 +3094,12 @@
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Pilot/Production action remains excluded."
+      }
     },
     {
       "id": "FP-801",
@@ -2819,7 +3140,12 @@
         "quality/catalogue-coverage-and-cases.draft.json",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed."
+      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed.",
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-802",
@@ -2854,7 +3180,12 @@
       "localImplementationPermission": "approved-under-A23",
       "remainingWork": [
         "Actual task-specific professional/policy/output acceptance remains; local build approval is already recorded."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-803",
@@ -2904,7 +3235,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Implemented or prepared portion verified; exact domain/policy/rights acceptance remains."
+      }
     },
     {
       "id": "FP-804",
@@ -2927,7 +3263,7 @@
         "A13",
         "A21"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Weekly/time/goal constraints and explicit reassessment evidence drive reviewable revisions; incomplete findings do not resolve; completed/approved history preserved.",
       "preparationOutputs": [
         "prd/PROGRESSION_PLANNING_PRD.md",
@@ -2959,7 +3295,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-805",
@@ -3019,7 +3360,12 @@
       ],
       "remainingWork": [
         "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "14 partial / 10 external cases remain; no complete-suite or UAT certificate."
+      }
     },
     {
       "id": "FP-B01",
@@ -3037,7 +3383,12 @@
       "acceptance": "Record exact commit, tracked/untracked changes, app/build/runtime versions, safe file inventory and disk capacity; do not expose secrets.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B02",
@@ -3058,7 +3409,12 @@
       "acceptance": "Inspect for secrets and sensitive exports before staging; commit scoped source/docs and create a non-moving Classic tag; preserve all user changes. No remote push.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B03",
@@ -3078,7 +3434,12 @@
       "acceptance": "Create source/docs archive plus Git bundle outside the implementation checkout in an ignored recovery directory; manifest/checksums verified. Exclude secrets, client exports, dependencies and generated caches. Same-device copy is not off-device disaster protection.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B04",
@@ -3099,7 +3460,12 @@
       "acceptance": "Record environment-variable names only, ignored-file categories, assets, local browser-storage use and hosted dependencies; identify gaps. No secret or real-client-data export. Document secure owner-managed configuration recovery.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B05",
@@ -3121,7 +3487,12 @@
       "acceptance": "Run existing build/lint and record existing failures; exercise critical workflows only in a synthetic isolated profile with hosted connections disabled.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B06",
@@ -3143,7 +3514,12 @@
       "acceptance": "Restore verified archive/bundle to a new exact directory, reconstruct dependencies, compare manifest and run baseline checks without overwriting the working project.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B07",
@@ -3163,7 +3539,12 @@
       "acceptance": "Document database, storage objects, auth/config and browser-local-data coverage, destinations, retention and post-backup-write reconciliation. No hosted backup executed under local permission; live recovery remains unverified until separately authorized.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B08",
@@ -3185,7 +3566,12 @@
       "acceptance": "Use approved local database/runtime; test owning coach/client permissions and synthetic backup/restore. Failure or unavailable backend leaves backend verification incomplete, never substitutes a mocked permission test.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B09",
@@ -3207,7 +3593,12 @@
       "acceptance": "Map all changed entry points, R1/R2/R3 off defaults, schema compatibility and preservation of new records when disabled. Record explicit no-destructive-restore boundaries.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B10",
@@ -3234,7 +3625,12 @@
       "acceptance": "Code archive and restore rehearsal pass; adequate storage/config coverage known; exact local runtime access resolved; sign-off gaps remain disabled. Record go/no-go for local implementation only.",
       "evidence": [
         "operations/LOCAL_EXECUTION_LOG.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     },
     {
       "id": "FP-B11",
@@ -3270,7 +3666,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Candidate feature-off/Stop/history compatibility verified; immutable Classic cannot be assumed to render every new state."
+      }
     },
     {
       "id": "FP-B12",
@@ -3304,7 +3705,12 @@
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
         "quality/HOSTED_ACCEPTANCE_MATRIX.md"
-      ]
+      ],
+      "a32Review": {
+        "report": "operations/A32_ENGINEERING_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
+      }
     }
   ],
   "preparationAuthorized": true,
@@ -3334,7 +3740,7 @@
     "A12": "local-build-authorized-under-A23-professional-release-gates-pending"
   },
   "preparationStatusDefinition": "Complete refers only to independently authorable local S1/S2 preparation; acceptanceStatus separately preserves actual review/gate requirements.",
-  "currentPhase": "hosted-verification-handoff-r1-r2-r3",
+  "currentPhase": "A32 evidence handoff; remaining acceptance and release gates open",
   "extendedPreparationApproval": {
     "record": "preparation/FULL_PREPARATION_APPROVAL.md",
     "A20_preparation": true,
@@ -3391,18 +3797,18 @@
     "productionEnabled": false,
     "codeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847"
   },
-  "hostedVerificationReport": "operations/HOSTED_BUILD_HANDOFF.md",
+  "hostedVerificationReport": "operations/A32_ENGINEERING_VERIFICATION.md",
   "hostedAcceptanceMatrix": "quality/hosted-acceptance-matrix.json",
   "hostedVerificationSummary": {
-    "testedCodeCommit": "bb513c2c9ae8e55826ab082d3b6b50151d653fd1",
-    "nodeTests": 132,
-    "nodePassed": 132,
-    "source": "quality/hosted-build-verification.json",
+    "testedCodeCommit": "3b9541543e75c6dbff7f4c5b6ffdb64fd033899b",
+    "nodeTests": 163,
+    "nodePassed": 163,
+    "source": "quality/a32-engineering-verification.json",
     "acceptance": {
       "mapped": 110,
-      "passedEngineeringInvariant": 57,
-      "partial": 43,
-      "blockedExternalScope": 10,
+      "passed-engineering-invariant": 86,
+      "blocked-external-scope": 10,
+      "partial": 14,
       "complete": false
     },
     "releaseAccepted": false

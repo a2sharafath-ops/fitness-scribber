@@ -1,0 +1,122 @@
+{
+  "version": "A32-2026-09-08",
+  "scope": "Bounded fictional engineering verification, not full acceptance or Production release",
+  "applicationCommit": "3b9541543e75c6dbff7f4c5b6ffdb64fd033899b",
+  "preview": {
+    "passed": true,
+    "recordedAt": "2026-09-08T14:12:55.443Z",
+    "codeCommit": "3b9541543e75c6dbff7f4c5b6ffdb64fd033899b",
+    "deploymentId": 6329365167,
+    "vercelDeployment": "8r263XgqahjGfYmhNm1xXryNQLbL",
+    "url": "https://fitness-scribber-kq6i-n0dg6r4zw-cureocity1.vercel.app",
+    "draftId": 61,
+    "assignmentId": 21,
+    "zeroAndStopPreserved": true,
+    "staleTwoTabApprovalDenied": true,
+    "racingDraftId": 62,
+    "newGeneration": 25,
+    "scope": "Actual two same-owner browser tabs: report in tab B commits before stale approval in tab A. Separate hosted API tests exercised simultaneous network races."
+  },
+  "tests": {
+    "node": 163,
+    "nodePassed": 163,
+    "denoHttp": 6,
+    "denoHttpPassed": 6,
+    "nativeSuites": 16,
+    "nativeSuitesPassed": 16
+  },
+  "functions": {
+    "poolingFunctions": 6,
+    "version": 2,
+    "verifyJwt": true,
+    "adminUsersVersion": 3,
+    "adminUsersUnchanged": true
+  },
+  "backup": {
+    "sha256": "d83d1ea90a8a8894523fd26aee5c4ebc323cf082e2499616b0cd972ae73c05ee",
+    "bytes": 757692,
+    "tables": 85,
+    "allRowFingerprintsMatch": true
+  },
+  "preservation": {
+    "passed": true,
+    "recordedAt": "2026-09-08T14:14:44.000Z",
+    "baselineTables": 85,
+    "baselineRows": 815,
+    "allBaselineRowsPreserved": true,
+    "addedRows": 188,
+    "addedPublicRows": 182,
+    "authUsersCreated": 3,
+    "previewBuildsReserved": 2,
+    "flags": {
+      "r1": false,
+      "r2": false,
+      "r3": false,
+      "singleton": true
+    },
+    "writes": 380,
+    "workspaces": 4,
+    "realPublished": 0,
+    "storageObjects": 0,
+    "originalCoaches": 2
+  },
+  "retirement": {
+    "passed": true,
+    "recordedAt": "2026-09-08T14:13:57.225Z",
+    "newTestUsersBanned": 3,
+    "originalCoachesAvailable": 2,
+    "allNewWorkspacesRevoked": true,
+    "historyRetained": true,
+    "globalFlagsOff": true,
+    "endsAt": "2026-09-15T10:37:56.492+00:00"
+  },
+  "resources": {
+    "newAuthUsers": 3,
+    "previewBuildsReserved": 3,
+    "rowsReserved": 471,
+    "harnessRequests": 188,
+    "proxyRequests": 486,
+    "proxyWriteRequests": 274,
+    "storageObjects": 0,
+    "additionalSpendingINR": 0
+  },
+  "transport": {
+    "passed": true,
+    "at": "2026-09-08T14:01:20.328Z",
+    "droppedResponses": 2,
+    "offlineRequests": 12,
+    "proxyRequests": 377,
+    "proxyWriteRequests": 219,
+    "rpcLatency": {
+      "samples": 206,
+      "medianMs": 514,
+      "p95Ms": 751,
+      "scope": "Mixed warm/cold sequential browser sample including proxy overhead; not a load or SLA certificate"
+    },
+    "manualDraftIds": [
+      53,
+      56,
+      58,
+      59
+    ]
+  },
+  "acceptance": {
+    "passed-engineering-invariant": 86,
+    "blocked-external-scope": 10,
+    "partial": 14,
+    "complete": false
+  },
+  "classic": {
+    "tag": "fitness-scribber-classic-2026-09-07",
+    "commit": "08ac0673d6e1d67ccd9fee2ffc5995074bcbf162",
+    "checksumsPassed": true,
+    "bundleVerified": true,
+    "offDevice": false
+  },
+  "production": {
+    "commit": "5de01b4e960e03e28d4a8b22527937103de10ad6",
+    "deploymentId": 6119996170,
+    "unchanged": true
+  },
+  "recordedAt": "2026-09-08T14:21:37.513Z"
+}

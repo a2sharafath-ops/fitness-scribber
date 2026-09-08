@@ -1,11 +1,11 @@
 {
-  "version": "A30-2026-09-08",
+  "version": "A32-2026-09-08",
   "acceptanceComplete": false,
   "productionReady": false,
   "counts": {
-    "partial": 43,
-    "passed-engineering-invariant": 57,
-    "blocked-external-scope": 10
+    "passed-engineering-invariant": 86,
+    "blocked-external-scope": 10,
+    "partial": 14
   },
   "scope": "Engineering evidence only. Passed means the stated invariant at its listed test layer, not clinical/participant acceptance or every hosted UI variation.",
   "cases": [
@@ -14,24 +14,38 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Empty legacy movement findings",
       "expected": "No assessed-absent entries or resolved needs fabricated",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "context.test.js",
-        "sources.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Exact empty legacy movement dataset still needs accepted-case execution."
+      "note": "Exact empty movement-source fixture stays missing, never assessed absent.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "context.test.js",
+          "source.test.js"
+        ],
+        "note": "Exact empty legacy movement dataset still needs accepted-case execution."
+      }
     },
     {
       "id": "TC-002",
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Untouched lifestyle 4/4/Moderate and wellness 5/3/3/3",
       "expected": "Legacy ambiguity retained; no automatic confirmed readiness/dose",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "context.test.js",
-        "sources.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Untouched lifestyle and daily-slider combinations not all replayed through the hosted UI."
+      "note": "Exact untouched lifestyle and wellness defaults supply no confirmed observations. UI slider permutations are not independently certified.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "context.test.js",
+          "source.test.js"
+        ],
+        "note": "Untouched lifestyle and daily-slider combinations not all replayed through the hosted UI."
+      }
     },
     {
       "id": "TC-003",
@@ -62,11 +76,18 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Future-effective assessment injected into earlier session",
       "expected": "Excluded from source candidates; reason trace identifies date mismatch",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "context.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Future-effective input rejected; a dedicated date-mismatch explanation is not emitted by this resolver."
+      "note": "Future-effective known input emits source_date_mismatch; future-recorded input is excluded from the historical cutoff.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "context.test.js"
+        ],
+        "note": "Future-effective input rejected; a dedicated date-mismatch explanation is not emitted by this resolver."
+      }
     },
     {
       "id": "TC-006",
@@ -139,12 +160,19 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Two findings map to same confirmed need",
       "expected": "Evidence retained; duplicate drill count/score not inflated",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js",
-        "extensions.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Coverage and signal deduplication exist; exact two-findings scoring scenario needs a dedicated fixture."
+      "note": "Exact duplicate findings and three-candidate incremental-coverage fixture pass; uncovered need wins over duplicate coverage and pins.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js",
+          "extensions.test.js"
+        ],
+        "note": "Coverage and signal deduplication exist; exact two-findings scoring scenario needs a dedicated fixture."
+      }
     },
     {
       "id": "TC-013",
@@ -220,24 +248,38 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Missing/old/future or differently named load reference",
       "expected": "No fabricated numeric load or substring transfer; reviewed alternative or incomplete dose",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js",
-        "context.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Wrong-variant/missing method checks passed; complete stale/future load-source combinations remain."
+      "note": "Dedicated stale, future, wrong-variant and unsupported-method load-source fixtures all remain unresolved.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js",
+          "context.test.js"
+        ],
+        "note": "Wrong-variant/missing method checks passed; complete stale/future load-source combinations remain."
+      }
     },
     {
       "id": "TC-020",
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Single rep saved by legacy default",
       "expected": "Not proof of verified maximal test; source/method ambiguity retained",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "sources.test.js",
-        "selection.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "No unconfirmed load authority; exact default one-rep legacy import still needs acceptance fixture."
+      "note": "A legacy one-rep default remains ambiguous and cannot supply confirmed maximal-load authority.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "source.test.js",
+          "selection.test.js"
+        ],
+        "note": "No unconfirmed load authority; exact default one-rep legacy import still needs acceptance fixture."
+      }
     },
     {
       "id": "TC-021",
@@ -255,11 +297,19 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Budget cannot fit required dose/rest/assistance",
       "expected": "Visible gap/coach choice; no silent limit/rest reduction",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js"
+        "completion-cases.test.js",
+        "ui.jsx"
       ],
-      "note": "Over-budget work is blocked; explicit numeric shortfall and coach alternatives are not fully verified."
+      "note": "Exact 1900/1800 comparison emits 100-second shortfall and coach alternatives; browser rendered it without reducing required rest/support.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js"
+        ],
+        "note": "Over-budget work is blocked; explicit numeric shortfall and coach alternatives are not fully verified."
+      }
     },
     {
       "id": "TC-023",
@@ -268,23 +318,40 @@
       "expected": "Fresh draft/context/IDs; no approval/private clinical notes copied",
       "status": "partial",
       "evidence": [
-        "migration.test.js",
-        "decision.test.js",
-        "native-flow.mjs"
+        "verification-hosted.mjs",
+        "verification-final-checks.mjs",
+        "builder-state.test.js"
       ],
-      "note": "Draft/copy boundary exists; not every hosted copy/template/cross-client UI path executed."
+      "note": "Actual manual/local-parser/tomorrow/bulk hosted UI and six API import boundaries passed. Positive cross-client/template/copy-last UI permutations still need an expanded accepted fixture set.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "migration.test.js",
+          "decision.test.js",
+          "native-flow.mjs"
+        ],
+        "note": "Draft/copy boundary exists; not every hosted copy/template/cross-client UI path executed."
+      }
     },
     {
       "id": "TC-024",
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Manual or voice item injected outside pool UI",
       "expected": "Same metadata/eligibility checks; cannot assign unmapped item by alternate path",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "decision.test.js",
-        "legacy-boundary.sql"
+        "verification-final-checks.mjs",
+        "parser-merge.test.js"
       ],
-      "note": "Unmapped manual input blocked; paid AI and microphone/voice-provider paths not executed."
+      "note": "Actual local typed-parser import saved as unassigned; unknown identity blocked. Microphone and external AI are explicitly unavailable in pooling mode, with no provider request.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "decision.test.js",
+          "legacy-boundary.sql"
+        ],
+        "note": "Unmapped manual input blocked; paid AI and microphone/voice-provider paths not executed."
+      }
     },
     {
       "id": "TC-025",
@@ -338,12 +405,20 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "New report during approval/start",
       "expected": "Operation conflicts/blocks or assignment invalidates before start; report not lost",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "native-concurrency.mjs",
-        "hosted stale-editor check"
+        "verification-hosted.mjs",
+        "verification-browser-receipt.mjs"
       ],
-      "note": "Database race passed locally; no network-interleaved hosted two-tab race certificate."
+      "note": "Two real authenticated API sessions raced report versus approval; final Preview two-tab stale approval denied after another tab reported a concern.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "native-concurrency.mjs",
+          "hosted stale-editor check"
+        ],
+        "note": "Database race passed locally; no network-interleaved hosted two-tab race certificate."
+      }
     },
     {
       "id": "TC-030",
@@ -373,23 +448,38 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Save fails, timeout after commit, duplicate retry",
       "expected": "Failed/unknown distinguished; same key resolves once; no false success/duplicate assignment",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "operations.test.js",
-        "hosted-r1.mjs"
+        "verification-final-checks.mjs"
       ],
-      "note": "Exact retry and journal behavior passed; browser response loss after commit not injected."
+      "note": "Browser response dropped after real hosted commit for actual and draft: automatic same-key retry yielded exactly one row each.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "operations.test.js",
+          "hosted-r1.mjs"
+        ],
+        "note": "Exact retry and journal behavior passed; browser response loss after commit not injected."
+      }
     },
     {
       "id": "TC-033",
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Two coach tabs approve different revisions",
       "expected": "Expected-version conflict; no silent overwrite or stale approval",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "native-concurrency.mjs"
+        "verification-hosted.mjs",
+        "verification-browser-receipt.mjs"
       ],
-      "note": "Atomic version guards passed; actual two-coach-browser-tab interleaving not executed."
+      "note": "Same-owner API session races plus two actual Preview tabs prove stale-generation denial; no two-person UAT is claimed.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "native-concurrency.mjs"
+        ],
+        "note": "Atomic version guards passed; actual two-coach-browser-tab interleaving not executed."
+      }
     },
     {
       "id": "TC-034",
@@ -456,12 +546,19 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Missing blocks, mirrored max/assessment and prefilled target loads",
       "expected": "No added performed work/double evidence or assumed observed load",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "migration.test.js",
-        "extensions.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Zero and lineage preserved; exact mirrored legacy assessment/max fixture not fully integrated."
+      "note": "Exact mirrored lineage counts once; conflicting mirror counts zero; explicit zero remains retained.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "migration.test.js",
+          "extensions.test.js"
+        ],
+        "note": "Zero and lineage preserved; exact mirrored legacy assessment/max fixture not fully integrated."
+      }
     },
     {
       "id": "TC-040",
@@ -470,10 +567,18 @@
       "expected": "Honest unsaved/draft-only/unsupported status; no permission escalation or old bypass",
       "status": "partial",
       "evidence": [
-        "operations.test.js",
-        "hosted-containment.mjs"
+        "verification-final-checks.mjs",
+        "operations.test.js"
       ],
-      "note": "Quota/corrupt storage contract and server-off passed; browser offline network transitions not injected."
+      "note": "Actual browser simulated transport outage preserved pending actual and independent Stop; reconnect/retry/reload passed. Full browser quota/account-switch/forced-expiry permutations remain.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "operations.test.js",
+          "hosted-containment.mjs"
+        ],
+        "note": "Quota/corrupt storage contract and server-off passed; browser offline network transitions not injected."
+      }
     },
     {
       "id": "TC-041",
@@ -482,9 +587,16 @@
       "expected": "Critical status/side/units/actions usable without colour/drag/tooltip; no prechecked optional consent",
       "status": "partial",
       "evidence": [
-        "browser desktop/390/768 checks"
+        "ui.jsx"
       ],
-      "note": "Native date keyboard entry, labels and reflow checked; full screen-reader/zoom/real-device participant acceptance remains."
+      "note": "390px budget/diff container stayed 390px with 358px table and 200% text-size fixture; table row/column scopes verified. Not OS zoom, screen-reader, physical-device or participant certification.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "browser desktop/390/768 checks"
+        ],
+        "note": "Native date keyboard entry, labels and reflow checked; full screen-reader/zoom/real-device participant acceptance remains."
+      }
     },
     {
       "id": "TC-042",
@@ -529,24 +641,38 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Baseline full gym, current hotel/no band/assistance unavailable",
       "expected": "Session-specific inventory/conditions govern; lost equipment invalidates affected choice",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js",
-        "sources.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Session-specific inventory required; complete gym-to-hotel/assistance scenario remains."
+      "note": "Exact fictional hotel inventory/assistance gate and per-session inventory mismatch fixtures pass; no accepted real exercise is inferred.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js",
+          "source.test.js"
+        ],
+        "note": "Session-specific inventory required; complete gym-to-hotel/assistance scenario remains."
+      }
     },
     {
       "id": "TC-046",
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Same semantic input in different array orders/locale/device time",
       "expected": "Same semantic output and reason order; operational IDs/times not selection dependencies",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "context.test.js",
-        "selection.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Canonical determinism passed; full locale/device/order permutation suite remains."
+      "note": "Eight catalogue/dose/manifest order permutations and reversed observation order replay identically. Physical locale/device parity is a separate acceptance gate.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "context.test.js",
+          "selection.test.js"
+        ],
+        "note": "Canonical determinism passed; full locale/device/order permutation suite remains."
+      }
     },
     {
       "id": "R2-T01",
@@ -565,12 +691,19 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Baseline HHQ stress Moderate; untouched daily stress slider",
       "expected": "No numeric conversion or confirmed current stress",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "context.test.js",
-        "sources.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "No scale/default authority; exact lifestyle/slider UI combination remains."
+      "note": "Exact legacy lifestyle/daily defaults never become confirmed source authority.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "context.test.js",
+          "source.test.js"
+        ],
+        "note": "No scale/default authority; exact lifestyle/slider UI combination remains."
+      }
     },
     {
       "id": "R2-T03",
@@ -646,23 +779,38 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Fictional allowed load at most 48 kg; available 45/50 kg",
       "expected": "Never select 50; choose 45 only if accepted lower bound/rounding allows, else gap",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "extensions.test.js",
-        "selection.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Bounds guard passed; exact 45/50 inventory-rounding fixture not completed."
+      "note": "Fictional maximum 48 with 45/50 inventory cannot round to 50; exact admitted inventory is required.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "extensions.test.js",
+          "selection.test.js"
+        ],
+        "note": "Bounds guard passed; exact 45/50 inventory-rounding fixture not completed."
+      }
     },
     {
       "id": "R2-T10",
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Budget 1,800 s; required work/rest/setup 1,900 s",
       "expected": "Required 100 s gap remains after optional omission",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js"
+        "completion-cases.test.js",
+        "ui.jsx"
       ],
-      "note": "Budget gate passed; explicit 100-second deficit display incomplete."
+      "note": "Exact 100-second deficit is visible with alternatives; no hidden rest/dose trimming.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js"
+        ],
+        "note": "Budget gate passed; explicit 100-second deficit display incomplete."
+      }
     },
     {
       "id": "R2-T11",
@@ -691,12 +839,21 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Proposal changes reps, side and total duration",
       "expected": "Diff exposes all three fields and sources; no hidden material change",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "review.test.js",
-        "hosted-r2.mjs"
+        "numerical.test.js",
+        "ui.jsx",
+        "verification-hosted.mjs"
       ],
-      "note": "Full JSON proposal/diff retained; exact reps+side+duration UX case remains."
+      "note": "Before/after full prescription and derived duration supplied by v2 hosted proposal; repetition/side/time table verified separately in isolated browser fixture.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "review.test.js",
+          "hosted-r2.mjs"
+        ],
+        "note": "Full JSON proposal/diff retained; exact reps+side+duration UX case remains."
+      }
     },
     {
       "id": "R2-T14",
@@ -715,11 +872,18 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "New report commits after preview and before approval",
       "expected": "Stale transaction rejected; no partial assignment",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "native-concurrency.mjs"
+        "verification-hosted.mjs"
       ],
-      "note": "Local atomic context-race proof; hosted network race remains."
+      "note": "Hosted report/approval and daily-versus-weekly source races retain current-source authority.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "native-concurrency.mjs"
+        ],
+        "note": "Local atomic context-race proof; hosted network race remains."
+      }
     },
     {
       "id": "R2-T16",
@@ -741,22 +905,37 @@
       "expected": "Query/retry same operation key; one assignment",
       "status": "partial",
       "evidence": [
-        "operations.test.js",
-        "hosted-r1.mjs"
+        "verification-hosted.mjs",
+        "verification-final-checks.mjs"
       ],
-      "note": "Same-key receipt contract passed; browser response-loss test remains."
+      "note": "Hosted exact daily-acceptance retry passed. Browser dropped responses were actual/draft saves, not the extension-review response itself.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "operations.test.js",
+          "hosted-r1.mjs"
+        ],
+        "note": "Same-key receipt contract passed; browser response-loss test remains."
+      }
     },
     {
       "id": "R2-T18",
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Offline cached proposal and client requests resume",
       "expected": "No authoritative resume; pending reports/actuals labelled accurately",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "execution.test.js",
-        "operations.test.js"
+        "verification-final-checks.mjs"
       ],
-      "note": "Offline/authority contract passed; actual browser offline resume test remains."
+      "note": "Actual runner browser outage/reconnect prevents resumed authority while exact pending actual and Stop reconcile. Physical network testing is not claimed.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "execution.test.js",
+          "operations.test.js"
+        ],
+        "note": "Offline/authority contract passed; actual browser offline resume test remains."
+      }
     },
     {
       "id": "R2-T19",
@@ -821,12 +1000,19 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Default one-rep strength entry, no method evidence",
       "expected": "Not a tested max or sufficient progression basis",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "sources.test.js",
-        "selection.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Unconfirmed method rejected; exact one-rep legacy progression fixture remains."
+      "note": "Dedicated legacy single-rep ambiguity fixture cannot authorize progression loading.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "source.test.js",
+          "selection.test.js"
+        ],
+        "note": "Unconfirmed method rejected; exact one-rep legacy progression fixture remains."
+      }
     },
     {
       "id": "R3-T05",
@@ -879,12 +1065,19 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Fictional cap 42 kg; equipment offers 40/45 kg",
       "expected": "Never round to 45; retain/review or gap as accepted policy specifies",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "extensions.test.js",
-        "selection.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Bounded loading passed; exact 40/45 kg inventory cap case remains."
+      "note": "Exact fictional 42kg cap with 40/45 inventory refuses unavailable 42 and excessive 45.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "extensions.test.js",
+          "selection.test.js"
+        ],
+        "note": "Bounded loading passed; exact 40/45 kg inventory cap case remains."
+      }
     },
     {
       "id": "R3-T10",
@@ -903,11 +1096,18 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Daily and weekly proposals modify same future occurrence",
       "expected": "One reconciled reviewed revision or conflict; no stacked independent changes",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "extensions.test.js"
+        "verification-hosted.mjs"
       ],
-      "note": "Conflict/deduplication contracts passed; combined same-occurrence daily+weekly UI race remains."
+      "note": "Real hosted daily/weekly race: whole weekly batch won, outdated daily source denied; fresh daily acceptance remained an unassigned child, original baseline unchanged.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "extensions.test.js"
+        ],
+        "note": "Conflict/deduplication contracts passed; combined same-occurrence daily+weekly UI race remains."
+      }
     },
     {
       "id": "R3-T12",
@@ -984,12 +1184,19 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "New restriction during weekly batch approval",
       "expected": "Reject stale batch atomically under all-or-none mode; no hidden partial success",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "native-concurrency.mjs",
-        "hosted weekly approval"
+        "verification-hosted.mjs"
       ],
-      "note": "Atomic batch and hosted positive path passed; hosted new-restriction race remains."
+      "note": "New-health versus weekly approval race commits all or none; any winning assignments are stale/held and cannot start.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "native-concurrency.mjs",
+          "hosted weekly approval"
+        ],
+        "note": "Atomic batch and hosted positive path passed; hosted new-restriction race remains."
+      }
     },
     {
       "id": "R3-T19",
@@ -1078,11 +1285,18 @@
       "source": "quality/catalogue-coverage-and-cases.draft.json",
       "scenario": "{\"requiredNeeds\":[\"NEED-09\",\"NEED-10\"],\"coveredByFirstPick\":[\"NEED-09\"]}",
       "expected": "After EX-015, EX-016 receives no incremental NEED-09 coverage; eligible EX-019 may cover NEED-10.",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js"
+        "completion-cases.test.js"
       ],
-      "note": "Incremental coverage mechanism exists; exact three-candidate scoring case remains."
+      "note": "Dedicated three-candidate incremental coverage and duplicate-signal fixture passes.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js"
+        ],
+        "note": "Incremental coverage mechanism exists; exact three-candidate scoring case remains."
+      }
     },
     {
       "id": "CAT-007",
@@ -1167,34 +1381,57 @@
       "source": "quality/catalogue-coverage-and-cases.draft.json",
       "scenario": "{\"budgetSeconds\":1800,\"requiredWorkSeconds\":1600,\"requiredRestSetupSeconds\":300,\"optionalWorkSeconds\":60}",
       "expected": "Even after optional omission, required time is 1900 seconds: visible 100-second shortfall.",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "selection.test.js"
+        "completion-cases.test.js",
+        "ui.jsx"
       ],
-      "note": "Required budget breach blocked; explicit 100-second shortfall display remains unverified/incomplete."
+      "note": "100-second deficit and safe alternatives rendered from engine output; optional omission does not make required over-budget work ready.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "selection.test.js"
+        ],
+        "note": "Required budget breach blocked; explicit 100-second shortfall display remains unverified/incomplete."
+      }
     },
     {
       "id": "CAT-015",
       "source": "quality/catalogue-coverage-and-cases.draft.json",
       "scenario": "{\"requestExpectedContext\":7,\"serverContext\":8,\"newHealthReport\":true}",
       "expected": "Atomic approve/assign fails stale; no partial assignment. Client must not start against generation 7.",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "native-concurrency.mjs"
+        "verification-hosted.mjs",
+        "verification-browser-receipt.mjs"
       ],
-      "note": "Atomic stale race passed locally; not the full hosted two-tab scenario."
+      "note": "Hosted concurrent API race and actual two-tab stale-revision refusal pass.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "native-concurrency.mjs"
+        ],
+        "note": "Atomic stale race passed locally; not the full hosted two-tab scenario."
+      }
     },
     {
       "id": "CAT-016",
       "source": "quality/catalogue-coverage-and-cases.draft.json",
       "scenario": "{\"save\":\"response-lost-after-commit\",\"operationKey\":\"fictional-key-01\"}",
       "expected": "Query/retry same key; one logical operation, no duplicate assignment and no success claim until receipt.",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "operations.test.js",
-        "hosted-r1.mjs"
+        "verification-final-checks.mjs"
       ],
-      "note": "Receipt replay passed; actual browser dropped-response injection remains."
+      "note": "Actual browser dropped response after hosted commit replays one exact receipt without duplicate record.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "operations.test.js",
+          "hosted-r1.mjs"
+        ],
+        "note": "Receipt replay passed; actual browser dropped-response injection remains."
+      }
     },
     {
       "id": "CAT-017",
@@ -1236,12 +1473,19 @@
       "source": "quality/catalogue-coverage-and-cases.draft.json",
       "scenario": "{\"serverState\":\"unavailable\",\"request\":\"resume\",\"actuals\":\"locally-entered\"}",
       "expected": "Resume prohibited; preserved actuals clearly pending sync, not server saved.",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "operations.test.js",
-        "execution.test.js"
+        "verification-final-checks.mjs"
       ],
-      "note": "Pending/offline contracts tested; browser network loss with pending actuals remains."
+      "note": "Simulated network outage in browser: pending actual, independent Stop, reconnect, exact retry and fresh-page retained history pass.",
+      "previousA30": {
+        "status": "partial",
+        "evidence": [
+          "operations.test.js",
+          "execution.test.js"
+        ],
+        "note": "Pending/offline contracts tested; browser network loss with pending actuals remains."
+      }
     },
     {
       "id": "CAT-021",

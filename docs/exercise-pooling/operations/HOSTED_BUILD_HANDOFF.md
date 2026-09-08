@@ -1,6 +1,6 @@
 # Fitness Scribber pooling — hosted engineering handoff
 
-This is the historical A30 checkpoint. The approved A31 usable coach-testing follow-up is tracked in [current progress](./COACH_TEST_PROGRESS.md); its completion is not implied by the old results below.
+This is the historical A30 checkpoint. **Current A32:** see [engineering verification](./A32_ENGINEERING_VERIFICATION.md) and [remaining work](./REMAINING_WORK.md). Six hosted functions are now v2; 163 Node tests, six HTTP tests, 16 native suites and an 85-table restore passed. The tested application is `3b95415`. All nine engineering identities are retired. The evidence below is not a current resource count, blocker or request for reapproval.
 
 8 September 2026 · v0.7/A30 · **tested engineering checkpoint; not launch-ready acceptance**.
 
