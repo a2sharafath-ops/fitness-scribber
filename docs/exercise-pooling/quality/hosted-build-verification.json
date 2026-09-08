@@ -1,0 +1,129 @@
+{
+  "reportId": "FS-POOL-A30-2026-09-08",
+  "recordedAt": "2026-09-08T07:24:52.039Z",
+  "status": "listed-hosted-engineering-checks-passed-contained-full-acceptance-open",
+  "testedApplicationCommit": "bb513c2c9ae8e55826ab082d3b6b50151d653fd1",
+  "branch": "codex/exercise-pooling-local",
+  "approval": "v0.7/A30",
+  "unit": {
+    "tests": 132,
+    "passed": 132,
+    "failed": 0,
+    "command": "npm test"
+  },
+  "lint": "passed",
+  "build": {
+    "status": "passed",
+    "remainingWarning": "main bundle exceeds 500 kB"
+  },
+  "hosted": {
+    "apiCheckEntries": 98,
+    "uniquePassingCheckNames": 91,
+    "failedChecks": 0,
+    "repeatedEntries": 7,
+    "apiEvidence": [
+      "hosted-fixtures.mjs",
+      "hosted-r1.mjs",
+      "hosted-r2.mjs",
+      "hosted-r3.mjs",
+      "hosted-governance-checks.mjs",
+      "hosted-containment.mjs"
+    ],
+    "browserEvidence": "operations/HOSTED_EXECUTION_LOG.md",
+    "fullAcceptancePassed": false
+  },
+  "preview": {
+    "alias": "https://fitness-scribber-kq6i-git-codex-exercise-pool-3bc1c9-cureocity1.vercel.app",
+    "testedImmutableUrl": "https://fitness-scribber-kq6i-2w7a9p8nz-cureocity1.vercel.app",
+    "githubDeploymentId": 6322555038,
+    "unauthenticatedStatus": 302,
+    "protectionChanged": false,
+    "ownerManagesAccessAndUat": true,
+    "verifiedBuildsThroughCandidate": 7,
+    "reservedDocumentationDeliveryBuilds": 1,
+    "approvedBuildLimit": 10,
+    "browserFlags": {
+      "r1": false,
+      "r2": false,
+      "r3": false
+    }
+  },
+  "backend": {
+    "projectRef": "haxxetirrcrwzwdzsdui",
+    "migrations": 18,
+    "functions": 6,
+    "jwtVerification": true,
+    "existingAdminUsersPreserved": true,
+    "flags": {
+      "r1": false,
+      "r2": false,
+      "r3": false
+    }
+  },
+  "preservation": {
+    "checkedAt": "2026-09-08T07:24:40.568Z",
+    "baselineTables": 52,
+    "baselineRows": 549,
+    "missingOrChangedBaselineTables": [],
+    "baselinePreserved": true,
+    "addedBaselineRows": 20,
+    "poolingRows": 123,
+    "totalRetainedAddedRows": 143,
+    "withinApproved1000AtCheck": true,
+    "storageObjects": 0,
+    "limits": "Retained-row count, not a lifetime count of managed transient tokens. Infrastructure singleton and 18 migration-ledger rows excluded. Identity inventory is private. No application/history deletion; Auth sign-out can remove run-created sessions/tokens."
+  },
+  "containment": {
+    "testUsersCreated": 5,
+    "testUsersDisabled": 5,
+    "refreshSessionsSignedOut": true,
+    "loginBanChecksPassed": true,
+    "fictionalManifestsRevoked": 2,
+    "scopeReviewerOperatorRevoked": true,
+    "fictionalNoticeWithdrawn": true,
+    "noFixtureDeletionRequested": true,
+    "accessTokenLimit": "Previously issued access JWTs expire normally; refresh sign-out and login bans do not instantly invalidate every issued JWT. Server flags and fixture grants are off."
+  },
+  "recovery": {
+    "backupSha256": "488f7e7f037f57723c75f5d16976cc13303f2a32aea9365d9c4e988da476b9a3",
+    "bytes": 403091,
+    "restoredTableFingerprints": 52,
+    "baselineRows": 549,
+    "originalRowsPreserved": true,
+    "twoPassMigrations": true,
+    "restoredSchemaSuites": 16,
+    "atomicTransactionSha256": "58851ad44d60084427fe31447e80bf262c9022db5108730db707ecc02aa5e66c",
+    "offDevice": false,
+    "fullManagedServiceRestore": false,
+    "limits": "Same-device private relational backup; managed Auth/REST/Edge runtime and provider secrets were not recreated. No hosted rewind."
+  },
+  "preservedVersions": {
+    "remoteMain": "5de01b4e960e03e28d4a8b22527937103de10ad6",
+    "production": "5de01b4e960e03e28d4a8b22527937103de10ad6",
+    "classicTag": "fitness-scribber-classic-2026-09-07",
+    "classicCommit": "08ac0673d6e1d67ccd9fee2ffc5995074bcbf162"
+  },
+  "acceptance": {
+    "partial": 43,
+    "passed-engineering-invariant": 57,
+    "blocked-external-scope": 10,
+    "complete": false,
+    "source": "quality/hosted-acceptance-matrix.json"
+  },
+  "release": {
+    "humanUatAccepted": false,
+    "professionalPolicyAccepted": false,
+    "realCataloguePublished": false,
+    "realClientEnabled": false,
+    "productionPromotionAuthorized": false
+  },
+  "limits": {
+    "extraSpendAuthorizedINR": 0,
+    "paidAddonEnabled": false,
+    "storageObjects": 0,
+    "originalRecordMutationFound": false,
+    "applicationRowsReserved": 440,
+    "reservedUiHeadroom": 100,
+    "rowCountMeaning": "Final retained rows; managed Auth sign-out removes transient run sessions/tokens. The snapshot is not a lifetime token-creation counter."
+  }
+}

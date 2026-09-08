@@ -1,15 +1,15 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
-  "version": "local-verification-2026-09-07",
-  "status": "local-implementation-checkpoint-verified-release-gates-open",
+  "version": "hosted-engineering-2026-09-08",
+  "status": "hosted-engineering-checkpoint-contained-full-acceptance-open",
   "currentSprint": "S6",
-  "executionMode": "local-backup-recovery-and-r1-r3-engineering",
+  "executionMode": "approved-existing-stack-synthetic-r1-r3",
   "implementationAuthorized": true,
   "productionChangesAuthorized": false,
   "hostedTestProposal": {
     "version": "0.7",
     "date": "2026-09-08",
-    "status": "approved-hosted-migration-applied-integration-in-progress",
+    "status": "approved-executed-listed-journeys-contained",
     "artifact": "preparation/EXISTING_TEST_STACK_APPROVAL.md",
     "ownerReportedUse": "Existing local, Vercel-labelled Production and Supabase environments are pre-launch testing only, without real-client data or staff/client handover; not independently verified from records.",
     "vercelProject": "cureocity1/fitness-scribber-kq6i",
@@ -21,9 +21,9 @@
     "mainPromotionAuthorized": false,
     "additionalSpendingLimitINR": 0,
     "sharedDatabaseWarning": "Preview does not isolate schema, RLS, functions or the global pooling_runtime row from the existing app.",
-    "nextGate": "Backup/52-table restore and 18 additive hosted migrations verified with flags off; six Edge Functions deployed. Verify protected Preview and hosted fictional journeys, then containment. Coach access/UAT are owner-managed."
+    "nextGate": "Close remaining engineering cases and external acceptance; owner manages UAT. No main/Production promotion or real catalogue publication authorized."
   },
-  "completedScope": "Preparation and owner product review recorded; Classic checkpoint preserved; local R1-R3 code saved at 3b779d9 with 120 unit tests, native core-schema integration/restore, Deno and scoped UI evidence. Full hosted/frontend integration, device/domain acceptance and release remain open.",
+  "completedScope": "Preparation and owner product review recorded; Classic preserved; local R1-R3 build plus approved existing-stack backup/52-table restore, 18 additive migrations, six functions, protected Preview and listed fictional API/browser journeys. Containment and exact evidence in operations/HOSTED_BUILD_HANDOFF.md; full acceptance remains open.",
   "priorityDefinitions": {
     "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",
     "P1": "Core R1 functionality and usability.",
@@ -1377,6 +1377,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1424,6 +1429,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1470,6 +1480,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1519,6 +1534,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1615,6 +1635,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1662,6 +1687,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1706,6 +1736,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1753,6 +1788,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1805,6 +1845,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1851,6 +1896,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1899,6 +1949,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1951,6 +2006,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -1997,6 +2057,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2045,6 +2110,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2093,6 +2163,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2142,6 +2217,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2185,7 +2265,12 @@
         "operations/LOCAL_BUILD_VERIFICATION.md"
       ],
       "remainingWork": [
-        "Integrated auth/API/UI, full requirement-linked accepted fixtures, accessibility and end-to-end performance/load evidence remain."
+        "All 110 cases mapped: 57 engineering invariants passed, 43 partial, 10 external-scope blocked. Close the exact remaining cases; hosted races/response loss/offline, all entry points, precise budget/load/travel cases, accessibility and end-to-end performance are not certified."
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2239,7 +2324,7 @@
         "A09",
         "A13"
       ],
-      "status": "awaiting-scope-approval",
+      "status": "in-progress",
       "acceptance": "Target-compatible staging migration, save/reload, reference preservation and restore results recorded; production execution remains unapproved.",
       "preparationOutputs": [
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
@@ -2248,7 +2333,16 @@
         "engineering/DETAILED_CONTRACTS.md",
         "engineering/EXTENSION_CONTRACTS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+      ],
+      "hostedCompletionSummary": "Approved A30 baseline restore matched all 52 tables; two-pass 18-migration rehearsal, atomic hosted application and preservation checks passed. Feature-off and original-app reads plus linked stop passed; new candidate stopped-status defects corrected.",
+      "remainingWork": [
+        "Broader legacy/client parity and managed Auth/REST/Edge/provider restore beyond native relational recovery; off-device backup destination/authority not provided."
+      ]
     },
     {
       "id": "FP-604",
@@ -2274,7 +2368,10 @@
         "ux/SCREEN_SPECIFICATIONS.md",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "remainingWork": [
+        "Owner manages coach access and human UAT. Existing Preview protection preserved; no invite, membership change or participant sign-off performed. Coordinate a specific test window and valid fictional authority before feature-on UAT."
+      ]
     },
     {
       "id": "FP-605",
@@ -2329,6 +2426,11 @@
       ],
       "remainingWork": [
         "Real support/operator/privacy facts and release acceptance remain."
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2415,7 +2517,8 @@
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
         "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md"
       ],
-      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending."
+      "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
+      "hostedCompletionSummary": "Implementation branch pushed, additive shared-test migration and protected Preview deployed under A30. Main/Production unchanged. This is not the task's pilot release."
     },
     {
       "id": "FP-608",
@@ -2579,6 +2682,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2627,6 +2735,11 @@
       ],
       "remainingWork": [
         "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2786,6 +2899,11 @@
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -2830,12 +2948,17 @@
       ],
       "localCompletionSummary": "Constraint-aware weekly persistence/atomic approval/supersession and scope-specific authorized reassessment recording.",
       "remainingWork": [
-        "Full frontend integration, professional evidence provisioning and accepted weekly coverage remain."
+        "Listed weekly API/browser atomic-approval and scoped reassessment passed. Exact accepted weekly/clinical parameters, full adverse races and domain coverage remain."
       ],
       "localAuthorizationRefs": [
         "A23",
         "A28",
         "A29"
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -3142,6 +3265,11 @@
       ],
       "remainingWork": [
         "Integrated Classic code against actual migrated Supabase auth/REST/storage target remains unverified; no live rollback certificate."
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     },
     {
@@ -3171,6 +3299,11 @@
       ],
       "remainingWork": [
         "Whole-system release is not marked complete; see unresolved task-specific gates."
+      ],
+      "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
+      "hostedEvidence": [
+        "operations/HOSTED_BUILD_HANDOFF.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
       ]
     }
   ],
@@ -3182,7 +3315,7 @@
     "A04": "Recommendations requested/drafted; no professional appointment/sign-off.",
     "A05": "Single coach plus client app; target India/GCC/USA/UK/Europe. Establishment/name/email and exact market activation pending.",
     "A06": "Explicit S1–S2 local preparation approval in user six-point reply.",
-    "remaining": "Owner product review and local R1–R3 build authorized under A22–A28; A29 isolated native testing runtime authorized by version 0.6. Required professional evidence and exact hosted/remote/live release actions remain pending. No deployment or real-client enablement."
+    "remaining": "A22-A29 local build/runtime and A30 exact existing-stack integration, branch push and protected Preview approved/executed. Professional/privacy/rights acceptance, human UAT, off-device/full managed recovery and real-client/main/Production release remain pending."
   },
   "lastPreparationBatch": {
     "version": "s1-foundation-draft-v0.1",
@@ -3201,7 +3334,7 @@
     "A12": "local-build-authorized-under-A23-professional-release-gates-pending"
   },
   "preparationStatusDefinition": "Complete refers only to independently authorable local S1/S2 preparation; acceptanceStatus separately preserves actual review/gate requirements.",
-  "currentPhase": "local-verification-handoff-r1-r2-r3",
+  "currentPhase": "hosted-verification-handoff-r1-r2-r3",
   "extendedPreparationApproval": {
     "record": "preparation/FULL_PREPARATION_APPROVAL.md",
     "A20_preparation": true,
@@ -3257,5 +3390,21 @@
     "hostedIntegration": "unverified",
     "productionEnabled": false,
     "codeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847"
+  },
+  "hostedVerificationReport": "operations/HOSTED_BUILD_HANDOFF.md",
+  "hostedAcceptanceMatrix": "quality/hosted-acceptance-matrix.json",
+  "hostedVerificationSummary": {
+    "testedCodeCommit": "bb513c2c9ae8e55826ab082d3b6b50151d653fd1",
+    "nodeTests": 132,
+    "nodePassed": 132,
+    "source": "quality/hosted-build-verification.json",
+    "acceptance": {
+      "mapped": 110,
+      "passedEngineeringInvariant": 57,
+      "partial": 43,
+      "blockedExternalScope": 10,
+      "complete": false
+    },
+    "releaseAccepted": false
   }
 }

@@ -1,13 +1,15 @@
 # Protected Preview — owner and coach test guide
 
-8 September 2026 · preparation for the approved hosted engineering run.
+8 September 2026 · owner-managed review after the hosted engineering checkpoint.
 
-**Deployment URL and tested version: pending verification. Do not distribute a guessed URL or describe this draft as a passed acceptance test.** The owner manages coach access and user acceptance testing. No coach invitation, Vercel membership change or public-access bypass is authorized by this guide.
+**[Open the protected Preview](https://fitness-scribber-kq6i-git-codex-exercise-pool-3bc1c9-cureocity1.vercel.app).** Tested application revision: `bb513c2c9ae8e55826ab082d3b6b50151d653fd1`; later documentation-only commits may advance the branch alias. Exact immutable builds are in the [hosted handoff](./HOSTED_BUILD_HANDOFF.md). This guide is not a signed human acceptance test. The owner manages coach access and user acceptance testing; no invitation, membership change or public-access bypass was made.
+
+**Current state: R1/R2/R3 off in the server and branch browser build.** Fictional test authority is revoked and run-created users are disabled after engineering verification. You can inspect existing permitted Classic pages with your own authorized access. The feature-on checklist below is for a separately coordinated fictional test session, not a promise that it can be run on the contained build immediately. Do not share the retired test credentials or enable real catalogue content to make a test pass.
 
 ## Before testing
 
 - Use the final protected Preview URL supplied in the execution report, not the current Production alias. Sign in through existing authorized Vercel access first, then the application's own account. These are different access checks.
-- Use only the designated fictional testing accounts and fictional clients. Do not enter actual health/client information, connect wearables, send invitations or exercise paid AI/email/SMS paths.
+- In a coordinated feature-on session, use only newly designated authorized fictional testing accounts/clients and valid fixture-only authority. Do not enter actual health/client information, connect wearables, send invitations or exercise paid AI/email/SMS paths.
 - The Preview shares the existing testing database. Agree the test window with the owner; the old app is not a separate backup database. Do not delete existing records or change global feature flags independently.
 - Follow the final report's feature-state table. Fixture catalogue/policy/reviewer evidence is engineering-only, not exercise or clinical acceptance. Unaccepted real catalogue records and unsupported paths must remain blocked.
 - Do not perform physical exercises based on test fixtures. This is software testing, not a training prescription.
@@ -40,4 +42,4 @@ If an unauthorized account sees another client's data, an unapproved workout sta
 
 ## Sign-off remains the owner's decision
 
-The final engineering report will distinguish executed automated checks, unexecuted cases, feature flags and known limitations. The owner/coach records actual usability acceptance separately. A passed software test does not constitute professional exercise/clinical approval, privacy/legal acceptance or permission to promote main/Production.
+The [engineering report](./HOSTED_BUILD_HANDOFF.md) and [110-case map](../quality/HOSTED_ACCEPTANCE_MATRIX.md) distinguish executed checks, partial/blocked cases, feature flags and limitations. The owner/coach records actual usability acceptance separately. A passed software test does not constitute professional exercise/clinical approval, privacy/legal acceptance or permission to promote main/Production.

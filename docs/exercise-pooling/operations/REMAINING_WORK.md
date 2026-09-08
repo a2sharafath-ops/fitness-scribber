@@ -1,48 +1,40 @@
-# Remaining pooling work and next approval bundle
+# Remaining pooling work and decisions
 
-Updated 7 September 2026 after local implementation checkpoint `3b779d9`. The original 82-task sprint remains the scope; local implementation, verification and external acceptance are tracked separately.
+8 September 2026 · supersedes the earlier local-only pending list. The original 82-task sprint remains the scope. **A30 is approved and has been executed; do not request the same backup/build/branch-Preview approval again.** Main/Production and real-client enablement are excluded.
 
-**8 September execution update:** the owner approved the [v0.7 existing-stack package](../preparation/EXISTING_TEST_STACK_APPROVAL.md), including the shared-database testing window, implementation-branch push and protected Preview. The full private export restored with all 52 table fingerprints matching. All 18 additive migrations were rehearsed and applied with flags off, preserving every baseline table; six pooling functions were deployed. Preview/auth/UI integration and final containment remain in progress. See the [execution log](./HOSTED_EXECUTION_LOG.md) for evidence and recovery limitations. Data being fictional remains owner-reported; existing records are preserved regardless.
+## Completed engineering checkpoint
 
-The owner has already approved ordinary local work, A29 and A30. **Do not ask again for the same backup/build/testing approval.** Work remains on `codex/exercise-pooling-local`; main and Fitness Scribber Classic are preserved. Coach access and human acceptance testing are owner-managed, not reasons to wait for a coach identity or change account access.
+R1–R3 code, source/context review, coach-only exact assignment, client execution/history, selection/swaps, daily/progression/weekly proposals, scoped reassessment and catalogue controls are implemented. The [hosted handoff](./HOSTED_BUILD_HANDOFF.md) records actual results: private backup/52-table restore, 18 additive migrations, six hosted functions, protected Preview, fictional coach/client journeys, feature-off recovery and containment. The latest candidate passes 132 unit tests, lint and build. Earlier 120-test/native/Deno evidence is retained in the historical [local report](./LOCAL_BUILD_VERIFICATION.md), not presented as a new run.
 
-## Completed local checkpoint
+This is a tested engineering checkpoint, **not completion of every sprint acceptance criterion or authorization for live coaching**. The [complete 110-case matrix](../quality/HOSTED_ACCEPTANCE_MATRIX.md) has 57 passing engineering invariants, 43 partial cases and 10 blocked by external scope. Each partial row identifies the exact remaining work; a passing unit invariant is not a full hosted/participant case pass.
 
-Core R1–R3 code, explicit source/context review, guarded permissions/assignment/execution, client reports/history/consent, selection/swaps, daily/progression/weekly proposals, scoped reassessment, catalogue controls and recovery journal are implemented. 120 unit tests, lint/build, six Deno HTTP tests and all six entrypoint typechecks passed. Fresh native PostgreSQL role/concurrency/integration and full public-row dump/restore checks passed.
+## Pending engineering, in priority order
 
-The [verification report](./LOCAL_BUILD_VERIFICATION.md) is the evidence, including limitations. It supersedes this file's earlier lists of unimplemented governance, weekly composition, Deno testing and native recovery.
-
-## Pending engineering verification and fit-for-release work
-
-| Work | Sprint references | Current limit / next action |
+| Priority / work | Sprint references | Remaining result required |
 |---|---|---|
-| Real frontend/auth/API integration | FP-303, 306, 502–505, 601 | Native SQL and injected gateways pass; no complete isolated Supabase auth/REST/storage/Edge stack has been verified. Test sign-in, coach/client scope, refresh, expiry, sign-out/account switches, concurrent tabs, exact retry and offline/response loss through the actual app. Fix any findings. |
-| Full role and entry-point acceptance | FP-504, 601 | SQL bypass guards and draft routes exist; every manual/template/voice/copy/bulk/client journey must still pass the same integrated stack. Prior copy browser results are historical, not a current full-path certificate. |
-| Device, accessibility and usability acceptance | FP-506, 604, 704, 805 | Current desktop/390px/1280px component checks and semantic labels pass. Full keyboard/focus/screen-reader, supported devices, longer realistic sessions and actual participant testing remain. |
-| Accepted policy/catalogue coverage | FP-302, 401–405, 507, 602, 702, 802 | 48 real candidates remain unpublished. Import actual accepted exact revisions/parameters into a release manifest, exercise all required goal/setting/level/role/side cells and diagnose coverage gaps. Fictional fixtures cannot stand in for expert decisions. |
-| Complete requirement-linked acceptance suite | FP-601, 704, 805 | Map and execute every required TC/CAT/R2/R3 acceptance case with accepted expected outcomes; current automated tests cover listed invariants, not every domain test specification. Measure end-to-end latency/load; the pure-engine benchmark is not an API SLA. |
-| Target-compatible migration and Classic recovery | FP-603, B11 | Fresh core-schema restore and feature-off UI checks pass separately. Still verify the actual Classic application against the migrated target Supabase API/auth/storage services, stop/log behavior and preservation of new sidecars/results. Do not certify hosted rollback from native SQL alone. |
-| Release-ready operational details | FP-605–608, 705, 805 | Populate real operator/support/privacy/market/retention/provider facts, record acceptance, stage migration, run an authorized pilot, and only then consider deployment/enablement. |
+| P0 — adverse hosted interactions | FP-303, 504, 601 | Two actual tabs/coaches racing context changes with approval/start/weekly batch; token expiry and recovery; browser commit-response loss/offline transitions; pending actuals and account switching under failures. Native atomic guards and API retry receipts have passed, but do not replace these cases. |
+| P0 — all programming entry points | FP-501–505, 601 | Complete manual/template/copy-last/cross-client/bulk and AI/voice-import UI-to-backend tests. Paid providers/audio uploads remain excluded. Existing guarded draft routes and API denial evidence are only partial coverage. |
+| P0 — exact domain cases and explanations | FP-302, 401–405, 507, 601, 704, 805 | Explicit numeric budget-shortfall display and alternatives; precise load-method/inventory cap/rounding, travel timezone/setting, mirrored legacy maximum and multi-finding ranking fixtures. Many can be strengthened synthetically; accepted exercise outputs require admitted parameters/content. |
+| P0 — client/Classic recovery parity | FP-307, 505, 603, B11 | Broader legacy workout/history paths and any launch-required client feature parity. Original old frontend misinterprets new stopped status. The candidate's planner/card now preserve it; do not claim the old immutable app supports every new state. |
+| P1 — accessibility and performance | FP-506, 601, 604, 704, 805 | Full keyboard/focus, screen reader, zoom, actual supported devices, representative session length and bounded end-to-end latency/load against an agreed target. Current reflow checks and pure-engine benchmark are narrower evidence. Main bundle still triggers a >500 kB warning. |
+| P0 release gate — full evidence closure | FP-601, 704, 805 | Close every required partial case at its stated layer, choose exact launch scope for blocked cases and record actual expected-output acceptance. Keep unmet cases visible rather than converting them into passes. |
 
-The new client view intentionally protects raw assessment/clinical notes and is narrower than Classic. Full client-app/onboarding feature parity is not part of this completed pooling checkpoint. Any parity required for launch must be specified and verified before enabling R1; do not silently expose the old private fields to restore parity.
+The pooling client view intentionally hides raw coach/assessment notes and is narrower than Classic. Full client-app/onboarding feature parity is not claimed. No clinician portal, autonomous clinical clearance, unattended assignment, invented numerical policy or distinct soft-retirement lifecycle is delivered by this checkpoint.
 
-No clinician portal, autonomous clinical clearance, unattended assignment, invented numerical policy, automatic multi-week schedule or distinct soft-retirement lifecycle has been claimed as delivered.
+The legacy coaching card's no-data “green light” was corrected and its prompts/live-AI route are suppressed in pooling mode. Other legacy metric heuristics, wellness defaults and third-party features are not approved pooling authority and still require their own launch review; no provider call was made in this run.
 
-## All remaining owner decisions / external permissions, together
+## Owner inputs and external sign-offs — consolidated
 
-These are **next-stage gates**, not a request to approve the completed local work again. An approval can authorize actions; it cannot replace evidence or another person's signature.
+These are future gates, **not another approval request for work already done**. Ordinary in-scope code/test improvements remain covered by the existing engineering authorization. Another hosted test session needs a coordinated exclusive window and valid fictional fixtures; it must stay within the approved target/cost/resource boundaries. Any material expansion needs a new specific decision.
 
-1. **Integration environment — approved:** exact v0.7 Vercel/Supabase targets, shared test window and ₹0 additional spend. Recovery gate passed; execute remaining tests within A30 limits, without another owner approval. A material target/cost/data-scope expansion would require a new decision.
-2. **Actual review evidence:** name the content/domain/clinical/rights reviewers as applicable and provide their accepted exact catalogue/policy versions and parameters. Owner product review is recorded; it is not a substitute for these separate professional decisions. Rehabilitation/special-needs enablement remains closed.
-3. **Business/privacy facts:** business/coach name, contact/support route, establishment and specific launch countries, qualified coaching/clinical scope, providers/regions, retention/rights/incident ownership and final published notices/consent. India/GCC/USA/UK/Europe were target intentions, not universal legal clearance.
-4. **Usability/pilot permission:** authorize specific coach/client test participants, contact/data scope and criteria. No real person has been contacted or real client assigned by this work.
-5. **Release/version-control permission:** implementation-branch push and protected Preview are approved. Main merge/push, Production promotion, real-client rollout and broader release authority remain pending.
-6. **Off-device/live recovery:** select an approved backup destination, access/encryption/retention and authorize the exact live/staging backup and restore rehearsal. Local same-disk archives do not protect against losing the computer.
+1. **Exact content/policy acceptance:** identify authorized exercise, clinical-policy and rights reviewers as applicable; record accepted exact revisions, populations, evidence, numerical parameters and constraints. The owner's six-PRD/twelve-catalogue product review is recorded. It cannot stand in for unidentified specialist signatures. All 48 real candidates stay unpublished; rehabilitation/special-needs paths stay closed unless their exact scope is accepted.
+2. **Business/privacy/market facts:** business/coach name, contact/support route, establishment, specific first launch countries, qualification/service scope, processors/regions, retention/rights/incident owners and final notices/consent. India/GCC/USA/UK/Europe are target intentions, not blanket legal clearance.
+3. **Human usability/UAT:** owner manages existing coach access and participating users. Record test scope, fictional/real data permission, device/browser and actual outcomes. No invitations, membership changes, protection bypass or real-person contact were performed. See the [test guide](./COACH_PREVIEW_TEST_GUIDE.md).
+4. **Off-device and full hosted recovery:** choose a specific private encrypted destination, access/retention policy and authorize the exact managed-service restore drill. Current backups are same-device; the relational restore does not recreate every managed service or provider credential. No whole-database rewind is authorized.
+5. **Pilot/release:** name operator and support owners, define cohort/criteria and accept the remaining mandatory evidence. Then separately authorize any main merge/push, Production promotion or real-client enablement. Branch push/Preview approval does not authorize those actions.
 
-The consolidated v0.7 scope is approved; do not repeat its approval request. The provider's “Production” label is not proof of a real-client launch. A30 preserves that alias while testing shared-backend changes. Actual client use, clinical/privacy acceptance and later promotion still require their own evidence and decision.
+## Safe handoff
 
-## Current safe stopping point
+Use the [protected branch Preview](https://fitness-scribber-kq6i-git-codex-exercise-pool-3bc1c9-cureocity1.vercel.app). Pooling is deliberately off at handoff; run-created test accounts are disabled as recorded in the final verifier. Do not distribute old test credentials or silently turn the flags back on for UAT. No local development URL is promised because no app server is being left running.
 
-Local implementation and the listed synthetic tests are saved. Inspect at `http://127.0.0.1:4179/` while the local process runs; it has no hosted connection or publishable catalogue. The feature-off compiled preview is `http://127.0.0.1:4180/`.
-
-Use **Fitness Scribber Classic** to identify the preserved pre-pooling code. Follow the [rollback runbook](./RELEASE_AND_ROLLBACK_RUNBOOK.md); never overwrite newer client data merely to return to old code.
+**Fitness Scribber Classic** identifies local tag `fitness-scribber-classic-2026-09-07`, commit `08ac0673d6e1d67ccd9fee2ffc5995074bcbf162`. Main/current Production remain `5de01b4e960e03e28d4a8b22527937103de10ad6`. Follow the [rollback runbook](./RELEASE_AND_ROLLBACK_RUNBOOK.md); switching code must not erase newer client data. The newer feature-off candidate is the tested route for handling newly stopped records.

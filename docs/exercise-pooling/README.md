@@ -1,8 +1,8 @@
-# Exercise pooling — local build and preparation
+# Exercise pooling — build, verification and preparation
 
-Current local code checkpoint: **`3b779d9`**, 7 September 2026. The owner approved local R1–R3 implementation and isolated runtime testing. The local build and substantial synthetic verification are saved; **full acceptance and release remain pending**. Start with the [current verification report](./operations/LOCAL_BUILD_VERIFICATION.md), [pending work and next approvals](./operations/REMAINING_WORK.md), and [sprint tracker](./sprint-backlog.json).
+Current tested application checkpoint: **`bb513c2`**, 8 September 2026, on `codex/exercise-pooling-local`. R1–R3 are built and listed local/hosted engineering checks passed. **Full acceptance and release remain pending.** Start with the [hosted handoff](./operations/HOSTED_BUILD_HANDOFF.md), [110-case evidence map](./quality/HOSTED_ACCEPTANCE_MATRIX.md), [pending work and decisions](./operations/REMAINING_WORK.md), and [82-task sprint tracker](./sprint-backlog.json). The historical local-only checkpoint is `3b779d9`.
 
-8 September: the owner approved [v0.7 existing-stack execution](./preparation/EXISTING_TEST_STACK_APPROVAL.md). The full private database export restored with matching fingerprints for all 52 public/auth/storage tables. The 18 additive migrations passed two local rehearsals, 16 restored-schema workflow suites and exact-transaction rehearsal, then were applied to the approved Supabase project with flags off and every baseline table unchanged. Six pooling Edge Functions were deployed. Protected Preview and hosted journey verification are in progress; see the [execution log](./operations/HOSTED_EXECUTION_LOG.md). Main and the current Production alias are not approved for promotion.
+8 September: the approved [v0.7 existing-stack run](./preparation/EXISTING_TEST_STACK_APPROVAL.md) completed its listed engineering journeys: private backup/52-table relational restore, 18 additive migrations, six pooling Edge Functions, protected Preview, fictional R1/R2/R3 workflows and feature-off recovery. See the [execution log](./operations/HOSTED_EXECUTION_LOG.md) and final handoff for containment, exact preservation counts and limits. The candidate passes 132 unit tests; all 110 preparation cases are mapped, not all passed. Pooling remains off and real candidates unpublished. Main and the current Production alias are not approved for promotion.
 
 The preparation package FS-POOL-FULL-PREP-0.3 and the historical documents below are preserved. Their “build not authorized” statements describe the preparation stage and are superseded by the [v0.6 local approval](./preparation/LOCAL_COMPLETION_APPROVAL.md) and scoped v0.7 testing approval above. Professional acceptance and real-client release are not implied.
 
@@ -33,9 +33,9 @@ Baseline lifestyle context can inform R1 scheduling and coach-facing recommendat
 
 The eight proposed pools are general warm-up, mobility/lengthening, SMR, activation, integration, main/accessory work, conditioning and cool-down. One exercise may have several reviewed roles. These are not eight mandatory workout blocks.
 
-## Existing foundations and gaps
+## Historical preparation inventory — not current implementation status
 
-This is a source-code inventory, not verification of the live database, production deployment or actual client records. Paths below are relative to the repository root.
+This table preserves the pre-build source-code inventory. Its “work needed” entries and lack-of-tests statement are historical, not today's backlog. Use the current handoff/matrix above for implementation evidence. Paths below are relative to the repository root.
 
 | Area | Existing foundation | Work needed before relying on it |
 |---|---|---|
@@ -66,7 +66,7 @@ Work can overlap after its prerequisites are stable: UX sketches and the test-ca
 
 ## Review gates
 
-The detailed reviewer matrix is in the [decision and review register](./DECISIONS_AND_REVIEWS.md). No gate is currently passed.
+The detailed reviewer matrix is in the [decision and review register](./DECISIONS_AND_REVIEWS.md). The table below is the original preparation/release model. Owner product review, local engineering and scoped A30 testing were subsequently approved; professional and pilot/release gates are not thereby passed.
 
 | Gate | Required evidence | Who must approve | What it permits |
 |---|---|---|---|
@@ -98,6 +98,6 @@ Reviewer roles are requirements, not appointments. A coach's content review does
 
 S1/S2 authoring is complete when the agreed documents, draft datasets, source/rights audit, UX/test specifications and review dossiers exist and pass document consistency checks. G2 implementation readiness additionally requires actual qualified acceptance of the admitted scope/content, resolved blocking decisions and explicit A12 build authorization. These are different states.
 
-Traceability is recorded in the [verification report](./quality/TRACEABILITY_AND_VERIFICATION.md) and [package manifest](./preparation/PACKAGE_MANIFEST.json). No app code, real-client data, dependencies, hosted settings, Git commits/pushes, migration or deployment were changed. Formal reviews and executed application tests are not claimed.
+Historical preparation traceability is recorded in the [verification report](./quality/TRACEABILITY_AND_VERIFICATION.md) and [package manifest](./preparation/PACKAGE_MANIFEST.json). Their no-build/no-deployment statements apply to that preparation snapshot. The later authorized engineering, branch pushes, migrations and Preview deployment are recorded in the current hosted handoff; professional acceptance and real-client release are still not claimed.
 
 See the [remaining approval bundle](./preparation/OPEN_DECISIONS.md) for the next gate; no further routine drafting answers are needed.
