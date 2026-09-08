@@ -1,0 +1,23 @@
+begin;
+set local role postgres;
+do $$declare w public.pooling_test_workspaces%rowtype;other text;doc jsonb;mid text;run text;
+begin
+ if has_table_privilege('authenticated','public.pooling_engineering_releases','insert') or has_function_privilege('anon','public.pooling_manifest_allowed(text,text)','execute') then raise exception 'permissions_leak';end if;
+ select x.* into w from public.pooling_test_workspaces x join public.pooling_engineering_slots g on x.coach_id=g.coach_id where g.workspace_limit=2 order by x.created_at,x.client_id limit 1;
+ select client_id into other from public.pooling_test_workspaces where client_id<>w.client_id limit 1;
+ select run_id into run from public.pooling_engineering_slots where coach_id=w.coach_id;
+ select document into doc from public.pooling_manifests where id=w.manifest_id;
+ mid:=w.client_id||'_a33_kg_manifest';doc:=jsonb_set(jsonb_set(doc,'{manifest,id}',to_jsonb(mid)),'{manifest,releaseEvidence}','"Fictional A33 kg/inventory software fixture only; no professional acceptance."');
+ insert into public.pooling_manifests(id,state,document) values(mid,'published',doc);
+ if public.pooling_manifest_allowed(w.client_id,mid) then raise exception 'unmapped_release_allowed';end if;
+ insert into public.pooling_engineering_releases(client_id,manifest_id,run_id) values(w.client_id,mid,run);
+ if not public.pooling_manifest_allowed(w.client_id,mid) or not public.pooling_manifest_allowed(w.client_id,w.manifest_id) then raise exception 'exact_release_missing';end if;
+ if public.pooling_manifest_allowed(other,mid) or public.pooling_manifest_allowed('unrelated-client',mid) then raise exception 'cross_client_release_leak';end if;
+ begin update public.pooling_manifests set document=jsonb_set(document,'{manifest,releaseEvidence}','"changed"') where id=mid;raise exception 'release_mutable';exception when raise_exception then if sqlerrm<>'immutable_release' then raise;end if;end;
+ begin update public.pooling_engineering_releases set run_id='new-run' where client_id=w.client_id;raise exception 'mapping_mutable';exception when raise_exception then if sqlerrm<>'engineering_release_immutable' then raise;end if;end;
+ update public.pooling_engineering_releases set revoked_at=clock_timestamp() where client_id=w.client_id;
+ if public.pooling_manifest_allowed(w.client_id,mid) then raise exception 'revoked_release_allowed';end if;
+ if not public.pooling_manifest_allowed(w.client_id,w.manifest_id) then raise exception 'original_release_changed';end if;
+ if exists(select 1 from public.pooling_runtime where r1 or r2 or r3) then raise exception 'global_flags_changed';end if;
+end $$;
+rollback;

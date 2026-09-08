@@ -1,5 +1,7 @@
 # A33 — remaining local engineering fixes
 
+Follow-up: the owner approved the bounded hosted expansion after this local-only record. See [current hosted execution](A33_HOSTED_VERIFICATION.md). The local evidence below remains valid; its pending-hosted paragraphs describe the earlier checkpoint.
+
 8 September 2026. The owner asked to fix the remaining work. This record covers completed local fixes and verification, plus a **read-only** hosted preflight. It does not certify full sprint acceptance, professional review, hosted Auth behavior for this new code, or a Production release. The previous six-PRD/twelve-catalogue owner review remains accepted and is not being requested again.
 
 ## Implemented

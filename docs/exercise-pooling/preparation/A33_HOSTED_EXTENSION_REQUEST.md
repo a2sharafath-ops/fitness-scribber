@@ -1,8 +1,8 @@
-# Proposed bounded hosted test expansion
+# Approved bounded hosted test expansion
 
-8 September 2026 — **not executed; exact shared-backend expansion requires confirmation.** The current owner request authorizes fixing the remaining work; local fixes are recorded in [A33 evidence](../operations/A33_ENGINEERING_FIXES.md). This package identifies the newly discovered shared-test capacity/scope change, rather than re-requesting existing product or engineering approval.
+8 September 2026 — **owner approved: “yes approved.” Execution and evidence are tracked separately.** This approval covers the exact bounds below, following the consolidated approval question. Local fixes are recorded in [A33 evidence](../operations/A33_ENGINEERING_FIXES.md). It does not authorize Production enablement or substitute for external release sign-offs.
 
-## Proposed action
+## Approved action
 
 Use the same Supabase project `haxxetirrcrwzwdzsdui` and protected Vercel branch Preview. Preserve main, Production, global pooling-off, all existing records, the two original accounts and their reserved slots/window. No new paid service, real client, invitation, clinician signature or live exercise content.
 

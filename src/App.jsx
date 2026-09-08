@@ -85,7 +85,9 @@ function Gate() {
   if (!role || role === 'pending') return <RoleOnboarding />
   if (role === 'admin') return <AdminPortal />
   if (role === 'athlete') return <AthletePortal />
-  return <Shell />
+  // A direct authenticated account switch must not reuse the previous actor's
+  // in-memory dataset, clipboard, dialogs or pending private component state.
+  return <Shell key={session.user.id} />
 }
 
 export default function App() {
