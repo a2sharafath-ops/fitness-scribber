@@ -98,8 +98,10 @@ export default function ExercisePoolPage() {
       <button className="btn" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={todayISO()} />, 'xl')}>Create review draft</button>
       <button className="btn ghost" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh drafts</button>
       <p>{hasBackend ? 'Canonical drafts require a current server decision and exact coach review below.' : 'Local drafts are stored separately from Classic prescriptions and have no server authority.'}</p>
-      {unassignedDrafts.map(row => <p key={row.id || row.operationKey}>{row.proposal.date} · revision {row.revision} · unassigned draft</p>)}
-      {!unassignedDrafts.length && <p>No current unassigned review drafts. Assigned and superseded revisions remain in the exact-revision history below.</p>}
+      {loading || error ? <p>Current draft availability is not confirmed. Refresh after the reported issue is resolved.</p> : <>
+        {unassignedDrafts.map(row => <p key={row.id || row.operationKey}>{row.proposal.date} · revision {row.revision} · unassigned draft</p>)}
+        {!unassignedDrafts.length && <p>No current unassigned review drafts. Assigned and superseded revisions remain in the exact-revision history below.</p>}
+      </>}
     </section>
     {!loading && <PoolingApprovalReview key={`PoolingApprovalReview:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
     <PoolingSuggestions key={`PoolingSuggestions:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>

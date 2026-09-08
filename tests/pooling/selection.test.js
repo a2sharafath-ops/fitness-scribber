@@ -31,3 +31,20 @@ test('reviewed percentage requires exact variant and comparable load source',()=
  data.context.facts.load.value.variantId='other-lift';assert.equal(selectPool(data).completeness,'blocked')
 })
 test('explicit bodyweight/no-load work does not acquire a max or invented load',()=>{const data=input();data.doses[0].loadMethod='none';assert.equal(selectPool(data).blocks[0].dose.prescription.loadKg,null)})
+test('TC-021 CAT-012: fictional per-side timing is exactly 95 seconds',()=>{
+ const d=input();Object.assign(d.doses[0],{sets:1,workSeconds:30,restSeconds:0,setupSeconds:20,transitionSeconds:15,sideMultiplier:2})
+ assert.equal(resolveDose(d.catalogue[0],d.doses[0],d.manifest).seconds,95)
+})
+test('CAT-013: fictional repetition timing is exactly 138 seconds',()=>{
+ const d=input();Object.assign(d.doses[0],{sets:2,mode:'repetitions',reps:8,workSeconds:24,restSeconds:60,setupSeconds:30,transitionSeconds:0,sideMultiplier:1})
+ assert.equal(resolveDose(d.catalogue[0],d.doses[0],d.manifest).seconds,138)
+})
+test('TC-015: advanced experience and pinning cannot override a prohibited demand',()=>{
+ const d=input();d.catalogue[0].levels=['advanced'];d.catalogue[0].demands=['fictional-restricted-demand'];d.request.level='advanced';d.request.prohibitedDemands=['fictional-restricted-demand'];d.request.pinnedIds=['synthetic-ex']
+ const r=selectPool(d);assert.equal(r.blocks.length,0);assert(r.candidates[0].reasons.includes('restriction_exclusion'))
+})
+test('TC-011: a setting label never supplies missing equipment or prerequisites',()=>{
+ const d=input();d.catalogue[0].equipment=['fictional-band'];d.catalogue[0].prerequisites=['fictional-anchor'];d.request.equipment=['fictional-band']
+ assert(selectPool(d).candidates[0].reasons.includes('prerequisite_missing'))
+ d.context.facts['fictional-anchor']={state:'usable',value:true};assert.equal(selectPool(d).completeness,'ready_for_coach_review')
+})
