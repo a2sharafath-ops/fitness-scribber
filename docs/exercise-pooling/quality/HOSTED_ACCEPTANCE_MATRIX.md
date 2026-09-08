@@ -1,12 +1,10 @@
-# A32 acceptance evidence matrix
+# A33 acceptance evidence matrix
 
 8 September 2026. All 110 preparation specifications are mapped below. **This is not a 110/110 pass certificate.**
 
-Counts: 86 passed-engineering-invariant; 10 blocked-external-scope; 14 partial.
+Counts: 92 passed-engineering-invariant; 10 blocked-external-scope; 8 partial.
 
-**A33 addendum:** [local recovery/UI/SQL fixes](../operations/A33_ENGINEERING_FIXES.md) add passing evidence for copies/templates, actual browser quota/Web Locks, interrupted extension review, travel history and kg/inventory progression. Counts above remain unchanged because required hosted/participant/domain layers are not replaced by local fixtures. A new hosted run needs the bounded test-setup expansion; no old test identity was reused.
-
-P = passed engineering invariant at the listed layer. L = partial; named work remains. B = blocked by external scope/review. None is professional or human UAT acceptance. Test filenames refer to `tests/pooling/` or `scripts/pooling/`; A32 browser evidence is in operations/A32_ENGINEERING_VERIFICATION.md. Historical A30 statuses remain in the JSON. Historical spec documents are not rewritten as executed tests.
+P = passed engineering invariant at the listed layer. L = partial; named work remains. B = blocked by external scope/review. None is professional or human UAT acceptance. Test filenames refer to `tests/pooling/` or `scripts/pooling/`; current browser evidence is in operations/A33_HOSTED_VERIFICATION.md. Historical A30/A32 statuses remain in the JSON. Historical spec documents are not rewritten as executed tests.
 
 | Case | Result | Evidence | Outcome / remaining work |
 |---|---|---|---|
@@ -32,7 +30,7 @@ P = passed engineering invariant at the listed layer. L = partial; named work re
 | TC-020 | P | completion-cases.test.js | A legacy one-rep default remains ambiguous and cannot supply confirmed maximal-load authority. |
 | TC-021 | P | selection.test.js | Exact 95-second arithmetic fixture passed. |
 | TC-022 | P | completion-cases.test.js; ui.jsx | Exact 1900/1800 comparison emits 100-second shortfall and coach alternatives; browser rendered it without reducing required rest/support. |
-| TC-023 | L | verification-hosted.mjs; verification-final-checks.mjs; builder-state.test.js | Actual manual/local-parser/tomorrow/bulk hosted UI and six API import boundaries passed. Positive cross-client/template/copy-last UI permutations still need an expanded accepted fixture set. |
+| TC-023 | P | a33-browser-server.mjs; a33-final-checks.mjs; template-import.test.js | Hosted-backed production UI copy-last, saved-template and same-coach cross-client imports each saved one unassigned draft; actuals/recipient-private notes stripped. Prior A32 manual/parser/tomorrow/bulk evidence retained; optional microphone/AI stays disabled. |
 | TC-024 | P | verification-final-checks.mjs; parser-merge.test.js | Actual local typed-parser import saved as unassigned; unknown identity blocked. Microphone and external AI are explicitly unavailable in pooling mode, with no provider request. |
 | TC-025 | P | browser canonical generation/swap; hosted-r2.mjs | New revisions remain unassigned until exact approval; old baseline retained. |
 | TC-026 | P | native-context.mjs; hosted-governance-checks.mjs | Prior authority cannot clear a new health concern. |
@@ -49,10 +47,10 @@ P = passed engineering invariant at the listed layer. L = partial; named work re
 | TC-037 | B | optional-device boundary | No live wearable integration or accepted device-specific processing in this run. |
 | TC-038 | P | migration.test.js; hosted-migration-rehearsal.mjs; hosted-preservation.mjs | Two migration passes and all 549 original hosted rows preserved; ambiguous names not remapped. |
 | TC-039 | P | completion-cases.test.js | Exact mirrored lineage counts once; conflicting mirror counts zero; explicit zero remains retained. |
-| TC-040 | L | verification-final-checks.mjs; operations.test.js | Actual browser simulated transport outage preserved pending actual and independent Stop; reconnect/retry/reload passed. Full browser quota/account-switch/forced-expiry permutations remain. |
+| TC-040 | P | a33-final-checks.mjs; a33-browser-server.mjs; remaining-browser.mjs; recovery-transport.test.js | Real provider-issued JWT expired naturally and was rejected; actual SDK refresh recovered its original pending request exactly once. Global sign-out, direct account switch, wrong-account retry and account change during held response passed. Real bounded browser storage/Web Locks proved separately in Chromium/WebKit; no physical-device certificate. |
 | TC-041 | L | ui.jsx | 390px budget/diff container stayed 390px with 358px table and 200% text-size fixture; table row/column scopes verified. Not OS zoom, screen-reader, physical-device or participant certification. |
 | TC-042 | P | context.test.js; final containment | No professional/launch acceptance inferred; temporary flags/authority disabled. |
-| TC-043 | L | review.test.js; sources.test.js; hosted-r3.mjs | Explicit timezone/per-session source contract passed; travel timezone UI journey remains. |
+| TC-043 | P | a33-browser-server.mjs; a33-final-checks.mjs; review.test.js | Hosted-backed native date/timezone form rejected disagreement; distinct Tokyo/Los Angeles drafts retain correct local dates and the same explicit instant. Old history remains intact. |
 | TC-044 | P | context.test.js; sources.test.js; canonical browser editor | Unknown adult/health facts block; form choices do not replace reviewed authority. |
 | TC-045 | P | completion-cases.test.js | Exact fictional hotel inventory/assistance gate and per-session inventory mismatch fixtures pass; no accepted real exercise is inferred. |
 | TC-046 | P | completion-cases.test.js | Eight catalogue/dose/manifest order permutations and reversed observation order replay identically. Physical locale/device parity is a separate acceptance gate. |
@@ -72,7 +70,7 @@ P = passed engineering invariant at the listed layer. L = partial; named work re
 | R2-T14 | P | hosted-r2.mjs; authority.sql | Client cannot accept/assign protected targets. |
 | R2-T15 | P | verification-hosted.mjs | Hosted report/approval and daily-versus-weekly source races retain current-source authority. |
 | R2-T16 | P | numerical.test.js; hosted-r2.mjs; browser daily no-change | Performed scope and original baseline untouched. |
-| R2-T17 | L | verification-hosted.mjs; verification-final-checks.mjs | Hosted exact daily-acceptance retry passed. Browser dropped responses were actual/draft saves, not the extension-review response itself. |
+| R2-T17 | P | a33-browser-server.mjs; a33-final-checks.mjs | Actual hosted extension-review response was dropped after commit; browser same-key reconciliation yielded one acceptance and one separate unassigned child. |
 | R2-T18 | P | verification-final-checks.mjs | Actual runner browser outage/reconnect prevents resumed authority while exact pending actual and Stop reconcile. Physical network testing is not claimed. |
 | R2-T19 | B | optional privacy/provider gate | Optional device-sharing withdrawal pathway requires accepted scope and provider integration. |
 | R2-T20 | P | catalogue.test.js; final containment | Draft C09 not admitted; synthetic tests do not override release gate. |
@@ -80,10 +78,10 @@ P = passed engineering invariant at the listed layer. L = partial; named work re
 | R3-T02 | P | extensions.test.js; hosted-governance-checks.mjs | Side equality required; opposite-side review does not resolve left. |
 | R3-T03 | P | extensions.test.js | Missing actual not replaced by planned target. |
 | R3-T04 | P | completion-cases.test.js | Dedicated legacy single-rep ambiguity fixture cannot authorize progression loading. |
-| R3-T05 | L | weekly.test.js | No invented catch-up day; travel-reason UI history scenario remains. |
+| R3-T05 | P | a33-browser-server.mjs; a33-final-checks.mjs; weekly.test.js | Explicit travel reason, selected dates/zones and original history retained through actual UI saves. No catch-up assignment invented; the extra explicit Save has its own distinct key. |
 | R3-T06 | P | numerical.test.js; hosted-containment.mjs | Health hold blocks new authority while prior results survive. |
 | R3-T07 | P | extensions.test.js; catalogue.test.js | Unapproved progression parameters cannot authorize numbers. |
-| R3-T08 | L | hosted-r3.mjs | Hosted comparable-history proposal passed with fictional seconds; exact kg/inventory case remains. |
+| R3-T08 | P | a33-fixtures.mjs; a33-final-checks.mjs | Actual hosted fictional 2 kg history cannot propose unavailable 4 kg; exact target-session [2,4] kg confirmation admits the 2-to-4 proposal. Accepted child stays unassigned and original actuals unchanged. No clinical/exercise policy acceptance inferred. |
 | R3-T09 | P | completion-cases.test.js | Exact fictional 42kg cap with 40/45 inventory refuses unavailable 42 and excessive 45. |
 | R3-T10 | P | hosted-r2.mjs; hosted-r3.mjs | Baseline, daily child and progression child remain separate unassigned revisions. |
 | R3-T11 | P | verification-hosted.mjs | Real hosted daily/weekly race: whole weekly batch won, outdated daily source denied; fresh daily acceptance remained an unassigned child, original baseline unchanged. |
@@ -123,4 +121,4 @@ P = passed engineering invariant at the listed layer. L = partial; named work re
 
 ## Remaining verification gate
 
-Before promotion, complete the remaining L cases at their required layer and resolve B cases only for the expressly admitted launch scope. Remaining variations include cross-client/template/copy-last UI, extension-review response-loss, forced-expiry/account-switch browser behavior, accepted real catalogue outputs, travel timezone UX, screen-reader/physical-device and participant UAT. No production promotion is authorized by this matrix.
+Before promotion, complete the remaining L cases at their required layer and resolve B cases only for the expressly admitted launch scope. Eight partial cases remain: TC-036/041, CAT-002/004/005/010/018 and R2-T11. They concern accepted real policy/catalogue cases, optional-sharing/privacy-rights service scope, and screen-reader/physical-device/participant acceptance. Agreed performance/load acceptance and managed-service/off-device recovery remain separate release gates. No production promotion is authorized by this matrix.

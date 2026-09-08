@@ -4,6 +4,12 @@ O02 / Q06 · version 0.1 · draft runbook. No release, hosted access, backup, mi
 
 Current execution evidence is [A32 hosted verification](./A32_ENGINEERING_VERIFICATION.md): the already authorized shared-backend work, 85-table relational restore, exact preserved baseline and fixture revocation are complete. This file remains a runbook, not new release authority. With test enrollments, global flags alone are not the whole containment boundary: revoke the affected exact workspace lease as well. Preserve Stop, actuals, corrections and history. Old PG16 installer paths in the historical manifest need re-download; current PG17 restored data and all backups remain.
 
+## A33 test-schema recovery addendum — 8 September 2026
+
+The approved A33 follow-up adds explicit engineering slot/release records and deterministic primary-workspace selection. See [A33 execution](A33_HOSTED_VERIFICATION.md) for measured backups, checksums and containment, not the older counts below. Original coach reservations and the original expiry are preserved; this does not authorize a real-client release.
+
+Keep the additive schema and historical rows during routine frontend fallback. Do **not** reintroduce the old unique `coach_id` workspace constraint over retained two-slot engineering history, delete the secondary workspace, reopen a revoked grant or edit a published fixture. Use the current guarded single-workspace default and revoke only the exact active test leases/releases/grants. Existing code checkpoints and database restore baselines remain separate; full managed-service/off-device recovery still needs its exact authorized destination.
+
 ## Local implementation addendum — 7 September 2026
 
 Code `3b779d9` and [local evidence](./LOCAL_BUILD_VERIFICATION.md) supersede hypothetical local-build statements. Live/staging execution still requires exact-target approval. The native harness lists the authoritative tested schema order: base/athlete/workout/screening/assessment/program schemas, then pooling, authority, decision gateway, sources, projections, legacy boundary, batches, review, extensions, extension gateway, catalogue, client home, governance, context review, weekly, suggestions, reassessment and catalogue admin. Do not blindly reapply this sequence to a hosted schema whose actual state has not been inspected and backed up.

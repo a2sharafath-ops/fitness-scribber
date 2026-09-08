@@ -1,11 +1,11 @@
 {
-  "version": "A32-2026-09-08",
+  "version": "A33-2026-09-08",
   "acceptanceComplete": false,
   "productionReady": false,
   "counts": {
-    "passed-engineering-invariant": 86,
+    "passed-engineering-invariant": 92,
     "blocked-external-scope": 10,
-    "partial": 14
+    "partial": 8
   },
   "scope": "Engineering evidence only. Passed means the stated invariant at its listed test layer, not clinical/participant acceptance or every hosted UI variation.",
   "cases": [
@@ -316,13 +316,13 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Copy to new date/client or template reuse",
       "expected": "Fresh draft/context/IDs; no approval/private clinical notes copied",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "verification-hosted.mjs",
-        "verification-final-checks.mjs",
-        "builder-state.test.js"
+        "a33-browser-server.mjs",
+        "a33-final-checks.mjs",
+        "template-import.test.js"
       ],
-      "note": "Actual manual/local-parser/tomorrow/bulk hosted UI and six API import boundaries passed. Positive cross-client/template/copy-last UI permutations still need an expanded accepted fixture set.",
+      "note": "Hosted-backed production UI copy-last, saved-template and same-coach cross-client imports each saved one unassigned draft; actuals/recipient-private notes stripped. Prior A32 manual/parser/tomorrow/bulk evidence retained; optional microphone/AI stays disabled.",
       "previousA30": {
         "status": "partial",
         "evidence": [
@@ -331,6 +331,24 @@
           "native-flow.mjs"
         ],
         "note": "Draft/copy boundary exists; not every hosted copy/template/cross-client UI path executed."
+      },
+      "previousA32": {
+        "status": "partial",
+        "evidence": [
+          "verification-hosted.mjs",
+          "verification-final-checks.mjs",
+          "builder-state.test.js"
+        ],
+        "note": "Actual manual/local-parser/tomorrow/bulk hosted UI and six API import boundaries passed. Positive cross-client/template/copy-last UI permutations still need an expanded accepted fixture set.",
+        "previousA30": {
+          "status": "partial",
+          "evidence": [
+            "migration.test.js",
+            "decision.test.js",
+            "native-flow.mjs"
+          ],
+          "note": "Draft/copy boundary exists; not every hosted copy/template/cross-client UI path executed."
+        }
       }
     },
     {
@@ -565,12 +583,14 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Offline, local storage failure or disabled module",
       "expected": "Honest unsaved/draft-only/unsupported status; no permission escalation or old bypass",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "verification-final-checks.mjs",
-        "operations.test.js"
+        "a33-final-checks.mjs",
+        "a33-browser-server.mjs",
+        "remaining-browser.mjs",
+        "recovery-transport.test.js"
       ],
-      "note": "Actual browser simulated transport outage preserved pending actual and independent Stop; reconnect/retry/reload passed. Full browser quota/account-switch/forced-expiry permutations remain.",
+      "note": "Real provider-issued JWT expired naturally and was rejected; actual SDK refresh recovered its original pending request exactly once. Global sign-out, direct account switch, wrong-account retry and account change during held response passed. Real bounded browser storage/Web Locks proved separately in Chromium/WebKit; no physical-device certificate.",
       "previousA30": {
         "status": "partial",
         "evidence": [
@@ -578,6 +598,22 @@
           "hosted-containment.mjs"
         ],
         "note": "Quota/corrupt storage contract and server-off passed; browser offline network transitions not injected."
+      },
+      "previousA32": {
+        "status": "partial",
+        "evidence": [
+          "verification-final-checks.mjs",
+          "operations.test.js"
+        ],
+        "note": "Actual browser simulated transport outage preserved pending actual and independent Stop; reconnect/retry/reload passed. Full browser quota/account-switch/forced-expiry permutations remain.",
+        "previousA30": {
+          "status": "partial",
+          "evidence": [
+            "operations.test.js",
+            "hosted-containment.mjs"
+          ],
+          "note": "Quota/corrupt storage contract and server-off passed; browser offline network transitions not injected."
+        }
       }
     },
     {
@@ -615,13 +651,22 @@
       "source": "quality/REFERENCE_CASES_AND_TEST_STRATEGY.md",
       "scenario": "Travel timezone change and second session same day",
       "expected": "Date context explicit; affected approval checked; daily wellness does not suppress session health-change check",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "review.test.js",
-        "sources.test.js",
-        "hosted-r3.mjs"
+        "a33-browser-server.mjs",
+        "a33-final-checks.mjs",
+        "review.test.js"
       ],
-      "note": "Explicit timezone/per-session source contract passed; travel timezone UI journey remains."
+      "note": "Hosted-backed native date/timezone form rejected disagreement; distinct Tokyo/Los Angeles drafts retain correct local dates and the same explicit instant. Old history remains intact.",
+      "previousA32": {
+        "status": "partial",
+        "evidence": [
+          "review.test.js",
+          "source.test.js",
+          "hosted-r3.mjs"
+        ],
+        "note": "Explicit timezone/per-session source contract passed; travel timezone UI journey remains."
+      }
     },
     {
       "id": "TC-044",
@@ -903,12 +948,12 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Approval commits but response is lost",
       "expected": "Query/retry same operation key; one assignment",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "verification-hosted.mjs",
-        "verification-final-checks.mjs"
+        "a33-browser-server.mjs",
+        "a33-final-checks.mjs"
       ],
-      "note": "Hosted exact daily-acceptance retry passed. Browser dropped responses were actual/draft saves, not the extension-review response itself.",
+      "note": "Actual hosted extension-review response was dropped after commit; browser same-key reconciliation yielded one acceptance and one separate unassigned child.",
       "previousA30": {
         "status": "partial",
         "evidence": [
@@ -916,6 +961,22 @@
           "hosted-r1.mjs"
         ],
         "note": "Same-key receipt contract passed; browser response-loss test remains."
+      },
+      "previousA32": {
+        "status": "partial",
+        "evidence": [
+          "verification-hosted.mjs",
+          "verification-final-checks.mjs"
+        ],
+        "note": "Hosted exact daily-acceptance retry passed. Browser dropped responses were actual/draft saves, not the extension-review response itself.",
+        "previousA30": {
+          "status": "partial",
+          "evidence": [
+            "operations.test.js",
+            "hosted-r1.mjs"
+          ],
+          "note": "Same-key receipt contract passed; browser response-loss test remains."
+        }
       }
     },
     {
@@ -1019,11 +1080,20 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Missed session explicitly due to travel",
       "expected": "Logistics context; no inability inference or compulsory catch-up",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
+        "a33-browser-server.mjs",
+        "a33-final-checks.mjs",
         "weekly.test.js"
       ],
-      "note": "No invented catch-up day; travel-reason UI history scenario remains."
+      "note": "Explicit travel reason, selected dates/zones and original history retained through actual UI saves. No catch-up assignment invented; the extra explicit Save has its own distinct key.",
+      "previousA32": {
+        "status": "partial",
+        "evidence": [
+          "weekly.test.js"
+        ],
+        "note": "No invented catch-up day; travel-reason UI history scenario remains."
+      }
     },
     {
       "id": "R3-T06",
@@ -1054,11 +1124,19 @@
       "source": "quality/EXTENSION_TEST_SPECIFICATIONS.md",
       "scenario": "Fictional policy permits +2 kg from 40 kg; all required conditions met",
       "expected": "Candidate 42 kg subject to inventory/bounds/coach approval; not automatically assigned",
-      "status": "partial",
+      "status": "passed-engineering-invariant",
       "evidence": [
-        "hosted-r3.mjs"
+        "a33-fixtures.mjs",
+        "a33-final-checks.mjs"
       ],
-      "note": "Hosted comparable-history proposal passed with fictional seconds; exact kg/inventory case remains."
+      "note": "Actual hosted fictional 2 kg history cannot propose unavailable 4 kg; exact target-session [2,4] kg confirmation admits the 2-to-4 proposal. Accepted child stays unassigned and original actuals unchanged. No clinical/exercise policy acceptance inferred.",
+      "previousA32": {
+        "status": "partial",
+        "evidence": [
+          "hosted-r3.mjs"
+        ],
+        "note": "Hosted comparable-history proposal passed with fictional seconds; exact kg/inventory case remains."
+      }
     },
     {
       "id": "R3-T09",

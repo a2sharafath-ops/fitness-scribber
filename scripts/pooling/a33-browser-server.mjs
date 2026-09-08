@@ -19,19 +19,24 @@ async function verify(){
  const copies=drafts.data.filter(d=>d.proposal.source==='manual_or_imported_builder'&&d.proposal.blocks.some(b=>b.exercises?.some(e=>e.exerciseDbRef===kg.imports.exerciseId)))
  if(copies.length){check('Hosted copy-last/template/same-coach cross-client UI yields three drafts',copies.length===3&&copies.filter(d=>d.client_id===b.clientId).length===1);check('Hosted imported actuals and private recipient notes are stripped',copies.every(d=>d.proposal.blocks.every(b=>b.exercises.every(e=>e.sets.every(s=>s.completedReps===null&&s.completedLoadKg===null))))&&copies.filter(d=>d.client_id===b.clientId).every(d=>d.proposal.notes===''));const r=await admin.from('pooling_assignments').select('id').in('draft_id',copies.map(d=>d.id));assert.ifError(r.error);check('Hosted imported drafts remain unassigned',r.data.length===0)}
  const travel=drafts.data.filter(d=>d.proposal.notes==='FICTIONAL A33 travel schedule; no catch-up requested')
- if(travel.length){check('Hosted travel history retains explicit dates, same instant and both zones',travel.length===2&&travel[0].proposal.date!==travel[1].proposal.date&&travel[0].proposal.session.sessionAt===travel[1].proposal.session.sessionAt&&travel[0].proposal.session.timeZone==='Asia/Tokyo'&&travel[1].proposal.session.timeZone==='America/Los_Angeles');const r=await admin.from('pooling_assignments').select('id').in('draft_id',travel.map(d=>d.id));assert.ifError(r.error);check('Hosted travel changes never invent a catch-up assignment',r.data.length===0)}
+ if(travel.length){
+  const tokyo=travel.filter(d=>d.proposal.session.timeZone==='Asia/Tokyo'),la=travel.filter(d=>d.proposal.session.timeZone==='America/Los_Angeles')
+  // One additional explicit Save was clicked during native date-field testing.
+  // Retain it and verify its own key; it is not a same-key retry duplicate.
+  check('Hosted travel revisions retain exact date/zone/instant, including the extra explicit UI submission',travel.length===3&&tokyo.length===2&&la.length===1&&tokyo.every(d=>d.proposal.date==='2026-09-09')&&la[0].proposal.date==='2026-09-08'&&travel.every(d=>Date.parse(d.proposal.session.sessionAt)===Date.parse('2026-09-08T23:30:00Z'))&&JSON.stringify(tokyo[0].proposal)===JSON.stringify(tokyo[1].proposal),{draftIds:travel.map(d=>d.id),extraExplicitSubmission:1})
+  const r=await admin.from('pooling_assignments').select('id').in('draft_id',travel.map(d=>d.id));assert.ifError(r.error);check('Hosted travel changes never invent a catch-up assignment',r.data.length===0)
+ }
  for(const e of events.filter(e=>e.fault==='response_dropped_after_commit'&&e.path.endsWith('/pooling_save_draft'))){const r=await admin.from('pooling_drafts').select('id').eq('operation_key',e.key);assert.ifError(r.error);check('Hosted dropped draft has exactly one durable row',r.data.length===1)}
  const flags=await admin.from('pooling_runtime').select('*').single();assert.ifError(flags.error);check('Global pooling remains off throughout A33 UI testing',!flags.data.r1&&!flags.data.r2&&!flags.data.r3)
  ledger.browserVerifiedAt=new Date().toISOString();h.save()
 }
 async function expiry(){
  const user=active.find(u=>u.label==='a33-b'),s=user.expirySession
- assert(Date.now()>s.expires_at*1000+3000,'Wait for actual signed JWT expiry; no clock/claim forgery')
+ // PostgREST documents 30 seconds of time-claim skew. Wait beyond it too.
+ assert(Date.now()>s.expires_at*1000+35000,'Wait past actual JWT expiry and provider clock-skew allowance; no clock/claim forgery')
  const response=await h.transport(url+'/rest/v1/rpc/pooling_test_status',{method:'POST',headers:{apikey:h.publicKey,Authorization:'Bearer '+s.access_token,'Content-Type':'application/json'},body:'{}'})
  const error=await response.json();check('Actually expired provider-issued JWT is rejected by hosted REST',response.status===401&&/expired/i.test(error.message??''),{status:response.status})
- const c=h.client(),r=await c.auth.refreshSession({refresh_token:s.refresh_token});assert.ifError(r.error);assert.equal(r.data.user.id,user.id)
- user.expirySession.refreshedAt=new Date().toISOString();user.expirySession.refreshedSession=r.data.session;h.save()
- check('Original provider refresh token refreshes after genuine JWT expiry',r.data.session.expires_at>Date.now()/1000)
+ ledger.expiredJwtVerifiedAt=new Date().toISOString();h.save()
 }
 const server=await createServer({configFile:false,envDir:false,define:{'import.meta.env.VITE_SUPABASE_URL':JSON.stringify(origin+'/__supabase'),'import.meta.env.VITE_SUPABASE_ANON_KEY':JSON.stringify(h.publicKey),'import.meta.env.VITE_POOLING_R1':'"true"','import.meta.env.VITE_POOLING_R2':'"true"','import.meta.env.VITE_POOLING_R3':'"true"'},plugins:[react(),{name:'a33-approved-hosted-test',configureServer(vite){vite.middlewares.use(async(req,res,next)=>{
  const path=new URL(req.url,origin)
@@ -61,6 +66,18 @@ const server=await createServer({configFile:false,envDir:false,define:{'import.m
     result.push({coachId:u.id,request:ledger.state.pendingFixtures[u.id]})}
    res.end(JSON.stringify(result));return
   }
+  if(path.pathname==='/__a33/expired-session'){
+   assert.equal(req.method,'POST');assert.equal(req.headers.origin,origin)
+   const token=String(req.headers.authorization||'').replace(/^Bearer /,'')
+   const verified=await h.client().auth.getUser(token);assert.ifError(verified.error)
+   const u=active.find(u=>u.id===verified.data.user.id&&u.label==='a33-b');assert(u,'Only the approved second fictional account')
+   assert(Date.now()>u.expirySession.expires_at*1000+35000,'Wait past actual provider JWT expiry and clock-skew allowance')
+   assert(!ledger.expiredSessionIssued,'Original session already issued: reconcile before requesting another')
+   ledger.expiredSessionIssued=new Date().toISOString();h.save()
+   // Only this newly verified account's own retained provider session is sent
+   // to its loopback test browser, never a service credential or another actor.
+   res.end(JSON.stringify({access_token:u.expirySession.access_token,refresh_token:u.expirySession.refresh_token}));return
+  }
   const target=path.pathname.replace(/^\/__supabase/,'');assert(/^\/(auth|rest|functions)\/v1\//.test(target))
   const token=String(req.headers.authorization??'').replace(/^Bearer /,'')
   if(target==='/auth/v1/token'){
@@ -70,17 +87,18 @@ const server=await createServer({configFile:false,envDir:false,define:{'import.m
   const draft=target.endsWith('/pooling_save_draft'),headers={}
   for(const key of ['authorization','apikey','content-type','x-client-info','prefer','range','accept-profile','content-profile','x-supabase-api-version','accept'])if(req.headers[key])headers[key]=req.headers[key]
   if(mode==='offline_draft'&&draft){events.push({path:target,fault:'offline_before_send',key:input.operation_key,request:input});h.save();req.socket.destroy();return}
-  if(mode==='expired_draft'&&draft){const actor=JSON.parse(Buffer.from(token.split('.')[1],'base64url').toString()).sub,u=active.find(u=>u.id===actor);assert(Date.now()>u.expirySession.expires_at*1000+3000);headers.authorization='Bearer '+u.expirySession.access_token;mode='normal'}
+  if(mode==='expired_draft'&&draft){const actor=JSON.parse(Buffer.from(token.split('.')[1],'base64url').toString()).sub,u=active.find(u=>u.id===actor);assert(Date.now()>u.expirySession.expires_at*1000+35000);headers.authorization='Bearer '+u.expirySession.access_token;mode='normal'}
   const started=Date.now(),response=await h.transport(url+target+path.search,{method:req.method,headers,...(!['GET','HEAD'].includes(req.method)?{body}:{})}),bytes=Buffer.from(await response.arrayBuffer())
   let data;try{data=JSON.parse(bytes.toString())}catch{}
   if(response.ok&&target==='/auth/v1/token'&&data?.refresh_token)refreshTokens.add(data.refresh_token)
-  const event={path:target,status:response.status,ms:Date.now()-started,key:input.operation_key};events.push(event);h.save()
+  const original=target==='/auth/v1/token'&&path.searchParams.get('grant_type')==='refresh_token'?active.find(u=>u.expirySession.refresh_token===input.refresh_token):null
+  const event={path:target,status:response.status,ms:Date.now()-started,key:input.operation_key,...(target==='/auth/v1/token'?{authGrant:path.searchParams.get('grant_type')}:{}),...(original?{retainedSessionActor:original.id,afterActualJwtExpiry:Date.now()>original.expirySession.expires_at*1000,refreshedActor:data?.user?.id,newExpiry:data?.expires_at}:{} )};events.push(event);h.save()
   if(response.ok&&((mode==='drop_review'&&target.endsWith('/pooling_review_extension'))||(mode==='drop_draft'&&draft))){mode='normal';event.fault='response_dropped_after_commit';event.receipt=data;h.save();req.socket.destroy();return}
   if(response.ok&&mode==='hold_draft'&&draft){mode='holding';event.fault='response_held_after_commit';h.save();await new Promise(resolve=>{const timer=setTimeout(()=>{release=null;resolve()},45000);release=()=>{clearTimeout(timer);resolve()}})}
   for(const [key,value]of response.headers)if(!['content-encoding','content-length','transfer-encoding','connection','access-control-allow-origin','set-cookie'].includes(key))res.setHeader(key,value)
   res.statusCode=response.status;res.end(bytes)
  }catch(error){events.push({failure:error.message,at:new Date().toISOString()});h.save();res.statusCode=503;res.end(JSON.stringify({error:error.message}))}
 })}}],server:{host:'127.0.0.1',port:5189,strictPort:true,fs:{deny:['.env','.env.*','**/.recovery/**','**/.local-test-runtime/**','**/.git/**']},watch:{ignored:['**/.recovery/**','**/.local-test-runtime/**']}},logLevel:'error'})
-await server.listen();console.log(JSON.stringify({app:origin,controls:origin+'/tests/pooling/a33-controls.html',scope:'Production UI and real hosted Auth/REST/Edge; exact fictional tokens only'}))
+await server.listen();console.log(JSON.stringify({pid:process.pid,app:origin,controls:origin+'/tests/pooling/a33-controls.html',scope:'Production UI and real hosted Auth/REST/Edge; exact fictional tokens only'}))
 const close=async()=>{release?.();h.save();writeFileSync(join(h.directory,'browser-summary.json'),JSON.stringify(summary(),null,2)+'\n',{mode:0o600});await server.close();process.exit(0)}
 process.on('SIGTERM',close);process.on('SIGINT',close)

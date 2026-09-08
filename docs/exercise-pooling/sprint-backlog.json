@@ -1,6 +1,6 @@
 {
   "name": "Fitness Scribber — Client Exercise Pooling",
-  "version": "A32-2026-09-08",
+  "version": "A33-2026-09-08",
   "status": "bounded-hosted-verification-contained-full-acceptance-open",
   "currentSprint": "S6",
   "executionMode": "approved-existing-stack-synthetic-r1-r3",
@@ -23,7 +23,7 @@
     "sharedDatabaseWarning": "Preview does not isolate schema, RLS, functions or the global pooling_runtime row from the existing app.",
     "nextGate": "Close remaining engineering cases and external acceptance; owner manages UAT. No main/Production promotion or real catalogue publication authorized."
   },
-  "completedScope": "Owner preparation/product review; Classic checkpoint; R1-R3 implementation; A32 85-table restore and corrective-migration rehearsal; six v2 Edge functions; final protected Preview and listed fictional API/browser/failure journeys; non-destructive containment. Not all 110 cases or sprint acceptance criteria are complete.",
+  "completedScope": "Owner review of all six PRDs and twelve catalogue drafts; Classic checkpoint and restore; R1-R3 implementation; A30-A32 hosted evidence plus A33 copy/import/travel/kg/recovery/real-Auth follow-up, scoped migrations, containment and original-row preservation. Human/domain/release acceptance remains open.",
   "priorityDefinitions": {
     "P0": "Safety, data integrity, permissions or dependency/release gate; highest priority within its eligible sprint.",
     "P1": "Core R1 functionality and usability.",
@@ -2270,7 +2270,7 @@
         "A10",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Each entry-point case re-evaluates target client/date/role and relevant restriction; no inherited source-client approval or hidden bypass.",
       "preparationOutputs": [
         "engineering/MIGRATION_INTEGRATION_FAILURES.md",
@@ -2287,7 +2287,7 @@
       ],
       "localCompletionSummary": "Legacy R1 read/write protections and draft routing for copies/templates/manual/voice/client paths.",
       "remainingWork": [
-        "Current full UI journey matrix and client-portal launch parity assessment remain."
+        "All named hosted import/copy UI variations passed; human coach/client acceptance and optional excluded provider scope remain."
       ],
       "localAuthorizationRefs": [
         "A23",
@@ -2297,12 +2297,21 @@
       "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
-        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md",
+        "operations/A33_HOSTED_VERIFICATION.md"
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "Positive cross-client/template/copy-last browser variations remain."
+      },
+      "previousA32RemainingWork": [
+        "Current full UI journey matrix and client-portal launch parity assessment remain."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "All named hosted import/copy UI variations passed; human coach/client acceptance and optional excluded provider scope remain."
       }
     },
     {
@@ -2327,7 +2336,7 @@
         "A10",
         "A12"
       ],
-      "status": "in-progress",
+      "status": "engineering-verified-acceptance-open",
       "acceptance": "Changed sources trigger appropriate review, concurrent edits cannot silently overwrite, unsaved changes are labelled and retryable, and network loss obeys approved policy.",
       "preparationOutputs": [
         "data/STATES_AND_AUTHORITY.md",
@@ -2345,7 +2354,7 @@
       ],
       "localCompletionSummary": "Durable original-operation journal, rejection/unknown separation, client scope guards, stop isolation.",
       "remainingWork": [
-        "Actual cross-tab/auth/network-loss end-to-end integration remains."
+        "Listed local storage/Web Locks and hosted response-loss, real expiry/refresh, sign-out and account-switch pending-operation checks passed. Human/device acceptance remains."
       ],
       "localAuthorizationRefs": [
         "A23",
@@ -2355,12 +2364,21 @@
       "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
-        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md",
+        "operations/A33_HOSTED_VERIFICATION.md"
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "Browser extension-review loss, forced expiry, quota and account-switch variations remain."
+      },
+      "previousA32RemainingWork": [
+        "Actual cross-tab/auth/network-loss end-to-end integration remains."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Listed local storage/Web Locks and hosted response-loss, real expiry/refresh, sign-out and account-switch pending-operation checks passed. Human/device acceptance remains."
       }
     },
     {
@@ -2403,7 +2421,7 @@
       ],
       "localCompletionSummary": "390px/1280px runner visual checks, disabled/focus styles, labels, unique IDs and desktop no-overflow checks.",
       "remainingWork": [
-        "Full keyboard/focus/device/screen-reader and participant acceptance remain."
+        "Native date entry, focus, dismissal guards and browser reflow checked. Physical-device, OS-zoom, real screen-reader and participant acceptance remain."
       ],
       "localAuthorizationRefs": [
         "A23",
@@ -2413,12 +2431,21 @@
       "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
-        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md",
+        "operations/A33_HOSTED_VERIFICATION.md"
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "Physical-device, OS zoom and real screen-reader/participant checks remain."
+      },
+      "previousA32RemainingWork": [
+        "Full keyboard/focus/device/screen-reader and participant acceptance remain."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Native date entry, focus, dismissal guards and browser reflow checked. Physical-device, OS-zoom, real screen-reader and participant acceptance remain."
       }
     },
     {
@@ -2521,17 +2548,26 @@
         "operations/LOCAL_BUILD_VERIFICATION.md"
       ],
       "remainingWork": [
-        "All 110 cases mapped: 57 engineering invariants passed, 43 partial, 10 external-scope blocked. Close the exact remaining cases; hosted races/response loss/offline, all entry points, precise budget/load/travel cases, accessibility and end-to-end performance are not certified."
+        "92 listed engineering invariants pass; 8 partial and 10 external-scope cases remain. Agreed performance/load targets, accepted real cases and participant/device acceptance remain."
       ],
       "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
-        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md",
+        "operations/A33_HOSTED_VERIFICATION.md"
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "14 partial / 10 external cases remain; no complete-suite or UAT certificate."
+      },
+      "previousA32RemainingWork": [
+        "All 110 cases mapped: 57 engineering invariants passed, 43 partial, 10 external-scope blocked. Close the exact remaining cases; hosted races/response loss/offline, all entry points, precise budget/load/travel cases, accessibility and end-to-end performance are not certified."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "92 listed engineering invariants pass; 8 partial and 10 external-scope cases remain. Agreed performance/load targets, accepted real cases and participant/device acceptance remain."
       }
     },
     {
@@ -2603,16 +2639,25 @@
       "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
-        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md",
+        "operations/A33_HOSTED_VERIFICATION.md"
       ],
       "hostedCompletionSummary": "Approved A30 baseline restore matched all 52 tables; two-pass 18-migration rehearsal, atomic hosted application and preservation checks passed. Feature-off and original-app reads plus linked stop passed; new candidate stopped-status defects corrected.",
       "remainingWork": [
-        "Broader legacy/client parity and managed Auth/REST/Edge/provider restore beyond native relational recovery; off-device backup destination/authority not provided."
+        "Fresh 85/86-table pre-migration restores, both additive rehearsals and the final 87-table post-retirement restore passed; all original rows preserved. Full managed-service/off-device disaster recovery needs an exact authorized target."
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "Same-device relational restore verified; full managed-service/off-device disaster recovery not executed."
+      },
+      "previousA32RemainingWork": [
+        "Broader legacy/client parity and managed Auth/REST/Edge/provider restore beyond native relational recovery; off-device backup destination/authority not provided."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Fresh 85/86-table pre-migration restores, both additive rehearsals and the final 87-table post-retirement restore passed; all original rows preserved. Full managed-service/off-device disaster recovery needs an exact authorized target."
       }
     },
     {
@@ -2865,7 +2910,7 @@
       "approvalRefs": [
         "A20"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "After R2 preparation permission, distinguish today/baseline and optional wearables, missingness, bounded suggestions and no compounded reductions; no build yet.",
       "preparationOutputs": [
         "prd/DAILY_ADJUSTMENT_PRD.md",
@@ -2877,7 +2922,7 @@
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending",
+      "acceptanceStatus": "owner-reviewed-professional-acceptance-separate",
       "outputs": [
         "prd/DAILY_ADJUSTMENT_PRD.md",
         "engineering/EXTENSION_CONTRACTS.md",
@@ -2886,12 +2931,25 @@
         "quality/catalogue-coverage-and-cases.draft.json",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed.",
+      "progressNote": "All six PRDs/twelve catalogue owner reviews are already accepted. Exact executable R2 policy/rights/domain acceptance and later enablement remain separate.",
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
-      }
+      },
+      "previousA32RemainingWork": [],
+      "remainingWork": [
+        "All six PRDs/twelve catalogue owner reviews are already accepted. Exact executable R2 policy/rights/domain acceptance and later enablement remain separate."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "All six PRDs/twelve catalogue owner reviews are already accepted. Exact executable R2 policy/rights/domain acceptance and later enablement remain separate."
+      },
+      "hostedEvidence": [
+        "operations/A33_HOSTED_VERIFICATION.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+      ]
     },
     {
       "id": "FP-702",
@@ -3045,17 +3103,26 @@
         "operations/LOCAL_BUILD_VERIFICATION.md"
       ],
       "remainingWork": [
-        "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+        "Exact hosted numerical-review response loss and original-key reconciliation passed. Accepted real policy/privacy, physical-device and participant criteria remain."
       ],
       "hostedVerificationStatus": "listed-A30-engineering-evidence-not-full-acceptance",
       "hostedEvidence": [
         "operations/HOSTED_BUILD_HANDOFF.md",
-        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md",
+        "operations/A33_HOSTED_VERIFICATION.md"
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "14 partial / 10 external cases remain; no complete-suite or UAT certificate."
+      },
+      "previousA32RemainingWork": [
+        "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Exact hosted numerical-review response loss and original-key reconciliation passed. Accepted real policy/privacy, physical-device and participant criteria remain."
       }
     },
     {
@@ -3119,7 +3186,7 @@
       "approvalRefs": [
         "A21"
       ],
-      "status": "draft-awaiting-review",
+      "status": "preparation-complete-owner-reviewed",
       "acceptance": "After R3 preparation permission, define comparable history, tolerance evidence, skip reasons, explicit finding resolution, weekly constraints and preservation rules.",
       "preparationOutputs": [
         "prd/PROGRESSION_PLANNING_PRD.md",
@@ -3131,7 +3198,7 @@
       ],
       "preparationCoverage": "Required design/review/test/runbook specifications prepared; actual task execution/acceptance pending.",
       "preparationStatus": "complete",
-      "acceptanceStatus": "pending",
+      "acceptanceStatus": "owner-reviewed-professional-acceptance-separate",
       "outputs": [
         "prd/PROGRESSION_PLANNING_PRD.md",
         "engineering/EXTENSION_CONTRACTS.md",
@@ -3140,12 +3207,25 @@
         "quality/catalogue-coverage-and-cases.draft.json",
         "quality/EXTENSION_TEST_SPECIFICATIONS.md"
       ],
-      "progressNote": "Early preparation explicitly authorized; final acceptance must incorporate verified build/pilot/domain evidence. No implementation or external review completed.",
+      "progressNote": "All six PRDs/twelve catalogue owner reviews are already accepted. Exact executable R3 policy/rights/domain acceptance and later enablement remain separate.",
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "See exact acceptance criterion and linked evidence; no broader acceptance inferred."
-      }
+      },
+      "previousA32RemainingWork": [],
+      "remainingWork": [
+        "All six PRDs/twelve catalogue owner reviews are already accepted. Exact executable R3 policy/rights/domain acceptance and later enablement remain separate."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "All six PRDs/twelve catalogue owner reviews are already accepted. Exact executable R3 policy/rights/domain acceptance and later enablement remain separate."
+      },
+      "hostedEvidence": [
+        "operations/A33_HOSTED_VERIFICATION.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+      ]
     },
     {
       "id": "FP-802",
@@ -3359,13 +3439,25 @@
         "operations/LOCAL_BUILD_VERIFICATION.md"
       ],
       "remainingWork": [
-        "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+        "Hosted exact 2-to-4 kg inventory-gated progression and travel-history paths passed. Accepted real content, pilot/UAT and scoped release remain pending."
       ],
       "a32Review": {
         "report": "operations/A32_ENGINEERING_VERIFICATION.md",
         "fullAcceptanceClaimed": false,
         "remaining": "14 partial / 10 external cases remain; no complete-suite or UAT certificate."
-      }
+      },
+      "previousA32RemainingWork": [
+        "Domain/privacy/device acceptance, target integration and authorized pilot/release portions remain."
+      ],
+      "a33Review": {
+        "report": "operations/A33_HOSTED_VERIFICATION.md",
+        "fullAcceptanceClaimed": false,
+        "remaining": "Hosted exact 2-to-4 kg inventory-gated progression and travel-history paths passed. Accepted real content, pilot/UAT and scoped release remain pending."
+      },
+      "hostedEvidence": [
+        "operations/A33_HOSTED_VERIFICATION.md",
+        "quality/HOSTED_ACCEPTANCE_MATRIX.md"
+      ]
     },
     {
       "id": "FP-B01",
@@ -3721,7 +3813,7 @@
     "A04": "Recommendations requested/drafted; no professional appointment/sign-off.",
     "A05": "Single coach plus client app; target India/GCC/USA/UK/Europe. Establishment/name/email and exact market activation pending.",
     "A06": "Explicit S1–S2 local preparation approval in user six-point reply.",
-    "remaining": "A22-A29 local build/runtime and A30 exact existing-stack integration, branch push and protected Preview approved/executed. Professional/privacy/rights acceptance, human UAT, off-device/full managed recovery and real-client/main/Production release remain pending."
+    "remaining": "A22-A33 local build, exact existing-stack integration, bounded fictional hosted follow-ups and protected feature-branch publication approved/executed. Professional/privacy/rights acceptance, human/device/load UAT, off-device/full managed recovery and real-client/main/Production release remain pending."
   },
   "lastPreparationBatch": {
     "version": "s1-foundation-draft-v0.1",
@@ -3740,7 +3832,7 @@
     "A12": "local-build-authorized-under-A23-professional-release-gates-pending"
   },
   "preparationStatusDefinition": "Complete refers only to independently authorable local S1/S2 preparation; acceptanceStatus separately preserves actual review/gate requirements.",
-  "currentPhase": "A32 evidence handoff; remaining acceptance and release gates open",
+  "currentPhase": "A33 engineering/hosted follow-up contained; human/domain/release gates remain open",
   "extendedPreparationApproval": {
     "record": "preparation/FULL_PREPARATION_APPROVAL.md",
     "A20_preparation": true,
@@ -3797,20 +3889,33 @@
     "productionEnabled": false,
     "codeCommit": "3b779d962dfc8ec58352de11ee74666e48c5c847"
   },
-  "hostedVerificationReport": "operations/A32_ENGINEERING_VERIFICATION.md",
+  "hostedVerificationReport": "operations/A33_HOSTED_VERIFICATION.md",
   "hostedAcceptanceMatrix": "quality/hosted-acceptance-matrix.json",
   "hostedVerificationSummary": {
-    "testedCodeCommit": "3b9541543e75c6dbff7f4c5b6ffdb64fd033899b",
-    "nodeTests": 163,
-    "nodePassed": 163,
-    "source": "quality/a32-engineering-verification.json",
-    "acceptance": {
-      "mapped": 110,
-      "passed-engineering-invariant": 86,
+    "version": "A33-2026-09-08",
+    "applicationCommit": "6ca02cb64322d44c868f7801d2206f3396df98f6",
+    "unitTests": 177,
+    "httpHandlerTests": 6,
+    "nativeSuites": 16,
+    "uiChecks": 14,
+    "originalTables": 85,
+    "originalRows": 1003,
+    "allOriginalRowsPreserved": true,
+    "counts": {
+      "passed-engineering-invariant": 92,
       "blocked-external-scope": 10,
-      "partial": 14,
-      "complete": false
+      "partial": 8
     },
-    "releaseAccepted": false
+    "fullAcceptance": false,
+    "productionReady": false
+  },
+  "a33Approval": {
+    "artifact": "preparation/A33_HOSTED_EXTENSION_REQUEST.md",
+    "status": "approved-executed-contained",
+    "newAccounts": 2,
+    "newWorkspaces": 3,
+    "previewBuilds": 2,
+    "mainPromotionAuthorized": false,
+    "originalWindowPreserved": true
   }
 }
