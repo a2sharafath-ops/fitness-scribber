@@ -8,7 +8,7 @@ import WorkoutSummary from './WorkoutSummary'
 import { buildFromPlan, buildFromPrescription, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
 import { programStats } from '../../../lib/program'
 import { fmtVL } from '../../../lib/units'
-import { poolingConfig } from '../../../lib/pooling/config'
+import usePoolingRuntime from '../../../hooks/usePoolingRuntime'
 import PoolingExecutionNotice from './PoolingExecutionNotice'
 import { executionAvailability } from '../../../lib/pooling/execution'
 
@@ -26,12 +26,13 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
 export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, bare }) {
+  const runtime=usePoolingRuntime(client.id)
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
   const ctx = { clientId: client.id, date: today, readiness: context.readiness, acwr: context.acwr, resolveTm }
   const locked = !!athlete && workout?.source === 'prescribed'
-  if (!executionAvailability({enabled:poolingConfig().r1,operation:'start'}).allowed) return <Shell bare={bare} extra={headerExtra}><PoolingExecutionNotice workout={workout} units={units} exercises={exercises} onSave={onSave} onAddSession={onAddSession} /></Shell>
+  if (!executionAvailability({enabled:runtime.governed,operation:'start'}).allowed) return <Shell bare={bare} extra={headerExtra}><PoolingExecutionNotice workout={workout} units={units} exercises={exercises} onSave={onSave} onAddSession={onAddSession} /></Shell>
 
   // ---- No workout yet → prescribed session, or a rest day ------------
   if (!workout) {

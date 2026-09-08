@@ -41,14 +41,16 @@ export function connection(){
  return {...process.env,...parseConnectionScript(cli(['db','dump','--linked','--dry-run'])),PGSSLMODE:'verify-full',PGSSLROOTCERT:ca,PGCONNECT_TIMEOUT:'15',PGOPTIONS:'-c default_transaction_read_only=on -c statement_timeout=30000'}
 }
 function run(bin,command,args,env){
- const r=spawnSync(join(bin,command),args,{env,encoding:'utf8',timeout:90000,input:'',maxBuffer:32*1024*1024})
+ // The post-pooling schema has substantially more objects. Keep a bounded but
+ // realistic export deadline; the calling task can yield while this runs.
+ const r=spawnSync(join(bin,command),args,{env,encoding:'utf8',timeout:command==='pg_dump'?300000:90000,stdio:['ignore','pipe','pipe'],maxBuffer:32*1024*1024})
  if(r.status!==0){
   const err=r.stderr||''
   const code=/certificate verify failed|root certificate|SSL error/i.test(err)?'tls_verification_failed':/permission denied/i.test(err)?'database_permission_denied':/could not translate host|Network is unreachable|timeout|timed out/i.test(err)?'database_connection_failed':'database_command_failed'
   if(diagnosticDirectory){
    const path=join(diagnosticDirectory,command+'-error-'+Date.now()+'.private.txt')
    writeFileSync(path,err,{mode:0o600,flag:'wx'})
-   console.error(JSON.stringify({command,exit:r.status,signal:r.signal,diagnosticFile:path,errorClass:code}))
+   console.error(JSON.stringify({command,exit:r.status,signal:r.signal,systemError:r.error?.code,diagnosticFile:path,errorClass:code}))
   }
   if(code==='tls_verification_failed')console.error(JSON.stringify({reason:code,details:err.split('\n').filter(s=>/certificate|SSL error|root CA/.test(s)).map(s=>s.replace(/password[^\s]*/gi,'[redacted]')).slice(0,3)}))
   throw Error(code)
@@ -57,12 +59,12 @@ function run(bin,command,args,env){
 }
 export function query(bin,env,sql){return run(bin,'psql',['-X','-q','-A','-t','-v','ON_ERROR_STOP=1','-c',"set role postgres; set timezone='UTC'; "+sql],env).trim()}
 function save(dir,name,value){const file=join(dir,name);writeFileSync(file,value,{mode:0o600,flag:'wx'});return file}
-export function fingerprintSQL(tables){
+export function fingerprintSQL(tables,portable=false){
  if(!tables.length)throw Error('no_fingerprint_tables')
  const ident=v=>'"'+v.replaceAll('"','""')+'"',literal=v=>"'"+v.replaceAll("'","''")+"'"
  const union=tables.map(t=>{
   if(!['public','auth','storage'].includes(t.schema) || typeof t.table!=='string')throw Error('unexpected_fingerprint_schema')
-  return `select ${literal(t.schema+'.'+t.table)} as name,jsonb_build_object('count',count(*),'sha256',encode(sha256(convert_to(coalesce(jsonb_agg(to_jsonb(x) order by to_jsonb(x)::text),'[]'::jsonb)::text,'UTF8')),'hex')) as value from ${ident(t.schema)}.${ident(t.table)} x`
+  return `select ${literal(t.schema+'.'+t.table)} as name,jsonb_build_object('count',count(*),'sha256',encode(sha256(convert_to(coalesce(jsonb_agg(to_jsonb(x) order by to_jsonb(x)::text${portable?' collate "C"':''}),'[]'::jsonb)::text,'UTF8')),'hex')) as value from ${ident(t.schema)}.${ident(t.table)} x`
  }).join(' union all ')
  return `select jsonb_object_agg(name,value) from (${union}) fingerprints`
 }

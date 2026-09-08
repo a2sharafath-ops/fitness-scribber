@@ -16,7 +16,7 @@ import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { hasBackend } from '../lib/supabase'
-import { poolingConfig } from '../lib/pooling/config'
+import usePoolingRuntime from '../hooks/usePoolingRuntime'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { uid } from '../lib/format'
@@ -47,7 +47,8 @@ export default function ClientDetailPage() {
   const { id } = useParams()
   const nav = useNavigate()
   const { db, commit, tz, units } = useData()
-  const poolingWorkflow=useGovernedWorkout(id,poolingConfig().r1)
+  const poolRuntime=usePoolingRuntime(id)
+  const poolingWorkflow=useGovernedWorkout(id,poolRuntime.governed,poolRuntime.r1)
   const { openModal } = useModal()
   const [profileOpen, setProfileOpen] = useState(false)
   const [trendKey, setTrendKey] = useState('stress') // which 30-day trend the chart shows
@@ -150,9 +151,9 @@ export default function ClientDetailPage() {
   // Same flow as the athlete portal: ▶ Start pops the morning check-in (unless
   // already logged today); ✓ Complete pops the RPE + duration form.
   const checkedIn = db.wellness.some((w) => w.clientId === c.id && w.date === today)
-  const startWorkout = (w) => { if (poolingConfig().r1) return toast('Start is disabled pending verified pooling authority.', 'info'); if (checkedIn) saveWorkout(w); else setCheckinW(w) }
+  const startWorkout = (w) => { if (poolRuntime.governed) return toast('Start is disabled pending verified pooling authority.', 'info'); if (checkedIn) saveWorkout(w); else setCheckinW(w) }
   const submitCheckin = (v) => {
-    if (poolingConfig().r1) { setCheckinW(null); return toast('Wellness cannot authorize a pooling session start.', 'info') }
+    if (poolRuntime.governed) { setCheckinW(null); return toast('Wellness cannot authorize a pooling session start.', 'info') }
     const w = checkinW
     setCheckinW(null)
     commit((d) => {
@@ -160,7 +161,7 @@ export default function ClientDetailPage() {
       if (w) d.workouts = [...(d.workouts || []).filter((x) => x.id !== w.id), w]
     })
   }
-  const skipCheckin = () => { const w = checkinW; setCheckinW(null); if (poolingConfig().r1) return; if (w) saveWorkout(w) }
+  const skipCheckin = () => { const w = checkinW; setCheckinW(null); if (poolRuntime.governed) return; if (w) saveWorkout(w) }
   const requestComplete = (w) => setRpeW(w)
   const finishWorkout = (w, rpe, minutes) => {
     const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec
@@ -314,7 +315,7 @@ export default function ClientDetailPage() {
           planner from the same card, with the AI coach beside it as a chat */}
       <div className="cc-wrap" style={{ marginTop: 16 }}>
         <div className="cc-main">
-          {poolingConfig().r1 && <GovernedWorkoutPanel workflow={poolingWorkflow} />}
+          {poolRuntime.governed && <GovernedWorkoutPanel workflow={poolingWorkflow} />}
           <PlannerWidget client={c} size="medium" todayProps={{
             client: c, today, workout: todayW, prescription: todayP, plans: db.plans, exercises: db.exercises,
             units, context: { readiness: rScore, acwr }, restingHr, age, bodyMassKg: c.anthro?.massKg ?? null,
@@ -323,7 +324,7 @@ export default function ClientDetailPage() {
             onAddSession: () => openModal(<WorkoutBuilderModal clientId={c.id} date={today} />, 'xl'),
           }} />
         </div>
-        <div className="cc-side">{poolingConfig().r1?<section className="card"><h2>Coaching review</h2><p>Classic readiness metrics are informational. Pooling changes require current evidence, accepted policy and explicit coach approval; legacy numerical progression suggestions are paused in this mode.</p></section>:<AICoach client={c} />}</div>
+        <div className="cc-side">{poolRuntime.governed?<section className="card"><h2>Coaching review</h2><p>Classic readiness metrics are informational. Pooling changes require current evidence, accepted policy and explicit coach approval; legacy numerical progression suggestions are paused in this mode.</p></section>:<AICoach client={c} />}</div>
       </div>
 
       {/* Recent activity — sessions, check-ins and PBs in one feed (Figma: Client Detail) */}

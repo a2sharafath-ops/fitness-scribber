@@ -3,7 +3,7 @@ import {readAssignments,recordExecution,submitPoolingReport,readPendingOperation
 import {hasBackend} from '../lib/supabase'
 import {DEFINITIVE_CODES} from '../lib/pooling/operations'
 
-export default function useGovernedWorkout(clientId,enabled){
+export default function useGovernedWorkout(clientId,enabled,startAllowed=true){
  const [assignments,setAssignments]=useState([]),[status,setStatus]=useState('loading'),[error,setError]=useState(''),[stopped,setStopped]=useState([])
  const current=useRef(null)
  // Every scope has independent in-flight work. A late response from a previous
@@ -32,6 +32,7 @@ export default function useGovernedWorkout(clientId,enabled){
  },[scope])
  const execute=useCallback(async(assignment,kind,payload={})=>{
    if(current.current!==scope || !enabled)return
+   if(['start','resume'].includes(kind)&&!startAllowed){setError('New starts are unavailable. Stop and preserved history remain available.');return}
    if(kind==='stop'){
      setStopped(ids=>ids.includes(assignment.id)?ids:[...ids,assignment.id])
      if(scope.stopping.has(assignment.id))return
@@ -56,7 +57,7 @@ export default function useGovernedWorkout(clientId,enabled){
    try{await recordExecution(request);if(current.current===scope){scope.pending=null;await refresh()}}
    catch(failure){fail(failure)}
    finally{scope.busy=false}
- },[refresh,clientId,enabled,scope,fail])
+ },[refresh,clientId,enabled,scope,fail,startAllowed])
  const sendReport=async request=>{
    scope.pending=request;scope.busy=true;scope.revision++;setStatus('saving');setError('')
    try{await submitPoolingReport(request);if(current.current===scope){scope.pending=null;await refresh()}}
@@ -73,5 +74,5 @@ export default function useGovernedWorkout(clientId,enabled){
    if(scope.pending.field)await sendReport(scope.pending)
    else {const assignment=assignments.find(row=>row.id===scope.pending.assignmentId);if(assignment)await execute(assignment,scope.pending.kind,scope.pending.payload)}
  }
- return {assignments,status,error,stopped,refresh,execute,reportHealth,retry,pending:scope.pending}
+ return {assignments,status,error,stopped,refresh,execute,reportHealth,retry,pending:scope.pending,startAllowed}
 }

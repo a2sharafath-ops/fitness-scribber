@@ -22,7 +22,7 @@ import {
   applyProgression, resolveTrainingMax, hasUnmapped, resetTrainingMaxes, programStats,
 } from '../../../lib/program'
 import { toast, confirmDialog } from '../../../lib/toast'
-import { poolingConfig } from '../../../lib/pooling/config'
+import usePoolingRuntime from '../../../hooks/usePoolingRuntime'
 import usePoolingBuilder from '../../../hooks/usePoolingBuilder'
 
 // Existing sessions load as saved; a fresh day opens with the standard
@@ -51,7 +51,8 @@ const fromExisting = (p, seedBlocks = []) => {
 export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '' }) {
   const { db, commit } = useData()
   const { closeModal } = useModal()
-  const pooling = poolingConfig().r1
+  const runtime=usePoolingRuntime(clientId)
+  const pooling = runtime.governed
   const draftSave = usePoolingBuilder({ enabled: pooling, clientId, date })
   const { initialProposal, markDirty } = draftSave
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()

@@ -1,5 +1,7 @@
 # Fitness Scribber pooling — hosted engineering handoff
 
+This is the historical A30 checkpoint. The approved A31 usable coach-testing follow-up is tracked in [current progress](./COACH_TEST_PROGRESS.md); its completion is not implied by the old results below.
+
 8 September 2026 · v0.7/A30 · **tested engineering checkpoint; not launch-ready acceptance**.
 
 The R1–R3 build is saved on `codex/exercise-pooling-local`. The approved existing-stack run exercised backup/recovery, additive migration, hosted authentication/permissions and fictional coach/client workflows. **Pooling is off at handoff.** Main, the current Production alias and the named Classic checkpoint were not promoted or replaced.

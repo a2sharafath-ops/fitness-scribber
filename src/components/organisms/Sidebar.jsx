@@ -5,6 +5,7 @@ import { openConcerns } from '../../lib/calc'
 import { hasBackend } from '../../lib/supabase'
 import Brand from '../atoms/Brand'
 import Icon from '../atoms/Icon'
+import {poolingConfig} from '../../lib/pooling/config'
 
 const ITEMS = [
   ['/', 'dashboard', 'Dashboard', true],
@@ -32,6 +33,7 @@ export default function Sidebar() {
         </NavLink>
       ))}
       <div className="nav-spacer" />
+      {poolingConfig().r1&&<NavLink to="/pooling-test" className={({isActive})=>'nav-item'+(isActive?' active':'')} aria-label="Pooling test workspace"><span className="ic" aria-hidden="true"><Icon name="dumbbell"/></span><span>Pooling test workspace</span></NavLink>}
       <NavLink to="/settings" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Settings">
         <span className="ic" aria-hidden="true"><Icon name="settings" /></span>
         <span>Settings</span>

@@ -15,11 +15,12 @@ import PoolingSuggestions from '../components/organisms/program/PoolingSuggestio
 import PoolingReassessment from '../components/organisms/program/PoolingReassessment'
 import PoolingCatalogueAdmin from '../components/organisms/program/PoolingCatalogueAdmin'
 import { hasBackend } from '../lib/supabase'
-import { poolingConfig } from '../lib/pooling/config'
 import { currentUnassignedDrafts } from '../lib/pooling/review'
+import usePoolingRuntime from '../hooks/usePoolingRuntime'
 
 export default function ExercisePoolPage() {
   const { id } = useParams()
+  const runtime=usePoolingRuntime(id)
   const { db } = useData()
   const { openModal } = useModal()
   const [refresh, setRefresh] = useState(0)
@@ -39,13 +40,13 @@ export default function ExercisePoolPage() {
   useEffect(() => {
     let active = true
     async function load() {
-      if (!poolingConfig().r1) { setLoading(false); return }
+      if (!runtime.r1) { setLoading(false); return }
       setLoading(true)
       setError('')
       try {
         const records = await readCatalogueDrafts()
         const data = hasBackend ? await readPooling(id) : { context: null, drafts: await readBuilderDrafts(id) }
-        const flags=poolingConfig()
+        const flags={r2:runtime.r2,r3:runtime.r3}
         const extensionPolicies=flags.r2 || flags.r3 ? await readExtensionPolicies() : null
         const extensionRequests={daily:flags.r2 ? await readExtensionRequests(id,'daily'):[],progression:flags.r3 ? await readExtensionRequests(id,'progression'):[]}
         const sourceData=await readSourceReview(db,id)
@@ -56,8 +57,8 @@ export default function ExercisePoolPage() {
     }
     load()
     return () => { active = false }
-  }, [id,refresh,db])
-  if (!poolingConfig().r1) return <div className="empty"><h1>Exercise pooling is disabled</h1><p>The Classic workflow is unchanged.</p><Link to={`/clients/${id}`}>Back to client</Link></div>
+  }, [id,refresh,db,runtime.r1,runtime.r2,runtime.r3])
+  if (!runtime.r1) return <div className="empty"><h1>{runtime.status==='loading'?'Checking client activation…':'Exercise pooling is unavailable for this client'}</h1><p>{runtime.testOnly?'The fictional testing window has ended or was revoked. Existing drafts and results are preserved.':runtime.status==='unavailable'?'Client activation could not be verified. No workflow was authorized.':'Existing clients retain the Classic workflow.'}</p><Link to="/pooling-test">Open fictional coach-testing workspace</Link><p><Link to={`/clients/${id}`}>Back to client and preserved sessions</Link></p></div>
   if (!client) return <div className="empty">Client not found.</div>
   async function report() {
     const operation = pending || { clientId: id, generation: state?.context?.generation || 1,
@@ -103,7 +104,7 @@ export default function ExercisePoolPage() {
         {!unassignedDrafts.length && <p>No current unassigned review drafts. Assigned and superseded revisions remain in the exact-revision history below.</p>}
       </>}
     </section>
-    {!loading && <PoolingApprovalReview key={`PoolingApprovalReview:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
+    {state && <PoolingApprovalReview key={`PoolingApprovalReview:${id}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend&&!loading&&!error} onRefresh={()=>setRefresh(value=>value+1)}/>}
     <PoolingSuggestions key={`PoolingSuggestions:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>
     <section className="card" aria-labelledby="health-review"><h2 id="health-review">Current health change</h2>
       <p>This is separate from optional daily wellness. A no-change answer does not clear an existing restriction.</p>
@@ -114,13 +115,13 @@ export default function ExercisePoolPage() {
       <button className="btn" disabled={!hasBackend || !healthChange || saveStatus === 'saving'} onClick={report}>{pending ? 'Retry same report' : 'Save attributed report'}</button>
       <p role="status">Report status: {saveStatus.replaceAll('_',' ')}</p>
     </section>
-    {policies && poolingConfig().r2 && <PoolingExtensionReview kind="daily" policy={policies.daily} requests={requests.daily} online={hasBackend} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts} onRefresh={()=>setRefresh(value=>value+1)} onRequest={operation=>requestReview('daily',operation)} onReview={async operation=>{await reviewExtension({clientId:id,generation:state?.context?.generation,...operation});setRefresh(value=>value+1)}}/>}
-    {policies && poolingConfig().r3 && <PoolingExtensionReview kind="progression" policy={policies.progression} requests={requests.progression} online={hasBackend} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts} onRefresh={()=>setRefresh(value=>value+1)} onRequest={operation=>requestReview('progression',operation)} onReview={async operation=>{await reviewExtension({clientId:id,generation:state?.context?.generation,...operation});setRefresh(value=>value+1)}}/>}
+    {policies && runtime.r2 && <PoolingExtensionReview kind="daily" policy={policies.daily} requests={requests.daily} online={hasBackend} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts} onRefresh={()=>setRefresh(value=>value+1)} onRequest={operation=>requestReview('daily',operation)} onReview={async operation=>{await reviewExtension({clientId:id,generation:state?.context?.generation,...operation});setRefresh(value=>value+1)}}/>}
+    {policies && runtime.r3 && <PoolingExtensionReview kind="progression" policy={policies.progression} requests={requests.progression} online={hasBackend} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts} onRefresh={()=>setRefresh(value=>value+1)} onRequest={operation=>requestReview('progression',operation)} onReview={async operation=>{await reviewExtension({clientId:id,generation:state?.context?.generation,...operation});setRefresh(value=>value+1)}}/>}
     <PoolingSourceReview key={`PoolingSourceReview:${id}`} sources={sourceReview.sources.filter(row=>row.id)} confirmations={sourceReview.confirmations} online={hasBackend} onConfirm={async operation=>{
       await confirmPoolingSource({clientId:id,generation:state?.context?.generation || 1,...operation});setRefresh(value=>value+1)
     }} />
-    {poolingConfig().r3 && <PoolingWeeklyReview key={`PoolingWeeklyReview:${id}:${refresh}`} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts || []} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
-    {poolingConfig().r3 && <PoolingReassessment key={`PoolingReassessment:${id}`} clientId={id} online={hasBackend}/>}
+    {runtime.r3 && <PoolingWeeklyReview key={`PoolingWeeklyReview:${id}:${refresh}`} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts || []} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
+    {runtime.r3 && <PoolingReassessment key={`PoolingReassessment:${id}`} clientId={id} online={hasBackend}/>}
     <PoolingCatalogueAdmin key={`PoolingCatalogueAdmin:${id}`} clientId={id} online={hasBackend}/>
     <section className="card" aria-labelledby="candidate-review"><h2 id="candidate-review">Candidate catalogue review</h2>
       <label htmlFor="pool-filter">Filter by name, role or movement pattern</label><input id="pool-filter" value={filter} onChange={event => setFilter(event.target.value)} />

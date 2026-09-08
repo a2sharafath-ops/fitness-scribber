@@ -1,5 +1,7 @@
 # Remaining pooling work and decisions
 
+Current A31 follow-up: the bounded coach-testing scope is approved and being verified. See [current progress](./COACH_TEST_PROGRESS.md). The A30 containment details below are historical, not a request to reapprove A31.
+
 8 September 2026 · supersedes the earlier local-only pending list. The original 82-task sprint remains the scope. **A30 is approved and has been executed; do not request the same backup/build/branch-Preview approval again.** Main/Production and real-client enablement are excluded.
 
 ## Completed engineering checkpoint

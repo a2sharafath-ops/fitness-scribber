@@ -11,6 +11,12 @@ export class PoolingError extends Error {
 }
 
 const known = DEFINITIVE_CODES
+export const readClientRuntime=clientId=>rpc('pooling_client_runtime',{target_client:clientId})
+export const readActorRuntime=()=>rpc('pooling_actor_runtime',{})
+export const readTestStatus=()=>rpc('pooling_test_status',{})
+export const createTestWorkspace=acknowledged=>rpc('pooling_create_test_workspace',{acknowledged})
+export const revokeTestWorkspace=clientId=>rpc('pooling_revoke_test_workspace',{target_client:clientId})
+export const readTestScenario=clientId=>rpc('pooling_test_scenario',{target_client:clientId})
 export async function readCatalogueDrafts() {
   const { default: candidateCatalogue } = await import('../../docs/exercise-pooling/catalogues/exercises.draft.json')
   return structuredClone(candidateCatalogue.exercises)

@@ -31,6 +31,7 @@ import Toaster from './components/organisms/Toaster'
 import './lib/chartSetup'
 
 const ExercisePoolPage = lazy(() => import('./pages/ExercisePoolPage'))
+const PoolingTestPage = lazy(() => import('./pages/PoolingTestPage'))
 
 function Shell() {
   return (
@@ -42,6 +43,7 @@ function Shell() {
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/pooling-test" element={<Suspense fallback={<p role="status">Loading coach test workspace…</p>}><PoolingTestPage /></Suspense>} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
               <Route path="/clients/:id/pool" element={<Suspense fallback={<p role="status">Loading exercise pool…</p>}><ExercisePoolPage /></Suspense>} />

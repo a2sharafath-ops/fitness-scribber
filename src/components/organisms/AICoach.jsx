@@ -6,7 +6,7 @@ import { callFunction, hasBackend } from '../../api/functions'
 import { lastNDates, todayISO, fmtDay } from '../../lib/dates'
 import { dailySum, acwrSeries, trainingMonotony, readinessScore, readinessFor, rolling30Baseline, deviationPct, latestOf, mean } from '../../lib/calc'
 import { programStats } from '../../lib/program'
-import { poolingConfig } from '../../lib/pooling/config'
+import usePoolingRuntime from '../../hooks/usePoolingRuntime'
 import { legacyCoachingNotice } from '../../lib/pooling/legacy-coaching'
 
 // Rule-based synthesis of live metrics into actionable coaching prompts.
@@ -77,7 +77,7 @@ export default function AICoach({ client }) {
   const [nonce, setNonce] = useState(0)
   const [live, setLive] = useState(null)
   const [loadingLive, setLoadingLive] = useState(false)
-  const governed = poolingConfig().r1
+  const {governed} = usePoolingRuntime(client.id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sug = useMemo(() => governed ? [legacyCoachingNotice({ poolingEnabled: true })] : suggest(db, client, tz, fmtVL), [db, client, tz, nonce, governed])
 
