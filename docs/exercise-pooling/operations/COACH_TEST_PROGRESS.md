@@ -1,6 +1,6 @@
 # A31 — seven-day fictional coach-test handoff
 
-8 September 2026. **Protected fictional workflow verified on Preview 9; final candidate/engineering-account retirement checks follow this commit. Not a real-client release.**
+8 September 2026. **Final Preview 10 and recovery-boundary checks passed; engineering-account retirement alone awaits direct confirmation after a system safety rejection.** See the [final verification receipt](./COACH_TEST_FINAL_VERIFICATION.md). Not a real-client release. The intermediate evidence below is retained with its original sequence.
 
 ## Preserved boundaries
 

@@ -27,7 +27,7 @@ if(!(Date.parse(account.data.user.banned_until)>Date.now())){
  const scenario=await coach.rpc('pooling_test_scenario',{target_client:cid});assert.equal(scenario.error?.message,'test_unavailable')
  const history=await h.rpc(coach,'pooling_read_assignments',{target_client:cid})
  assert(history.some(a=>a.status==='complete'&&a.actuals.length===3))
- assert(history.some(a=>a.id===ledger.a31.finalPreviewSmoke.assignmentId&&a.status==='stopped'&&a.actuals.length>=2))
+ assert(history.some(a=>a.id===ledger.a31.finalPreviewSmoke.assignmentId&&a.status==='stop'&&a.actuals.length>=2))
  const {data:{session}}=await coach.auth.getSession()
  const logout=await admin.auth.admin.signOut(session.access_token,'global');assert.ifError(logout.error)
  const ban=await admin.auth.admin.updateUserById(user.id,{ban_duration:'876000h'});assert.ifError(ban.error)
