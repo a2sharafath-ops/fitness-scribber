@@ -6,6 +6,7 @@ import PoolingBudgetNotice from '../../molecules/PoolingBudgetNotice'
 function CanonicalEditor({clientId,context,manifests,onSaved}){
  const [release,setRelease]=useState(''),[date,setDate]=useState(''),[instant,setInstant]=useState(''),[zone,setZone]=useState('UTC')
  const [setting,setSetting]=useState(''),[level,setLevel]=useState(''),[budget,setBudget]=useState(''),[goals,setGoals]=useState(''),[selection,setSelection]=useState([])
+ const [note,setNote]=useState('')
  const [status,setStatus]=useState('unsaved'),[error,setError]=useState(''),[pending,setPending]=useState(null)
  const document=manifests.find(row=>row.id===release)?.document,roles=document?.modulePolicy?.requiredRoles || []
  function edit(index,changes){setSelection(rows=>rows.map((row,i)=>i===index?{...row,...changes}:row));setStatus('unsaved')}
@@ -14,7 +15,7 @@ function CanonicalEditor({clientId,context,manifests,onSaved}){
   try{
    let request=pending
    if(!request){
-    const proposal=canonicalProposal({date,sessionAt:instant,timeZone:zone,manifestId:release,request:{setting,level,budgetSeconds:Number(budget)*60,goalPriority:goals.split(',').map(v=>v.trim()).filter(Boolean),roles:roles.map(id=>({id,required:true}))},selection,allowEmpty:true})
+    const proposal=canonicalProposal({date,sessionAt:instant,timeZone:zone,manifestId:release,request:{setting,level,budgetSeconds:Number(budget)*60,goalPriority:goals.split(',').map(v=>v.trim()).filter(Boolean),roles:roles.map(id=>({id,required:true}))},selection,notes:note,allowEmpty:true})
     const current=await readBuilderDraftState(clientId,date)
     request={clientId,operationKey:crypto.randomUUID(),proposal,...current,generation:context?.generation || current.generation}
     // A canonical review is a new exact revision, not an edit of saved authority.
@@ -36,6 +37,7 @@ function CanonicalEditor({clientId,context,manifests,onSaved}){
    <label htmlFor="canonical-level">Reviewed training level</label><select id="canonical-level" value={level} onChange={e=>setLevel(e.target.value)}><option value="">Choose level</option>{['beginner','intermediate','advanced'].map(v=><option key={v}>{v}</option>)}</select>
    <label htmlFor="canonical-budget">Time budget (minutes)</label><input id="canonical-budget" type="number" min="1" value={budget} onChange={e=>setBudget(e.target.value)}/>
    <label htmlFor="canonical-goals">Priority goal IDs, in order (comma separated)</label><input id="canonical-goals" value={goals} onChange={e=>setGoals(e.target.value)}/>
+   <label htmlFor="canonical-note">Planning note or travel reason (optional)</label><textarea id="canonical-note" maxLength={2000} value={note} onChange={e=>setNote(e.target.value)}/><p>This note records context only; it cannot supply clearance, approved doses or extra catch-up sessions.</p>
    {selection.map((item,index)=>{
     const exercise=document.catalogue.find(row=>row.id===item.exerciseId && row.revision===item.exerciseRevision)
     const doses=(document.doses || []).filter(row=>exercise?.doseRefs?.includes(row.id))
@@ -82,6 +84,8 @@ export default function PoolingApprovalReview({clientId,context,drafts,workspace
    const key=row.id || row.operationKey,decision=decisions.find(v=>v.draftId===row.id),parent=drafts.find(p=>p.id===row.parent_id),diff=selectionDiff(parent?.proposal.selection,row.proposal.selection)
    return <details key={key}><summary>{row.proposal.date} · draft {row.id || 'local'} · revision {row.revision}{assignments.some(a=>a.draftId===row.id)?' · assigned':''}</summary>
     <p>{row.proposal.session?.timeZone || 'Timezone not yet confirmed'} · {row.proposal.session?.request?.budgetSeconds ?? 'Unknown'} seconds budget · goals: {row.proposal.session?.request?.goalPriority?.join(', ') || 'not specified'}</p>
+    {row.proposal.session?.sessionAt && <p>Session instant: <time dateTime={row.proposal.session.sessionAt}>{row.proposal.session.sessionAt}</time></p>}
+    <p>Planning note: {row.proposal.notes || 'None recorded'}</p>
     <p>{diff.length} canonical occurrence changes relative to the previous revision.</p>
     <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(diff,null,2)}</pre>
     {!row.proposal.selection?.length && <p>Use source-checked generation or map canonical variants and doses before requesting an assignment decision.</p>}

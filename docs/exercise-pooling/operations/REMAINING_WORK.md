@@ -1,10 +1,12 @@
 # Remaining pooling work and release gates
 
-8 September 2026 · current A32 handoff. [Executed engineering/hosted evidence](./A32_ENGINEERING_VERIFICATION.md), [all 82 sprint tasks](./A32_SPRINT_RECONCILIATION.md), [all 110 cases](../quality/HOSTED_ACCEPTANCE_MATRIX.md).
+8 September 2026 · current A33 local-fix handoff. [Latest local fixes/evidence](./A33_ENGINEERING_FIXES.md), [previous hosted evidence](./A32_ENGINEERING_VERIFICATION.md), [all 82 sprint tasks](./A32_SPRINT_RECONCILIATION.md), [all 110 cases](../quality/HOSTED_ACCEPTANCE_MATRIX.md).
+
+A33 fixed account-bound recovery, delayed builder responses, guarded modal dismissal, governed template import and explicit travel-note/instant history. 177 unit tests, six HTTP-handler tests, 16 database suites, two-engine browser recovery checks, 17 actual UI-to-local-SQL assertions and a fresh 85-table post-fix restore passed. This is **local evidence, not a fresh hosted run or human acceptance**. Current shared testing has no unreserved workspace slots and supports only one workspace per coach. [Exact proposed hosted expansion](../preparation/A33_HOSTED_EXTENSION_REQUEST.md) is pending; original reservations and retired accounts were left untouched. Fixes have not yet been pushed/deployed.
 
 The additional fixes and bounded fictional hosted run are complete and contained. **The whole acceptance plan is not complete:** 86 listed engineering invariants pass, 14 cases remain partial, and 10 need external scope/review. These counts are not a 110/110 test certificate.
 
-## Completed in this run
+## Completed in the previous A32 hosted run
 
 163 unit tests, six HTTP tests, 16 native suites, clean lint/build; a fresh 85-table relational restore; corrective migration rehearsed twice; six hosted functions updated to v2. Actual hosted races, exact retries, Auth refresh/sign-out, browser dropped-commit responses/offline reconciliation, manual/local-parser/tomorrow/bulk drafts, final Preview approval/start/zero/pause/resume/Stop and two-tab stale approval were verified.
 
@@ -16,9 +18,9 @@ All 815 pre-A32 rows across 85 tables are unchanged. All nine A30–A32 engineer
 
 These remain open, not hidden inside “engineering complete.” See the matrix for the exact evidence already supplied.
 
-1. Positive cross-client, template and copy-last UI-to-hosted journeys with an appropriately scoped fixture set (TC-023).
-2. Extension-review response loss specifically; full browser forced-expiry, quota and account-switch/pending-journal combinations (R2-T17, TC-040). Actual/draft dropped responses and real Auth refresh/sign-out have passed, but do not replace these variations.
-3. Travel-timezone UI/history and exact hosted kg/inventory progression variations (TC-043, R3-T05, R3-T08). Pure source/identity/inventory/cap tests already pass.
+1. Hosted equivalents of the now-passing local cross-client, template and copy-last UI/SQL journeys (TC-023). Requires the bounded fixture expansion above.
+2. Hosted extension-review response loss and real Auth forced-expiry/account-switch/pending-journal combinations (R2-T17, TC-040). A33 verified real browser quota/Web Locks in Chromium/WebKit and dropped review responses after local SQL commit; it did not certify those Auth combinations against the provider.
+3. Hosted equivalents of A33's passing travel-timezone UI/history and exact kg/inventory progression checks (TC-043, R3-T05, R3-T08). Accepted real policy/catalogue outputs remain separate from these fictional cases.
 4. Physical devices, real screen-reader and OS-zoom/keyboard participant checks; agreed end-to-end performance targets and representative load acceptance (TC-041 / FP-506, 601, 604). Current evidence is narrower browser/component reflow and bounded timing.
 
 The three A32 fictional identities are now retired; do not reactivate them or use an original coach's credentials for further automated tests. Future hosted runs must use a fresh explicitly bounded fixture set and preserve the original two-coach window. Local variations needing no new hosted resources remain covered by existing engineering authorization. No new task, automation or unattended follow-up is scheduled.
@@ -37,4 +39,4 @@ The three A32 fictional identities are now retired; do not reactivate them or us
 
 “Fitness Scribber Classic” is tag `fitness-scribber-classic-2026-09-07`, commit `08ac0673d6e1d67ccd9fee2ffc5995074bcbf162`; its archive and full Git bundle verify. Main/Production remain `5de01b4e960e03e28d4a8b22527937103de10ad6`. Restore code only after checking new-state compatibility; do not erase later client data or assume the immutable old frontend understands newly stopped records. Follow the [rollback runbook](./RELEASE_AND_ROLLBACK_RUNBOOK.md).
 
-Storage is still tight and fluctuating; the last check was about 139 MiB free. Only the unused task-downloaded PG16 installer was removed (re-downloadable). All databases, code, documents and backups remain. Measure space before another heavy restore or build environment is created.
+The disk-space error was fixed by clearing regenerable browser/npm caches and old installer downloads. About 8.5 GiB was reclaimed; approximately 9 GiB remained during A33 verification. File-write checks and builds pass. Project data, dependencies and backups were preserved. Space can still fluctuate; measure before heavy restores. A33's new test browser/runtime and both post-fix database copies remain available.

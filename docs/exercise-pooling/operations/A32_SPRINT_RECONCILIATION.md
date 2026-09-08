@@ -2,6 +2,8 @@
 
 8 September 2026. Every original task is retained. Preparation/product acceptance, tested engineering and professional/participant/release acceptance are distinct. A32 does not turn incomplete tests or signatures into done tasks.
 
+**A33 follow-up:** [latest local fixes and evidence](./A33_ENGINEERING_FIXES.md) advance FP-504/505/506/601/603/704/805 with template/copy UI, account-bound recovery, dismissal/navigation fixes, travel history, exact kg/inventory tests and another 85-table local restore. Their hosted/participant/domain boundaries remain open. The table below is the historical A32 snapshot; consult [current remaining work](./REMAINING_WORK.md), not its older local-test descriptions, for next actions. No accepted PRD/catalogue owner review is reopened by this addendum.
+
 | Task | Sprint | Task | Current state | Remaining boundary |
 |---|---|---|---|---|
 | FP-001 | S0 | Convert the readiness map into a traceable sprint backlog and approval checklist | done | Owner product review recorded; exact task-specific external acceptance remains where required. |

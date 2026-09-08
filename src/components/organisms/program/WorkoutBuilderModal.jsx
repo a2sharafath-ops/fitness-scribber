@@ -16,6 +16,7 @@ import { useFormat } from '../../../hooks/useFormat'
 import useDragReorder from '../../../hooks/useDragReorder'
 import { moveOrdered } from '../../../lib/arrange'
 import { mergeParsedBlocks } from '../../../lib/merge-parsed-blocks'
+import { templateReviewBlocks } from '../../../lib/pooling/template-import'
 import { uid } from '../../../lib/format'
 import { fmtDay, addDays } from '../../../lib/dates'
 import {
@@ -51,7 +52,7 @@ const fromExisting = (p, seedBlocks = []) => {
 
 export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '' }) {
   const { db, commit } = useData()
-  const { closeModal } = useModal()
+  const { closeModal, registerCloseGuard } = useModal()
   const runtime=usePoolingRuntime(clientId)
   const pooling = runtime.governed
   const draftSave = usePoolingBuilder({ enabled: pooling, clientId, date })
@@ -68,6 +69,15 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const [step, setStep] = useState('edit') // edit | dates | progress | dictate | clients
   const [targets, setTargets] = useState(new Set())
   const [clientTargets, setClientTargets] = useState(new Set())
+  const [templateKey,setTemplateKey]=useState('')
+  const templates=[...(db.templates || []).map(t=>({...t,key:`template:${t.id}`})),...(db.plans || []).map(t=>({...t,key:`plan:${t.id}`}))]
+  const importTemplate=()=>{
+    try{
+      setBlocks(templateReviewBlocks(templates.find(t=>t.key===templateKey),db.exercises))
+      setNotes('');setStep('edit')
+      toast('Template imported as an unassigned review draft. Review identity and doses before saving.','info')
+    }catch(error){toast(error.message,'error')}
+  }
   useEffect(() => {
     if (pooling && Array.isArray(initialProposal?.blocks)) {
       setBlocks(structuredClone(initialProposal.blocks))
@@ -211,6 +221,9 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     if (pooling && draftSave.pending && !await confirmDialog({ title: 'Leave unsaved draft?', message: 'Some drafts were not saved. Closing discards the unsaved edits in this window; already saved drafts remain.', confirmLabel: 'Discard unsaved edits' })) return
     closeModal()
   }
+  // Escape/backdrop must follow the same recovery guard as the visible Close
+  // button; otherwise a failed or in-flight draft can be silently dismissed.
+  useEffect(()=>registerCloseGuard(closeBuilder))
 
   return (
     <ModalShell title={'Workout — ' + fmtDay(date)} onClose={closeBuilder}
@@ -284,6 +297,14 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
       {step === 'dictate' && (
         <DictationPanel localOnly={pooling} synonyms={db.synonyms} exercises={db.exercises} onInsert={insertDictated} onBack={() => setStep('edit')} />
       )}
+      {step === 'template' && <section>
+        <h3>Import saved template as a review draft</h3>
+        <p>Replaces this editor’s unsaved blocks only. Private notes, completed actuals and previous approvals are not imported. The saved template and all existing workouts remain unchanged.</p>
+        <label htmlFor="pooling-template">Saved template</label><select id="pooling-template" value={templateKey} onChange={e=>setTemplateKey(e.target.value)}><option value="">Choose a template</option>{templates.map(t=><option key={t.key} value={t.key}>{t.name || t.title || t.id}</option>)}</select>
+        {!templates.length && <p>No saved templates are available.</p>}
+        <Button onClick={importTemplate} disabled={!templateKey}>Import into review editor</Button>
+        <Button variant="ghost" onClick={()=>setStep('edit')}>Back</Button>
+      </section>}
 
       {step === 'edit' && (
         <>
@@ -293,6 +314,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
             <Button variant="ghost" size="sm" onClick={() => setStep('dates')} disabled={!blocks.length}>📅 Bulk paste…</Button>
             <Button variant="ghost" size="sm" onClick={() => setStep('dictate')}>🎙️ Dictate</Button>
             <Button variant="ghost" size="sm" onClick={copyLast}>↩ Copy last session</Button>
+            {pooling && <Button variant="ghost" size="sm" onClick={()=>setStep('template')}>Import saved template</Button>}
           </div>
 
           {blocks.length > 1 && (

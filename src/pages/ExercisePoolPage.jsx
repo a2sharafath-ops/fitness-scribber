@@ -20,6 +20,12 @@ import usePoolingRuntime from '../hooks/usePoolingRuntime'
 
 export default function ExercisePoolPage() {
   const { id } = useParams()
+  return <ExercisePoolWorkspace key={id} id={id}/>
+}
+
+// Navigation must not carry a pending health answer, extension request or
+// displayed private source state into another client's workspace.
+function ExercisePoolWorkspace({id}) {
   const runtime=usePoolingRuntime(id)
   const { db } = useData()
   const { openModal } = useModal()

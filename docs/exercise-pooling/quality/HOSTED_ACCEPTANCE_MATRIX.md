@@ -4,6 +4,8 @@
 
 Counts: 86 passed-engineering-invariant; 10 blocked-external-scope; 14 partial.
 
+**A33 addendum:** [local recovery/UI/SQL fixes](../operations/A33_ENGINEERING_FIXES.md) add passing evidence for copies/templates, actual browser quota/Web Locks, interrupted extension review, travel history and kg/inventory progression. Counts above remain unchanged because required hosted/participant/domain layers are not replaced by local fixtures. A new hosted run needs the bounded test-setup expansion; no old test identity was reused.
+
 P = passed engineering invariant at the listed layer. L = partial; named work remains. B = blocked by external scope/review. None is professional or human UAT acceptance. Test filenames refer to `tests/pooling/` or `scripts/pooling/`; A32 browser evidence is in operations/A32_ENGINEERING_VERIFICATION.md. Historical A30 statuses remain in the JSON. Historical spec documents are not rewritten as executed tests.
 
 | Case | Result | Evidence | Outcome / remaining work |

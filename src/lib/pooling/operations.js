@@ -15,6 +15,7 @@ export function pendingOperations(storage,scope){return structuredClone(read(sto
 export function prepareOperation(storage,{scope,kind,request}) {
  if(!scope || !kind || !request?.operationKey)throw new Error('invalid_operation')
  const db=read(storage),prior=db.operations.find(row=>row.scope===scope && row.request.operationKey===request.operationKey)
+ if(db.operations.some(row=>row.scope!==scope && row.request.operationKey===request.operationKey))throw new Error('session_mismatch')
  if(prior){if(prior.kind!==kind || canonical(prior.request)!==canonical(request))throw new Error('idempotency_conflict');if(prior.rejection)throw new Error(prior.rejection);return structuredClone(prior)}
  const row={scope,kind,request:structuredClone(request),receipt:null};db.operations.push(row);write(storage,db);return structuredClone(row)
 }
