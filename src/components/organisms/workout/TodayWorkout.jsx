@@ -87,6 +87,18 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
     )
   }
 
+  // A stop is retained history, not an unstarted draft. This also applies when
+  // pooling is switched off; do not reinterpret its new status as Classic Start.
+  if (workout.status === 'stopped') return (
+    <Shell bare={bare} extra={headerExtra}>
+      <section aria-label="Stopped session">
+        <h3>Session stopped</h3>
+        <p>Recorded work is preserved. This stopped record cannot be restarted from this card.</p>
+        <p>Ask your coach to review a separate session before continuing.</p>
+      </section>
+    </Shell>
+  )
+
   // ---- Editing a suggested session (never reachable when locked) ----
   if (editing && !locked && workout.status !== 'in_progress') {
     return (
