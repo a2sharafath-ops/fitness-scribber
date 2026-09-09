@@ -11,6 +11,7 @@ const ITEMS = [
   ['/', 'dashboard', 'Dashboard', true],
   ['/clients', 'users', 'Clients'],
   ['/workouts', 'dumbbell', 'Workouts'],
+  ['/pooling-test', 'target', 'Pooling test'],
   ['/schedule', 'calendar', 'Schedule'],
   ['/progress', 'chart', 'Progress'],
   ['/messages', 'message', 'Messages'],
@@ -24,8 +25,8 @@ export default function Sidebar() {
   return (
     <nav id="sidebar" aria-label="Main navigation">
       <Brand />
-      {ITEMS.map(([to, ic, label, end]) => (
-        <NavLink key={to} to={to} end={end} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label={label}>
+      {ITEMS.filter(([to]) => to !== '/pooling-test' || poolingConfig().r1).map(([to, ic, label, end]) => (
+        <NavLink key={to} to={to} end={end} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label={label} title={label}>
           <span className="ic" aria-hidden="true"><Icon name={ic} /></span>
           <span>{label}</span>
           {to === '/concerns' && <span className={'nav-badge' + (openCount > 0 ? ' show' : '')}>{openCount}</span>}
@@ -33,7 +34,6 @@ export default function Sidebar() {
         </NavLink>
       ))}
       <div className="nav-spacer" />
-      {poolingConfig().r1&&<NavLink to="/pooling-test" className={({isActive})=>'nav-item'+(isActive?' active':'')} aria-label="Pooling test workspace"><span className="ic" aria-hidden="true"><Icon name="dumbbell"/></span><span>Pooling test workspace</span></NavLink>}
       <NavLink to="/settings" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Settings">
         <span className="ic" aria-hidden="true"><Icon name="settings" /></span>
         <span>Settings</span>

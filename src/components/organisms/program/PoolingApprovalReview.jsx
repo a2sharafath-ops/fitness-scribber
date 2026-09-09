@@ -76,7 +76,7 @@ export default function PoolingApprovalReview({clientId,context,drafts,workspace
   const decision=decisions.find(v=>v.draftId===row.id)
   return online && context?.held===false && decision?.generation===context.generation && decision.manifestState==='published' && Date.parse(decision.validUntil)>Date.now() && decision.result.completeness==='ready_for_coach_review' && decision.result.sessionState==='eligible_for_coach_review' && !drafts.some(child=>child.parent_id===row.id) && !assignments.some(a=>a.draftId===row.id)
  }
- return <section className="card" aria-labelledby="pool-exact-title"><h2 id="pool-exact-title">Exact-revision review and assignment</h2>
+ return <section className="card" aria-labelledby="pool-exact-title"><h2 id="pool-exact-title" tabIndex={-1}>Exact-revision review and assignment</h2>
   <CanonicalEditor clientId={clientId} context={context} manifests={workspace.manifests || []} onSaved={onRefresh}/>
   <p>Only the owning coach can assign a currently valid decision. Selecting several reviewed revisions uses one transaction: all succeed, or none do.</p>
   {context?.held && <><label htmlFor="context-review-reference">Current coach review reference</label><input id="context-review-reference" value={contextReference} onChange={e=>setContextReference(e.target.value)}/><p>Context review requires recorded scope/consent and complete current observations. Unresolved concerns or restrictions remain held. A successful review creates a new unassigned revision, not an assignment.</p></>}

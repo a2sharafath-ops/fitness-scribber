@@ -1,0 +1,14 @@
+.pooling-navigation { min-width:0; margin-bottom:18px; overflow-wrap:anywhere; }
+.pooling-navigation h2 { margin-bottom:8px; }
+.pooling-navigation h3 { font-size:.86em; color:var(--muted); margin:16px 0 8px; }
+.pooling-navigation p { font-size:.93em; color:var(--muted); }
+.pooling-navigation ul { display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0; }
+.pooling-navigation li { display:flex; min-width:0; max-width:100%; }
+.pooling-navigation li > :is(a,span) { display:flex; align-items:center; min-height:44px; padding:10px 14px; border:1px solid var(--border); border-radius:10px; line-height:1.4; font-size:.93em; }
+.pooling-navigation a { color:var(--text); background:var(--surface); text-decoration:none; }
+.pooling-navigation a:hover, .pooling-navigation a[aria-current] { background:var(--tint-red); border-color:var(--accent); color:var(--accent); }
+.pooling-navigation a[aria-current] { font-weight:700; text-decoration:underline; text-underline-offset:3px; }
+.pooling-navigation [aria-disabled] { color:var(--muted); border-style:dashed; cursor:not-allowed; }
+.pooling-navigation a:focus-visible, .pooling-navigation h2:focus-visible, .pooling-workspace h2[id]:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+.pooling-navigation h2[id], .pooling-workspace h2[id], #governed-workouts { scroll-margin-top:20px; }
+@media print { .pooling-navigation { display:none; } }

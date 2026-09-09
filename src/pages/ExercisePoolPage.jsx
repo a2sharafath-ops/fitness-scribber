@@ -17,6 +17,7 @@ import PoolingCatalogueAdmin from '../components/organisms/program/PoolingCatalo
 import { hasBackend } from '../lib/supabase'
 import { currentUnassignedDrafts } from '../lib/pooling/review'
 import usePoolingRuntime from '../hooks/usePoolingRuntime'
+import PoolingNavigation from '../components/organisms/PoolingNavigation'
 
 export default function ExercisePoolPage() {
   const { id } = useParams()
@@ -92,6 +93,7 @@ function ExercisePoolWorkspace({id}) {
   }
   return <div className="pooling-workspace">
     <div className="topbar"><div><h1>Exercise Pool · {client.name}</h1><p className="sub">Coach review workspace · never automatic assignment</p></div><Link className="btn ghost" to={`/clients/${id}`}>Back to client</Link></div>
+    <PoolingNavigation clientId={id} testOnly={!!runtime.testOnly} r1={runtime.r1} r2={runtime.r2} r3={runtime.r3} ready={!loading} reviewReady={!loading&&!error&&!!state} extensionsReady={!!policies}/>
     <section className="card" aria-labelledby="pool-status"><h2 id="pool-status">Review and availability</h2>
       <p>{hasBackend ? 'Online source checks are required for governed actions.' : 'Local preview only. Backend approval, assignment, start and resume are unavailable.'}</p>
       <p>Catalogue candidates below are unpublished drafts, not an eligible exercise pool. Professional evidence and release admission remain pending.</p>
@@ -101,7 +103,7 @@ function ExercisePoolWorkspace({id}) {
     </section>
     <PoolingOperationRecovery clientId={id} refreshKey={refresh} onReconciled={()=>setRefresh(value=>value+1)}/>
     {hasBackend && <PoolingGovernance clientId={id} onChanged={()=>setRefresh(value=>value+1)}/>}
-    <section className="card" aria-labelledby="review-drafts"><h2 id="review-drafts">Unassigned review drafts</h2>
+    <section className="card" aria-labelledby="review-drafts"><h2 id="review-drafts" tabIndex={-1}>Unassigned review drafts</h2>
       <button className="btn" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={todayISO()} />, 'xl')}>Create review draft</button>
       <button className="btn ghost" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh drafts</button>
       <p>{hasBackend ? 'Canonical drafts require a current server decision and exact coach review below.' : 'Local drafts are stored separately from Classic prescriptions and have no server authority.'}</p>
@@ -112,7 +114,7 @@ function ExercisePoolWorkspace({id}) {
     </section>
     {state && <PoolingApprovalReview key={`PoolingApprovalReview:${id}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend&&!loading&&!error} onRefresh={()=>setRefresh(value=>value+1)}/>}
     <PoolingSuggestions key={`PoolingSuggestions:${id}:${refresh}`} clientId={id} context={state?.context} drafts={state?.drafts || []} workspace={workspace} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>
-    <section className="card" aria-labelledby="health-review"><h2 id="health-review">Current health change</h2>
+    <section className="card" aria-labelledby="health-review"><h2 id="health-review" tabIndex={-1}>Current health change</h2>
       <p>This is separate from optional daily wellness. A no-change answer does not clear an existing restriction.</p>
       <label htmlFor="pool-health">Client-reported change</label>
       <select id="pool-health" value={healthChange} disabled={saveStatus === 'saving' || !!pending} onChange={event => { setHealthChange(event.target.value); setSaveStatus('unsaved') }}>
@@ -129,7 +131,7 @@ function ExercisePoolWorkspace({id}) {
     {runtime.r3 && <PoolingWeeklyReview key={`PoolingWeeklyReview:${id}:${refresh}`} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts || []} online={hasBackend} onRefresh={()=>setRefresh(value=>value+1)}/>}
     {runtime.r3 && <PoolingReassessment key={`PoolingReassessment:${id}`} clientId={id} online={hasBackend}/>}
     <PoolingCatalogueAdmin key={`PoolingCatalogueAdmin:${id}`} clientId={id} online={hasBackend}/>
-    <section className="card" aria-labelledby="candidate-review"><h2 id="candidate-review">Candidate catalogue review</h2>
+    <section className="card" aria-labelledby="candidate-review"><h2 id="candidate-review" tabIndex={-1}>Candidate catalogue review</h2>
       <label htmlFor="pool-filter">Filter by name, role or movement pattern</label><input id="pool-filter" value={filter} onChange={event => setFilter(event.target.value)} />
       <p>{filtered.length} candidate records. Eligibility: review required.</p>
       <div style={{ overflowX: 'auto' }}><table><thead><tr><th scope="col">Exercise</th><th scope="col">Roles</th><th scope="col">Equipment</th><th scope="col">Availability</th></tr></thead>

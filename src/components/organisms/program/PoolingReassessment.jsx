@@ -7,7 +7,7 @@ export default function PoolingReassessment({clientId,online=true}){
   if((await readPendingOperations(clientId)).some(r=>r.kind==='reassessment'))throw Error('Reconcile the existing reassessment request in Operation recovery first.')
   await requestReassessment({clientId,operationKey:crypto.randomUUID(),review:{field,side,protocol,sourceReference:source,reason}});setRows(await readReassessments(clientId));setStatus('Scoped request saved. No restriction was resolved and no session assigned.')
  }catch(e){setError(e.message)}finally{setBusy(false)}}
- return <section className="card"><h2>Scoped reassessment request</h2><p>Identify the exact field, side, protocol and source needing review. A request, good workout or new no-change answer cannot clear a restriction. Resolution requires separately authorized, matching review evidence.</p>
+ return <section className="card" aria-labelledby="pool-reassessment-title"><h2 id="pool-reassessment-title" tabIndex={-1}>Scoped reassessment request</h2><p>Identify the exact field, side, protocol and source needing review. A request, good workout or new no-change answer cannot clear a restriction. Resolution requires separately authorized, matching review evidence.</p>
   <fieldset disabled={!online || busy}><legend>Exact review scope</legend>
    <label htmlFor="reassessment-field">Field or task key</label><input id="reassessment-field" value={field} onChange={e=>setField(e.target.value)}/>
    <label htmlFor="reassessment-side">Side needing review</label><select id="reassessment-side" value={side} onChange={e=>setSide(e.target.value)}><option value="">Choose explicitly</option>{['left','right','bilateral','midline','not_applicable'].map(s=><option key={s}>{s}</option>)}</select>

@@ -19,7 +19,7 @@ function PerformedSet({assignment,block,setIndex,side,workflow,latest,active}){
 
 export default function GovernedWorkoutPanel({workflow}){
  const [health,setHealth]=useState({})
- return <section className="card pooling-workspace" aria-labelledby="governed-workouts"><h2 id="governed-workouts">Coach-approved pooling sessions</h2>
+ return <section className="card pooling-workspace" aria-labelledby="governed-workouts"><h2 id="governed-workouts" tabIndex={-1}>Coach-approved pooling sessions</h2>
   <p>Only server-approved revisions appear here. Stop exercising immediately when needed; record-save confirmation is separate. Targets and performed results are kept distinct.</p>
   <button className="btn ghost" onClick={workflow.refresh} disabled={workflow.status==='saving'}>Refresh approved sessions</button>
   <p role="status">{workflow.status.replaceAll('_',' ')}</p>{workflow.error && <p role="alert">{workflow.error}</p>}

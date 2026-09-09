@@ -12,7 +12,7 @@ export default function PoolingWeeklyReview({clientId,context,workspace,drafts,o
   if((await readPendingOperations(clientId)).some(r=>['weekly','week_approve'].includes(r.kind)))throw Error('Reconcile the saved weekly operation in Operation recovery before creating another.')
   await action();setRows(await readWeeks(clientId));setReviewed([]);onRefresh()
  }catch(e){setError(e.message)}finally{setBusy(false)}}
- return <section className="card" aria-labelledby="weekly-review-title"><h2 id="weekly-review-title">Constrained weekly plan</h2>
+ return <section className="card" aria-labelledby="weekly-review-title"><h2 id="weekly-review-title" tabIndex={-1}>Constrained weekly plan</h2>
   <p>Assemble exact session drafts into an explicit seven-day window. No extra training day or catch-up volume is added. Numerical limits and recovery spacing must come from an admitted weekly policy.</p>
   {!online && <p>Local preview: server validation, weekly saving and assignment are unavailable.</p>}
   <fieldset disabled={!online || busy}><legend>Explicit weekly constraints</legend>

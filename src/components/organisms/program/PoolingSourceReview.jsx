@@ -19,7 +19,7 @@ export default function PoolingSourceReview({sources,confirmations,onConfirm,onl
    }catch(failure){setError(failure.message);setStatus(failure.code==='outcome_unknown'?'outcome unknown':'failed');if(['source_changed','stale_context','invalid_confirmation'].includes(failure.code))setPending(null)}
  }
  return <section className="card" aria-labelledby="pool-source-title">
-   <h2 id="pool-source-title">Explicit source review</h2>
+   <h2 id="pool-source-title" tabIndex={-1}>Explicit source review</h2>
    <p>Confirm an observation against its source revision. Untouched form defaults remain unknown. This does not clear restrictions, grant consent or assign a workout.</p>
    <fieldset disabled={!!pending || status==='saving'} onChange={()=>setStatus('unsaved')}>
      <legend>Observation and evidence</legend>

@@ -31,6 +31,7 @@ import { forClient, baselineProgress } from '../lib/assessment'
 import Icon from '../components/atoms/Icon'
 import useGovernedWorkout from '../hooks/useGovernedWorkout'
 import GovernedWorkoutPanel from '../components/organisms/workout/GovernedWorkoutPanel'
+import PoolingNavigation from '../components/organisms/PoolingNavigation'
 
 // Compact health metric card (Figma: Client Detail metrics row).
 function MetricCard({ label, value, unit, state, color }) {
@@ -210,6 +211,7 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Client header card (Figma: Client Detail) — identity, quick stats & actions */}
+      {(poolRuntime.testOnly || poolRuntime.r1) && <PoolingNavigation clientId={id} testOnly={!!poolRuntime.testOnly} r1={poolRuntime.r1} r2={poolRuntime.r2} r3={poolRuntime.r3} ready={poolRuntime.governed}/>}
       <div className="card client-header">
         <div className="ch-id" role="button" tabIndex={0} title="View full profile"
           onClick={() => setProfileOpen(true)}
