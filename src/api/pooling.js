@@ -5,6 +5,7 @@ import {validateConfirmation} from '../lib/pooling/sources'
 import {OPERATION_KEY,DEFINITIVE_CODES,pendingOperations} from '../lib/pooling/operations'
 import {createJournalIdentity} from '../lib/pooling/journal-identity'
 import {PoolingError,runRecoverableOperation,actorTransport} from '../lib/pooling/recovery-transport'
+import {poolingReadFailure} from '../lib/pooling/read-errors'
 const journalActor=supabase?createJournalIdentity(supabase.auth):null
 export {PoolingError}
 
@@ -60,8 +61,14 @@ async function rpc(name, payload, headers) {
     if(headers)for(const [key,value]of Object.entries(headers))query.setHeader(key,value)
     result=await query
   }
-  catch { throw new PoolingError('outcome_unknown', 'The save outcome is unknown. Reconcile or retry using the same operation key.', payload.operation_key) }
+  catch {
+    const failure=poolingReadFailure(name)
+    if(failure)throw new PoolingError(failure.code,failure.message)
+    throw new PoolingError('outcome_unknown', 'The save outcome is unknown. Reconcile or retry using the same operation key.', payload.operation_key)
+  }
   if (result.error) {
+    const failure=poolingReadFailure(name,result.error)
+    if(failure)throw new PoolingError(failure.code,failure.message)
     const code = known.find(value => result.error.message === value)
     if (code) throw new PoolingError(code, code.replaceAll('_',' '), payload.operation_key)
     throw new PoolingError('outcome_unknown', 'The backend could not confirm this operation. Keep the same operation key when checking or retrying.', payload.operation_key)

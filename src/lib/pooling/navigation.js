@@ -25,10 +25,11 @@ export function poolingNavigation({clientId, testOnly = true, r1 = false, r2 = f
   const clientPath = clientId ? `/clients/${encodeURIComponent(clientId)}` : null
   const flags = {r2, r3}
   function destination([key, label, section, flag]) {
-    if (flag && !flags[flag]) return []
+    if (flag && !flags[flag] && !testOnly) return []
     const reason = !clientPath ? 'Create your fictional workspace first.'
       : key === 'sessions' ? ''
       : !r1 ? 'Pooling is inactive; existing sessions and history remain available.'
+      : flag && !flags[flag] ? `${label} is not enabled for this workspace in this build. No prerequisite entered in a form can override this setting.`
       : !reviewReady || (['daily', 'progression'].includes(key) && !extensionsReady) ? 'Review data is loading or unavailable.' : ''
     return [{key, label, to: reason ? null : `${clientPath}${key === 'sessions' ? '' : '/pool'}#${section}`, reason}]
   }

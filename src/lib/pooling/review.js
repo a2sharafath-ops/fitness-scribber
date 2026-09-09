@@ -4,6 +4,19 @@ export function currentUnassignedDrafts(drafts=[],assignments=[]) {
   return drafts.filter(draft=>!assignments.some(row=>row.draftId===draft.id) && !drafts.some(row=>row.parent_id===draft.id && draft.id!=null))
 }
 
+// Assignment history shows its pinned decision, never a later validation of
+// the same draft. If that decision is absent, do not substitute new authority.
+export function draftReviewDecision(draftId,decisions=[],assignments=[]) {
+  const assignment=assignments.find(row=>row.draftId===draftId)
+  return assignment ? decisions.find(row=>row.id===assignment.decisionId && row.draftId===draftId) : decisions.find(row=>row.draftId===draftId)
+}
+
+// A separate review must not refresh an assigned draft's decision snapshot or
+// mark it superseded. Keep exact comparable occurrence identities, not authority.
+export function independentReviewProposal(proposal) {
+  return canonicalProposal({date:proposal.date,sessionAt:proposal.session?.sessionAt,timeZone:proposal.session?.timeZone,manifestId:proposal.manifestId,request:proposal.session?.request,selection:proposal.selection,notes:proposal.notes || ''})
+}
+
 // A canonical proposal is still untrusted. Only a server decision can authorize it.
 export function canonicalProposal({date,sessionAt,timeZone,manifestId,request,selection,notes='',allowEmpty=false}) {
   const at=Date.parse(sessionAt)

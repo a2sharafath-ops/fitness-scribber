@@ -7,6 +7,7 @@ export default function PoolingNavigation({ready = true, ...scope}) {
   const location = useLocation()
   const focusedLocation = useRef(null)
   const groups = poolingNavigation(scope)
+  const locks = [...new Set(Object.values(groups).flat().filter(item=>!item.to).map(item=>item.reason))]
   // React Router does not scroll to fragments after an async page load. Focus
   // the heading once per navigation, not again when a form refreshes its data.
   useEffect(() => {
@@ -34,5 +35,8 @@ export default function PoolingNavigation({ready = true, ...scope}) {
       }</li>)}</ul>
     </div>)}
     {!scope.clientId && <p>Create your fictional workspace in Test setup to unlock the client-specific links.</p>}
+    {!!scope.clientId && locks.map(reason=><p key={reason} className="pooling-lock">Unavailable steps: {reason}</p>)}
+    <p>Save unfinished edits before moving to a different screen. A step link opens its section; use the named action inside that section to make a change.</p>
+    <Link className="pooling-return" to={`${location.pathname}#pooling-navigation`} aria-label="Back to pooling steps">↑ Steps</Link>
   </nav>
 }

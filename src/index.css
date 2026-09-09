@@ -1075,3 +1075,8 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .pooling-workspace :is(button,input,select,textarea,summary):focus-visible { outline:3px solid var(--accent, #a32b35); outline-offset:3px; }
 .pooling-workspace pre { max-height:420px; overflow:auto; background:var(--surface2, #f7f7f7); padding:12px; border-radius:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
 .pooling-workspace .btn { margin:4px 6px 4px 0; min-height:44px; max-width:100%; white-space:normal; }
+.pooling-action { display:inline-block; vertical-align:top; max-width:100%; margin:4px 12px 8px 0; }
+.pooling-action .pooling-lock { max-width:65ch; margin:3px 0 8px; color:var(--muted); font-size:.93em; }
+.pooling-action button:disabled { opacity:.55; cursor:not-allowed; }
+.pooling-next-step { padding:14px; border-left:3px solid var(--accent); background:var(--surface2); border-radius:8px; margin:10px 0; }
+.pooling-workspace .pooling-step-link { text-decoration:underline; text-underline-offset:3px; font-weight:600; }

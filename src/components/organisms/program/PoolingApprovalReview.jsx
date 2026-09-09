@@ -1,9 +1,11 @@
 import {useState} from 'react'
 import {approveDraft,approveBatch,decideDraft,readPendingOperations,readBuilderDraftState,saveRecoverableBuilderDraft,reviewContext} from '../../../api/pooling'
-import {canonicalProposal,selectionDiff} from '../../../lib/pooling/review'
+import {canonicalProposal,selectionDiff,independentReviewProposal,draftReviewDecision} from '../../../lib/pooling/review'
 import PoolingBudgetNotice from '../../molecules/PoolingBudgetNotice'
+import PoolingAction from '../../molecules/PoolingAction'
+import {approvalBlock} from '../../../lib/pooling/action-readiness'
 
-function CanonicalEditor({clientId,context,manifests,onSaved}){
+function CanonicalEditor({clientId,context,manifests,onSaved,blockedReason}){
  const [release,setRelease]=useState(''),[date,setDate]=useState(''),[instant,setInstant]=useState(''),[zone,setZone]=useState('UTC')
  const [setting,setSetting]=useState(''),[level,setLevel]=useState(''),[budget,setBudget]=useState(''),[goals,setGoals]=useState(''),[selection,setSelection]=useState([])
  const [note,setNote]=useState('')
@@ -48,15 +50,15 @@ function CanonicalEditor({clientId,context,manifests,onSaved}){
      <button className="btn ghost" onClick={()=>setSelection(rows=>rows.filter((_,i)=>i!==index))}>Remove occurrence {index+1}</button>
     </fieldset>
    })}
-   <button className="btn ghost" disabled={!document} onClick={()=>setSelection(rows=>[...rows,{occurrenceId:crypto.randomUUID(),role:'',exerciseId:'',doseId:''}])}>Add canonical occurrence</button>
+   <PoolingAction className="btn ghost" reason={!document?'Choose a published release to see its exercises and dose revisions.':''} onClick={()=>setSelection(rows=>[...rows,{occurrenceId:crypto.randomUUID(),role:'',exerciseId:'',doseId:''}])}>Add canonical occurrence</PoolingAction>
   </fieldset>
   <p>With no occurrences selected, this saves session inputs for source-checked pool generation. Empty inputs cannot be approved as a workout.</p>
-  <button className="btn" disabled={status==='saving' || (!pending && !release)} onClick={save}>{pending?'Retry original canonical draft':'Save canonical draft or session inputs'}</button>
+  <PoolingAction reason={status==='saving'?'The draft is saving. Wait for confirmation.':pending?'':blockedReason||(!release?'Choose a published release before saving.':'')} onClick={save}>{pending?'Retry original canonical draft':'Save canonical draft or session inputs'}</PoolingAction>
   <p role="status">Canonical draft: {status}. Saving never assigns.</p>{error && <p role="alert">{error}</p>}
  </details>
 }
 
-export default function PoolingApprovalReview({clientId,context,drafts,workspace,online,onRefresh}){
+export default function PoolingApprovalReview({clientId,context,drafts,workspace,online,onRefresh,blockedReason=''}){
  const [checked,setChecked]=useState([]),[status,setStatus]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[pending,setPending]=useState(null)
  const [contextReference,setContextReference]=useState('')
  const decisions=workspace.decisions || [],assignments=workspace.assignments || []
@@ -72,17 +74,18 @@ export default function PoolingApprovalReview({clientId,context,drafts,workspace
   try{const receipt=await (operation.kind==='batch'?approveBatch:approveDraft)(operation.request);setPending(null);setStatus(`Assignment confirmed: ${receipt.batchId?`batch ${receipt.batchId}`:receipt.assignmentId}.`)}
   catch(failure){if(failure.code!=='outcome_unknown' && failure.code!=='unavailable' && failure.code!=='failed_save')setPending(null);throw failure}
  }
- const ready=row=>{
-  const decision=decisions.find(v=>v.draftId===row.id)
-  return online && context?.held===false && decision?.generation===context.generation && decision.manifestState==='published' && Date.parse(decision.validUntil)>Date.now() && decision.result.completeness==='ready_for_coach_review' && decision.result.sessionState==='eligible_for_coach_review' && !drafts.some(child=>child.parent_id===row.id) && !assignments.some(a=>a.draftId===row.id)
- }
+ const block=row=>approvalBlock({row,context,decision:decisions.find(v=>v.draftId===row.id),drafts,assignments,online})
+ const ready=row=>!block(row)
  return <section className="card" aria-labelledby="pool-exact-title"><h2 id="pool-exact-title" tabIndex={-1}>Exact-revision review and assignment</h2>
-  <CanonicalEditor clientId={clientId} context={context} manifests={workspace.manifests || []} onSaved={onRefresh}/>
+  <CanonicalEditor clientId={clientId} context={context} manifests={workspace.manifests || []} onSaved={onRefresh} blockedReason={blockedReason}/>
+  {!drafts.length&&<p className="pooling-next-step">{blockedReason||'No saved drafts yet. Prepare a fictional session in Test setup, then generate a pool draft. Its Validate and Approve buttons will appear here.'}</p>}
+  {!!drafts.length&&<p className="pooling-next-step">Current unassigned revisions are expanded below. Validate your chosen draft, read its decision and full dose, tick the exact-review acknowledgement, then explicitly approve it. Historical or already-assigned drafts remain available in their dated rows.</p>}
   <p>Only the owning coach can assign a currently valid decision. Selecting several reviewed revisions uses one transaction: all succeed, or none do.</p>
   {context?.held && <><label htmlFor="context-review-reference">Current coach review reference</label><input id="context-review-reference" value={contextReference} onChange={e=>setContextReference(e.target.value)}/><p>Context review requires recorded scope/consent and complete current observations. Unresolved concerns or restrictions remain held. A successful review creates a new unassigned revision, not an assignment.</p></>}
   {drafts.map(row=>{
-   const key=row.id || row.operationKey,decision=decisions.find(v=>v.draftId===row.id),parent=drafts.find(p=>p.id===row.parent_id),diff=selectionDiff(parent?.proposal.selection,row.proposal.selection)
-   return <details key={key}><summary>{row.proposal.date} · draft {row.id || 'local'} · revision {row.revision}{assignments.some(a=>a.draftId===row.id)?' · assigned':''}</summary>
+   const key=row.id || row.operationKey,decision=draftReviewDecision(row.id,decisions,assignments),parent=drafts.find(p=>p.id===row.parent_id),diff=selectionDiff(parent?.proposal.selection,row.proposal.selection)
+   const assigned=assignments.some(a=>a.draftId===row.id),superseded=drafts.some(child=>child.parent_id===row.id)
+   return <details key={key} open={!assignments.some(a=>a.draftId===row.id)&&!drafts.some(child=>child.parent_id===row.id)}><summary>{row.proposal.date} · draft {row.id || 'local'} · revision {row.revision}{assignments.some(a=>a.draftId===row.id)?' · assigned':''}</summary>
     <p>{row.proposal.session?.timeZone || 'Timezone not yet confirmed'} · {row.proposal.session?.request?.budgetSeconds ?? 'Unknown'} seconds budget · goals: {row.proposal.session?.request?.goalPriority?.join(', ') || 'not specified'}</p>
     {row.proposal.session?.sessionAt && <p>Session instant: <time dateTime={row.proposal.session.sessionAt}>{row.proposal.session.sessionAt}</time></p>}
     <p>Planning note: {row.proposal.notes || 'None recorded'}</p>
@@ -90,13 +93,19 @@ export default function PoolingApprovalReview({clientId,context,drafts,workspace
     <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(diff,null,2)}</pre>
     {!row.proposal.selection?.length && <p>Use source-checked generation or map canonical variants and doses before requesting an assignment decision.</p>}
     {context?.held && <button className="btn ghost" disabled={!online || !row.id || !row.proposal.session || !row.proposal.manifestId || !contextReference.trim() || busy || !!pending} onClick={()=>run(async()=>{if((await readPendingOperations(clientId)).some(op=>op.kind==='context_review'))throw Error('Reconcile the saved context review in operation recovery before requesting another.');const receipt=await reviewContext({clientId,draftId:row.id,generation:context.generation,reference:contextReference,operationKey:crypto.randomUUID()});setStatus(`Context review recorded; inspect new unassigned draft ${receipt.draftId}.`)})}>Request source-bound context review</button>}
-    <button className="btn ghost" disabled={!online || !row.id || !row.proposal.selection?.length || busy || !!pending} onClick={()=>run(async()=>{const result=await decideDraft({clientId,draftId:row.id,generation:context?.generation});setStatus(`Decision ${result.receipt.decisionId}: ${result.result.completeness}.`)})}>Validate exact draft {row.id || 'local'}</button>
+    <PoolingAction className="btn ghost" reason={!online?'Wait for connected workspace data, or retry loading after the error.':busy?'An operation is saving. Wait for confirmation.':pending?'Reconcile the original approval before a new validation.':assigned?'This draft is assigned. Copy it for separate review instead of refreshing its approved source snapshot.':superseded?'A newer revision replaces this draft. Validate the current unassigned revision.':!row.id||!row.proposal.selection?.length?'Generate an exercise selection for this saved draft first.':''} onClick={()=>run(async()=>{const result=await decideDraft({clientId,draftId:row.id,generation:context?.generation});setStatus(`Decision ${result.receipt.decisionId}: ${result.result.completeness}.`)})}>Validate exact draft {row.id || 'local'}</PoolingAction>
+    {row.id&&row.proposal.selection?.length>0&&<><PoolingAction className="btn ghost" reason={!online?'Load current workspace data before making a separate review copy.':busy?'An operation is saving. Wait for confirmation.':pending?'Reconcile the original pending approval before copying.':''} onClick={()=>run(async()=>{
+      if((await readPendingOperations(clientId)).some(operation=>operation.kind==='draft'))throw Error('Reconcile the saved draft operation in Operation recovery before making another copy.')
+      const receipt=await saveRecoverableBuilderDraft({clientId,generation:context?.generation,operationKey:crypto.randomUUID(),parentId:null,proposal:independentReviewProposal(row.proposal)})
+      setStatus(`Separate unassigned review copy saved: draft ${receipt.id}. Original draft ${row.id}, its assignments and results are unchanged. Use the new ID as a review target; validate and approve separately if assignment is intended.`)
+    })}>Copy draft {row.id} for separate review</PoolingAction><p>A separate copy retains the exact date, selection and doses, but no approval or results. It does not supersede this draft.</p></>}
     {decision && <><p>Decision {decision.id} · {decision.result.completeness} · expires {decision.validUntil}</p><PoolingBudgetNotice result={decision.result}/><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify({blocks:decision.result.blocks,gaps:decision.result.gaps,durationSeconds:decision.result.durationSeconds},null,2)}</pre></>}
+    {assigned&&!decision&&<p>The decision pinned to this assignment is not loaded. Open Sessions &amp; results to inspect the assignment; a newer validation is not a substitute for its original approval.</p>}
     <label><input type="checkbox" disabled={!ready(row) || busy || !!pending} checked={checked.includes(key)} onChange={e=>setChecked(ids=>e.target.checked?[...ids,key]:ids.filter(id=>id!==key))}/>I reviewed this exact client/date, full dose, source gaps and revision changes.</label>
-    <button className="btn" disabled={!ready(row) || !checked.includes(key) || busy || !!pending} onClick={()=>run(()=>approve([row]))}>Approve &amp; assign draft {row.id || 'local'}</button>
+    <PoolingAction reason={busy?'An operation is saving. Wait for confirmation.':pending?'Reconcile the original pending approval first.':block(row)||(!checked.includes(key)?'Read the exact decision and dose, then tick the review acknowledgement above.':'')} onClick={()=>run(()=>approve([row]))}>Approve &amp; assign draft {row.id || 'local'}</PoolingAction>
    </details>
   })}
-  <button className="btn" disabled={busy || !!pending || checked.length<2 || !checked.every(id=>drafts.some(row=>row.id===id && ready(row)))} onClick={()=>run(()=>approve(drafts.filter(row=>checked.includes(row.id))))}>Approve selected revisions atomically ({checked.length})</button>
+  <PoolingAction reason={busy?'An approval is saving.':pending?'Reconcile the original pending approval first.':checked.length<2?'Optional batch action: validate and explicitly review at least two current revisions. For one draft, use its individual Approve button above.':!checked.every(id=>drafts.some(row=>row.id===id&&ready(row)))?'At least one selected revision needs a fresh validation or review.':''} onClick={()=>run(()=>approve(drafts.filter(row=>checked.includes(row.id))))}>Approve selected revisions atomically ({checked.length})</PoolingAction>
   {pending && <button className="btn" disabled={busy} onClick={()=>run(()=>approve([]))}>Reconcile original approval</button>}
   {status && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
  </section>

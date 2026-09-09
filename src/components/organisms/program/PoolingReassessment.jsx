@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react'
 import {readReassessments,requestReassessment,readPendingOperations} from '../../../api/pooling'
+import PoolingAction from '../../molecules/PoolingAction'
 export default function PoolingReassessment({clientId,online=true}){
  const [rows,setRows]=useState([]),[field,setField]=useState(''),[side,setSide]=useState(''),[protocol,setProtocol]=useState(''),[source,setSource]=useState(''),[reason,setReason]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState('')
  useEffect(()=>{let active=true;if(online)readReassessments(clientId).then(data=>{if(active)setRows(data)}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[clientId,online])
@@ -15,7 +16,7 @@ export default function PoolingReassessment({clientId,online=true}){
    <label htmlFor="reassessment-source">Source reference</label><input id="reassessment-source" value={source} onChange={e=>setSource(e.target.value)}/>
    <label htmlFor="reassessment-reason">Why review is needed</label><textarea id="reassessment-reason" value={reason} onChange={e=>setReason(e.target.value)}/>
   </fieldset>
-  <button className="btn" disabled={!online || busy || ![field,side,protocol,source,reason].every(v=>v.trim())} onClick={save}>Save scoped review request</button>
+  <PoolingAction reason={!online?'Load the current connected workspace before saving a reassessment request.':busy?'The scoped request is saving.':![field,side,protocol,source,reason].every(v=>v.trim())?'Specify the exact field, side, protocol, source reference and review reason.':''} onClick={save}>Save scoped review request</PoolingAction>
   {rows.map(r=><p key={r.id}>Request {r.id} · {r.request.field} · {r.request.side} · {r.request.protocol} · {r.state.replaceAll('_',' ')}</p>)}
   {status && <p role="status">{status}</p>}{error && <p role="alert">{error}</p>}
  </section>

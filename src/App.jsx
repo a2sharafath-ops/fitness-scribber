@@ -14,7 +14,10 @@ import PageLoadFailure from './components/molecules/PageLoadFailure'
 
 // A failed chunk must remain recoverable after a deployment or network loss.
 // Reload never clears the account-scoped pending-operation journal.
-const page = load => lazy(() => load().catch(() => ({ default: PageLoadFailure })))
+const page = load => lazy(() => load().catch(error => {
+  if (import.meta.env.DEV) console.error('Application route module failed to load', error)
+  return { default: PageLoadFailure }
+}))
 const AthletePortal = page(() => import('./pages/AthletePortal'))
 const AdminPortal = page(() => import('./pages/AdminPortal'))
 const DashboardPage = page(() => import('./pages/DashboardPage'))

@@ -11,4 +11,5 @@
 .pooling-navigation [aria-disabled] { color:var(--muted); border-style:dashed; cursor:not-allowed; }
 .pooling-navigation a:focus-visible, .pooling-navigation h2:focus-visible, .pooling-workspace h2[id]:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
 .pooling-navigation h2[id], .pooling-workspace h2[id], #governed-workouts { scroll-margin-top:20px; }
+.pooling-navigation .pooling-return { position:fixed; right:18px; bottom:18px; z-index:9; padding:12px 18px; min-height:44px; border:1px solid var(--border); border-radius:999px; background:var(--surface); box-shadow:0 3px 16px #0002; font-weight:700; }
 @media print { .pooling-navigation { display:none; } }

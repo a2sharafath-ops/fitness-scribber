@@ -2,7 +2,7 @@
 import {createServer} from 'vite'
 import react from '@vitejs/plugin-react'
 const server = await createServer({
-  configFile:false, envDir:false,
+  configFile:false, envDir:false, cacheDir:'node_modules/.vite-pooling-navigation',
   define:{'import.meta.env.VITE_SUPABASE_URL':'""','import.meta.env.VITE_SUPABASE_ANON_KEY':'""'},
   plugins:[react(),{name:'navigation-fixture',configureServer(vite){
     vite.middlewares.use((req,res,next)=>{

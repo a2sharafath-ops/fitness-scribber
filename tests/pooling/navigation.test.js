@@ -24,8 +24,13 @@ test('routes encode the exact client ID and never reuse a previous client', () =
   assert(all({...active,clientId:'next-client'}).filter(row => row.to.startsWith('/clients/')).every(row => row.to.startsWith('/clients/next-client')))
 })
 test('disabled R2/R3 capabilities cannot be exposed by navigation', () => {
-  const keys = all({clientId:active.clientId,r1:true}).map(row => row.key)
-  for (const key of ['daily', 'progression', 'weekly', 'reassessment']) assert(!keys.includes(key))
+  const items = all({clientId:active.clientId,r1:true})
+  for (const key of ['daily', 'progression', 'weekly', 'reassessment']) {
+    const item=items.find(row=>row.key===key)
+    assert.equal(item.to,null)
+    assert.match(item.reason,/not enabled/)
+  }
+  assert(!all({clientId:active.clientId,r1:true,testOnly:false}).some(row=>row.key==='daily'))
 })
 test('inactive workspace retains setup, guide and preserved sessions but disables pooling actions', () => {
   const items = all({...active,r1:false,r2:false,r3:false})

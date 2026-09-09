@@ -1,6 +1,7 @@
 import {useState} from 'react'
+import PoolingAction from '../../molecules/PoolingAction'
 
-export default function PoolingSourceReview({sources,confirmations,onConfirm,online}){
+export default function PoolingSourceReview({sources,confirmations,onConfirm,online,blockedReason=''}){
  const [sourceIndex,setSourceIndex]=useState(''),[key,setKey]=useState(''),[state,setState]=useState('unknown'),[value,setValue]=useState('null')
  const [unit,setUnit]=useState(''),[protocol,setProtocol]=useState(''),[side,setSide]=useState('not_applicable'),[effectiveAt,setEffectiveAt]=useState(''),[sessionAt,setSessionAt]=useState(''),[evidence,setEvidence]=useState('')
  const [status,setStatus]=useState('unsaved'),[error,setError]=useState(''),[pending,setPending]=useState(null)
@@ -34,7 +35,7 @@ export default function PoolingSourceReview({sources,confirmations,onConfirm,onl
      <label>Session date and time with UTC offset, when session-specific<input placeholder="2026-09-07T12:00:00+05:30" value={sessionAt} onChange={e=>setSessionAt(e.target.value)} /></label>
      <label>Actual evidence reference<input value={evidence} onChange={e=>setEvidence(e.target.value)} /></label>
    </fieldset>
-   <button className="btn" disabled={status==='saving' || (!pending && (sourceIndex==='' || !key || !unit || !protocol || !effectiveAt || !evidence))} onClick={save}>{pending?'Retry original confirmation':'Save source review'}</button>
+   <PoolingAction reason={status==='saving'?'The source confirmation is saving.':pending?'':blockedReason||(!sources.length?'No source records are loaded. Prepare the fictional scenario or collect the actual source through its assessment form.':sourceIndex===''?'Select the exact source record to review.':!key?'Enter the field key defined by the reviewed module.':!unit||!protocol?'Enter the source unit and protocol/version.':!effectiveAt?'Enter the source’s effective date/time with UTC offset.':!evidence?'Enter the actual evidence reference for this observation.':'')} onClick={save}>{pending?'Retry original confirmation':'Save source review'}</PoolingAction>
    <p role="status">{status} · {online?'Server checks apply.':'Local record only; no approval authority.'}</p>
    {error && <p role="alert">{error}</p>}
    <p>{confirmations.length} saved confirmation records. Changed sources require a new review.</p>

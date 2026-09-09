@@ -13,6 +13,7 @@ export default function useGovernedWorkout(clientId,enabled,startAllowed=true){
  const refresh=useCallback(async()=>{
    const revision=++scope.revision
    if(!enabled || !clientId || !hasBackend){setAssignments([]);setStatus('unavailable');return}
+   setStatus(scope.pending?'outcome_unknown':'loading')
    try{
      const [rows,operations]=await Promise.all([readAssignments(clientId),readPendingOperations(clientId)])
      if(current.current!==scope || scope.revision!==revision)return
@@ -20,6 +21,7 @@ export default function useGovernedWorkout(clientId,enabled,startAllowed=true){
      scope.pending=operations.find(row=>['execution','report'].includes(row.kind))?.request || null
      setStopped(ids=>[...new Set([...ids,...operations.filter(row=>row.kind==='execution' && row.request.kind==='stop').map(row=>row.request.assignmentId)])])
      setStatus(scope.pending?'outcome_unknown':'ready')
+     if(!scope.pending)setError('')
    }
    catch(failure){if(current.current===scope && scope.revision===revision){setStatus(scope.pending?'outcome_unknown':'unavailable');setError(failure.message)}}
  },[clientId,enabled,scope])
@@ -28,7 +30,7 @@ export default function useGovernedWorkout(clientId,enabled,startAllowed=true){
    if(current.current!==scope)return
    const unknown=!DEFINITIVE_CODES.includes(failure.code)
    if(!unknown)scope.pending=null
-   setStatus(unknown?'outcome_unknown':'failed');setError(failure.message)
+   setStatus(unknown?'outcome_unknown':'failed');setError(failure.code==='source_changed'?'The validated source snapshot changed; this assignment cannot start or resume. In Validate & approve, copy its exact draft for separate review and explicitly validate and approve the new copy. Existing history is retained.':failure.message)
  },[scope])
  const execute=useCallback(async(assignment,kind,payload={})=>{
    if(current.current!==scope || !enabled)return
