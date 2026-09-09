@@ -11,6 +11,7 @@ import RoleOnboarding from './pages/RoleOnboarding'
 import AppLayout from './components/templates/AppLayout'
 import Toaster from './components/organisms/Toaster'
 import PageLoadFailure from './components/molecules/PageLoadFailure'
+import PageErrorBoundary from './components/molecules/PageErrorBoundary'
 
 // A failed chunk must remain recoverable after a deployment or network loss.
 // Reload never clears the account-scoped pending-operation journal.
@@ -53,7 +54,7 @@ function Shell() {
               <Route path="/pooling-test" element={<Navigate to="/clients" replace />} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
-              <Route path="/clients/:id/pool" element={<Suspense fallback={<p role="status">Loading workout…</p>}><CoachWorkoutPage /></Suspense>} />
+              <Route path="/clients/:id/pool" element={<PageErrorBoundary><Suspense fallback={<p role="status">Loading workout…</p>}><CoachWorkoutPage /></Suspense></PageErrorBoundary>} />
               <Route path="/clients/:id/pool/advanced" element={<Suspense fallback={<p role="status">Loading support tools…</p>}><ExercisePoolPage /></Suspense>} />
               <Route path="/clients/:id/assessments" element={<AssessmentsPage />} />
               <Route path="/clients/:id/assessments/:type" element={<AssessmentDetailPage />} />
