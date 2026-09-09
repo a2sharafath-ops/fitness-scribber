@@ -16,7 +16,7 @@ try{
   assert.match(cases.missingPolicy,/No review request has been saved yet/)
   assert.match(cases.admittedPolicy,/software-policy-only/)
   assert.match(cases.admittedPolicy,/Progression review/)
-  assert.match(cases.weekly,/Choose their published release and weekly policy/)
+  assert.match(cases.weekly,/Choose their release and weekly policy/)
   assert.match(cases.weekly,/No saved weekly review yet/)
   assert.match(cases.suggestions,/Wait for the connected workspace/)
   assert.match(cases.suggestions,/Propose reviewed swap/)

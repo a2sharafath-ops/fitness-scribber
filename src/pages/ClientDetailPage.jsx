@@ -32,6 +32,7 @@ import Icon from '../components/atoms/Icon'
 import useGovernedWorkout from '../hooks/useGovernedWorkout'
 import GovernedWorkoutPanel from '../components/organisms/workout/GovernedWorkoutPanel'
 import PoolingNavigation from '../components/organisms/PoolingNavigation'
+import PoolingModeSwitch from '../components/organisms/program/PoolingModeSwitch'
 
 // Compact health metric card (Figma: Client Detail metrics row).
 function MetricCard({ label, value, unit, state, color }) {
@@ -49,7 +50,7 @@ export default function ClientDetailPage() {
   const nav = useNavigate()
   const { db, commit, tz, units } = useData()
   const poolRuntime=usePoolingRuntime(id)
-  const poolingWorkflow=useGovernedWorkout(id,poolRuntime.governed,poolRuntime.r1)
+  const poolingWorkflow=useGovernedWorkout(id,poolRuntime.governed||poolRuntime.development,poolRuntime.r1)
   const { openModal } = useModal()
   const [profileOpen, setProfileOpen] = useState(false)
   const [trendKey, setTrendKey] = useState('stress') // which 30-day trend the chart shows
@@ -211,7 +212,8 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Client header card (Figma: Client Detail) — identity, quick stats & actions */}
-      {(poolRuntime.testOnly || poolRuntime.r1) && <PoolingNavigation clientId={id} testOnly={!!poolRuntime.testOnly} r1={poolRuntime.r1} r2={poolRuntime.r2} r3={poolRuntime.r3} ready={poolRuntime.governed}/>}
+      <PoolingModeSwitch clientId={id} runtime={poolRuntime}/>
+      {poolRuntime.r1 && <><button className="btn" onClick={()=>nav(`/clients/${id}/pool#pool-prepare-title`)}>Generate workout for {c.name}</button><PoolingNavigation clientId={id} testOnly={false} r1={poolRuntime.r1} r2={poolRuntime.r2} r3={poolRuntime.r3} ready={poolRuntime.governed}/></>}
       <div className="card client-header">
         <div className="ch-id" role="button" tabIndex={0} title="View full profile"
           onClick={() => setProfileOpen(true)}
@@ -317,14 +319,16 @@ export default function ClientDetailPage() {
           planner from the same card, with the AI coach beside it as a chat */}
       <div className="cc-wrap" style={{ marginTop: 16 }}>
         <div className="cc-main">
-          {poolRuntime.governed && <GovernedWorkoutPanel workflow={poolingWorkflow} />}
+          {(poolRuntime.governed||poolRuntime.development) && <GovernedWorkoutPanel workflow={poolingWorkflow} />}
+          <details open={!poolRuntime.governed}><summary>Classic planner and workout history</summary>
           <PlannerWidget client={c} size="medium" todayProps={{
             client: c, today, workout: todayW, prescription: todayP, plans: db.plans, exercises: db.exercises,
             units, context: { readiness: rScore, acwr }, restingHr, age, bodyMassKg: c.anthro?.massKg ?? null,
             resolveTm: (name) => resolveTrainingMax(db, c.id, name, today).kg,
             onStart: startWorkout, onSave: saveWorkout, onComplete: requestComplete, onClear: clearWorkout, onTemplate: saveTemplate,
-            onAddSession: () => openModal(<WorkoutBuilderModal clientId={c.id} date={today} />, 'xl'),
+            onAddSession: () => poolRuntime.r1?nav(`/clients/${id}/pool#pool-prepare-title`):openModal(<WorkoutBuilderModal clientId={c.id} date={today} />, 'xl'),
           }} />
+          </details>
         </div>
         <div className="cc-side">{poolRuntime.governed?<section className="card"><h2>Coaching review</h2><p>Classic readiness metrics are informational. Pooling changes require current evidence, accepted policy and explicit coach approval; legacy numerical progression suggestions are paused in this mode.</p></section>:<AICoach client={c} />}</div>
       </div>

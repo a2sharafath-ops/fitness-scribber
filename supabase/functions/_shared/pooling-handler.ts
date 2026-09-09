@@ -10,7 +10,7 @@ export function createPoolingHandler(service: (gateway: any)=>((request: any)=>P
   catch(error){
    const code=error instanceof Error?error.message:'unavailable'
    const status:Record<string,number>={invalid_request:400,forbidden:403,feature_disabled:409,unsupported_policy:409,stale_context:409,source_changed:409,content_revoked:409,context_held:409,idempotency_conflict:409,session_mismatch:409,baseline_review_required:409,draft_conflict:409,source_unavailable:503,decision_save_unconfirmed:503}
-   Object.assign(status,{invalid_week:400,stale_draft:409,required_gap:409,invalid_release:400,acceptance_required:409,acceptance_mismatch:409,record_not_admitted:409,immutable_release:409})
+   Object.assign(status,{invalid_week:400,stale_draft:409,required_gap:409,invalid_release:400,acceptance_required:409,acceptance_mismatch:409,record_not_admitted:409,immutable_release:409,assigned_snapshot_immutable:409})
    return json({error:code in status?code:'unavailable',assignment:null},status[code] || 503)
   }
  }

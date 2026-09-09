@@ -9,7 +9,7 @@ export default function PoolingSuggestions({clientId,context,drafts,workspace,on
  const original=draft?.proposal.selection?.find(s=>s.occurrenceId===occurrence),record=doc?.catalogue.find(e=>e.id===original?.exerciseId && e.revision===original?.exerciseRevision)
  const alternatives=record?.familyId && record.laterality?doc.catalogue.filter(e=>e.id!==record.id && e.familyId===record.familyId && e.laterality===record.laterality):[]
  const choices=currentUnassignedDrafts(drafts,workspace.assignments).filter(d=>d.id && d.proposal.manifestId)
- const blocked=!online?'Wait for the connected workspace to load, or retry loading after the displayed error.':busy?'The suggestion is saving. Wait for its new draft ID.':!choices.length?'No current session inputs are available. Return to Test setup and prepare one fictional session, or save reviewed session inputs.':!draft?'Choose a current draft in “Session inputs or canonical draft” first.':''
+ const blocked=!online?'Wait for the connected workspace to load, or retry loading after the displayed error.':busy?'The suggestion is saving. Wait for its new draft ID.':!choices.length?'Use Prepare workout above to review this client’s inputs and generate a workout.':!draft?'Choose a current draft in “Session inputs or canonical draft” first.':''
  useEffect(()=>{let active=true;if(online)readSuggestions(clientId).then(data=>{if(active)setRows(data)}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[clientId,online,context?.generation])
  async function generate(mode){setBusy(true);setError('');try{
   if((await readPendingOperations(clientId)).some(r=>r.kind==='suggestion'))throw Error('Reconcile the existing suggestion operation before generating another.')

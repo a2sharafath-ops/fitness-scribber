@@ -25,7 +25,7 @@ export default function PoolingNavigation({ready = true, ...scope}) {
   }, [ready, location.key, location.pathname, location.hash])
   const current = location.pathname + location.hash
   return <nav className="pooling-navigation card" aria-label="Pooling workflow">
-    <h2 id="pooling-navigation" tabIndex={-1}>{scope.testOnly === false ? 'Jump to a pooling section' : 'Jump to a testing step'}</h2>
+    <h2 id="pooling-navigation" tabIndex={-1}>Workout workflow</h2>
     <p>Links only move you between screens. Preparing, saving and approving still require their own explicit actions.</p>
     {Object.entries(groups).map(([group, items]) => <div key={group}>
       <h3>{group === 'workflow' ? 'Workflow' : 'Review tools'}</h3>
@@ -34,7 +34,7 @@ export default function PoolingNavigation({ready = true, ...scope}) {
         : <span aria-disabled="true" title={reason}>{label}<span className="sr-only"> — {reason}</span></span>
       }</li>)}</ul>
     </div>)}
-    {!scope.clientId && <p>Create your fictional workspace in Test setup to unlock the client-specific links.</p>}
+    {!scope.clientId && <p>Choose a client from Clients to open their workout workflow.</p>}
     {!!scope.clientId && locks.map(reason=><p key={reason} className="pooling-lock">Unavailable steps: {reason}</p>)}
     <p>Save unfinished edits before moving to a different screen. A step link opens its section; use the named action inside that section to make a change.</p>
     <Link className="pooling-return" to={`${location.pathname}#pooling-navigation`} aria-label="Back to pooling steps">↑ Steps</Link>

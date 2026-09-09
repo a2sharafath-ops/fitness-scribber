@@ -9,9 +9,13 @@ import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { fmtDate } from '../lib/dates'
 import { baseOptions } from '../lib/chartSetup'
+import useCoachSessions from '../hooks/useCoachSessions'
+import PoolingSessionList from '../components/organisms/workout/PoolingSessionList'
+import {poolingConfig} from '../lib/pooling/config'
 
 export default function ProgressPage() {
   const { db, commit } = useData()
+  const sessions=useCoachSessions()
   const { openModal } = useModal()
   const { toDisp, fmtWt, unitName } = useFormat()
   const [clientId, setClientId] = useState(db.clients[0]?.id)
@@ -39,6 +43,7 @@ export default function ProgressPage() {
       </div>
       {!c ? <div className="empty"><div className="big">👥</div>Add a client to start tracking</div> : (
         <>
+          {poolingConfig().r1&&<PoolingSessionList sessions={sessions} clients={db.clients} clientId={clientId} title="Workout completion and results"/>}
           <div className="grid cards-3">
             <Kpi label="Latest weight" value={logs.length ? fmtWt(logs[logs.length - 1].weightKg) : '—'} delta={delta('weightKg')} deltaColor="var(--green)" />
             <Kpi label="Squat 1RM est." value={logs.length ? fmtWt(logs[logs.length - 1].squat) : '—'} delta={delta('squat')} deltaColor="var(--green)" />

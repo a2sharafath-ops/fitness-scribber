@@ -5,13 +5,11 @@ import { openConcerns } from '../../lib/calc'
 import { hasBackend } from '../../lib/supabase'
 import Brand from '../atoms/Brand'
 import Icon from '../atoms/Icon'
-import {poolingConfig} from '../../lib/pooling/config'
 
 const ITEMS = [
   ['/', 'dashboard', 'Dashboard', true],
   ['/clients', 'users', 'Clients'],
   ['/workouts', 'dumbbell', 'Workouts'],
-  ['/pooling-test', 'target', 'Pooling test'],
   ['/schedule', 'calendar', 'Schedule'],
   ['/progress', 'chart', 'Progress'],
   ['/messages', 'message', 'Messages'],
@@ -25,7 +23,7 @@ export default function Sidebar() {
   return (
     <nav id="sidebar" aria-label="Main navigation">
       <Brand />
-      {ITEMS.filter(([to]) => to !== '/pooling-test' || poolingConfig().r1).map(([to, ic, label, end]) => (
+      {ITEMS.map(([to, ic, label, end]) => (
         <NavLink key={to} to={to} end={end} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label={label} title={label}>
           <span className="ic" aria-hidden="true"><Icon name={ic} /></span>
           <span>{label}</span>

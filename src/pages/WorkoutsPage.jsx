@@ -6,13 +6,18 @@ import ExerciseThumb from '../components/molecules/ExerciseThumb'
 import { ExerciseForm, PlanForm } from '../components/organisms/forms/WorkoutForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
+import {Link} from 'react-router-dom'
+import useCoachSessions from '../hooks/useCoachSessions'
+import PoolingSessionList from '../components/organisms/workout/PoolingSessionList'
+import {poolingConfig} from '../lib/pooling/config'
 
 const DIFF_COLOR = { Beginner: 'green', Intermediate: 'orange', Advanced: 'red' }
 
 export default function WorkoutsPage() {
   const { db } = useData()
   const { openModal } = useModal()
-  const [tab, setTab] = useState('plans')
+  const [tab, setTab] = useState(poolingConfig().r1?'clients':'plans')
+  const sessions=useCoachSessions()
   const exName = (id) => db.exercises.find((e) => e.id === id)?.name || '?'
   const exMuscle = (id) => db.exercises.find((e) => e.id === id)?.muscle || ''
 
@@ -20,16 +25,17 @@ export default function WorkoutsPage() {
     <>
       <div className="topbar">
         <div><h1>Workouts</h1><div className="sub">{db.plans.length} plans · {db.exercises.length} exercises</div></div>
-        {tab === 'plans'
+        {tab === 'clients'?<Link className="btn" to="/clients">Choose client to generate workout</Link>:tab === 'plans'
           ? <Button onClick={() => openModal(<PlanForm />, true)}>＋ New Plan</Button>
           : <Button onClick={() => openModal(<ExerciseForm />)}>＋ New Exercise</Button>}
       </div>
       <div className="tabs">
+        {poolingConfig().r1&&<button className={'tab'+(tab==='clients'?' active':'')} onClick={()=>setTab('clients')}>Client Workouts</button>}
         <button className={'tab' + (tab === 'plans' ? ' active' : '')} onClick={() => setTab('plans')}>Workout Plans</button>
         <button className={'tab' + (tab === 'lib' ? ' active' : '')} onClick={() => setTab('lib')}>Exercise Library</button>
       </div>
 
-      {tab === 'plans' ? (
+      {tab==='clients'?<PoolingSessionList sessions={sessions} clients={db.clients}/>:tab === 'plans' ? (
         <div className="grid cards-2">
           {db.plans.map((p) => {
             const assigned = db.clients.filter((c) => c.planId === p.id)

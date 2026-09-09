@@ -19,6 +19,9 @@ import { currentUnassignedDrafts } from '../lib/pooling/review'
 import usePoolingRuntime from '../hooks/usePoolingRuntime'
 import PoolingNavigation from '../components/organisms/PoolingNavigation'
 import PoolingAction from '../components/molecules/PoolingAction'
+import PoolingClientPreparation from '../components/organisms/program/PoolingClientPreparation'
+import PoolingModeSwitch from '../components/organisms/program/PoolingModeSwitch'
+import ClientSubnav from '../components/templates/ClientSubnav'
 
 export default function ExercisePoolPage() {
   const { id } = useParams()
@@ -68,7 +71,7 @@ function ExercisePoolWorkspace({id}) {
     load()
     return () => { active = false }
   }, [id,refresh,db,runtime.r1,runtime.r2,runtime.r3])
-  if (!runtime.r1) return <div className="pooling-workspace"><h1>{runtime.status==='loading'?'Checking client activation…':'Exercise pooling is unavailable for this client'}</h1><p>{runtime.testOnly?'The fictional testing window has ended or was revoked. Existing drafts and results are preserved.':runtime.status==='unavailable'?'Client activation could not be verified. No workflow was authorized.':'Existing clients retain the Classic workflow. Create or reopen your separate fictional workspace from Test setup to try pooling.'}</p><PoolingNavigation clientId={runtime.testOnly?id:undefined} r1={false} r2={false} r3={false}/><Link to="/pooling-test">Open fictional coach-testing workspace</Link><p><Link to={`/clients/${id}`}>Back to client and preserved sessions</Link></p></div>
+  if (!runtime.r1) return <div className="pooling-workspace"><h1>{runtime.status==='loading'?'Checking client activation…':'Classic workflow is active'}</h1><p>{runtime.status==='unavailable'?'Client activation could not be verified. Retry when connected.':'Pooling drafts, assignments and results are preserved. Use the switch below to return to the integrated development workflow.'}</p><PoolingModeSwitch clientId={id} runtime={runtime}/><p><Link to={`/clients/${id}`}>Back to client and preserved sessions</Link></p></div>
   if (!client) return <div className="empty">Client not found.</div>
   async function report() {
     const operation = pending || { clientId: id, generation: state?.context?.generation || 1,
@@ -88,7 +91,8 @@ function ExercisePoolWorkspace({id}) {
       if (failure.code !== 'outcome_unknown') setPending(null)
     }
   }
-  const filtered = catalogue.filter(row => `${row.name} ${row.roles.join(' ')} ${row.pattern}`.toLowerCase().includes(filter.toLowerCase()))
+  const activeCatalogue=runtime.developmentEnabled?workspace.manifests.find(m=>m.document.manifest.audience==='development')?.document.catalogue||[]:catalogue
+  const filtered = activeCatalogue.filter(row => `${row.name} ${row.roles.join(' ')} ${row.pattern}`.toLowerCase().includes(filter.toLowerCase()))
   const unassignedDrafts=currentUnassignedDrafts(state?.drafts || [],workspace.assignments)
   async function requestReview(kind,operation) {
     await saveExtensionRequest({clientId:id,kind,generation:state?.context?.generation || 1,...operation})
@@ -96,11 +100,14 @@ function ExercisePoolWorkspace({id}) {
   }
   return <div className="pooling-workspace">
     <div className="topbar"><div><h1>Exercise Pool · {client.name}</h1><p className="sub">Coach review workspace · never automatic assignment</p></div><Link className="btn ghost" to={`/clients/${id}`}>Back to client</Link></div>
-    <PoolingNavigation clientId={id} testOnly={!!runtime.testOnly} r1={runtime.r1} r2={runtime.r2} r3={runtime.r3} ready={!loading} reviewReady={!loading&&!error&&!!state} extensionsReady={!!policies}/>
+    <ClientSubnav client={client}/>
+    <PoolingModeSwitch clientId={id} runtime={runtime}/>
+    <PoolingNavigation clientId={id} testOnly={false} r1={runtime.r1} r2={runtime.r2} r3={runtime.r3} ready={!loading} reviewReady={!loading&&!error&&!!state} extensionsReady={!!policies}/>
+    {runtime.developmentEnabled&&<PoolingClientPreparation clientId={id} drafts={state?.drafts||[]} assignments={workspace.assignments||[]} onPrepared={()=>setRefresh(value=>value+1)}/>}
     {runtime.testOnly&&<p className="pooling-next-step">For a first test: prepare one fictional session in Test setup, then choose it under Generate &amp; swap. Generate or swap before final validation. Expand the newest draft under Validate &amp; approve, review it explicitly, then open Sessions &amp; results. Daily adjustment uses an approved but unstarted baseline; test it before starting that baseline. Progression follows saved baseline results, and weekly planning comes last.</p>}
     <section className="card" aria-labelledby="pool-status"><h2 id="pool-status">Review and availability</h2>
       <p>{hasBackend ? 'Online source checks are required for governed actions.' : 'Local preview only. Backend approval, assignment, start and resume are unavailable.'}</p>
-      <p>Catalogue candidates below are unpublished drafts, not an eligible exercise pool. Professional evidence and release admission remain pending.</p>
+      <p>{runtime.developmentEnabled?'Development catalogue is available for these test records. Generation, source checks and exact coach approval are required; production/clinical publication remains separate.':'Catalogue candidates below are review drafts. Only an admitted release can be used for generation.'}</p>
       {loading && <p role="status">Loading review data…</p>}
       {error && <p role="alert">{error}</p>}
       {readBlocked&&<p>{readBlocked}</p>}
@@ -108,7 +115,7 @@ function ExercisePoolWorkspace({id}) {
       {!loading && hasBackend && <p>Context: {state?.context ? `generation ${state.context.generation} · ${state.context.held ? 'review hold' : 'requires current checks'}` : 'not yet collected; not assumed normal'}</p>}
     </section>
     <PoolingOperationRecovery clientId={id} refreshKey={refresh} onReconciled={()=>setRefresh(value=>value+1)}/>
-    {hasBackend && <PoolingGovernance clientId={id} onChanged={()=>setRefresh(value=>value+1)}/>}
+    {hasBackend && !runtime.developmentEnabled && <PoolingGovernance clientId={id} onChanged={()=>setRefresh(value=>value+1)}/>}
     <section className="card" aria-labelledby="review-drafts"><h2 id="review-drafts" tabIndex={-1}>Unassigned review drafts</h2>
       <button className="btn" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={todayISO()} />, 'xl')}>Create review draft</button>
       <button className="btn ghost" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh drafts</button>
@@ -136,12 +143,12 @@ function ExercisePoolWorkspace({id}) {
     }} blockedReason={readBlocked}/>
     {runtime.r3 && <PoolingWeeklyReview key={`PoolingWeeklyReview:${id}:${refresh}`} clientId={id} context={state?.context} workspace={workspace} drafts={state?.drafts || []} online={online} onRefresh={()=>setRefresh(value=>value+1)}/>}
     {runtime.r3 && <PoolingReassessment key={`PoolingReassessment:${id}`} clientId={id} online={online}/>}
-    <PoolingCatalogueAdmin key={`PoolingCatalogueAdmin:${id}`} clientId={id} online={hasBackend}/>
+    {!runtime.developmentEnabled&&<PoolingCatalogueAdmin key={`PoolingCatalogueAdmin:${id}`} clientId={id} online={hasBackend}/>}
     <section className="card" aria-labelledby="candidate-review"><h2 id="candidate-review" tabIndex={-1}>Candidate catalogue review</h2>
       <label htmlFor="pool-filter">Filter by name, role or movement pattern</label><input id="pool-filter" value={filter} onChange={event => setFilter(event.target.value)} />
-      <p>{filtered.length} candidate records. Eligibility: review required.</p>
+      <p>{filtered.length} exercise records. {runtime.developmentEnabled?'Development release: eligibility is determined from this client’s confirmed inputs.':'Unpublished candidates: review required.'}</p>
       <div style={{ overflowX: 'auto' }}><table><thead><tr><th scope="col">Exercise</th><th scope="col">Roles</th><th scope="col">Equipment</th><th scope="col">Availability</th></tr></thead>
-        <tbody>{filtered.map(row => <tr key={`${row.id}:${row.revision}`}><th scope="row">{row.name}</th><td>{row.roles.join(', ').replaceAll('_',' ')}</td><td>{row.equipment.length ? row.equipment.join(', ').replaceAll('_',' ') : 'No listed equipment; setup still needs confirmation'}</td><td>Unpublished · not assignable</td></tr>)}</tbody></table></div>
+        <tbody>{filtered.map(row => <tr key={`${row.id}:${row.revision}`}><th scope="row">{row.name}</th><td>{row.roles.join(', ').replaceAll('_',' ')}</td><td>{row.equipment.length ? row.equipment.join(', ').replaceAll('_',' ') : 'No listed equipment; setup still needs confirmation'}</td><td>{runtime.developmentEnabled?'Development · prerequisites and dose checked at generation':'Unpublished · not assignable'}</td></tr>)}</tbody></table></div>
     </section>
   </div>
 }

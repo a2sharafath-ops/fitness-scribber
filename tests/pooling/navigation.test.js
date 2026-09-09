@@ -8,12 +8,12 @@ const active = {clientId:'fictional-navigation', r1:true, r2:true, r3:true}
 
 test('navigation without a workspace never guesses a client or links to client actions', () => {
   const items = all()
-  assert.deepEqual(items.filter(item => item.to).map(item => item.key), ['setup', 'walkthrough'])
+  assert.deepEqual(items.filter(item => item.to).map(item => item.key), [])
   assert(items.filter(item => !item.to).every(item => item.reason))
 })
 test('active workspace provides exact, client-scoped workflow and review destinations', () => {
   const items = all(active)
-  assert.equal(items.length, 14)
+  assert.equal(items.length, 12)
   assert.equal(new Set(items.map(item => item.to)).size, items.length)
   assert(items.every(item => item.to && poolingSectionId(item.to.slice(item.to.indexOf('#')))))
   assert.equal(items.find(item => item.key === 'sessions').to, '/clients/fictional-navigation#governed-workouts')
@@ -24,7 +24,7 @@ test('routes encode the exact client ID and never reuse a previous client', () =
   assert(all({...active,clientId:'next-client'}).filter(row => row.to.startsWith('/clients/')).every(row => row.to.startsWith('/clients/next-client')))
 })
 test('disabled R2/R3 capabilities cannot be exposed by navigation', () => {
-  const items = all({clientId:active.clientId,r1:true})
+  const items = all({clientId:active.clientId,r1:true,testOnly:true})
   for (const key of ['daily', 'progression', 'weekly', 'reassessment']) {
     const item=items.find(row=>row.key===key)
     assert.equal(item.to,null)
@@ -32,9 +32,9 @@ test('disabled R2/R3 capabilities cannot be exposed by navigation', () => {
   }
   assert(!all({clientId:active.clientId,r1:true,testOnly:false}).some(row=>row.key==='daily'))
 })
-test('inactive workspace retains setup, guide and preserved sessions but disables pooling actions', () => {
+test('inactive ordinary client retains preserved sessions without separate test navigation', () => {
   const items = all({...active,r1:false,r2:false,r3:false})
-  assert.deepEqual(items.filter(row => row.to).map(row => row.key), ['setup','prepare','sessions','walkthrough'])
+  assert.deepEqual(items.filter(row => row.to).map(row => row.key), ['sessions'])
   assert(items.filter(row => !row.to).every(row => row.reason.includes('inactive')))
 })
 test('loading or failed review data cannot link to an unmounted approval or extension section', () => {
@@ -56,6 +56,7 @@ test('fragment focus accepts only known section IDs, not selectors or arbitrary 
 })
 test('all navigation destinations have matching focusable headings in their actual page components', () => {
   const files = {
+    'pool-prepare-title':'src/components/organisms/program/PoolingClientPreparation.jsx',
     'test-setup':'src/pages/PoolingTestPage.jsx', 'test-prepare':'src/pages/PoolingTestPage.jsx', 'test-walkthrough':'src/pages/PoolingTestPage.jsx',
     'pool-source-title':'src/components/organisms/program/PoolingSourceReview.jsx',
     'pool-suggestions-title':'src/components/organisms/program/PoolingSuggestions.jsx',

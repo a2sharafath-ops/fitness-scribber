@@ -11,6 +11,10 @@ export {PoolingError}
 
 const known = DEFINITIVE_CODES
 export const readClientRuntime=clientId=>rpc('pooling_client_runtime',{target_client:clientId})
+export const readDevelopmentContext=clientId=>rpc('pooling_development_context',{target_client:clientId})
+export const readCoachSessions=()=>rpc('pooling_coach_sessions',{})
+export const prepareClient=request=>recoverable('preparation',request.clientId,request,headers=>rpc('pooling_prepare_client',{target_client:request.clientId,expected_generation:request.generation,operation_key:request.operationKey,proposal:request.proposal,observations:request.observations},headers))
+export const setDevelopment=request=>recoverable('development_mode',request.clientId,request,headers=>rpc('pooling_set_development',{target_client:request.clientId,enabled:request.enabled,operation_key:request.operationKey},headers))
 export const readActorRuntime=()=>rpc('pooling_actor_runtime',{})
 export const readTestStatus=()=>rpc('pooling_test_status',{})
 export const createTestWorkspace=acknowledged=>rpc('pooling_create_test_workspace',{acknowledged})
@@ -174,7 +178,7 @@ export const approveBatch=request=>recoverable('batch',request.clientId,request,
 export const reviewExtension=request=>recoverable('extension_review',request.clientId,request,headers=>rpc('pooling_review_extension',{target_client:request.clientId,request_id:request.requestId,expected_generation:request.generation,operation_key:request.operationKey,action:request.action,reason:request.reason,proposal_id:request.proposalId || null,amended_draft:request.amendedDraft || null},headers))
 export async function retryPendingOperation(row){
  if(!row?.request?.clientId || row.scope!==await journalScope(row.request.clientId))throw new PoolingError('session_mismatch','This pending operation belongs to a different account or client. Its saved request is preserved.')
-const handlers={draft:saveRecoverableBuilderDraft,confirmation:confirmPoolingSource,report:submitPoolingReport,execution:recordExecution,approve:approveDraft,batch:approveBatch,extension:saveExtensionRequest,extension_review:reviewExtension,legacy_stop:stopLegacy,consent:recordConsent,context_review:reviewContext,weekly:generateWeek,week_approve:approveWeek,suggestion:generateSuggestion,reassessment:requestReassessment,catalogue_submission:submitCatalogue,publication:applyPublication}
+const handlers={preparation:prepareClient,development_mode:setDevelopment,draft:saveRecoverableBuilderDraft,confirmation:confirmPoolingSource,report:submitPoolingReport,execution:recordExecution,approve:approveDraft,batch:approveBatch,extension:saveExtensionRequest,extension_review:reviewExtension,legacy_stop:stopLegacy,consent:recordConsent,context_review:reviewContext,weekly:generateWeek,week_approve:approveWeek,suggestion:generateSuggestion,reassessment:requestReassessment,catalogue_submission:submitCatalogue,publication:applyPublication}
  if(!handlers[row.kind])throw new PoolingError('unavailable','This operation requires a supported recovery handler. Its saved request is preserved.')
  return handlers[row.kind](row.request)
 }

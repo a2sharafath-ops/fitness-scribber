@@ -1,5 +1,6 @@
 // Navigation only: destinations never create drafts or authorize a workflow.
 const SECTIONS = [
+  ['prepare-client', 'Prepare workout', 'pool-prepare-title'],
   ['sources', 'Sources', 'pool-source-title'],
   ['generate', 'Generate & swap', 'pool-suggestions-title'],
   ['approve', 'Validate & approve', 'pool-exact-title'],
@@ -21,12 +22,12 @@ export function poolingSectionId(hash) {
   return IDS.has(id) ? id : null
 }
 
-export function poolingNavigation({clientId, testOnly = true, r1 = false, r2 = false, r3 = false, reviewReady = true, extensionsReady = true} = {}) {
+export function poolingNavigation({clientId, testOnly = false, r1 = false, r2 = false, r3 = false, reviewReady = true, extensionsReady = true} = {}) {
   const clientPath = clientId ? `/clients/${encodeURIComponent(clientId)}` : null
   const flags = {r2, r3}
   function destination([key, label, section, flag]) {
     if (flag && !flags[flag] && !testOnly) return []
-    const reason = !clientPath ? 'Create your fictional workspace first.'
+    const reason = !clientPath ? 'Open a client from Clients first.'
       : key === 'sessions' ? ''
       : !r1 ? 'Pooling is inactive; existing sessions and history remain available.'
       : flag && !flags[flag] ? `${label} is not enabled for this workspace in this build. No prerequisite entered in a form can override this setting.`

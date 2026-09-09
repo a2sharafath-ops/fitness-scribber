@@ -1,12 +1,17 @@
 import { canonical } from './context.js'
 import { budgetGap } from './budget.js'
-export const ENGINE_VERSION = 'pool-selection-3'
+export const ENGINE_VERSION = 'pool-selection-4'
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0
 const unique = values => [...new Set(values)].sort(compare)
 
 export function admission(record, manifest) {
   if (!manifest || manifest.state !== 'published' || manifest.revoked || !manifest.releaseEvidence) return false
   const entry = manifest.records?.find(item => item.id === record.id && item.revision === record.revision)
+  // Development releases are separately server-scoped to approved tester accounts.
+  // They never borrow or manufacture the professional evidence used by releases.
+  if (manifest.audience === 'development') return !!entry && record.reviewStatus === 'development' &&
+    record.automationEligible === true && record.developmentEvidence?.reference === manifest.releaseEvidence
+  if (record.reviewStatus === 'development' || record.developmentEvidence) return false
   return !!entry && record.reviewStatus === 'published' && record.automationEligible === true &&
     record.rightsStatus === 'accepted' && ['content', 'rights', 'scope'].every(kind =>
       record.approvalEvidence?.some(e => e.kind === kind && e.decision === 'accepted' && e.reviewerId && e.reference && e.revision === record.revision))
@@ -44,6 +49,14 @@ export function doseTiming(dose) {
 
 export function resolveDose(record, dose, manifest, context = null) {
   if (!dose || !record.doseRefs?.includes(dose.id) || !admission(dose, manifest)) return { state: 'unresolved', reasons: ['dose_not_admitted'] }
+  // Development's timed/no-load doses cannot prescribe resistance merely because
+  // an exercise omitted its external_load demand (e.g. suitcase carry or bands).
+  const resistanceEquipment = /^(?:dumbbell(?:_pair)?|barbell|plates|loop_band|long_band|cable_row_machine|lat_pulldown_machine)$/
+  if (manifest.audience === 'development' &&
+      (record.demands?.some(demand => ['external_load','asymmetric_load','axial_load'].includes(demand)) || record.equipment?.some(item => resistanceEquipment.test(item))) &&
+      (!['absolute','percentage'].includes(dose.loadMethod) || dose.comparison?.loadBasis === 'no_external_load')) {
+    return {state:'unresolved',reasons:['reviewed_resistance_prescription_required']}
+  }
   const timing=doseTiming(dose)
   if(timing.state!=='resolved')return timing
   const {seconds,mode}=timing,{sets,workSeconds,restSeconds,setupSeconds,transitionSeconds,sideMultiplier}=dose
@@ -75,7 +88,10 @@ export function selectPool({ context, catalogue, doses, manifest, request }) {
   const byId = new Map(records.map(record => [record.id, record]))
   const covered = new Set(), used = new Set(), blocks = [], gaps = [], omissions = []
   let durationSeconds = 0
-  for (const role of request.roles) {
+  // Optional activation/mobility must not consume the only option or budget
+  // available for a required main/cooldown section. Restore display order later.
+  const roleOrder=new Map(request.roles.map((role,index)=>[role.id,index]))
+  for (const role of [...request.roles].sort((a,b)=>Number(b.required)-Number(a.required))) {
     const options = candidates.filter(candidate => candidate.eligibility === 'eligible' && !used.has(candidate.id) && byId.get(candidate.id).roles.includes(role.id))
       .map(candidate => {
         const record = byId.get(candidate.id)
@@ -92,7 +108,7 @@ export function selectPool({ context, catalogue, doses, manifest, request }) {
       })
     let selected, minimumSeconds=Infinity
     for (const option of options) {
-      const possibleDoses = doses.filter(dose => option.record.doseRefs?.includes(dose.id)).sort((a, b) => compare(a.id, b.id))
+      const possibleDoses = doses.filter(dose => option.record.doseRefs?.includes(dose.id) && (!dose.levels || dose.levels.includes(request.level))).sort((a, b) => compare(a.id, b.id))
       for (const rawDose of possibleDoses) {
         const dose = resolveDose(option.record, rawDose, manifest,context)
         if(dose.state==='resolved')minimumSeconds=Math.min(minimumSeconds,dose.seconds)
@@ -112,6 +128,7 @@ export function selectPool({ context, catalogue, doses, manifest, request }) {
       exerciseRevision: record.revision, dose, matchedNeeds: candidate.matchedNeeds })
   }
   for (const id of unique(request.requiredNeeds || [])) if (!covered.has(id)) gaps.push({ need: id, reason: 'required_need_uncovered' })
+  blocks.sort((a,b)=>roleOrder.get(a.role)-roleOrder.get(b.role))
   const output = { engineVersion: ENGINE_VERSION, resolverVersion: context.version, contextGeneration: context.generation,
     manifestId: manifest?.id || null, sessionState: context.state, candidates, blocks, gaps, omissions, durationSeconds,
     completeness: context.state === 'eligible_for_coach_review' && !gaps.length && blocks.length ? 'ready_for_coach_review' : 'blocked',

@@ -13,7 +13,7 @@ test('read failures explain unavailable data, never an uncertain save',()=>{
 test('read access denial explains the correct workspace without printing backend internals',()=>{
   const failure=poolingReadFailure('pooling_read_assignments',{message:'forbidden',details:'sensitive internal data'})
   assert.equal(failure.code,'forbidden')
-  assert.match(failure.message,/own fictional workspace/)
+  assert.match(failure.message,/record owned by your sign-in/)
   assert(!failure.message.includes('sensitive'))
 })
 test('uncertain write and unknown RPC outcomes are not incorrectly reclassified as harmless reads',()=>{

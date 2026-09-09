@@ -2,7 +2,7 @@ import { buildSourceSnapshot } from '../../../src/lib/pooling/sources.js'
 import {canonical} from '../../../src/lib/pooling/context.js'
 // Server-only adapter. Construct with a verified-user client and a service client
 // inside the trusted runtime, never from browser code.
-const sourceFailure=error=>new Error(['forbidden','feature_disabled','stale_draft','stale_context','source_changed','content_revoked','context_held'].includes(error?.message)?error.message:'source_unavailable')
+const sourceFailure=error=>new Error(['forbidden','feature_disabled','stale_draft','stale_context','source_changed','content_revoked','context_held','assigned_snapshot_immutable'].includes(error?.message)?error.message:'source_unavailable')
 export function createSupabaseDecisionGateway({userClient,serviceClient}) {
   let actor=null
   const loaded=new Map()

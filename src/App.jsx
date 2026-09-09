@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
 import { DataProvider } from './store/DataContext'
@@ -37,7 +37,6 @@ const MessagesPage = page(() => import('./pages/MessagesPage'))
 const SettingsPage = page(() => import('./pages/SettingsPage'))
 const ReportPage = page(() => import('./pages/ReportPage'))
 const ExercisePoolPage = page(() => import('./pages/ExercisePoolPage'))
-const PoolingTestPage = page(() => import('./pages/PoolingTestPage'))
 
 function Shell() {
   return (
@@ -50,7 +49,7 @@ function Shell() {
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/pooling-test" element={<Suspense fallback={<p role="status">Loading coach test workspace…</p>}><PoolingTestPage /></Suspense>} />
+              <Route path="/pooling-test" element={<Navigate to="/clients" replace />} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
               <Route path="/clients/:id/pool" element={<Suspense fallback={<p role="status">Loading exercise pool…</p>}><ExercisePoolPage /></Suspense>} />
