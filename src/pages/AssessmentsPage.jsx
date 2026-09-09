@@ -8,7 +8,7 @@ import AssessmentTrends from '../components/organisms/AssessmentTrends'
 import CurrentLiftsPerformance from '../components/organisms/CurrentLiftsPerformance'
 import ClientSubnav from '../components/templates/ClientSubnav'
 import Icon from '../components/atoms/Icon'
-import { TYPES, ACTIVE_TYPES, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, forClient, latest, describe, dueStatus } from '../lib/assessment'
+import { TYPES, ACTIVE_TYPES, ONBOARDING_TYPES, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, forClient, latest, describe, dueStatus } from '../lib/assessment'
 import { fmtDate } from '../lib/dates'
 
 // Each assessment type shows one card summarising its LATEST entry; clicking the
@@ -28,24 +28,24 @@ export default function AssessmentsPage() {
   const addType = (type, phase) => openModal(assessmentForm(type, id, undefined, phase))
   const goDetail = (type) => nav(`/clients/${id}/assessments/${type}`)
   const onEnter = (fn) => (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn() } }
+  const nextType = TYPES.find((type) => ONBOARDING_TYPES.includes(type.key) && !list.some((row) => row.type === type.key)) || TYPES.find((type) => REASSESS_TYPES.includes(type.key) && dueStatus(list, type.key, interval).overdue)
 
   return (
-    <>
+    <div className="coach-page">
       <ClientSubnav client={c} />
       <div className="topbar">
-        <div><h1>Assessments</h1><div className="sub">{c.name} · baselines &amp; reassessments</div></div>
-        <Button onClick={newAssessment}>＋ New assessment</Button>
+        <div><p className="coach-eyebrow">Understand the client</p><h1>Assessments</h1><div className="sub">Record a starting point, then review changes over time.</div></div>
+        <Button onClick={nextType?()=>addType(nextType.key,list.some(row=>row.type===nextType.key)?'reassessment':'baseline'):newAssessment}>{nextType?`Continue assessment: ${nextType.label}`:'New assessment'}</Button>
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <section className="coach-card">
+        <div className="coach-card-head"><div><p className="coach-eyebrow">Required information</p><h2>Assessment progress</h2></div><button className="coach-text-button" onClick={newAssessment}>Choose assessment</button></div>
         <AssessmentChecklist list={list} intervalDays={interval} onAdd={(type) => addType(type, 'baseline')} />
-      </div>
+      </section>
 
-      <div style={{ marginBottom: 16 }}>
-        <CurrentLiftsPerformance client={c} />
-      </div>
+      <details className="coach-card coach-disclosure"><summary>Strength tracking <span>Optional details</span></summary><p>Use this when strength measurements are part of the client’s coaching plan.</p><CurrentLiftsPerformance client={c} /></details>
 
-      <div className="grid cards-2" style={{ alignItems: 'start' }}>
+      <details className="coach-card coach-disclosure"><summary>Assessment history <span>{list.length} records</span></summary><p>Open a section to review its latest values and earlier entries.</p><div className="grid cards-2" style={{ alignItems: 'start' }}>
         {typesToShow.map((t) => {
           const recs = list.filter((a) => a.type === t.key)
           const l = latest(list, t.key)
@@ -90,9 +90,9 @@ export default function AssessmentsPage() {
             </div>
           )
         })}
-      </div>
+      </div></details>
 
-      <AssessmentTrends list={list} />
-    </>
+      <details className="coach-card coach-disclosure"><summary>Changes over time <span>Charts</span></summary><AssessmentTrends list={list} /></details>
+    </div>
   )
 }

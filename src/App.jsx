@@ -20,9 +20,9 @@ const page = load => lazy(() => load().catch(error => {
 }))
 const AthletePortal = page(() => import('./pages/AthletePortal'))
 const AdminPortal = page(() => import('./pages/AdminPortal'))
-const DashboardPage = page(() => import('./pages/DashboardPage'))
-const ClientsPage = page(() => import('./pages/ClientsPage'))
-const ClientDetailPage = page(() => import('./pages/ClientDetailPage'))
+const DashboardPage = page(() => import('./pages/CoachDashboardPage'))
+const ClientsPage = page(() => import('./pages/CoachClientsPage'))
+const ClientDetailPage = page(() => import('./pages/CoachClientPage'))
 const ClientProfilePage = page(() => import('./pages/ClientProfilePage'))
 const AssessmentsPage = page(() => import('./pages/AssessmentsPage'))
 const AssessmentDetailPage = page(() => import('./pages/AssessmentDetailPage'))
@@ -37,6 +37,7 @@ const MessagesPage = page(() => import('./pages/MessagesPage'))
 const SettingsPage = page(() => import('./pages/SettingsPage'))
 const ReportPage = page(() => import('./pages/ReportPage'))
 const ExercisePoolPage = page(() => import('./pages/ExercisePoolPage'))
+const CoachWorkoutPage = page(() => import('./pages/CoachWorkoutPage'))
 
 function Shell() {
   return (
@@ -52,7 +53,8 @@ function Shell() {
               <Route path="/pooling-test" element={<Navigate to="/clients" replace />} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
-              <Route path="/clients/:id/pool" element={<Suspense fallback={<p role="status">Loading exercise pool…</p>}><ExercisePoolPage /></Suspense>} />
+              <Route path="/clients/:id/pool" element={<Suspense fallback={<p role="status">Loading workout…</p>}><CoachWorkoutPage /></Suspense>} />
+              <Route path="/clients/:id/pool/advanced" element={<Suspense fallback={<p role="status">Loading support tools…</p>}><ExercisePoolPage /></Suspense>} />
               <Route path="/clients/:id/assessments" element={<AssessmentsPage />} />
               <Route path="/clients/:id/assessments/:type" element={<AssessmentDetailPage />} />
               <Route path="/clients/:id/metric/:metric" element={<MetricDetailPage />} />

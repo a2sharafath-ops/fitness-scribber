@@ -17,7 +17,7 @@ export default function SchedulePage() {
   const { db, tz } = useData()
   const { openModal } = useModal()
   const pooling=useCoachSessions(),navigate=useNavigate()
-  const entries=[...db.sessions,...pooling.rows.map(row=>({id:`pool-${row.id}`,clientId:row.clientId,date:row.date,time:row.sessionAt?new Intl.DateTimeFormat('en-GB',{timeZone:row.timeZone||'UTC',hour:'2-digit',minute:'2-digit'}).format(new Date(row.sessionAt)):'',type:'Pool workout',status:row.status==='complete'?'Completed':row.status==='stop'?'Cancelled':'Confirmed',pooling:true}))]
+  const entries=[...db.sessions,...pooling.rows.map(row=>({id:`pool-${row.id}`,clientId:row.clientId,date:row.date,time:row.sessionAt?new Intl.DateTimeFormat('en-GB',{timeZone:row.timeZone||'UTC',hour:'2-digit',minute:'2-digit'}).format(new Date(row.sessionAt)):'',type:'Workout',status:row.status==='complete'?'Completed':row.status==='stop'?'Cancelled':'Confirmed',pooling:true}))]
   const openSession=s=>s.pooling?navigate(`/clients/${s.clientId}#governed-workouts`):openModal(<SessionForm session={s}/> )
   const now = new Date()
   const [ym, setYm] = useState({ y: now.getFullYear(), m: now.getMonth() + 1 })
@@ -40,10 +40,10 @@ export default function SchedulePage() {
   return (
     <>
       <div className="topbar">
-        <div><h1>Schedule</h1><div className="sub">{upcoming.length} upcoming sessions</div></div>
-        <Button onClick={() => openModal(<SessionForm />)}>＋ Book Session</Button>
+        <div><p className="coach-eyebrow">Appointments and workouts</p><h1>Calendar</h1><div className="sub">{upcoming.length} upcoming items</div></div>
+        <Button onClick={() => openModal(<SessionForm />)}>Book session</Button>
       </div>
-      {pooling.error&&<p role="alert">Pooling schedule could not load: {pooling.error}</p>}
+      {pooling.error&&<p className="coach-inline-warning" role="alert">Workout dates could not be refreshed. Coaching appointments are still shown.</p>}
       <div className="grid" style={{ gridTemplateColumns: '2.4fr 1fr', alignItems: 'start' }}>
         <div className="card">
           <div className="flex between" style={{ marginBottom: 14 }}>
@@ -60,7 +60,7 @@ export default function SchedulePage() {
                 {cell.evs.slice(0, 3).map((s) => {
                   const c = db.clients.find((x) => x.id === s.clientId)
                   return <div key={s.id} className="cal-evt" style={{ background: colorFor(c?.name || '?') + '22', color: colorFor(c?.name || '?') }}
-                    onClick={(e) => { e.stopPropagation(); openSession(s) }}>{s.time} {c?.name.split(' ')[0] || '?'}{s.pooling?' · Pool':''}</div>
+                    onClick={(e) => { e.stopPropagation(); openSession(s) }}>{s.time} {c?.name.split(' ')[0] || '?'}</div>
                 })}
                 {cell.evs.length > 3 && <div className="muted" style={{ fontSize: 10 }}>+{cell.evs.length - 3} more</div>}
               </div>

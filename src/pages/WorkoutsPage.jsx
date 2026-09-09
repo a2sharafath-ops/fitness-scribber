@@ -18,20 +18,20 @@ export default function WorkoutsPage() {
   const { openModal } = useModal()
   const [tab, setTab] = useState(poolingConfig().r1?'clients':'plans')
   const sessions=useCoachSessions()
-  const exName = (id) => db.exercises.find((e) => e.id === id)?.name || '?'
+  const exName = (id) => db.exercises.find((e) => e.id === id)?.name || 'Exercise unavailable'
   const exMuscle = (id) => db.exercises.find((e) => e.id === id)?.muscle || ''
 
   return (
     <>
       <div className="topbar">
-        <div><h1>Workouts</h1><div className="sub">{db.plans.length} plans · {db.exercises.length} exercises</div></div>
-        {tab === 'clients'?<Link className="btn" to="/clients">Choose client to generate workout</Link>:tab === 'plans'
-          ? <Button onClick={() => openModal(<PlanForm />, true)}>＋ New Plan</Button>
-          : <Button onClick={() => openModal(<ExerciseForm />)}>＋ New Exercise</Button>}
+        <div><p className="coach-eyebrow">Programming</p><h1>Workouts</h1><div className="sub">Prepare client workouts or manage reusable content.</div></div>
+        {tab === 'clients'?<Link className="btn" to="/clients">Create client workout</Link>:tab === 'plans'
+          ? <Button onClick={() => openModal(<PlanForm />, true)}>New template</Button>
+          : <Button onClick={() => openModal(<ExerciseForm />)}>New exercise</Button>}
       </div>
       <div className="tabs">
-        {poolingConfig().r1&&<button className={'tab'+(tab==='clients'?' active':'')} onClick={()=>setTab('clients')}>Client Workouts</button>}
-        <button className={'tab' + (tab === 'plans' ? ' active' : '')} onClick={() => setTab('plans')}>Workout Plans</button>
+        {poolingConfig().r1&&<button className={'tab'+(tab==='clients'?' active':'')} onClick={()=>setTab('clients')}>Client workouts</button>}
+        <button className={'tab' + (tab === 'plans' ? ' active' : '')} onClick={() => setTab('plans')}>Templates</button>
         <button className={'tab' + (tab === 'lib' ? ' active' : '')} onClick={() => setTab('lib')}>Exercise Library</button>
       </div>
 
@@ -47,7 +47,7 @@ export default function WorkoutsPage() {
                   {p.items.map((it, i) => (
                     <div className="ex-item" key={i}><div style={{ flex: 1 }}><strong>{exName(it.exId)}</strong>
                       <div className="muted" style={{ fontSize: 12 }}>{it.sets} × {it.reps} · rest {it.rest}</div></div>
-                      <Tag color="gray">{exMuscle(it.exId)}</Tag></div>
+                      {exMuscle(it.exId)&&<Tag color="gray">{exMuscle(it.exId)}</Tag>}</div>
                   ))}
                 </div>
                 <div className="pill-row" style={{ marginTop: 12 }}>

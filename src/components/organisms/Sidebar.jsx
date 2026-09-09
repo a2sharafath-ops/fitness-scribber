@@ -7,13 +7,11 @@ import Brand from '../atoms/Brand'
 import Icon from '../atoms/Icon'
 
 const ITEMS = [
-  ['/', 'dashboard', 'Dashboard', true],
+  ['/', 'dashboard', 'Today', true],
   ['/clients', 'users', 'Clients'],
+  ['/schedule', 'calendar', 'Calendar'],
   ['/workouts', 'dumbbell', 'Workouts'],
-  ['/schedule', 'calendar', 'Schedule'],
-  ['/progress', 'chart', 'Progress'],
   ['/messages', 'message', 'Messages'],
-  ['/concerns', 'alert', 'Concerns'],
 ]
 
 export default function Sidebar() {
@@ -32,11 +30,20 @@ export default function Sidebar() {
         </NavLink>
       ))}
       <div className="nav-spacer" />
+      <NavLink to="/progress" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Reports and progress">
+        <span className="ic" aria-hidden="true"><Icon name="chart" /></span>
+        <span>Reports</span>
+      </NavLink>
+      <NavLink to="/concerns" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Concerns">
+        <span className="ic" aria-hidden="true"><Icon name="alert" /></span>
+        <span>Concerns</span>
+        <span className={'nav-badge' + (openCount > 0 ? ' show' : '')}>{openCount}</span>
+      </NavLink>
       <NavLink to="/settings" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Settings">
         <span className="ic" aria-hidden="true"><Icon name="settings" /></span>
         <span>Settings</span>
       </NavLink>
-      <div className="sb-foot">Fitness Partner v2.0<br />{hasBackend ? 'Synced to your account' : 'All data saved locally'}</div>
+      <div className="sb-foot">Coach workspace<br />{hasBackend ? 'Changes saved to your account' : 'Changes saved on this device'}</div>
     </nav>
   )
 }
