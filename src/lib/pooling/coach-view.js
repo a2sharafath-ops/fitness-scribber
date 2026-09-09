@@ -42,7 +42,7 @@ export function coachGapText(gap = {}) {
   const code = String(gap.reason || gap.code || gap.kind || '').toLowerCase()
   if (code.includes('equipment')) return `Confirm the equipment needed for ${label}.`
   if (code.includes('prerequisite') || code.includes('capability')) return `Review whether the client can safely perform ${label}.`
-  if (code.includes('budget') || code.includes('duration')) return `Allow more session time or review the optional sections for ${label}.`
+  if (code.includes('budget') || code.includes('duration')) return `The workout needs more time for ${label}. Increase the session time or review the workout details.`
   if (gap.role) return `The workout still needs an eligible ${coachLabel(gap.role).toLowerCase()} exercise.`
   if (gap.needId || gap.need) return `The confirmed training need “${label}” is not covered by an eligible exercise.`
   return `Review ${label.toLowerCase()} before the workout can be assigned.`
