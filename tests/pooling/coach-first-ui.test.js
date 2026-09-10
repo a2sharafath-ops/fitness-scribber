@@ -32,3 +32,13 @@ test('primary coach navigation uses task language rather than engine language', 
   assert.doesNotMatch(sidebar, /Exercise Pool|Context Preparation|Validate & Approve/)
   assert.doesNotMatch(subnav, /Exercise Pool|Load & Strength|Monitoring/)
 })
+
+test('settings exposes a confirmed account workflow switch without destructive wording', () => {
+  const settings = source('src/pages/SettingsPage.jsx')
+  const workflow = source('src/components/organisms/program/PoolingModeSwitch.jsx')
+  assert.match(settings, /<PoolingModeSwitch clientId={workflowClient\.id} runtime={workflowRuntime}/)
+  assert.match(workflow, /confirmDialog/)
+  assert.match(workflow, /Switch to Fitness Scribber Classic/)
+  assert.match(workflow, /Existing clients, assessments, drafts, assigned workouts and results stay saved/)
+  assert.match(workflow, /It does not delete data or change the rest of the app design/)
+})
