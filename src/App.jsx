@@ -1,5 +1,4 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
 import { DataProvider } from './store/DataContext'
@@ -8,37 +7,27 @@ import { ClipboardProvider } from './store/ClipboardContext'
 import AuthPage from './pages/AuthPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleOnboarding from './pages/RoleOnboarding'
+import AthletePortal from './pages/AthletePortal'
+import AdminPortal from './pages/AdminPortal'
 import AppLayout from './components/templates/AppLayout'
+import DashboardPage from './pages/DashboardPage'
+import ClientsPage from './pages/ClientsPage'
+import ClientDetailPage from './pages/ClientDetailPage'
+import ClientProfilePage from './pages/ClientProfilePage'
+import AssessmentsPage from './pages/AssessmentsPage'
+import AssessmentDetailPage from './pages/AssessmentDetailPage'
+import MetricDetailPage from './pages/MetricDetailPage'
+import CommandCenterPage from './pages/CommandCenterPage'
+import MonitorPage from './pages/MonitorPage'
+import WorkoutsPage from './pages/WorkoutsPage'
+import SchedulePage from './pages/SchedulePage'
+import ProgressPage from './pages/ProgressPage'
+import ConcernsPage from './pages/ConcernsPage'
+import MessagesPage from './pages/MessagesPage'
+import SettingsPage from './pages/SettingsPage'
+import ReportPage from './pages/ReportPage'
 import Toaster from './components/organisms/Toaster'
-import PageLoadFailure from './components/molecules/PageLoadFailure'
-import PageErrorBoundary from './components/molecules/PageErrorBoundary'
-
-// A failed chunk must remain recoverable after a deployment or network loss.
-// Reload never clears the account-scoped pending-operation journal.
-const page = load => lazy(() => load().catch(error => {
-  if (import.meta.env.DEV) console.error('Application route module failed to load', error)
-  return { default: PageLoadFailure }
-}))
-const AthletePortal = page(() => import('./pages/AthletePortal'))
-const AdminPortal = page(() => import('./pages/AdminPortal'))
-const DashboardPage = page(() => import('./pages/CoachDashboardPage'))
-const ClientsPage = page(() => import('./pages/CoachClientsPage'))
-const ClientDetailPage = page(() => import('./pages/CoachClientPage'))
-const ClientProfilePage = page(() => import('./pages/ClientProfilePage'))
-const AssessmentsPage = page(() => import('./pages/AssessmentsPage'))
-const AssessmentDetailPage = page(() => import('./pages/AssessmentDetailPage'))
-const MetricDetailPage = page(() => import('./pages/MetricDetailPage'))
-const CommandCenterPage = page(() => import('./pages/CommandCenterPage'))
-const MonitorPage = page(() => import('./pages/MonitorPage'))
-const WorkoutsPage = page(() => import('./pages/WorkoutsPage'))
-const SchedulePage = page(() => import('./pages/SchedulePage'))
-const ProgressPage = page(() => import('./pages/ProgressPage'))
-const ConcernsPage = page(() => import('./pages/ConcernsPage'))
-const MessagesPage = page(() => import('./pages/MessagesPage'))
-const SettingsPage = page(() => import('./pages/SettingsPage'))
-const ReportPage = page(() => import('./pages/ReportPage'))
-const ExercisePoolPage = page(() => import('./pages/ExercisePoolPage'))
-const CoachWorkoutPage = page(() => import('./pages/CoachWorkoutPage'))
+import './lib/chartSetup'
 
 function Shell() {
   return (
@@ -46,16 +35,12 @@ function Shell() {
       <ModalProvider>
         <ClipboardProvider>
         <BrowserRouter>
-          <Suspense fallback={<p role="status">Loading page…</p>}>
           <Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/pooling-test" element={<Navigate to="/clients" replace />} />
               <Route path="/clients/:id" element={<ClientDetailPage />} />
               <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
-              <Route path="/clients/:id/pool" element={<PageErrorBoundary><Suspense fallback={<p role="status">Loading workout…</p>}><CoachWorkoutPage /></Suspense></PageErrorBoundary>} />
-              <Route path="/clients/:id/pool/advanced" element={<Suspense fallback={<p role="status">Loading support tools…</p>}><ExercisePoolPage /></Suspense>} />
               <Route path="/clients/:id/assessments" element={<AssessmentsPage />} />
               <Route path="/clients/:id/assessments/:type" element={<AssessmentDetailPage />} />
               <Route path="/clients/:id/metric/:metric" element={<MetricDetailPage />} />
@@ -70,7 +55,6 @@ function Shell() {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Routes>
-          </Suspense>
         </BrowserRouter>
         </ClipboardProvider>
       </ModalProvider>
@@ -90,15 +74,13 @@ function Gate() {
   if (!role || role === 'pending') return <RoleOnboarding />
   if (role === 'admin') return <AdminPortal />
   if (role === 'athlete') return <AthletePortal />
-  // A direct authenticated account switch must not reuse the previous actor's
-  // in-memory dataset, clipboard, dialogs or pending private component state.
-  return <Shell key={session.user.id} />
+  return <Shell />
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <Suspense fallback={<p role="status">Loading workspace…</p>}><Gate /></Suspense>
+      <Gate />
       <Toaster />
     </AuthProvider>
   )

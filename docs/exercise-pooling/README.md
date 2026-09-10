@@ -1,14 +1,10 @@
-# Exercise pooling — build, verification and preparation
+# Exercise pooling — whole-system preparation
 
-Current tested application checkpoint: **`6ca02cb`**, 8 September 2026, on `codex/exercise-pooling-local`. R1–R3 are built; the completed bounded follow-up is recorded in [A33 hosted verification](./operations/A33_HOSTED_VERIFICATION.md). **Full acceptance and release remain pending.** Start with that current record, the [110-case evidence map](./quality/HOSTED_ACCEPTANCE_MATRIX.md), [pending work and decisions](./operations/REMAINING_WORK.md), and [82-task reconciliation](./operations/A33_SPRINT_RECONCILIATION.md). The historical local-only checkpoint is `3b779d9`.
-
-The current candidate passes 177 unit tests, six HTTP-handler tests and 16 database suites. All 110 preparation cases are mapped, not all passed. Pooling remains off and real candidates unpublished. Main and Production are not approved for promotion. The earlier [v0.7 existing-stack run](./preparation/EXISTING_TEST_STACK_APPROVAL.md), [execution log](./operations/HOSTED_EXECUTION_LOG.md) and [first hosted handoff](./operations/HOSTED_BUILD_HANDOFF.md) remain historical evidence; their older counts/checkpoints are not the current status.
-
-The preparation package FS-POOL-FULL-PREP-0.3 and the historical documents below are preserved. Their “build not authorized” statements describe the preparation stage and are superseded by the [v0.6 local approval](./preparation/LOCAL_COMPLETION_APPROVAL.md) and scoped v0.7 testing approval above. Professional acceptance and real-client release are not implied.
+Current package: FS-POOL-FULL-PREP-0.3. **All independently authorable preparation is complete; reviews, building and release remain pending.**
 
 Start with the [full preparation handoff](./preparation/FULL_PREPARATION_HANDOFF.md). All six PRD drafts and twelve catalogue artifacts now have preparation content, including daily adjustments and progression/planning. The full package has 110 synthetic test specifications, not executed app tests.
 
-The earlier [expanded preparation approval](./preparation/FULL_PREPARATION_APPROVAL.md) brought forward all six PRDs and twelve catalogue artifacts. Local building/commits were subsequently approved under A22–A29; A30 authorizes only the specified implementation-branch push, protected Preview and existing-backend synthetic test run. Merge/main promotion remains excluded. Earlier S1–S2 documents/archives remain scope snapshots, not current execution status.
+The owner approved bringing forward the remaining preparation in the [expanded approval record](./preparation/FULL_PREPARATION_APPROVAL.md). No app build, hosted action, commit/push or deployment is authorized. Earlier S1–S2 documents/archives remain scope snapshots; their statements that P05/P06/C09/C10 were deferred are superseded for drafting only.
 
 Use the [full artifact manifest](./preparation/FULL_PREPARATION_MANIFEST.json), [sprint backlog](./sprint-backlog.json) and [remaining approvals](./preparation/OPEN_DECISIONS.md). Actual professional acceptance, numerical policy limits and business/provider facts remain pending. Existing implementation dependencies are unchanged.
 
@@ -33,9 +29,9 @@ Baseline lifestyle context can inform R1 scheduling and coach-facing recommendat
 
 The eight proposed pools are general warm-up, mobility/lengthening, SMR, activation, integration, main/accessory work, conditioning and cool-down. One exercise may have several reviewed roles. These are not eight mandatory workout blocks.
 
-## Historical preparation inventory — not current implementation status
+## Existing foundations and gaps
 
-This table preserves the pre-build source-code inventory. Its “work needed” entries and lack-of-tests statement are historical, not today's backlog. Use the current handoff/matrix above for implementation evidence. Paths below are relative to the repository root.
+This is a source-code inventory, not verification of the live database, production deployment or actual client records. Paths below are relative to the repository root.
 
 | Area | Existing foundation | Work needed before relying on it |
 |---|---|---|
@@ -66,7 +62,7 @@ Work can overlap after its prerequisites are stable: UX sketches and the test-ca
 
 ## Review gates
 
-The detailed reviewer matrix is in the [decision and review register](./DECISIONS_AND_REVIEWS.md). The table below is the original preparation/release model. Owner product review, local engineering and scoped A30 testing were subsequently approved; professional and pilot/release gates are not thereby passed.
+The detailed reviewer matrix is in the [decision and review register](./DECISIONS_AND_REVIEWS.md). No gate is currently passed.
 
 | Gate | Required evidence | Who must approve | What it permits |
 |---|---|---|---|
@@ -98,6 +94,6 @@ Reviewer roles are requirements, not appointments. A coach's content review does
 
 S1/S2 authoring is complete when the agreed documents, draft datasets, source/rights audit, UX/test specifications and review dossiers exist and pass document consistency checks. G2 implementation readiness additionally requires actual qualified acceptance of the admitted scope/content, resolved blocking decisions and explicit A12 build authorization. These are different states.
 
-Historical preparation traceability is recorded in the [verification report](./quality/TRACEABILITY_AND_VERIFICATION.md) and [package manifest](./preparation/PACKAGE_MANIFEST.json). Their no-build/no-deployment statements apply to that preparation snapshot. The later authorized engineering, branch pushes, migrations and Preview deployment are recorded in the current hosted handoff; professional acceptance and real-client release are still not claimed.
+Traceability is recorded in the [verification report](./quality/TRACEABILITY_AND_VERIFICATION.md) and [package manifest](./preparation/PACKAGE_MANIFEST.json). No app code, real-client data, dependencies, hosted settings, Git commits/pushes, migration or deployment were changed. Formal reviews and executed application tests are not claimed.
 
 See the [remaining approval bundle](./preparation/OPEN_DECISIONS.md) for the next gate; no further routine drafting answers are needed.

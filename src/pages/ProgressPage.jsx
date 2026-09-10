@@ -9,13 +9,9 @@ import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { fmtDate } from '../lib/dates'
 import { baseOptions } from '../lib/chartSetup'
-import useCoachSessions from '../hooks/useCoachSessions'
-import PoolingSessionList from '../components/organisms/workout/PoolingSessionList'
-import {poolingConfig} from '../lib/pooling/config'
 
 export default function ProgressPage() {
   const { db, commit } = useData()
-  const sessions=useCoachSessions()
   const { openModal } = useModal()
   const { toDisp, fmtWt, unitName } = useFormat()
   const [clientId, setClientId] = useState(db.clients[0]?.id)
@@ -33,27 +29,26 @@ export default function ProgressPage() {
   return (
     <>
       <div className="topbar">
-        <div><p className="coach-eyebrow">Client reports</p><h1>Progress</h1><div className="sub">Review completed workouts, body measurements and strength over time.</div></div>
+        <div><h1>Progress Tracking</h1><div className="sub">Body metrics &amp; strength over time</div></div>
         <div className="flex gap">
           <select style={{ width: 'auto' }} value={clientId} onChange={(e) => setClientId(e.target.value)}>
             {db.clients.map((cl) => <option key={cl.id} value={cl.id}>{cl.name}</option>)}
           </select>
-          <Button onClick={() => openModal(<BodyMetricForm clientId={clientId} />)}>Record measurement</Button>
+          <Button onClick={() => openModal(<BodyMetricForm clientId={clientId} />)}>＋ Log Entry</Button>
         </div>
       </div>
       {!c ? <div className="empty"><div className="big">👥</div>Add a client to start tracking</div> : (
         <>
-          {poolingConfig().r1&&<PoolingSessionList sessions={sessions} clients={db.clients} clientId={clientId} title="Workout completion and results"/>}
           <div className="grid cards-3">
             <Kpi label="Latest weight" value={logs.length ? fmtWt(logs[logs.length - 1].weightKg) : '—'} delta={delta('weightKg')} deltaColor="var(--green)" />
-            <Kpi label="Estimated squat strength" value={logs.length ? fmtWt(logs[logs.length - 1].squat) : '—'} delta={delta('squat')} deltaColor="var(--green)" />
+            <Kpi label="Squat 1RM est." value={logs.length ? fmtWt(logs[logs.length - 1].squat) : '—'} delta={delta('squat')} deltaColor="var(--green)" />
             <Kpi label="Entries logged" value={logs.length} delta={c.goal} />
           </div>
           <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
-            <div className="card"><div className="section-title" style={{ margin: '0 0 12px' }}>Body weight over time</div>
+            <div className="card"><div className="section-title" style={{ margin: '0 0 12px' }}>Body Weight Trend</div>
               {logs.length > 1 ? <div style={{ height: 200 }}><Line data={{ labels: logs.map((l) => fmtDate(l.date)), datasets: [{ label: unitName(), data: logs.map((l) => toDisp(l.weightKg)), borderColor: '#0b87c9', backgroundColor: 'rgba(74,168,255,.12)', fill: true, tension: 0.3 }] }} options={opts} /></div> : <div className="empty"><div className="big"><Icon name="chart" size={40} /></div>Need 2+ entries to chart</div>}
             </div>
-            <div className="card"><div className="section-title" style={{ margin: '0 0 12px' }}>Squat strength over time</div>
+            <div className="card"><div className="section-title" style={{ margin: '0 0 12px' }}>Strength Trend (Squat)</div>
               {logs.length > 1 ? <div style={{ height: 200 }}><Line data={{ labels: logs.map((l) => fmtDate(l.date)), datasets: [{ label: unitName(), data: logs.map((l) => toDisp(l.squat)), borderColor: '#fb404a', backgroundColor: 'rgba(251,64,74,.12)', fill: true, tension: 0.3 }] }} options={opts} /></div> : <div className="empty"><div className="big"><Icon name="chart" size={40} /></div>Need 2+ entries to chart</div>}
             </div>
           </div>

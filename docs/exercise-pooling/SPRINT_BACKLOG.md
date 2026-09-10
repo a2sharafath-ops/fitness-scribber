@@ -1,10 +1,10 @@
 # Exercise pooling — prioritized sprint project
 
-## Current update — 8 September 2026 (A32)
+## Current update — 7 September 2026
 
-The owner accepted the six PRDs and twelve catalogue drafts and authorized backup, build and bounded hosted verification, including direct shared-backend confirmation. **Application `3b95415` is committed, pushed and tested on the protected Preview.** 163 unit tests, 16 native suites, six HTTP tests, lint/build, an 85-table restore and listed hosted/browser workflows pass. All 815 pre-A32 rows are preserved; the three new engineering identities are retired. Main/Production and global-off remain unchanged. [Current evidence](./operations/A32_ENGINEERING_VERIFICATION.md); [all 82 current task states](./operations/A32_SPRINT_RECONCILIATION.md); [remaining work](./operations/REMAINING_WORK.md).
+The owner reports the six PRDs and twelve catalogues reviewed and accepted as-is and has directed building. Execution is currently paused at the owner's request to obtain one consolidated backup/recovery/full-local-build approval first. Specialist evidence and live-release permissions are not inferred. See the [complete backup-to-build package](./preparation/BACKUP_TO_BUILD_APPROVAL.md) for the current scope, every task, all permissions/sign-offs and setup requirements.
 
-The tracker still has **82 tasks**: the original 70 below plus **FP-B01–FP-B12** in SB. No duplicate sprint was created. The tracker separates preparation/product review, bounded engineering evidence and full acceptance. The 110-case matrix has **86 passed engineering invariants, 14 partial and 10 external-scope cases**; full acceptance is not claimed. B11 verifies the candidate's fallback, not complete new-state compatibility of the immutable old frontend. Earlier status text below is a historical preparation snapshot, superseded by this update for current authority/status.
+The current tracker has **82 tasks**: the original 70 below plus **FP-B01–FP-B12** in the SB backup/recovery sprint. The package contains their full acceptance criteria and dependency table; FP-301 now also requires FP-B10. SB preflight precedes S3, with final recovery after the local R1–R3 build. The proposed early local R2/R3 path requires explicit A23 approval and does not waive human/pilot/release acceptance. Earlier status text below is a preparation snapshot, superseded by this update only where stated.
 
 Status: whole-system preparation complete. Early P05/C09, P06/C10 and operational preparation is now authorized and drafted; reviews/build/release remain pending. See the [full handoff](./preparation/FULL_PREPARATION_HANDOFF.md).
 

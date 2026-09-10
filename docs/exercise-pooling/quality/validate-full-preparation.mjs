@@ -46,14 +46,12 @@ for (const a of manifest.artifacts) {
 }
 check(manifest.implementationAuthorized === false && manifest.productionEnabled === false, 'Manifest authority');
 const b = json('sprint-backlog.json');
-const localBuild=b.implementationAuthorized===true && b.localOnlyProposal?.status==='owner-approved-local-only';
-check(b.tasks.length === (localBuild?82:70) && (b.implementationAuthorized === false || localBuild) && b.productionChangesAuthorized === false, 'Backlog scope');
-if(localBuild)check(b.consolidatedPlan==='preparation/LOCAL_COMPLETION_APPROVAL.md' && b.implementationAuthorizationDetail.professionalSignoffVerified===false, 'Local approval is not professional acceptance');
+check(b.tasks.length === 70 && b.implementationAuthorized === false && b.productionChangesAuthorized === false, 'Backlog scope');
 for (const t of b.tasks) for (const f of t.preparationOutputs || []) check(fs.existsSync(path.join(root,f)), `${t.id}: missing preparation ${f}`);
 for (const id of ['FP-605','FP-701','FP-801']) {
   const t = b.tasks.find(t=>t.id===id);
   check(t?.preparationStatus === 'complete' && t?.acceptanceStatus === 'pending' && t?.status !== 'done', `${id}: false completion/acceptance`);
 }
-check(b.extendedPreparationApproval.A20_preparation && b.extendedPreparationApproval.A21_preparation && b.extendedPreparationApproval.A20_build===localBuild && b.extendedPreparationApproval.A21_build===localBuild, 'Extension authorization');
-console.log(JSON.stringify({packageId:manifest.packageId,status:errors.length?'failed':'passed-document-checks',checks,errors,prdDrafts:6,catalogueArtifacts:12,extensionRules:rules.size,extensionCases:caseIds.length,totalTestSpecifications:110,parameterCounts,artifactCount:manifest.artifacts.length,completePreparationTaskPortions:b.tasks.filter(t=>t.preparationStatus==='complete').length,applicationTestsExecuted:false,professionalAcceptanceRecorded:false,implementationAuthorized:b.implementationAuthorized,scope:'Document integrity only; accepted local build exception does not publish draft content'},null,2));
+check(b.extendedPreparationApproval.A20_preparation && b.extendedPreparationApproval.A21_preparation && !b.extendedPreparationApproval.A20_build && !b.extendedPreparationApproval.A21_build, 'Extension authorization');
+console.log(JSON.stringify({packageId:manifest.packageId,status:errors.length?'failed':'passed-document-checks',checks,errors,prdDrafts:6,catalogueArtifacts:12,extensionRules:rules.size,extensionCases:caseIds.length,totalTestSpecifications:110,parameterCounts,artifactCount:manifest.artifacts.length,completePreparationTaskPortions:b.tasks.filter(t=>t.preparationStatus==='complete').length,applicationTestsExecuted:false,professionalAcceptanceRecorded:false,implementationAuthorized:false},null,2));
 process.exitCode = errors.length ? 1 : 0;

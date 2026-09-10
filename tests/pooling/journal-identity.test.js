@@ -1,6 +1,0 @@
-import test from 'node:test'
-import assert from 'node:assert/strict'
-import {createJournalIdentity} from '../../src/lib/pooling/journal-identity.js'
-test('verified journal scope remains available to queue a stop when offline',async()=>{let calls=0;const identity=createJournalIdentity({onAuthStateChange:()=>{},getUser:async()=>{calls++;return {data:{user:{id:'test-user'}}}}});assert.equal(await identity(),'test-user');assert.equal(await identity(),'test-user');assert.equal(calls,1)})
-test('sign-out or another account cannot reuse the previous recovery scope',async()=>{let callback,actor='first';const identity=createJournalIdentity({onAuthStateChange:fn=>{callback=fn},getUser:async()=>({data:actor?{user:{id:actor}}:null})});await identity();actor=null;callback('SIGNED_OUT',null);await assert.rejects(identity,/forbidden/);actor='second';callback('SIGNED_IN',{user:{id:actor}});assert.equal(await identity(),'second')})
-test('identity changed during verification cannot save a wrong-account scope',async()=>{let callback,resolve;const identity=createJournalIdentity({onAuthStateChange:fn=>{callback=fn},getUser:()=>new Promise(r=>{resolve=r})});const pending=identity();callback('SIGNED_OUT',null);resolve({data:{user:{id:'old'}}});await assert.rejects(()=>pending,/forbidden/)})

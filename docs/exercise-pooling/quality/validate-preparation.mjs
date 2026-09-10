@@ -104,17 +104,14 @@ for (const id of reqIds) check(trace.includes(`| ${id} `), `Unmapped ${id}`);
 const tcIds = new Set([...read('quality/REFERENCE_CASES_AND_TEST_STRATEGY.md').matchAll(/\| (TC-\d{3}) \|/g)].map(x => x[1]));
 check(tcIds.size === 46, 'TC count');
 const taskIds = new Set(backlog.tasks.map(x => x.id));
-const localBuild = backlog.implementationAuthorized === true && backlog.localOnlyProposal?.status === 'owner-approved-local-only';
-const expectedTasks = localBuild ? 82 : 70;
-check(backlog.tasks.length === expectedTasks && taskIds.size === expectedTasks, 'Task count/duplicates');
+check(backlog.tasks.length === 70 && taskIds.size === 70, 'Task count/duplicates');
 const prepTasks = backlog.tasks.filter(t => ['S1', 'S2'].includes(t.sprint));
 check(prepTasks.length === 31 && prepTasks.every(t => t.preparationStatus === 'complete' && t.acceptanceStatus === 'pending' && t.status !== 'done'), 'Preparation/acceptance task status');
-check((backlog.implementationAuthorized === false || localBuild) && backlog.productionChangesAuthorized === false, 'Backlog authorization');
-if(localBuild)check(backlog.consolidatedPlan === 'preparation/LOCAL_COMPLETION_APPROVAL.md' && backlog.implementationAuthorizationDetail.professionalSignoffVerified === false, 'Recorded local exception without fabricated professional acceptance');
+check(backlog.implementationAuthorized === false && backlog.productionChangesAuthorized === false, 'Backlog authorization');
 check(manifest.implementationAuthorized === false && manifest.productionEnabled === false, 'Manifest authorization');
 check(manifest.artifacts.length === 40 && new Set(manifest.artifacts.map(a => a.id)).size === 40, 'Artifact count/duplicates');
 for (const gate of ['G1', 'G2']) check(backlog.gateStatus[gate] === 'pending' && manifest.gateStatus[gate] === 'pending', `False ${gate} acceptance`);
-check(backlog.gateStatus.A12 === (localBuild ? 'local-build-authorized-under-A23-professional-release-gates-pending' : 'not-authorized') && manifest.gateStatus.A12 === 'not-authorized', 'Current local approval and historical manifest must remain distinct');
+check(backlog.gateStatus.A12 === 'not-authorized' && manifest.gateStatus.A12 === 'not-authorized', 'A12 must stay unapproved');
 for (const t of backlog.tasks) {
   for (const d of t.dependsOn || []) check(taskIds.has(d), `${t.id}: missing task dependency ${d}`);
   for (const f of t.outputs || []) check(fs.existsSync(path.join(root, f)), `${t.id}: missing output ${f}`);
@@ -141,5 +138,5 @@ for (const f of files.filter(f => f.endsWith('.md'))) {
 }
 const counts = { exercises: exercises.length, protocols: rules.protocols.length, needs: rules.needs.length, mappings: mappings.length, policies: rules.policies.length, goals: rules.goals.length, doses: rules.doses.length, families: rules.families.length, sessions: rules.sessions.length, reasons: reasons.length, sources: sources.length, equipmentIds: vocabulary.equipment.length, coverageRows: fixtures.coverage.length, accessScenarios: fixtures.accessCases.length, tcSpecifications: tcIds.size, catSpecifications: fixtures.cases.length, productionApprovedExercises: exercises.filter(x => x.automationEligible).length };
 for (const [key, value] of Object.entries(counts)) check(manifest.draftCounts[key] === value, `Manifest count mismatch ${key}`);
-console.log(JSON.stringify({ packageId: manifest.packageId, status: errors.length ? 'failed' : 'passed-document-checks', assertions, errors, counts, taskCount: taskIds.size, preparationCompleteTasks: prepTasks.length, artifactCount: manifest.artifacts.length, applicationTestsExecuted: false, professionalAcceptanceRecorded: false, implementationAuthorized: backlog.implementationAuthorized, scope: 'Document integrity only; historical draft manifests unchanged, local approval separately recorded' }, null, 2));
+console.log(JSON.stringify({ packageId: manifest.packageId, status: errors.length ? 'failed' : 'passed-document-checks', assertions, errors, counts, taskCount: taskIds.size, preparationCompleteTasks: prepTasks.length, artifactCount: manifest.artifacts.length, applicationTestsExecuted: false, professionalAcceptanceRecorded: false, implementationAuthorized: false }, null, 2));
 process.exitCode = errors.length ? 1 : 0;

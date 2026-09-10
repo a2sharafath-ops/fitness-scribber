@@ -9,7 +9,6 @@ export function ModalProvider({ children }) {
   const [wide, setWide] = useState(false)
   const dialogRef = useRef(null)
   const returnFocusRef = useRef(null) // element focused before the modal opened
-  const closeGuardRef = useRef(null)
 
   // isWide: false | true | 'xl' (extra-wide, e.g. the workout builder)
   const openModal = useCallback((content, isWide = false) => {
@@ -18,11 +17,6 @@ export function ModalProvider({ children }) {
     setWide(isWide)
   }, [])
   const closeModal = useCallback(() => setNode(null), [])
-  const registerCloseGuard=useCallback(handler=>{
-    closeGuardRef.current=handler
-    return()=>{if(closeGuardRef.current===handler)closeGuardRef.current=null}
-  },[])
-  const requestClose=useCallback(()=>closeGuardRef.current?closeGuardRef.current():closeModal(),[closeModal])
 
   // Move focus into the dialog on open; restore it to the trigger on close.
   useEffect(() => {
@@ -42,7 +36,7 @@ export function ModalProvider({ children }) {
   useEffect(() => {
     if (!node) return
     const onKey = (e) => {
-      if (e.key === 'Escape') { requestClose(); return }
+      if (e.key === 'Escape') { closeModal(); return }
       if (e.key !== 'Tab') return
       const box = dialogRef.current
       if (!box) return
@@ -55,16 +49,16 @@ export function ModalProvider({ children }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [node, requestClose])
+  }, [node, closeModal])
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal, registerCloseGuard }}>
+    <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
       {node && (
         <div
           className="overlay"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) requestClose()
+            if (e.target === e.currentTarget) closeModal()
           }}
         >
           <div ref={dialogRef} tabIndex={-1} className={'modal' + (wide ? ' wide' : '') + (wide === 'xl' ? ' xl' : '')} role="dialog" aria-modal="true">

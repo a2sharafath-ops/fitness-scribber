@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase, hasBackend } from '../lib/supabase'
 
 const AuthContext = createContext(null)
@@ -8,9 +8,6 @@ export function AuthProvider({ children }) {
   const [ready, setReady] = useState(!hasBackend)
   const [profile, setProfile] = useState(null)
   const [profileReady, setProfileReady] = useState(!hasBackend)
-  const [profileOwner, setProfileOwner] = useState(null)
-  const profileRequest = useRef(0)
-  const currentUser = useRef(null)
   // True after the user follows a password-reset email link — forces the
   // "set a new password" screen until they choose one.
   const [recovery, setRecovery] = useState(false)
@@ -30,15 +27,11 @@ export function AuthProvider({ children }) {
   // the profile then (profileReady=false) unmounts the whole app — which looks
   // like a full page refresh. The profile only needs reloading when the user changes.
   const userId = session?.user?.id || null
-  currentUser.current = userId
   const loadProfile = useCallback(async () => {
-    const request = ++profileRequest.current
-    if (!hasBackend || !userId) { setProfile(null); setProfileOwner(userId); setProfileReady(true); return }
+    if (!hasBackend || !userId) { setProfile(null); setProfileReady(true); return }
     setProfileReady(false)
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-    if (currentUser.current !== userId || profileRequest.current !== request) return
     setProfile(data || null)
-    setProfileOwner(userId)
     setProfileReady(true)
   }, [userId])
 
@@ -77,9 +70,9 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user || null,
     ready,
-    profile: profileOwner === userId ? profile : null,
-    role: profileOwner === userId ? profile?.role || null : null,
-    profileReady: profileOwner === userId && profileReady,
+    profile,
+    role: profile?.role || null,
+    profileReady,
     recovery,
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
     signUp: (email, password) => supabase.auth.signUp({ email, password }),

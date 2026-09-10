@@ -6,8 +6,6 @@ import { callFunction, hasBackend } from '../../api/functions'
 import { lastNDates, todayISO, fmtDay } from '../../lib/dates'
 import { dailySum, acwrSeries, trainingMonotony, readinessScore, readinessFor, rolling30Baseline, deviationPct, latestOf, mean } from '../../lib/calc'
 import { programStats } from '../../lib/program'
-import usePoolingRuntime from '../../hooks/usePoolingRuntime'
-import { legacyCoachingNotice } from '../../lib/pooling/legacy-coaching'
 
 // Rule-based synthesis of live metrics into actionable coaching prompts.
 function suggest(db, client, tz, fmtVL) {
@@ -15,8 +13,6 @@ function suggest(db, client, tz, fmtVL) {
   const r = readinessFor(db, client.id)
   const today = todayISO(tz)
   const rScore = readinessScore(db, client.id, today) ?? readinessScore(db, client.id, [...lastNDates(28, tz)].reverse().find((d) => readinessScore(db, client.id, d) != null) || today)
-  const boundary = legacyCoachingNotice({ readinessScore: rScore })
-  if (boundary) return [boundary]
   const intMap = dailySum(db.srpe, client.id, 'tl')
   const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
   const mono = trainingMonotony(last7)
@@ -77,12 +73,10 @@ export default function AICoach({ client }) {
   const [nonce, setNonce] = useState(0)
   const [live, setLive] = useState(null)
   const [loadingLive, setLoadingLive] = useState(false)
-  const {governed} = usePoolingRuntime(client.id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const sug = useMemo(() => governed ? [legacyCoachingNotice({ poolingEnabled: true })] : suggest(db, client, tz, fmtVL), [db, client, tz, nonce, governed])
+  const sug = useMemo(() => suggest(db, client, tz, fmtVL), [db, client, tz, nonce])
 
   const askLive = async () => {
-    if (governed) return
     setLoadingLive(true); setLive(null)
     try {
       const { text } = await callFunction('insights', { summary: summarize(db, client, tz, fmtVL) })
@@ -120,13 +114,13 @@ export default function AICoach({ client }) {
       </div>
       <div className="ai-foot">
         <button className="btn ghost sm" style={{ width: '100%' }} onClick={() => setNonce((n) => n + 1)}>⟳ Re-analyze current data</button>
-        {hasBackend && !governed && (
+        {hasBackend && (
           <button className="btn sm" style={{ width: '100%', marginTop: 8 }} onClick={askLive} disabled={loadingLive}>
             {loadingLive ? 'Thinking…' : <><Icon name="sparkles" size={14} /> Ask AI (live)</>}
           </button>
         )}
         <div className="muted" style={{ fontSize: 10, marginTop: 8, textAlign: 'center' }}>
-          {governed ? 'Pooling decisions require current sources, admitted policies and explicit coach review.' : <>Legacy metric synthesis; not exercise clearance{hasBackend ? '; “Ask AI” calls your LLM endpoint.' : '.'}</>}
+          Rule-based synthesis of live metrics{hasBackend ? '; “Ask AI” calls your LLM endpoint.' : '. Connect a backend + LLM for free-form coaching.'}
         </div>
       </div>
     </div>

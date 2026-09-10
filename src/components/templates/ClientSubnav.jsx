@@ -1,14 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { poolingConfig } from '../../lib/pooling/config'
 
-// Coach-facing sections use familiar task names. Specialist analysis routes
-// remain reachable from Details and Progress without crowding primary navigation.
+// Shared breadcrumb + tab bar for every per-client screen, so the five client
+// views (Overview, Profile, Assessments, Load & Strength, Monitoring) read as
+// one record instead of scattered pages. Presentational — routing only.
 const tabsFor = (id) => [
-  { to: `/clients/${id}`, label: 'Summary', end: true },
-  { to: `/clients/${id}/profile`, label: 'Details' },
+  { to: `/clients/${id}`, label: 'Overview', end: true },
+  { to: `/clients/${id}/profile`, label: 'Profile' },
   { to: `/clients/${id}/assessments`, label: 'Assessments' },
-  ...(poolingConfig().r1 ? [{ to: `/clients/${id}/pool`, label: 'Workouts' }] : []),
-  { to: `/monitor/${id}`, label: 'Progress' },
+  { to: `/command/${id}`, label: 'Load & Strength' },
+  { to: `/monitor/${id}`, label: 'Monitoring' },
 ]
 
 export default function ClientSubnav({ client, tabsOnly = false }) {

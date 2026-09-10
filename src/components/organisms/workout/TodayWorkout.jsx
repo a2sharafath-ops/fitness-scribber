@@ -8,9 +8,6 @@ import WorkoutSummary from './WorkoutSummary'
 import { buildFromPlan, buildFromPrescription, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
 import { programStats } from '../../../lib/program'
 import { fmtVL } from '../../../lib/units'
-import usePoolingRuntime from '../../../hooks/usePoolingRuntime'
-import PoolingExecutionNotice from './PoolingExecutionNotice'
-import { executionAvailability } from '../../../lib/pooling/execution'
 
 const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'green' }
 
@@ -26,13 +23,11 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
 export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, bare }) {
-  const runtime=usePoolingRuntime(client.id)
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
   const ctx = { clientId: client.id, date: today, readiness: context.readiness, acwr: context.acwr, resolveTm }
   const locked = !!athlete && workout?.source === 'prescribed'
-  if (!executionAvailability({enabled:runtime.governed,operation:'start'}).allowed) return <Shell bare={bare} extra={headerExtra}><PoolingExecutionNotice workout={workout} units={units} exercises={exercises} onSave={onSave} onAddSession={onAddSession} /></Shell>
 
   // ---- No workout yet → prescribed session, or a rest day ------------
   if (!workout) {
@@ -87,18 +82,6 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
       </Shell>
     )
   }
-
-  // A stop is retained history, not an unstarted draft. This also applies when
-  // pooling is switched off; do not reinterpret its new status as Classic Start.
-  if (workout.status === 'stopped') return (
-    <Shell bare={bare} extra={headerExtra}>
-      <section aria-label="Stopped session">
-        <h3>Session stopped</h3>
-        <p>Recorded work is preserved. This stopped record cannot be restarted from this card.</p>
-        <p>Ask your coach to review a separate session before continuing.</p>
-      </section>
-    </Shell>
-  )
 
   // ---- Editing a suggested session (never reachable when locked) ----
   if (editing && !locked && workout.status !== 'in_progress') {

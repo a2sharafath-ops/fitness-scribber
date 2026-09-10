@@ -12,28 +12,16 @@ import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
 import { useAuth } from '../store/AuthContext'
 import { supabase } from '../lib/supabase'
-import { poolingConfig } from '../lib/pooling/config'
-import {readActorRuntime} from '../api/pooling'
-import usePoolingRuntime from '../hooks/usePoolingRuntime'
-import { toast } from '../lib/toast'
 import { callFunction } from '../api/functions'
 import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
 import { screeningsFor, finalizeScreening } from '../lib/screening'
 import { workoutPeaks, resolveTrainingMax } from '../lib/program'
-import useGovernedWorkout from '../hooks/useGovernedWorkout'
-import GovernedWorkoutPanel from '../components/organisms/workout/GovernedWorkoutPanel'
-import PoolingClientReports from '../components/organisms/workout/PoolingClientReports'
-import PoolingGovernance from '../components/organisms/program/PoolingGovernance'
-import PoolingReassessment from '../components/organisms/program/PoolingReassessment'
 
 export default function AthletePortal() {
   const { user, signOut } = useAuth()
   const [state, setState] = useState(null)
-  const [loadError,setLoadError]=useState('')
-  const runtime=usePoolingRuntime(state?.client?.id)
-  const poolingWorkflow=useGovernedWorkout(state?.client?.id,!!state?.poolingRuntime?.governed,runtime.r1)
   const [busy, setBusy] = useState(false)
   const [checkinW, setCheckinW] = useState(null) // workout waiting to start until the check-in popup resolves
   const [rpeW, setRpeW] = useState(null)         // completed workout waiting for the RPE popup
@@ -41,19 +29,9 @@ export default function AthletePortal() {
 
   const load = useCallback(async () => {
     if (!user) return
-    if(poolingConfig().r1){
-      try{
-        const activation=await readActorRuntime()
-        if(activation.governed){
-          const {data,error}=await supabase.rpc('pooling_athlete_snapshot')
-          if(error)throw error
-          setLoadError('');setState({...data,poolingRuntime:activation});return
-        }
-      }catch{setLoadError('Protected client runtime could not be loaded. Retry before using a workout.');return}
-    }
     const { data: clients } = await supabase.from('clients').select('*').eq('userId', user.id)
     const client = clients?.[0]
-    if (!client) { setLoadError('');setState({ client: null }); return }
+    if (!client) { setState({ client: null }); return }
     const out = {}
     for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'wearable_tokens', 'workouts', 'assessments', 'screenings', 'maxes']) {
       const { data } = await supabase.from(t).select('*').eq('clientId', client.id)
@@ -64,7 +42,7 @@ export default function AthletePortal() {
       supabase.from('plans').select('*'),
       supabase.from('exercises').select('*'),
     ])
-    setLoadError('');setState({ client, plans: plans || [], exercises: exercises || [], ...out })
+    setState({ client, plans: plans || [], exercises: exercises || [], ...out })
   }, [user])
   useEffect(() => { load() }, [load])
 
@@ -80,7 +58,6 @@ export default function AthletePortal() {
     }
   }, [])
 
-  if(loadError)return <div className="empty"><p role="alert">{loadError}</p><Button onClick={load}>Retry</Button></div>
   if (!state) return <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading…</div>
   if (!state.client) {
     return (
@@ -96,7 +73,6 @@ export default function AthletePortal() {
   }
 
   const { client } = state
-  if(state.poolingRuntime?.governed)return <main className="pooling-workspace" style={{maxWidth:960,margin:'auto',padding:24}}><h1>{client.name}</h1><p>{state.message}</p>{!runtime.r1&&<p role="status">New actions are unavailable. Stop and preserved history remain available.</p>}<GovernedWorkoutPanel workflow={poolingWorkflow} /><PoolingClientReports clientId={client.id} onChanged={poolingWorkflow.refresh}/><PoolingGovernance clientId={client.id} clientView onChanged={poolingWorkflow.refresh}/>{runtime.r3 && <PoolingReassessment clientId={client.id}/>}<Button variant="ghost" onClick={signOut}>Sign out</Button></main>
   const readiness = readinessFor({ wellness: state.wellness, wearable: state.wearable }, client.id)
   const checkedIn = state.wellness.some((w) => w.date === today)
   const recent = [...state.wellness].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7)
@@ -154,12 +130,10 @@ export default function AthletePortal() {
   // Start flow: pressing ▶ Start first pops the morning check-in (skipped if
   // already done today), then the session actually starts.
   const startWorkout = (w) => {
-    if (runtime.status!=='ready'||runtime.governed) return toast('Start is disabled pending verified pooling authority.', 'info')
     if (checkedIn) { saveWorkout(w); return }
     setCheckinW(w)
   }
   const submitCheckin = async (v) => {
-    if (runtime.status!=='ready'||runtime.governed) { setCheckinW(null); return toast('Wellness cannot authorize a pooling session start.', 'info') }
     const ok = await insert('wellness', v)
     if (!ok) return
     const w = checkinW
@@ -169,7 +143,6 @@ export default function AthletePortal() {
   const skipCheckin = async () => {
     const w = checkinW
     setCheckinW(null)
-    if (runtime.status!=='ready'||runtime.governed) return
     if (w) await saveWorkout(w)
   }
 
@@ -316,3 +289,4 @@ function WearableSection({ clientId, tokens, latest, onChange }) {
     </Card>
   )
 }
+

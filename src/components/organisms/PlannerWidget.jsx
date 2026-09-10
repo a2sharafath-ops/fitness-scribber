@@ -34,7 +34,7 @@ export default function PlannerWidget({ client, size = 'medium', todayProps }) {
   const { prescription, workout, context = {} } = todayProps || {}
   const pStats = prescription ? programStats(prescription) : null
   const todayName = workout
-    ? (workout.status === 'completed' ? 'Session completed' : workout.status === 'stopped' ? 'Session stopped' : 'Session in progress')
+    ? (workout.status === 'completed' ? 'Session completed' : 'Session in progress')
     : pStats && pStats.exercises
       ? (prescription.notes || 'Prescribed session')
       : 'Rest / unplanned'
