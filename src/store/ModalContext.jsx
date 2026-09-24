@@ -9,14 +9,25 @@ export function ModalProvider({ children }) {
   const [wide, setWide] = useState(false)
   const dialogRef = useRef(null)
   const returnFocusRef = useRef(null) // element focused before the modal opened
+  const closeGuardRef = useRef(null)
 
   // isWide: false | true | 'xl' (extra-wide, e.g. the workout builder)
   const openModal = useCallback((content, isWide = false) => {
     returnFocusRef.current = document.activeElement
+    closeGuardRef.current = null
     setNode(() => content)
     setWide(isWide)
   }, [])
-  const closeModal = useCallback(() => setNode(null), [])
+  const setCloseGuard = useCallback((guard) => {
+    closeGuardRef.current = guard
+    return () => { if (closeGuardRef.current === guard) closeGuardRef.current = null }
+  }, [])
+  const closeModal = useCallback(async (options) => {
+    if (options?.force !== true && closeGuardRef.current && !await closeGuardRef.current()) return false
+    closeGuardRef.current = null
+    setNode(null)
+    return true
+  }, [])
 
   // Move focus into the dialog on open; restore it to the trigger on close.
   useEffect(() => {
@@ -52,7 +63,7 @@ export function ModalProvider({ children }) {
   }, [node, closeModal])
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal }}>
+    <ModalContext.Provider value={{ openModal, closeModal, setCloseGuard }}>
       {children}
       {node && (
         <div
@@ -61,7 +72,7 @@ export function ModalProvider({ children }) {
             if (e.target === e.currentTarget) closeModal()
           }}
         >
-          <div ref={dialogRef} tabIndex={-1} className={'modal' + (wide ? ' wide' : '') + (wide === 'xl' ? ' xl' : '')} role="dialog" aria-modal="true">
+          <div ref={dialogRef} tabIndex={-1} className={'modal' + (wide ? ' wide' : '') + (wide === 'xl' ? ' xl' : '')} role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-label="Dialog">
             {node}
           </div>
         </div>

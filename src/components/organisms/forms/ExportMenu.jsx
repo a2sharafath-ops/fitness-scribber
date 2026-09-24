@@ -36,10 +36,10 @@ export default function ExportMenu({ clientId }) {
   const filt = (arr) => (clientId ? arr.filter((x) => x.clientId === clientId) : arr)
 
   const specs = {
-    wellness: ['Wellness', ['Athlete', 'Date', 'Sleep', 'Stress', 'Fatigue', 'Soreness', 'Score'], (w) => [cname(w.clientId), w.date, w.sleep, w.stress, w.fatigue, w.soreness, w.score]],
-    srpe: ['SessionRPE', ['Athlete', 'Date', 'sRPE', 'Duration(min)', 'sRPE-TL(AU)'], (s) => [cname(s.clientId), s.date, s.rpe, s.duration, s.tl]],
-    resistance: ['Resistance', ['Athlete', 'Date', 'Exercise', 'Pattern', 'Sets', 'Reps', 'Weight(kg)', 'VolumeLoad(kg)'], (r) => [cname(r.clientId), r.date, r.exercise, r.pattern, r.sets, r.reps, r.weight, r.volumeLoad]],
-    cardio: ['Conditioning', ['Athlete', 'Date', 'Modality', 'TRIMP', 'TiZ(min)', 'TSS', 'HSD(km)'], (x) => [cname(x.clientId), x.date, x.modality, x.trimp, x.tiz, x.tss, x.hsd]],
+    wellness: ['Wellness', ['Athlete', 'Date', 'Sleep', 'Stress', 'Fatigue', 'Soreness', 'Score', 'Source'], (w) => [cname(w.clientId), w.date, w.sleep, w.stress, w.fatigue, w.soreness, w.score, w.source]],
+    srpe: ['SessionRPE', ['Athlete', 'Date', 'sRPE', 'Duration(min)', 'sRPE-TL(AU)', 'Source'], (s) => [cname(s.clientId), s.date, s.rpe, s.duration, s.tl, s.source]],
+    resistance: ['Resistance', ['Athlete', 'Date', 'Exercise', 'Pattern', 'Sets', 'Reps', 'Weight(kg)', 'VolumeLoad(kg)', 'Source'], (r) => [cname(r.clientId), r.date, r.exercise, r.pattern, r.sets, r.reps, r.weight, r.volumeLoad, r.source]],
+    cardio: ['Conditioning', ['Athlete', 'Date', 'Modality', 'TRIMP', 'TiZ(min)', 'TSS', 'HSD(km)', 'Source'], (x) => [cname(x.clientId), x.date, x.modality, x.trimp, x.tiz, x.tss, x.hsd, x.source]],
     wearable: ['Wearable', ['Athlete', 'Date', 'HRV(ms)', 'RHR(bpm)', 'Sleep(h)', 'Source'], (x) => [cname(x.clientId), x.date, x.hrv, x.rhr, x.sleepHrs, x.source]],
   }
   const tag = clientId ? '_' + cname(clientId).replace(/\s+/g, '-') : ''

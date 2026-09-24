@@ -18,8 +18,8 @@ const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const rColor = (r) => (r == null ? 'var(--muted)' : r >= 65 ? 'var(--green)' : r >= 45 ? 'var(--blue)' : 'var(--accent)')
 const aColor = (a) => (a == null ? 'var(--muted)' : a >= 0.8 && a <= 1.3 ? 'var(--green)' : a > 1.5 ? 'var(--accent)' : 'var(--blue)')
 
-export default function PlannerWidget({ client, size = 'medium', todayProps }) {
-  const [view, setView] = useState('collapsed')
+export default function PlannerWidget({ client, size = 'medium', todayProps, initialView = 'collapsed', showContext = true }) {
+  const [view, setView] = useState(initialView)
   const { db, tz } = useData()
   const { fmtVL } = useFormat()
   const today = todayISO(tz)
@@ -62,10 +62,10 @@ export default function PlannerWidget({ client, size = 'medium', todayProps }) {
             </div>
           </div>
           <div className="nav-spacer" />
-          {context.readiness != null && (
+          {showContext && context.readiness != null && (
             <span className="pw-chip">R <b style={{ color: rColor(context.readiness) }}>{context.readiness}</b></span>
           )}
-          {context.acwr != null && (
+          {showContext && context.acwr != null && (
             <span className="pw-chip">ACWR <b style={{ color: aColor(context.acwr) }}>{context.acwr.toFixed(2)}</b></span>
           )}
           <Button size="sm" onClick={(e) => { e.stopPropagation(); setView('day') }}>Open day</Button>
@@ -80,11 +80,12 @@ export default function PlannerWidget({ client, size = 'medium', todayProps }) {
               <button key={d} className={'pw-day' + (isToday ? ' today' : '')} onClick={() => setView('week')}
                 aria-label={`${d}${isPlanned ? ' — training day' : ' — rest day'}`}
                 title={isPlanned ? 'Training day' : 'Rest day'}>
-                <span className="dw">{DOW[i]}</span>
+                <span className="dw">{isToday ? 'Today' : DOW[i]}</span>
                 <span className={'pw-day-ic ' + state} aria-hidden="true">
                   <Icon name={isPlanned ? 'dumbbell' : 'coffee'} size={15} />
                 </span>
                 <span className="dn">{+d.slice(8, 10)}</span>
+                <span className="pw-day-status">{isPlanned ? 'Train' : 'Rest'}</span>
               </button>
             )
           })}

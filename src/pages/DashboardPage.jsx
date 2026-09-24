@@ -146,7 +146,7 @@ export default function DashboardPage() {
     const high = openConcerns(db, x.c.id).some((q) => q.severity === 'High')
     const dsince = x.lastCheckin ? daysAgo(x.lastCheckin, today) : null
     if (x.openC > 0) return { c: x.c, reason: `${x.openC} open concern${x.openC > 1 ? 's' : ''}`, tone: high ? 'red' : 'amber', chip: high ? 'Overdue' : 'At risk', rank: high ? 0 : 1 }
-    if (x.r.color === 'red') return { c: x.c, reason: 'Readiness at-risk', tone: 'amber', chip: 'At risk', rank: 1 }
+    if (x.r.color === 'red') return { c: x.c, reason: 'Lower app readiness score today', tone: 'amber', chip: 'Review', rank: 1 }
     if (dsince != null && dsince >= 8) return { c: x.c, reason: `No check-in for ${dsince}d`, tone: 'red', chip: 'Overdue', rank: 2 }
     if (dsince == null && x.c.status === 'Active') return { c: x.c, reason: 'No check-in yet', tone: 'amber', chip: 'At risk', rank: 3 }
     return null
@@ -155,21 +155,20 @@ export default function DashboardPage() {
   // Roster readiness meter — distribution of today's readiness across the roster.
   const noData = db.clients.length - tracked
   const readinessSegs = [
-    { key: 'green', label: 'Ready', n: ready, color: 'var(--green)' },
-    { key: 'yellow', label: 'Monitor', n: monitor, color: 'var(--accent2)' },
-    { key: 'red', label: 'At-risk', n: atRisk, color: 'var(--accent)' },
+    { key: 'green', label: 'Higher score', n: ready, color: 'var(--green)' },
+    { key: 'yellow', label: 'Middle score', n: monitor, color: 'var(--accent2)' },
+    { key: 'red', label: 'Lower score', n: atRisk, color: 'var(--accent)' },
     { key: 'gray', label: 'No data', n: noData, color: '#c6c7cc' },
   ]
 
-  // Load-risk spotlight — injury-risk flags from ACWR (> 1.5) and monotony (> 2).
-  const loadRisk = squad
-    .filter((x) => (x.acwr != null && x.acwr > 1.5) || (x.mono > 2 && x.wkLoad > 0))
+  // Recent sRPE records are a route into load context, not a risk classification.
+  const loadContext = squad
     .map((x) => ({
       c: x.c,
-      reason: x.acwr != null && x.acwr > 1.5
-        ? `ACWR ${x.acwr} · elevated injury risk`
-        : `Monotony ${x.mono.toFixed(1)} · low variation`,
+      logs: db.srpe.filter((r) => r.clientId === x.c.id && r.date >= addDays(today, -6) && r.date <= today),
     }))
+    .filter((x) => x.logs.length)
+    .sort((a, b) => b.logs.length - a.logs.length)
 
   // Today's training board — who has a workout prescribed today vs a rest day,
   // and who has no program assigned at all.
@@ -191,16 +190,9 @@ export default function DashboardPage() {
   const missingCheckin = activeClients.length - checkedInCount
   const ringColor = checkinPct >= 80 ? 'var(--green)' : checkinPct >= 40 ? 'var(--accent2)' : 'var(--accent)'
 
-  // Curio AI — the single most useful action for right now, in priority order:
-  // injury risk → missing check-ins → unassigned programs → at-risk readiness.
+  // Curio AI — practical roster tasks based on recorded activity and coverage.
   const curio = (() => {
     const bulk = () => openModal(<BulkWellnessForm />, true)
-    if (loadRisk.length) {
-      const first = loadRisk[0]
-      return { title: `${loadRisk.length} client${loadRisk.length > 1 ? 's' : ''} in the injury-risk zone`,
-        body: `${first.c.name}${loadRisk.length > 1 ? ` and ${loadRisk.length - 1} other${loadRisk.length > 2 ? 's' : ''}` : ''} — ${first.reason.toLowerCase()}. Consider a deload before their next block.`,
-        label: 'Review load', onClick: () => nav('/monitor/' + first.c.id) }
-    }
     if (missingCheckin > 0 && activeClients.length) {
       return { title: `${missingCheckin} client${missingCheckin > 1 ? 's haven’t' : ' hasn’t'} checked in today`,
         body: 'Readiness is only as good as check-in coverage. Log or request morning check-ins to keep the roster current.',
@@ -212,8 +204,8 @@ export default function DashboardPage() {
         label: 'Assign programs', onClick: () => nav('/clients') }
     }
     if (atRisk) {
-      return { title: `${atRisk} client${atRisk > 1 ? 's' : ''} at-risk today`,
-        body: 'Review the at-risk list before programming their next block.',
+      return { title: `${atRisk} client${atRisk > 1 ? 's have' : ' has'} a lower app score today`,
+        body: 'Review the dated inputs and speak with the client before changing their training plan.',
         label: 'Review roster', onClick: () => nav('/clients') }
     }
     if (tracked === 0) {
@@ -221,9 +213,9 @@ export default function DashboardPage() {
         body: 'Log morning wellness or connect wearables so Curio can surface readiness insights across your roster.',
         label: 'Bulk check-in', onClick: bulk }
     }
-    return { title: 'Roster recovery looks strong',
-      body: `${ready} of ${tracked} tracked client${tracked === 1 ? '' : 's'} ${ready === 1 ? 'is' : 'are'} ready to train today. Good window to progress well-recovered cohorts.`,
-      label: 'Plan workouts', onClick: () => nav('/workouts') }
+    return { title: 'Today’s check-ins are available',
+      body: `${tracked} of ${db.clients.length} clients have app readiness interpretations today. Review their dated wellness and wearable inputs before planning; a score is not training or medical clearance.`,
+      label: 'Review clients', onClick: () => nav('/clients') }
   })()
 
   // Compliance to-do — reassessments due, screening gates / re-screens, across
@@ -233,8 +225,8 @@ export default function DashboardPage() {
   activeClients.forEach((c) => {
     const alist = forClient(db.assessments, c.id)
     const scr = screeningsFor(db.screenings, c.id).complete
-    if (scr && programStatus(scr) === 'gated') todo.push({ c, label: 'Screening pending clearance', chip: 'Gated', tone: 'red', rank: 0, onClick: () => nav('/clients/' + c.id + '/profile') })
-    else if (scr && rescreenDue(scr, today)) todo.push({ c, label: 'Health re-screen due', chip: 'Re-screen', tone: 'amber', rank: 1, onClick: () => nav('/clients/' + c.id + '/profile') })
+    if (scr && programStatus(scr) === 'gated') todo.push({ c, label: 'Screening pending clearance', chip: 'Gated', tone: 'red', rank: 0, onClick: () => nav('/clients/' + c.id + '/assessments#health-screening') })
+    else if (scr && rescreenDue(scr, today)) todo.push({ c, label: 'Health re-screen due', chip: 'Re-screen', tone: 'amber', rank: 1, onClick: () => nav('/clients/' + c.id + '/assessments#health-screening') })
     REASSESS_TYPES.forEach((t) => {
       const d = dueStatus(alist, t, interval)
       if (d.has && d.overdue) todo.push({ c, label: `${typeMeta(t).label} reassessment due`, chip: 'Reassess', tone: 'amber', rank: 2, onClick: () => nav(`/clients/${c.id}/assessments/${t}`) })
@@ -298,7 +290,7 @@ export default function DashboardPage() {
             pillClass="sc-indigo" pill={`${upcoming} upcoming`} onClick={() => nav('/schedule')} />
           <Stat icon="activity" chipBg="var(--tint-green)" chipColor="var(--green)" num={adhWin != null ? adhWin + '%' : '—'} label="Adherence · 30d"
             pillClass="sc-green" pill={inWin.length ? `${doneWin}/${inWin.length} sessions` : 'no sessions'} trend={adhTrend} onClick={() => nav('/schedule')} />
-          <Stat icon="alert" chipBg="var(--tint-amber)" chipColor="var(--accent2)" num={atRisk} label="At-risk clients"
+          <Stat icon="alert" chipBg="var(--tint-amber)" chipColor="var(--accent2)" num={atRisk} label="Lower app scores today"
             pillClass="sc-amber" pill={`${openC.length} concern${openC.length === 1 ? '' : 's'}`} onClick={() => nav('/concerns')} />
         </div>
 
@@ -417,7 +409,7 @@ export default function DashboardPage() {
             <div className="dash-card-head">
               <div style={{ flex: 1 }}>
                 <div className="dash-card-title">Roster readiness</div>
-                <div className="dash-card-sub">Today, from morning check-ins &amp; wearables</div>
+                <div className="dash-card-sub">Today’s available check-ins &amp; wearables · interpretation, not clearance</div>
               </div>
               <span className="muted" style={{ fontSize: 12 }}>{tracked} of {db.clients.length} with data</span>
             </div>
@@ -457,20 +449,20 @@ export default function DashboardPage() {
 
           <div className="dash-health-row">
             <div className="dash-card clickable" role="button" tabIndex={0}
-              onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Load-risk clients">
+              onClick={() => nav('/clients')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/clients') }} aria-label="Recent training load">
               <div className="dash-card-head">
                 <div style={{ flex: 1 }}>
-                  <div className="dash-card-title">Load-risk spotlight {loadRisk.length ? <span className="dash-count-badge">{loadRisk.length}</span> : null}</div>
-                  <div className="dash-card-sub">ACWR &amp; monotony injury-risk flags</div>
+                  <div className="dash-card-title">Training-load records {loadContext.length ? <span className="dash-count-badge">{loadContext.length}</span> : null}</div>
+                  <div className="dash-card-sub">Clients with sRPE entries in the past 7 days</div>
                 </div>
               </div>
-              {loadRisk.length ? loadRisk.slice(0, 4).map((x) => (
-                <button key={x.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/monitor/' + x.c.id) }}>
-                  <span className="dash-att-av" style={{ background: 'var(--tint-red)', color: 'var(--accent)' }}>{initials(x.c.name)}</span>
-                  <span className="dash-rinfo"><div className="t">{x.c.name}</div><div className="s">{x.reason}</div></span>
-                  <StatusChip cls="sc-red" label="Review load" />
+              {loadContext.length ? loadContext.slice(0, 4).map((x) => (
+                <button key={x.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + x.c.id + '/check-ins?view=load') }}>
+                  <span className="dash-att-av" style={{ background: 'var(--tint-blue)', color: 'var(--blue)' }}>{initials(x.c.name)}</span>
+                  <span className="dash-rinfo"><div className="t">{x.c.name}</div><div className="s">{x.logs.length} sRPE {x.logs.length === 1 ? 'entry' : 'entries'} · latest {shortD([...x.logs].sort((a, b) => b.date.localeCompare(a.date))[0].date)}</div></span>
+                  <StatusChip cls="sc-gray" label="View log" />
                 </button>
-              )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="check" size={34} /></div>No load-risk flags — training loads look balanced.</div>}
+              )) : <div className="empty" style={{ padding: 20 }}><div className="big"><Icon name="chart" size={34} /></div>No sRPE entries recorded in the past 7 days.</div>}
             </div>
 
             <div className="dash-list clickable" role="button" tabIndex={0}

@@ -13,14 +13,12 @@ gate activate when `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are present.
 2. In **Project Settings → API**, copy the **Project URL** and the **anon public** key.
 
 ## 2. Configure the app
-```bash
-cp .env.example .env
-```
-Put your values in `.env`:
+Copy `.env.example` to `.env.local` and put the browser-safe project URL and anon/public key there:
 ```
 VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR-ANON-PUBLIC-KEY
 ```
+Do not put a service-role key, database password, or Supabase personal access token in a `VITE_` variable. Vite exposes those values to browsers. `.env.local` is git-ignored.
 
 ## 3. Create the schema
 Open **SQL Editor** in the Supabase dashboard, paste the contents of
@@ -32,6 +30,13 @@ Then run [`supabase/schema_program.sql`](./supabase/schema_program.sql) (Advance
 Programming Platform: block-structured workouts, `maxes` 1RM/Training-Max ledger,
 `synonyms` voice index — plus a one-time migration of flat prescription items into
 blocks). Existing installs: re-running it is safe (idempotent).
+
+For an existing project running Phase 5, also run
+[`supabase/schema_monitoring_sources.sql`](./supabase/schema_monitoring_sources.sql)
+in the SQL Editor. It adds a nullable `source` column to wellness, session RPE,
+resistance and conditioning records. Historic rows remain unknown rather than
+being assigned an invented source. Applying this migration requires project
+owner/database access; the anon/public key cannot alter the schema.
 
 ### Voice-to-workout parsing (optional)
 Deploy the `parse-workout` edge function alongside `insights` — it reuses the same
@@ -51,7 +56,7 @@ Without it (or in local mode) dictation falls back to the built-in heuristic par
 bun install
 bun run dev
 ```
-You'll get a **sign-in screen**. Create an account, then open **Settings → Account → "Load demo data"**
+You'll get a **sign-in screen**. Sign in with a coach account, then open **Settings → Account → "Load demo data"**
 to populate your account with the sample athletes (or just start adding your own clients).
 
 ## How it works
@@ -62,10 +67,8 @@ to populate your account with the sample athletes (or just start adding your own
   changed (`persistDiff`). All existing components keep using `commit()` unchanged.
 - **Pure logic unchanged:** `src/lib/calc.js` runs identically on local or remote data.
 
-## Next steps (not included yet)
-- **Athlete logins** — add a `clients.userId` column and a second RLS policy
-  (`"userId" = auth.uid()`) so athletes can submit their own Hooper/RPE on a read-restricted view.
-- **Wearable OAuth** — add an Edge Function to hold Oura/Whoop secrets and run a daily sync into
-  the `wearable` table (replaces the simulated pulls).
-- **LLM coaching** — add an Edge Function `/insights` that calls an LLM; keep the current
-  rule-based `AICoach` as the instant fallback.
+## Optional production integrations
+
+See [SETUP_PRODUCTION.md](./SETUP_PRODUCTION.md) for athlete accounts, wearable OAuth,
+and live AI configuration. Those integrations require their own schema, edge functions,
+provider credentials, and validation beyond the base backend connection.

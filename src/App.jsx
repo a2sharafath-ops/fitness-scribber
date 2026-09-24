@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
 import { DataProvider } from './store/DataContext'
@@ -10,6 +10,7 @@ import RoleOnboarding from './pages/RoleOnboarding'
 import AthletePortal from './pages/AthletePortal'
 import AdminPortal from './pages/AdminPortal'
 import AppLayout from './components/templates/AppLayout'
+import ClientLayout from './components/templates/ClientLayout'
 import DashboardPage from './pages/DashboardPage'
 import ClientsPage from './pages/ClientsPage'
 import ClientDetailPage from './pages/ClientDetailPage'
@@ -17,7 +18,8 @@ import ClientProfilePage from './pages/ClientProfilePage'
 import AssessmentsPage from './pages/AssessmentsPage'
 import AssessmentDetailPage from './pages/AssessmentDetailPage'
 import MetricDetailPage from './pages/MetricDetailPage'
-import CommandCenterPage from './pages/CommandCenterPage'
+import ClientTrainingPage from './pages/ClientTrainingPage'
+import ClientProgressPage from './pages/ClientProgressPage'
 import MonitorPage from './pages/MonitorPage'
 import WorkoutsPage from './pages/WorkoutsPage'
 import SchedulePage from './pages/SchedulePage'
@@ -28,6 +30,13 @@ import SettingsPage from './pages/SettingsPage'
 import ReportPage from './pages/ReportPage'
 import Toaster from './components/organisms/Toaster'
 import './lib/chartSetup'
+import { clientSectionPath } from './lib/clientRoutes'
+
+function LegacyClientRoute({ section }) {
+  const { id } = useParams()
+  const { search, hash } = useLocation()
+  return <Navigate to={clientSectionPath(id, section, search, hash)} replace />
+}
 
 function Shell() {
   return (
@@ -39,13 +48,19 @@ function Shell() {
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/clients/:id" element={<ClientDetailPage />} />
-              <Route path="/clients/:id/profile" element={<ClientProfilePage />} />
-              <Route path="/clients/:id/assessments" element={<AssessmentsPage />} />
-              <Route path="/clients/:id/assessments/:type" element={<AssessmentDetailPage />} />
-              <Route path="/clients/:id/metric/:metric" element={<MetricDetailPage />} />
-              <Route path="/command/:id" element={<CommandCenterPage />} />
-              <Route path="/monitor/:id" element={<MonitorPage />} />
+              <Route path="/clients/:id" element={<ClientLayout />}>
+                <Route index element={<ClientDetailPage />} />
+                <Route path="training" element={<ClientTrainingPage />} />
+                <Route path="progress" element={<ClientProgressPage />} />
+                <Route path="check-ins" element={<MonitorPage />} />
+                <Route path="assessments" element={<AssessmentsPage />} />
+                <Route path="assessments/:type" element={<AssessmentDetailPage />} />
+                <Route path="profile" element={<ClientProfilePage />} />
+                <Route path="profile/:type" element={<AssessmentDetailPage />} />
+                <Route path="metric/:metric" element={<MetricDetailPage />} />
+              </Route>
+              <Route path="/command/:id" element={<LegacyClientRoute section="training" />} />
+              <Route path="/monitor/:id" element={<LegacyClientRoute section="check-ins" />} />
               <Route path="/report/:id" element={<ReportPage />} />
               <Route path="/workouts" element={<WorkoutsPage />} />
               <Route path="/schedule" element={<SchedulePage />} />

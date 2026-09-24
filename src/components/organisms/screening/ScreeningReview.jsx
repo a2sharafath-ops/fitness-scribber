@@ -10,7 +10,7 @@ import './ScreeningFlow.css'
 // TRAINER-ONLY view of a completed screening: outcome, triggering answers, red
 // flags, risk factors, and the clearance workflow. None of this is ever shown to
 // the client — the trainer reviews here and communicates clearance personally.
-export default function ScreeningReview({ screening, draft, onClearance, onStart }) {
+export default function ScreeningReview({ screening, draft, onClearance, onStart, historical = false }) {
   const today = todayISO()
   if (!screening) {
     return (
@@ -42,8 +42,8 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
         <div className="section-title" style={{ margin: 0 }}>Health screening <Tag color="gray">Trainer-only</Tag></div>
         <div className="flex gap" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <Tag color={meta.color}>{RISK_ICON[meta.color]} PAR-Q+ {s.outcome}: {meta.label}</Tag>
-          <Tag color={gated ? 'red' : 'green'}>{gated ? RISK_ICON.red + ' Program gated' : RISK_ICON.green + ' Program ready'}</Tag>
-          {expired && <Tag color="yellow">{RISK_ICON.yellow} Expired — re-screen</Tag>}
+          <Tag color={gated ? 'red' : 'green'}>{historical ? `Recorded status: ${gated ? 'gated' : 'ready'}` : gated ? RISK_ICON.red + ' Program gated' : RISK_ICON.green + ' Program ready'}</Tag>
+          {expired && <Tag color="yellow">{RISK_ICON.yellow} {historical ? 'Expired historical record' : 'Expired — re-screen'}</Tag>}
         </div>
       </div>
       <p className="muted" style={{ fontSize: 12, margin: '6px 0 10px' }}>
@@ -85,7 +85,7 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
         <div className="i-b">{s.outcome === 'C' || flags.major.length > 0 ? TRAINER_ADVICE_REVIEW : TRAINER_ADVICE_CLEARED}</div>
       </div>
 
-      {(s.outcome === 'C' || flags.major.length > 0) && (
+      {(s.outcome === 'C' || flags.major.length > 0) && !historical && (
         <div className="intake-block">
           <div className="i-h">✅ Clearance workflow — you decide and communicate this to the client</div>
           <div className="row3" style={{ marginTop: 8 }}>
@@ -112,7 +112,11 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
           </p>
         </div>
       )}
-      {(expired || onStart) && (
+      {historical && s.clearance && <div className="intake-block">
+        <div className="i-h">Recorded clearance decision</div>
+        <div className="i-b">Status: {s.clearance.status || 'Not recorded'} · Date: {fmtDate(s.clearance.dateCleared)}{s.clearance.notes ? ` · ${s.clearance.notes}` : ''}</div>
+      </div>}
+      {onStart && (
         <div className="flex gap" style={{ marginTop: 10 }}>
           {onStart && <Button variant="ghost" onClick={onStart}>Re-screen{draft ? ' (draft in progress)' : ''}</Button>}
         </div>

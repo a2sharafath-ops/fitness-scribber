@@ -5,7 +5,7 @@ export default function ModalShell({ title, onClose, children, footer }) {
       <button className="x" style={{ float: 'right' }} onClick={onClose} aria-label="Close">
         ×
       </button>
-      <h2>{title}</h2>
+      <h2 id="modal-title">{title}</h2>
       {children}
       {footer && <div className="modal-foot">{footer}</div>}
     </>

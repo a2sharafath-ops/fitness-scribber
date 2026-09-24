@@ -16,8 +16,9 @@ import { toast, confirmDialog } from '../../lib/toast'
 import { cloneBlocksFresh, itemsToBlocks } from '../../lib/program'
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const weekOffset = (date, tz) => Math.floor((Date.parse(date) - Date.parse(weekDates(0, tz)[0])) / (7 * 86400000)) * 7
 
-export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay, bare }) {
+export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay, bare, focusDate }) {
   const sz = size || (featured ? 'featured' : 'default')
   const isFeatured = sz === 'featured'
   const isMedium = sz === 'medium'
@@ -26,8 +27,8 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   const { clip, setClip, clearClip } = useClipboard()
   const { fmtVL } = useFormat()
   const [view, setView] = useState(initialView || (isFeatured ? 'month' : 'week'))
-  const [anchor, setAnchor] = useState(todayISO(tz)) // any date within the shown month
-  const [weekStart, setWeekStart] = useState(0)
+  const [anchor, setAnchor] = useState(focusDate || todayISO(tz)) // any date within the shown month
+  const [weekStart, setWeekStart] = useState(focusDate ? weekOffset(focusDate, tz) : 0)
   const [collapsed, setCollapsed] = useState(false)
   const [sel, setSel] = useState(null)      // { from, to } — drag-selected span
   const [dropDt, setDropDt] = useState(null) // day currently hovered by a chip drag
@@ -36,6 +37,12 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   const chip = useRef(null)                  // source date of a chip drag
   const suppress = useRef(false)             // swallow the click that ends a drag
   const today = todayISO(tz)
+
+  useEffect(() => {
+    if (!focusDate) return
+    setAnchor(focusDate)
+    setWeekStart(weekOffset(focusDate, tz))
+  }, [focusDate, tz])
 
   // A range-select ends on mouseup anywhere — a plain click (no movement)
   // clears the selection and falls through to the normal prescribe click.
@@ -172,6 +179,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   const cls = (dt, base) =>
     base
     + (dt === today ? ' today' : '')
+    + (dt === focusDate ? ' focused' : '')
     + (inSel(dt) ? ' sel' : '')
     + (dropDt === dt ? ' drop' : '')
     + (clip && pasteTargets.includes(dt) ? ' paste-hint' : '')
@@ -241,13 +249,15 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
               — {clip ? 'click a day to paste' : 'click a day to prescribe · drag across days to select · drag a session onto another day to copy'}
             </span>
           </div>
+          <p className="planner-scroll-hint">Scroll sideways to review the month calendar.</p>
+          <div className="plan-month-scroll" role="region" aria-label="Month calendar; scroll horizontally for all days" tabIndex={0}>
           <div className="plan-dow">{DOW.map((d) => <div key={d}>{d}</div>)}</div>
           <div className="plan-month">
             {monthGridDates(anchor).map((dt) => {
               const { vl, name } = dayData(dt)
               return (
                 <div key={dt} className={cls(dt, 'plan-cell') + (dt.slice(0, 7) !== anchor.slice(0, 7) ? ' out' : '')}
-                  role="button" tabIndex={0} aria-label={`${clip ? 'Paste to' : 'Prescribe'} ${dt}`} {...cell(dt)}>
+                  role="button" tabIndex={0} aria-label={`${clip ? 'Paste to' : 'Prescribe'} ${dt}${dt === today ? ' (today)' : ''}`} {...cell(dt)}>
                   <div className="pc-date">{+dt.slice(8, 10)}{dt === today && <span className="pc-today">today</span>}</div>
                   {name && sessionChip(dt, name)}
                   {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : null}
@@ -257,6 +267,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
                 </div>
               )
             })}
+          </div>
           </div>
         </>
       ) : (
@@ -270,8 +281,8 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
               const { vl, name } = dayData(dt)
               return (
                 <div key={dt} className={cls(dt, 'plan-day')}
-                  role="button" tabIndex={0} aria-label={`${clip ? 'Paste to' : 'Prescribe'} ${DOW[i]} ${dt}`} {...cell(dt)}>
-                  <div className="pd-date">{DOW[i]} {+dt.slice(8, 10)}</div>
+                  role="button" tabIndex={0} aria-label={`${clip ? 'Paste to' : 'Prescribe'} ${DOW[i]} ${dt}${dt === today ? ' (today)' : ''}`} {...cell(dt)}>
+                  <div className="pd-date">{DOW[i]} {+dt.slice(8, 10)}{dt === today && <span className="plan-today-label">Today</span>}</div>
                   {name ? sessionChip(dt, name) : <div className="plan-rest muted">Rest / unplanned</div>}
                   {vl ? <div className="plan-vl">VL {fmtVL(vl)}</div> : <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
                   {/* Load metrics for a day exist only once its session RPE is logged;

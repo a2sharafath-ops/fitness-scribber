@@ -15,14 +15,20 @@ export default function BulkWellnessForm() {
   const [date, setDate] = useState(todayISO(tz))
   const [rows, setRows] = useState(actives.map(() => ({ sl: '', st: '', fa: '', so: '' })))
   const upd = (i, k, v) => setRows(rows.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
+  const hasEntry = rows.some((row) => [row.sl, row.st, row.fa, row.so].some((value) => value !== ''))
+  const incomplete = rows.some((row) => {
+    const values = [row.sl, row.st, row.fa, row.so]
+    return values.some((value) => value !== '') && values.some((value) => value === '' || Number(value) < 1 || Number(value) > 7)
+  })
 
   const save = () => {
+    if (!date || !hasEntry || incomplete) return
     commit((d) => {
       actives.forEach((c, i) => {
         const r = rows[i]
         if (!r.sl && !r.st && !r.fa && !r.so) return
-        const sleep = +r.sl || 4, stress = +r.st || 4, fatigue = +r.fa || 4, soreness = +r.so || 4
-        const val = { clientId: c.id, date, sleep, stress, fatigue, soreness, score: calcWellness(sleep, stress, fatigue, soreness) }
+        const sleep = +r.sl, stress = +r.st, fatigue = +r.fa, soreness = +r.so
+        const val = { clientId: c.id, date, sleep, stress, fatigue, soreness, score: calcWellness(sleep, stress, fatigue, soreness), source: 'Coach bulk entry' }
         const ex = d.wellness.find((w) => w.clientId === c.id && w.date === date)
         if (ex) Object.assign(ex, val)
         else d.wellness.push({ id: uid(), ...val })
@@ -32,7 +38,8 @@ export default function BulkWellnessForm() {
   }
   return (
     <ModalShell title="Bulk Morning Check-in" onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save check-ins</Button></>}>
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save} disabled={!date || !hasEntry || incomplete}>Save check-ins</Button></>}>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Complete all four ratings for each client you include. Empty rows are skipped.</p>
       <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
       <div className="bulk-grid" style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
         <span>Athlete</span><span>Sleep</span><span>Stress</span><span>Fatigue</span><span>Soreness</span>

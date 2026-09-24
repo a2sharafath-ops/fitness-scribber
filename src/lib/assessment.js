@@ -44,8 +44,16 @@ export function estOneRepMax(weightKg, reps) {
 // Assessments can be recorded more than once on the same day. Prefer the full
 // creation timestamp when present so "latest" really is the newest entry;
 // legacy records without one still sort correctly by their assessment date.
-const recordStamp = (a) => a.createdAt || a.date || ''
-const byDateDesc = (a, b) => recordStamp(b).localeCompare(recordStamp(a))
+const byDateDesc = (a, b) => (b.date || '').localeCompare(a.date || '') ||
+  (b.createdAt || '').localeCompare(a.createdAt || '')
+
+// Tracked lift peaks are progress observations, not complete fitness tests.
+// Early backend imports retained their auto-update note but not sourceMaxId.
+export const isTrainingDerivedAssessment = (rec) => rec?.type === 'fitness' && (
+  !!rec.data?.sourceMaxId || !!rec.data?.sourceWorkoutId || rec.phase === 'progress' ||
+  /^(Auto-update: new estimated 1RM peak|Trainer-recorded 1RM:)/.test(rec.notes || '')
+)
+export const formalAssessments = (list) => (list || []).filter((a) => !isTrainingDerivedAssessment(a))
 
 export const forClient = (assessments, clientId) =>
   (assessments || []).filter((a) => a.clientId === clientId)
@@ -60,25 +68,35 @@ export const baseline = (list, type) => {
   return of.find((a) => a.phase === 'baseline') || of.sort((a, b) => (a.date || '').localeCompare(b.date || ''))[0] || null
 }
 
-// Merge anthropometrics from every source the app collects them in.
-// Manually entered values (client.anthro) win; gaps fill from the latest
-// body-composition assessment, then the completed screening's HHQ personal
-// details — so the profile card is populated as soon as screening or
-// assessment data exists, without re-typing. `derived` flags that at least
-// one shown value came from a fallback source.
+// Preserve the source of each displayed measurement. Older profile snapshots
+// may contain values mirrored from body composition without a source marker;
+// those are explicitly labelled unknown rather than claimed as manual.
+export function resolveAnthroDetails(db, client) {
+  const stored = client.anthro || {}
+  const sourceMap = stored._sources || {}
+  const bodyRecord = latest(forClient(db.assessments, client.id), 'body_comp')
+  const screening = screeningsFor(db.screenings, client.id).complete
+  const body = bodyRecord?.data || {}
+  const personal = screening?.hhq?.personal || {}
+  const fields = ['age', 'heightCm', 'massKg', 'bodyFatPct', 'leanMassKg']
+  return Object.fromEntries(fields.map((field) => {
+    const value = num(stored[field])
+    const source = sourceMap[field]
+    if (value != null) {
+      if (source?.kind === 'body_comp') return [field, { value, kind: 'body_comp', label: `Body composition · ${source.method || 'method not recorded'}`, date: source.date || null, recordId: source.recordId || null }]
+      if (source?.kind === 'profile') return [field, { value, kind: 'profile', label: 'Profile entry', date: source.date || null }]
+      return [field, { value, kind: 'unknown', label: 'Stored profile value · origin not recorded', date: null }]
+    }
+    if (num(body[field]) != null) return [field, { value: num(body[field]), kind: 'body_comp', label: `Body composition · ${body.method || 'method not recorded'}`, date: bodyRecord.date, recordId: bodyRecord.id }]
+    if (num(personal[field]) != null) return [field, { value: num(personal[field]), kind: 'screening', label: 'Health screening', date: screening.completedOn, recordId: screening.id }]
+    return [field, { value: null, kind: 'missing', label: 'Not recorded', date: null }]
+  }))
+}
+
 export function resolveAnthro(db, client) {
-  const a = client.anthro || {}
-  const bc = latest(forClient(db.assessments, client.id), 'body_comp')?.data || {}
-  const hp = screeningsFor(db.screenings, client.id).complete?.hhq?.personal || {}
-  const pick = (...vals) => { for (const v of vals) { const n = num(v); if (n != null) return n } return null }
-  const merged = {
-    age: pick(a.age, hp.age),
-    heightCm: pick(a.heightCm, hp.heightCm),
-    massKg: pick(a.massKg, bc.massKg, hp.massKg),
-    bodyFatPct: pick(a.bodyFatPct, bc.bodyFatPct),
-    leanMassKg: pick(a.leanMassKg, bc.leanMassKg),
-  }
-  merged.derived = Object.entries(merged).some(([k, v]) => v != null && num(a[k]) == null)
+  const details = resolveAnthroDetails(db, client)
+  const merged = Object.fromEntries(Object.entries(details).map(([field, item]) => [field, item.value]))
+  merged.derived = Object.values(details).some((item) => ['body_comp', 'screening'].includes(item.kind))
   return merged
 }
 
@@ -235,21 +253,24 @@ export function compare(type, b, l) {
 
 // Onboarding baseline set (what a new client should have) and the objective
 // types that get periodic reassessment reminders.
-export const ONBOARDING_TYPES = ['fitness', 'movement', 'body_comp', 'lifestyle', 'goals']
+export const ONBOARDING_TYPES = ['fitness', 'movement', 'body_comp']
 export const REASSESS_TYPES = ['fitness', 'movement', 'body_comp']
 export const DEFAULT_REASSESS_DAYS = 84 // 12 weeks
+export const hasBaselineRecord = (list, type) => formalAssessments(list).some((a) =>
+  a.type === type && (a.phase === 'baseline' || !a.phase))
 
 const todayLocal = (now = new Date()) => new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
 
 // Which onboarding baselines exist vs. are missing.
 export function baselineProgress(list, types = ONBOARDING_TYPES) {
-  const doneTypes = types.filter((t) => list.some((a) => a.type === t))
+  const formal = formalAssessments(list)
+  const doneTypes = types.filter((t) => hasBaselineRecord(formal, t))
   return { done: doneTypes.length, total: types.length, doneTypes, missing: types.filter((t) => !doneTypes.includes(t)) }
 }
 
 // Reassessment timing for one type: last date, due date, overdue, days left.
 export function dueStatus(list, type, intervalDays = DEFAULT_REASSESS_DAYS, now = new Date()) {
-  const l = latest(list, type)
+  const l = latest(formalAssessments(list), type)
   if (!l) return { has: false }
   const today = todayLocal(now)
   const dueDate = addDays(l.date, intervalDays)

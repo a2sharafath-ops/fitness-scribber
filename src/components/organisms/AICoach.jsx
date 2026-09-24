@@ -4,51 +4,35 @@ import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { callFunction, hasBackend } from '../../api/functions'
 import { lastNDates, todayISO, fmtDay } from '../../lib/dates'
-import { dailySum, acwrSeries, trainingMonotony, readinessScore, readinessFor, rolling30Baseline, deviationPct, latestOf, mean } from '../../lib/calc'
+import { dailySum, acwrSeries, trainingMonotony, readinessFor, rolling30Baseline, deviationPct, latestOf } from '../../lib/calc'
 import { programStats } from '../../lib/program'
 
-// Rule-based synthesis of live metrics into actionable coaching prompts.
+// Observational prompts avoid treating calculated metrics as clearance or risk cutoffs.
 function suggest(db, client, tz, fmtVL) {
   const out = []
-  const r = readinessFor(db, client.id)
   const today = todayISO(tz)
-  const rScore = readinessScore(db, client.id, today) ?? readinessScore(db, client.id, [...lastNDates(28, tz)].reverse().find((d) => readinessScore(db, client.id, d) != null) || today)
-  const intMap = dailySum(db.srpe, client.id, 'tl')
-  const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
-  const mono = trainingMonotony(last7)
-  const acwr = acwrSeries(intMap, lastNDates(28, tz)).filter((v) => v != null).slice(-1)[0]
   const w = latestOf(db.wellness, client.id)
   const hr = latestOf(db.wearable, client.id)
-  let hrvDev = null
-  if (hr) { const b = rolling30Baseline(db, client.id, 'hrv', hr.date); if (b) hrvDev = deviationPct(hr.hrv, b) }
   const upcoming = db.prescriptions.filter((p) => p.clientId === client.id && p.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0]
   const upStats = upcoming ? programStats(upcoming) : null
   const planVL = upStats ? upStats.volume : 0
-  const avgVL = mean(lastNDates(28, tz).map((d) => dailySum(db.resistance, client.id, 'volumeLoad')[d] || 0).filter((v) => v > 0))
 
-  if (hrvDev != null && hrvDev < -8) out.push({ t: 'warn', h: 'HRV suppressed', m: `Morning HRV is ${hrvDev.toFixed(0)}% below the 30-day baseline. Favor aerobic/technical work today and delay high-intensity loading.` })
-  if (r.color === 'red') out.push({ t: 'warn', h: 'Readiness red', m: 'Both subjective wellness and objective HRV are down. Consider an active-recovery day or reduce planned Volume Load by 15–20%.' })
-  else if (rScore != null && rScore < 45) out.push({ t: 'warn', h: 'Reduced readiness', m: `Composite readiness is ${rScore}/100. If training proceeds, cut one working set per lift or drop intensity ~5%.` })
+  if (w) out.push({ t: 'info', h: 'Latest wellness check-in', m: `${fmtDay(w.date)} · ${w.source || 'source not recorded'}. Sleep ${w.sleep ?? 'missing'}/7, stress ${w.stress ?? 'missing'}/7, fatigue ${w.fatigue ?? 'missing'}/7, soreness ${w.soreness ?? 'missing'}/7. Review alongside the client's report and plan.` })
+  else out.push({ t: 'info', h: 'Wellness not recorded', m: 'There is no wellness check-in to interpret. Ask the client how they feel before using readiness in a training decision.' })
+  if (hr) out.push({ t: 'info', h: 'Latest wearable observation', m: `${fmtDay(hr.date)} · ${hr.source || 'source not recorded'}. HRV ${hr.hrv ?? 'missing'} ms. Compare with the dated personal baseline in Check-ins & load.` })
   if (upcoming) {
-    if (planVL > avgVL * 1.3 && avgVL > 0) out.push({ t: 'warn', h: 'Planned load spike', m: `${fmtDay(upcoming.date)}'s session is ${Math.round((planVL / avgVL - 1) * 100)}% above the 7–28d average Volume Load (${fmtVL(Math.round(planVL))}). Confirm this progression is intentional.` })
-    else if (planVL > 0) out.push({ t: 'info', h: 'Session drafted', m: `${fmtDay(upcoming.date)}: ${upStats.exercises} exercise(s), ~${fmtVL(Math.round(planVL))} Volume Load. ${rScore != null && rScore >= 65 ? 'Readiness supports it — green light.' : 'Cross-check against today’s readiness before confirming.'}` })
+    out.push({ t: 'info', h: 'Session drafted', m: `${fmtDay(upcoming.date)}: ${upStats.exercises} exercise(s), ~${fmtVL(Math.round(planVL))} planned volume load. Compare with the client's recent sessions and check-in before confirming.` })
   }
-  if (acwr != null && acwr > 1.5) out.push({ t: 'warn', h: 'Acute:chronic spike', m: `ACWR is ${acwr.toFixed(2)} (>1.5) — elevated injury-risk zone. Cap or deload weekly load to pull back toward 0.8–1.3.` })
-  else if (acwr != null && acwr < 0.8) out.push({ t: 'info', h: 'Detraining risk', m: `ACWR is ${acwr.toFixed(2)} (<0.8). There's room to progressively add load this week.` })
-  if (mono > 2) out.push({ t: 'warn', h: 'Monotony high', m: `Training monotony is ${mono} — daily loads are too uniform. Vary hard/easy days to lower strain and injury risk.` })
-  if (w && w.soreness >= 5) out.push({ t: 'warn', h: 'DOMS elevated', m: `Reported muscle soreness is ${w.soreness}/7. Reduce eccentric volume and prioritize recovery modalities.` })
-  if (out.length === 0 || (r.color === 'green' && (acwr == null || (acwr >= 0.8 && acwr <= 1.3)) && mono <= 2))
-    out.unshift({ t: 'good', h: 'Athlete primed', m: 'Readiness, load ratio and monotony are all in range. Green light to progress key lifts ~2.5–5% this week.' })
   return out.slice(0, 5)
 }
 
 // Compact metric summary handed to the LLM endpoint.
 function summarize(db, client, tz, fmtVL) {
   const r = readinessFor(db, client.id)
-  const intMap = dailySum(db.srpe, client.id, 'tl')
+  const intMap = dailySum(db.srpe.filter((row) => typeof row.tl === 'number' && Number.isFinite(row.tl)), client.id, 'tl')
   const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
   const mono = trainingMonotony(last7)
-  const acwr = acwrSeries(intMap, lastNDates(28, tz)).filter((v) => v != null).slice(-1)[0]
+  const acwr = acwrSeries(intMap, lastNDates(28, tz)).at(-1)
   const w = latestOf(db.wellness, client.id)
   const hr = latestOf(db.wearable, client.id)
   let hrvDev = null
@@ -58,9 +42,10 @@ function summarize(db, client, tz, fmtVL) {
   const planVL = upStats ? upStats.volume : 0
   return [
     `Athlete: ${client.name}, goal: ${client.goal}, level: ${client.level}.`,
-    `Readiness: ${r.label} (wellness ${r.wellness ?? 'n/a'}/28${hrvDev != null ? `, HRV ${hrvDev.toFixed(0)}% vs baseline` : ''}).`,
-    `Weekly internal load (sRPE-TL): ${Math.round(last7.reduce((a, b) => a + b, 0))} AU. ACWR ${acwr ? acwr.toFixed(2) : 'n/a'}. Monotony ${mono}.`,
-    w ? `Latest wellness — sleep ${w.sleep}/7, stress ${w.stress}/7, fatigue ${w.fatigue}/7, soreness ${w.soreness}/7.` : 'No recent wellness check-in.',
+    `App readiness interpretation: ${r.label}, as of ${r.date || 'unknown date'} (wellness ${r.wellness == null ? 'missing' : `${r.wellness}/28`}${r.hrvDev != null ? `, same-day HRV ${r.hrvDev.toFixed(0)}% vs personal baseline` : ', same-day HRV comparison missing'}). This is not medical or exercise clearance.`,
+    `Weekly internal load (sRPE-TL): ${Math.round(last7.reduce((a, b) => a + b, 0))} AU. ACWR ${acwr ? acwr.toFixed(2) : 'n/a'} (7/28-day context, not an injury-risk cutoff). Monotony ${mono} (7-day mean/SD; unlogged days treated as zero).`,
+    w ? `Latest wellness ${w.date} (${w.source || 'source not recorded'}) — sleep ${w.sleep ?? 'missing'}/7, stress ${w.stress ?? 'missing'}/7, fatigue ${w.fatigue ?? 'missing'}/7, soreness ${w.soreness ?? 'missing'}/7.` : 'No recent wellness check-in.',
+    hr ? `Latest wearable ${hr.date} (${hr.source || 'source not recorded'}) — HRV ${hr.hrv ?? 'missing'} ms${hrvDev != null ? `, ${hrvDev.toFixed(0)}% vs prior 30-day baseline` : ', baseline missing'}.` : 'No wearable reading recorded.',
     upcoming ? `Next prescribed session ${fmtDay(upcoming.date)}: ${upStats.exercises} exercises, ~${fmtVL(Math.round(planVL))} volume load.` : 'No upcoming session prescribed.',
   ].join('\n')
 }

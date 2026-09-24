@@ -200,7 +200,7 @@ export function seed() {
       const stress = clamp(3 - wobble * 0.6 + (Math.random() - 0.5))
       const fatigue = clamp(3 - wobble * 0.7 + (Math.random() - 0.5))
       const soreness = clamp(3 - wobble * 0.5 + (Math.random() - 0.5))
-      db.wellness.push({ id: uid(), clientId: m.cid, date, sleep, stress, fatigue, soreness, score: sleep + (8 - stress) + (8 - fatigue) + (8 - soreness) })
+      db.wellness.push({ id: uid(), clientId: m.cid, date, sleep, stress, fatigue, soreness, score: sleep + (8 - stress) + (8 - fatigue) + (8 - soreness), source: 'Demo sample' })
       if (m.opt) {
         db.wearable.push({ id: uid(), clientId: m.cid, date,
           hrv: Math.round(m.baseHrv + wobble * 4 + (Math.random() - 0.5) * 6),
@@ -213,16 +213,16 @@ export function seed() {
           const sets = 3 + (Math.random() < 0.3 ? 1 : 0)
           const reps = 8 + Math.floor(Math.random() * 5)
           const weight = Math.round(load / (sets * reps * 4) / 2.5) * 2.5
-          db.resistance.push({ id: uid(), clientId: m.cid, date, exercise: ex, pattern: pat, sets, reps, weight, volumeLoad: sets * reps * weight })
+          db.resistance.push({ id: uid(), clientId: m.cid, date, exercise: ex, pattern: pat, sets, reps, weight, volumeLoad: sets * reps * weight, source: 'Demo sample' })
         })
         const rpe = Math.max(3, Math.min(10, Math.round(6 - wobble * 0.8 + (Math.random() - 0.5) * 1.5)))
         const duration = 55 + Math.floor(Math.random() * 30)
-        db.srpe.push({ id: uid(), clientId: m.cid, date, sessionId: null, rpe, duration, tl: rpe * duration })
+        db.srpe.push({ id: uid(), clientId: m.cid, date, sessionId: null, rpe, duration, tl: rpe * duration, source: 'Demo sample' })
       }
       if ([3, 6].includes(wk % 7)) {
         db.cardio.push({ id: uid(), clientId: m.cid, date, modality: off % 2 ? 'Zone 2 Run' : 'Intervals',
           trimp: Math.round(60 + Math.random() * 60), tiz: Math.round(20 + Math.random() * 25),
-          tss: Math.round(40 + Math.random() * 60), hsd: +(0.4 + Math.random() * 1.6).toFixed(2) })
+          tss: Math.round(40 + Math.random() * 60), hsd: +(0.4 + Math.random() * 1.6).toFixed(2), source: 'Demo sample' })
       }
     }
   })

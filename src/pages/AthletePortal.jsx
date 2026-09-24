@@ -134,7 +134,7 @@ export default function AthletePortal() {
     setCheckinW(w)
   }
   const submitCheckin = async (v) => {
-    const ok = await insert('wellness', v)
+    const ok = await insert('wellness', { ...v, source: 'Client check-in' })
     if (!ok) return
     const w = checkinW
     setCheckinW(null)
@@ -160,7 +160,7 @@ export default function AthletePortal() {
       const mins = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
       const { error: e2 } = await supabase.from('srpe').insert({
         id: uid(), clientId: client.id, coachId: client.coachId,
-        date: w.date, sessionId: null, rpe, duration: mins, tl: calcSRPETL(rpe, mins),
+        date: w.date, sessionId: null, rpe, duration: mins, tl: calcSRPETL(rpe, mins), source: 'Client workout',
       })
       if (e2) alert(e2.message)
     }

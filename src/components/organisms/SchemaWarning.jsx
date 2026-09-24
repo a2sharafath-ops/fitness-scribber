@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useData } from '../../store/DataContext'
 
 // Surfaces a visible banner when the database is out of sync with the app:
@@ -8,22 +7,23 @@ import { useData } from '../../store/DataContext'
 // data appears to "vanish". The banner names the tables so the gap is obvious.
 export default function SchemaWarning() {
   const { dbIssues } = useData()
-  const [dismissed, setDismissed] = useState(false)
-  if (!dbIssues?.length || dismissed) return null
+  if (!dbIssues?.length) return null
   const tables = dbIssues.map((i) => i.table).join(', ')
-  const many = dbIssues.length > 1
   const write = dbIssues.some((i) => i.kind === 'write')
   const load = dbIssues.some((i) => i.kind !== 'write')
   const action = write && load ? 'load or save' : write ? 'save' : 'load'
   return (
     <div className="schema-warn" role="alert">
       <span className="schema-warn-ic" aria-hidden="true">⚠</span>
-      <span>
-        <strong>Database out of sync:</strong> couldn’t {action} {tables}.
-        {' '}A {many ? 'table or column is' : 'table or column is'} likely missing — changes here won’t be
-        kept until the Supabase schema is updated (apply the matching schema file), then reload.
-      </span>
-      <button className="x" onClick={() => setDismissed(true)} aria-label="Dismiss warning">×</button>
+      <div>
+        <strong>Data issue:</strong> couldn’t {action} {tables}.
+        {' '}{write ? 'Some changes may not be saved.' : 'Some records may be missing from this view.'}
+        {' '}Check the connection and schema, then reload after the issue is resolved.
+        {import.meta.env.DEV && <details>
+          <summary>Technical details</summary>
+          <ul>{dbIssues.map((issue) => <li key={`${issue.table}:${issue.kind}`}>{issue.table}: {issue.message}</li>)}</ul>
+        </details>}
+      </div>
     </div>
   )
 }

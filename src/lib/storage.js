@@ -40,7 +40,8 @@ export function loadDB() {
 export function saveDB(db) {
   try {
     localStorage.setItem(KEY, JSON.stringify(db))
+    return true
   } catch {
-    /* storage unavailable — degrade to in-memory only */
+    return false
   }
 }

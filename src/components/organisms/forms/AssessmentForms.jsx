@@ -5,9 +5,9 @@ import Field from '../../atoms/Field'
 import RangeSlider from '../../atoms/RangeSlider'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
-import { uid } from '../../../lib/format'
+import { saveAssessmentRecord } from '../../../lib/assessmentWrite'
 import { todayISO } from '../../../lib/dates'
-import { ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax, movementScore } from '../../../lib/assessment'
+import { ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax, movementScore, latest, forClient } from '../../../lib/assessment'
 import { SECTIONS, SEVERITY, itemsInSection, isPresent } from '../../../lib/posture'
 import { FIELD_LABELS, parseBodyComp } from '../../../lib/bodyCompPdf'
 import { screeningsFor, goalsFromScreening } from '../../../lib/screening'
@@ -38,13 +38,8 @@ function useSave(clientId, type, buildData, extra, record) {
   const { closeModal } = useModal()
   return (f) => {
     commit((d) => {
-      if (record) {
-        const a = d.assessments.find((x) => x.id === record.id)
-        if (a) { a.date = f.date; a.phase = f.phase; a.notes = (f.notes || '').trim(); a.data = buildData() }
-      } else {
-        d.assessments.push({ id: uid(), clientId, type, date: f.date, phase: f.phase, notes: (f.notes || '').trim(), data: buildData(), createdAt: new Date().toISOString() })
-      }
-      extra?.(d)
+      const savedRecord = saveAssessmentRecord(d, { clientId, type, form: f, data: buildData(), record })
+      if (savedRecord) extra?.(d, savedRecord)
     })
     closeModal()
   }
@@ -296,15 +291,25 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
     leanMassKg: numOrNull(f.leanMassKg), skeletalMuscleKg: numOrNull(f.skeletalMuscleKg),
     visceralFat: numOrNull(f.visceralFat), hydrationL: numOrNull(f.hydrationL),
   })
-  // Also refresh the client's current anthro snapshot from this reading.
-  const save = useSave(clientId, 'body_comp', data, (d) => {
+  // Mirror only the latest assessment into the current profile snapshot and
+  // retain the source record. An explicit profile override stays in control.
+  const save = useSave(clientId, 'body_comp', data, (d, savedRecord) => {
     const c = d.clients.find((x) => x.id === clientId)
-    if (!c) return
+    if (!c || latest(forClient(d.assessments, clientId), 'body_comp')?.id !== savedRecord.id) return
     c.anthro = c.anthro || {}
+    c.anthro._sources = c.anthro._sources || {}
     const v = data()
-    if (v.massKg != null) c.anthro.massKg = v.massKg
-    if (v.bodyFatPct != null) c.anthro.bodyFatPct = v.bodyFatPct
-    if (v.leanMassKg != null) c.anthro.leanMassKg = v.leanMassKg
+    for (const field of ['massKg', 'bodyFatPct', 'leanMassKg']) {
+      const prior = c.anthro._sources[field]
+      if (prior?.kind === 'profile') continue
+      if (v[field] != null) {
+        c.anthro[field] = v[field]
+        c.anthro._sources[field] = { kind: 'body_comp', recordId: savedRecord.id, date: savedRecord.date, method: v.method }
+      } else if (prior?.kind === 'body_comp') {
+        c.anthro[field] = null
+        delete c.anthro._sources[field]
+      }
+    }
   }, record)
   return (
     <ModalShell title={<><Icon name="tuning" size={16} /> Body composition</>} onClose={closeModal}
@@ -551,17 +556,17 @@ const FORMS = {
 export const assessmentForm = (type, clientId, record, defaultPhase) => FORMS[type]?.(clientId, record, defaultPhase) || null
 
 // Launcher: pick which assessment to record.
-export function NewAssessmentMenu({ clientId }) {
+export function NewAssessmentMenu({ clientId, types = ACTIVE_TYPES }) {
   const { openModal, closeModal } = useModal()
   return (
     <ModalShell title="New assessment" onClose={closeModal}>
       <div className="grid cards-2" style={{ gap: 10 }}>
-        {ACTIVE_TYPES.map((t) => {
+        {types.map((t) => {
           const m = typeMeta(t)
           return <Button key={t} variant="ghost" onClick={() => openModal(FORMS[t](clientId))}><Icon name={m.icon} size={14} /> {m.label}</Button>
         })}
       </div>
-      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Pain, lifestyle and goals can also be self-reported by the athlete in their portal.</p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Pain may also be self-reported by the athlete. Their reports are dated; use Concerns for new symptoms between formal assessments.</p>
     </ModalShell>
   )
 }

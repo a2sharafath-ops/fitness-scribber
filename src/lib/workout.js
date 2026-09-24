@@ -221,20 +221,6 @@ export function blankWorkout({ clientId, date }) {
   return base({ clientId, date, title: 'Custom workout', source: 'manual', planId: null, main: [newExercise()], note: 'Built manually' })
 }
 
-// Rule-based "auto" coach: scale a plan's volume by readiness / ACWR.
-// (Same spirit as the existing rule-based AI coach; swap for an LLM later.)
-export function adaptFromPlan(plan, exercises, { clientId, date, readiness, acwr }) {
-  const w = buildFromPlan(plan, exercises, { clientId, date })
-  let factor = 1, note = 'Adaptive — matched to plan'
-  if (readiness != null && readiness < 50) { factor = 0.8; note = 'Adaptive — volume trimmed for low readiness' }
-  if (acwr != null && acwr > 1.5) { factor = Math.min(factor, 0.7); note = 'Adaptive — deload, ACWR spike' }
-  if (factor < 1) w.main = w.main.map((m) => ({ ...m, sets: Math.max(1, Math.round(m.sets * factor)) }))
-  w.title = (plan?.name || 'Workout') + ' · auto'
-  w.source = 'ai'
-  w.note = note
-  return w
-}
-
 // Estimated volume load (kg) — per-set when rows exist (prescribed loads),
 // else the legacy sets×reps×weight. Used for the pre-start overview.
 export const itemEstVolume = (m) =>

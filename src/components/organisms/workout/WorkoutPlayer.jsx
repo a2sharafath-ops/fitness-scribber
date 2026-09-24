@@ -5,6 +5,12 @@ import SetLogRow from '../../molecules/SetLogRow'
 import HeartRateTile from '../../molecules/HeartRateTile'
 import { newExercise, secToClock, workoutVolume, runBlocks, normalizeRunItem } from '../../../lib/workout'
 import { fmtVL } from '../../../lib/units'
+import { getWorkoutDraft, setWorkoutDraft, clearWorkoutDraft } from '../../../lib/workoutDraft'
+
+const prepareForRun = (workout, resolveTm) => {
+  const withRows = (items) => (items || []).map((item) => normalizeRunItem(item, resolveTm))
+  return { ...workout, warmup: withRows(workout.warmup), main: withRows(workout.main), cooldown: withRows(workout.cooldown) }
+}
 
 // The live/edit surface for a Today's Workout.
 //   running=false → edit mode (adjust before starting; "Save" / "Cancel")
@@ -12,8 +18,9 @@ import { fmtVL } from '../../../lib/units'
 //                   …) where every set is logged with load, reps and RIR/RPE,
 //                   plus a per-exercise note. Used by both the coach's in-app
 //                   runner and the athlete portal (locked only affects editing).
-export default function WorkoutPlayer({ workout, units, restingHr, age, running, locked, resolveTm, onSave, onComplete, onCancel }) {
-  const [w, setW] = useState(workout)
+export default function WorkoutPlayer({ workout, units, restingHr, age, running, locked, resolveTm, onSave, onComplete, onCancel, preserveDraft = false }) {
+  const mode = running ? 'run' : 'edit'
+  const [w, setW] = useState(() => (preserveDraft && getWorkoutDraft(workout, mode)) || (running ? prepareForRun(workout, resolveTm) : workout))
   const [now, setNow] = useState(Date.now())
   const [step, setStep] = useState(0)
   const [showWarm, setShowWarm] = useState(true)
@@ -24,13 +31,26 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
   // normalised so every exercise has per-set logging rows (older sessions and
   // plan/manual builds get rows synthesised from their set count).
   useEffect(() => {
-    if (!running) { setW(workout); return }
-    const withRows = (arr) => (arr || []).map((it) => normalizeRunItem(it, resolveTm))
-    setW({ ...workout, warmup: withRows(workout.warmup), main: withRows(workout.main), cooldown: withRows(workout.cooldown) })
+    if (!running) { setW((preserveDraft && getWorkoutDraft(workout, mode)) || workout); return }
+    setW((preserveDraft && getWorkoutDraft(workout, mode)) || prepareForRun(workout, resolveTm))
     setStep(0)
     // Re-normalise only when the session identity or run state changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workout.id, running])
+
+  useEffect(() => {
+    if (preserveDraft) setWorkoutDraft(workout, mode, w)
+  }, [preserveDraft, workout, mode, w])
+
+  useEffect(() => {
+    if (!preserveDraft || !running) return undefined
+    const warn = (event) => { event.preventDefault(); event.returnValue = '' }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [preserveDraft, running])
+
+  const saveAndExit = () => { if (preserveDraft) clearWorkoutDraft(workout, mode); onSave(w) }
+  const cancelEdit = () => { if (preserveDraft) clearWorkoutDraft(workout, mode); onCancel?.() }
 
   useEffect(() => {
     if (!running) return
@@ -86,12 +106,13 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
         </div>
 
         {/* Progress across blocks */}
-        <div className="wp-steps" role="tablist" aria-label="Session blocks">
+        <nav className="wp-steps" aria-label="Session blocks">
           {blocks.map((b, i) => (
             <button key={b.key} className={'wp-step' + (i === step ? ' cur' : '') + (i < step ? ' past' : '')}
-              onClick={() => setStep(i)} role="tab" aria-selected={i === step}>{b.title}</button>
+              onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined}
+              aria-label={`Block ${i + 1} of ${blocks.length}: ${b.title}`}>{b.title}</button>
           ))}
-        </div>
+        </nav>
 
         {cur && (
           <div className="wp-block">
@@ -120,7 +141,7 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
         )}
 
         <div className="modal-foot wp-nav">
-          <Button variant="ghost" onClick={() => onSave(w)}>Save &amp; exit</Button>
+          <Button variant="ghost" onClick={saveAndExit}>Save &amp; exit</Button>
           <div className="flex gap">
             {step > 0 && <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>← Back</Button>}
             {last
@@ -174,8 +195,8 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
       </Section>
 
       <div className="modal-foot" style={{ gap: 8 }}>
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button onClick={() => onSave(w)}>Save changes</Button>
+        <Button variant="ghost" onClick={cancelEdit}>Cancel</Button>
+        <Button onClick={saveAndExit}>Save changes</Button>
       </div>
     </div>
   )

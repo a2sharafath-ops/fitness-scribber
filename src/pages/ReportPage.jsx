@@ -10,7 +10,7 @@ import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { lastNDates, fmtDate, todayISO } from '../lib/dates'
-import { readinessFor, dailySum, acwrSeries, trainingMonotony } from '../lib/calc'
+import { readinessFor, dailySum, acwrSeries, trainingMonotony, sdev } from '../lib/calc'
 import { forClient, baseline, latest, movementScore, compare, MOVEMENT_MAX, resolveAnthro } from '../lib/assessment'
 import { RISK_ICON } from '../lib/format'
 import { screeningsFor, redFlags, OUTCOME_META, HHQ_CONDITIONS, HHQ_SYMPTOMS } from '../lib/screening'
@@ -29,10 +29,13 @@ export default function ReportPage() {
 
   const r = readinessFor(db, c.id)
   const a = resolveAnthro(db, c)
-  const intMap = dailySum(db.srpe, c.id, 'tl')
-  const last7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
-  const mono = trainingMonotony(last7)
-  const acwr = acwrSeries(intMap, lastNDates(28, tz)).filter((v) => v != null).slice(-1)[0]
+  const intMap = dailySum(db.srpe.filter((row) => typeof row.tl === 'number' && Number.isFinite(row.tl)), c.id, 'tl')
+  const loadDates = lastNDates(28, tz)
+  const last7 = loadDates.slice(-7).map((d) => intMap[d] || 0)
+  const mono = sdev(last7) > 0 ? trainingMonotony(last7) : null
+  const acwr = acwrSeries(intMap, loadDates).at(-1)
+  const logged7 = loadDates.slice(-7).filter((date) => Object.hasOwn(intMap, date)).length
+  const logged28 = loadDates.filter((date) => Object.hasOwn(intMap, date)).length
   const wkVL = lastNDates(7, tz).reduce((s, d) => s + (dailySum(db.resistance, c.id, 'volumeLoad')[d] || 0), 0)
   const conc = db.concerns.filter((x) => x.clientId === c.id && x.status === 'Open')
   const recentRes = db.resistance.filter((x) => x.clientId === c.id).sort((x, y) => y.date.localeCompare(x.date)).slice(0, 8)
@@ -66,7 +69,7 @@ export default function ReportPage() {
   return (
     <>
       <div className="flex between" style={{ marginBottom: 14 }}>
-        <button className="back" style={{ margin: 0 }} onClick={() => nav('/command/' + c.id)}>← Back</button>
+        <button className="back" style={{ margin: 0 }} onClick={() => nav('/clients/' + c.id)}>← Back</button>
         <div className="flex gap">
           <Button variant="ghost" onClick={() => openModal(<ExportMenu clientId={c.id} />)}>⬇ CSV</Button>
           <Button onClick={() => window.print()}>🖨 Print / Save as PDF</Button>
@@ -84,13 +87,18 @@ export default function ReportPage() {
           <AnthroCell label="Body mass" value={a.massKg != null ? fmtWt(a.massKg) : null} />
           <AnthroCell label="Body fat" value={a.bodyFatPct} unit="%" />
         </div>
-        <div className="section-title">Current status (7-day)</div>
+        <div className="section-title">Recorded check-in and load context</div>
         <div className="kpi-strip">
-          <Kpi label="Readiness" value={(r.wellness ?? '—') + '/28'} />
-          <Kpi label="ACWR" value={acwr ? acwr.toFixed(2) : '—'} />
-          <Kpi label="Monotony" value={mono} />
+          <Kpi label="App readiness" value={r.score == null ? '—' : `${r.score}/100`} />
+          <Kpi label="ACWR" value={acwr == null ? '—' : acwr.toFixed(2)} />
+          <Kpi label="Monotony" value={mono ?? '—'} />
           <Kpi label="Weekly Volume Load" value={fmtVL(wkVL)} />
         </div>
+        <p className="muted" style={{ fontSize: 12, lineHeight: 1.6, margin: '8px 0 18px' }}>
+          App readiness is dated {fmtDate(r.date)} and reflects available wellness and wearable inputs; it is not medical or exercise clearance.
+          ACWR compares 7-day and 28-day average daily sRPE load ({fmtDate(loadDates[0])}–{fmtDate(loadDates.at(-1))}; {logged7}/7 and {logged28}/28 days logged).
+          Monotony is 7-day mean daily load divided by its standard deviation. Unlogged days enter these formulas as zero and may represent missing data rather than rest; no injury-risk threshold is applied.
+        </p>
         <div className="section-title">Health history &amp; PAR-Q</div>
         {!scr ? (
           <div className="muted">No pre-participation screening on file.</div>

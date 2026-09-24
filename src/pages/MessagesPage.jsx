@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { useConversations } from '../hooks/useConversations'
@@ -17,7 +18,9 @@ export default function MessagesPage() {
   const { openModal } = useModal()
   const { byClient, reload } = useConversations()
   const clients = db.clients || []
-  const [selectedId, setSelectedId] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedId = searchParams.get('clientId')
+  const setSelectedId = (id) => setSearchParams(id ? { clientId: id } : {})
   const sel = clients.find((c) => c.id === selectedId) || null
 
   // Local mode has no scheduled Edge Function, so generate reminders/nudges on

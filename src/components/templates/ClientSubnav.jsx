@@ -1,32 +1,33 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
-// Shared breadcrumb + tab bar for every per-client screen, so the five client
-// views (Overview, Profile, Assessments, Load & Strength, Monitoring) read as
-// one record instead of scattered pages. Presentational — routing only.
-const tabsFor = (id) => [
+const sections = (id) => [
   { to: `/clients/${id}`, label: 'Overview', end: true },
-  { to: `/clients/${id}/profile`, label: 'Profile' },
+  { to: `/clients/${id}/training`, label: 'Training' },
+  { to: `/clients/${id}/progress`, label: 'Progress' },
+  { to: `/clients/${id}/check-ins`, label: 'Check-ins & load' },
   { to: `/clients/${id}/assessments`, label: 'Assessments' },
-  { to: `/command/${id}`, label: 'Load & Strength' },
-  { to: `/monitor/${id}`, label: 'Monitoring' },
+  { to: `/clients/${id}/profile`, label: 'Profile' },
 ]
 
-export default function ClientSubnav({ client, tabsOnly = false }) {
+export default function ClientSubnav({ client }) {
+  const { pathname } = useLocation()
+  const metricDetail = pathname.startsWith(`/clients/${client.id}/metric/`)
   return (
     <div className="client-subnav">
-      {!tabsOnly && <nav className="crumb" aria-label="Breadcrumb">
-        <NavLink to="/clients" className="crumb-link">Clients</NavLink>
+      <nav className="crumb" aria-label="Breadcrumb">
+        <NavLink to="/clients" end className="crumb-link">Clients</NavLink>
         <span className="crumb-sep" aria-hidden="true">›</span>
         <span className="crumb-cur">{client.name}</span>
-      </nav>}
-      <div className="tabs client-tabs" role="tablist" aria-label="Client sections">
-        {tabsFor(client.id).map((t) => (
-          <NavLink key={t.to} to={t.to} end={t.end} role="tab"
-            className={({ isActive }) => 'tab' + (isActive ? ' active' : '')}>
-            {t.label}
+      </nav>
+      <nav className="tabs client-tabs" aria-label="Client sections">
+        {sections(client.id).map(({ to, label, end }) => (
+          <NavLink key={to} to={to} end={end}
+            aria-current={metricDetail && label === 'Check-ins & load' ? 'page' : undefined}
+            className={({ isActive }) => 'tab' + (isActive || (metricDetail && label === 'Check-ins & load') ? ' active' : '')}>
+            {label}
           </NavLink>
         ))}
-      </div>
+      </nav>
     </div>
   )
 }

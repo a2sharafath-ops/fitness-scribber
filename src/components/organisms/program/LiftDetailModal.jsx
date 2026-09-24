@@ -47,7 +47,7 @@ export default function LiftDetailModal({ client, lift }) {
   const data = {
     labels: chron.map((m) => shortLabel(m.date)),
     datasets: [{
-      label: `Estimated 1RM (${unitName()})`,
+      label: `Recorded 1RM (${unitName()})`,
       data: chron.map((m) => toDisp(m.valueKg)),
       borderColor: COLORS.green,
       backgroundColor: 'rgba(52,199,89,.12)',

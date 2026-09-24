@@ -2,7 +2,7 @@
 // calendar paste + progression rules (spec 3), voice dictation (spec 5) and
 // the completion feedback loop (spec 4) applied on save. This page-tier modal
 // owns state and data access; the cards below it stay presentational.
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import MultiDatePicker from '../../molecules/MultiDatePicker'
 import BlockCard from './BlockCard'
@@ -48,7 +48,7 @@ const fromExisting = (p, seedBlocks = []) => {
 
 export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '' }) {
   const { db, commit } = useData()
-  const { closeModal } = useModal()
+  const { closeModal, setCloseGuard } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
   const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
@@ -61,6 +61,17 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const [step, setStep] = useState('edit') // edit | dates | progress | dictate | clients
   const [targets, setTargets] = useState(new Set())
   const [clientTargets, setClientTargets] = useState(new Set())
+  const initialDraftRef = useRef(null)
+  if (initialDraftRef.current === null) initialDraftRef.current = JSON.stringify({ blocks, notes })
+  const changed = JSON.stringify({ blocks, notes }) !== initialDraftRef.current
+  useEffect(() => {
+    if (!changed) return undefined
+    return setCloseGuard(() => confirmDialog({
+      title: 'Discard workout changes?',
+      message: 'The unsaved prescription changes for this client and date will be lost.',
+      confirmLabel: 'Discard changes', danger: true,
+    }))
+  }, [changed, setCloseGuard])
 
   const client = db.clients.find((c) => c.id === clientId)
   const maxHr = 220 - (client?.anthro?.age || 30)
@@ -175,14 +186,14 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         if (reset.length) events.push(`Training Max reset to rolling Absolute 1RM: ${reset.join(', ')}`)
       }
     })
-    closeModal()
+    closeModal({ force: true })
     toast('Workout saved')
     if (events.length) events.forEach((e, i) => setTimeout(() => toast(e, 'info', 6000), i * 350))
   }
   const del = async () => {
     if (!await confirmDialog({ title: 'Delete workout', message: 'Delete this prescribed workout?', confirmLabel: 'Delete', danger: true })) return
     commit((d) => { d.prescriptions = d.prescriptions.filter((p) => !(p.clientId === clientId && p.date === date)) })
-    closeModal()
+    closeModal({ force: true })
     toast('Workout deleted')
   }
 

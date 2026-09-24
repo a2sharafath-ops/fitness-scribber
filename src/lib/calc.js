@@ -69,13 +69,12 @@ export function rolling30Baseline(db, clientId, field, beforeDate) {
   const vals = db.wearable
     .filter((w) => w.clientId === clientId && w.date < beforeDate && new Date(w.date) >= lo)
     .map((w) => w[field])
-  return mean(vals)
+    .filter((value) => typeof value === 'number' && Number.isFinite(value))
+  return vals.length ? mean(vals) : null
 }
 
-// ACWR needs a chronic training base before the ratio means anything: with a
-// single logged session the math degenerates to (L/7)÷(L/28) = exactly 4.00,
-// falsely flagging every new athlete as "elevated injury risk". Report null
-// until the 28-day window holds at least this many trained days.
+// A single logged session makes the ratio mechanically equal to 4.00.
+// Suppress that sparse-data artifact and disclose the recorded-day count in UI.
 export const MIN_ACWR_DAYS = 3
 
 export function acwrSeries(loadMap, dates) {
@@ -95,19 +94,17 @@ const clamp100 = (v) => Math.max(0, Math.min(100, v))
 // they are combined into the final score is new.
 //   • Subjective (Hooper) part: (score − 4) / 24 × 100.
 //   • Objective (HRV) part: 50 + (% deviation from the 30-day baseline) × 2.5.
-const wellnessPartOf = (w) => (w ? Math.round(clamp100(((w.score - 4) / 24) * 100)) : null)
+const wellnessPartOf = (w) => (w?.score == null ? null : Math.round(clamp100(((w.score - 4) / 24) * 100)))
 function hrvPartOf(db, clientId, date, hr) {
-  if (!hr) return { part: null, dev: null, baseline: null }
+  if (hr?.hrv == null) return { part: null, dev: null, baseline: null }
   const baseline = rolling30Baseline(db, clientId, 'hrv', date)
   if (!baseline) return { part: null, dev: null, baseline: null }
   const dev = deviationPct(hr.hrv, baseline)
   return { part: Math.round(clamp100(50 + dev * 2.5)), dev, baseline }
 }
 
-// Full readiness for one day. The component parts are the originals; the CHANGES
-// live only in the COMBINE step: a red-flag-dominant blend instead of a plain
-// mean, an R/Y/G taken from that same number (so score and light can't
-// disagree), and a data-confidence level.
+// App-specific readiness interpretation for one date, based on the inputs
+// available that day. The bands are display groupings, not clearance decisions.
 export function computeReadiness(db, clientId, date) {
   const w = db.wellness.find((x) => x.clientId === clientId && x.date === date)
   const hr = db.wearable.find((x) => x.clientId === clientId && x.date === date)
@@ -127,9 +124,9 @@ export function computeReadiness(db, clientId, date) {
   const confidence = parts.length >= 2 ? 'high' : parts.length === 1 ? 'low' : 'none'
   let color = 'gray', label = 'No data'
   if (score != null) {
-    if (score < 45) { color = 'red'; label = 'Red — At risk' }
-    else if (score >= 67) { color = 'green'; label = 'Green — Ready' }
-    else { color = 'yellow'; label = 'Yellow — Monitor' }
+    if (score < 45) { color = 'red'; label = 'Lower app score' }
+    else if (score >= 67) { color = 'green'; label = 'Higher app score' }
+    else { color = 'yellow'; label = 'Middle app score' }
   }
 
   return {
@@ -154,10 +151,10 @@ export function readinessFor(db, clientId) {
     ...db.wellness.filter((x) => x.clientId === clientId).map((x) => x.date),
     ...db.wearable.filter((x) => x.clientId === clientId).map((x) => x.date),
   ]
-  if (!dates.length) return { label: 'No data', color: 'gray', wellness: null, hrvDev: null, score: null, confidence: 'none' }
+  if (!dates.length) return { label: 'No data', color: 'gray', wellness: null, hrvDev: null, score: null, confidence: 'none', date: null }
   const date = dates.sort((a, b) => b.localeCompare(a))[0]
   const r = computeReadiness(db, clientId, date)
-  return { label: r.label, color: r.color, wellness: r.wellness ? r.wellness.score : null, hrvDev: r.hrvDev, score: r.score, confidence: r.confidence }
+  return { label: r.label, color: r.color, wellness: r.wellness ? r.wellness.score : null, hrvDev: r.hrvDev, score: r.score, confidence: r.confidence, date }
 }
 
 // Smoothed readiness + trend over a window (default 5 days vs the prior 5), to

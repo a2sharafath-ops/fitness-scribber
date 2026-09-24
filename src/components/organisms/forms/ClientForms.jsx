@@ -77,7 +77,7 @@ export function ClientForm({ client }) {
           <select value={f.plan} onChange={set('plan')}>{['Standard', 'Premium'].map((o) => <option key={o}>{o}</option>)}</select>
         </Field>
       </div>
-      <Field label="Notes"><textarea value={f.notes} onChange={set('notes')} placeholder="Injuries, preferences, etc." /></Field>
+      <Field label="Coach notes"><textarea value={f.notes} onChange={set('notes')} placeholder="Scheduling, package or follow-up notes" /></Field>
     </ModalShell>
   )
 }
@@ -185,8 +185,8 @@ export function AssignPlanForm({ client }) {
       {gated && (
         <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
           ⚠ {client.name}'s health screening needs review before an active program starts.
-          Record physician/ePARmed-X+ clearance as <strong>Received</strong> in their profile
-          (Health screening card) to unlock plan assignment.
+          Record physician/ePARmed-X+ clearance as <strong>Received</strong> in their Assessments
+          (Health screening section) to unlock plan assignment.
         </p>
       )}
     </ModalShell>

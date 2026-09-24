@@ -56,16 +56,16 @@ export default function CurrentLiftsPerformance({ client }) {
   return (
     <div className="card">
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> Current lifts performance</div>
+        <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> Tracked lifts</div>
         <span className="muted" style={{ fontSize: 11 }}>
-          1RM auto-updates from completed main-lift sets · baselines %1RM prescription targets
+          Estimated 1RM updates from completed main-lift sets; coach-entered values are separate history entries.
         </span>
       </div>
 
       {tracked.length ? (
         <>
           <div className="clp-row clp-head">
-            <span>Lift</span><span>Absolute 1RM (30d)</span><span>Training Max</span><span>Last update</span><span>Details</span><span>Record 1RM</span><span />
+            <span>Lift</span><span>Highest 1RM (30d)</span><span>Training Max</span><span>Last update</span><span>Details</span><span>Coach-entered 1RM</span><span />
           </div>
           {tracked.map((lift) => {
             const abs = absolute1RM(db.maxes, client.id, lift, today)
@@ -83,7 +83,7 @@ export default function CurrentLiftsPerformance({ client }) {
                   <Icon name="chart" size={13} /> View
                 </button>
                 <span className="clp-entry">
-                  <input type="number" placeholder={unitName()} aria-label={`Record 1RM for ${lift}`}
+                  <input type="number" placeholder={unitName()} aria-label={`Record coach-entered 1RM for ${lift}`}
                     value={entry[lift] ?? ''} onChange={(e) => setEntry((x) => ({ ...x, [lift]: e.target.value }))}
                     onKeyDown={onEntryKey(lift)} />
                   <Button size="sm" variant="ghost" onClick={() => record(lift)} disabled={!entry[lift]}>Set</Button>

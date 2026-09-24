@@ -23,7 +23,7 @@ bun run lint     # oxlint
 - **Reporting** — CSV export and a printable athlete report (Save as PDF).
 - **Accessibility** — non-color status cues, ARIA roles/labels, full keyboard navigation.
 
-All data persists locally in the browser (`localStorage`). The wearable integrations and AI assistant are simulated/rule-based — designed to be wired to real APIs (Oura/Whoop/HealthKit, an LLM) behind a backend later.
+The app uses Supabase authentication and Postgres when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured. Without them it uses browser `localStorage` for a standalone demo. See [SETUP_BACKEND.md](./SETUP_BACKEND.md) for schema and migration steps. Wearable sync and live AI require separate edge-function and vendor/provider configuration.
 
 ## Architecture
 

@@ -22,7 +22,7 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // intercepts the Start press so the parent can run a pre-flight (check-in popup).
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
-export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, bare }) {
+export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, bare, preserveDraft = false }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -38,12 +38,12 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
     // prescribe one straight from this card; the athlete just sees a rest day.
     if (!prescription) {
       return (
-        <Shell bare={bare} extra={headerExtra}>
+        <Shell bare={bare} extra={headerExtra} label={headerLabel}>
           <div className="tw-rest">
             <span className="tw-rest-ic" aria-hidden="true"><Icon name="coffee" size={20} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="tw-rest-h">Rest day</div>
-              <div className="muted" style={{ fontSize: 13 }}>Nothing prescribed for today.</div>
+              <div className="muted" style={{ fontSize: 13 }}>Nothing prescribed for {isToday ? 'today' : 'this date'}.</div>
             </div>
             {onAddSession && <Button size="sm" onClick={onAddSession}>＋ Add a session</Button>}
           </div>
@@ -53,9 +53,9 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
 
     const pStats = programStats(prescription)
     return (
-      <Shell bare={bare} extra={headerExtra}>
+      <Shell bare={bare} extra={headerExtra} label={headerLabel}>
         <div className="tw-suggest">
-          <div className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Prescribed for today</div>
+          <div className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Prescribed for {isToday ? 'today' : 'this date'}</div>
           <div style={{ fontSize: 17, fontWeight: 800, margin: '4px 0 2px' }}>Coach's session</div>
           <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>{pStats.exercises} exercises · {pStats.sets} sets{prescription.notes ? ' · ' + prescription.notes : ''}</div>
           <div className="flex gap" style={{ flexWrap: 'wrap' }}>
@@ -86,8 +86,8 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   // ---- Editing a suggested session (never reachable when locked) ----
   if (editing && !locked && workout.status !== 'in_progress') {
     return (
-      <Shell bare={bare} extra={headerExtra}>
-        <WorkoutPlayer workout={workout} units={units} running={false}
+      <Shell bare={bare} extra={headerExtra} label={headerLabel}>
+        <WorkoutPlayer workout={workout} units={units} running={false} preserveDraft={preserveDraft}
           onSave={(w) => { onSave(w); setEditing(false) }} onCancel={() => setEditing(false)} />
       </Shell>
     )
@@ -95,10 +95,21 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
 
   // ---- Live session -------------------------------------------------
   if (workout.status === 'in_progress') {
+    if (!runOpen) return (
+      <Shell bare={bare} extra={headerExtra} label={headerLabel}>
+        <div className="tw-rest">
+          <div style={{ flex: 1 }}>
+            <div className="tw-rest-h">Session in progress</div>
+            <div className="muted" style={{ fontSize: 13 }}>Saved work is ready to continue.</div>
+          </div>
+          <Button onClick={onResume}>Resume session</Button>
+        </div>
+      </Shell>
+    )
     return (
-      <Shell bare={bare} extra={headerExtra}>
-        <WorkoutPlayer workout={workout} units={units} running locked={locked} restingHr={restingHr} age={age} resolveTm={resolveTm}
-          onSave={onSave} onComplete={onComplete} />
+      <Shell bare={bare} extra={headerExtra} label={headerLabel}>
+        <WorkoutPlayer workout={workout} units={units} running locked={locked} restingHr={restingHr} age={age} resolveTm={resolveTm} preserveDraft={preserveDraft}
+          onSave={(item) => { onSave(item); onExit?.() }} onComplete={onComplete} />
       </Shell>
     )
   }
@@ -106,7 +117,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   // ---- Completed → full summary -------------------------------------
   if (workout.status === 'completed') {
     return (
-      <Shell bare={bare} extra={headerExtra} action={!locked && <Button variant="ghost" size="sm" onClick={onClear}>New workout →</Button>}>
+      <Shell bare={bare} extra={headerExtra} label={headerLabel} action={!locked && <Button variant="ghost" size="sm" onClick={onClear}>New workout →</Button>}>
         <WorkoutSummary workout={workout} units={units} exercises={exercises} restingHr={restingHr} age={age} bodyMassKg={bodyMassKg}
           locked={locked} onEdit={() => setEditing(true)} onDelete={onClear} onTemplate={onTemplate}
           onDuration={(sec) => onSave({ ...workout, durationSec: sec })} />
@@ -118,7 +129,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   const vol = workoutVolume(workout)
   const start = () => (onStart || onSave)({ ...workout, status: 'in_progress', startedAt: new Date().toISOString() })
   return (
-    <Shell bare={bare} extra={headerExtra}>
+    <Shell bare={bare} extra={headerExtra} label={headerLabel}>
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
         <div>
           <div className="flex gap"><Tag color={SRC_COLOR[workout.source]}>{SOURCE_LABEL[workout.source]}</Tag>
@@ -144,7 +155,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   )
 }
 
-function Shell({ children, action, extra, bare }) {
+function Shell({ children, action, extra, label, bare }) {
   // bare: rendered inside the PlannerWidget's persistent card — no own card
   // shell, just a slim context row (label + any state action) above the body.
   if (bare) {
@@ -161,7 +172,7 @@ function Shell({ children, action, extra, bare }) {
   return (
     <div className="card">
       <div className="flex between" style={{ marginBottom: 12 }}>
-        <div className="section-title" style={{ margin: 0 }}>Today's Workout</div>
+        <div className="section-title" style={{ margin: 0 }}>{label || "Today's Workout"}</div>
         <div className="flex gap">{extra}{action}</div>
       </div>
       {children}

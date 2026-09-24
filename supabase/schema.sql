@@ -51,27 +51,27 @@ create table if not exists wellness (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
   "clientId" text, "date" text,
-  "sleep" integer, "stress" integer, "fatigue" integer, "soreness" integer, "score" integer
+  "sleep" integer, "stress" integer, "fatigue" integer, "soreness" integer, "score" integer, "source" text
 );
 
 create table if not exists srpe (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  "clientId" text, "date" text, "sessionId" text, "rpe" integer, "duration" integer, "tl" integer
+  "clientId" text, "date" text, "sessionId" text, "rpe" integer, "duration" integer, "tl" integer, "source" text
 );
 
 create table if not exists resistance (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
   "clientId" text, "date" text, "exercise" text, "pattern" text,
-  "sets" integer, "reps" integer, "weight" numeric, "volumeLoad" numeric
+  "sets" integer, "reps" integer, "weight" numeric, "volumeLoad" numeric, "source" text
 );
 
 create table if not exists cardio (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
   "clientId" text, "date" text, "modality" text,
-  "trimp" numeric, "tiz" numeric, "tss" numeric, "hsd" numeric
+  "trimp" numeric, "tiz" numeric, "tss" numeric, "hsd" numeric, "source" text
 );
 
 create table if not exists wearable (

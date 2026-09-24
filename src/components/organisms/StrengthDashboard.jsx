@@ -1,113 +1,54 @@
-// Dual-Axis Context Chart (spec 6.1): rolling 30-day Absolute 1RM as a
-// locked step line + fluctuating Training Max dashed line (left, load axis),
-// against ACWR with health-zone background banding and daily strain bars
-// hugging the basement (right, workload axis). Data: maxes ledger + sRPE.
 import { useState } from 'react'
-import { Chart } from 'react-chartjs-2'
+import { Line } from 'react-chartjs-2'
 import Icon from '../atoms/Icon'
-import SegToggle from '../molecules/SegToggle'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
-import { baseOptions, COLORS, GRID, TEXT, shortLabel } from '../../lib/chartSetup'
-import { lastNDates } from '../../lib/dates'
-import { dailySum, acwrSeries, trainingStrain, trainingMonotony } from '../../lib/calc'
-import { absolute1RM, trainingMaxKg } from '../../lib/program'
+import { baseOptions, COLORS, shortLabel } from '../../lib/chartSetup'
+import { fmtDate } from '../../lib/dates'
 
-// Background banding on the ACWR axis: soft green sweet spot (0.8–1.3),
-// warning wash above 1.5 (spec: elevated injury-risk zone).
-const acwrBands = {
-  id: 'acwrBands',
-  beforeDraw(chart) {
-    const y1 = chart.scales.y1
-    if (!y1) return
-    const { ctx, chartArea: a } = chart
-    const px = (v) => Math.max(a.top, Math.min(a.bottom, y1.getPixelForValue(v)))
-    ctx.save()
-    ctx.fillStyle = 'rgba(61, 220, 151, 0.07)'
-    ctx.fillRect(a.left, px(1.3), a.right - a.left, px(0.8) - px(1.3))
-    ctx.fillStyle = 'rgba(255, 90, 60, 0.09)'
-    ctx.fillRect(a.left, a.top, a.right - a.left, px(1.5) - a.top)
-    ctx.restore()
-  },
-}
-
-const SPAN = [[28, '4wk'], [56, '8wk'], [90, '12wk']]
+const newest = (rows) => [...rows].sort((a, b) => b.date.localeCompare(a.date))[0] || null
 
 export default function StrengthDashboard({ client }) {
-  const { db, tz } = useData()
-  const { toDisp, unitName } = useFormat()
-  const lifts = [...new Set(db.maxes.filter((m) => m.clientId === client.id).map((m) => m.exercise))].sort()
-  const [lift, setLift] = useState(lifts[0] || '')
-  const [range, setRange] = useState(90) // this chart's own date range
+  const { db } = useData()
+  const { fmtWt, toDisp, unitName } = useFormat()
+  const records = (db.maxes || []).filter((m) => m.clientId === client.id)
+  const lifts = [...new Set([...(client.trackedLifts || []), ...records.map((m) => m.exercise)])].sort()
+  const [selected, setSelected] = useState('')
+  const lift = lifts.includes(selected) ? selected : lifts[0]
 
-  if (!lifts.length) {
-    return (
-      <div className="card">
-        <div className="section-title" style={{ margin: 0 }}>Strength — Absolute 1RM vs Training Max</div>
-        <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="dumbbell" size={40} /></div>
-          No 1RM history yet. Complete sets in a Main Lifts block (auto-1RM on) and peaks will appear here automatically.</div>
-      </div>
-    )
-  }
+  if (!lift) return <div className="card progress-strength"><h2>Strength</h2><p className="muted">No lift history yet. Track a lift below, then record a 1RM or complete a main-lift set.</p></div>
 
-  const D = lastNDates(range, tz)
-  const abs = D.map((d) => { const v = absolute1RM(db.maxes, client.id, lift, d); return v != null ? toDisp(v) : null })
-  const tm = D.map((d) => { const v = trainingMaxKg(db.maxes, client.id, lift, d); return v != null ? toDisp(v) : null })
-  const intMap = dailySum(db.srpe, client.id, 'tl')
-  const acwr = acwrSeries(intMap, D)
-  const loads = D.map((d) => intMap[d] || 0)
-  const strain = D.map((_, i) => trainingStrain(loads.slice(Math.max(0, i - 6), i + 1)))
-  const mono = D.map((_, i) => trainingMonotony(loads.slice(Math.max(0, i - 6), i + 1)))
-  const strainMax = Math.max(...strain, 1)
-  // Normalised into the ACWR axis so the bars sit along the basement floor.
-  const strainBars = strain.map((s) => +(s / strainMax * 0.5).toFixed(3))
+  const own = records.filter((m) => m.exercise.toLowerCase() === lift.toLowerCase())
+  const estimates = own.filter((m) => m.kind === 'e1rm' && m.source === 'auto').sort((a, b) => a.date.localeCompare(b.date))
+  const entered = own.filter((m) => m.kind === 'e1rm' && m.source !== 'auto')
+  const tm = own.filter((m) => m.kind === 'tm')
+  const firstEstimate = estimates[0]
+  const lastEstimate = estimates.at(-1)
+  const lastEntered = newest(entered)
+  const lastTm = newest(tm)
+  const change = firstEstimate && lastEstimate && firstEstimate.id !== lastEstimate.id
+    ? +(lastEstimate.valueKg - firstEstimate.valueKg).toFixed(1) : null
 
-  const latestAbs = [...abs].reverse().find((v) => v != null)
-  const latestTm = [...tm].reverse().find((v) => v != null)
+  const opts = baseOptions()
+  opts.plugins.legend.display = false
+  opts.scales.y.title = { display: true, text: unitName() }
 
   return (
-    <div className="card">
-      <div className="flex between" style={{ flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <div className="section-title" style={{ margin: 0 }}>Strength — Absolute 1RM vs Training Max</div>
-        <div className="flex gap" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <SegToggle options={SPAN} value={range} onChange={setRange} ariaLabel="Strength date range" />
-          <select value={lift} aria-label="Lift" onChange={(e) => setLift(e.target.value)} style={{ width: 'auto' }}>
-            {lifts.map((l) => <option key={l}>{l}</option>)}
-          </select>
-        </div>
+    <div className="card progress-strength">
+      <div className="progress-section-head">
+        <div><h2>Strength</h2><p className="muted">Estimated values from completed sets, coach entries, and programming maxes have separate sources.</p></div>
+        <label className="progress-lift-select">Lift <select value={lift} onChange={(e) => setSelected(e.target.value)}>{lifts.map((name) => <option key={name} value={name}>{name}</option>)}</select></label>
       </div>
-      <div className="muted" style={{ fontSize: 12, margin: '6px 0' }}>
-        Absolute 1RM {latestAbs != null ? `${latestAbs} ${unitName()}` : '—'} · Training Max {latestTm != null ? `${latestTm} ${unitName()}` : '—'} ·
-        green band = ACWR sweet spot (0.8–1.3), red wash = &gt;1.5 injury-risk zone · floor bars = weekly strain
+      <div className="progress-metric-grid">
+        <div className="progress-metric"><span>Latest estimated 1RM</span><strong>{lastEstimate ? fmtWt(lastEstimate.valueKg) : '—'}</strong><small>{lastEstimate ? `Epley from completed set · ${fmtDate(lastEstimate.date)}` : 'No completed-set estimate'}</small></div>
+        <div className="progress-metric"><span>Latest coach-entered 1RM</span><strong>{lastEntered ? fmtWt(lastEntered.valueKg) : '—'}</strong><small>{lastEntered ? `Coach entry · ${fmtDate(lastEntered.date)} · test status not recorded` : 'No coach entry'}</small></div>
+        <div className="progress-metric"><span>Training max checkpoint</span><strong>{lastTm ? fmtWt(lastTm.valueKg) : '—'}</strong><small>{lastTm ? `${fmtDate(lastTm.date)} · ${lastTm.source === 'block-start' ? 'block start' : lastTm.source || 'recorded'}` : 'No explicit checkpoint'}</small></div>
       </div>
-      <div style={{ height: 240 }}>
-        <Chart
-          type="bar"
-          plugins={[acwrBands]}
-          data={{
-            labels: D.map(shortLabel),
-            datasets: [
-              { type: 'line', label: `Absolute 1RM (${unitName()})`, data: abs, yAxisID: 'y', stepped: 'before', borderColor: COLORS.green, backgroundColor: 'rgba(61,220,151,.1)', pointRadius: 0, spanGaps: true, borderWidth: 2.5, order: 1 },
-              { type: 'line', label: `Training Max (${unitName()})`, data: tm, yAxisID: 'y', borderColor: COLORS.blue, borderDash: [6, 4], pointRadius: 0, spanGaps: true, borderWidth: 1.5, order: 2 },
-              { type: 'line', label: 'ACWR', data: acwr, yAxisID: 'y1', borderColor: COLORS.amber, pointRadius: 0, spanGaps: true, borderWidth: 1.2, order: 3 },
-              { type: 'bar', label: 'Strain (scaled)', data: strainBars, yAxisID: 'y1', backgroundColor: 'rgba(139,149,165,.4)', barPercentage: 0.6, order: 4 },
-            ],
-          }}
-          options={{
-            ...baseOptions(),
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-              legend: { labels: { color: TEXT, boxWidth: 12, font: { size: 11 } } },
-              tooltip: { callbacks: { afterBody: (items) => { const i = items[0]?.dataIndex; return i != null ? `Strain ${strain[i].toLocaleString()} · Monotony ${mono[i]}` : '' } } },
-            },
-            scales: {
-              x: { grid: { color: GRID }, ticks: { color: TEXT, maxTicksLimit: 8, font: { size: 9 } } },
-              y: { position: 'left', title: { display: true, text: `Load (${unitName()})`, color: COLORS.green, font: { size: 10 } }, grid: { color: GRID }, ticks: { color: TEXT } },
-              y1: { position: 'right', min: 0, max: 2, title: { display: true, text: 'Workload (ACWR)', color: COLORS.amber, font: { size: 10 } }, grid: { drawOnChartArea: false }, ticks: { color: TEXT } },
-            },
-          }}
-        />
-      </div>
+      {estimates.length >= 2 ? <>
+        <div className="progress-compare-line"><Icon name="chart" size={15} /> Estimated 1RM: {fmtWt(firstEstimate.valueKg)} on {fmtDate(firstEstimate.date)} → {fmtWt(lastEstimate.valueKg)} on {fmtDate(lastEstimate.date)} <b>({change > 0 ? '+' : ''}{toDisp(change)} {unitName()})</b></div>
+        <div className="progress-chart"><Line data={{ labels: estimates.map((m) => shortLabel(m.date)), datasets: [{ label: `Estimated 1RM (${unitName()})`, data: estimates.map((m) => toDisp(m.valueKg)), borderColor: COLORS.blue, backgroundColor: 'rgba(11,135,201,.09)', fill: true, tension: 0.15, pointRadius: 5 }] }} options={opts} /></div>
+      </> : <p className="progress-footnote">{lastEstimate ? 'One estimate recorded. A second dated estimate will show change over time.' : 'No estimated 1RM for this lift. Complete a main-lift set to create one.'}</p>}
+      <p className="progress-footnote">The training max is a programming checkpoint; it is not an observed test result. The chart shows estimated 1RM only, in {unitName()}.</p>
     </div>
   )
 }

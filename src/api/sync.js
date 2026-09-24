@@ -9,11 +9,11 @@ const stripOwner = (rows) => rows.map(({ coachId: _own, ...r }) => r)
 const byId = (arr) => Object.fromEntries((arr || []).map((r) => [r.id, r]))
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 
-export async function fetchAll() {
+export async function fetchAll(client = supabase) {
   const db = {}
   const loadIssues = []
   for (const t of TABLES) {
-    const { data, error } = await supabase.from(t).select('*')
+    const { data, error } = await client.from(t).select('*')
     // Be resilient to a table that hasn't been migrated yet (e.g. workouts before
     // schema_workouts.sql is applied) — fall back to empty instead of breaking load,
     // but record the failure so the UI can surface it (a missing table means those
@@ -21,7 +21,7 @@ export async function fetchAll() {
     if (error) { console.warn('fetch', t, 'failed:', error.message); db[t] = []; loadIssues.push({ table: t, message: error.message }); continue }
     db[t] = stripOwner(data || [])
   }
-  const { data: s } = await supabase.from('settings').select('*').maybeSingle()
+  const { data: s } = await client.from('settings').select('*').maybeSingle()
   const { coachId: _own, ...settings } = s || {}
   db.settings = { trainerName: '', businessName: '', units: 'kg', tz: '', ...settings }
   // defensive defaults so pure calc never sees undefined nested fields
@@ -38,18 +38,18 @@ export async function fetchAll() {
 // Returns the tables whose write (upsert/delete) failed — usually a missing
 // column or table — so the UI can surface that a change wasn't saved instead of
 // failing silently. An empty array means everything persisted.
-export async function persistDiff(prev, next) {
+export async function persistDiff(prev, next, client = supabase) {
   const issues = []
   for (const t of TABLES) {
     const a = byId(prev[t]), b = byId(next[t])
     const ups = (next[t] || []).filter((r) => !a[r.id] || !eq(a[r.id], r))
     const dels = (prev[t] || []).filter((r) => !b[r.id]).map((r) => r.id)
-    if (ups.length) { const { error } = await supabase.from(t).upsert(ups); if (error) { console.error(t, 'upsert', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
-    if (dels.length) { const { error } = await supabase.from(t).delete().in('id', dels); if (error) { console.error(t, 'delete', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
+    if (ups.length) { const { error } = await client.from(t).upsert(ups); if (error) { console.error(t, 'upsert', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
+    if (dels.length) { const { error } = await client.from(t).delete().in('id', dels); if (error) { console.error(t, 'delete', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
   }
   if (!eq(prev.settings, next.settings)) {
-    const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await supabase.from('settings').upsert({ coachId: user.id, ...next.settings })
+    const { data: { user } } = await client.auth.getUser()
+    const { error } = await client.from('settings').upsert({ coachId: user.id, ...next.settings })
     if (error) { console.error('settings', error); issues.push({ table: 'settings', message: error.message, kind: 'write' }) }
   }
   return issues

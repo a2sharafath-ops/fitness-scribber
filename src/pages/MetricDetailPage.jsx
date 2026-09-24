@@ -1,35 +1,28 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import Avatar from '../components/atoms/Avatar'
-import Button from '../components/atoms/Button'
+import { Link, useParams, useLocation, Navigate } from 'react-router-dom'
 import SegToggle from '../components/molecules/SegToggle'
 import ReadinessBreakdown from '../components/organisms/metrics/ReadinessBreakdown'
-import AcwrBreakdown from '../components/organisms/metrics/AcwrBreakdown'
-import MonotonyBreakdown from '../components/organisms/metrics/MonotonyBreakdown'
-import StrainBreakdown from '../components/organisms/metrics/StrainBreakdown'
 import SrpeTlBreakdown from '../components/organisms/metrics/SrpeTlBreakdown'
 import { useData } from '../store/DataContext'
 
 const METRICS = {
-  readiness: { title: 'Readiness', icon: '🟢', sub: 'Composite of subjective wellness and HRV deviation', Comp: ReadinessBreakdown },
-  srpetl: { title: 'sRPE-TL', icon: '🎚️', sub: 'Session load — RPE × duration (AU)', Comp: SrpeTlBreakdown },
-  acwr: { title: 'ACWR', icon: '⚖️', sub: 'Acute : chronic workload ratio', Comp: AcwrBreakdown },
-  monotony: { title: 'Monotony', icon: '📉', sub: 'Day-to-day sameness of training load', Comp: MonotonyBreakdown },
-  strain: { title: 'Strain', icon: '🔥', sub: 'Weekly load amplified by monotony', Comp: StrainBreakdown },
+  readiness: { title: 'Readiness', sub: 'Dated app summary of available wellness and HRV inputs; not clearance', Comp: ReadinessBreakdown },
+  srpetl: { title: 'sRPE-TL', sub: 'Session load — RPE × duration (AU)', Comp: SrpeTlBreakdown },
 }
 
 export default function MetricDetailPage() {
   const { id, metric } = useParams()
-  const nav = useNavigate()
+  const { search, hash } = useLocation()
   const { db } = useData()
   const [range, setRange] = useState(28)
   const c = db.clients.find((x) => x.id === id)
   const m = METRICS[metric]
 
-  if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
+  if (!c) return <Link className="btn ghost back" to="/clients">← Clients</Link>
+  if (['acwr', 'monotony', 'strain'].includes(metric)) return <Navigate to={`/clients/${id}/check-ins?view=load${search ? `&${search.slice(1)}` : ''}${hash}`} replace />
   if (!m) return (
     <>
-      <button className="back" onClick={() => nav('/clients/' + id)}>← Back</button>
+      <Link className="back" to={`/clients/${id}`}>← Back</Link>
       <div className="empty" style={{ padding: 40 }}><div className="big">❓</div>Unknown metric.</div>
     </>
   )
@@ -37,15 +30,9 @@ export default function MetricDetailPage() {
   const { Comp } = m
   return (
     <>
-      <button className="back" onClick={() => nav('/command/' + c.id)}>← Back to Load &amp; Strength</button>
+      <Link className="back" to={`/clients/${c.id}/check-ins`}>← Back to Check-ins &amp; load</Link>
       <div className="topbar">
-        <div className="flex gap">
-          <Avatar name={c.name} size={44} />
-          <div>
-            <h1>{m.icon} {m.title}</h1>
-            <div className="sub">{c.name} · {m.sub}</div>
-          </div>
-        </div>
+        <div><h1>{m.title}</h1><div className="sub">{c.name} · {m.sub}</div></div>
         <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '12 wk']]} value={range} onChange={setRange} ariaLabel="Date range" />
       </div>
 
