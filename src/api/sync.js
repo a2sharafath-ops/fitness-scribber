@@ -12,6 +12,8 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 export async function fetchAll(client = supabase) {
   const db = {}
   const loadIssues = []
+  const { data: { user } } = await client.auth.getUser()
+  if (!user?.id) throw new Error('Your sign-in expired. Please sign in again before loading data.')
   for (const t of TABLES) {
     const { data, error } = await client.from(t).select('*')
     // Be resilient to a table that hasn't been migrated yet (e.g. workouts before
@@ -30,7 +32,7 @@ export async function fetchAll(client = supabase) {
     if (c.monitorOptIn == null) c.monitorOptIn = false
   })
   // Blocks upgrade for rows written before schema_program.sql was applied.
-  ensureProgramShape(db)
+  ensureProgramShape(db, user.id)
   if (loadIssues.length) db._loadIssues = loadIssues
   return db
 }

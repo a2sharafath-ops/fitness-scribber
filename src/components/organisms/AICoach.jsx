@@ -19,7 +19,7 @@ function suggest(db, client, tz, fmtVL) {
 
   if (w) out.push({ t: 'info', h: 'Latest wellness check-in', m: `${fmtDay(w.date)} · ${w.source || 'source not recorded'}. Sleep ${w.sleep ?? 'missing'}/7, stress ${w.stress ?? 'missing'}/7, fatigue ${w.fatigue ?? 'missing'}/7, soreness ${w.soreness ?? 'missing'}/7. Review alongside the client's report and plan.` })
   else out.push({ t: 'info', h: 'Wellness not recorded', m: 'There is no wellness check-in to interpret. Ask the client how they feel before using readiness in a training decision.' })
-  if (hr) out.push({ t: 'info', h: 'Latest wearable observation', m: `${fmtDay(hr.date)} · ${hr.source || 'source not recorded'}. HRV ${hr.hrv ?? 'missing'} ms. Compare with the dated personal baseline in Check-ins & load.` })
+  if (hr) out.push({ t: 'info', h: 'Latest wearable observation', m: `${fmtDay(hr.date)} · ${hr.source || 'source not recorded'}. HRV ${hr.hrv ?? 'missing'} ms. Compare with the dated personal baseline in Check-ins.` })
   if (upcoming) {
     out.push({ t: 'info', h: 'Session drafted', m: `${fmtDay(upcoming.date)}: ${upStats.exercises} exercise(s), ~${fmtVL(Math.round(planVL))} planned volume load. Compare with the client's recent sessions and check-in before confirming.` })
   }

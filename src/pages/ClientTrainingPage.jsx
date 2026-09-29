@@ -44,7 +44,7 @@ export default function ClientTrainingPage() {
         <div><h1>Training</h1><div className="sub">Plan sessions, record actual work, and review history.</div></div>
         {!logging && <div className="flex gap">
           <Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>
-          <Link className="btn ghost sm" to={`/clients/${id}/check-ins`}>Check-ins &amp; load</Link>
+          <Link className="btn ghost sm" to={`/clients/${id}/check-ins`}>Check-ins</Link>
         </div>}
       </div>
 

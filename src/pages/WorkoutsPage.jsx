@@ -6,13 +6,20 @@ import ExerciseThumb from '../components/molecules/ExerciseThumb'
 import { ExerciseForm, PlanForm } from '../components/organisms/forms/WorkoutForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
-
-const DIFF_COLOR = { Beginner: 'green', Intermediate: 'orange', Advanced: 'red' }
+import { muscleTargets } from '../lib/muscleVolume'
 
 export default function WorkoutsPage() {
   const { db } = useData()
   const { openModal } = useModal()
   const [tab, setTab] = useState('plans')
+  const [search, setSearch] = useState('')
+  const [mappingFilter, setMappingFilter] = useState('all')
+  const mappingState = (e) => e.mode === 'SMR' || e.mode === 'Stretch' ? 'mobility' : muscleTargets(e).direct.length ? 'mapped' : 'review'
+  const visibleExercises = db.exercises.filter((e) =>
+    (!search || `${e.name} ${e.muscle} ${muscleTargets(e).direct.join(' ')} ${muscleTargets(e).indirect.join(' ')}`.toLowerCase().includes(search.toLowerCase())) &&
+    (mappingFilter === 'all' || mappingState(e) === mappingFilter))
+  const mappedCount = db.exercises.filter((e) => mappingState(e) === 'mapped').length
+  const reviewCount = db.exercises.filter((e) => mappingState(e) === 'review').length
   const exName = (id) => db.exercises.find((e) => e.id === id)?.name || '?'
   const exMuscle = (id) => db.exercises.find((e) => e.id === id)?.muscle || ''
 
@@ -54,20 +61,24 @@ export default function WorkoutsPage() {
         </div>
       ) : (
         <div className="card" style={{ padding: 0 }}>
-          <table>
-            <thead><tr><th>Demo</th><th>Exercise</th><th>Muscle group</th><th>Equipment</th><th>Difficulty</th><th /></tr></thead>
+          <div className="exercise-library-tools"><div><h2>Exercise muscles</h2><p>{mappedCount} mapped · {reviewCount} need review. Direct and assisting labels describe movement roles, not measured muscle force.</p></div><label>Find exercise<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name or muscle" /></label><label>Show<select value={mappingFilter} onChange={(e) => setMappingFilter(e.target.value)}><option value="all">All exercises</option><option value="mapped">Mapped</option><option value="review">Needs review</option><option value="mobility">Mobility</option></select></label></div>
+          <div className="exercise-library-scroll" role="region" aria-label="Exercise library; scroll horizontally for more columns" tabIndex={0}><table>
+            <caption className="sr-only">Exercise library muscle assignments</caption>
+            <thead><tr><th scope="col">Demo</th><th scope="col">Exercise</th><th scope="col">Direct muscles</th><th scope="col">Assisting muscles</th><th scope="col">Equipment</th><th scope="col">Mapping</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>
-              {db.exercises.map((e) => (
+              {visibleExercises.map((e) => (
                 <tr key={e.id}>
                   <td style={{ width: 110 }}><ExerciseThumb exercise={e} size="sm" /></td>
-                  <td><strong>{e.name}</strong></td>
-                  <td><Tag color="gray">{e.muscle}</Tag></td>
+                  <th scope="row"><strong>{e.name}</strong></th>
+                  <td>{muscleTargets(e).direct.join(', ') || '—'}</td>
+                  <td>{muscleTargets(e).indirect.join(', ') || '—'}</td>
                   <td className="muted">{e.equip}</td>
-                  <td><Tag color={DIFF_COLOR[e.difficulty] || 'gray'}>{e.difficulty || '—'}</Tag></td>
+                  <td>{mappingState(e) === 'mobility' ? 'Mobility · no working-set mapping' : mappingState(e) === 'review' ? 'Needs review' : e.muscleTargets?.source === 'coach' ? 'Coach edited' : e.muscleTargets?.source === 'catalog' ? 'Catalog mapping' : 'Mapped'}</td>
                   <td style={{ textAlign: 'right' }}><Button variant="ghost" size="sm" onClick={() => openModal(<ExerciseForm exercise={e} />)}>Edit</Button></td></tr>
               ))}
+              {!visibleExercises.length && <tr><td colSpan={7}>No exercises match this filter.</td></tr>}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </>

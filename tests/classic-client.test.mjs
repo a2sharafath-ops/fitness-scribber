@@ -10,13 +10,17 @@ after(() => vite.close())
 const load = (path) => vite.ssrLoadModule(`/src/${path}`)
 const { TABLES } = await load('lib/supabase.js')
 const { fetchAll, persistDiff } = await load('api/sync.js')
-const { clientSectionPath, assessmentCanonicalPath } = await load('lib/clientRoutes.js')
+const { clientSectionPath, loadProgressPath, assessmentCanonicalPath } = await load('lib/clientRoutes.js')
 const { logWorkoutCheckin, completeClassicWorkout } = await load('lib/classicWorkflow.js')
 const { saveAssessmentRecord } = await load('lib/assessmentWrite.js')
 const { getWorkoutDraft, setWorkoutDraft, clearWorkoutDraft } = await load('lib/workoutDraft.js')
 const { removeWorkoutStrength, absolute1RM } = await load('lib/program.js')
 const { dailySum, dayMetrics, readinessFor } = await load('lib/calc.js')
 const { forClient, formalAssessments } = await load('lib/assessment.js')
+const { compareToObservedBand, observedReferenceBand, trailingObservedBands } = await load('lib/progress.js')
+const { performedLiftHistory, performedLiftOptions } = await load('lib/performedLifts.js')
+const { loadResponseRows, pairedResponsePoints, responseSeries } = await load('lib/loadResponse.js')
+const { addDays, todayISO } = await load('lib/dates.js')
 const { DataProvider } = await load('store/DataContext.jsx')
 const { default: ClientLayout } = await load('components/templates/ClientLayout.jsx')
 const { default: SchemaWarning } = await load('components/organisms/SchemaWarning.jsx')
@@ -111,6 +115,8 @@ function renderRoutedSection(path, db) {
 test('legacy and assessment routes preserve client, query, and anchor', () => {
   assert.equal(clientSectionPath('a', 'training', '?date=2026-09-24', '#session'), '/clients/a/training?date=2026-09-24#session')
   assert.equal(clientSectionPath('b', 'check-ins', '?view=load', '#history'), '/clients/b/check-ins?view=load#history')
+  assert.equal(loadProgressPath('b', '?view=load&range=28', '#history'), '/clients/b/progress?range=28#history')
+  assert.equal(loadProgressPath('b', '?tab=objective'), '/clients/b/progress#training-load')
   assert.equal(assessmentCanonicalPath('a', 'goals', '/clients/a/assessments/goals', '?x=1', '#record'), '/clients/a/profile/goals?x=1#record')
   assert.equal(assessmentCanonicalPath('a', 'fitness', '/clients/a/profile/fitness', '', '#history'), '/clients/a/assessments/fitness#history')
   assert.equal(assessmentCanonicalPath('a', 'fitness', '/clients/a/assessments/fitness'), null)
@@ -136,7 +142,7 @@ test('all six routed Classic sections render for the selected client', () => {
     ['/clients/a', 'Overview'],
     ['/clients/a/training?date=2026-09-24', 'Training'],
     ['/clients/a/progress', 'Progress'],
-    ['/clients/a/check-ins?view=wellness', 'Check-ins &amp; load'],
+    ['/clients/a/check-ins?view=wellness', 'Check-ins'],
     ['/clients/a/assessments', 'Assessments'],
     ['/clients/a/profile', 'Profile'],
   ]) {
@@ -206,6 +212,7 @@ test('backend load surfaces missing tables; diff writes only changed rows and re
   const loaded = await fetchAll(client)
   assert.equal(loaded.clients[0].coachId, undefined)
   assert.deepEqual(loaded._loadIssues, [{ table: 'wearable', message: 'missing table' }])
+  assert.equal(loaded.exercises.find((exercise) => exercise.name === 'Bench Press').id, 'catalog:coach:strength:bench%20press')
   const prev = fixture()
   const next = structuredClone(prev)
   next.wellness.push({ id: 'w1', clientId: 'a', date: '2026-09-24', score: 20 })
@@ -218,15 +225,163 @@ test('backend load surfaces missing tables; diff writes only changed rows and re
 test('empty Check-ins and Progress views disclose missing observations for the selected client', () => {
   const db = fixture()
   const wellness = renderClientPage('/clients/a/check-ins', db, MonitorPage)
-  const load = renderClientPage('/clients/a/check-ins?view=load', db, MonitorPage)
-  const progress = renderClientPage('/clients/a/progress', db, ClientProgressPage)
+  const load = renderClientPage('/clients/a/progress#training-load', db, ClientProgressPage)
+  const outcomes = renderClientPage('/clients/a/progress#outcomes', db, ClientProgressPage)
   assert.match(wellness, /No wellness observations yet/)
   assert.match(wellness, /No check-in or wearable reading recorded yet/)
-  assert.match(load, /No session effort recorded yet/)
-  assert.match(load, /Blank days are unlogged/)
-  assert.match(progress, /No body composition assessment yet/)
-  assert.match(progress, /No formal fitness assessment yet/)
-  assert.doesNotMatch(wellness + load + progress, /Blair/)
+  assert.doesNotMatch(wellness, /Training load/)
+  assert.match(load, /Load response/)
+  assert.match(load, /No recorded values for this selection/)
+  assert.match(load, /No session RPE in the past 28 days/)
+  assert.equal((load.match(/Not available/g) || []).length, 3)
+  assert.equal((load.match(/<small class="progress-derived-trend">— No comparison<\/small>/g) || []).length, 3)
+  assert.match(load, /Unlogged days are unknown/)
+  assert.doesNotMatch(load, /Data coverage/)
+  assert.doesNotMatch(load, /No body composition assessment yet/)
+  assert.match(outcomes, /No body composition assessment yet/)
+  assert.match(outcomes, /No formal fitness assessment yet/)
+  assert.doesNotMatch(outcomes, /Load response/)
+  assert.doesNotMatch(wellness + load + outcomes, /Blair/)
+})
+
+test('load cards keep comparison short while exposing sparse and stale details to assistive technology', () => {
+  const date = todayISO('UTC')
+  const sparse = fixture()
+  sparse.srpe.push({ id: 'a-one', clientId: 'a', date, rpe: 5, duration: 30, tl: 150, source: 'Coach manual' })
+  const sparsePage = renderClientPage('/clients/a/progress#training-load', sparse, ClientProgressPage)
+  assert.match(sparsePage, /Not available/)
+  assert.match(sparsePage, /1\/3 positive-load days needed by the existing 28-day calculation/)
+  assert.match(sparsePage, /1\/7 days logged; other days unconfirmed/)
+  assert.match(sparsePage, /<small class="progress-derived-trend">— Baseline unavailable<\/small>/)
+
+  const zero = fixture()
+  zero.srpe.push({ id: 'a-zero', clientId: 'a', date, rpe: 0, duration: 30, tl: 0, source: 'Coach manual' })
+  const zeroPage = renderClientPage('/clients/a/progress#training-load', zero, ClientProgressPage)
+  assert.equal((zeroPage.match(/Not available/g) || []).length, 3)
+  assert.match(zeroPage, /No variation in the 7-day daily loads/)
+  assert.match(zeroPage, /7-day monotony is unavailable/)
+
+  const stale = fixture()
+  stale.srpe.push({ id: 'a-old', clientId: 'a', date: addDays(date, -30), rpe: 5, duration: 30, tl: 150, source: 'Coach manual' })
+  const stalePage = renderClientPage('/clients/a/progress#training-load', stale, ClientProgressPage)
+  assert.equal((stalePage.match(/Not available/g) || []).length, 3)
+  assert.match(stalePage, /No session RPE in the past 28 days/)
+})
+
+test('Progress owns dated load history and excludes another client', () => {
+  const db = fixture()
+  db.srpe.push(
+    { id: 'a-load', clientId: 'a', date: '2026-09-24', rpe: 5, duration: 30, tl: 150, source: 'Coach manual' },
+    { id: 'b-load', clientId: 'b', date: '2026-09-23', rpe: 10, duration: 90, tl: 900, source: 'Blair-only source' },
+  )
+  const progress = renderClientPage('/clients/a/progress', db, ClientProgressPage)
+  const load = renderClientPage('/clients/a/progress#training-load', db, ClientProgressPage)
+  for (const section of ['strength', 'training-load', 'outcomes', 'attendance']) {
+    assert.match(progress, new RegExp(`role="tab" id="${section}"`))
+    assert.match(progress, new RegExp(`id="progress-panel-${section}"`))
+  }
+  assert.equal((progress.match(/id="training-load"/g) || []).length, 1)
+  assert.match(progress, /id="strength" aria-selected="true"/)
+  assert.match(load, /id="training-load" aria-selected="true"/)
+  assert.match(load, /150 AU/)
+  assert.match(load, /Coach manual/)
+  assert.match(load, /Load calculations/)
+  assert.doesNotMatch(load, /Muscle volume|Assign muscles/)
+  assert.match(load, /<details class="load-response-settings"><summary>/)
+  assert.match(load, /Customize chart/)
+  assert.match(load, /X-axis<select/)
+  assert.equal((load.match(/class="progress-derived-card"/g) || []).length, 3)
+  assert.match(load, /ACWR/)
+  assert.match(load, /Monotony/)
+  assert.match(load, /Strain/)
+  assert.doesNotMatch(load, /Show dated table view/)
+  assert.ok(load.indexOf('Load calculations') < load.indexOf('Load response'))
+  assert.match(load, /Open ACWR graph and table/)
+  assert.doesNotMatch(load, /Advanced load calculations/)
+  assert.doesNotMatch(load, /900 AU|Blair-only source/)
+  assert.doesNotMatch(progress, /150 AU|No body composition assessment yet/)
+  assert.match(renderClientPage('/clients/a/progress#history', db, ClientProgressPage), /150 AU/)
+  const completion = renderClientPage('/clients/a/progress#attendance', db, ClientProgressPage)
+  assert.match(completion, /Booked session completion/)
+  assert.doesNotMatch(completion, /150 AU|No body composition assessment yet/)
+  const srpeDetail = renderRoutedSection('/clients/a/metric/srpetl', db)
+  assert.match(srpeDetail, /Back to Training load/)
+  assert.match(srpeDetail, /href="\/clients\/a\/progress#training-load"/)
+})
+
+test('Strength selects only this client’s completed lifts and groups recorded work', () => {
+  const db = fixture()
+  db.workouts.push(
+    { id: 'done-a', clientId: 'a', date: '2026-09-24', status: 'completed', main: [
+      { name: 'Power Clean', blockType: 'Main Lifts', setRows: [{ done: true, load: 50, reps: 3 }, { done: false, load: 60, reps: 2 }] },
+      { name: 'Bench Press', blockType: 'Main Lifts', setRows: [{ done: true, load: 75, reps: 5 }] },
+      { name: 'Cable Curl', blockType: 'Assisted', setRows: [{ done: true, load: 12, reps: 10 }] },
+      { name: 'Deadlift', blockType: 'Main Lifts', setRows: [{ done: false, load: 100, reps: 5 }] },
+    ] },
+    { id: 'planned-a', clientId: 'a', date: '2026-09-25', status: 'suggested', main: [{ name: 'Snatch', done: true }] },
+    { id: 'done-b', clientId: 'b', date: '2026-09-24', status: 'completed', main: [{ name: 'Blair Lift', done: true, doneWeight: 90, doneReps: 5 }] },
+  )
+  db.resistance.push({ id: 'r-a', clientId: 'a', date: '2026-09-23', exercise: 'Lateral Raise', sets: 3, reps: 12, weight: 8, source: 'Coach manual' })
+  db.maxes.push({ id: 'manual-a', clientId: 'a', date: '2026-09-24', exercise: 'Unperformed Lift', kind: 'e1rm', valueKg: 120, source: 'manual' })
+  const options = performedLiftOptions(db, 'a')
+  assert.deepEqual(options, [
+    { name: 'Power Clean', group: 'Power Ballistic' },
+    { name: 'Bench Press', group: 'Main Lift' },
+    { name: 'Cable Curl', group: 'Accessory Lifts' },
+    { name: 'Lateral Raise', group: 'Accessory Lifts' },
+  ])
+  assert.deepEqual(performedLiftHistory(db, 'a').filter((row) => row.name === 'Power Clean').map(({ loadKg, reps, sets }) => ({ loadKg, reps, sets })), [{ loadKg: 50, reps: 3, sets: 1 }])
+  const html = renderClientPage('/clients/a/progress', db, ClientProgressPage)
+  assert.match(html, /Performed lift <select/)
+  assert.match(html, /<optgroup label="Power Ballistic">/)
+  assert.match(html, /<optgroup label="Main Lift">/)
+  assert.match(html, /<optgroup label="Accessory Lifts">/)
+  const selector = html.match(/<label class="progress-lift-select">[\s\S]*?<\/label>/)?.[0]
+  assert.doesNotMatch(selector, /Unperformed Lift|Blair Lift/)
+  assert.match(html, /Unperformed Lift.*1RM record only/)
+  assert.doesNotMatch(html, /Blair Lift|Track lift|Lift to track/)
+})
+
+test('load graph band uses earlier observed values and withholds sparse baselines', () => {
+  assert.equal(observedReferenceBand([1, 2, 3]), null)
+  assert.deepEqual(observedReferenceBand([1, 2, 3, 4]), { lower: 1.75, upper: 3.25, count: 4 })
+  assert.deepEqual(observedReferenceBand([4, null, 1, 3, 2]), { lower: 1.75, upper: 3.25, count: 4 })
+  const observations = [1, 2, 3, 4, 100].map((value, index) => ({ date: `2026-09-${String(index + 1).padStart(2, '0')}`, value }))
+  const bands = trailingObservedBands(observations, 'value', ['2026-09-04', '2026-09-05'])
+  assert.equal(bands[0], null, 'current and future observations must not define a past baseline')
+  assert.deepEqual(bands[1], { lower: 1.75, upper: 3.25, count: 4 })
+  assert.deepEqual(trailingObservedBands(observations, 'value', ['2026-09-05'])[0], bands[1], 'displayed date range must not change a dated baseline')
+  assert.equal(compareToObservedBand(4, bands[1]), 'above')
+  assert.equal(compareToObservedBand(1, bands[1]), 'below')
+  assert.equal(compareToObservedBand(2, bands[1]), 'within')
+  assert.equal(compareToObservedBand(3.25, bands[1]), 'within')
+  assert.equal(compareToObservedBand(4, null), 'unavailable')
+  assert.equal(compareToObservedBand(null, bands[1]), 'unavailable')
+})
+
+test('Load response aligns same-day metrics and rolling means preserve missing dates', () => {
+  const db = fixture()
+  db.srpe.push(
+    { id: 'a1', clientId: 'a', date: '2026-09-01', tl: 100, rpe: 5, duration: 20, source: 'Coach manual' },
+    { id: 'a2', clientId: 'a', date: '2026-09-03', tl: 200, rpe: 10, duration: 20, source: 'Workout completion' },
+    { id: 'b1', clientId: 'b', date: '2026-09-03', tl: 900, rpe: 10, duration: 90, source: 'Blair only' },
+  )
+  db.wearable.push(
+    { id: 'h1', clientId: 'a', date: '2026-09-03', hrv: 50, source: 'Manual wearable' },
+    { id: 'h2', clientId: 'a', date: '2026-09-05', hrv: 60, source: 'Manual wearable' },
+  )
+  const rows = loadResponseRows(db, 'a', '2026-09-05', 5)
+  const load = responseSeries(rows, 'load')
+  const rolling = responseSeries(rows, 'load', 7)
+  const hrv = responseSeries(rows, 'hrv')
+  assert.deepEqual(load.map((point) => point.value), [100, null, 200, null, null])
+  assert.deepEqual(rolling.map((point) => point.value), [100, null, 150, null, null])
+  assert.equal(rolling[2].count, 2)
+  assert.deepEqual(pairedResponsePoints(rows, load, hrv).map((point) => ({ date: point.date, x: point.x, y: point.y })), [
+    { date: '2026-09-03', x: 200, y: 50 },
+  ])
+  assert.doesNotMatch(JSON.stringify(rows), /900|Blair only/)
+  assert.equal(rows[2].sources.load, 'Workout completion')
 })
 
 test('check-in and workout completion write dated source, load, and client-specific strength history', () => {

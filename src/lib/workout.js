@@ -166,6 +166,7 @@ export function buildFromPlan(plan, exercises, { clientId, date }) {
     return {
       id: uid(),
       name: exName(it),
+      exId: it.exId || null,
       sets: +it.sets || 3,
       reps: timed ? '' : String(it.reps ?? '10'),
       duration: timed ? String(it.reps) : null,

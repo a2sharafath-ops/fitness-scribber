@@ -16,8 +16,9 @@ bun run lint     # oxlint
 ## Features
 
 - **Dashboard** — KPIs plus a streamlined, risk-sorted *Squad Readiness & Workload* board (Readiness, ACWR, Wellness, Concerns) and a bulk morning check-in.
-- **Command Center** (`/command/:id`) — two-column workspace: a configurable **Load-Response dashboard** (X/Y metric toggles, rolling-average windows, dual-axis charts, ACWR), a **Workout Planner** (prescription modal with auto Volume Load, supersets, copy-last-session and templates), and a pinned **rule-based AI coaching assistant**. A click-to-open off-canvas **profile panel** holds anthropometrics + intake/history.
-- **Athlete Monitor** (`/monitor/:id`) — Readiness Matrix (color-coded quadrants), Hooper Index & Session-RPE logs, resistance/conditioning logs, and opt-in wearable tracking with 30-day baselines.
+- **Classic client workspace** (`/clients/:id`) — Overview, Training, Progress, Check-ins, Assessments, and Profile share one client identity and navigation.
+- **Progress** (`/clients/:id/progress`) — strength and assessment outcomes, training load (session RPE, resistance and conditioning history), and booked-session completion. Derived load measures show their data windows and missingness.
+- **Check-ins** (`/clients/:id/check-ins`) — wellness, concerns, and opt-in wearable observations, with dated sources and missing values shown explicitly.
 - **Clients, Workouts, Schedule, Progress, Concerns, Settings** — full CRUD.
 - **Units** (kg/lb) and **timezone-aware** day boundaries.
 - **Reporting** — CSV export and a printable athlete report (Save as PDF).
@@ -36,11 +37,12 @@ src/
   components/
     atoms/       Avatar, Tag, Shape, Button, Card, Kpi, ProgressBar, Field, RangeSlider
     molecules/   StatCard, ReadinessTag, ConcernCard, SegToggle, AnthroCell, ModalShell
-    organisms/   Sidebar, LoadResponseDashboard, WorkoutPlanner, AICoach, ReadinessMatrix,
-                 ProfilePanel, PrescriptionModal, forms/*
-    templates/   AppLayout
-  pages/       one component per route (Dashboard, Clients, ClientDetail, CommandCenter,
-               Monitor, Workouts, Schedule, Progress, Concerns, Settings, Report)
+    organisms/   Sidebar, ClientTrainingLoad, StrengthDashboard, WorkoutPlanner,
+                 AICoach, ProfilePanel, forms/*
+    templates/   AppLayout, ClientLayout
+  pages/       one component per route (Dashboard, Clients, ClientDetail, ClientTraining,
+               ClientProgress, Monitor/Check-ins, Assessments, Profile, Workouts,
+               Schedule, Progress, Concerns, Settings, Report)
 ```
 
 Calculations are pure functions that take data explicitly; React state lives in `DataContext` and is persisted on every change.

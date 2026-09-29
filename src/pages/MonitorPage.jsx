@@ -1,22 +1,22 @@
 import { useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { Bar, Line } from 'react-chartjs-2'
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { Line } from 'react-chartjs-2'
 import Button from '../components/atoms/Button'
 import InfoTip from '../components/atoms/InfoTip'
 import ConcernCard from '../components/molecules/ConcernCard'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
-import { WellnessForm, SRPEForm, ResistanceForm, CardioForm, WearableForm } from '../components/organisms/forms/LogForms'
+import { WellnessForm, WearableForm } from '../components/organisms/forms/LogForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
-import { useFormat } from '../hooks/useFormat'
 import { callFunction, hasBackend } from '../api/functions'
 import { addDays, fmtDate, lastNDates, todayISO } from '../lib/dates'
 import { baseOptions, COLORS, shortLabel } from '../lib/chartSetup'
-import { acwrSeries, dailySum, readinessParts, rolling30Baseline, sdev, trainingMonotony, trainingStrain } from '../lib/calc'
+import { readinessParts, rolling30Baseline } from '../lib/calc'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { GLOSSARY } from '../lib/glossary'
+import { loadProgressPath } from '../lib/clientRoutes'
 
-const VIEWS = [['wellness', 'Wellness'], ['load', 'Training load'], ['concerns', 'Concerns'], ['wearables', 'Wearables']]
+const VIEWS = [['wellness', 'Wellness'], ['concerns', 'Concerns'], ['wearables', 'Wearables']]
 const LEGACY_VIEWS = { readiness: 'wellness', subjective: 'wellness', objective: 'load', wearables: 'wearables' }
 const sourceOf = (row) => row?.source || 'Source not recorded'
 const valueOf = (value, unit = '') => value == null || value === '' ? 'Not recorded' : `${value}${unit}`
@@ -39,6 +39,7 @@ function History({ count, label, children }) {
 
 export default function MonitorPage() {
   const { id } = useParams()
+  const { search, hash } = useLocation()
   const [params] = useSearchParams()
   const { db, commit, tz } = useData()
   const { openModal } = useModal()
@@ -47,6 +48,7 @@ export default function MonitorPage() {
   const view = VIEWS.some(([key]) => key === requestedView) ? requestedView : 'wellness'
   const today = todayISO(tz)
   if (!client) return <Link className="btn ghost" to="/clients">← Clients</Link>
+  if (requestedView === 'load') return <Navigate to={loadProgressPath(id, search, hash)} replace />
 
   const del = async (collection, entryId) => {
     if (!await confirmDialog({ title: 'Delete entry', message: 'Delete this entry?', confirmLabel: 'Delete', danger: true })) return
@@ -55,12 +57,11 @@ export default function MonitorPage() {
   }
 
   return <>
-    <div className="topbar checkins-title"><div><h1>Check-ins &amp; load</h1><div className="sub">Review response, recorded training, concerns, and device observations for {client.name}</div></div></div>
-    <nav className="checkins-views" aria-label="Check-ins and load views">
+    <div className="topbar checkins-title"><div><h1>Check-ins</h1><div className="sub">Review wellness, concerns, and device observations for {client.name}</div></div></div>
+    <nav className="checkins-views" aria-label="Check-ins views">
       {VIEWS.map(([key, label]) => <Link key={key} to={`?view=${key}`} className={'checkins-view-link' + (view === key ? ' active' : '')} aria-current={view === key ? 'page' : undefined}>{label}</Link>)}
     </nav>
     {view === 'wellness' && <WellnessView client={client} today={today} openModal={openModal} del={del} />}
-    {view === 'load' && <TrainingLoadView client={client} today={today} openModal={openModal} del={del} />}
     {view === 'concerns' && <ConcernsView client={client} openModal={openModal} />}
     {view === 'wearables' && <WearablesView client={client} today={today} openModal={openModal} del={del} />}
   </>
@@ -100,76 +101,6 @@ function WellnessView({ client, today, openModal, del }) {
         {!wellness.length && <tr><td colSpan={8} className="muted">No entries recorded.</td></tr>}
       </tbody></LogTable></History>
     </section>
-  </div>
-}
-
-function AdvancedLoad({ rows, clientId, today }) {
-  const usable = rows.filter((row) => typeof row.tl === 'number' && Number.isFinite(row.tl))
-  const latest = usable.find((row) => row.date <= today)
-  if (!latest) return <p className="checkins-empty">No session RPE observations yet, so derived load measures are unavailable.</p>
-  const end = latest.date
-  const start = addDays(end, -27)
-  const dates = Array.from({ length: 28 }, (_, index) => addDays(start, index))
-  const map = dailySum(usable, clientId, 'tl')
-  const load7 = dates.slice(-7).map((date) => map[date] || 0)
-  const logged7 = dates.slice(-7).filter((date) => Object.hasOwn(map, date)).length
-  const logged28 = dates.filter((date) => Object.hasOwn(map, date)).length
-  const acwr = acwrSeries(map, dates).at(-1)
-  const monotony = sdev(load7) > 0 ? trainingMonotony(load7) : null
-  const strain = monotony == null ? null : trainingStrain(load7)
-  const weekly = load7.reduce((total, value) => total + value, 0)
-  return <>
-    <div className="checkins-window">Computed through {fmtDate(end)} from recorded sRPE × duration entries. 7-day window: {fmtDate(dates.at(-7))}–{fmtDate(end)}, {logged7}/7 days logged. 28-day window: {fmtDate(start)}–{fmtDate(end)}, {logged28}/28 days logged.</div>
-    <div className="checkins-advanced-grid">
-      <div className="checkins-stat"><span>7-day recorded load</span><strong>{weekly.toLocaleString()} AU</strong><small>Sum of sRPE-TL · {logged7} logged days</small></div>
-      <div className="checkins-stat"><span>ACWR <InfoTip {...GLOSSARY.acwr} /></span><strong>{acwr == null ? '—' : acwr.toFixed(2)}</strong><small>7-day average ÷ 28-day average · {acwr == null ? 'insufficient recorded training days' : `${logged28} logged days in the 28-day window`}</small></div>
-      <div className="checkins-stat"><span>Monotony <InfoTip {...GLOSSARY.monotony} /></span><strong>{monotony == null ? '—' : monotony}</strong><small>7-day mean ÷ day-to-day standard deviation · {monotony == null ? 'no load variation to divide by' : `${logged7} logged days`}</small></div>
-      <div className="checkins-stat"><span>Strain <InfoTip {...GLOSSARY.strain} /></span><strong>{strain == null ? '—' : strain.toLocaleString()}</strong><small>7-day recorded load × monotony</small></div>
-    </div>
-    <p className="checkins-note">Unlogged days are treated as zero by these existing formulas; they may be missing entries rather than rest days. These ratios describe recorded load and do not provide a universal injury-risk or training-clearance threshold.</p>
-  </>
-}
-
-function TrainingLoadView({ client, today, openModal, del }) {
-  const { db, tz } = useData()
-  const { fmtVL, toDisp, unitName } = useFormat()
-  const srpe = mine(db.srpe, client.id)
-  const resistance = mine(db.resistance, client.id)
-  const cardio = mine(db.cardio, client.id)
-  const dates = lastNDates(28, tz)
-  const loadMap = dailySum(srpe.filter((row) => typeof row.tl === 'number' && Number.isFinite(row.tl)), client.id, 'tl')
-  const observed = dates.filter((date) => Object.hasOwn(loadMap, date)).length
-
-  return <div className="checkins-stack">
-    <section className="card">
-      <div className="checkins-section-head"><div><h2>Session effort</h2><p className="muted">sRPE × duration, in arbitrary units (AU). This is a record of internal training load.</p></div><Button onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Record session RPE</Button></div>
-      <SourceLine row={srpe[0]} today={today} />
-      {srpe[0] ? <div className="checkins-latest">Latest: {valueOf(srpe[0].rpe)}/10 RPE × {valueOf(srpe[0].duration, ' min')} = {valueOf(srpe[0].tl, ' AU')}</div> : <p className="checkins-empty">No session effort recorded yet.</p>}
-      {observed > 0 && <div className="checkins-chart"><Bar data={{ labels: dates.map(shortLabel), datasets: [{ label: 'Recorded sRPE-TL (AU)', data: dates.map((date) => Object.hasOwn(loadMap, date) ? loadMap[date] : null), backgroundColor: COLORS.blue }] }} options={lineOptions()} /></div>}
-      <p className="checkins-window">Last 28 days · {fmtDate(dates[0])}–{fmtDate(dates.at(-1))} · {observed}/28 days logged. Blank days are unlogged, not confirmed rest days.</p>
-      <details className="checkins-advanced"><summary>Advanced load calculations: ACWR, monotony and strain</summary><AdvancedLoad rows={srpe} clientId={client.id} today={today} /></details>
-      <History count={srpe.length} label="session RPE"><LogTable caption="Session RPE history"><thead><tr><th scope="col">Date</th><th scope="col">RPE</th><th scope="col">Duration</th><th scope="col">sRPE-TL <InfoTip {...GLOSSARY.srpeTl} /></th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
-        {srpe.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.rpe)}</td><td>{valueOf(row.duration, ' min')}</td><td>{valueOf(row.tl, ' AU')}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete session RPE from ${fmtDate(row.date)}`} onClick={() => del('srpe', row.id)}>×</button></td></tr>)}
-        {!srpe.length && <tr><td colSpan={6} className="muted">No entries recorded.</td></tr>}
-      </tbody></LogTable></History>
-    </section>
-
-    <div className="checkins-load-grid">
-      <section className="card"><div className="checkins-section-head"><div><h2>Resistance logs</h2><p className="muted">Sets × reps × load, with the recorded movement pattern.</p></div><Button variant="ghost" onClick={() => openModal(<ResistanceForm clientId={client.id} />)}>＋ Log resistance</Button></div><SourceLine row={resistance[0]} today={today} />
-        {resistance[0] ? <p className="checkins-latest">Latest: {resistance[0].exercise} · {valueOf(resistance[0].sets)} × {valueOf(resistance[0].reps)} × {resistance[0].weight == null ? 'Not recorded' : `${toDisp(resistance[0].weight)} ${unitName()}`}</p> : <p className="checkins-empty">No resistance logs recorded.</p>}
-        <History count={resistance.length} label="resistance"><LogTable caption="Resistance log history"><thead><tr><th scope="col">Date</th><th scope="col">Exercise</th><th scope="col">Pattern</th><th scope="col">Sets × reps × {unitName()}</th><th scope="col">Volume load</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
-          {resistance.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.exercise)}</td><td>{valueOf(row.pattern)}</td><td>{valueOf(row.sets)} × {valueOf(row.reps)} × {row.weight == null ? 'Not recorded' : toDisp(row.weight)}</td><td>{row.volumeLoad == null ? 'Not recorded' : fmtVL(row.volumeLoad)}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete resistance entry from ${fmtDate(row.date)}`} onClick={() => del('resistance', row.id)}>×</button></td></tr>)}
-          {!resistance.length && <tr><td colSpan={7} className="muted">No resistance logs recorded.</td></tr>}
-        </tbody></LogTable></History>
-      </section>
-      <section className="card"><div className="checkins-section-head"><div><h2>Conditioning logs</h2><p className="muted">Recorded modality and conditioning measures. Blank fields remain missing.</p></div><Button variant="ghost" onClick={() => openModal(<CardioForm clientId={client.id} />)}>＋ Log conditioning</Button></div><SourceLine row={cardio[0]} today={today} />
-        {cardio[0] ? <p className="checkins-latest">Latest: {cardio[0].modality} · TRIMP {valueOf(cardio[0].trimp)} · TiZ {valueOf(cardio[0].tiz, ' min')}</p> : <p className="checkins-empty">No conditioning logs recorded.</p>}
-        <History count={cardio.length} label="conditioning"><LogTable caption="Conditioning log history"><thead><tr><th scope="col">Date</th><th scope="col">Modality</th><th scope="col">TRIMP <InfoTip {...GLOSSARY.trimp} /></th><th scope="col">TiZ <InfoTip {...GLOSSARY.tiz} /></th><th scope="col">TSS <InfoTip {...GLOSSARY.tss} /></th><th scope="col">HSD <InfoTip {...GLOSSARY.hsd} /></th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
-          {cardio.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.modality)}</td><td>{valueOf(row.trimp)}</td><td>{valueOf(row.tiz, ' min')}</td><td>{valueOf(row.tss)}</td><td>{valueOf(row.hsd, ' km')}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete conditioning entry from ${fmtDate(row.date)}`} onClick={() => del('cardio', row.id)}>×</button></td></tr>)}
-          {!cardio.length && <tr><td colSpan={8} className="muted">No conditioning logs recorded.</td></tr>}
-        </tbody></LogTable></History>
-      </section>
-    </div>
   </div>
 }
 

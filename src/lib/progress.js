@@ -20,3 +20,31 @@ export function assessmentPair(list, type) {
   const last = rows.at(-1) || null
   return { first, last, comparable: !!first && !!last && first.id !== last.id }
 }
+
+// Descriptive reference only: the middle half of earlier recorded values.
+// Four observations are a display floor, not a validated clinical sample size.
+export function observedReferenceBand(values) {
+  const sorted = values.filter((value) => typeof value === 'number' && Number.isFinite(value)).sort((a, b) => a - b)
+  if (sorted.length < 4) return null
+  const percentile = (fraction) => {
+    const index = (sorted.length - 1) * fraction
+    const lower = Math.floor(index)
+    return sorted[lower] + (sorted[Math.ceil(index)] - sorted[lower]) * (index - lower)
+  }
+  return { lower: percentile(0.25), upper: percentile(0.75), count: sorted.length }
+}
+
+// Retrospective reference for a graph date: use only earlier observations in
+// the preceding calendar window, so later records cannot change past bands.
+export function trailingObservedBands(rows, field, dates, days = 28) {
+  return dates.map((date) => observedReferenceBand(rows
+    .filter((row) => row.date < date && row.date >= addDays(date, -days))
+    .map((row) => row[field])))
+}
+
+export function compareToObservedBand(value, band) {
+  if (value == null || !band) return 'unavailable'
+  if (value > band.upper) return 'above'
+  if (value < band.lower) return 'below'
+  return 'within'
+}

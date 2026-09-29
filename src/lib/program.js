@@ -7,6 +7,7 @@ import { uid } from './format'
 import { addDays } from './dates'
 import { EXERCISE_LIBRARY } from './exerciseLibrary'
 import { CORRECTIVE_LIBRARY } from './correctiveLibrary'
+import { recommendedMuscleTargets } from './exerciseMuscleMap.js'
 import { postureFindings, SEVERITY_WEIGHT } from './posture'
 
 // ---- Vocabulary -----------------------------------------------------------
@@ -363,7 +364,7 @@ export function itemsToBlocks(items) {
 }
 
 // Idempotent store migration: new collections + lazy blocks upgrade.
-export function ensureProgramShape(db) {
+export function ensureProgramShape(db, catalogOwnerId = null) {
   if (!db.maxes) db.maxes = []
   if (!db.synonyms) db.synonyms = []
   ;(db.clients || []).forEach((c) => { if (!c.trackedLifts) c.trackedLifts = [] })
@@ -380,43 +381,59 @@ export function ensureProgramShape(db) {
     if (!t.blocks) t.blocks = []
     renameBlocks(t.blocks)
   })
-  mergeExerciseLibrary(db)
+  mergeExerciseLibrary(db, catalogOwnerId)
   return db
 }
 
-// Merge the imported Strength-Training-Manual library into db.exercises, removing
-// only DUPLICATES. Any existing exercise whose name is also in the library is a
-// duplicate of a library entry, so it's dropped and the canonical library
-// version stands (with full pattern / %1RM-relative metadata). Existing
-// exercises NOT in the library (custom or seeded extras) are kept untouched.
-// Runs on every load via ensureProgramShape.
-export function mergeExerciseLibrary(db) {
+// Merge catalog metadata without replacing exercise identities or coach edits.
+// Older behavior recreated ids on each load and erased muscle assignments.
+export function mergeExerciseLibrary(db, catalogOwnerId = null) {
   if (!db.exercises) db.exercises = []
-  const libNames = new Set([...EXERCISE_LIBRARY, ...CORRECTIVE_LIBRARY].map((x) => x.name.toLowerCase()))
-  // Keep the extras (names not in the library); library-named rows are the
-  // duplicates and get replaced by the canonical versions added below.
-  db.exercises = db.exercises.filter((e) => !libNames.has(String(e.name).toLowerCase()))
-  for (const x of EXERCISE_LIBRARY) {
-    db.exercises.push({
-      id: uid(),
+  const byName = new Map(db.exercises.map((e) => [String(e.name || '').trim().toLowerCase(), e]))
+  const append = (x, corrective = false) => {
+    const key = x.name.trim().toLowerCase()
+    const prior = byName.get(key)
+    const defaults = {
+      id: `catalog:${catalogOwnerId ? `${catalogOwnerId}:` : ''}${corrective ? 'corrective' : 'strength'}:${encodeURIComponent(key)}`,
       name: x.name, muscle: x.muscle, equip: x.equip, difficulty: x.difficulty,
-      category: x.category, pattern: x.pattern,
+      category: corrective ? 'Corrective' : x.category, pattern: corrective ? 'Corrective' : x.pattern,
+      mode: corrective ? x.mode : null, target: corrective ? x.target : null,
       relPct: x.relPct ?? null, relTo: x.relTo ?? null,
-      video: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + ' proper form'),
-      thumb: '', source: 'stm-library',
-    })
+      muscleTargets: corrective ? recommendedMuscleTargets(x.name, x.mode) : x.muscleTargets,
+      video: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + (corrective ? ' exercise how to' : ' proper form')),
+      thumb: '', source: corrective ? 'corrective-library' : 'stm-library',
+    }
+    if (prior) {
+      // A saved empty assignment is intentional; only missing metadata gets a default.
+      Object.entries(defaults).forEach(([field, value]) => { if (prior[field] === undefined) prior[field] = value })
+      if (prior.muscleTargets?.source === 'catalog') prior.muscleTargets = defaults.muscleTargets
+      // A previous catalog rule matched "row" inside "narrow". This exact
+      // impossible assignment was generated automatically; repair it once.
+      if (x.name === 'Push Ups (Narrow)' &&
+        JSON.stringify(prior.muscleTargets?.direct) === JSON.stringify(['Lats', 'Upper back'])) {
+        prior.muscleTargets = defaults.muscleTargets
+      }
+    } else {
+      db.exercises.push(defaults)
+      byName.set(key, defaults)
+    }
   }
-  // Corrective exercises carry `mode` (SMR/Stretch/Activation) and `target`
-  // muscles so the movement screen can generate a corrective block.
-  for (const x of CORRECTIVE_LIBRARY) {
-    db.exercises.push({
-      id: uid(),
-      name: x.name, muscle: x.muscle, equip: x.equip, difficulty: x.difficulty,
-      category: 'Corrective', pattern: 'Corrective',
-      mode: x.mode, target: x.target, relPct: null, relTo: null,
-      video: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + ' exercise how to'),
-      thumb: '', source: 'corrective-library',
-    })
+  EXERCISE_LIBRARY.forEach((x) => append(x))
+  CORRECTIVE_LIBRARY.forEach((x) => append(x, true))
+  // Older merges discarded the demo Bench Press/Deadlift ids and left three
+  // seeded plan slots orphaned. Repair only those exact known demo slots.
+  const byId = new Set(db.exercises.map((e) => e.id))
+  const canonicalId = (name) => byName.get(name.toLowerCase())?.id
+  for (const plan of db.plans || []) {
+    const fixes = plan.name === 'Fat Loss & Tone — 3 Day'
+      ? [[2, 'Bench Press', 3, '12']]
+      : plan.name === 'Strength — Powerlifting Block'
+        ? [[1, 'Bench Press', 5, '5'], [2, 'Deadlift', 3, '3']]
+        : []
+    for (const [index, name, sets, reps] of fixes) {
+      const item = plan.items?.[index]
+      if (item && !byId.has(item.exId) && Number(item.sets) === sets && String(item.reps) === reps) item.exId = canonicalId(name)
+    }
   }
   return db
 }

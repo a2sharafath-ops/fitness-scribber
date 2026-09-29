@@ -1,9 +1,5 @@
-// Current Lifts Performance — the trainer chooses which main lifts to track
-// for this client. Each tracked lift shows the live rolling 30-day Absolute
-// 1RM (auto-calculated via Epley when the client completes main-lift sets)
-// and the Training Max that baselines %1RM prescription targets. New peaks
-// on tracked lifts auto-push a fitness-assessment record; the trainer can
-// also record a 1RM manually (e.g. a tested baseline at intake).
+// 1RM ledger. Previously entered records remain accessible even when their
+// lift has no completed workout or resistance log for the performed selector.
 import { useState } from 'react'
 import Button from '../atoms/Button'
 import Icon from '../atoms/Icon'
@@ -13,16 +9,17 @@ import { useModal } from '../../store/ModalContext'
 import { useFormat } from '../../hooks/useFormat'
 import { todayISO, fmtDate } from '../../lib/dates'
 import { absolute1RM, trainingMaxKg, recordLiftMax } from '../../lib/program'
-import { confirmDialog } from '../../lib/toast'
+import { performedLiftOptions } from '../../lib/performedLifts'
 
 export default function CurrentLiftsPerformance({ client }) {
   const { db, commit, tz } = useData()
   const { openModal } = useModal()
   const { toDisp, dispToKg, unitName } = useFormat()
-  const [pick, setPick] = useState('')
   const [entry, setEntry] = useState({})
   const today = todayISO(tz)
-  const tracked = client.trackedLifts || []
+  const performed = performedLiftOptions(db, client.id).map((item) => item.name)
+  const lifts = [...performed, ...[...new Set((db.maxes || []).filter((row) => row.clientId === client.id && row.exercise).map((row) => row.exercise))]
+    .filter((name) => !performed.some((lift) => lift.toLowerCase() === name.toLowerCase()))]
 
   // Latest e1RM event for the row's "last update" cell; the full history + chart
   // + per-entry delete live in the detail modal.
@@ -31,20 +28,6 @@ export default function CurrentLiftsPerformance({ client }) {
     .sort((a, b) => b.date.localeCompare(a.date))[0]
   const openDetail = (lift) => openModal(<LiftDetailModal client={client} lift={lift} />, true)
 
-  const addLift = () => {
-    const name = pick.trim()
-    if (!name || tracked.some((l) => l.toLowerCase() === name.toLowerCase())) return
-    commit((d) => { const c = d.clients.find((x) => x.id === client.id); c.trackedLifts = [...(c.trackedLifts || []), name] })
-    setPick('')
-  }
-  const removeLift = async (lift) => {
-    if (!await confirmDialog({
-      title: 'Stop tracking lift',
-      message: `Stop tracking ${lift}? It will be removed from this list. Recorded 1RM history is kept — re-add the lift to see it again.`,
-      confirmLabel: 'Stop tracking', danger: true,
-    })) return
-    commit((d) => { const c = d.clients.find((x) => x.id === client.id); c.trackedLifts = (c.trackedLifts || []).filter((l) => l !== lift) })
-  }
   const record = (lift) => {
     const kg = dispToKg(entry[lift])
     if (!kg || kg <= 0) return
@@ -56,26 +39,26 @@ export default function CurrentLiftsPerformance({ client }) {
   return (
     <div className="card">
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> Tracked lifts</div>
+        <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> 1RM records</div>
         <span className="muted" style={{ fontSize: 11 }}>
-          Estimated 1RM updates from completed main-lift sets; coach-entered values are separate history entries.
+          Historical 1RM-only lifts stay here for review, but appear in the selector only after completed work is logged.
         </span>
       </div>
 
-      {tracked.length ? (
+      {lifts.length ? (
         <>
           <div className="clp-row clp-head">
-            <span>Lift</span><span>Highest 1RM (30d)</span><span>Training Max</span><span>Last update</span><span>Details</span><span>Coach-entered 1RM</span><span />
+            <span>Lift</span><span>Highest 1RM (30d)</span><span>Training Max</span><span>Last update</span><span>Details</span><span>Coach-entered 1RM</span>
           </div>
-          {tracked.map((lift) => {
+          {lifts.map((lift) => {
             const abs = absolute1RM(db.maxes, client.id, lift, today)
             const tm = trainingMaxKg(db.maxes, client.id, lift, today)
             const ev = lastEvent(lift)
             return (
               <div className="clp-row" key={lift}>
-                <span style={{ fontWeight: 600 }}>{lift}</span>
-                <span className="clp-val">{abs != null ? `${toDisp(abs)} ${unitName()}` : '—'}</span>
-                <span>{tm != null ? `${toDisp(tm)} ${unitName()}` : '—'}</span>
+                <span style={{ fontWeight: 600 }}>{lift}{!performed.some((name) => name.toLowerCase() === lift.toLowerCase()) && <small className="clp-record-only">1RM record only</small>}</span>
+                <span className="clp-val"><small className="clp-mobile-label">Highest 1RM (30d)</small>{abs != null ? `${toDisp(abs)} ${unitName()}` : '—'}</span>
+                <span><small className="clp-mobile-label">Training max</small>{tm != null ? `${toDisp(tm)} ${unitName()}` : '—'}</span>
                 <span className="muted" style={{ fontSize: 11 }}>
                   {ev ? `${fmtDate(ev.date)} · ${ev.source === 'auto' ? 'auto (Epley)' : 'manual'}` : 'no data yet'}
                 </span>
@@ -83,31 +66,21 @@ export default function CurrentLiftsPerformance({ client }) {
                   <Icon name="chart" size={13} /> View
                 </button>
                 <span className="clp-entry">
+                  <small className="clp-mobile-label">Coach-entered 1RM</small>
                   <input type="number" placeholder={unitName()} aria-label={`Record coach-entered 1RM for ${lift}`}
                     value={entry[lift] ?? ''} onChange={(e) => setEntry((x) => ({ ...x, [lift]: e.target.value }))}
                     onKeyDown={onEntryKey(lift)} />
                   <Button size="sm" variant="ghost" onClick={() => record(lift)} disabled={!entry[lift]}>Set</Button>
                 </span>
-                <button className="x" aria-label={`Stop tracking ${lift}`} onClick={() => removeLift(lift)}>×</button>
               </div>
             )
           })}
         </>
       ) : (
         <div className="muted" style={{ fontSize: 12, margin: '10px 0' }}>
-          No lifts tracked yet — choose the main lifts whose 1RM should feed this client's assessment and prescription intensities.
+          No performed lifts recorded yet. Complete a workout set or log resistance first.
         </div>
       )}
-
-      <div className="flex gap" style={{ marginTop: 10 }}>
-        <input list="clpExList" value={pick} placeholder="Add a lift to track…" aria-label="Lift to track"
-          style={{ maxWidth: 260 }} onChange={(e) => setPick(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') addLift() }} />
-        <datalist id="clpExList">
-          {db.exercises.filter((e) => !tracked.some((l) => l.toLowerCase() === e.name.toLowerCase())).map((e) => <option key={e.id} value={e.name} />)}
-        </datalist>
-        <Button size="sm" onClick={addLift} disabled={!pick.trim()}>＋ Track lift</Button>
-      </div>
     </div>
   )
 }

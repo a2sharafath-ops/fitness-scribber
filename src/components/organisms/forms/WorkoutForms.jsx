@@ -6,18 +6,29 @@ import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { uid } from '../../../lib/format'
 import { toast, confirmDialog } from '../../../lib/toast'
+import { MUSCLES, exerciseKey, muscleTargets } from '../../../lib/muscleVolume'
 
-const GROUPS = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Hamstrings', 'Glutes', 'Full Body']
+const GROUPS = ['Unspecified', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Hamstrings', 'Glutes', 'Full Body']
 const EQUIPS = ['Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Bands']
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
-export function ExerciseForm({ exercise }) {
-  const { commit } = useData()
+export function ExerciseForm({ exercise, initialName = '' }) {
+  const { db, commit } = useData()
   const { closeModal } = useModal()
-  const [f, setF] = useState(exercise || { name: '', muscle: 'Chest', equip: 'Barbell', difficulty: 'Beginner', video: '', thumb: '' })
+  const [f, setF] = useState(exercise || { name: initialName, muscle: 'Unspecified', equip: 'Barbell', difficulty: 'Beginner', video: '', thumb: '' })
+  const targets = muscleTargets(f)
+  const setRole = (muscle, role) => setF((current) => {
+    const previous = muscleTargets(current)
+    return { ...current, muscleTargets: {
+      direct: [...previous.direct.filter((m) => m !== muscle), ...(role === 'direct' ? [muscle] : [])],
+      indirect: [...previous.indirect.filter((m) => m !== muscle), ...(role === 'indirect' ? [muscle] : [])],
+      source: 'coach',
+    } }
+  })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const save = () => {
     if (!f.name.trim()) return toast('Exercise name is required', 'error')
+    if (db.exercises.some((e) => e.id !== exercise?.id && exerciseKey(e.name) === exerciseKey(f.name))) return toast('An exercise with this name already exists. Edit that entry or use a distinct name.', 'error')
     commit((db) => {
       if (exercise) Object.assign(db.exercises.find((x) => x.id === exercise.id), f)
       else db.exercises.push({ id: uid(), ...f })
@@ -43,9 +54,16 @@ export function ExerciseForm({ exercise }) {
       </>}>
       <Field label="Name"><input value={f.name} onChange={set('name')} placeholder="e.g. Incline Dumbbell Press" /></Field>
       <div className="row2">
-        <Field label="Muscle group"><select value={f.muscle} onChange={set('muscle')}>{GROUPS.map((g) => <option key={g}>{g}</option>)}</select></Field>
+        <Field label="Broad category (legacy)"><select value={f.muscle} onChange={set('muscle')}>{GROUPS.map((g) => <option key={g}>{g}</option>)}</select></Field>
         <Field label="Equipment"><select value={f.equip} onChange={set('equip')}>{EQUIPS.map((q) => <option key={q}>{q}</option>)}</select></Field>
       </div>
+      <details className="progress-disclosure" open={!!initialName}>
+        <summary>Muscle assignments · {targets.direct.length} direct / {targets.indirect.length} indirect</summary>
+        {f.mode === 'SMR' || f.mode === 'Stretch' ? <p className="checkins-note">This is a mobility exercise. Its targeted tissues are listed separately; it has no resistance working-set mapping.</p> : <>
+          <p className="checkins-note">Direct = principal movers; indirect = assisting muscles. These are anatomical categories for this variation, not measured force. Coach edits override the catalog suggestion and apply to all history.</p>
+          <div className="muscle-assignment-grid">{MUSCLES.map((muscle) => <label key={muscle}>{muscle}<select aria-label={`${muscle} contribution`} value={targets.direct.includes(muscle) ? 'direct' : targets.indirect.includes(muscle) ? 'indirect' : ''} onChange={(e) => setRole(muscle, e.target.value)}><option value="">Not assigned</option><option value="direct">Direct</option><option value="indirect">Indirect</option></select></label>)}</div>
+        </>}
+      </details>
       <div className="row2">
         <Field label="Difficulty"><select value={f.difficulty || 'Beginner'} onChange={set('difficulty')}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select></Field>
         <Field label="Video URL"><input value={f.video || ''} onChange={set('video')} placeholder="YouTube/Vimeo/MP4 link" /></Field>

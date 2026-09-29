@@ -278,7 +278,7 @@ export default function DashboardPage() {
             <div className="onb-steps">
               <OnboardStep n={1} done={hasClients} title="Add your first client" desc="Build your roster" action="Add client" onClick={() => openModal(<ClientForm />)} />
               <OnboardStep n={2} done={hasBaseline} title="Record a baseline" desc="Fitness, movement &amp; body-comp" action="Open a client" onClick={() => nav('/clients')} />
-              <OnboardStep n={3} done={hasCheckin} title="Log morning check-ins" desc="Powers readiness &amp; load" action="Bulk check-in" onClick={() => openModal(<BulkWellnessForm />, true)} />
+              <OnboardStep n={3} done={hasCheckin} title="Log morning check-ins" desc="Supports the readiness review" action="Bulk check-in" onClick={() => openModal(<BulkWellnessForm />, true)} />
             </div>
           </div>
         )}
@@ -457,7 +457,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               {loadContext.length ? loadContext.slice(0, 4).map((x) => (
-                <button key={x.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + x.c.id + '/check-ins?view=load') }}>
+                <button key={x.c.id} className="dash-row" onClick={(e) => { e.stopPropagation(); nav('/clients/' + x.c.id + '/progress#training-load') }}>
                   <span className="dash-att-av" style={{ background: 'var(--tint-blue)', color: 'var(--blue)' }}>{initials(x.c.name)}</span>
                   <span className="dash-rinfo"><div className="t">{x.c.name}</div><div className="s">{x.logs.length} sRPE {x.logs.length === 1 ? 'entry' : 'entries'} · latest {shortD([...x.logs].sort((a, b) => b.date.localeCompare(a.date))[0].date)}</div></span>
                   <StatusChip cls="sc-gray" label="View log" />

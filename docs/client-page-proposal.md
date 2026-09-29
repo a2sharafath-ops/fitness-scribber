@@ -2,6 +2,8 @@
 
 24 September 2026. Status: approved. Shared client navigation (Phase 1), the task-focused Overview (Phase 2), the Training workspace (Phase 3), Progress (Phase 4), Check-ins & load (Phase 5), Assessments (Phase 6), Profile (Phase 7), and responsive accessibility work (Phase 8) are implemented.
 
+28 September 2026 amendment: the client workspace now labels the section **Check-ins** and limits its views to Wellness, Concerns, and Wearables. **Progress** now has four sections—Strength, Training load, Outcomes, and Completion—based on the [Progress HTML design](./progress-page-design.html). Training load retains session RPE, resistance, conditioning, histories, and contextual calculations. Existing `?view=load` and legacy objective links forward to the Progress load section. The original proposal below records the earlier approved layout.
+
 ## Recommendation
 
 Use one persistent client workspace with six destinations: Overview, Training, Progress, Check-ins & load, Assessments, Profile. The design groups information by trainer task, rather than by technical metric or input type. No pooling engine or automated programme generation is proposed.

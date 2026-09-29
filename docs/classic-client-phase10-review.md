@@ -2,6 +2,8 @@
 
 24 September 2026. Compared with the approved [client-page proposal](./client-page-proposal.md). This is a code and authenticated-browser review, not a study of trainer outcomes or a clinical validation.
 
+28 September 2026 navigation update: Check-ins now contains Wellness, Concerns, and Wearables. Progress groups Strength, Training load, Outcomes, and Completion with in-page links. Load recording/history tools and dated data context remain intact. The table below records the layout reviewed on 24 September; the later change has route and client-isolation regression tests.
+
 | Review area | Result |
 |---|---|
 | Information architecture | One client shell has Overview, Training, Progress, Check-ins & load, Assessments, and Profile in a consistent order. Overview prepares for today; Training plans and records; Progress shows dated outcomes; Check-ins groups response and load; Assessments owns screening and formal tests; Profile owns stable details and dated goals/lifestyle. |

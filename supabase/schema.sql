@@ -26,8 +26,23 @@ create table if not exists exercises (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
   "name" text not null, "muscle" text, "equip" text,
-  "difficulty" text, "video" text, "thumb" text
+  "difficulty" text, "video" text, "thumb" text,
+  "muscleTargets" jsonb, "category" text, "pattern" text,
+  "relPct" numeric, "relTo" text, "mode" text, "target" jsonb,
+  "source" text
 );
+
+alter table exercises add column if not exists "muscleTargets" jsonb;
+alter table exercises add column if not exists "difficulty" text;
+alter table exercises add column if not exists "video" text;
+alter table exercises add column if not exists "thumb" text;
+alter table exercises add column if not exists "category" text;
+alter table exercises add column if not exists "pattern" text;
+alter table exercises add column if not exists "relPct" numeric;
+alter table exercises add column if not exists "relTo" text;
+alter table exercises add column if not exists "mode" text;
+alter table exercises add column if not exists "target" jsonb;
+alter table exercises add column if not exists "source" text;
 
 create table if not exists plans (
   "id" text primary key,

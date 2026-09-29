@@ -142,7 +142,7 @@ export default function ClientDetailPage() {
       <section className="card overview-checkin" aria-labelledby="checkin-title">
         <div className="flex between overview-section-head">
           <div><h2 id="checkin-title">Check-in snapshot</h2><p className="muted">Recorded inputs for today’s review</p></div>
-          <Link className="btn ghost sm" to={checkInsUrl}>View check-ins &amp; load →</Link>
+          <Link className="btn ghost sm" to={checkInsUrl}>View check-ins →</Link>
         </div>
         <div className="overview-checkin-grid">
           <div>

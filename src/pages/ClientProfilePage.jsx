@@ -161,7 +161,7 @@ export default function ClientProfilePage() {
     </section>
 
     <section className="card profile-health-link" aria-label="Health and concerns">
-      <div><h2>Health screening &amp; concerns</h2><p>Formal screening and clearance stay in Assessments. New symptoms stay in Check-ins &amp; load until reviewed.</p>
+      <div><h2>Health screening &amp; concerns</h2><p>Formal screening and clearance stay in Assessments. New symptoms stay in Check-ins until reviewed.</p>
         {concerns.length > 0 && <p className="profile-concern-count">{concerns.length} open concern{concerns.length === 1 ? '' : 's'} · last recorded {fmtDate([...concerns].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0].date)}</p>}
       </div>
       <div className="profile-health-actions"><Link className="btn ghost" to={screeningPath}>Health screening →</Link>
