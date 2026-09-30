@@ -28,6 +28,7 @@ const { ModalProvider } = await load('store/ModalContext.jsx')
 const { ClipboardProvider } = await load('store/ClipboardContext.jsx')
 const { default: ClientDetailPage } = await load('pages/ClientDetailPage.jsx')
 const { default: ClientTrainingPage } = await load('pages/ClientTrainingPage.jsx')
+const { default: WorkoutPlanner } = await load('components/organisms/WorkoutPlanner.jsx')
 const { default: MonitorPage } = await load('pages/MonitorPage.jsx')
 const { default: ClientProgressPage } = await load('pages/ClientProgressPage.jsx')
 const { default: AssessmentsPage } = await load('pages/AssessmentsPage.jsx')
@@ -192,6 +193,32 @@ test('trainer shortcuts to routed destinations are links', () => {
   assert.match(overview, /href="\/clients\/a\/training"[^>]*>Plan a session/)
   assert.match(overview, /href="\/clients\/a\/check-ins"[^>]*>View check-ins/)
   assert.match(training, /href="\/workouts"[^>]*>Programme library/)
+})
+
+test('planner week and month show only this client’s completed workout logs, distinct from prescriptions', () => {
+  const db = fixture()
+  db.workouts.push(
+    { id: 'done-a', clientId: 'a', date: '2026-09-28', title: 'Squat Demo', status: 'completed', main: [] },
+    { id: 'done-b', clientId: 'b', date: '2026-09-30', title: 'Other Client Workout', status: 'completed', main: [] },
+    { id: 'draft-a', clientId: 'a', date: '2026-09-30', title: 'Unfinished Workout', status: 'in_progress', main: [] },
+  )
+  const renderPlanner = (view) => renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db },
+    React.createElement(ModalProvider, null,
+      React.createElement(ClipboardProvider, null,
+        React.createElement(MemoryRouter, null,
+          React.createElement(WorkoutPlanner, { client: db.clients[0], initialView: view, focusDate: '2026-09-28' }),
+        ),
+      ),
+    ),
+  ))
+  for (const view of ['week', 'month']) {
+    const html = renderPlanner(view)
+    assert.match(html, /class="plan-completed-status"[^>]*>.*Completed/)
+    assert.match(html, /class="plan-completed-name">Squat Demo/)
+    assert.match(html, /href="\/clients\/a\/training\?date=2026-09-28#selected-workout"/)
+    assert.match(html, view === 'week' ? /Prescribe Mon 2026-09-28/ : /Prescribe 2026-09-28/)
+    assert.doesNotMatch(html, /Other Client Workout|Unfinished Workout/)
+  }
 })
 
 test('legacy readiness detail keeps neutral wording and one shared client identity', () => {

@@ -7,6 +7,7 @@ import WorkoutPlanner from './WorkoutPlanner'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { programStats } from '../../lib/program'
+import { completedWorkoutsByDate } from '../../lib/planner'
 import { weekDates, todayISO, fmtDay } from '../../lib/dates'
 
 // Planner widget (Figma: Client Overview focus row). One persistent card:
@@ -31,6 +32,7 @@ export default function PlannerWidget({ client, size = 'medium', todayProps, ini
       .filter((p) => p.clientId === client.id && programStats(p).exercises > 0)
       .map((p) => p.date),
   )
+  const completed = completedWorkoutsByDate(db.workouts, client.id)
   const { prescription, workout, context = {} } = todayProps || {}
   const pStats = prescription ? programStats(prescription) : null
   const todayName = workout
@@ -75,17 +77,18 @@ export default function PlannerWidget({ client, size = 'medium', todayProps, ini
           {week.map((d, i) => {
             const isToday = d === today
             const isPlanned = planned.has(d)
-            const state = isToday ? 'today' : isPlanned ? 'planned' : 'rest'
+            const isCompleted = completed.has(d)
+            const state = isCompleted ? 'completed' : isToday ? 'today' : isPlanned ? 'planned' : 'rest'
             return (
               <button key={d} className={'pw-day' + (isToday ? ' today' : '')} onClick={() => setView('week')}
-                aria-label={`${d}${isPlanned ? ' — training day' : ' — rest day'}`}
-                title={isPlanned ? 'Training day' : 'Rest day'}>
+                aria-label={`${d}${isCompleted ? ' — completed workout logged' : isPlanned ? ' — prescribed session' : ' — no session planned or logged'}`}
+                title={isCompleted ? 'Completed workout log' : isPlanned ? 'Prescribed session' : 'No session planned or logged'}>
                 <span className="dw">{isToday ? 'Today' : DOW[i]}</span>
                 <span className={'pw-day-ic ' + state} aria-hidden="true">
-                  <Icon name={isPlanned ? 'dumbbell' : 'coffee'} size={15} />
+                  <Icon name={isCompleted || isPlanned ? 'dumbbell' : 'coffee'} size={15} />
                 </span>
                 <span className="dn">{+d.slice(8, 10)}</span>
-                <span className="pw-day-status">{isPlanned ? 'Train' : 'Rest'}</span>
+                <span className="pw-day-status">{isCompleted ? 'Done' : isPlanned ? 'Plan' : 'Open'}</span>
               </button>
             )
           })}

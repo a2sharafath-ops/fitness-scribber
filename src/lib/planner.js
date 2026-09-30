@@ -18,6 +18,19 @@ const blocksOf = (p) => (p?.blocks?.length ? p.blocks : itemsToBlocks(p?.items))
 // A prescription only counts as a "session" once it actually holds exercises.
 export const isSession = (p) => !!p && programStats(p).exercises > 0
 
+// A workout log is evidence of performed work, not a prescription. Calendar
+// views can display it without creating a second, misleading planner record.
+export function completedWorkoutsByDate(workouts, clientId) {
+  const byDate = new Map()
+  for (const workout of workouts || []) {
+    if (workout.clientId !== clientId || workout.status !== 'completed' || !workout.date) continue
+    const rows = byDate.get(workout.date) || []
+    rows.push(workout)
+    byDate.set(workout.date, rows)
+  }
+  return byDate
+}
+
 // Build a clip from a selected span of dates. `dates` is the full selection
 // (including empty days); only days holding a real session are carried, each
 // keyed by its offset from the first selected day. Returns null when the span

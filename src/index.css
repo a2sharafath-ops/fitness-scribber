@@ -270,6 +270,13 @@ canvas{max-width:100%}
 .plan-vl{font-size:10px;color:var(--muted);margin-top:4px;font-weight:700}
 /* Single session-name label per day (replaces the per-exercise list) */
 .plan-session{font-size:11px;font-weight:700;color:var(--blue);background:var(--tint-blue);border-radius:6px;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-source-key{font-size:11px;color:var(--muted);margin:0 0 8px}
+.plan-date-trigger{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;background:none;border:0;text-align:left;cursor:pointer;font:inherit}
+.plan-date-trigger:focus-visible,.plan-completed:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.plan-completed{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;min-height:44px;margin-top:5px;padding:5px 7px;border-radius:6px;background:var(--tint-green);color:var(--green);font-size:11px;font-weight:750;line-height:1.25}
+.plan-completed:hover{background:#d5efdc}
+.plan-completed-status{white-space:nowrap}
+.plan-completed-name{max-width:100%;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}
 .plan-rest{font-size:10px;font-style:italic;padding:2px 0}
 .planner-featured .plan-session,.planner-medium .plan-session{font-size:12px}
 /* Per-day load-response metrics inside a planner cell */
@@ -317,6 +324,7 @@ canvas{max-width:100%}
 .plan-cell:hover{border-color:var(--accent)}
 .plan-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .plan-cell.out{opacity:.45}
+.plan-cell.has-record{min-height:120px}
 .plan-cell .pc-date{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
 .plan-cell .pc-today{font-size:8px;font-weight:800;letter-spacing:.4px;color:var(--accent);text-transform:uppercase}
 .plan-cell .pc-more{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px}
@@ -1395,6 +1403,7 @@ html:has(.progress-index){overflow-x:clip}
 .pw-day.today .dw{color:var(--accent)}
 .pw-day-ic{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;color:#c6c7cc}
 .pw-day-ic.planned{color:var(--blue);background:var(--surface2)}
+.pw-day-ic.completed{color:var(--green);background:var(--tint-green)}
 .pw-day-ic.today{color:var(--accent);background:var(--surface)}
 .pw-day-ic.rest{color:#b7b8be}
 .pw-day .dn{font-size:11px;color:var(--muted);font-weight:600}
