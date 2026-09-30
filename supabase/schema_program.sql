@@ -8,6 +8,7 @@
 
 -- ---- Block-structured programs on existing tables ----------------------
 alter table prescriptions add column if not exists "blocks" jsonb default '[]'::jsonb;
+alter table prescriptions add column if not exists "name" text;
 alter table templates     add column if not exists "blocks" jsonb default '[]'::jsonb;
 
 -- Trainer-chosen lifts for "Current Lifts Performance": only these push

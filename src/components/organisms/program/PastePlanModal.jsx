@@ -4,15 +4,15 @@ import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
-import { fmtDay } from '../../../lib/dates'
-import { clipTargets, clipClashes, pasteClip } from '../../../lib/planner'
+import { fmtDay, todayISO } from '../../../lib/dates'
+import { clipTargets, clipClashes, pasteClip, isClosedTrainingDay } from '../../../lib/planner'
 import { toast, confirmDialog } from '../../../lib/toast'
 
 // Fan a copied span of planner days out to several clients at once. The clip's
 // pattern is preserved: sessions land at the same relative offsets from the
 // chosen start date, so a Mon/Wed/Fri block stays a Mon/Wed/Fri block.
 export default function PastePlanModal({ clip }) {
-  const { db, commit } = useData()
+  const { db, commit, tz } = useData()
   const { closeModal } = useModal()
   const [ids, setIds] = useState(new Set())
   const [start, setStart] = useState(clip.anchor)
@@ -25,6 +25,10 @@ export default function PastePlanModal({ clip }) {
   const apply = async () => {
     const list = [...ids]
     if (!list.length || !start) return
+    if (list.some((cid) => targets.some((date) => isClosedTrainingDay(db, cid, date, todayISO(tz))))) {
+      toast('One or more target days are past or completed. Choose open dates.', 'error')
+      return
+    }
     const clash = list.filter((cid) => clipClashes(db, clip, cid, start).length)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',

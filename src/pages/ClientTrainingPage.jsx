@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
 import ClientWorkoutFlow from '../components/organisms/ClientWorkoutFlow'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
+import WorkoutBuilderModal from '../components/organisms/program/WorkoutBuilderModal'
 import AICoach from '../components/organisms/AICoach'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { useData } from '../store/DataContext'
@@ -30,12 +31,12 @@ export default function ClientTrainingPage() {
   const plan = db.plans.find((item) => item.id === client.planId)
   const workouts = (db.workouts || []).filter((item) => item.clientId === id && item.status === 'completed')
     .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10)
+  const selectedCompleted = (db.workouts || []).find((item) => item.clientId === id && item.date === selectedDate && item.status === 'completed')
   const completedAppointments = db.sessions.filter((item) => item.clientId === id && item.status === 'Completed')
     .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5)
-  const selectDate = (date, scroll = false) => {
+  const selectDate = (date) => {
     if (logging) return
     setSearchParams(date === today ? {} : { date })
-    if (scroll) document.getElementById('selected-workout')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
@@ -70,14 +71,17 @@ export default function ClientTrainingPage() {
             {selectedDate !== today && <Button variant="ghost" size="sm" onClick={() => selectDate(today)}>Today</Button>}
           </div>}
         </div>
-        <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} onRunStateChange={setLogging} />
+        {selectedCompleted ? <div className="card training-completed-preview">
+          <div><strong>{selectedCompleted.title || 'Completed workout'}</strong><p className="muted">Completed workout log for {fmtDate(selectedDate)}.</p></div>
+          <Button variant="ghost" size="sm" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={selectedDate} review />, 'xl')}>Review day</Button>
+        </div> : <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} onRunStateChange={setLogging} />}
         {logging && <p className="training-save-note">Save &amp; exit in the workout before switching dates or opening the planner.</p>}
       </section>
 
       {!logging && <>
         <section className="training-planner" aria-labelledby="training-planner-title">
           <div className="training-section-head">
-            <div><h2 id="training-planner-title">Plan the week</h2><p className="muted">Choose a day to prescribe. Copy sessions across days or clients from the planner.</p></div>
+            <div><h2 id="training-planner-title">Workout calendar</h2><p className="muted">Choose a day to review a workout or plan an open date.</p></div>
           </div>
           <WorkoutPlanner client={client} focusDate={selectedDate} />
         </section>
@@ -90,9 +94,9 @@ export default function ClientTrainingPage() {
             <div>
               <h3>Completed workout logs</h3>
               {workouts.length ? workouts.map((item) => <button key={item.id} className="training-history-row"
-                onClick={() => selectDate(item.date, true)}>
+                onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={item.date} review />, 'xl')}>
                 <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.main?.length || 0} exercises</small></span>
-                <span>View summary →</span>
+                <span>Review day →</span>
               </button>) : <p className="muted">No completed workout logs yet.</p>}
             </div>
             <div>

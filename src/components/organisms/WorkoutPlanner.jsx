@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import Button from '../atoms/Button'
 import SegToggle from '../molecules/SegToggle'
 import DayMetrics from '../molecules/DayMetrics'
@@ -11,7 +10,7 @@ import { useClipboard } from '../../store/ClipboardContext'
 import { useFormat } from '../../hooks/useFormat'
 import { dailySum, dayMetrics } from '../../lib/calc'
 import { programStats } from '../../lib/program'
-import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession, deleteSpan, completedWorkoutsByDate } from '../../lib/planner'
+import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession, deleteSpan, completedWorkoutsByDate, isClosedTrainingDay } from '../../lib/planner'
 import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths, datesBetween } from '../../lib/dates'
 import { toast, confirmDialog } from '../../lib/toast'
 import { cloneBlocksFresh, itemsToBlocks } from '../../lib/program'
@@ -60,12 +59,12 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   }, [])
 
   const intMap = dailySum(db.srpe, client.id, 'tl')
-  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} />, 'xl')
+  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} review />, 'xl')
   const prescOn = (dt) => db.prescriptions.find((p) => p.clientId === client.id && p.date === dt)
   const dayData = (dt) => {
     const presc = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
     const stats = presc.map(programStats).reduce((a, s) => ({ exercises: a.exercises + s.exercises, sets: a.sets + s.sets, volume: a.volume + s.volume }), { exercises: 0, sets: 0, volume: 0 })
-    const names = presc.map((p) => (p.notes || '').trim()).filter(Boolean)
+    const names = presc.map((p) => (p.name || '').trim()).filter(Boolean)
     const name = names.length ? names.join(' · ') : (stats.exercises ? `Session · ${stats.exercises} ex / ${stats.sets} sets` : null)
     return { vl: Math.round(stats.volume), name }
   }
@@ -73,6 +72,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   const shownDates = view === 'month' ? monthGridDates(anchor) : weekDates(weekStart, tz)
   const prescribedDates = new Set(db.prescriptions.filter((p) => p.clientId === client.id && isSession(p)).map((p) => p.date))
   const completedByDate = completedWorkoutsByDate(db.workouts, client.id)
+  const completedAppointments = new Set((db.sessions || []).filter((item) => item.clientId === client.id && String(item.status).toLowerCase() === 'completed').map((item) => item.date))
   const periodDates = view === 'month' ? shownDates.filter((d) => d.slice(0, 7) === anchor.slice(0, 7)) : shownDates
   const plannedDays = periodDates.filter((d) => prescribedDates.has(d)).length
   const completedDays = periodDates.filter((d) => completedByDate.has(d)).length
@@ -113,6 +113,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   // so the whole pattern (and its gaps) is visible before committing.
   const pasteTargets = clip && hoverDt ? clipTargets(clip, hoverDt) : []
   const pasteAt = async (dt) => {
+    if (clipTargets(clip, dt).some((target) => isClosedTrainingDay(db, client.id, target, today))) return toast('A target day is already past or completed. Choose open dates.', 'error')
     const clash = clipClashes(db, clip, client.id, dt)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',
@@ -129,6 +130,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
     chip.current = null
     setDropDt(null)
     if (!src || src === dt) return
+    if (isClosedTrainingDay(db, client.id, dt, today)) return toast('This day is closed to new planning.', 'error')
     const p = prescOn(src)
     if (!isSession(p)) return
     if (prescribedDates.has(dt) && !await confirmDialog({
@@ -137,7 +139,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
       confirmLabel: 'Overwrite',
     })) return
     const blocks = p.blocks?.length ? p.blocks : itemsToBlocks(p.items)
-    commit((d) => writePrescription(d, client.id, dt, cloneBlocksFresh(blocks), p.notes || ''))
+    commit((d) => writePrescription(d, client.id, dt, cloneBlocksFresh(blocks), p.notes || '', p.name || ''))
     toast(`Copied ${fmtDay(src)} → ${fmtDay(dt)}.`)
   }
 
@@ -179,14 +181,22 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   )
 
   const completedChip = (dt, workouts) => workouts.length ? (
-    <Link className="plan-completed" to={`/clients/${client.id}/training?date=${dt}#selected-workout`}
+    <button type="button" className="plan-completed" onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
       title={`${workouts.length === 1 ? workouts[0].title || 'Workout' : `${workouts.length} workouts`} · completed workout log`}
-      aria-label={`${dt}: ${workouts.length} completed workout ${workouts.length === 1 ? workouts[0].title || 'Workout' : 'logs'}. View recorded workout`}
-      onMouseDown={(event) => event.stopPropagation()}
-      onClick={(event) => event.stopPropagation()}>
+      aria-label={`${dt}: ${workouts.length} completed workout ${workouts.length === 1 ? workouts[0].title || 'Workout' : 'logs'}. Review day in workout builder`}
+      onMouseDown={(event) => event.stopPropagation()}>
       <span className="plan-completed-status"><span aria-hidden="true">✓ </span>{workouts.length === 1 ? 'Completed' : `${workouts.length} completed`}</span>
       <span className="plan-completed-name">{workouts.length === 1 ? workouts[0].title || 'Workout' : 'Workout logs'}</span>
-    </Link>
+    </button>
+  ) : null
+
+  const appointmentChip = (dt, workouts) => !workouts.length && completedAppointments.has(dt) ? (
+    <button type="button" className="plan-appointment" onMouseDown={(event) => event.stopPropagation()}
+      onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
+      title="Completed appointment · no workout log"
+      aria-label={`${dt}: completed appointment; no workout log. Review day`}>
+      <span>Appt done</span><span>No log</span>
+    </button>
   ) : null
 
   const cls = (dt, base) =>
@@ -259,7 +269,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
         <>
           <div style={{ margin: '10px 0 8px', fontSize: 14, fontWeight: 700 }}>
             {monthLabel(anchor)} <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
-              — {clip ? 'click a day to paste' : 'click a day to prescribe · drag across days to select · drag a session onto another day to copy'}
+              — {clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
             </span>
           </div>
           <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>
@@ -271,12 +281,13 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
               const { vl, name } = dayData(dt)
               const logged = completedByDate.get(dt) || []
               return (
-                <div key={dt} className={cls(dt, 'plan-cell') + (logged.length ? ' has-record' : '') + (dt.slice(0, 7) !== anchor.slice(0, 7) ? ' out' : '')}
-                  role="group" aria-label={`${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : ''}`} {...cell(dt)}>
-                  <button type="button" className="pc-date plan-date-trigger" aria-label={`${clip ? 'Paste to' : 'Prescribe'} ${dt}${dt === today ? ' (today)' : ''}`}
+                <div key={dt} className={cls(dt, 'plan-cell') + (logged.length || completedAppointments.has(dt) ? ' has-record' : '') + (dt.slice(0, 7) !== anchor.slice(0, 7) ? ' out' : '')}
+                  role="group" aria-label={`${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : completedAppointments.has(dt) ? ', completed appointment with no workout log' : ''}`} {...cell(dt)}>
+                  <button type="button" className="pc-date plan-date-trigger" aria-label={`${clip ? 'Paste to' : 'Review or plan'} ${dt}${dt === today ? ' (today)' : ''}`}
                     onClick={(event) => { event.stopPropagation(); activateDate(dt) }}>{+dt.slice(8, 10)}{dt === today && <span className="pc-today">today</span>}</button>
                   {name && sessionChip(dt, name)}
                   {completedChip(dt, logged)}
+                  {appointmentChip(dt, logged)}
                   {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : null}
                   {/* Load metrics for a day exist only once its session RPE is logged;
                       future days therefore show no ACWR/Mono/Strain projections. */}
@@ -291,7 +302,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
         <>
           <div style={{ fontSize: 12, color: 'var(--muted)', margin: '8px 0' }}>
             Week of {fmtDate(weekDates(weekStart, tz)[0])}
-            {' — '}{clip ? 'click a day to paste' : 'click a day to prescribe · drag across days to select · drag a session onto another day to copy'}
+            {' — '}{clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
           </div>
           <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>
           <div className="plan-week">
@@ -300,12 +311,13 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
               const logged = completedByDate.get(dt) || []
               return (
                 <div key={dt} className={cls(dt, 'plan-day')}
-                  role="group" aria-label={`${DOW[i]} ${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : ''}`} {...cell(dt)}>
-                  <button type="button" className="pd-date plan-date-trigger" aria-label={`${clip ? 'Paste to' : 'Prescribe'} ${DOW[i]} ${dt}${dt === today ? ' (today)' : ''}`}
+                  role="group" aria-label={`${DOW[i]} ${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : completedAppointments.has(dt) ? ', completed appointment with no workout log' : ''}`} {...cell(dt)}>
+                  <button type="button" className="pd-date plan-date-trigger" aria-label={`${clip ? 'Paste to' : 'Review or plan'} ${DOW[i]} ${dt}${dt === today ? ' (today)' : ''}`}
                     onClick={(event) => { event.stopPropagation(); activateDate(dt) }}>{DOW[i]} {+dt.slice(8, 10)}{dt === today && <span className="plan-today-label">Today</span>}</button>
                   {name && sessionChip(dt, name)}
                   {completedChip(dt, logged)}
-                  {!name && !logged.length && <div className="plan-rest muted">Unplanned / no log</div>}
+                  {appointmentChip(dt, logged)}
+                  {!name && !logged.length && !completedAppointments.has(dt) && <div className="plan-rest muted">Unplanned / no log</div>}
                   {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : !logged.length && <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
                   {/* Load metrics for a day exist only once its session RPE is logged;
                       future days therefore show no ACWR/Mono/Strain projections. */}

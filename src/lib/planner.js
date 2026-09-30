@@ -18,6 +18,14 @@ const blocksOf = (p) => (p?.blocks?.length ? p.blocks : itemsToBlocks(p?.items))
 // A prescription only counts as a "session" once it actually holds exercises.
 export const isSession = (p) => !!p && programStats(p).exercises > 0
 
+// A past date or a completed appointment/workout is closed to new planning.
+// An existing prescription may still be reviewed (and corrected separately).
+export function isClosedTrainingDay(db, clientId, date, today) {
+  return date < today
+    || (db.workouts || []).some((w) => w.clientId === clientId && w.date === date && w.status === 'completed')
+    || (db.sessions || []).some((s) => s.clientId === clientId && s.date === date && String(s.status).toLowerCase() === 'completed')
+}
+
 // A workout log is evidence of performed work, not a prescription. Calendar
 // views can display it without creating a second, misleading planner record.
 export function completedWorkoutsByDate(workouts, clientId) {
@@ -42,7 +50,7 @@ export function buildClip(db, client, dates) {
     .map((date) => {
       const p = db.prescriptions.find((x) => x.clientId === client.id && x.date === date)
       if (!isSession(p)) return null
-      return { offset: daysBetween(anchor, date), blocks: blocksOf(p), notes: p.notes || '' }
+      return { offset: daysBetween(anchor, date), blocks: blocksOf(p), name: p.name || '', notes: p.notes || '' }
     })
     .filter(Boolean)
   if (!days.length) return null
@@ -65,11 +73,11 @@ export const clipClashes = (db, clip, clientId, startDate) =>
     isSession(db.prescriptions.find((p) => p.clientId === clientId && p.date === date)))
 
 // Write (or overwrite) one prescription on a client's calendar.
-export function writePrescription(draft, clientId, date, blocks, notes = '') {
+export function writePrescription(draft, clientId, date, blocks, notes = '', name = '') {
   const items = blocksToItems(blocks)
   const ex = draft.prescriptions.find((p) => p.clientId === clientId && p.date === date)
-  if (ex) { ex.blocks = blocks; ex.items = items; ex.notes = notes }
-  else draft.prescriptions.push({ id: uid(), clientId, date, notes, blocks, items })
+  if (ex) { ex.blocks = blocks; ex.items = items; ex.notes = notes; ex.name = name }
+  else draft.prescriptions.push({ id: uid(), clientId, date, name, notes, blocks, items })
 }
 
 // How many of `dates` actually hold a session for this client — what a delete
@@ -97,7 +105,7 @@ export function pasteClip(draft, clip, clientId, startDate) {
   const written = []
   for (const d of clip?.days || []) {
     const date = addDays(startDate, d.offset)
-    writePrescription(draft, clientId, date, cloneBlocksFresh(d.blocks), d.notes)
+    writePrescription(draft, clientId, date, cloneBlocksFresh(d.blocks), d.notes, d.name || '')
     written.push(date)
   }
   return written

@@ -11,10 +11,11 @@ const load = (path) => vite.ssrLoadModule(`/src/${path}`)
 const { TABLES } = await load('lib/supabase.js')
 const { fetchAll, persistDiff } = await load('api/sync.js')
 const { clientSectionPath, loadProgressPath, assessmentCanonicalPath } = await load('lib/clientRoutes.js')
-const { logWorkoutCheckin, completeClassicWorkout } = await load('lib/classicWorkflow.js')
+const { logWorkoutCheckin, completeClassicWorkout, correctClassicWorkout } = await load('lib/classicWorkflow.js')
 const { saveAssessmentRecord } = await load('lib/assessmentWrite.js')
 const { getWorkoutDraft, setWorkoutDraft, clearWorkoutDraft } = await load('lib/workoutDraft.js')
 const { removeWorkoutStrength, absolute1RM } = await load('lib/program.js')
+const { isClosedTrainingDay, writePrescription, buildClip, pasteClip } = await load('lib/planner.js')
 const { dailySum, dayMetrics, readinessFor } = await load('lib/calc.js')
 const { forClient, formalAssessments } = await load('lib/assessment.js')
 const { compareToObservedBand, observedReferenceBand, trailingObservedBands } = await load('lib/progress.js')
@@ -29,6 +30,8 @@ const { ClipboardProvider } = await load('store/ClipboardContext.jsx')
 const { default: ClientDetailPage } = await load('pages/ClientDetailPage.jsx')
 const { default: ClientTrainingPage } = await load('pages/ClientTrainingPage.jsx')
 const { default: WorkoutPlanner } = await load('components/organisms/WorkoutPlanner.jsx')
+const { default: WorkoutBuilderModal } = await load('components/organisms/program/WorkoutBuilderModal.jsx')
+const { default: CompletedWorkoutEditor } = await load('components/organisms/workout/CompletedWorkoutEditor.jsx')
 const { default: MonitorPage } = await load('pages/MonitorPage.jsx')
 const { default: ClientProgressPage } = await load('pages/ClientProgressPage.jsx')
 const { default: AssessmentsPage } = await load('pages/AssessmentsPage.jsx')
@@ -202,6 +205,7 @@ test('planner week and month show only this client’s completed workout logs, d
     { id: 'done-b', clientId: 'b', date: '2026-09-30', title: 'Other Client Workout', status: 'completed', main: [] },
     { id: 'draft-a', clientId: 'a', date: '2026-09-30', title: 'Unfinished Workout', status: 'in_progress', main: [] },
   )
+  db.sessions.push({ id: 'appointment-a', clientId: 'a', date: '2026-09-30', status: 'Completed' })
   const renderPlanner = (view) => renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db },
     React.createElement(ModalProvider, null,
       React.createElement(ClipboardProvider, null,
@@ -215,10 +219,80 @@ test('planner week and month show only this client’s completed workout logs, d
     const html = renderPlanner(view)
     assert.match(html, /class="plan-completed-status"[^>]*>.*Completed/)
     assert.match(html, /class="plan-completed-name">Squat Demo/)
-    assert.match(html, /href="\/clients\/a\/training\?date=2026-09-28#selected-workout"/)
-    assert.match(html, view === 'week' ? /Prescribe Mon 2026-09-28/ : /Prescribe 2026-09-28/)
+    assert.match(html, /Review day in workout builder/)
+    assert.match(html, /Appt done<\/span><span>No log/)
+    assert.match(html, view === 'week' ? /Review or plan Mon 2026-09-28/ : /Review or plan 2026-09-28/)
     assert.doesNotMatch(html, /Other Client Workout|Unfinished Workout/)
   }
+})
+
+test('session names persist separately from notes and completed days cannot receive new plans', () => {
+  const db = fixture()
+  const past = addDays(todayISO('UTC'), -1)
+  const future = addDays(todayISO('UTC'), 1)
+  writePrescription(db, 'a', future, [], 'Trainer notes', 'Lower-body strength')
+  assert.equal(db.prescriptions[0].name, 'Lower-body strength')
+  assert.equal(db.prescriptions[0].notes, 'Trainer notes')
+  db.prescriptions[0].items = [{ exercise: 'Squat', sets: 3, reps: 6, load: 70 }]
+  const clip = buildClip(db, db.clients[0], [future])
+  pasteClip(db, clip, 'b', addDays(future, 1))
+  assert.equal(db.prescriptions.find((item) => item.clientId === 'b').name, 'Lower-body strength')
+  assert.equal(isClosedTrainingDay(db, 'a', past, todayISO('UTC')), true)
+  assert.equal(isClosedTrainingDay(db, 'a', future, todayISO('UTC')), false)
+  db.sessions.push({ id: 'done', clientId: 'a', date: future, status: 'Completed' })
+  assert.equal(isClosedTrainingDay(db, 'a', future, todayISO('UTC')), true)
+  assert.equal(isClosedTrainingDay(db, 'b', future, todayISO('UTC')), false)
+})
+
+test('completed-workout corrections preserve unrelated data and refresh only changed strength work', () => {
+  const db = fixture()
+  const original = { id: 'logged', clientId: 'a', date: '2026-09-20', title: 'Squat day', status: 'completed',
+    warmup: [], cooldown: [], main: [{ id: 'lift', name: 'Squat', setRows: [{ n: 1, done: true, reps: 5, load: 50 }] }] }
+  db.workouts.push(original)
+  db.maxes.push({ id: 'old-peak', clientId: 'a', exercise: 'Squat', date: original.date, kind: 'e1rm', valueKg: 58.3, sourceWorkoutId: original.id })
+  db.assessments.push({ id: 'old-assessment', clientId: 'a', data: { sourceWorkoutId: original.id } })
+  correctClassicWorkout(db, 'a', { ...original, title: 'Renamed squat day' })
+  assert.equal(db.maxes[0].id, 'old-peak')
+  assert.equal(db.assessments[0].id, 'old-assessment')
+  const revised = { ...db.workouts[0], main: [{ ...original.main[0], setRows: [{ n: 1, done: true, reps: 5, load: 60 }] }] }
+  correctClassicWorkout(db, 'a', revised)
+  assert.equal(db.workouts[0].main[0].setRows[0].load, 60)
+  assert.equal(db.maxes.some((item) => item.id === 'old-peak'), false)
+  assert.equal(db.assessments.some((item) => item.id === 'old-assessment'), false)
+  assert.equal(db.maxes.some((item) => item.sourceWorkoutId === 'logged' && item.valueKg === 70), true)
+  assert.throws(() => correctClassicWorkout(db, 'b', revised), /another client/)
+})
+
+test('calendar day review shows completed blocks and insights without add-exercise actions', () => {
+  const db = fixture()
+  const past = addDays(todayISO('UTC'), -1)
+  db.workouts.push({ id: 'logged-a', clientId: 'a', date: past, title: 'Lower strength', status: 'completed', durationSec: 3600,
+    warmup: [], cooldown: [], main: [{ id: 'squat', name: 'Back squat', blockType: 'Main Lifts', setRows: [{ n: 1, done: true, reps: 6, load: 70 }] }] })
+  const renderDay = (date) => renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db },
+    React.createElement(ModalProvider, null, React.createElement(WorkoutBuilderModal, { clientId: 'a', date, review: true }))))
+  const completed = renderDay(past)
+  assert.match(completed, /Lower strength/)
+  assert.match(completed, /Main Lifts/)
+  assert.match(completed, /Back squat/)
+  assert.match(completed, /Session insights/)
+  assert.match(completed, /Edit logged details/)
+  assert.doesNotMatch(completed, /Add exercise|Save Workout/)
+  const correction = renderToStaticMarkup(React.createElement(CompletedWorkoutEditor, { workout: db.workouts[0], units: 'kg' }))
+  assert.match(correction, /Session name|Set 1 load/)
+  assert.doesNotMatch(correction, /Add exercise|Remove exercise|Add set/)
+  const emptyPast = renderDay(addDays(past, -1))
+  assert.match(emptyPast, /Past days are closed to new planning/)
+  assert.doesNotMatch(emptyPast, /Add exercise|Save Workout/)
+  db.prescriptions.push({ id: 'past-plan', clientId: 'a', date: addDays(past, -1), name: 'Upper-body plan', notes: '',
+    items: [{ exercise: 'Bench press', sets: 2, reps: 8, load: 40 }] })
+  const plannedPast = renderDay(addDays(past, -1))
+  assert.match(plannedPast, /Upper-body plan/)
+  assert.match(plannedPast, /Main Lifts|Bench press/)
+  assert.match(plannedPast, /Edit session/)
+  assert.doesNotMatch(plannedPast, /Add exercise|Save Workout/)
+  const future = renderDay(addDays(todayISO('UTC'), 1))
+  assert.match(future, /Session name/)
+  assert.match(future, /Add exercise/)
 })
 
 test('legacy readiness detail keeps neutral wording and one shared client identity', () => {

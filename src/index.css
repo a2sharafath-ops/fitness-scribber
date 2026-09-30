@@ -273,10 +273,34 @@ canvas{max-width:100%}
 .plan-source-key{font-size:11px;color:var(--muted);margin:0 0 8px}
 .plan-date-trigger{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;background:none;border:0;text-align:left;cursor:pointer;font:inherit}
 .plan-date-trigger:focus-visible,.plan-completed:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.plan-completed{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;min-height:44px;margin-top:5px;padding:5px 7px;border-radius:6px;background:var(--tint-green);color:var(--green);font-size:11px;font-weight:750;line-height:1.25}
+.plan-completed{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;width:100%;min-width:0;min-height:44px;margin-top:5px;padding:5px 7px;border:0;border-radius:6px;background:var(--tint-green);color:var(--green);font:inherit;font-size:11px;font-weight:750;line-height:1.25;text-align:left;cursor:pointer}
 .plan-completed:hover{background:#d5efdc}
 .plan-completed-status{white-space:nowrap}
 .plan-completed-name{max-width:100%;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}
+.plan-appointment{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;width:100%;min-height:44px;margin-top:5px;padding:6px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font:inherit;font-size:11px;font-weight:700;line-height:1.25;text-align:left;cursor:pointer}
+.plan-appointment:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.training-day-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.training-day-review-head h2{font-size:20px;margin:5px 0}
+.training-day-review-head p{margin:0 0 4px}
+.training-day-status{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.training-day-log-list{flex-wrap:wrap;margin:12px 0}
+.training-day-blocks{display:grid;gap:12px;margin-top:16px}
+.training-day-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.training-day-block h3{font-size:15px;margin:0 0 10px}
+.training-day-exercise{padding:10px 0;border-top:1px solid var(--border)}
+.training-day-exercise:first-of-type{border-top:0;padding-top:0}
+.training-day-exercise ol{list-style:none;margin:6px 0 0;padding-left:0;color:var(--muted);font-size:13px}
+.training-day-exercise li{margin:3px 0}
+.training-day-exercise p{margin:5px 0 0;font-size:13px}
+.training-day-insights-title{font-size:16px;margin:20px 0 0}
+.training-day-fields{display:grid;gap:12px;margin-bottom:16px}
+.training-day-fields label,.training-day-legacy-fields label{display:grid;gap:5px;font-size:12px;font-weight:700}
+.training-day-fields input,.training-day-fields textarea,.training-day-legacy-fields input{width:100%;min-height:44px;border:1px solid var(--border);border-radius:7px;padding:8px;background:var(--surface);color:var(--text);font:inherit}
+.training-day-legacy-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.training-day-actions{justify-content:flex-end;margin-top:16px}
+.training-completed-preview{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.training-completed-preview p{font-size:13px;margin:4px 0 0}
+@media(max-width:600px){.training-day-legacy-fields{grid-template-columns:1fr}.training-day-block{padding:10px}.training-day-review-head h2{font-size:18px}}
 .plan-rest{font-size:10px;font-style:italic;padding:2px 0}
 .planner-featured .plan-session,.planner-medium .plan-session{font-size:12px}
 /* Per-day load-response metrics inside a planner cell */

@@ -105,7 +105,7 @@ create table if not exists concerns (
 create table if not exists prescriptions (
   "id" text primary key,
   "coachId" uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  "clientId" text, "date" text, "notes" text, "items" jsonb default '[]'::jsonb
+  "clientId" text, "date" text, "name" text, "notes" text, "items" jsonb default '[]'::jsonb
 );
 
 create table if not exists templates (

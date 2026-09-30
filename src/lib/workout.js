@@ -211,7 +211,7 @@ export function buildFromPrescription(presc, { clientId, date, resolveTm }) {
   const main = (blocks || [])
     .filter((b) => b.blockType !== 'Warm-up' && b.blockType !== 'Cool-down')
     .flatMap((b) => b.exercises.map((e) => toItem(e, b.blockType)))
-  const w = base({ clientId, date, title: 'Prescribed workout', source: 'prescribed', planId: null, main, note: presc?.notes || 'Assigned in the workout planner' })
+  const w = base({ clientId, date, title: presc?.name?.trim() || 'Prescribed workout', source: 'prescribed', planId: null, main, note: presc?.notes || 'Assigned in the workout planner' })
   const warmup = section('Warm-up')
   const cooldown = section('Cool-down')
   if (warmup.length) w.warmup = warmup

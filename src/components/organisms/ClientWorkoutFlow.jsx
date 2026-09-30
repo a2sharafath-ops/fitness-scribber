@@ -4,11 +4,12 @@ import TodayWorkout from './workout/TodayWorkout'
 import CheckInModal from './workout/CheckInModal'
 import RPEModal from './workout/RPEModal'
 import WorkoutBuilderModal from './program/WorkoutBuilderModal'
+import { isClosedTrainingDay } from '../../lib/planner'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { toast } from '../../lib/toast'
 import { readinessScore, dailySum, acwrSeries } from '../../lib/calc'
-import { completeClassicWorkout, logWorkoutCheckin } from '../../lib/classicWorkflow'
+import { completeClassicWorkout, correctClassicWorkout, logWorkoutCheckin } from '../../lib/classicWorkflow'
 import { removeWorkoutStrength, resolveTrainingMax } from '../../lib/program'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { clearWorkoutDraft } from '../../lib/workoutDraft'
@@ -25,6 +26,8 @@ export default function ClientWorkoutFlow({ client, date, presentation = 'traini
   const sessionDate = date || todayISO(tz)
   const workout = (db.workouts || []).find((item) => item.clientId === client.id && item.date === sessionDate) || null
   const prescription = db.prescriptions.find((item) => item.clientId === client.id && item.date === sessionDate) || null
+  const dayClosed = isClosedTrainingDay(db, client.id, sessionDate, todayISO(tz))
+  const completedAppointment = db.sessions.some((item) => item.clientId === client.id && item.date === sessionDate && String(item.status).toLowerCase() === 'completed')
   const wearable = db.wearable.filter((item) => item.clientId === client.id && item.date <= sessionDate)
     .sort((a, b) => b.date.localeCompare(a.date))[0] || null
   const range = Array.from({ length: 28 }, (_, index) => addDays(sessionDate, index - 27))
@@ -33,7 +36,9 @@ export default function ClientWorkoutFlow({ client, date, presentation = 'traini
   const age = client.anthro?.age ?? null
 
   const saveWorkout = (item) => commit((data) => {
-    data.workouts = [...(data.workouts || []).filter((existing) => existing.id !== item.id), item]
+    const previous = (data.workouts || []).find((existing) => existing.id === item.id)
+    if (previous?.status === 'completed') correctClassicWorkout(data, client.id, item)
+    else data.workouts = [...(data.workouts || []).filter((existing) => existing.id !== item.id), item]
   })
   const saveTemplate = (plan) => commit((data) => { data.plans = [...data.plans, plan] })
   const clearWorkout = () => {
@@ -68,14 +73,14 @@ export default function ClientWorkoutFlow({ client, date, presentation = 'traini
   }
 
   const workoutProps = {
-    client, today: sessionDate, workout, prescription, plans: db.plans, exercises: db.exercises, preserveDraft: true,
+    client, today: sessionDate, workout, prescription, plans: db.plans, exercises: db.exercises, preserveDraft: true, dayClosed, completedAppointment,
     units, context: { readiness, acwr }, restingHr: wearable?.rhr ?? null,
     age, bodyMassKg: client.anthro?.massKg ?? null,
     resolveTm: (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg,
     onStart: startWorkout, onSave: saveWorkout, onComplete: setRpeW, onClear: clearWorkout,
     runOpen, onResume: () => setRunOpen(true), onExit: () => setRunOpen(false),
     onTemplate: saveTemplate,
-    onAddSession: () => openModal(<WorkoutBuilderModal clientId={client.id} date={sessionDate} />, 'xl'),
+    onAddSession: dayClosed ? null : () => openModal(<WorkoutBuilderModal clientId={client.id} date={sessionDate} />, 'xl'),
   }
 
   return (

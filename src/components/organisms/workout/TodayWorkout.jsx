@@ -5,6 +5,7 @@ import Icon from '../../atoms/Icon'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import WorkoutPlayer from './WorkoutPlayer'
 import WorkoutSummary from './WorkoutSummary'
+import CompletedWorkoutEditor from './CompletedWorkoutEditor'
 import { buildFromPlan, buildFromPrescription, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
 import { programStats } from '../../../lib/program'
 import { fmtVL } from '../../../lib/units'
@@ -22,7 +23,7 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // intercepts the Start press so the parent can run a pre-flight (check-in popup).
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
-export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, bare, preserveDraft = false }) {
+export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, bare, preserveDraft = false, dayClosed = false, completedAppointment = false }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -42,8 +43,8 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
           <div className="tw-rest">
             <span className="tw-rest-ic" aria-hidden="true"><Icon name="coffee" size={20} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="tw-rest-h">Rest day</div>
-              <div className="muted" style={{ fontSize: 13 }}>Nothing prescribed for {isToday ? 'today' : 'this date'}.</div>
+              <div className="tw-rest-h">{dayClosed ? 'No workout logged' : 'Rest day'}</div>
+              <div className="muted" style={{ fontSize: 13 }}>{completedAppointment ? 'Appointment completed; no workout log was saved.' : dayClosed ? 'This past date is closed to new planning.' : `Nothing prescribed for ${isToday ? 'today' : 'this date'}.`}</div>
             </div>
             {onAddSession && <Button size="sm" onClick={onAddSession}>＋ Add a session</Button>}
           </div>
@@ -56,15 +57,15 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
       <Shell bare={bare} extra={headerExtra} label={headerLabel}>
         <div className="tw-suggest">
           <div className="muted" style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px' }}>Prescribed for {isToday ? 'today' : 'this date'}</div>
-          <div style={{ fontSize: 17, fontWeight: 800, margin: '4px 0 2px' }}>Coach's session</div>
+          <div style={{ fontSize: 17, fontWeight: 800, margin: '4px 0 2px' }}>{prescription.name || "Coach's session"}</div>
           <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>{pStats.exercises} exercises · {pStats.sets} sets{prescription.notes ? ' · ' + prescription.notes : ''}</div>
           <div className="flex gap" style={{ flexWrap: 'wrap' }}>
-            <Button onClick={() => pick(buildFromPrescription(prescription, ctx))}>Use this workout</Button>
+            {!dayClosed && <Button onClick={() => pick(buildFromPrescription(prescription, ctx))}>Use this workout</Button>}
           </div>
         </div>
 
         {/* A coach-prescribed session is the athlete's only option — no swapping or hand-building. */}
-        {!athlete && (
+        {!athlete && !dayClosed && (
           <div className="tw-alt">
             {plans.length > 0 && (
               <div className="flex gap" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -87,8 +88,11 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   if (editing && !locked && workout.status !== 'in_progress') {
     return (
       <Shell bare={bare} extra={headerExtra} label={headerLabel}>
-        <WorkoutPlayer workout={workout} units={units} running={false} preserveDraft={preserveDraft}
-          onSave={(w) => { onSave(w); setEditing(false) }} onCancel={() => setEditing(false)} />
+        {workout.status === 'completed'
+          ? <CompletedWorkoutEditor workout={workout} units={units}
+              onSave={(updated) => { onSave(updated); setEditing(false) }} onCancel={() => setEditing(false)} />
+          : <WorkoutPlayer workout={workout} units={units} running={false} preserveDraft={preserveDraft}
+              onSave={(w) => { onSave(w); setEditing(false) }} onCancel={() => setEditing(false)} />}
       </Shell>
     )
   }
@@ -117,7 +121,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   // ---- Completed → full summary -------------------------------------
   if (workout.status === 'completed') {
     return (
-      <Shell bare={bare} extra={headerExtra} label={headerLabel} action={!locked && <Button variant="ghost" size="sm" onClick={onClear}>New workout →</Button>}>
+      <Shell bare={bare} extra={headerExtra} label={headerLabel}>
         <WorkoutSummary workout={workout} units={units} exercises={exercises} restingHr={restingHr} age={age} bodyMassKg={bodyMassKg}
           locked={locked} onEdit={() => setEditing(true)} onDelete={onClear} onTemplate={onTemplate}
           onDuration={(sec) => onSave({ ...workout, durationSec: sec })} />
@@ -137,9 +141,9 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
           {workout.note && <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{workout.note}</div>}
         </div>
         <div className="flex gap">
-          {!locked && <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>Edit</Button>}
-          {!locked && <Button variant="ghost" size="sm" onClick={onClear}>Change</Button>}
-          <Button size="sm" onClick={start}>▶ Start</Button>
+          {!locked && !dayClosed && <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>Edit</Button>}
+          {!locked && !dayClosed && <Button variant="ghost" size="sm" onClick={onClear}>Change</Button>}
+          {!dayClosed && <Button size="sm" onClick={start}>▶ Start</Button>}
         </div>
       </div>
       <div className="kpi-strip" style={{ marginTop: 12 }}>

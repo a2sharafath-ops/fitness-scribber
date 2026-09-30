@@ -6,8 +6,11 @@ import { useEffect, useRef, useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import MultiDatePicker from '../../molecules/MultiDatePicker'
 import BlockCard from './BlockCard'
+import DayBlockReview from './DayBlockReview'
 import ProgressionPanel from './ProgressionPanel'
 import DictationPanel from './DictationPanel'
+import CompletedWorkoutEditor from '../workout/CompletedWorkoutEditor'
+import WorkoutInsights from '../workout/WorkoutInsights'
 import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
 import { useData } from '../../../store/DataContext'
@@ -16,7 +19,9 @@ import { useFormat } from '../../../hooks/useFormat'
 import useDragReorder from '../../../hooks/useDragReorder'
 import { moveOrdered } from '../../../lib/arrange'
 import { uid } from '../../../lib/format'
-import { fmtDay, addDays } from '../../../lib/dates'
+import { fmtDay, addDays, todayISO } from '../../../lib/dates'
+import { isClosedTrainingDay } from '../../../lib/planner'
+import { correctClassicWorkout } from '../../../lib/classicWorkflow'
 import {
   newBlock, defaultBlocks, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
   applyProgression, resolveTrainingMax, hasUnmapped, resetTrainingMaxes, programStats,
@@ -46,12 +51,19 @@ const fromExisting = (p, seedBlocks = []) => {
   return base
 }
 
-export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '' }) {
-  const { db, commit } = useData()
+export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false }) {
+  const { db, commit, tz, units } = useData()
   const { closeModal, setCloseGuard } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
+  const completed = (db.workouts || []).filter((item) => item.clientId === clientId && item.date === date && item.status === 'completed')
+  const completedAppointment = (db.sessions || []).some((item) => item.clientId === clientId && item.date === date && String(item.status).toLowerCase() === 'completed')
+  const closedDay = isClosedTrainingDay(db, clientId, date, todayISO(tz))
+  const [selectedLogId, setSelectedLogId] = useState(() => completed[0]?.id || null)
+  const selectedLog = completed.find((item) => item.id === selectedLogId) || completed[0] || null
+  const [mode, setMode] = useState(() => completed.length || completedAppointment || (review && (existing || closedDay)) ? 'view' : 'edit')
   const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
+  const [name, setName] = useState(existing?.name || '')
   const [notes, setNotes] = useState(() => {
     const current = existing?.notes || ''
     if (!seedNotes || current.includes(seedNotes)) return current
@@ -62,8 +74,8 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const [targets, setTargets] = useState(new Set())
   const [clientTargets, setClientTargets] = useState(new Set())
   const initialDraftRef = useRef(null)
-  if (initialDraftRef.current === null) initialDraftRef.current = JSON.stringify({ blocks, notes })
-  const changed = JSON.stringify({ blocks, notes }) !== initialDraftRef.current
+  if (initialDraftRef.current === null) initialDraftRef.current = JSON.stringify({ blocks, name, notes })
+  const changed = mode === 'edit' && JSON.stringify({ blocks, name, notes }) !== initialDraftRef.current
   useEffect(() => {
     if (!changed) return undefined
     return setCloseGuard(() => confirmDialog({
@@ -91,7 +103,8 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     const prev = db.prescriptions.filter((p) => p.clientId === clientId && p.date < date).sort((a, b) => b.date.localeCompare(a.date))[0]
     if (!prev) return toast('No earlier session to copy.', 'error')
     setBlocks(cloneBlocksFresh(prev.blocks?.length ? prev.blocks : itemsToBlocks(prev.items)))
-    if (prev.notes) setNotes(prev.notes)
+    setName(prev.name || '')
+    setNotes(prev.notes || '')
     toast('Copied last session', 'info')
   }
 
@@ -101,8 +114,8 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const writeTo = (d, dt, payload, cid = clientId) => {
     const items = blocksToItems(payload)
     const ex = d.prescriptions.find((p) => p.clientId === cid && p.date === dt)
-    if (ex) { ex.blocks = payload; ex.items = items; ex.notes = notes }
-    else d.prescriptions.push({ id: uid(), clientId: cid, date: dt, notes, blocks: payload, items })
+    if (ex) { ex.blocks = payload; ex.items = items; ex.name = name.trim(); ex.notes = notes }
+    else d.prescriptions.push({ id: uid(), clientId: cid, date: dt, name: name.trim(), notes, blocks: payload, items })
   }
 
   // Days this client already has a real (non-empty) session on — surfaced in the
@@ -122,6 +135,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const copyToClients = async () => {
     const ids = [...clientTargets]
     if (!ids.length) return
+    if (ids.some((cid) => isClosedTrainingDay(db, cid, date, todayISO(tz)))) return toast('A selected client has a closed training day. Choose an open date.', 'error')
     const clash = ids.filter(hasSession)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',
@@ -139,6 +153,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   // with brand-new ids, no progression.
   const quickClone = async (offset) => {
     const dt = addDays(date, offset)
+    if (isClosedTrainingDay(db, clientId, dt, todayISO(tz))) return toast('The target day is closed to new planning.', 'error')
     if (db.prescriptions.some((p) => p.clientId === clientId && p.date === dt) &&
       !await confirmDialog({ title: 'Overwrite session', message: `${fmtDay(dt)} already has a session — overwrite it?`, confirmLabel: 'Overwrite' })) return
     commit((d) => writeTo(d, dt, cloneBlocksFresh(blocks)))
@@ -148,6 +163,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   // Spec 3.2 — calendar duplication is gated behind the Progression Rule Window.
   const bulkApply = (rules) => {
     const dates = [...targets].sort()
+    if (dates.some((dt) => isClosedTrainingDay(db, clientId, dt, todayISO(tz)))) return toast('The selected dates include a closed training day.', 'error')
     const progressed = applyProgression(blocks, rules, resolveTm)
     commit((d) => dates.forEach((dt) => writeTo(d, dt, cloneBlocksFresh(progressed))))
     setStep('edit')
@@ -169,7 +185,10 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   }
 
   const save = () => {
+    if (completed.length || completedAppointment || (closedDay && !existing)) return toast('This day is closed to new planning.', 'error')
     if (hasUnmapped(blocks)) return toast('Some dictated exercises are unvalidated (orange) — pick their standard library term first.', 'error')
+    if (!name.trim()) return toast('Add a session name before saving.', 'error')
+    if (!blocks.some((block) => block.exercises.length)) return toast('Add an exercise before saving this session.', 'error')
     const payload = blocks.map((b, i) => ({ ...b, order: i + 1 }))
     const events = []
     commit((d) => {
@@ -200,14 +219,47 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const total = blocksVolume(blocks)
 
   return (
-    <ModalShell title={'Workout — ' + fmtDay(date)} onClose={closeModal}
-      footer={step === 'edit' && <>
+    <ModalShell title={'Session · ' + fmtDay(date)} onClose={closeModal}
+      footer={mode === 'edit' && step === 'edit' && <>
         {existing && <Button variant="danger" onClick={del}>Delete</Button>}
         <Button variant="ghost" onClick={closeModal}>Cancel</Button>
         <Button onClick={save}>Save Workout</Button>
       </>}>
 
-      {step === 'dates' && (
+      {mode === 'view' && <div className="training-day-review">
+        <div className="training-day-review-head">
+          <div>
+            <span className="training-day-status">{selectedLog ? 'Completed workout log' : completedAppointment ? 'Completed appointment' : existing ? 'Prescribed session' : 'No session'}</span>
+            <h2>{selectedLog?.title || existing?.name || (existing ? 'Prescribed session' : 'No workout on this date')}</h2>
+            {(selectedLog?.note || existing?.notes) && <p className="muted">{selectedLog?.note || existing?.notes}</p>}
+          </div>
+          <div className="flex gap">
+            {selectedLog && <Button variant="ghost" size="sm" onClick={() => setMode('edit-log')}>Edit logged details</Button>}
+            {!selectedLog && existing && !completedAppointment && <Button variant="ghost" size="sm" onClick={() => setMode('edit')}>Edit session</Button>}
+          </div>
+        </div>
+        {completed.length > 1 && <div className="flex gap training-day-log-list" aria-label="Workout logs on this date">
+          {completed.map((item) => <Button key={item.id} variant={item.id === selectedLog?.id ? 'primary' : 'ghost'} size="sm" onClick={() => setSelectedLogId(item.id)}>{item.title}</Button>)}
+        </div>}
+        {selectedLog || existing ? <DayBlockReview workout={selectedLog} prescription={existing} units={units} />
+          : <p className="muted">{completedAppointment ? 'The appointment is complete, but no workout log was saved.' : 'No workout was prescribed or logged. Past days are closed to new planning.'}</p>}
+        {selectedLog && <>
+          <h3 className="training-day-insights-title">Session insights</h3>
+          <WorkoutInsights workout={selectedLog} units={units} exercises={db.exercises}
+            restingHr={null} age={client?.anthro?.age ?? null} bodyMassKg={client?.anthro?.massKg ?? null}
+            mood={db.wellness.find((item) => item.clientId === clientId && item.date === date)?.mood} />
+        </>}
+      </div>}
+
+      {mode === 'edit-log' && selectedLog && <CompletedWorkoutEditor key={selectedLog.id} workout={selectedLog} units={units}
+        onCancel={() => setMode('view')}
+        onSave={(updated) => {
+          commit((data) => correctClassicWorkout(data, clientId, updated))
+          setMode('view')
+          toast('Logged workout corrected.')
+        }} />}
+
+      {mode === 'edit' && step === 'dates' && (
         <>
           <div className="section-title" style={{ marginTop: 0 }}>Bulk paste — select target dates</div>
           <MultiDatePicker selected={targets} minDate={date} sourceDate={date} sessionDates={sessionDates}
@@ -218,7 +270,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
           </div>
         </>
       )}
-      {step === 'clients' && (
+      {mode === 'edit' && step === 'clients' && (
         <>
           <div className="section-title" style={{ marginTop: 0 }}>Copy this workout to other clients</div>
           <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
@@ -256,15 +308,16 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
           </div>
         </>
       )}
-      {step === 'progress' && (
+      {mode === 'edit' && step === 'progress' && (
         <ProgressionPanel blocks={blocks} dates={[...targets].sort()} onConfirm={bulkApply} onBack={() => setStep('dates')} />
       )}
-      {step === 'dictate' && (
+      {mode === 'edit' && step === 'dictate' && (
         <DictationPanel synonyms={db.synonyms} exercises={db.exercises} onInsert={insertDictated} onBack={() => setStep('edit')} />
       )}
 
-      {step === 'edit' && (
+      {mode === 'edit' && step === 'edit' && (
         <>
+          <Field label="Session name"><input value={name} maxLength={100} onChange={(event) => setName(event.target.value)} placeholder="e.g. Lower-body strength" /></Field>
           <div className="flex gap" style={{ marginBottom: 10, flexWrap: 'wrap' }}>
             <Button variant="ghost" size="sm" onClick={() => quickClone(1)} disabled={!blocks.length}>→ Copy to Tomorrow</Button>
             <Button variant="ghost" size="sm" onClick={() => setStep('clients')} disabled={!blocks.length}>👥 Copy to clients…</Button>
