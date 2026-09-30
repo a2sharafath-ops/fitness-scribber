@@ -26,22 +26,20 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
   }
 
   const kpis = [
-    ['Strain', s.strain || '—', '/21 · est'],
+    ['Strain', s.strain || '—', s.strain ? '/21 · est' : 'No measured HR'],
     ['Duration', s.durationSec ? secToClock(s.durationSec) : '—', 'start → finish'],
-    ['Energy', s.energy ? s.energy + ' kcal' : '—', 'est'],
-    ['Avg HR', s.avg ? s.avg + ' bpm' : '—', 'session'],
-    ['Peak HR', s.peak ? s.peak + ' bpm' : '—', `${s.maxHr} max`],
-    ['HR recovery', s.hrr != null ? s.hrr + ' bpm' : '—', '1-min · est'],
+    ['Energy', s.energy ? s.energy + ' kcal' : '—', s.energy ? 'est' : 'No measured HR'],
+    ['Avg HR', s.avg ? s.avg + ' bpm' : '—', s.avg ? 'measured' : 'No measured HR'],
+    ['Peak HR', s.peak ? s.peak + ' bpm' : '—', s.peak ? 'measured' : 'No measured HR'],
     ['Weight moved', fmtVL(s.volume, units), 'total tonnage'],
     ['Reps', s.reps || '—', `${s.sets} sets`],
-    ['Cardio load', s.trimp || '—', 'TRIMP · est'],
-    ['Perceived effort', s.rpe ? s.rpe + '/10' : '—', 'from peak HR'],
+    ['Cardio load', s.trimp || '—', s.trimp ? 'TRIMP · est' : 'No measured HR'],
   ]
 
   const shareText = () => [
     `${workout.title} — ${fmtDate(workout.date)}`,
     `Duration ${secToClock(s.durationSec)} · Strain ${s.strain} · ${s.energy} kcal`,
-    `Avg HR ${s.avg ?? '—'} · Peak ${s.peak ?? '—'} · Effort ${s.rpe ?? '—'}/10`,
+    `Avg HR ${s.avg ?? '—'} · Peak ${s.peak ?? '—'}`,
     `Weight moved ${fmtVL(s.volume, units)} · ${s.reps} reps`,
     '',
     ...main.map((m) => `• ${m.name}: ${m.sets}×${m.duration || m.reps}${m.weight != null ? ` @ ${toDisp(m.weight, units)} ${unitName(units)}` : ''} · rest ${secToClock(m.rest)}`),
@@ -95,7 +93,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
           ) : <div className="muted" style={{ fontSize: 13 }}>No load recorded.</div>}
         </div>
         <div className="card" style={{ background: 'var(--surface2)' }}>
-          <div className="section-title" style={{ margin: '0 0 8px' }}>Muscular strain by group</div>
+          <div className="section-title" style={{ margin: '0 0 8px' }}>Logged work by group</div>
           {s.muscleStrain.length ? (
             <div style={{ height: 180 }}>
               <Bar

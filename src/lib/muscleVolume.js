@@ -20,8 +20,17 @@ export function resolveMuscleExercise(exercises, item) {
   return matches.length === 1 ? matches[0] : null
 }
 
-export function muscleVolume(db, clientId, start, end) {
+export const WORKING_GROUPS = ['Main Lift', 'Accessory Lift', 'Power']
+export function workingGroup(item) {
+  // A warm-up/cool-down block always wins over a library or coach category.
+  if (/warm[ -]?up|cool[ -]?down/i.test(item.blockType || '')) return null
+  if (WORKING_GROUPS.includes(item.muscleVolumeGroup)) return item.muscleVolumeGroup
+  return ({ 'Main Lifts': 'Main Lift', 'Main Lift': 'Main Lift', Assisted: 'Accessory Lift', 'Accessory Lift': 'Accessory Lift', 'Accessory Lifts': 'Accessory Lift', Power: 'Power', 'Power Ballistic': 'Power', Ballistic: 'Power' })[item.blockType] || null
+}
+
+export function muscleVolume(db, clientId, start, end, { workingOnly = false } = {}) {
   const observations = []
+  const excluded = []
   const inWindow = (r) => r.clientId === clientId && r.date >= start && r.date <= end
   const add = (row, name, sets, reps, load, key, exId) => {
     if (!sets) return
@@ -29,23 +38,32 @@ export function muscleVolume(db, clientId, start, end) {
     const targets = muscleTargets(exercise)
     const validLoad = number(load)
     const validReps = count(reps)
-    observations.push({ key, date: row.date, name: name || 'Unnamed exercise', exercise, targets, sets,
+    observations.push({ key, date: row.date, name: name || 'Unnamed exercise', exercise, targets, sets, reps: validReps, load: validLoad, group: row.group,
       source: row.source || 'Source not recorded',
       volume: validReps != null && validLoad != null && validLoad >= 0 ? sets * validReps * validLoad : null })
   }
   for (const w of (db.workouts || []).filter((w) => inWindow(w) && w.status === 'completed')) {
     for (const [i, item] of (w.main || []).entries()) {
-      const row = { ...w, source: 'Completed workout' }
+      const row = { ...w, source: 'Completed workout', group: workingGroup(item) }
+      const allow = (s, j, sets) => {
+        if (!workingOnly) return true
+        const isWarm = /warm[ -]?up|cool[ -]?down/i.test(item.blockType || '') || [item.purpose, s.purpose].some((p) => p === 'warmup' || p === 'warm-up') || item.isWarmup === true || s.isWarmup === true
+        const reason = isWarm ? 'Warm-up / cool-down' : !row.group ? 'Lift group needs review' : s.purpose !== 'working' ? 'Set type needs review' : !sets ? 'Actual set count missing' : null
+        if (!reason) return true
+        excluded.push({ key: `workout:${w.id}:${i}:${j ?? 'legacy'}`, workoutId: w.id, itemId: item.id, itemIndex: i, setIndex: j, date: w.date, name: item.name || 'Unnamed exercise', sets, reason, reviewable: !isWarm && !!sets, group: row.group, purpose: s.purpose || '' })
+        return false
+      }
       if (Array.isArray(item.setRows) && item.setRows.length) {
-        item.setRows.forEach((s, j) => { if (s.done) add(row, item.name, 1, s.reps, s.load, `workout:${w.id}:${i}:${j}`, item.exId) })
+        item.setRows.forEach((s, j) => { if (s.done && allow(s, j, 1)) add(row, item.name, 1, s.reps, s.load, `workout:${w.id}:${i}:${j}`, item.exId) })
       } else if (item.done) {
+        if (!allow(item, null, count(item.doneSets))) continue
         // Legacy actuals only. Prescribed sets/reps/weight are not performance.
         add(row, item.name, count(item.doneSets), item.doneReps, item.doneWeight, `workout:${w.id}:${i}`, item.exId)
         if (!count(item.doneSets)) observations.push({ key: `workout:${w.id}:${i}`, date: w.date, name: item.name || 'Unnamed exercise', source: row.source, sets: 0, volume: null, targets: { direct: [], indirect: [] }, unknownSets: true })
       }
     }
   }
-  for (const r of (db.resistance || []).filter(inWindow)) {
+  for (const r of (workingOnly ? [] : db.resistance || []).filter(inWindow)) {
     add(r, r.exercise, count(r.sets), r.reps, r.weight, `resistance:${r.id}`)
   }
   const muscles = MUSCLES.map((muscle) => {
@@ -58,6 +76,19 @@ export function muscleVolume(db, clientId, start, end) {
       volume: known.length ? known.reduce((sum, r) => sum + r.volume, 0) : null,
       missingVolumeSets: sumSets(direct.filter((r) => r.volume == null)), observations: [...direct, ...indirect] }
   }).filter((r) => r.directSets || r.indirectSets)
-  return { muscles, observations, unmapped: observations.filter((r) => !r.targets.direct.length && !r.targets.indirect.length),
+  return { muscles, observations, excluded, separateLogs: (db.resistance || []).filter(inWindow).length, unmapped: observations.filter((r) => !r.targets.direct.length && !r.targets.indirect.length),
     totalSets: observations.reduce((sum, r) => sum + r.sets, 0) }
+}
+
+// Re-check the source identity before editing nested JSON; never alter another client.
+export function reviewMuscleSet(db, clientId, record, group, purpose) {
+  if (!WORKING_GROUPS.includes(group) || !['working', 'warmup'].includes(purpose)) return false
+  const workout = (db.workouts || []).find((w) => w.id === record.workoutId && w.clientId === clientId && w.status === 'completed')
+  const item = workout?.main?.[record.itemIndex]
+  if (!item || item.id !== record.itemId || item.name !== record.name || /warm[ -]?up|cool[ -]?down/i.test(item.blockType || '')) return false
+  const set = record.setIndex == null ? item : item.setRows?.[record.setIndex]
+  if (!set?.done) return false
+  item.muscleVolumeGroup = group
+  set.purpose = purpose
+  return true
 }

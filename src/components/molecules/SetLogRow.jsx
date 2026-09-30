@@ -8,7 +8,7 @@ import { toDisp, dispToKg, unitName } from '../../lib/units'
 const RPE_SCALE = [10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5]
 const RIR_SCALE = [0, 1, 2, 3, 4, 5, 6]
 
-export default function SetLogRow({ row, units, onChange }) {
+export default function SetLogRow({ row, units, onChange, warmupBlock = false }) {
   const effortType = row.effortType === 'RPE' ? 'RPE' : 'RIR'
   const scale = effortType === 'RPE' ? RPE_SCALE : RIR_SCALE
 
@@ -35,7 +35,7 @@ export default function SetLogRow({ row, units, onChange }) {
   return (
     <div className={'slog' + (row.done ? ' done' : '')}>
       <span className="slog-n">{row.n}</span>
-      <span className="slog-target" title="Prescribed target">{target}</span>
+      <span className="slog-target" title="Prescribed target">{target}<select style={{ minHeight: 44, marginTop: 4, width: '100%' }} aria-label={`Set ${row.n} type`} value={warmupBlock ? 'warmup' : row.purpose || ''} disabled={warmupBlock} onChange={(e) => onChange({ purpose: e.target.value })}><option value="">Choose set type</option><option value="working">Working set</option><option value="warmup">Warm-up set</option></select></span>
       <label className="slog-f"><span>Load ({unitName(units)})</span>
         <input type="number" step="0.5" inputMode="decimal" value={row.load == null ? '' : toDisp(row.load, units)}
           placeholder={row.pLoadKg != null ? String(toDisp(row.pLoadKg, units)) : '—'} aria-label={`Set ${row.n} load`}

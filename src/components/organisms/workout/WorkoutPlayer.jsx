@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from '../../atoms/Button'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import SetLogRow from '../../molecules/SetLogRow'
-import HeartRateTile from '../../molecules/HeartRateTile'
 import { newExercise, secToClock, workoutVolume, runBlocks, normalizeRunItem } from '../../../lib/workout'
 import { fmtVL } from '../../../lib/units'
 import { getWorkoutDraft, setWorkoutDraft, clearWorkoutDraft } from '../../../lib/workoutDraft'
@@ -18,14 +17,13 @@ const prepareForRun = (workout, resolveTm) => {
 //                   …) where every set is logged with load, reps and RIR/RPE,
 //                   plus a per-exercise note. Used by both the coach's in-app
 //                   runner and the athlete portal (locked only affects editing).
-export default function WorkoutPlayer({ workout, units, restingHr, age, running, locked, resolveTm, onSave, onComplete, onCancel, preserveDraft = false }) {
+export default function WorkoutPlayer({ workout, units, running, locked, resolveTm, onSave, onComplete, onCancel, preserveDraft = false }) {
   const mode = running ? 'run' : 'edit'
   const [w, setW] = useState(() => (preserveDraft && getWorkoutDraft(workout, mode)) || (running ? prepareForRun(workout, resolveTm) : workout))
   const [now, setNow] = useState(Date.now())
   const [step, setStep] = useState(0)
   const [showWarm, setShowWarm] = useState(true)
   const [showCool, setShowCool] = useState(false)
-  const hr = useRef({ sum: 0, n: 0, max: 0 })
 
   // Reset local state when a different session loads. Live sessions are
   // normalised so every exercise has per-set logging rows (older sessions and
@@ -59,11 +57,8 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
   }, [running])
 
   const elapsed = running && w.startedAt ? Math.max(0, Math.floor((now - new Date(w.startedAt).getTime()) / 1000)) : 0
-  const onSample = (bpm) => { const h = hr.current; h.sum += bpm; h.n += 1; h.max = Math.max(h.max, bpm) }
-
   const complete = () => {
-    const h = hr.current
-    onComplete({ ...w, status: 'completed', endedAt: new Date().toISOString(), durationSec: elapsed, hrAvg: h.n ? Math.round(h.sum / h.n) : null, hrMax: h.max || null })
+    onComplete({ ...w, status: 'completed', endedAt: new Date().toISOString(), durationSec: elapsed, hrAvg: null, hrMax: null })
   }
 
   // ---- Live: block-by-block stepper ----------------------------------------
@@ -101,10 +96,6 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
           <div className="wp-timer" role="timer" aria-label="Elapsed time">⏱ {secToClock(elapsed)}</div>
         </div>
 
-        <div style={{ margin: '10px 0' }}>
-          <HeartRateTile active restingHr={restingHr} age={age} onSample={onSample} />
-        </div>
-
         {/* Progress across blocks */}
         <nav className="wp-steps" aria-label="Session blocks">
           {blocks.map((b, i) => (
@@ -127,7 +118,7 @@ export default function WorkoutPlayer({ workout, units, restingHr, age, running,
                   <span /><span>Target</span><span>Load</span><span>Reps</span><span>{it.setRows[0]?.effortType === 'RPE' ? 'RPE' : 'RIR'}</span><span>✓</span>
                 </div>
                 {it.setRows.map((r, i) => (
-                  <SetLogRow key={i} row={r} units={units} onChange={(patch) => patchRow(cur.section, it.id, i, patch)} />
+                  <SetLogRow key={i} row={r} units={units} warmupBlock={cur.section === 'warmup' || /warm[ -]?up/i.test(it.blockType || '')} onChange={(patch) => patchRow(cur.section, it.id, i, patch)} />
                 ))}
                 <label className="wp-ex-note">
                   <span>Note / reflection</span>

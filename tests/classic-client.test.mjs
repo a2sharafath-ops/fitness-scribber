@@ -34,6 +34,25 @@ const { default: AssessmentsPage } = await load('pages/AssessmentsPage.jsx')
 const { default: AssessmentDetailPage } = await load('pages/AssessmentDetailPage.jsx')
 const { default: ClientProfilePage } = await load('pages/ClientProfilePage.jsx')
 const { default: MetricDetailPage } = await load('pages/MetricDetailPage.jsx')
+const { muscleVolume, reviewMuscleSet } = await load('lib/muscleVolume.js')
+const { setRowFromPrescribed, ensureSetRows, summarize: summarizeWorkout } = await load('lib/workout.js')
+const { default: RPEModal } = await load('components/organisms/workout/RPEModal.jsx')
+
+test('simulated workout heart rate is not reported as measured or used to suggest RPE', () => {
+  const oldSession = { durationSec: 1800, hrAvg: 124, hrMax: 128, main: [] }
+  const result = summarizeWorkout(oldSession)
+  assert.equal(result.avg, null)
+  assert.equal(result.peak, null)
+  assert.equal(result.energy, null)
+  assert.equal(result.trimp, 0)
+  assert.equal(result.strain, 0)
+  assert.equal(result.hrr, null)
+  const modal = renderToStaticMarkup(React.createElement(RPEModal, { workout: oldSession }))
+  assert.match(modal, /Choose your rating/)
+  assert.match(modal, /Select an RPE to calculate/)
+  assert.doesNotMatch(modal, /suggested.*peak HR/)
+  assert.match(modal, /disabled=""[^>]*>Save &amp; finish/)
+})
 
 const fixture = () => ({
   ...Object.fromEntries(TABLES.map((table) => [table, []])),
@@ -463,4 +482,48 @@ test('Classic flow persists only its changed workout, check-in, load, strength, 
   assert.deepEqual(await persistDiff(prev, next, backend.client), [])
   assert.deepEqual(backend.calls.map((call) => call.table).sort(), ['assessments', 'maxes', 'srpe', 'wellness', 'workouts'])
   assert.ok(backend.calls.every((call) => call.data.every((row) => row.clientId === 'a')))
+})
+
+test('Training load renders the live muscle map with client-owned working sets and missing-data coverage', () => {
+  const db = fixture(), date = todayISO('UTC')
+  db.exercises = [{ id: 'squat', name: 'Verified squat', muscleTargets: { direct: ['Quadriceps', 'Glutes'], indirect: ['Abdominals'] } }]
+  const w = { id: 'w', clientId: 'a', date, status: 'completed', main: [{ id: 'e', name: 'Verified squat', exId: 'squat', blockType: 'Main Lifts', setRows: [
+    { purpose: 'working', done: true, reps: 5, load: 80 }, { purpose: 'working', done: true, reps: null, load: 80 }, { purpose: 'warmup', done: true, reps: 10, load: 20 },
+  ] }] }
+  db.workouts = [w, { ...w, id: 'other', clientId: 'b', main: [{ name: 'Private other lift', done: true, doneSets: 6 }] }]
+  const html = renderClientPage('/clients/a/progress#training-load', db, ClientProgressPage)
+  assert.match(html, /Weekly muscle volume/)
+  assert.match(html, /Quadriceps: 2 direct sets/)
+  assert.match(html, /1\/2 with known volume load/)
+  assert.doesNotMatch(html, /Verified squat/)
+  assert.doesNotMatch(html, /Private other lift/)
+  assert.match(html, /muscle-body-outline/)
+  assert.match(html, /Muscle-volume week containing/)
+  const empty = renderClientPage('/clients/b/progress#training-load', { ...db, workouts: [] }, ClientProgressPage)
+  assert.match(empty, /No classified working sets for this week/)
+})
+
+test('muscle classification persists and reloads through workout JSON without changing recorded actuals', async () => {
+  const prev = fixture()
+  prev.exercises = [{ id: 'bench', name: 'Bench Press', muscleTargets: { direct: ['Chest'], indirect: [] } }]
+  prev.workouts = [{ id: 'w', clientId: 'a', date: '2026-09-22', status: 'completed', main: [{ id: 'e', name: 'Bench Press', setRows: [{ done: true, reps: 8, load: 30 }] }] }]
+  const next = structuredClone(prev)
+  const report = muscleVolume(next, 'a', '2026-09-21', '2026-09-27', { workingOnly: true })
+  assert.equal(reviewMuscleSet(next, 'a', report.excluded[0], 'Accessory Lift', 'working'), true)
+  const backend = fakeBackend()
+  assert.deepEqual(await persistDiff(prev, next, backend.client), [])
+  assert.deepEqual(backend.calls.map((c) => c.table), ['workouts'])
+  const persisted = backend.calls[0].data[0]
+  assert.deepEqual(persisted.main[0].setRows[0], { done: true, reps: 8, load: 30, purpose: 'working' })
+  const reloaded = { ...next, workouts: JSON.parse(JSON.stringify([persisted])) }
+  assert.equal(muscleVolume(reloaded, 'a', '2026-09-21', '2026-09-27', { workingOnly: true }).muscles[0].volume, 240)
+  const denied = fakeBackend({}, { 'upsert:workouts': { message: 'write denied' } })
+  assert.equal((await persistDiff(prev, next, denied.client))[0].table, 'workouts')
+})
+
+test('new logging rows support warm-up purpose without silently relabeling existing set rows', () => {
+  assert.equal(setRowFromPrescribed({ purpose: 'warmup' }).purpose, 'warmup')
+  assert.equal(setRowFromPrescribed({}).purpose, 'working')
+  assert.equal(ensureSetRows({ sets: 2 })[0].purpose, 'working')
+  assert.equal(ensureSetRows({ setRows: [{ done: true, reps: 5, load: 20 }] })[0].purpose, undefined)
 })

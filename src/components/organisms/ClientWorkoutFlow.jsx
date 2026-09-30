@@ -86,7 +86,7 @@ export default function ClientWorkoutFlow({ client, date, presentation = 'traini
           headerLabel={sessionDate === todayISO(tz) ? "Today's Workout" : `Workout · ${fmtDate(sessionDate)}`} />}
       {checkinW && <CheckInModal today={sessionDate} onSubmit={submitCheckin} onSkip={skipCheckin}
         onClose={() => { setCheckinW(null); setRunOpen(false) }} />}
-      {rpeW && <RPEModal workout={rpeW} age={age}
+      {rpeW && <RPEModal workout={rpeW}
         onSubmit={(rpe, minutes) => finishWorkout(rpeW, rpe, minutes)}
         onSkip={(minutes) => finishWorkout(rpeW, null, minutes)} onClose={() => setRpeW(null)} />}
     </>

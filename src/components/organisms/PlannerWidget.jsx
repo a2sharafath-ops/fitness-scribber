@@ -39,7 +39,7 @@ export default function PlannerWidget({ client, size = 'medium', todayProps, ini
       ? (prescription.notes || 'Prescribed session')
       : 'Rest / unplanned'
   const todayMeta = workout
-    ? `${workout.items?.length || 0} exercises`
+    ? `${workout.main?.length || 0} ${(workout.main?.length || 0) === 1 ? 'exercise' : 'exercises'}`
     : pStats && pStats.exercises
       ? `${pStats.exercises} ex · ${pStats.sets} sets · VL ${fmtVL(Math.round(pStats.volume))}`
       : 'Nothing prescribed for today'

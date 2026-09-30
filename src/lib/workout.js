@@ -60,6 +60,7 @@ export const setRowFromPrescribed = (s = {}, i = 0, intensityType = null, tmKg =
   const target = targetLoadKg(intensityType, s, tmKg)
   return {
     n: i + 1,
+    purpose: s.purpose || 'working',
     pReps: s.prescribedReps ?? null,
     pIntensityType: intensityType,
     pIntensityValue: s.prescribedIntensityValue ?? null,
@@ -83,6 +84,7 @@ export function ensureSetRows(it) {
   const n = Math.max(1, parseInt(it?.sets, 10) || 1)
   return Array.from({ length: n }, (_, i) => ({
     n: i + 1,
+    purpose: 'working',
     pReps: it?.reps ?? null,
     pIntensityType: null, pIntensityValue: null,
     pLoadKg: it?.weight ?? null,
@@ -242,16 +244,17 @@ export const actualSets = (m) => +(m.doneSets ?? m.sets) || 0
 export const actualReps = (m) => parseInt(m.doneReps ?? m.reps, 10) || 0
 export const actualWeight = (m) => +(m.doneWeight ?? m.weight) || 0
 
-// Derive a completed session's vitals + breakdowns. Several values (energy, HRR,
-// strain) are physiological estimates from duration + heart rate and are labelled
-// as such in the UI — the wearable doesn't stream them yet. Tonnage/reps use the
+// Derive a completed session's vitals + breakdowns. Heart-rate estimates require
+// an explicit measured source; old simulated samples must not become observations.
+// Tonnage/reps use the
 // logged actuals where present, so the summary reflects what was actually done.
 export function summarize(w, { exercises = [], restingHr = null, age = null, bodyMassKg = null } = {}) {
   const minutes = (w.durationSec || 0) / 60
   const maxHr = 220 - (age || 30)
   const rest = restingHr || 60
-  const avg = w.hrAvg || null
-  const peak = w.hrMax || null
+  const measuredHr = w.hrSource === 'wearable' || w.hrSource === 'manual'
+  const avg = measuredHr ? (w.hrAvg || null) : null
+  const peak = measuredHr ? (w.hrMax || null) : null
   const frac = avg ? Math.max(0, Math.min(1, (avg - rest) / Math.max(1, maxHr - rest))) : 0
   const intensity = avg ? Math.min(1, avg / maxHr) : 0
 
@@ -271,11 +274,10 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
     : actualWeight(m)), 0)
 
   const met = 2 + intensity * 9
-  const energy = Math.round((met * 3.5 * (bodyMassKg || 75)) / 200 * minutes)
+  const energy = avg ? Math.round((met * 3.5 * (bodyMassKg || 75)) / 200 * minutes) : null
   const trimp = avg ? Math.round(minutes * frac * 0.64 * Math.exp(1.92 * frac)) : 0
   const strain = avg ? Math.min(21, +(Math.pow(frac, 1.5) * (minutes / 2.2) + frac * 6).toFixed(1)) : 0
-  const rpe = peak ? Math.max(1, Math.min(10, Math.round((peak / maxHr) * 10))) : null
-  const hrr = peak ? Math.round((peak - rest) * 0.32) : null
+  const hrr = null // A recovery observation needs two measured time points.
 
   // muscular vs cardio split + per-muscle strain (match names to the library)
   const muscleOf = (name) => exercises.find((e) => e.name && name.toLowerCase().includes(e.name.toLowerCase()))?.muscle
@@ -294,7 +296,7 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
   const itemDone = (m) => (hasRows(m) ? doneRows(m).length > 0 : !!m.done)
 
   return {
-    minutes, durationSec: w.durationSec || 0, volume, reps, sets, topWeight, energy, trimp, strain, rpe, hrr,
+    minutes, durationSec: w.durationSec || 0, volume, reps, sets, topWeight, energy, trimp, strain, hrr,
     avg, peak, rest, maxHr,
     muscularPct: Math.round((muscular / total) * 100), cardioPct: Math.round((cardio / total) * 100),
     muscleStrain, doneMain: main.filter(itemDone).length, totalMain: main.length,

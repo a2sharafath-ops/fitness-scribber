@@ -1,198 +1,134 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import Button from '../components/atoms/Button'
-import Tag from '../components/atoms/Tag'
-import Shape from '../components/atoms/Shape'
-import Kpi from '../components/atoms/Kpi'
-import AnthroCell from '../components/molecules/AnthroCell'
-import ReadinessTag from '../components/molecules/ReadinessTag'
+import { useMemo, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import ExportMenu from '../components/organisms/forms/ExportMenu'
+import ModalShell from '../components/molecules/ModalShell'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
-import { lastNDates, fmtDate, todayISO } from '../lib/dates'
-import { readinessFor, dailySum, acwrSeries, trainingMonotony, sdev } from '../lib/calc'
-import { forClient, baseline, latest, movementScore, compare, MOVEMENT_MAX, resolveAnthro } from '../lib/assessment'
-import { RISK_ICON } from '../lib/format'
-import { screeningsFor, redFlags, OUTCOME_META, HHQ_CONDITIONS, HHQ_SYMPTOMS } from '../lib/screening'
-import { questionText, generalYesIds, followupYesIds, DELAY_FLAGS } from '../lib/parq'
+import { clientReport, reportPreferences } from '../lib/clientReport'
+import { datesBetween, fmtDate, todayISO } from '../lib/dates'
+import { latest } from '../lib/assessment'
+import { MUSCLES } from '../lib/muscleVolume'
+import bodyImage from '../assets/muscle-body-outline.png'
+import regions from '../assets/muscle-body-regions.json'
+import './ReportPage.css'
 
-const SEV = { High: 'red', Medium: 'yellow', Low: 'gray' }
+const palette = ['#d4eee1', '#9cd3b8', '#55b393', '#21876e', '#075642']
+const fmt = (value) => value == null ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })
+const short = (date) => fmtDate(date).replace(/, \d{4}$/, '')
+const strengthChange = (lift) => lift?.points.length > 1 ? +(lift.points.at(-1).estimate - lift.points[0].estimate).toFixed(1) : null
+const targetOf = (record) => record?.data?.shortTerm?.concat(record.data.longTerm || []) || record?.data?.longTerm || []
+
+function ReportModal({ title, children }) {
+  const { closeModal } = useModal()
+  return <ModalShell title={title} onClose={closeModal}>{children}</ModalShell>
+}
+
+function SettingsModal({ client, preferences, save }) {
+  const { closeModal } = useModal()
+  const [sections, setSections] = useState(preferences.sections)
+  const [note, setNote] = useState(preferences.note)
+  const fields = [['exposure', 'Weekly muscle map'], ['wellbeing', 'How training felt'], ['outcomes', 'Assessment comparisons'], ['body', 'Body measurements'], ['appendix', 'Calculation appendix in PDF']]
+  return <ModalShell title="Customize report" onClose={closeModal} footer={<><button type="button" className="btn ghost" onClick={closeModal}>Cancel</button><button type="button" className="btn" onClick={() => { save(client.id, { sections, note: note.trim().slice(0, 300) }); closeModal() }}>Save report choices</button></>}>
+    <div className="cr-settings"><p>Choose the supporting sections for this client. The summary, strength, consistency and next focus remain visible.</p><div className="cr-settings-grid">{fields.map(([key, label]) => <label key={key}><input type="checkbox" checked={sections[key]} onChange={(event) => setSections({ ...sections, [key]: event.target.checked })} />{label}</label>)}</div><label className="cr-note-input">Coach note <span>300 characters max</span><textarea rows={4} maxLength={300} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a short observation and next focus, using this client’s records." /></label><p className="cr-settings-hint">Saved in this client’s report preferences. The source assessments and workouts do not change.</p></div>
+  </ModalShell>
+}
+
+function StrengthChart({ lift, open, format }) {
+  if (!lift) return <div className="cr-empty">No completed working sets with recorded load and reps in this period.</div>
+  const points = lift.points
+  const values = points.map((point) => point.estimate)
+  const min = Math.max(0, Math.floor((Math.min(...values) - 5) / 5) * 5)
+  const max = Math.ceil((Math.max(...values) + 5) / 5) * 5
+  const y = (value) => 153 - (value - min) / (max - min || 1) * 108
+  const x = (date) => 44 + (Date.parse(`${date}T00:00:00Z`) - Date.parse(`${points[0].date}T00:00:00Z`)) / Math.max(1, Date.parse(`${points.at(-1).date}T00:00:00Z`) - Date.parse(`${points[0].date}T00:00:00Z`)) * 430
+  const line = points.map((point) => `${x(point.date)},${y(point.estimate)}`).join(' ')
+  return <svg className="cr-chart" viewBox="0 0 520 190" role="group" aria-label={`${lift.name}: ${points.length} dated estimated one-rep maximum values between ${fmtDate(points[0].date)} and ${fmtDate(points.at(-1).date)}`}>
+    {[min, (min + max) / 2, max].map((value) => <g key={value}><path d={`M42 ${y(value)}H490`} stroke="#e4ebe3" strokeDasharray="3 4" /><text x="3" y={y(value) + 4}>{fmt(format.toDisp(value))}</text></g>)}
+    {points.length > 1 && <polyline fill="none" stroke="#2b6654" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" points={line} />}
+    {points.map((point) => <g key={point.date}><text x={x(point.date)} y="183" textAnchor="middle">{short(point.date)}</text><circle cx={x(point.date)} cy={y(point.estimate)} r="5" role="button" tabIndex={0} aria-label={`${fmtDate(point.date)}: ${format.fmtWt(point.estimate)} estimated, from ${format.fmtWt(point.load)} times ${point.reps} repetitions. View record.`} onClick={() => open(point)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(point) } }}><title>{fmtDate(point.date)} · {format.fmtWt(point.load)} × {point.reps} reps</title></circle></g>)}
+  </svg>
+}
+
+function MuscleMap({ report, units, open }) {
+  const [metric, setMetric] = useState('sets')
+  const [hover, setHover] = useState(null)
+  const muscles = Object.fromEntries(MUSCLES.map((name) => [name, report.muscle.muscles.find((row) => row.muscle === name) || { muscle: name, directSets: 0, indirectSets: 0, volume: null, missingVolumeSets: 0, observations: [] }]))
+  const value = (muscle) => metric === 'sets' ? muscle.directSets : muscle.volume
+  const max = Math.max(0, ...Object.values(muscles).map((row) => value(row) || 0))
+  const label = (muscle) => metric === 'sets' ? `${muscle.directSets} ${muscle.directSets === 1 ? 'set' : 'sets'}` : !muscle.directSets ? 'No direct sets' : muscle.volume == null ? 'Load unknown' : `${fmt(units === 'lb' ? muscle.volume * 2.2046226 : muscle.volume)} ${units}·reps${muscle.missingVolumeSets ? ' · partial' : ''}`
+  const fill = (muscle) => !muscle.directSets ? '#a0a0a0' : metric === 'load' && muscle.volume == null ? 'url(#cr-unknown)' : metric === 'load' && muscle.volume === 0 ? '#f5f7f6' : palette[Math.max(0, Math.ceil((value(muscle) || 0) / (max || 1) * 5) - 1)]
+  const showMuscle = (name) => {
+    const muscle = muscles[name]
+    setHover(null)
+    open(name, <><p className="cr-modal-period">{fmtDate(report.muscle.start)}–{fmtDate(report.muscle.end)} · completed working sets</p><div className="cr-modal-kpis"><div><strong>{metric === 'sets' ? muscle.directSets : fmt(units === 'lb' && muscle.volume != null ? muscle.volume * 2.2046226 : muscle.volume)}</strong><span>{metric === 'sets' ? 'direct sets' : `${units}·reps${muscle.missingVolumeSets ? ' · known subtotal' : ''}`}</span></div><div><strong>{muscle.indirectSets}</strong><span>assisting sets</span></div></div>{muscle.observations.length ? <div className="cr-table-scroll" role="region" tabIndex={0} aria-label={`${name} exercise records; scroll horizontally`}><table><caption>{name} exercise records</caption><thead><tr><th scope="col">Exercise / date</th><th scope="col">Role</th><th scope="col">Actual work</th><th scope="col">Exposure</th></tr></thead><tbody>{muscle.observations.map((row) => <tr key={row.key}><th scope="row">{row.name}<small>{fmtDate(row.date)} · {row.group} · {row.source}</small></th><td>{row.targets.direct.includes(name) ? 'Direct' : 'Assisting'}</td><td>{row.sets} × {row.reps ?? '—'} reps<br />{row.load == null ? 'Load unknown' : `${fmt(units === 'lb' ? row.load * 2.2046226 : row.load)} ${units}`}</td><td>{metric === 'sets' ? `${row.sets} ${row.sets === 1 ? 'set' : 'sets'}` : row.targets.direct.includes(name) ? row.volume == null ? 'Unknown' : `${fmt(units === 'lb' ? row.volume * 2.2046226 : row.volume)} ${units}·reps` : 'Assisting'}</td></tr>)}</tbody></table></div> : <p className="cr-empty">No completed working sets recorded for this muscle in this week.</p>}{muscle.missingVolumeSets > 0 && <p className="cr-modal-note">{muscle.missingVolumeSets} direct sets lack recorded reps or load. Displayed volume is a known subtotal.</p>}<p className="cr-modal-note">Muscle totals overlap. Assisting sets stay separate. Warm-ups are excluded.</p></>)
+  }
+  const position = (event, focus = false) => { const path = event.currentTarget, rect = path.ownerSVGElement.getBoundingClientRect(), target = focus ? path.getBoundingClientRect() : null; const x = focus ? target.left + target.width / 2 : event.clientX, y = focus ? target.top : event.clientY; setHover({ name: path.dataset.name, x: Math.max(55, Math.min(rect.width - 55, x - rect.left)), y: Math.max(42, y - rect.top) }) }
+  const seen = new Set()
+  const top = Object.values(muscles).filter((row) => row.directSets).sort((a, b) => (value(b) || 0) - (value(a) || 0)).slice(0, 4)
+  const missing = report.muscle.observations.filter((row) => row.volume == null).reduce((sum, row) => sum + row.sets, 0)
+  return <section id="report-exposure" className="cr-section"><div className="cr-section-head"><div><span className="cr-eyebrow">02 / Training exposure</span><h2>Your training, mapped.</h2></div><span className="cr-pill">{short(report.muscle.start)}–{fmtDate(report.muscle.end)} · complete week</span></div><div className="cr-card cr-anatomy-card"><div><div className="cr-anatomy"><img src={bodyImage} alt="Front and back muscle outlines" /><svg viewBox="0 0 768 768" role="group" aria-label="Muscle map; select a group for exercise records"><defs><pattern id="cr-unknown" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#ddd" /><path d="M0 8L8 0" stroke="#858c87" strokeWidth="2" /></pattern></defs>{regions.map(([name, path], index) => { const muscle = muscles[name], first = !seen.has(name); seen.add(name); return <path key={`${name}-${index}`} data-name={name} d={path} fill={fill(muscle)} className={`cr-muscle${hover?.name === name ? ' active' : ''}`} role={first ? 'button' : undefined} tabIndex={first ? 0 : undefined} aria-hidden={first ? undefined : true} aria-label={first ? `${name}: ${label(muscle)}. View exercises` : undefined} onPointerEnter={position} onPointerMove={position} onPointerLeave={() => setHover(null)} onFocus={(event) => position(event, true)} onBlur={() => setHover(null)} onClick={() => showMuscle(name)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showMuscle(name) } }} /> })}</svg>{hover && <div className="cr-muscle-tip" style={{ left: hover.x, top: hover.y }} aria-hidden="true"><strong>{hover.name}</strong><span>{label(muscles[hover.name])}</span></div>}</div><div className="cr-muscle-scale"><span>No direct sets</span><i style={{ background: '#a0a0a0' }} /><span>Low</span>{palette.map((color) => <i key={color} style={{ background: color }} />)}<span>{fmt(units === 'lb' && metric === 'load' ? max * 2.2046226 : max)} {metric === 'sets' ? 'sets' : `${units}·reps`}</span></div><p className="cr-tiny cr-center">Relative weekly scale · select a muscle for exercises</p></div><div className="cr-muscle-side"><div className="cr-segment" role="group" aria-label="Muscle metric"><button type="button" aria-pressed={metric === 'sets'} onClick={() => setMetric('sets')}>Sets</button><button type="button" aria-pressed={metric === 'load'} onClick={() => setMetric('load')}>Volume load</button></div><h3>Every session<br />leaves a record.</h3><p className="cr-muted">{report.muscle.totalSets} working sets from Main Lift, Accessory Lift and Power.</p>{report.muscle.totalSets === 0 && <p className="cr-empty">No classified working sets in this complete week.</p>}<div className="cr-muscle-bars">{top.map((muscle) => <button type="button" key={muscle.muscle} onClick={() => showMuscle(muscle.muscle)}><span>{muscle.muscle}</span><strong>{label(muscle)}</strong><i><b style={{ width: `${Math.max(0, (value(muscle) || 0) / (max || 1) * 100)}%` }} /></i></button>)}</div><p className="cr-tiny">{report.muscle.totalSets - missing}/{report.muscle.totalSets} sets with known volume load · warm-ups excluded</p><details className="cr-disclosure"><summary>All muscle groups</summary><div className="cr-muscle-list">{MUSCLES.map((name) => <button type="button" key={name} onClick={() => showMuscle(name)}>{name}</button>)}</div></details><p className="cr-tiny">Direct exposure. Muscle totals overlap; more volume is not a score of better training.</p></div></div></section>
+}
+
+function ReportContents({ client, db, tz, dbIssues, saveStatus, commit }) {
+  const { openModal } = useModal()
+  const format = useFormat()
+  const today = todayISO(tz)
+  const [end, setEnd] = useState(today)
+  const [days, setDays] = useState(28)
+  const [selectedLift, setSelectedLift] = useState('')
+  const data = useMemo(() => clientReport(db, client.id, end, days, today), [db, client.id, end, days, today])
+  const prefs = reportPreferences(client)
+  const lift = data.lifts.find((row) => row.id === selectedLift) || data.lifts[0] || null
+  const changes = strengthChange(lift)
+  const open = (title, body) => openModal(<ReportModal title={title}>{body}</ReportModal>, true)
+  const saveSettings = (clientId, settings) => commit((draft) => { const row = draft.clients.find((item) => item.id === clientId); if (!row) return; row.intake = row.intake || {}; row.intake.reportPreferences = { sections: settings.sections, note: settings.note, noteDate: settings.note ? today : null } })
+  const issueTables = ['clients', 'workouts', 'exercises', 'sessions', 'wellness', 'srpe', 'assessments', 'concerns', 'database connection', 'local storage']
+  const issues = (dbIssues || []).filter((issue) => issueTables.includes(issue.table))
+  const goalsRecord = latest((db.assessments || []).filter((row) => row.clientId === client.id && row.type === 'goals' && row.date <= end), 'goals')
+  const goals = targetOf(goalsRecord).map((item) => item.text).filter(Boolean).slice(0, 3)
+  if (!goals.length && client.goal) goals.push(client.goal)
+  const body = data.assessments.body
+  const movement = data.assessments.movement
+  const fitness = data.assessments.fitness
+  const bodyFields = [['Body mass', 'massKg', true], ['Body fat', 'bodyFatPct', false], ['Lean mass', 'leanMassKg', true]]
+  const company = db.settings?.businessName || 'Fitness Partner'
+  const trainer = db.settings?.trainerName || 'Your trainer'
+  const workoutCount = data.workouts.length
+  const weekCount = Math.ceil(days / 7)
+  const sections = prefs.sections
+  const onPrint = () => window.print()
+  const openStrengthPoint = (point) => open(`${lift.name} · ${fmtDate(point.date)}`, <><p className="cr-modal-period">{point.source} · {lift.kind === 'workout' ? 'completed working set' : 'dated resistance log'}</p><div className="cr-modal-kpis"><div><strong>{format.fmtWt(point.load)}</strong><span>actual load</span></div><div><strong>{point.reps}</strong><span>repetitions</span></div><div><strong>{format.fmtWt(point.estimate)}</strong><span>Epley estimate</span></div></div><p className="cr-modal-note">Estimated 1RM = actual load × (1 + reps / 30). This is not a tested maximum or training max.</p></>)
+
+  return <div className="cr-page"><div className="cr-actionbar"><Link className="cr-back" to={`/clients/${client.id}`}>← {client.name}</Link><div><button type="button" onClick={() => openModal(<SettingsModal client={client} preferences={prefs} save={saveSettings} />)}>Customize report</button><button type="button" onClick={() => openModal(<ExportMenu clientId={client.id} />)}>CSV</button><button type="button" className="cr-primary" onClick={onPrint}>Print / PDF ↗</button></div></div>
+    <div id="reportBody"><header className="cr-masthead"><div className="cr-logo"><span aria-hidden="true">f</span><div><strong>{company}</strong><small>PERSONAL PROGRESS</small></div></div><span className="cr-prepared">Prepared for {client.name}</span></header>
+      <div className="cr-topline"><div><span className="cr-eyebrow">{client.name} / Progress report</span><h1>Your progress, in perspective.</h1></div><div className="cr-period"><label>Period <select value={days} onChange={(event) => setDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option></select></label><label>Ending <input type="date" value={end} max={today} onChange={(event) => { if (event.target.value && event.target.value <= today) setEnd(event.target.value) }} /></label></div></div>
+      {issues.length > 0 && <div className="cr-warning" role="alert">Some source data could not load or save ({issues.map((issue) => issue.table).join(', ')}). This report may be incomplete. Check the connection before exporting.</div>}
+      {saveStatus === 'failed' && <div className="cr-warning" role="alert">Report choices or other edits could not be saved. They remain visible locally; resolve the save issue before reloading.</div>}
+      {data.concerns.length > 0 && <div className="cr-followup"><strong>{data.concerns.length} open {data.concerns.length === 1 ? 'concern' : 'concerns'} to review together</strong><span>Latest {fmtDate([...data.concerns].sort((a, b) => b.date.localeCompare(a.date))[0].date)} · Source: client concern log</span></div>}
+      <section className="cr-hero"><div><span className="cr-eyebrow">{fmtDate(data.start)} – {fmtDate(end)} · {days}-day report</span><h2>{workoutCount ? <>Showing up.<br /><em>Your work, recorded.</em></> : data.lifts.length ? <>Training recorded.<br /><em>A starting point to build on.</em></> : <>Your story<br /><em>starts here.</em></>}</h2><p>{workoutCount ? `${workoutCount} completed ${workoutCount === 1 ? 'workout' : 'workouts'} in this report. Explore what your records show.` : data.lifts.length ? 'Dated resistance logs contribute to your strength story below. A completed workout will add session context.' : 'There are no completed workout logs in this period. Your first recorded session will give us a starting point.'}</p></div><div className="cr-hero-side"><span className="cr-eyebrow">YOUR WORK, RECORDED</span><div className="cr-hero-number"><strong>{workoutCount}</strong><span>completed<br />{workoutCount === 1 ? 'workout' : 'workouts'}</span></div><div className="cr-session-marks" aria-hidden="true">{Array.from({ length: Math.min(12, workoutCount) }, (_, index) => <i key={index}>✓</i>)}</div></div><div className="cr-hero-footer"><span>YOUR FOCUS <b>{client.goal || 'Agree your next focus together'}</b></span><span>Prepared by <b>{trainer}</b></span></div></section>
+      <div className="cr-wins" aria-label="Report highlights"><div><span>Strength · {lift?.name || 'recorded lifts'}</span><strong>{changes != null ? `${changes > 0 ? '+' : ''}${fmt(format.toDisp(changes))} ${format.unitName()}` : lift ? format.fmtWt(lift.points.at(-1).estimate) : '—'}</strong><small>{changes != null ? `First → latest Epley estimate · ${short(lift.points[0].date)}–${short(lift.points.at(-1).date)}` : lift ? `First Epley estimate · ${fmtDate(lift.points[0].date)}` : 'No comparable lift records yet'}</small></div><div><span>Past booked sessions</span><strong>{data.bookings.total ? `${data.bookings.completed} / ${data.bookings.total}` : '—'}</strong><small>{data.bookings.total ? `${data.bookings.unresolved} ${data.bookings.unresolved === 1 ? 'status' : 'statuses'} to confirm · cancelled excluded` : 'No past non-cancelled bookings in this period'}</small></div><div><span>7-day blocks with a workout</span><strong>{data.activeWeeks} / {weekCount}</strong><small>Based on completed workout dates</small></div></div>
+      <nav className="cr-nav" aria-label="Report sections"><a href="#report-strength">Strength &amp; consistency</a>{sections.exposure && <a href="#report-exposure">Training exposure</a>}{sections.outcomes && <a href="#report-outcomes">Assessments</a>}<a href="#report-next">Next chapter</a><a href="#report-sources">Data &amp; sources ↘</a></nav>
+
+      <section id="report-strength" className="cr-section"><div className="cr-section-head"><div><span className="cr-eyebrow">01 / The work is adding up</span><h2>Progress you can see.</h2></div></div><div className="cr-two"><article className="cr-card"><div className="cr-card-head"><div><h3>Your strength trend</h3><p>Epley estimated 1RM · {format.unitName()}</p></div>{data.lifts.length > 0 && <label><span className="sr-only">Performed lift</span><select value={lift.id} onChange={(event) => setSelectedLift(event.target.value)}>{data.lifts.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.kind}</option>)}</select></label>}</div>{lift ? <><div className="cr-metric"><strong>{format.fmtWt(lift.points.at(-1).estimate)}</strong><span>{changes == null ? 'Baseline' : `${changes > 0 ? '+' : ''}${fmt(format.toDisp(changes))} ${format.unitName()}`}</span></div><p className="cr-tiny">{changes == null ? 'A second comparable record will begin a trend.' : `First → latest recorded estimates · ${fmtDate(lift.points[0].date)}–${fmtDate(lift.points.at(-1).date)}`}</p><StrengthChart lift={lift} open={openStrengthPoint} format={format} /><div className="cr-card-foot"><span>Estimates from recorded work · not a tested maximum</span><button type="button" onClick={() => open(`${lift.name} · recorded working sets`, <div className="cr-table-scroll" role="region" tabIndex={0} aria-label="Strength records; scroll horizontally"><table><caption>Recorded strength · Epley estimates</caption><thead><tr><th scope="col">Date</th><th scope="col">Source</th><th scope="col">Actual set</th><th scope="col">Estimate</th></tr></thead><tbody>{lift.points.map((point) => <tr key={point.date}><th scope="row">{fmtDate(point.date)}</th><td>{point.source}</td><td>{format.fmtWt(point.load)} × {point.reps}</td><td>{format.fmtWt(point.estimate)}</td></tr>)}</tbody></table></div>)}>View records ↗</button></div></> : <p className="cr-empty">Record completed working sets or dated resistance logs with load and reps to start this trend.</p>}</article>
+        <article className="cr-card"><div className="cr-card-head"><div><h3>A routine, taking shape</h3><p>{fmtDate(data.start)}–{fmtDate(end)} · completed workout dates</p></div></div><div className="cr-consistency"><div className="cr-ring" style={{ '--angle': `${data.bookings.percent == null ? 0 : data.bookings.percent * 3.6}deg` }}><div><strong>{data.bookings.percent == null ? '—' : `${data.bookings.percent}%`}</strong><small>of past bookings</small></div></div><div><strong>{data.bookings.total ? `${data.bookings.completed} of ${data.bookings.total} completed` : 'No past bookings'}</strong><p>{data.bookings.total ? `${data.bookings.unresolved} awaiting a status update. Cancelled bookings excluded.` : 'Booking completion is unavailable for this period.'}</p></div></div><div className="cr-calendar" role="img" aria-label={`${data.workoutDates.length} calendar days with a completed workout between ${fmtDate(data.start)} and ${fmtDate(end)}`}>{datesBetween(data.start, end).map((date) => <span key={date} className={data.workoutDates.includes(date) ? 'done' : ''} title={`${fmtDate(date)} · ${data.workoutDates.includes(date) ? 'Completed workout' : 'No completed workout log'}`}>{date.slice(-2)}<span className="sr-only"> {data.workoutDates.includes(date) ? 'completed workout' : 'no completed workout log'}</span></span>)}</div><p className="cr-calendar-key"><i /> Completed workout date · Blank does not mean rest day</p><div className="cr-card-foot"><span>{workoutCount} workout logs · {data.bookings.total} eligible past bookings</span><button type="button" onClick={() => open('Consistency · source records', <><div className="cr-modal-kpis"><div><strong>{workoutCount}</strong><span>completed workouts</span></div><div><strong>{data.bookings.completed}/{data.bookings.total}</strong><span>past bookings completed</span></div></div><p className="cr-modal-note">Unresolved bookings need a status update. Cancelled bookings are excluded. Workout logs and appointment statuses are separate sources.</p><div className="cr-table-scroll" role="region" tabIndex={0} aria-label="Completed workout dates"><table><caption>Completed workouts in this period</caption><thead><tr><th scope="col">Date</th><th scope="col">Workout</th><th scope="col">Source</th></tr></thead><tbody>{data.workouts.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{row.title || row.name || 'Workout'}</td><td>{row.source || 'Completed workout log'}</td></tr>)}</tbody></table></div></>)}>See breakdown ↗</button></div></article></div></section>
+      {sections.exposure && <MuscleMap report={data} units={format.unitName()} open={open} />}
+      {sections.wellbeing && <section id="report-wellbeing" className="cr-card cr-wellbeing"><div><span className="cr-eyebrow">The human side</span><h3>How training felt.</h3><p>{data.wellness.days}/{days} days with a wellness check-in</p></div><div><span>Mean session effort</span><strong>{fmt(data.effort.mean)}<small> / 10</small></strong><p>{data.effort.count} session RPE {data.effort.count === 1 ? 'entry' : 'entries'} · {fmtDate(data.start)}–{fmtDate(end)}</p></div><div><span>Sleep quality</span><strong>{fmt(data.wellness.sleepMean)}<small> / 7</small></strong><p>{data.wellness.sleepCount} ratings · {fmtDate(data.wellness.sleepStart)}–{fmtDate(end)}</p></div></section>}
+      {sections.outcomes && <section id="report-outcomes" className="cr-section"><div className="cr-section-head"><div><span className="cr-eyebrow">03 / Beyond the weights</span><h2>Small changes. A wider picture.</h2></div></div><div className="cr-outcomes"><article className="cr-card"><h3>Movement screen</h3><p className="cr-tiny">{movement.last ? `${movement.latestScore.protocol === 'nasm' ? 'NASM movement quality' : 'Five-pattern screen'} · ${fmtDate(movement.last.date)}` : 'No formal movement screen recorded'}</p>{movement.last ? <><div className="cr-compare"><div><strong>{movement.comparable ? `${movement.firstScore.score}/${movement.firstScore.max}` : '—'}</strong><span>{movement.comparable ? `${fmtDate(movement.first.date)} · baseline` : 'Comparable baseline unavailable'}</span></div><b aria-hidden="true">→</b><div><strong>{movement.latestScore.score}/{movement.latestScore.max}</strong><span>{fmtDate(movement.last.date)} · latest</span></div></div><p className="cr-tiny">{movement.comparable ? movement.inPeriod ? 'Same recorded protocol · review item details before interpreting change.' : 'Last reassessment predates this report period.' : 'A same-protocol reassessment is needed for a change.'}</p></> : <p className="cr-empty">Record a baseline to start this view.</p>}<div className="cr-card-foot"><span>Coach-recorded assessment</span><Link to={`/clients/${client.id}/assessments/movement`}>Assessment history ↗</Link></div></article>
+        <article className="cr-card"><h3>Fitness tests</h3><p className="cr-tiny">Formal coach assessment · workout estimates stay in Strength</p>{fitness.last ? <><div className="cr-fitness-summary">{(fitness.last.data?.strength || []).slice(0, 3).map((item) => <div key={item.lift}><span>{item.lift}</span><strong>{format.fmtWt(item.valueKg)}</strong></div>)}{fitness.last.data?.endurance?.test && <div><span>{fitness.last.data.endurance.test}</span><strong>{fitness.last.data.endurance.result || 'Result not recorded'}</strong></div>}{!fitness.last.data?.strength?.length && !fitness.last.data?.endurance?.test && <p className="cr-empty">Test values were not recorded.</p>}</div><p className="cr-tiny">Latest {fmtDate(fitness.last.date)} · {fitness.inPeriod ? 'recorded in this period' : 'recorded earlier'}</p></> : <p className="cr-empty">No formal fitness assessment yet.</p>}<div className="cr-card-foot"><span>Test labels and units preserved</span><Link to={`/clients/${client.id}/assessments/fitness`}>Assessment history ↗</Link></div></article></div></section>}
+      {sections.body && <section id="report-body" className="cr-section"><div className="cr-section-head"><div><span className="cr-eyebrow">Optional / Chosen measures</span><h2>Body measurements.</h2></div></div><div className="cr-card cr-body-grid">{bodyFields.map(([label, field, isWeight]) => { const current = body.last?.data?.[field], first = body.comparable ? body.first.data?.[field] : null; return <div key={field}><span>{label}</span><strong>{current == null ? '—' : isWeight ? format.fmtWt(current) : `${fmt(current)}%`}</strong><small>{first == null ? 'No comparable baseline' : `${isWeight ? format.fmtWt(first) : `${fmt(first)}%`} · ${fmtDate(body.first.date)}`}</small></div> })}<p>{body.last ? `${fmtDate(body.last.date)} · ${body.last.data?.method || 'method not recorded'}. ${body.comparable ? 'Same method recorded; measurement conditions may differ.' : 'Method changed or baseline missing; no change is calculated.'}` : 'No body-composition assessment recorded.'}</p></div></section>}
+      <section id="report-next" className="cr-section"><div className="cr-section-head"><div><span className="cr-eyebrow">04 / Keep the story moving</span><h2>Your next chapter.</h2></div><span className="cr-pill">Coach-selected focus</span></div><div className="cr-next"><div><span className="cr-eyebrow">{prefs.note ? `A NOTE FROM ${trainer.toUpperCase()}` : 'YOUR NEXT CONVERSATION'}</span><h3>{prefs.note ? 'Keep the conversation going.' : 'Build on your own record.'}</h3><p>{prefs.note || 'Review these records with your trainer and agree on a useful next focus together.'}</p><small>{prefs.note ? `${trainer} · ${fmtDate(prefs.noteDate)}` : 'No report note recorded'}</small></div><div className="cr-focus">{goals.length ? goals.map((goal, index) => <div key={`${index}-${goal}`}><span>{String(index + 1).padStart(2, '0')}</span><p>{goal}</p></div>) : <p>No goals recorded yet. Agree on a next focus with your trainer.</p>}</div></div></section>
+      <div className="cr-coverage" aria-label="Report data coverage"><span>{workoutCount} completed workouts</span><span>{lift?.points.length || 0} strength dates for selected lift</span><span>Wellness on {data.wellness.days}/{days} days</span><span>{data.assessments.movement.last || data.assessments.fitness.last ? 'Assessment records available' : 'No formal assessment records'}</span></div>
+      <details id="report-sources" className="cr-sources" open={sections.appendix}><summary>Data, sources &amp; calculation notes</summary><p>Report window: {fmtDate(data.start)}–{fmtDate(end)}. Four or more consecutive 7-day blocks start at the report window’s first date. The muscle map uses the last complete Monday–Sunday week, {fmtDate(data.muscle.start)}–{fmtDate(data.muscle.end)}.</p><p>Strength uses separate series for completed classified working sets and dated resistance logs with recorded load and reps. They are not merged because a resistance log may duplicate a workout set. Epley estimates are not tested maxima. Booked-session completion counts past, non-cancelled appointments; workout logs are separate. Unresolved appointments need a status update.</p><p>Muscle groups use Exercise Library mappings. Only completed Main Lift, Accessory Lift and Power working sets count. Warm-up blocks and warm-up sets are excluded. Volume load = recorded external load × actual reps × completed sets; a muscle’s known subtotal may be partial. Multiple muscles can share one exercise, so muscle totals overlap. Zero external load does not mean zero effort.</p><p>Wellness and session RPE are dated self-reports; missing values stay missing. Assessment comparisons require recorded baseline and latest results, with the same protocol or measurement method. Body changes are shown neutrally. These records do not provide medical clearance.</p>{sections.appendix && <div className="cr-load-appendix"><h3>Coach load context</h3><div><span>ACWR</span><strong>{data.load.acwr == null ? 'Unavailable' : fmt(data.load.acwr)}</strong><span>Monotony</span><strong>{data.load.monotony == null ? 'Unavailable' : fmt(data.load.monotony)}</strong><span>Strain</span><strong>{data.load.strain == null ? 'Unavailable' : fmt(data.load.strain)}</strong></div><p>Session RPE entries: {data.load.logged7}/7 days, {data.load.logged28}/28 days. ACWR compares 7-day and 28-day mean daily session load; monotony is 7-day mean divided by daily standard deviation; strain is 7-day load × monotony. Existing formulas treat unlogged days as zero, which may also be missing data. No threshold or clearance is inferred.</p></div>}<p>Generated from this client’s stored records on {fmtDate(today)}. Coach-selected note and section choices are saved separately from workout and assessment records.</p></details>
+      <footer className="cr-footer"><span>{company} · Prepared {fmtDate(today)}</span><span>{client.name} · Personal progress report</span></footer>
+    </div>
+  </div>
+}
 
 export default function ReportPage() {
   const { id } = useParams()
-  const nav = useNavigate()
-  const { db, tz } = useData()
-  const { openModal } = useModal()
-  const { fmtWt, fmtVL } = useFormat()
-  const c = db.clients.find((x) => x.id === id)
-  if (!c) return <Button className="back" variant="ghost" onClick={() => nav('/clients')}>← Clients</Button>
-
-  const r = readinessFor(db, c.id)
-  const a = resolveAnthro(db, c)
-  const intMap = dailySum(db.srpe.filter((row) => typeof row.tl === 'number' && Number.isFinite(row.tl)), c.id, 'tl')
-  const loadDates = lastNDates(28, tz)
-  const last7 = loadDates.slice(-7).map((d) => intMap[d] || 0)
-  const mono = sdev(last7) > 0 ? trainingMonotony(last7) : null
-  const acwr = acwrSeries(intMap, loadDates).at(-1)
-  const logged7 = loadDates.slice(-7).filter((date) => Object.hasOwn(intMap, date)).length
-  const logged28 = loadDates.filter((date) => Object.hasOwn(intMap, date)).length
-  const wkVL = lastNDates(7, tz).reduce((s, d) => s + (dailySum(db.resistance, c.id, 'volumeLoad')[d] || 0), 0)
-  const conc = db.concerns.filter((x) => x.clientId === c.id && x.status === 'Open')
-  const recentRes = db.resistance.filter((x) => x.clientId === c.id).sort((x, y) => y.date.localeCompare(x.date)).slice(0, 8)
-  const today = todayISO(tz)
-
-  // Assessment summary: movement (baseline→latest), body-comp deltas, goals.
-  const alist = forClient(db.assessments, c.id)
-  const mvB = baseline(alist, 'movement'), mvL = latest(alist, 'movement')
-  const bcB = baseline(alist, 'body_comp'), bcL = latest(alist, 'body_comp')
-  const bcRows = bcB && bcL && bcB.id !== bcL.id ? compare('body_comp', bcB, bcL) : []
-  const goalsL = latest(alist, 'goals')
-
-  // Health history + PAR-Q, drawn from the completed pre-participation screening
-  // (replaces the old free-text intake snapshot — that data now lives in the HHQ).
-  const scr = screeningsFor(db.screenings, c.id).complete
-  const h = scr?.hhq || {}
-  const scrMeta = scr ? OUTCOME_META[scr.outcome] || { label: '—', color: 'gray' } : null
-  const gYes = scr ? generalYesIds(scr.parq?.general) : []
-  const fYes = scr ? followupYesIds(scr.parq?.followup) : []
-  const delays = scr ? DELAY_FLAGS.filter((d) => scr.parq?.delay?.[d.id]) : []
-  const flags = scr ? redFlags(scr) : { major: [], minor: [] }
-  const conditions = HHQ_CONDITIONS.filter((x) => ['past', 'current'].includes(h.conditions?.[x.id]?.status))
-    .map((x) => `${x.label} (${h.conditions[x.id].status})`)
-  const symptoms = HHQ_SYMPTOMS.filter((x) => h.symptoms?.[x.id] === true).map((x) => x.label)
-  const meds = [h.meds?.prescriptions && `Rx: ${h.meds.prescriptions}`, h.meds?.otc && `OTC: ${h.meds.otc}`,
-    h.meds?.supplements && `Supplements: ${h.meds.supplements}`, h.meds?.allergies && `Allergies: ${h.meds.allergies}`].filter(Boolean)
-  const injuries = [h.msk?.currentPain && `Current pain: ${h.msk.currentPain}`, h.msk?.pastInjuries && `Past injuries: ${h.msk.pastInjuries}`,
-    h.msk?.surgeries && `Surgeries: ${h.msk.surgeries}`, h.msk?.romLimits && `ROM limits: ${h.msk.romLimits}`,
-    h.msk?.avoidMovements && `Avoid: ${h.msk.avoidMovements}`].filter(Boolean)
-
-  return (
-    <>
-      <div className="flex between" style={{ marginBottom: 14 }}>
-        <button className="back" style={{ margin: 0 }} onClick={() => nav('/clients/' + c.id)}>← Back</button>
-        <div className="flex gap">
-          <Button variant="ghost" onClick={() => openModal(<ExportMenu clientId={c.id} />)}>⬇ CSV</Button>
-          <Button onClick={() => window.print()}>🖨 Print / Save as PDF</Button>
-        </div>
-      </div>
-      <div id="reportBody">
-        <div className="flex between" style={{ borderBottom: '2px solid var(--border)', paddingBottom: 12, marginBottom: 16 }}>
-          <div><h1 style={{ fontSize: 22 }}>{c.name} — Athlete Report</h1>
-            <div className="muted">{db.settings.businessName || 'Fitness Partner'} · {db.settings.trainerName || ''} · {fmtDate(today)}</div></div>
-          <ReadinessTag readiness={r} />
-        </div>
-        <div className="anthro-grid" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
-          <AnthroCell label="Age" value={a.age} />
-          <AnthroCell label="Height" value={a.heightCm} unit=" cm" />
-          <AnthroCell label="Body mass" value={a.massKg != null ? fmtWt(a.massKg) : null} />
-          <AnthroCell label="Body fat" value={a.bodyFatPct} unit="%" />
-        </div>
-        <div className="section-title">Recorded check-in and load context</div>
-        <div className="kpi-strip">
-          <Kpi label="App readiness" value={r.score == null ? '—' : `${r.score}/100`} />
-          <Kpi label="ACWR" value={acwr == null ? '—' : acwr.toFixed(2)} />
-          <Kpi label="Monotony" value={mono ?? '—'} />
-          <Kpi label="Weekly Volume Load" value={fmtVL(wkVL)} />
-        </div>
-        <p className="muted" style={{ fontSize: 12, lineHeight: 1.6, margin: '8px 0 18px' }}>
-          App readiness is dated {fmtDate(r.date)} and reflects available wellness and wearable inputs; it is not medical or exercise clearance.
-          ACWR compares 7-day and 28-day average daily sRPE load ({fmtDate(loadDates[0])}–{fmtDate(loadDates.at(-1))}; {logged7}/7 and {logged28}/28 days logged).
-          Monotony is 7-day mean daily load divided by its standard deviation. Unlogged days enter these formulas as zero and may represent missing data rather than rest; no injury-risk threshold is applied.
-        </p>
-        <div className="section-title">Health history &amp; PAR-Q</div>
-        {!scr ? (
-          <div className="muted">No pre-participation screening on file.</div>
-        ) : (
-          <>
-            <div className="intake-block">
-              <div className="i-h">📋 PAR-Q+ outcome</div>
-              <div className="i-b">
-                <Tag color={scrMeta.color}>{RISK_ICON[scrMeta.color]} {scr.outcome} — {scrMeta.label}</Tag>
-                <span className="muted" style={{ fontSize: 11, marginLeft: 8 }}>Completed {fmtDate(scr.completedOn)} · valid until {fmtDate(scr.validUntil)}</span>
-                {gYes.length || fYes.length || delays.length ? (
-                  <div style={{ marginTop: 6 }}>
-                    {gYes.map((qid) => <div key={qid}>YES — {questionText(qid)}</div>)}
-                    {fYes.map((qid) => <div key={'f' + qid}>YES — {questionText(qid)}</div>)}
-                    {delays.map((d) => <div key={d.id}>{RISK_ICON.yellow} {d.text}</div>)}
-                  </div>
-                ) : <div className="muted" style={{ marginTop: 4 }}>No questions triggered review.</div>}
-              </div>
-            </div>
-            {(flags.major.length > 0 || flags.minor.length > 0) && (
-              <div className="intake-block">
-                <div className="i-h">🚩 Red flags</div>
-                <div className="i-b">
-                  {flags.major.map((x) => <div key={x}>{RISK_ICON.red} {x}</div>)}
-                  {flags.minor.map((x) => <div key={x}>{RISK_ICON.yellow} {x}</div>)}
-                </div>
-              </div>
-            )}
-            <div className="intake-block">
-              <div className="i-h">🩺 Medical &amp; health history</div>
-              <div className="i-b">
-                <div><strong>Conditions:</strong> {conditions.length ? conditions.join(' · ') : '—'}</div>
-                <div><strong>Current symptoms:</strong> {symptoms.length ? symptoms.join(' · ') : '—'}</div>
-                <div><strong>Medications / allergies:</strong> {meds.length ? meds.join(' · ') : '—'}</div>
-              </div>
-            </div>
-            <div className="intake-block">
-              <div className="i-h">🩹 Injuries, pain &amp; movement</div>
-              <div className="i-b">{injuries.length ? injuries.map((t, i) => <div key={i}>{t}</div>) : '—'}</div>
-            </div>
-          </>
-        )}
-        {alist.length > 0 && (
-          <>
-            <div className="section-title">Assessments</div>
-            {mvL && (
-              <div className="intake-block">
-                <div className="i-h">🤸 Movement screen</div>
-                <div className="i-b">
-                  {mvB && mvB.id !== mvL.id
-                    ? `Baseline ${movementScore(mvB.data).score}/${MOVEMENT_MAX} (${fmtDate(mvB.date)}) → Latest ${movementScore(mvL.data).score}/${MOVEMENT_MAX} (${fmtDate(mvL.date)})`
-                    : `${movementScore(mvL.data).score}/${MOVEMENT_MAX} (${fmtDate(mvL.date)})`}
-                </div>
-              </div>
-            )}
-            {bcRows.length > 0 && (
-              <table>
-                <thead><tr><th>Body composition</th><th>{fmtDate(bcB.date)}</th><th>{fmtDate(bcL.date)}</th><th>Δ</th></tr></thead>
-                <tbody>
-                  {bcRows.map((r, i) => (
-                    <tr key={i}><td>{r.label}</td><td>{r.from ?? '—'}{r.from != null ? r.unit : ''}</td><td>{r.to ?? '—'}{r.to != null ? r.unit : ''}</td>
-                      <td>{r.delta != null && r.delta !== 0 ? `${r.delta > 0 ? '+' : ''}${r.delta}${r.unit || ''}` : '—'}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            {goalsL && (goalsL.data.shortTerm?.length || goalsL.data.longTerm?.length) ? (
-              <div className="intake-block">
-                <div className="i-h">🎯 Goals</div>
-                <div className="i-b">
-                  {(goalsL.data.shortTerm || []).map((g, i) => <div key={'s' + i}>• {g.text}{g.by ? ` (by ${fmtDate(g.by)})` : ''} <span className="muted">— short-term</span></div>)}
-                  {(goalsL.data.longTerm || []).map((g, i) => <div key={'l' + i}>• {g.text}{g.by ? ` (by ${fmtDate(g.by)})` : ''} <span className="muted">— long-term</span></div>)}
-                </div>
-              </div>
-            ) : null}
-          </>
-        )}
-
-        <div className="section-title">Open concerns ({conc.length})</div>
-        {conc.length ? conc.map((x) => (
-          <div className="intake-block" key={x.id}><div className="i-b"><Tag color={SEV[x.severity]}><Shape color={SEV[x.severity]} /> {x.severity}</Tag> {x.text}</div></div>
-        )) : <div className="muted">None</div>}
-        <div className="section-title">Recent resistance work</div>
-        <table>
-          <thead><tr><th>Date</th><th>Exercise</th><th>Sets×Reps</th><th>Weight</th><th>Volume Load</th></tr></thead>
-          <tbody>
-            {recentRes.map((x) => (
-              <tr key={x.id}><td>{fmtDate(x.date)}</td><td>{x.exercise}</td><td>{x.sets}×{x.reps}</td><td>{fmtWt(x.weight)}</td><td>{fmtVL(x.volumeLoad)}</td></tr>
-            ))}
-            {!recentRes.length && <tr><td colSpan={5} className="muted">No data</td></tr>}
-          </tbody>
-        </table>
-        <p className="muted" style={{ fontSize: 11, marginTop: 20 }}>Generated by Fitness Partner on {fmtDate(today)}. For coaching use.</p>
-      </div>
-    </>
-  )
+  const { db, tz, dbIssues, saveStatus, commit } = useData()
+  const client = db.clients.find((row) => row.id === id)
+  if (!client) return <div className="cr-missing"><p>Client not found.</p><Link className="btn" to="/clients">Back to clients</Link></div>
+  return <ReportContents key={id} client={client} db={db} tz={tz} dbIssues={dbIssues} saveStatus={saveStatus} commit={commit} />
 }

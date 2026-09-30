@@ -1,20 +1,17 @@
 import { useState } from 'react'
 import Button from '../../atoms/Button'
-import RangeSlider from '../../atoms/RangeSlider'
 import Field from '../../atoms/Field'
 import ModalShell from '../../molecules/ModalShell'
 import { calcSRPETL } from '../../../lib/calc'
 
-// Session-RPE popup, shown when ✓ Complete is pressed. Shows RPE (pre-suggested
-// from peak HR when available) plus the session duration, pre-filled from the
+// Session-RPE popup, shown when ✓ Complete is pressed. The athlete chooses
+// their own rating; the session duration is pre-filled from the
 // live timer and editable. Presentational: the owner persists the completed
 // workout + sRPE row. Serves both the athlete portal and the coach's client page.
 //   onSubmit(rpe, minutes) — save workout + sRPE
 //   onSkip(minutes) — save workout without an RPE entry · onClose() — keep running
-export default function RPEModal({ busy, workout, age, onSubmit, onSkip, onClose }) {
-  const maxHr = 220 - (age || 30)
-  const suggested = workout.hrMax ? Math.max(1, Math.min(10, Math.round((workout.hrMax / maxHr) * 10))) : 6
-  const [rpe, setRpe] = useState(suggested)
+export default function RPEModal({ busy, workout, onSubmit, onSkip, onClose }) {
+  const [rpe, setRpe] = useState('')
   const [minutes, setMinutes] = useState(workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30)
   const mins = Math.max(1, Math.round(+minutes || 0) || 1)
   return (
@@ -23,15 +20,19 @@ export default function RPEModal({ busy, workout, age, onSubmit, onSkip, onClose
         <ModalShell title="How hard was that session?" onClose={onClose}
           footer={<>
             <Button variant="ghost" disabled={busy} onClick={() => onSkip(mins)}>Skip</Button>
-            <Button disabled={busy} onClick={() => onSubmit(rpe, mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
+            <Button disabled={busy || !rpe} onClick={() => onSubmit(Number(rpe), mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
           </>}>
-          <RangeSlider label="Session RPE (Borg CR10)" value={rpe} min={1} max={10} lo="Rest" hi="Max effort" onChange={setRpe} />
+          <Field label="Session RPE (Borg CR10)">
+            <select value={rpe} onChange={(e) => setRpe(e.target.value)}>
+              <option value="">Choose your rating</option>
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => <option key={value} value={value}>{value} / 10</option>)}
+            </select>
+          </Field>
           <Field label="Workout duration (minutes)">
             <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
           </Field>
           <div className="muted" style={{ fontSize: 12 }}>
-            Training load: <strong>{calcSRPETL(rpe, mins)} AU</strong>
-            {workout.hrMax ? <span> · suggested {suggested}/10 from peak HR</span> : null}
+            Training load: <strong>{rpe ? `${calcSRPETL(Number(rpe), mins)} AU` : 'Select an RPE to calculate'}</strong>
           </div>
         </ModalShell>
       </div>

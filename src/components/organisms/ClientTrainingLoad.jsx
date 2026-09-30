@@ -4,6 +4,7 @@ import Button from '../atoms/Button'
 import InfoTip from '../atoms/InfoTip'
 import ModalShell from '../molecules/ModalShell'
 import LoadResponseChart from './LoadResponseChart'
+import ClientMuscleVolume from './ClientMuscleVolume'
 import { SRPEForm, ResistanceForm, CardioForm } from './forms/LogForms'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
@@ -173,6 +174,7 @@ export default function ClientTrainingLoad({ client }) {
     <div className="progress-section-head"><h2 id="progress-load-title">Training load</h2><Button onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Record session RPE</Button></div>
     <AdvancedLoad rows={srpe} clientId={client.id} clientName={client.name} today={today} />
     <LoadResponseChart db={db} clientId={client.id} today={today} />
+    <ClientMuscleVolume key={client.id} clientId={client.id} />
     <div className="progress-load-logs">
       <section className="progress-log-card"><h3>Session RPE</h3><SourceLine row={srpe[0]} today={today} />
         {srpe[0] ? <p className="checkins-latest">{valueOf(srpe[0].rpe)}/10 RPE × {valueOf(srpe[0].duration, ' min')} = {valueOf(srpe[0].tl, ' AU')}</p> : <p className="checkins-empty">No session RPE observations yet.</p>}
