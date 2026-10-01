@@ -14,11 +14,11 @@ function PlannedSet({ row, index, units }) {
   return <li>Set {row.setNumber ?? index + 1}: {target || 'Target not recorded'}</li>
 }
 
-function LoggedSet({ row, index, units }) {
+function LoggedSet({ row, index, units, completed }) {
   const value = row.done ? [
     (row.reps ?? row.pReps) != null ? `${row.reps ?? row.pReps} reps` : null,
     (row.load ?? row.pLoadKg) != null ? `${toDisp(row.load ?? row.pLoadKg, units)} ${unitName(units)}` : null,
-  ].filter(Boolean).join(' · ') : 'Skipped'
+  ].filter(Boolean).join(' · ') : completed ? 'Skipped' : 'Not logged yet'
   return <li>Set {row.n ?? index + 1}: {value || 'Completed; values not recorded'}</li>
 }
 
@@ -32,7 +32,7 @@ export default function DayBlockReview({ prescription, workout, units }) {
         <h3>{block.title}</h3>
         {block.items.map((item) => <div key={item.id} className="training-day-exercise">
           <strong>{item.name}</strong>
-          {item.setRows?.length ? <ol>{item.setRows.map((row, index) => <LoggedSet key={row.n ?? index} row={row} index={index} units={units} />)}</ol>
+          {item.setRows?.length ? <ol>{item.setRows.map((row, index) => <LoggedSet key={row.n ?? index} row={row} index={index} units={units} completed={workout.status === 'completed'} />)}</ol>
             : <p className="muted">{item.doneSets ?? item.sets ?? '—'} sets · {item.doneReps ?? item.reps ?? '—'} reps
               {(item.doneWeight ?? item.weight) != null ? ` · ${toDisp(item.doneWeight ?? item.weight, units)} ${unitName(units)}` : ''}</p>}
         </div>)}

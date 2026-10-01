@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from '../atoms/Button'
 import SegToggle from '../molecules/SegToggle'
 import DayMetrics from '../molecules/DayMetrics'
@@ -18,11 +19,12 @@ import { cloneBlocksFresh, itemsToBlocks } from '../../lib/program'
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const weekOffset = (date, tz) => Math.floor((Date.parse(date) - Date.parse(weekDates(0, tz)[0])) / (7 * 86400000)) * 7
 
-export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay, bare, focusDate }) {
+export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay, bare, focusDate, title = 'Workout Planner', compactCopy = false }) {
   const sz = size || (featured ? 'featured' : 'default')
   const isFeatured = sz === 'featured'
   const isMedium = sz === 'medium'
   const { db, commit, tz } = useData()
+  const navigate = useNavigate()
   const { openModal } = useModal()
   const { clip, setClip, clearClip } = useClipboard()
   const { fmtVL } = useFormat()
@@ -59,7 +61,8 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   }, [])
 
   const intMap = dailySum(db.srpe, client.id, 'tl')
-  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} review />, 'xl')
+  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} review
+    onLog={(date) => navigate(`/clients/${client.id}/training?date=${date}&run=1#workout-log`)} />, 'xl')
   const prescOn = (dt) => db.prescriptions.find((p) => p.clientId === client.id && p.date === dt)
   const dayData = (dt) => {
     const presc = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
@@ -72,6 +75,9 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
   const shownDates = view === 'month' ? monthGridDates(anchor) : weekDates(weekStart, tz)
   const prescribedDates = new Set(db.prescriptions.filter((p) => p.clientId === client.id && isSession(p)).map((p) => p.date))
   const completedByDate = completedWorkoutsByDate(db.workouts, client.id)
+  const pendingByDate = new Map((db.workouts || [])
+    .filter((item) => item.clientId === client.id && item.status !== 'completed')
+    .map((item) => [item.date, item]))
   const completedAppointments = new Set((db.sessions || []).filter((item) => item.clientId === client.id && String(item.status).toLowerCase() === 'completed').map((item) => item.date))
   const periodDates = view === 'month' ? shownDates.filter((d) => d.slice(0, 7) === anchor.slice(0, 7)) : shownDates
   const plannedDays = periodDates.filter((d) => prescribedDates.has(d)).length
@@ -190,7 +196,16 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
     </button>
   ) : null
 
-  const appointmentChip = (dt, workouts) => !workouts.length && completedAppointments.has(dt) ? (
+  const pendingChip = (dt, workout) => workout ? (
+    <button type="button" className="plan-pending" onMouseDown={(event) => event.stopPropagation()}
+      onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
+      aria-label={`${dt}: ${workout.status === 'in_progress' ? 'workout in progress' : 'workout ready'}, ${workout.title || 'Workout'}. Review day`}>
+      <span>{workout.status === 'in_progress' ? 'In progress' : 'Ready'}</span>
+      <span>{workout.title || 'Workout'}</span>
+    </button>
+  ) : null
+
+  const appointmentChip = (dt, workouts, pending) => !workouts.length && !pending && completedAppointments.has(dt) ? (
     <button type="button" className="plan-appointment" onMouseDown={(event) => event.stopPropagation()}
       onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
       title="Completed appointment · no workout log"
@@ -216,7 +231,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
           <button className="planner-collapse" onClick={() => setCollapsed((v) => !v)}
             aria-expanded={!collapsed} aria-label={collapsed ? 'Expand workout planner' : 'Collapse workout planner'}>
             <span className="pc-caret" aria-hidden="true">{collapsed ? '▸' : '▾'}</span>
-            <span className="section-title" style={{ margin: 0, fontSize: isFeatured ? 19 : undefined }}>Workout Planner</span>
+            <span className="section-title" style={{ margin: 0, fontSize: isFeatured ? 19 : undefined }}>{title}</span>
           </button>
         )}
         {collapsed ? (
@@ -268,11 +283,11 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
       {collapsed ? null : view === 'month' ? (
         <>
           <div style={{ margin: '10px 0 8px', fontSize: 14, fontWeight: 700 }}>
-            {monthLabel(anchor)} <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
+            {monthLabel(anchor)} {!compactCopy && <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
               — {clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
-            </span>
+            </span>}
           </div>
-          <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>
+          {!compactCopy && <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>}
           <p className="planner-scroll-hint">Scroll sideways to review the month calendar.</p>
           <div className="plan-month-scroll" role="region" aria-label="Month calendar; scroll horizontally for all days" tabIndex={0}>
           <div className="plan-dow">{DOW.map((d) => <div key={d}>{d}</div>)}</div>
@@ -280,6 +295,7 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
             {monthGridDates(anchor).map((dt) => {
               const { vl, name } = dayData(dt)
               const logged = completedByDate.get(dt) || []
+              const pending = pendingByDate.get(dt)
               return (
                 <div key={dt} className={cls(dt, 'plan-cell') + (logged.length || completedAppointments.has(dt) ? ' has-record' : '') + (dt.slice(0, 7) !== anchor.slice(0, 7) ? ' out' : '')}
                   role="group" aria-label={`${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : completedAppointments.has(dt) ? ', completed appointment with no workout log' : ''}`} {...cell(dt)}>
@@ -287,7 +303,8 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
                     onClick={(event) => { event.stopPropagation(); activateDate(dt) }}>{+dt.slice(8, 10)}{dt === today && <span className="pc-today">today</span>}</button>
                   {name && sessionChip(dt, name)}
                   {completedChip(dt, logged)}
-                  {appointmentChip(dt, logged)}
+                  {!logged.length && pendingChip(dt, pending)}
+                  {appointmentChip(dt, logged, pending)}
                   {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : null}
                   {/* Load metrics for a day exist only once its session RPE is logged;
                       future days therefore show no ACWR/Mono/Strain projections. */}
@@ -300,15 +317,18 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
         </>
       ) : (
         <>
-          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '8px 0' }}>
-            Week of {fmtDate(weekDates(weekStart, tz)[0])}
-            {' — '}{clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
-          </div>
-          <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>
+          {!compactCopy && <>
+            <div style={{ fontSize: 12, color: 'var(--muted)', margin: '8px 0' }}>
+              Week of {fmtDate(weekDates(weekStart, tz)[0])}
+              {' — '}{clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
+            </div>
+            <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>
+          </>}
           <div className="plan-week">
             {weekDates(weekStart, tz).map((dt, i) => {
               const { vl, name } = dayData(dt)
               const logged = completedByDate.get(dt) || []
+              const pending = pendingByDate.get(dt)
               return (
                 <div key={dt} className={cls(dt, 'plan-day')}
                   role="group" aria-label={`${DOW[i]} ${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : completedAppointments.has(dt) ? ', completed appointment with no workout log' : ''}`} {...cell(dt)}>
@@ -316,9 +336,10 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
                     onClick={(event) => { event.stopPropagation(); activateDate(dt) }}>{DOW[i]} {+dt.slice(8, 10)}{dt === today && <span className="plan-today-label">Today</span>}</button>
                   {name && sessionChip(dt, name)}
                   {completedChip(dt, logged)}
-                  {appointmentChip(dt, logged)}
-                  {!name && !logged.length && !completedAppointments.has(dt) && <div className="plan-rest muted">Unplanned / no log</div>}
-                  {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : !logged.length && <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
+                  {!logged.length && pendingChip(dt, pending)}
+                  {appointmentChip(dt, logged, pending)}
+                  {!name && !logged.length && !pending && !completedAppointments.has(dt) && <div className="plan-rest muted">Unplanned / no log</div>}
+                  {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : !logged.length && !pending && <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
                   {/* Load metrics for a day exist only once its session RPE is logged;
                       future days therefore show no ACWR/Mono/Strain projections. */}
                   {(dt === today || (dt > today && intMap[dt] !== undefined)) && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}

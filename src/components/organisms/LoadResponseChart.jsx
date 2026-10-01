@@ -66,20 +66,25 @@ export default function LoadResponseChart({ db, clientId, today }) {
     datasets: [styleFor(primaryStyle, COLORS.blue, byId[primary], yValues, 'y'),
       ...(secondary ? [styleFor(secondaryStyle, COLORS.amber, byId[secondary], y2Values, 'y2')] : [])],
   }
+  const emptyScale = (scale) => hasData ? scale : { ...scale, ticks: { ...scale.ticks, display: false }, grid: { ...scale.grid, display: false } }
+  const emptyLabel = scatter
+    ? `${byId[primary].label} vs ${byId[xMetric].label} will appear here`
+    : `${byId[primary].label}${secondary ? ` and ${byId[secondary].label}` : ` (${byId[primary].unit})`} will appear here`
   const options = {
     ...baseOptions(),
     interaction: { mode: scatter ? 'nearest' : 'index', intersect: false },
     plugins: {
       ...baseOptions().plugins,
+      legend: { ...baseOptions().plugins.legend, display: Boolean(hasData) },
       tooltip: { callbacks: {
         title: (items) => scatter ? fmtDate(items[0]?.raw?.date) : fmtDate(rows[items[0]?.dataIndex]?.date),
         label: (item) => `${item.dataset.label}: ${formatValue(item.parsed.y)}`,
       } },
     },
     scales: {
-      x: scatter ? { ...baseOptions().scales.x, type: 'linear', title: { display: true, text: `${byId[xMetric].label} (${byId[xMetric].unit})` } } : { ...baseOptions().scales.x, title: { display: true, text: 'Recorded date' } },
-      y: axis(byId[primary], 'left', COLORS.blue),
-      ...(secondary ? { y2: axis(byId[secondary], 'right', COLORS.amber) } : {}),
+      x: scatter ? emptyScale({ ...baseOptions().scales.x, type: 'linear', title: { display: true, text: `${byId[xMetric].label} (${byId[xMetric].unit})` } }) : { ...baseOptions().scales.x, title: { display: true, text: 'Recorded date' } },
+      y: emptyScale(axis(byId[primary], 'left', COLORS.blue)),
+      ...(secondary ? { y2: emptyScale(axis(byId[secondary], 'right', COLORS.amber)) } : {}),
     },
   }
   const tableRows = rows.filter((row, index) => scatter
@@ -102,15 +107,13 @@ export default function LoadResponseChart({ db, clientId, today }) {
       </div>
       {scatter && <p className="load-response-hint">Metric X-axis uses same-date pairs as dots. Line and column styles apply to the date view only.</p>}
     </details>
-    {hasData ? <div className="load-response-canvas">{scatter
+    <div className="load-response-canvas">{scatter
       ? <Scatter data={chartData} options={options} role="img" aria-label={`Load response scatter chart, ${plotted}. X-axis ${byId[xMetric].label}; Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />
-      : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}</div>
-      : <p className="progress-empty">No {scatter ? 'same-date pairs' : 'recorded values'} for this selection. Try another metric or period.</p>}
-    <div className="load-response-status">{(scatter || primary !== 'load' || secondary) && <span>{plotted}</span>}<span>Session RPE: {logged}/{days} days</span><span>Unlogged days are unknown</span></div>
+      : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}{!hasData && <p className="load-response-empty-label">{emptyLabel}</p>}</div>
+    {hasData && <div className="load-response-status">{(scatter || primary !== 'load' || secondary) && <span>{plotted}</span>}<span>Session RPE: {logged}/{days} days</span><span>Unlogged days are unknown</span></div>}
     {secondary && <p className="load-response-hint">Separate Y scales: compare values, not line crossings.</p>}
-    <details className="progress-derived-table"><summary>Show dated values and sources</summary><div className="progress-derived-detail"><div className="checkins-table-scroll" role="region" aria-label="Load response table; scroll horizontally for more columns" tabIndex={0}><table className="checkins-table"><caption className="sr-only">Load response recorded dates, selected values, and sources</caption><thead><tr><th scope="col">Date</th>{scatter && <th scope="col">{byId[xMetric].label} ({byId[xMetric].unit})</th>}<th scope="col">{byId[primary].label} ({byId[primary].unit})</th>{secondary && <th scope="col">{byId[secondary].label} ({byId[secondary].unit})</th>}<th scope="col">Sources on date</th></tr></thead><tbody>
+    {tableRows.length > 0 && <details className="progress-derived-table"><summary>Show dated values and sources</summary><div className="progress-derived-detail"><div className="checkins-table-scroll" role="region" aria-label="Load response table; scroll horizontally for more columns" tabIndex={0}><table className="checkins-table"><caption className="sr-only">Load response recorded dates, selected values, and sources</caption><thead><tr><th scope="col">Date</th>{scatter && <th scope="col">{byId[xMetric].label} ({byId[xMetric].unit})</th>}<th scope="col">{byId[primary].label} ({byId[primary].unit})</th>{secondary && <th scope="col">{byId[secondary].label} ({byId[secondary].unit})</th>}<th scope="col">Sources on date</th></tr></thead><tbody>
       {tableRows.map((row) => { const index = rows.indexOf(row); return <tr key={row.date}><th scope="row">{fmtDate(row.date)}</th>{scatter && <td>{display(xValues[index])}</td>}<td>{display(yValues[index])}</td>{secondary && <td>{display(y2Values[index])}</td>}<td>{[...new Set([xMetric, primary, secondary].filter(Boolean).map((metric) => row.sources[metric]).filter(Boolean))].join(', ') || 'Source not recorded'}</td></tr> })}
-      {!tableRows.length && <tr><td colSpan={scatter + 3 + Boolean(secondary)}>No matching observations in this period.</td></tr>}
-    </tbody></table></div><p className="checkins-note">Missing days stay blank. {window ? `${window}-day means use recorded days only; counts show coverage. ` : 'Daily loads are summed; ratings and readings are averaged when multiple entries share a date. '}Pairing and separate Y scales do not show causation. Display choices do not change ACWR, monotony, or strain calculations.</p></div></details>
+    </tbody></table></div><p className="checkins-note">Missing days stay blank. {window ? `${window}-day means use recorded days only; counts show coverage. ` : 'Daily loads are summed; ratings and readings are averaged when multiple entries share a date. '}Pairing and separate Y scales do not show causation. Display choices do not change ACWR, monotony, or strain calculations.</p></div></details>}
   </section>
 }

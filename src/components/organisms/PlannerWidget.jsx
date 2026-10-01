@@ -44,7 +44,7 @@ export default function PlannerWidget({ client, size = 'medium', todayProps, ini
     ? `${workout.main?.length || 0} ${(workout.main?.length || 0) === 1 ? 'exercise' : 'exercises'}`
     : pStats && pStats.exercises
       ? `${pStats.exercises} ex · ${pStats.sets} sets · VL ${fmtVL(Math.round(pStats.volume))}`
-      : 'Nothing prescribed for today'
+      : ''
   const open = (v) => (e) => {
     if (!e.key || e.key === 'Enter' || e.key === ' ') { e.preventDefault?.(); setView(v) }
   }
@@ -60,7 +60,7 @@ export default function PlannerWidget({ client, size = 'medium', todayProps, ini
             <div className="pw-overline">TODAY · {fmtDay(today).toUpperCase()}</div>
             <div className="pw-trow">
               <span className="pw-tname">{todayName}</span>
-              <span className="muted" style={{ fontSize: 12 }}>{todayMeta}</span>
+              {todayMeta && <span className="muted" style={{ fontSize: 12 }}>{todayMeta}</span>}
             </div>
           </div>
           <div className="nav-spacer" />

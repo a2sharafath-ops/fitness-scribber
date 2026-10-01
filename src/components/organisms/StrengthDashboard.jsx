@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Line } from 'react-chartjs-2'
 import Icon from '../atoms/Icon'
+import InfoTip from '../atoms/InfoTip'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { baseOptions, COLORS, shortLabel } from '../../lib/chartSetup'
@@ -49,7 +50,7 @@ export default function StrengthDashboard({ client }) {
 
   return <div className="progress-strength">
     <div className="progress-section-head">
-      <div><span className="progress-eyebrow">01 / Recorded performance</span><h2 id="progress-strength-title">Strength</h2><p>Only completed workout sets and dated resistance logs appear. Groups use the recorded workout block or exercise type.</p></div>
+      <div><span className="progress-eyebrow">01 / Recorded performance</span><h2 id="progress-strength-title">Strength</h2></div>
       <label className="progress-lift-select">Performed lift <select value={lift} onChange={(event) => setSelected(event.target.value)}>{LIFT_GROUPS.map((group) => {
         const members = options.filter((option) => option.group === group)
         return members.length ? <optgroup key={group} label={group}>{members.map((option) => <option key={option.name} value={option.name}>{option.name}</option>)}</optgroup> : null
@@ -60,18 +61,19 @@ export default function StrengthDashboard({ client }) {
       <div className="progress-metric"><span>Coach-entered 1RM</span><strong>{lastEntered ? fmtWt(lastEntered.valueKg) : '—'}</strong><small>{lastEntered ? `${fmtDate(lastEntered.date)} · coach entry · test status not recorded` : 'No coach entry recorded'}</small></div>
       <div className="progress-metric"><span>Training max · programming</span><strong>{lastTm ? fmtWt(lastTm.valueKg) : '—'}</strong><small>{lastTm ? `${fmtDate(lastTm.date)} · ${lastTm.source === 'block-start' ? 'block-start checkpoint' : lastTm.source || 'recorded checkpoint'}` : 'No explicit checkpoint'}</small></div>
     </div> : <div className="progress-metric-grid">
-      <div className="progress-metric"><span>Recorded entries</span><strong>{work.length}</strong><small>Completed sets or resistance logs for this lift</small></div>
-      <div className="progress-metric"><span>Latest recorded load</span><strong>{latestWork.loadKg > 0 ? fmtWt(latestWork.loadKg) : 'No external load'}</strong><small>{fmtDate(latestWork.date)} · {latestWork.source}</small></div>
+      <div className="progress-metric"><span>Recorded entries</span><strong>{work.length}</strong></div>
+      <div className="progress-metric"><span>Latest recorded load</span><strong>{latestWork.loadKg > 0 ? fmtWt(latestWork.loadKg) : 'No external load'}</strong><small>{fmtDate(latestWork.date)}</small></div>
       <div className="progress-metric"><span>Latest recorded reps</span><strong>{latestWork.reps ?? '—'}</strong><small>{fmtDate(latestWork.date)} · {latestWork.sets ?? '—'} set{latestWork.sets === 1 ? '' : 's'}</small></div>
     </div>}
     <div className="progress-strength-detail">
       <div className="progress-inset">
-        <h3>{showEstimateTrend ? 'Estimated 1RM over time' : 'Recorded set load over time'}</h3>
+        <h3 className="progress-chart-heading">{showEstimateTrend ? 'Estimated 1RM over time' : 'Recorded set load over time'} <InfoTip
+          label="strength chart context" symbol="i"
+          text={`${showEstimateTrend ? 'Same lift · Epley estimated 1RM · ' : 'Same lift · recorded set load; changes in reps can affect interpretation · '}${unitName()}`} /></h3>
         {showEstimateTrend || showLoadTrend ? <>
           <div className="progress-compare-line"><Icon name="chart" size={15} /> {fmtWt(firstTrend[trendField])} on {fmtDate(firstTrend.date)} → {fmtWt(lastTrend[trendField])} on {fmtDate(lastTrend.date)} <b>({change > 0 ? '+' : ''}{toDisp(change)} {unitName()})</b></div>
           <div className="progress-chart"><Line data={{ labels: (showEstimateTrend ? estimates : loaded).map((row) => shortLabel(row.date)), datasets: [{ label: `${showEstimateTrend ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: (showEstimateTrend ? estimates : loaded).map((row) => toDisp(row[trendField])), borderColor: COLORS.blue, backgroundColor: 'rgba(11,135,201,.09)', fill: true, tension: 0.15, pointRadius: 5 }] }} options={opts} /></div>
         </> : <p className="progress-empty">{choice.group === 'Main Lift' && lastEstimate ? 'One estimate recorded. A second dated estimate will show change over time.' : loaded.length === 1 ? 'One loaded entry recorded. A second dated entry will show change over time.' : 'No comparable loaded entries yet. Recorded sets and reps remain available below.'}</p>}
-        <p className="progress-footnote">{showEstimateTrend ? 'Same lift · Epley estimated 1RM · ' : 'Same lift · recorded set load; changes in reps can affect interpretation · '}{unitName()}</p>
       </div>
       <aside className="progress-inset progress-read-note" aria-label="How to read strength results">
         <h3>How to read this</h3>

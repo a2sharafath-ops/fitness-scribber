@@ -16,7 +16,7 @@ import { clearWorkoutDraft } from '../../lib/workoutDraft'
 
 // Overview and Training share the same Classic session writes. The date is
 // explicit so a completed workout can be reopened from Training history.
-export default function ClientWorkoutFlow({ client, date, presentation = 'training', onRunStateChange }) {
+export default function ClientWorkoutFlow({ client, date, presentation = 'training', onRunStateChange, onSessionComplete }) {
   const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
   const [checkinW, setCheckinW] = useState(null)
@@ -67,6 +67,7 @@ export default function ClientWorkoutFlow({ client, date, presentation = 'traini
     clearWorkoutDraft(item, 'run')
     setRpeW(null)
     setRunOpen(false)
+    onSessionComplete?.()
     peaks.forEach((entry, index) => setTimeout(() => toast(
       `New estimated 1RM — ${entry.exercise}: ${entry.valueKg} kg${entry.tracked ? ' (assessment updated)' : ''}`,
       'info', 6000), index * 350))

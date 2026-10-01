@@ -29,7 +29,7 @@ const unavailableReason = (measure, row) => {
   return '7-day monotony is unavailable, so strain cannot be calculated.'
 }
 
-function LoadMetricGraphModal({ measure, history, clientName, today }) {
+function LoadMetricGraphModal({ measure, history, today }) {
   const { closeModal } = useModal()
   const [displayDays, setDisplayDays] = useState(28)
   const [showBand, setShowBand] = useState(true)
@@ -51,7 +51,7 @@ function LoadMetricGraphModal({ measure, history, clientName, today }) {
   ] : []
   datasets.push({ label: measure.title, data: dates.map((date) => byDate[date]?.[measure.id] ?? null), borderColor: COLORS.blue, backgroundColor: COLORS.blue, pointRadius: dates.map((date) => byDate[date]?.[measure.id] == null ? 0 : date === selected?.date ? 6 : 4), pointHoverRadius: 7, showLine: false, spanGaps: false })
   const axisLabel = measure.id === 'strain' ? 'Strain (AU)' : `${measure.title} (ratio)`
-  const options = { ...baseOptions(), scales: { ...baseOptions().scales, y: { ...baseOptions().scales.y, title: { display: true, text: axisLabel } } }, plugins: { legend: { display: false }, tooltip: { filter: (item) => item.datasetIndex === datasets.length - 1, callbacks: { title: (items) => fmtDate(dates[items[0].dataIndex]), label: (item) => `${measure.title}: ${measureValue(measure.id, { [measure.id]: item.parsed.y })}` } } }, onClick: (_event, elements) => { if (elements.length && elements[0].datasetIndex === datasets.length - 1) setSelectedDate(dates[elements[0].index]) } }
+  const options = { ...baseOptions(), scales: { ...baseOptions().scales, y: { ...baseOptions().scales.y, display: plotted.length > 0, title: { display: true, text: axisLabel } } }, plugins: { legend: { display: false }, tooltip: { filter: (item) => item.datasetIndex === datasets.length - 1, callbacks: { title: (items) => fmtDate(dates[items[0].dataIndex]), label: (item) => `${measure.title}: ${measureValue(measure.id, { [measure.id]: item.parsed.y })}` } } }, onClick: (_event, elements) => { if (elements.length && elements[0].datasetIndex === datasets.length - 1) setSelectedDate(dates[elements[0].index]) } }
   const bandText = selectedBand ? `${measureValue(measure.id, { [measure.id]: selectedBand.lower })}–${measureValue(measure.id, { [measure.id]: selectedBand.upper })}` : null
   const sources = selected && (measure.id === 'acwr' ? selected.sources28 : selected.sources7)
   const componentRows = selected && (measure.id === 'acwr' ? [
@@ -64,23 +64,18 @@ function LoadMetricGraphModal({ measure, history, clientName, today }) {
     ['7-day recorded load', `${selected.load7.toLocaleString()} AU`],
     ['7-day monotony', selected.monotony == null ? 'Unavailable' : selected.monotony.toFixed(2)],
   ])
-  return <ModalShell title={`${measure.title} history`} onClose={closeModal} footer={<Button variant="ghost" onClick={closeModal}>Close</Button>}>
+  return <ModalShell title={<span className="progress-load-graph-title">{measure.title} history <InfoTip {...GLOSSARY[measure.id]} symbol="i" /></span>} onClose={closeModal} footer={<Button variant="ghost" onClick={closeModal}>Close</Button>}>
     <div className="progress-load-graph">
-      <p className="progress-load-graph-intro">{clientName} · {GLOSSARY[measure.id].text}</p>
-      <div className="progress-load-graph-controls"><label>Display period <select value={displayDays} onChange={(event) => setDisplayDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option></select></label><label className="progress-load-band-toggle"><input type="checkbox" checked={showBand} onChange={(event) => setShowBand(event.target.checked)} /> Show personal baseline band</label></div>
-      {plotted.length ? <>
-        <div className="progress-load-graph-canvas"><Line data={{ labels: dates.map(shortLabel), datasets }} options={options} role="img" aria-label={`${measure.title} on ${plotted.length} logged dates between ${fmtDate(start)} and ${fmtDate(end)}. Calendar days without a session RPE entry have no point.${selectedBand ? ` Trailing personal baseline band for ${fmtDate(selected.date)}: ${bandText}.` : ''}`} /></div>
-        <div className="progress-load-graph-legend"><span><i className="progress-load-graph-point" /> Dated {measure.title} values</span>{hasBand && <span><i className="progress-load-graph-band" /> Trailing personal baseline band</span>}</div>
-      </> : <p className="checkins-empty">No calculable {measure.title} values in this {displayDays}-day view. {unavailableReason(measure.id, chronological.at(-1))} Use “Record session RPE” on this page to add dated session effort and duration.</p>}
-      <p className="checkins-window">{chronological.length}/{displayDays} calendar days have session RPE entries; {plotted.length} have a calculable {measure.title} value in {fmtDate(start)}–{fmtDate(end)}. Unlogged days have no point. {showBand ? selectedBand ? `On ${fmtDate(selected.date)}, the band is the middle 50% of ${selectedBand.count} earlier calculable values in the preceding 28 days (${bandText}).` : selected ? 'No band for the inspected date: fewer than four earlier calculable values in the preceding 28 days.' : 'No personal baseline band without calculable values.' : 'Personal baseline band hidden.'}</p>
-      <details className="progress-derived-table"><summary>Show dated {measure.title} table</summary><div className="progress-derived-detail"><p className="checkins-window">Recorded session RPE dates in {fmtDate(start)}–{fmtDate(end)}. Each row uses calculation windows ending on its date. Source: this client’s session RPE × duration entries. Scroll the table sideways for all columns on narrow screens.</p>
-        {chronological.length ? <LogTable caption={`${measure.title} history`}><thead><tr><th scope="col">Date</th><th scope="col">{measure.title}</th><th scope="col">7-day load</th><th scope="col">7-day coverage</th>{measure.id === 'acwr' && <th scope="col">28-day coverage</th>}<th scope="col">Sources in window</th></tr></thead><tbody>
+      <div className="progress-load-graph-controls"><label>Display period <select value={displayDays} onChange={(event) => setDisplayDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option></select></label>{plotted.length > 0 && <label className="progress-load-band-toggle"><input type="checkbox" checked={showBand} onChange={(event) => setShowBand(event.target.checked)} /> Show personal baseline band</label>}</div>
+      <div className="progress-load-graph-canvas"><Line data={{ labels: dates.map(shortLabel), datasets }} options={options} role="img" aria-label={`${measure.title} chart, ${plotted.length} calculated values between ${fmtDate(start)} and ${fmtDate(end)}. Unlogged days have no point.${selectedBand ? ` Trailing personal baseline band for ${fmtDate(selected.date)}: ${bandText}.` : ''}`} /></div>
+      {plotted.length ? <><div className="progress-load-graph-legend"><span><i className="progress-load-graph-point" /> Dated {measure.title} values</span>{hasBand && <span><i className="progress-load-graph-band" /> Trailing personal baseline band</span>}</div><p className="checkins-window">{plotted.length} calculated values · {chronological.length}/{displayDays} days logged</p></> : <p className="checkins-empty">No calculable {measure.title} values yet. {unavailableReason(measure.id, chronological.at(-1))}</p>}
+      {chronological.length > 0 && <details className="progress-derived-table"><summary>Show dated {measure.title} table</summary><div className="progress-derived-detail">
+        <LogTable caption={`${measure.title} history`}><thead><tr><th scope="col">Date</th><th scope="col">{measure.title}</th><th scope="col">7-day load</th><th scope="col">7-day coverage</th>{measure.id === 'acwr' && <th scope="col">28-day coverage</th>}<th scope="col">Sources in window</th></tr></thead><tbody>
           {[...chronological].reverse().map((row) => <tr key={row.date}><th scope="row">{fmtDate(row.date)}</th><td>{measureValue(measure.id, row)}</td><td>{row.load7.toLocaleString()} AU</td><td>{row.logged7}/7 days logged</td>{measure.id === 'acwr' && <td>{row.logged28}/28 days logged</td>}<td>{measure.id === 'acwr' ? row.sources28 : row.sources7}</td></tr>)}
-        </tbody></LogTable> : <p className="checkins-empty">No session RPE observations yet, so this calculation and its history are unavailable.</p>}
-        <p className="checkins-note">Unlogged days are treated as zero by these existing formulas; they may be missing entries rather than rest days. {measure.id === 'acwr' && `ACWR requires at least ${MIN_ACWR_DAYS} positive-load days in the 28-day window. `}These measures describe recorded load and do not provide a universal injury-risk or training-clearance threshold.</p>
-      </div></details>
+        </tbody></LogTable>
+        <p className="checkins-note">Unlogged days may be missing entries, not rest days.</p>
+      </div></details>}
       {selected && <div className="progress-load-graph-breakdown"><label>Inspect recorded date <select value={selected.date} onChange={(event) => setSelectedDate(event.target.value)}>{[...chronological].reverse().map((row) => <option key={row.date} value={row.date}>{fmtDate(row.date)}</option>)}</select></label><div className="progress-load-graph-summary"><strong>{measure.title}: {measureValue(measure.id, selected)}</strong><span>{fmtDate(selected.date)} · {selected.logged7}/7 days logged{measure.id === 'acwr' ? ` · ${selected.logged28}/28 days logged` : ''}</span></div><dl>{componentRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p>Sources in calculation window: {sources}.</p></div>}
-      <p className="checkins-note">The shaded band uses only earlier recorded values for each date; it is a descriptive comparison, not a target or injury-risk threshold. ACWR uses the existing coupled 7-day/28-day arithmetic averages; monotony uses the 7-day mean divided by its daily standard deviation; strain is 7-day load × monotony. Unlogged days enter those formulas as zero but may be missing records rather than rest days. No metric provides training clearance.</p>
     </div>
   </ModalShell>
 }
@@ -96,9 +91,10 @@ function LogTable({ caption, children }) {
 }
 
 function History({ count, label, children }) {
+  if (!count) return null
   return <details className="checkins-history"><summary>View {label} history ({count})</summary>{children}</details>
 }
-function AdvancedLoad({ rows, clientId, clientName, today }) {
+function AdvancedLoad({ rows, clientId, today }) {
   const { openModal } = useModal()
   const usable = rows.filter((row) => row.date <= today && typeof row.tl === 'number' && Number.isFinite(row.tl))
   const latest = usable.find((row) => row.date <= today)
@@ -140,16 +136,16 @@ function AdvancedLoad({ rows, clientId, clientName, today }) {
         const available = Boolean(recent && current[measure.id] != null)
         const band = available ? trailingObservedBands(history, measure.id, [current.date])[0] : null
         const position = compareToObservedBand(available ? current[measure.id] : null, band)
-        const indicator = !available ? '— No comparison' : position === 'unavailable' ? '— Baseline unavailable' : {
+        const indicator = !available ? '' : position === 'unavailable' ? '— Baseline unavailable' : {
           above: '↑ Above baseline', below: '↓ Below baseline', within: '≈ Within baseline',
         }[position]
         const detail = !recent ? `No session RPE in the past 28 days${latest ? `; last entry ${fmtDate(latest.date)}` : ''}.` : current[measure.id] == null
           ? `${fmtDate(current.date)}. ${unavailableReason(measure.id, current)}`
           : `${fmtDate(current.date)}. ${measure.id === 'acwr' ? `${current.logged28}/28` : `${current.logged7}/7`} days logged; other days unconfirmed.`
-        return <button key={measure.id} type="button" className="progress-derived-card" aria-label={`Open ${measure.title} graph and table. ${indicator}. ${detail}`} onClick={() => openModal(<LoadMetricGraphModal measure={measure} history={history} clientName={clientName} today={today} />, true)}>
+        return <button key={measure.id} type="button" className="progress-derived-card" aria-label={`Open ${measure.title} graph and table. ${indicator ? `${indicator}. ` : ''}${detail}`} onClick={() => openModal(<LoadMetricGraphModal measure={measure} history={history} today={today} />, true)}>
           <span className="progress-derived-card-heading"><span>{measure.title}</span>{recent && <time dateTime={current.date}>{shortLabel(current.date)}</time>}</span>
           <strong>{available ? measureValue(measure.id, current) : 'Not available'}</strong>
-          <small className="progress-derived-trend">{indicator}</small>
+          {indicator && <small className="progress-derived-trend">{indicator}</small>}
           <span className="progress-derived-action">View history <span aria-hidden="true">↗</span></span>
         </button>
       })}
@@ -172,7 +168,7 @@ export default function ClientTrainingLoad({ client }) {
   const cardio = mine(db.cardio, client.id)
   return <div className="progress-load-content">
     <div className="progress-section-head"><h2 id="progress-load-title">Training load</h2><Button onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Record session RPE</Button></div>
-    <AdvancedLoad rows={srpe} clientId={client.id} clientName={client.name} today={today} />
+    <AdvancedLoad rows={srpe} clientId={client.id} today={today} />
     <LoadResponseChart db={db} clientId={client.id} today={today} />
     <ClientMuscleVolume key={client.id} clientId={client.id} />
     <div className="progress-load-logs">

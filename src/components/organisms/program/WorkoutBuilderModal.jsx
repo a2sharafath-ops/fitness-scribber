@@ -51,17 +51,18 @@ const fromExisting = (p, seedBlocks = []) => {
   return base
 }
 
-export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false }) {
+export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false, onLog }) {
   const { db, commit, tz, units } = useData()
   const { closeModal, setCloseGuard } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
   const completed = (db.workouts || []).filter((item) => item.clientId === clientId && item.date === date && item.status === 'completed')
+  const unfinishedWorkout = (db.workouts || []).find((item) => item.clientId === clientId && item.date === date && item.status !== 'completed')
   const completedAppointment = (db.sessions || []).some((item) => item.clientId === clientId && item.date === date && String(item.status).toLowerCase() === 'completed')
   const closedDay = isClosedTrainingDay(db, clientId, date, todayISO(tz))
   const [selectedLogId, setSelectedLogId] = useState(() => completed[0]?.id || null)
   const selectedLog = completed.find((item) => item.id === selectedLogId) || completed[0] || null
-  const [mode, setMode] = useState(() => completed.length || completedAppointment || (review && (existing || closedDay)) ? 'view' : 'edit')
+  const [mode, setMode] = useState(() => completed.length || unfinishedWorkout || completedAppointment || (review && (existing || closedDay)) ? 'view' : 'edit')
   const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
   const [name, setName] = useState(existing?.name || '')
   const [notes, setNotes] = useState(() => {
@@ -216,6 +217,11 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     toast('Workout deleted')
   }
 
+  const openWorkoutLog = () => {
+    closeModal({ force: true })
+    onLog?.(date)
+  }
+
   const total = blocksVolume(blocks)
 
   return (
@@ -229,19 +235,21 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
       {mode === 'view' && <div className="training-day-review">
         <div className="training-day-review-head">
           <div>
-            <span className="training-day-status">{selectedLog ? 'Completed workout log' : completedAppointment ? 'Completed appointment' : existing ? 'Prescribed session' : 'No session'}</span>
-            <h2>{selectedLog?.title || existing?.name || (existing ? 'Prescribed session' : 'No workout on this date')}</h2>
-            {(selectedLog?.note || existing?.notes) && <p className="muted">{selectedLog?.note || existing?.notes}</p>}
+            <span className="training-day-status">{selectedLog ? 'Completed workout log' : unfinishedWorkout?.status === 'in_progress' ? 'Workout in progress' : unfinishedWorkout ? 'Workout ready' : completedAppointment ? 'Completed appointment' : existing ? 'Prescribed session' : 'No session'}</span>
+            <h2>{selectedLog?.title || unfinishedWorkout?.title || existing?.name || (existing ? 'Prescribed session' : 'No workout on this date')}</h2>
+            {(selectedLog?.note || unfinishedWorkout?.note || existing?.notes) && <p className="muted">{selectedLog?.note || unfinishedWorkout?.note || existing?.notes}</p>}
           </div>
           <div className="flex gap">
             {selectedLog && <Button variant="ghost" size="sm" onClick={() => setMode('edit-log')}>Edit logged details</Button>}
-            {!selectedLog && existing && !completedAppointment && <Button variant="ghost" size="sm" onClick={() => setMode('edit')}>Edit session</Button>}
+            {!selectedLog && !unfinishedWorkout && existing && !completedAppointment && <Button variant="ghost" size="sm" onClick={() => setMode('edit')}>Edit session</Button>}
+            {onLog && !selectedLog && (unfinishedWorkout?.status === 'in_progress' || !completedAppointment && date === todayISO(tz) && (existing || unfinishedWorkout)) &&
+              <Button size="sm" onClick={openWorkoutLog}>{unfinishedWorkout?.status === 'in_progress' ? 'Resume workout' : 'Log workout'}</Button>}
           </div>
         </div>
         {completed.length > 1 && <div className="flex gap training-day-log-list" aria-label="Workout logs on this date">
           {completed.map((item) => <Button key={item.id} variant={item.id === selectedLog?.id ? 'primary' : 'ghost'} size="sm" onClick={() => setSelectedLogId(item.id)}>{item.title}</Button>)}
         </div>}
-        {selectedLog || existing ? <DayBlockReview workout={selectedLog} prescription={existing} units={units} />
+        {selectedLog || unfinishedWorkout || existing ? <DayBlockReview workout={selectedLog || (!existing && unfinishedWorkout)} prescription={existing} units={units} />
           : <p className="muted">{completedAppointment ? 'The appointment is complete, but no workout log was saved.' : 'No workout was prescribed or logged. Past days are closed to new planning.'}</p>}
         {selectedLog && <>
           <h3 className="training-day-insights-title">Session insights</h3>

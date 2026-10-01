@@ -15,11 +15,8 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
   if (!screening) {
     return (
       <div className="card">
-        <div className="section-title" style={{ margin: '0 0 8px' }}>Health screening <Tag color="gray">Trainer-only</Tag></div>
-        <p className="muted" style={{ fontSize: 13 }}>
-          {draft ? 'Screening in progress — the client has a saved draft.' : 'No pre-participation screening on file yet.'}
-        </p>
-        {onStart && <Button style={{ marginTop: 10 }} onClick={onStart}>{draft ? 'Continue screening with client' : 'Record screening with client'}</Button>}
+        <div className="section-title" style={{ margin: '0 0 12px' }}>{draft ? 'Screening draft saved' : 'No screening on file'} <Tag color="gray">Trainer-only</Tag></div>
+        {onStart && <Button onClick={onStart}>{draft ? 'Continue screening with client' : 'Record screening with client'}</Button>}
       </div>
     )
   }

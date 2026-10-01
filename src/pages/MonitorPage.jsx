@@ -57,13 +57,13 @@ export default function MonitorPage() {
   }
 
   return <>
-    <div className="topbar checkins-title"><div><h1>Check-ins</h1><div className="sub">Review wellness, concerns, and device observations for {client.name}</div></div></div>
+    <div className="topbar checkins-title"><h1>Check-ins</h1></div>
     <nav className="checkins-views" aria-label="Check-ins views">
       {VIEWS.map(([key, label]) => <Link key={key} to={`?view=${key}`} className={'checkins-view-link' + (view === key ? ' active' : '')} aria-current={view === key ? 'page' : undefined}>{label}</Link>)}
     </nav>
     {view === 'wellness' && <WellnessView client={client} today={today} openModal={openModal} del={del} />}
     {view === 'concerns' && <ConcernsView client={client} openModal={openModal} />}
-    {view === 'wearables' && <WearablesView client={client} today={today} openModal={openModal} del={del} />}
+    {view === 'wearables' && <WearablesView client={client} openModal={openModal} del={del} />}
   </>
 }
 
@@ -78,28 +78,26 @@ function WellnessView({ client, today, openModal, del }) {
   const dates = lastNDates(28, tz)
   const byDate = Object.fromEntries(wellness.map((row) => [row.date, row.score]))
   const observed = dates.filter((date) => Object.hasOwn(byDate, date)).length
+  const missingScoreInput = '1 complete wellness check-in needed for this date'
 
   return <div className="checkins-stack">
     <section className="card checkins-summary">
-      <div className="checkins-section-head"><div><h2>Training response snapshot</h2><p className="muted">{latestDate ? `Inputs recorded on ${fmtDate(latestDate)}` : 'No check-in or wearable reading recorded yet'}</p></div><InfoTip {...GLOSSARY.readiness} /></div>
-      <div className="checkins-snapshot-grid">
-        <div className="checkins-stat"><span>App readiness score</span><strong>{parts?.score == null ? '—' : `${parts.score}/100`}</strong><small>{latestDate ? fmtDate(latestDate) : 'Date unavailable'} · {parts?.score == null ? 'not enough comparable input' : parts.confidence === 'high' ? 'wellness and HRV baseline' : 'one usable input'}</small></div>
-        <div className="checkins-stat"><span>Wellness input</span><strong>{dayWellness ? `${valueOf(dayWellness.score)}/28` : 'Missing'}</strong><small>{dayWellness ? `${fmtDate(dayWellness.date)} · ${sourceOf(dayWellness)}` : `No check-in on ${fmtDate(latestDate)}`}</small></div>
-        <div className="checkins-stat"><span>Wearable input</span><strong>{dayWearable ? `${valueOf(dayWearable.hrv, ' ms')} HRV` : 'Missing'}</strong><small>{dayWearable ? `${fmtDate(dayWearable.date)} · ${sourceOf(dayWearable)}` : `No wearable reading on ${fmtDate(latestDate)}`}</small></div>
-      </div>
-      <p className="checkins-note">This is a dated interpretation of available inputs, not medical or exercise clearance. A missing device reading does not block a manual wellness check-in.</p>
+      <div className="checkins-section-head"><h2>Training response snapshot</h2><InfoTip {...GLOSSARY.readiness} /></div>
+      {latestDate ? <div className="checkins-snapshot-grid">
+        <div className="checkins-stat"><span>App readiness score</span><strong>{parts?.score == null ? '—' : `${parts.score}/100`}</strong><small>{fmtDate(latestDate)} · {parts?.score == null ? missingScoreInput : parts.confidence === 'high' ? 'wellness and HRV baseline' : 'one usable input'}</small></div>
+        {dayWellness && <div className="checkins-stat"><span>Wellness input</span><strong>{valueOf(dayWellness.score)}/28</strong><small>{fmtDate(dayWellness.date)} · {sourceOf(dayWellness)}</small></div>}
+        {dayWearable && <div className="checkins-stat"><span>Wearable input</span><strong>{valueOf(dayWearable.hrv, ' ms')} HRV</strong><small>{fmtDate(dayWearable.date)} · {sourceOf(dayWearable)}</small></div>}
+      </div> : <p className="checkins-empty">No check-in or wearable data yet.</p>}
     </section>
 
     <section className="card">
-      <div className="checkins-section-head"><div><h2>Wellness check-ins</h2><p className="muted">Sleep quality, stress, fatigue, and soreness, each rated 1–7.</p></div><Button onClick={() => openModal(<WellnessForm clientId={client.id} />)}>＋ Record check-in</Button></div>
-      <SourceLine row={wellness[0]} today={today} />
-      {wellness[0] ? <div className="checkins-latest">Latest: sleep {valueOf(wellness[0].sleep)}/7 · stress {valueOf(wellness[0].stress)}/7 · fatigue {valueOf(wellness[0].fatigue)}/7 · soreness {valueOf(wellness[0].soreness)}/7</div> : <p className="checkins-empty">No wellness observations yet. Manual entry is available above.</p>}
+      <div className="checkins-section-head"><h2>Wellness check-ins</h2><Button onClick={() => openModal(<WellnessForm clientId={client.id} />)}>＋ Record check-in</Button></div>
+      {wellness[0] && <SourceLine row={wellness[0]} today={today} />}
+      {wellness[0] ? <div className="checkins-latest">Latest: sleep {valueOf(wellness[0].sleep)}/7 · stress {valueOf(wellness[0].stress)}/7 · fatigue {valueOf(wellness[0].fatigue)}/7 · soreness {valueOf(wellness[0].soreness)}/7</div> : <p className="checkins-empty">No wellness check-ins yet.</p>}
       {observed > 1 && <div className="checkins-chart"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: 'Wellness score /28', data: dates.map((date) => byDate[date] ?? null), borderColor: COLORS.blue, backgroundColor: 'rgba(11,135,201,.08)', fill: false, pointRadius: 3, spanGaps: false }] }} options={lineOptions()} /></div>}
-      <p className="checkins-window">Last 28 days · {fmtDate(dates[0])}–{fmtDate(dates.at(-1))} · {observed}/28 days recorded. Blank days are unrecorded, not zero scores.</p>
-      <History count={wellness.length} label="wellness"><LogTable caption="Wellness check-in history"><thead><tr><th scope="col">Date</th><th scope="col">Sleep</th><th scope="col">Stress</th><th scope="col">Fatigue</th><th scope="col">Soreness</th><th scope="col">Score</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
+      {wellness.length > 0 && <History count={wellness.length} label="wellness"><LogTable caption="Wellness check-in history"><thead><tr><th scope="col">Date</th><th scope="col">Sleep</th><th scope="col">Stress</th><th scope="col">Fatigue</th><th scope="col">Soreness</th><th scope="col">Score</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
         {wellness.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.sleep)}</td><td>{valueOf(row.stress)}</td><td>{valueOf(row.fatigue)}</td><td>{valueOf(row.soreness)}</td><td>{valueOf(row.score)}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete wellness entry from ${fmtDate(row.date)}`} onClick={() => del('wellness', row.id)}>×</button></td></tr>)}
-        {!wellness.length && <tr><td colSpan={8} className="muted">No entries recorded.</td></tr>}
-      </tbody></LogTable></History>
+      </tbody></LogTable></History>}
     </section>
   </div>
 }
@@ -149,7 +147,7 @@ function ConnectDevices({ clientId }) {
   return <div className="checkins-device-actions"><Button variant="ghost" size="sm" disabled={busy} onClick={() => connect('oura')}>Connect Oura</Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => connect('whoop')}>Connect Whoop</Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => connect('fitbit')}>Connect Fitbit</Button><Button size="sm" disabled={busy} onClick={sync}>Sync now</Button></div>
 }
 
-function WearablesView({ client, today, openModal, del }) {
+function WearablesView({ client, openModal, del }) {
   const { db, commit, tz } = useData()
   const records = mine(db.wearable, client.id)
   const latest = records[0]
@@ -165,16 +163,14 @@ function WearablesView({ client, today, openModal, del }) {
   }
   const pauseSync = () => { commit((draft) => { draft.clients.find((row) => row.id === client.id).monitorOptIn = false }); toast('Wearable sync paused') }
   return <div className="checkins-stack">
-    <section className="card"><div className="checkins-section-head"><div><h2>Wearable observations</h2><p className="muted">Sync is {client.monitorOptIn ? 'enabled' : 'off'} for this client. Manual entry and existing records remain available.</p></div><Button onClick={() => openModal(<WearableForm clientId={client.id} />)}>＋ Manual entry</Button></div>
-      <SourceLine row={latest} today={today} />
-      {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div><p className="checkins-window">Prior 30-day HRV average: {baselineCount ? `${baseline.toFixed(1)} ms from ${baselineCount} reading${baselineCount === 1 ? '' : 's'}` : 'not available'}. This is personal context, not a clearance or risk threshold.</p></> : <p className="checkins-empty">No wearable reading recorded. Wellness check-ins can still be entered manually.</p>}
+    <section className="card"><div className="checkins-section-head"><h2>Wearable observations</h2><Button onClick={() => openModal(<WearableForm clientId={client.id} />)}>＋ Manual entry</Button></div>
+      {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div>{latest.hrv != null && <p className="checkins-window">30-day HRV baseline: {baseline ? `${baseline.toFixed(1)} ms (${baselineCount} reading${baselineCount === 1 ? '' : 's'})` : '1 earlier usable reading needed'}</p>}</> : <p className="checkins-empty">No wearable data yet.</p>}
       {observed > 1 && <div className="checkins-chart"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: 'HRV (ms)', data: dates.map((date) => byDate[date] ?? null), borderColor: COLORS.purple, pointRadius: 3, spanGaps: false }] }} options={lineOptions()} /></div>}
-      <p className="checkins-window">Last 28 days · {fmtDate(dates[0])}–{fmtDate(dates.at(-1))} · {observed}/28 days with HRV recorded. Gaps are missing readings.</p>
-      <History count={records.length} label="wearable"><LogTable caption="Wearable reading history"><thead><tr><th scope="col">Date</th><th scope="col">HRV</th><th scope="col">Resting HR</th><th scope="col">Sleep</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
+      {observed > 1 && <p className="checkins-window">Last 28 days · {observed}/28 days recorded</p>}
+      {records.length > 0 && <History count={records.length} label="wearable"><LogTable caption="Wearable reading history"><thead><tr><th scope="col">Date</th><th scope="col">HRV</th><th scope="col">Resting HR</th><th scope="col">Sleep</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
         {records.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.hrv, ' ms')}</td><td>{valueOf(row.rhr, ' bpm')}</td><td>{valueOf(row.sleepHrs, ' h')}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete wearable reading from ${fmtDate(row.date)}`} onClick={() => del('wearable', row.id)}>×</button></td></tr>)}
-        {!records.length && <tr><td colSpan={6} className="muted">No wearable observations recorded.</td></tr>}
-      </tbody></LogTable></History>
+      </tbody></LogTable></History>}
     </section>
-    <section className="card"><div className="checkins-section-head"><div><h2>Device connection</h2><p className="muted">A device is optional. Live OAuth and sync require deployed backend functions and vendor keys.</p></div>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</section>
+    <section className="card"><div className="checkins-section-head"><h2>Device connection <InfoTip term="Device sync" text="Live sync requires backend functions and vendor credentials. Manual entry works without a device." /></h2>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</section>
   </div>
 }

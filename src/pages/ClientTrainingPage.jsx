@@ -34,15 +34,18 @@ export default function ClientTrainingPage() {
   const selectedCompleted = (db.workouts || []).find((item) => item.clientId === id && item.date === selectedDate && item.status === 'completed')
   const completedAppointments = db.sessions.filter((item) => item.clientId === id && item.status === 'Completed')
     .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5)
-  const selectDate = (date) => {
-    if (logging) return
-    setSearchParams(date === today ? {} : { date })
+  const runRequested = searchParams.get('run') === '1'
+  const unfinishedWorkout = (db.workouts || []).some((item) => item.clientId === id && item.date === selectedDate && item.status === 'in_progress')
+  const showRunner = runRequested && !selectedCompleted && (selectedDate === today || unfinishedWorkout)
+  const closeRunner = () => {
+    setLogging(false)
+    setSearchParams(selectedDate === today ? {} : { date: selectedDate })
   }
 
   return (
     <>
       <div className="topbar training-topbar">
-        <div><h1>Training</h1><div className="sub">Plan sessions, record actual work, and review history.</div></div>
+        <h1>Training</h1>
         {!logging && <div className="flex gap">
           <Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>
           <Link className="btn ghost sm" to={`/clients/${id}/check-ins`}>Check-ins</Link>
@@ -50,46 +53,31 @@ export default function ClientTrainingPage() {
       </div>
 
       <section className="card training-program" aria-labelledby="training-program-title">
-        <div>
-          <div className="overview-eyebrow">CURRENT PROGRAMME</div>
+        <div className="training-program-copy">
+          <span className="overview-eyebrow">PROGRAMME</span>
           <h2 id="training-program-title">{plan ? plan.name : 'No programme assigned'}</h2>
-          <p className="muted">{plan ? `${plan.desc || 'Custom programme'} · ${plan.items?.length || 0} exercises in the programme`
-            : 'Use the weekly planner below to prescribe a session for this client.'}</p>
+          {plan && <span className="muted">{plan.items?.length || 0} exercises</span>}
         </div>
         {!logging && <Link className="btn ghost sm" to="/workouts">Programme library →</Link>}
       </section>
 
-      <section id="selected-workout" className="training-session" aria-labelledby="training-session-title">
-        <div className="training-section-head">
-          <div>
-            <h2 id="training-session-title">{selectedDate === today ? 'Today’s session' : `Session · ${fmtDate(selectedDate)}`}</h2>
-            <p className="muted">Prescribed targets and recorded sets stay separate in the workout.</p>
-          </div>
-          {!logging && <div className="training-date-controls">
-            <label htmlFor="training-date">Workout date</label>
-            <input id="training-date" type="date" value={selectedDate} onChange={(event) => selectDate(event.target.value)} />
-            {selectedDate !== today && <Button variant="ghost" size="sm" onClick={() => selectDate(today)}>Today</Button>}
-          </div>}
+      {showRunner && <section id="workout-log" className="training-session" aria-label={`Workout logging for ${fmtDate(selectedDate)}`}>
+        <div className="training-runner-head">
+          <span>Logging · {fmtDate(selectedDate)}</span>
+          {!logging && <Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>}
         </div>
-        {selectedCompleted ? <div className="card training-completed-preview">
-          <div><strong>{selectedCompleted.title || 'Completed workout'}</strong><p className="muted">Completed workout log for {fmtDate(selectedDate)}.</p></div>
-          <Button variant="ghost" size="sm" onClick={() => openModal(<WorkoutBuilderModal clientId={id} date={selectedDate} review />, 'xl')}>Review day</Button>
-        </div> : <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} onRunStateChange={setLogging} />}
-        {logging && <p className="training-save-note">Save &amp; exit in the workout before switching dates or opening the planner.</p>}
-      </section>
+        <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate}
+          onRunStateChange={setLogging} onSessionComplete={closeRunner} />
+        {logging && <p className="training-save-note">Save &amp; exit before opening the calendar.</p>}
+      </section>}
 
       {!logging && <>
-        <section className="training-planner" aria-labelledby="training-planner-title">
-          <div className="training-section-head">
-            <div><h2 id="training-planner-title">Workout calendar</h2><p className="muted">Choose a day to review a workout or plan an open date.</p></div>
-          </div>
-          <WorkoutPlanner client={client} focusDate={selectedDate} />
+        <section id="selected-workout" className="training-planner" aria-label="Workout calendar">
+          <WorkoutPlanner client={client} focusDate={selectedDate} title="Workout calendar" compactCopy />
         </section>
 
-        <section className="card training-history" aria-labelledby="training-history-title">
-          <div className="training-section-head">
-            <div><h2 id="training-history-title">Session history</h2><p className="muted">Workout logs and booked appointment status are separate records.</p></div>
-          </div>
+        <details className="card training-history">
+          <summary id="training-history-title">Session history</summary>
           <div className="training-history-grid">
             <div>
               <h3>Completed workout logs</h3>
@@ -107,7 +95,7 @@ export default function ClientTrainingPage() {
               </div>) : <p className="muted">No completed appointments yet.</p>}
             </div>
           </div>
-        </section>
+        </details>
 
         <details className="card training-assistance">
           <summary>Coach assistance</summary>

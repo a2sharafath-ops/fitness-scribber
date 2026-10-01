@@ -91,7 +91,7 @@ export default function ClientDetailPage() {
   return (
     <>
       <div className="topbar overview-title">
-        <div><h1>Overview</h1><div className="sub">Prepare for {fmtDate(today)}</div></div>
+        <h1>Overview</h1>
         <div className="flex gap">
           {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={client} />)}><Icon name="link" size={14} /> Invite</Button>}
           <Button onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>
@@ -102,9 +102,7 @@ export default function ClientDetailPage() {
         <section className="card overview-next" aria-labelledby="next-session-title">
           <div className="overview-eyebrow">NEXT SESSION</div>
           <h2 id="next-session-title">{nextSession ? nextSession.type : 'No upcoming session booked'}</h2>
-          <p className="muted">{nextSession
-            ? `${nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · ${nextSession.time || 'Time not set'} · ${nextSession.dur || '—'} min · ${nextSession.status}`
-            : 'Plan training or book a session when the schedule is ready.'}</p>
+          {nextSession && <p className="muted">{`${nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · ${nextSession.time || 'Time not set'} · ${nextSession.dur || '—'} min · ${nextSession.status}`}</p>}
           <div className="overview-next-actions">
             {focusToday
               ? <Button onClick={() => document.getElementById('today-training')?.scrollIntoView({ behavior: 'smooth' })}>{trainingAction} →</Button>
@@ -115,7 +113,6 @@ export default function ClientDetailPage() {
         </section>
 
         <section className="card overview-attention" aria-labelledby="attention-title">
-          <div className="overview-eyebrow">ATTENTION</div>
           <h2 id="attention-title">What needs review</h2>
           {openConcerns.length > 0 && <button className="overview-alert" onClick={() => document.getElementById('open-concerns')?.scrollIntoView({ behavior: 'smooth' })}>
             <strong>{openConcerns.length} open concern{openConcerns.length === 1 ? '' : 's'}</strong>
@@ -132,35 +129,33 @@ export default function ClientDetailPage() {
             Reassessment due: {dueTypes.map(typeLabel).join(', ')} <span>Review →</span>
           </Link>}
           {!checkedIn && <Link className="overview-attention-link" to={checkInsUrl}>
-            No wellness check-in recorded today <span>Check-ins →</span>
+            Today’s check-in missing <span>Check-ins →</span>
           </Link>}
           {!openConcerns.length && !earlierUnresolved.length && baselines.done === baselines.total && !dueTypes.length && checkedIn &&
-            <p className="muted">No open concerns or assessment reminders. Today’s check-in is recorded.</p>}
+            <p className="muted">All caught up.</p>}
         </section>
       </div>
 
       <section className="card overview-checkin" aria-labelledby="checkin-title">
         <div className="flex between overview-section-head">
-          <div><h2 id="checkin-title">Check-in snapshot</h2><p className="muted">Recorded inputs for today’s review</p></div>
+          <h2 id="checkin-title">Check-in snapshot</h2>
           <Link className="btn ghost sm" to={checkInsUrl}>View check-ins →</Link>
         </div>
         <div className="overview-checkin-grid">
           <div>
             <strong>Wellness</strong>
-            <div className="overview-source">{wellness ? `${recordedLabel(wellness.date, today)} · ${wellness.source || 'Source not recorded'}` : 'Not recorded · source unavailable'}</div>
-            <p>{wellness ? `Sleep ${wellness.sleep ?? '—'}/7 · Stress ${wellness.stress ?? '—'}/7 · Fatigue ${wellness.fatigue ?? '—'}/7 · Soreness ${wellness.soreness ?? '—'}/7` : 'No wellness entries yet.'}</p>
+            {wellness ? <><div className="overview-source">{recordedLabel(wellness.date, today)} · {wellness.source || 'Source not recorded'}</div><p>Sleep {wellness.sleep ?? '—'}/7 · Stress {wellness.stress ?? '—'}/7 · Fatigue {wellness.fatigue ?? '—'}/7 · Soreness {wellness.soreness ?? '—'}/7</p></> : <p>Not recorded</p>}
           </div>
           <div>
             <strong>Wearable</strong>
-            <div className="overview-source">{wearable ? `${recordedLabel(wearable.date, today)} · ${wearable.source || 'Source not recorded'}` : 'Not recorded · source unavailable'}</div>
-            <p>{wearable ? `HRV ${wearable.hrv ?? '—'} ms · Resting HR ${wearable.rhr ?? '—'} bpm` : 'Manual check-ins remain available without a device.'}</p>
+            {wearable ? <><div className="overview-source">{recordedLabel(wearable.date, today)} · {wearable.source || 'Source not recorded'}</div><p>HRV {wearable.hrv ?? '—'} ms · Resting HR {wearable.rhr ?? '—'} bpm</p></> : <p>Not recorded</p>}
           </div>
         </div>
       </section>
 
       <section id="today-training" className="overview-workout" aria-labelledby="today-training-title">
         <div className="flex between overview-section-head">
-          <div><h2 id="today-training-title">Today’s training</h2><p className="muted">Review the planned work and record the actual session here.</p></div>
+          <h2 id="today-training-title">Today’s training</h2>
           <Link className="btn ghost sm" to={trainingUrl}>Full training planner →</Link>
         </div>
         <ClientWorkoutFlow client={client} date={today} presentation="overview" />
@@ -168,7 +163,7 @@ export default function ClientDetailPage() {
 
       {openConcerns.length > 0 && <section id="open-concerns" className="overview-concerns" aria-labelledby="concerns-title">
         <div className="flex between overview-section-head">
-          <div><h2 id="concerns-title">Open concerns</h2><p className="muted">Review these before the next session.</p></div>
+          <h2 id="concerns-title">Open concerns</h2>
           <Button variant="ghost" size="sm" onClick={() => openModal(<ConcernForm clientId={id} />)}>＋ Flag a concern</Button>
         </div>
         <div className="overview-concern-list">{openConcerns.map(concernCard)}</div>
@@ -181,7 +176,7 @@ export default function ClientDetailPage() {
         {activity.length ? activity.map((event, index) => <div className="act-row" key={`${event.date}-${index}`}>
           <span className="act-chip"><Icon name={event.icon} size={16} /></span>
           <span className="act-info"><span className="t">{event.title}</span><span className="s">{event.meta}</span></span>
-        </div>) : <p className="muted">No completed sessions, check-ins, or strength records yet.</p>}
+        </div>) : <p className="muted">No recent activity.</p>}
         {resolvedConcerns.length > 0 && <details className="overview-history">
           <summary>Resolved concerns ({resolvedConcerns.length})</summary>
           <div className="overview-concern-list">{resolvedConcerns.map(concernCard)}</div>

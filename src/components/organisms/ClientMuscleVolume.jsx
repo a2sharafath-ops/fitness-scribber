@@ -2,6 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
+import InfoTip from '../atoms/InfoTip'
 import ModalShell from '../molecules/ModalShell'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { MUSCLES, WORKING_GROUPS, muscleVolume, reviewMuscleSet } from '../../lib/muscleVolume'
@@ -24,7 +25,7 @@ function ReviewSet({ record, clientId }) {
   const save = () => {
     let applied = false
     commit((draft) => { applied = reviewMuscleSet(draft, clientId, record, group, purpose) })
-    setMessage(applied ? 'Review applied locally; check the save status above.' : 'This record changed. Reload the review before saving.')
+    setMessage(applied ? 'Classification updated.' : 'This record changed. Reload the review before saving.')
   }
   return <div className="muscle-review-row">
     <span><strong>{record.name}</strong><small>{fmtDate(record.date)} · {record.setIndex == null ? `${record.sets} recorded sets` : `Set ${record.setIndex + 1}`} · {record.reason}</small></span>
@@ -97,12 +98,12 @@ export default function ClientMuscleVolume({ clientId }) {
   const retry = async () => { setRetrying(true); setRetryError(''); try { await refresh() } catch (e) { setRetryError(e.message || 'Could not refresh data') } finally { setRetrying(false) } }
 
   return <section className="muscle-report" aria-labelledby={`${id}-title`}>
-    <header className="muscle-report-head"><h3 id={`${id}-title`}>Weekly muscle volume</h3>
+    <header className="muscle-report-head"><h3 id={`${id}-title`} className="muscle-report-title">Weekly muscle volume <InfoTip term="Muscle volume" text="Completed Power, Main and Accessory working sets only. Warm-ups are excluded. Volume load is recorded reps × external kg; missing load stays unknown. Muscle totals may overlap." symbol="i" /></h3>
       <div className="muscle-week"><button type="button" aria-label="Previous muscle-volume week" onClick={() => setAnchor(addDays(start, -7))}>←</button><label><span className="sr-only">Week containing</span><input type="date" aria-label="Muscle-volume week containing" value={anchor} max={today} onChange={(e) => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value) && e.target.value <= today) setAnchor(e.target.value) }} /></label><button type="button" aria-label="Next muscle-volume week" disabled={end >= today} onClick={() => setAnchor(addDays(start, 7))}>→</button></div>
     </header>
     {issue ? <div role="alert" className="muscle-notice">Some workout or exercise data could not be loaded or saved. Totals may be incomplete. <button type="button" onClick={retry} disabled={retrying}>{retrying ? 'Retrying…' : 'Retry data load'}</button>{retryError && <p>{retryError}</p>}</div> : null}
     <div className="muscle-toolbar"><div className="muscle-metrics" role="group" aria-label="Muscle-volume metric"><button type="button" aria-pressed={metric === 'sets'} onClick={() => setMetric('sets')}>Sets</button><button type="button" aria-pressed={metric === 'load'} onClick={() => setMetric('load')}>Volume load</button></div><span>{fmtDate(start)}–{fmtDate(end)}</span></div>
-    {report.totalSets === 0 && !issue && <div className="muscle-empty-explain"><strong>No classified working sets for this week.</strong><p>{report.separateLogs ? `${report.separateLogs} separate resistance logs are present, but they do not identify warm-up sets and may duplicate workouts. ` : ''}{report.excluded.length ? `${report.excluded.length} completed workout sets need review or are warm-ups. ` : ''}Use a completed workout with Main Lift, Accessory Lift or Power working sets to build this map.</p>{demoClient && demoClient.id !== clientId ? <Link className="btn" to={`/clients/${demoClient.id}/progress#training-load`}>View sample demo client</Link> : !demoClient ? <button type="button" className="btn" onClick={createDemo}>Create sample demo client</button> : null}</div>}
+    {report.totalSets === 0 && !issue && <div className="muscle-empty-explain"><strong>No classified working sets this week.</strong><p>Complete a Power, Main or Accessory working set to populate the map.</p>{demoClient && demoClient.id !== clientId ? <Link className="btn" to={`/clients/${demoClient.id}/progress#training-load`}>View sample demo client</Link> : !demoClient ? <button type="button" className="btn" onClick={createDemo}>Create sample demo client</button> : null}</div>}
     <div className="muscle-map-panel">
       <div className="muscle-body">
         <img src={bodyImage} alt="Front and back muscle outlines" />
@@ -114,19 +115,14 @@ export default function ClientMuscleVolume({ clientId }) {
       </div>
       <p className="muscle-caption">Select a muscle for exercises</p>
       <div className="muscle-legend" aria-label={`Relative weekly scale, zero to ${fmt(max)} ${metric === 'sets' ? 'sets' : 'kg repetitions'}`}><span>Low</span>{palette.map((color) => <i key={color} style={{ background: color }} />)}<span>{fmt(max)} {metric === 'sets' ? 'sets' : 'kg·reps'}</span></div>
-      <p className="muscle-caption">Weekly scale · Gray: no direct sets{metric === 'load' ? ' · Stripes: unknown load · White: zero external load' : ''}</p>
+      <p className="muscle-caption">Gray: no direct sets{metric === 'load' ? ' · Stripes: unknown load · White: zero external load' : ''}</p>
     </div>
-    <p className="muscle-coverage">{report.totalSets} working sets · {report.totalSets - missing}/{report.totalSets} with known volume load{report.unmapped.length ? ` · ${report.unmapped.reduce((s, r) => s + r.sets, 0)} unmapped sets` : ''}</p>
+    {report.totalSets > 0 && <p className="muscle-coverage">{report.totalSets} working sets · {report.totalSets - missing}/{report.totalSets} with known volume load{report.unmapped.length ? ` · ${report.unmapped.reduce((s, r) => s + r.sets, 0)} unmapped sets` : ''}</p>}
     <details className="muscle-list-disclosure"><summary>All muscle groups</summary><div className="muscle-list">{muscles.map((m) => <button key={m.muscle} type="button" onClick={() => showDetail(m.muscle)}><span>{m.muscle}{!surfaceNames.has(m.muscle) && <small>List only</small>}{partial(m) && <small>Load incomplete</small>}</span><strong>{fmt(value(m))}</strong></button>)}</div></details>
-    <details className="muscle-method"><summary>Coverage &amp; calculation details{review.length ? ` · ${review.length} records need review` : ''}</summary>
-      <p>Only completed Main Lift, Accessory Lift and Power working sets enter this report. Entire warm-up/cool-down blocks and individual warm-up sets are excluded. Unclassified sets stay outside totals until reviewed.</p>
-      <p>{report.separateLogs} standalone resistance logs in this week are not included: their warm-up classification and overlap with workouts are unknown. Log this work in the <Link to={`/clients/${clientId}/training`}>client workout</Link> to use it here.</p>
-      <p>Volume load is the sum of actual reps × recorded external kg; missing values remain unknown. Zero external load is not zero effort. Per-hand/per-side conventions are not inferred. Direct and assisting sets stay separate; no fractional weighting. The current <Link to="/workouts">Exercise Library</Link> mapping is used, so editing it recalculates history.</p>
-      {!!report.unmapped.length && <div className="muscle-notice"><strong>Muscle assignments needed</strong><ul>{report.unmapped.map((r) => <li key={r.key}>{r.name} · {fmtDate(r.date)} · {r.sets} sets</li>)}</ul></div>}
-      <p role="status">Save status: {saveStatus === 'failed' ? 'Failed — changes remain local; resolve the save issue before reloading.' : saveStatus || 'ready'}</p>
-      {!!review.length && <><h4>Review completed sets</h4><p>Choose the actual group and set type. This updates the saved workout classification, not its recorded load or reps.</p>{review.map((r) => <ReviewSet key={r.key} record={r} clientId={clientId} />)}</>}
-      {report.excluded.some((r) => !r.reviewable) && <p>{report.excluded.filter((r) => !r.reviewable).length} records excluded for warm-up/cool-down or missing actual set counts.</p>}
-      <p>Surface regions follow the approved illustration, not individually measured anatomy. Deep groups are list-only. Bilateral totals do not measure left/right balance.</p>
-    </details>
+    {(review.length > 0 || report.unmapped.length > 0) && <details className="muscle-method"><summary>{review.length ? `Review classifications (${review.length})` : `Assign muscles (${report.unmapped.length})`}</summary>
+      {!!report.unmapped.length && <div className="muscle-notice"><strong>Muscle assignments needed</strong><ul>{report.unmapped.map((r) => <li key={r.key}>{r.name} · {fmtDate(r.date)} · {r.sets} sets</li>)}</ul><Link to="/workouts">Open Exercise Library</Link></div>}
+      {!!review.length && review.map((r) => <ReviewSet key={r.key} record={r} clientId={clientId} />)}
+    </details>}
+    {saveStatus === 'failed' && !issue && <p className="muscle-notice" role="alert">Changes could not be saved. Resolve the save issue before reloading.</p>}
   </section>
 }

@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
+import InfoTip from '../components/atoms/InfoTip'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { NewAssessmentMenu, assessmentForm } from '../components/organisms/forms/AssessmentForms'
@@ -61,7 +62,7 @@ export default function AssessmentsPage() {
 
   return <>
     <div className="topbar assess-title">
-      <div><h1>Assessments</h1><div className="sub">Screening and dated tests for {client.name}</div></div>
+      <h1>Assessments</h1>
       <Button onClick={() => openModal(<NewAssessmentMenu clientId={id} types={TEST_TYPES.map((type) => type.key)} />)}>＋ New assessment</Button>
     </div>
     <nav className="assess-jump" aria-label="Assessment groups">
@@ -72,7 +73,7 @@ export default function AssessmentsPage() {
 
     <section className="assess-section" id="health-screening" aria-labelledby="assess-screen-title">
       <div className="assess-section-head">
-        <div><h2 id="assess-screen-title">Health screening</h2><p>Review the completed intake, clearance record, and previous screenings. A new symptom belongs in <Link to={`/clients/${id}/check-ins?view=concerns`}>Concerns</Link> until it is formally reassessed.</p></div>
+        <div><h2 id="assess-screen-title">Health screening</h2><p>New symptom? Record it in <Link to={`/clients/${id}/check-ins?view=concerns`}>Concerns</Link>.</p></div>
       </div>
       <ScreeningReview screening={screening.complete} draft={screening.draft}
         onClearance={(clearance) => screening.complete && saveClearance(screening.complete.id, clearance)} onStart={startScreening} />
@@ -89,9 +90,8 @@ export default function AssessmentsPage() {
     </section>
 
     <section className="assess-section" id="formal-assessments" aria-labelledby="assess-tests-title">
-      <div className="assess-section-head"><div><h2 id="assess-tests-title">Baseline and reassessment</h2><p>Fitness, movement, and body measurements are recorded here. Compare outcomes in <Link to={`/clients/${id}/progress`}>Progress</Link>; training-derived lift estimates stay there.</p></div></div>
+      <div className="assess-section-head"><h2 id="assess-tests-title">Baseline and reassessment <InfoTip term="Review dates" text={`Review dates follow the ${intervalDays}-day reminder setting. They are scheduling prompts, not clinical thresholds.`} /></h2></div>
       <AssessmentChecklist list={records} intervalDays={intervalDays} onAdd={(type) => addType(type, 'baseline')} />
-      <p className="assess-review-rule">Review dates use the existing {db.settings?.reassessIntervalDays ? 'coach-configured' : 'app-default'} {intervalDays}-day reminder cadence (<Link to="/settings">Settings</Link>). They are scheduling prompts, not clinical thresholds.</p>
       <div className="assess-task-grid">{TEST_TYPES.map((type) => <AssessmentCard key={type.key} type={type} records={records.filter((row) => row.type === type.key)} intervalDays={intervalDays} clientId={id} onAdd={addType} />)}</div>
     </section>
 
