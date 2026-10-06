@@ -1,9 +1,18 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { loadDB, saveDB } from '../lib/storage'
 import { hasBackend } from '../lib/supabase'
-import { fetchAll, persistDiff } from '../api/sync'
+import { fetchAll, persistDiff, deleteClientRemote } from '../api/sync'
 
 const DataContext = createContext(null)
+
+const removeClientFromSnapshot = (snapshot, clientId) => {
+  snapshot.clients = snapshot.clients.filter((c) => c.id !== clientId)
+  ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable',
+    'concerns', 'prescriptions', 'workouts', 'maxes', 'assessments', 'screenings']
+    .forEach((key) => {
+      if (snapshot[key]) snapshot[key] = snapshot[key].filter((row) => row.clientId !== clientId)
+    })
+}
 
 export function DataProvider({ children, initialDb, initialError = null, backend = hasBackend }) {
   // Local mode: hydrate from localStorage immediately. Backend mode: load async.
@@ -103,6 +112,31 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     }
   }, [backend])
 
+  const deleteClient = useCallback(async (clientId) => {
+    if (!backend) {
+      commit((current) => removeClientFromSnapshot(current, clientId))
+      return
+    }
+    await writeQueueRef.current
+    if (writeFailedRef.current) {
+      throw new Error('Resolve the existing save issue before deleting a client.')
+    }
+    await deleteClientRemote(clientId)
+    try {
+      await refresh()
+    } catch (error) {
+      // The database transaction already succeeded. Keep the visible roster
+      // accurate even if reloading other tables temporarily fails.
+      const next = structuredClone(dbRef.current)
+      removeClientFromSnapshot(next, clientId)
+      commitVersionRef.current += 1
+      dbRef.current = next
+      setDb(next)
+      console.error('Client deleted, but refresh failed', error)
+      return { refreshFailed: true }
+    }
+  }, [backend, commit, refresh])
+
   const value = useMemo(() => {
     // Combine load failures (missing table) and write failures (missing column),
     // de-duped by table, for the schema-warning banner.
@@ -110,8 +144,8 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     for (const i of [...(db?._loadIssues || []), ...writeIssues]) {
       byTable.set(i.table, { table: i.table, message: i.message, kind: i.kind || 'load' })
     }
-    return { db, commit, refresh, saveStatus, tz: db?.settings?.tz, units: db?.settings?.units, dbIssues: [...byTable.values()] }
-  }, [db, commit, refresh, saveStatus, writeIssues])
+    return { db, commit, deleteClient, refresh, saveStatus, tz: db?.settings?.tz, units: db?.settings?.units, dbIssues: [...byTable.values()] }
+  }, [db, commit, deleteClient, refresh, saveStatus, writeIssues])
 
   if (backend && !db) {
     if (loadError) {

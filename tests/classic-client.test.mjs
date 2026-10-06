@@ -9,7 +9,7 @@ const vite = await createServer({ server: { middlewareMode: true }, appType: 'cu
 after(() => vite.close())
 const load = (path) => vite.ssrLoadModule(`/src/${path}`)
 const { TABLES } = await load('lib/supabase.js')
-const { fetchAll, persistDiff } = await load('api/sync.js')
+const { fetchAll, persistDiff, deleteClientRemote } = await load('api/sync.js')
 const { clientSectionPath, loadProgressPath, assessmentCanonicalPath } = await load('lib/clientRoutes.js')
 const { logWorkoutCheckin, completeClassicWorkout, correctClassicWorkout } = await load('lib/classicWorkflow.js')
 const { saveAssessmentRecord } = await load('lib/assessmentWrite.js')
@@ -41,6 +41,24 @@ const { default: MetricDetailPage } = await load('pages/MetricDetailPage.jsx')
 const { muscleVolume, reviewMuscleSet } = await load('lib/muscleVolume.js')
 const { setRowFromPrescribed, ensureSetRows, summarize: summarizeWorkout } = await load('lib/workout.js')
 const { default: RPEModal } = await load('components/organisms/workout/RPEModal.jsx')
+
+test('client deletion uses one RPC and propagates a rejected transaction', async () => {
+  const calls = []
+  const client = {
+    rpc: async (name, args) => {
+      calls.push([name, args])
+      return { error: new Error('dependent row blocked deletion') }
+    },
+  }
+  await assert.rejects(deleteClientRemote('client-a', client), /dependent row blocked deletion/)
+  assert.deepEqual(calls, [['delete_client_and_data', { p_client_id: 'client-a' }]])
+  client.rpc = async (name, args) => {
+    calls.push([name, args])
+    return { error: null }
+  }
+  await deleteClientRemote('client-b', client)
+  assert.equal(calls.length, 2)
+})
 
 test('simulated workout heart rate is not reported as measured or used to suggest RPE', () => {
   const oldSession = { durationSec: 1800, hrAvg: 124, hrMax: 128, main: [] }

@@ -12,8 +12,10 @@ import { toast, confirmDialog } from '../../../lib/toast'
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
 export function ClientForm({ client }) {
-  const { commit, tz } = useData()
+  const { commit, deleteClient, tz } = useData()
   const { closeModal } = useModal()
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const [f, setF] = useState(
     client || { name: '', email: '', phone: '', goal: '', level: 'Beginner', status: 'Active', plan: 'Standard', notes: '' },
   )
@@ -34,16 +36,18 @@ export function ClientForm({ client }) {
   }
   const del = async () => {
     if (!await confirmDialog({ title: 'Delete client', message: 'Delete this client and all their data? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
-    commit((db) => {
-      db.clients = db.clients.filter((c) => c.id !== client.id)
-      // Remove every client-scoped collection so no orphaned records are left.
-      ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable', 'concerns',
-        'prescriptions', 'workouts', 'maxes', 'assessments', 'screenings'].forEach(
-        (k) => { if (db[k]) db[k] = db[k].filter((x) => x.clientId !== client.id) },
-      )
-    })
-    closeModal()
-    toast('Client deleted')
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      const result = await deleteClient(client.id)
+      closeModal()
+      toast(result?.refreshFailed ? 'Client deleted. Reload to refresh the remaining data.' : 'Client deleted')
+    } catch (error) {
+      console.error('Client deletion failed', error)
+      setDeleteError(error?.message || 'Client deletion failed. Please try again.')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   return (
@@ -52,12 +56,13 @@ export function ClientForm({ client }) {
       onClose={closeModal}
       footer={
         <>
-          {client && <Button variant="danger" onClick={del}>Delete</Button>}
-          <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-          <Button onClick={save}>Save</Button>
+          {client && <Button variant="danger" disabled={deleting} onClick={del}>{deleting ? 'Deleting…' : 'Delete'}</Button>}
+          <Button variant="ghost" disabled={deleting} onClick={closeModal}>Cancel</Button>
+          <Button disabled={deleting} onClick={save}>Save</Button>
         </>
       }
     >
+      {deleteError && <p role="alert" className="error">{deleteError}</p>}
       <Field label="Full name">
         <input value={f.name} onChange={set('name')} placeholder="e.g. Sarah Mitchell" />
       </Field>

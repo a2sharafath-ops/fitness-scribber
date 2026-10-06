@@ -57,6 +57,13 @@ export async function persistDiff(prev, next, client = supabase) {
   return issues
 }
 
+// Client deletion must bypass persistDiff: separate table requests can leave a
+// partially deleted client if a later foreign key blocks the clients request.
+export async function deleteClientRemote(clientId, client = supabase) {
+  const { error } = await client.rpc('delete_client_and_data', { p_client_id: clientId })
+  if (error) throw error
+}
+
 // One-time demo data load for a fresh coach account.
 export async function seedRemote() {
   const data = seed()
