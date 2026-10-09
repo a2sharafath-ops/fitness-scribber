@@ -11,11 +11,11 @@ import { toast, confirmDialog } from '../../../lib/toast'
 const TYPES = ['1-on-1 Training', 'Assessment', 'Consultation', 'Group Session', 'Check-in']
 const STATUSES = ['Pending', 'Confirmed', 'Completed', 'Cancelled']
 
-export default function SessionForm({ session, date }) {
+export default function SessionForm({ session, date, clientId }) {
   const { db, commit, tz } = useData()
   const { closeModal } = useModal()
   const [f, setF] = useState(
-    session || { clientId: db.clients[0]?.id, date: date || todayISO(tz), time: '09:00', type: '1-on-1 Training', dur: 60, status: 'Pending' },
+    session || { clientId: clientId || db.clients[0]?.id, date: date || todayISO(tz), time: '09:00', type: '1-on-1 Training', dur: 60, status: 'Pending' },
   )
   const set = (k, num) => (e) => setF({ ...f, [k]: num ? +e.target.value : e.target.value })
   const save = () => {

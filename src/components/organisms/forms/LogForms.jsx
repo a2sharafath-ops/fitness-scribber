@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
+import RangeSlider from '../../atoms/RangeSlider'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { useFormat } from '../../../hooks/useFormat'
@@ -27,29 +28,30 @@ function RatingSelect({ label, value, min, max, lo, hi, onChange }) {
 }
 
 export function WellnessForm({ clientId, entry }) {
-  const { commit, tz } = useData()
+  const { db, commit, tz } = useData()
   const { closeModal } = useModal()
-  const [f, setF] = useState(entry || { date: todayISO(tz), sleep: '', stress: '', fatigue: '', soreness: '' })
+  const [f, setF] = useState(() => entry || db.wellness.find((row) => row.clientId === clientId && row.date === todayISO(tz)) || { date: todayISO(tz), sleep: '', stress: '', fatigue: '', soreness: '' })
   const complete = Boolean(f.date) && [f.sleep, f.stress, f.fatigue, f.soreness].every((value) => Number(value) >= 1 && Number(value) <= 7)
   const score = complete ? calcWellness(f.sleep, f.stress, f.fatigue, f.soreness) : null
   const sl = (k) => (v) => setF({ ...f, [k]: v })
   const save = () => {
     if (!complete) return
-    commit((db) => upsert(db.wellness, (w) => w.id === entry?.id, { clientId, date: f.date, sleep: f.sleep, stress: f.stress, fatigue: f.fatigue, soreness: f.soreness, score, source: recordedSource(entry) }))
+    commit((data) => {
+      const existing = data.wellness.find((row) => entry ? row.id === entry.id : row.clientId === clientId && row.date === f.date)
+      upsert(data.wellness, (row) => entry ? row.id === entry.id : row.clientId === clientId && row.date === f.date,
+        { clientId, date: f.date, sleep: f.sleep, stress: f.stress, fatigue: f.fatigue, soreness: f.soreness, score, source: recordedSource(existing) })
+    })
     closeModal()
   }
   return (
-    <ModalShell title="Hooper Index — Morning Wellness" onClose={closeModal}
+    <ModalShell title="Record wellness check-in" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save} disabled={!complete}>Save</Button></>}>
       <Field label="Date"><input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
-      <RatingSelect label="Sleep Quality" value={f.sleep} min={1} max={7} lo="Terrible" hi="Excellent" onChange={sl('sleep')} />
-      <RatingSelect label="Stress" value={f.stress} min={1} max={7} lo="None" hi="Extreme" onChange={sl('stress')} />
-      <RatingSelect label="Fatigue" value={f.fatigue} min={1} max={7} lo="Fresh" hi="Exhausted" onChange={sl('fatigue')} />
-      <RatingSelect label="Muscle Soreness (DOMS)" value={f.soreness} min={1} max={7} lo="None" hi="Severe" onChange={sl('soreness')} />
-      <div className="card" style={{ textAlign: 'center' }}>
-        <div className="muted" style={{ fontSize: 11 }}>AGGREGATED WELLNESS SCORE</div>
-        <div style={{ fontSize: 30, fontWeight: 800 }}>{score ?? '—'}</div>
-        <div className="muted" style={{ fontSize: 11 }}>out of 28 · higher = better</div>
+      <div className="wellness-sliders">
+        <RangeSlider variant="wellness" label="Sleep quality" value={f.sleep} min={1} max={7} lo="Very poor" hi="Very good" onChange={sl('sleep')} />
+        <RangeSlider variant="wellness" label="Stress" value={f.stress} min={1} max={7} lo="Very low" hi="Very high" onChange={sl('stress')} />
+        <RangeSlider variant="wellness" label="Fatigue" value={f.fatigue} min={1} max={7} lo="Very low" hi="Very high" onChange={sl('fatigue')} />
+        <RangeSlider variant="wellness" label="Soreness" value={f.soreness} min={1} max={7} lo="Very low" hi="Very high" onChange={sl('soreness')} />
       </div>
     </ModalShell>
   )

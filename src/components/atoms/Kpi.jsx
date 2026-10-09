@@ -1,10 +1,10 @@
 // Compact KPI tile used in dashboards. Becomes an interactive button when onClick is supplied.
-export default function Kpi({ label, value, delta, deltaColor, onClick }) {
+export default function Kpi({ label, value, delta, deltaColor, onClick, valueSize }) {
   const interactive = typeof onClick === 'function'
   const body = (
     <>
       <div className="k-l">{label}</div>
-      <div className="k-v">{value}</div>
+      <div className="k-v" style={valueSize ? { fontSize: valueSize } : undefined}>{value}</div>
       {delta != null && (
         <div className="k-d" style={deltaColor ? { color: deltaColor } : { color: 'var(--muted)' }}>
           {delta}

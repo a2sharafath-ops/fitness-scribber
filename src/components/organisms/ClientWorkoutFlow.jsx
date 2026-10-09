@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import PlannerWidget from './PlannerWidget'
 import TodayWorkout from './workout/TodayWorkout'
 import CheckInModal from './workout/CheckInModal'
 import RPEModal from './workout/RPEModal'
@@ -14,9 +13,9 @@ import { removeWorkoutStrength, resolveTrainingMax } from '../../lib/program'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { clearWorkoutDraft } from '../../lib/workoutDraft'
 
-// Overview and Training share the same Classic session writes. The date is
+// Training owns the Classic session writes. The date is
 // explicit so a completed workout can be reopened from Training history.
-export default function ClientWorkoutFlow({ client, date, presentation = 'training', onRunStateChange, onSessionComplete }) {
+export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSessionComplete }) {
   const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
   const [checkinW, setCheckinW] = useState(null)
@@ -86,10 +85,8 @@ export default function ClientWorkoutFlow({ client, date, presentation = 'traini
 
   return (
     <>
-      {presentation === 'overview'
-        ? <PlannerWidget client={client} size="medium" initialView="day" showContext={false} todayProps={workoutProps} />
-        : <TodayWorkout {...workoutProps} isToday={sessionDate === todayISO(tz)}
-          headerLabel={sessionDate === todayISO(tz) ? "Today's Workout" : `Workout · ${fmtDate(sessionDate)}`} />}
+      <TodayWorkout {...workoutProps} isToday={sessionDate === todayISO(tz)}
+          headerLabel={sessionDate === todayISO(tz) ? "Today's Workout" : `Workout · ${fmtDate(sessionDate)}`} />
       {checkinW && <CheckInModal today={sessionDate} onSubmit={submitCheckin} onSkip={skipCheckin}
         onClose={() => { setCheckinW(null); setRunOpen(false) }} />}
       {rpeW && <RPEModal workout={rpeW}

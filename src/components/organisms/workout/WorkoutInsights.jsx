@@ -2,6 +2,7 @@ import { Doughnut, Bar } from 'react-chartjs-2'
 import { baseOptions, COLORS } from '../../../lib/chartSetup'
 import { fmtVL } from '../../../lib/units'
 import { summarize, secToClock } from '../../../lib/workout'
+import Kpi from '../../atoms/Kpi'
 
 const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, COLORS.red, '#5ac8fa', '#f59ec4']
 
@@ -24,7 +25,7 @@ export default function WorkoutInsights({ workout, units, exercises = [], restin
     <div className="workout-insights">
       <div className="kpi-strip" style={{ marginTop: 14 }}>
         {kpis.map(([label, value, detail]) => (
-          <div className="kpi" key={label}><div className="k-l">{label}</div><div className="k-v" style={{ fontSize: 18 }}>{value}</div><div className="k-d">{detail}</div></div>
+          <Kpi key={label} label={label} value={value} delta={detail} deltaColor="inherit" valueSize={18} />
         ))}
       </div>
       <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
@@ -7,30 +8,32 @@ import { ClipboardProvider } from './store/ClipboardContext'
 import AuthPage from './pages/AuthPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import RoleOnboarding from './pages/RoleOnboarding'
-import AthletePortal from './pages/AthletePortal'
-import AdminPortal from './pages/AdminPortal'
 import AppLayout from './components/templates/AppLayout'
 import ClientLayout from './components/templates/ClientLayout'
-import DashboardPage from './pages/DashboardPage'
-import ClientsPage from './pages/ClientsPage'
-import ClientDetailPage from './pages/ClientDetailPage'
-import ClientProfilePage from './pages/ClientProfilePage'
-import AssessmentsPage from './pages/AssessmentsPage'
-import AssessmentDetailPage from './pages/AssessmentDetailPage'
-import MetricDetailPage from './pages/MetricDetailPage'
-import ClientTrainingPage from './pages/ClientTrainingPage'
-import ClientProgressPage from './pages/ClientProgressPage'
-import MonitorPage from './pages/MonitorPage'
-import WorkoutsPage from './pages/WorkoutsPage'
-import SchedulePage from './pages/SchedulePage'
-import ProgressPage from './pages/ProgressPage'
-import ConcernsPage from './pages/ConcernsPage'
-import MessagesPage from './pages/MessagesPage'
-import SettingsPage from './pages/SettingsPage'
-import ReportPage from './pages/ReportPage'
 import Toaster from './components/organisms/Toaster'
-import './lib/chartSetup'
 import { clientSectionPath } from './lib/clientRoutes'
+
+const AthletePortal = lazy(() => import('./pages/AthletePortal'))
+const AdminPortal = lazy(() => import('./pages/AdminPortal'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ClientsPage = lazy(() => import('./pages/ClientsPage'))
+const ClientDetailPage = lazy(() => import('./pages/ClientDetailPage'))
+const ClientProfilePage = lazy(() => import('./pages/ClientProfilePage'))
+const AssessmentsPage = lazy(() => import('./pages/AssessmentsPage'))
+const AssessmentDetailPage = lazy(() => import('./pages/AssessmentDetailPage'))
+const MetricDetailPage = lazy(() => import('./pages/MetricDetailPage'))
+const ClientTrainingPage = lazy(() => import('./pages/ClientTrainingPage'))
+const ClientProgressPage = lazy(() => import('./pages/ClientProgressPage'))
+const MonitorPage = lazy(() => import('./pages/MonitorPage'))
+const WorkoutsPage = lazy(() => import('./pages/WorkoutsPage'))
+const SchedulePage = lazy(() => import('./pages/SchedulePage'))
+const ProgressPage = lazy(() => import('./pages/ProgressPage'))
+const ConcernsPage = lazy(() => import('./pages/ConcernsPage'))
+const MessagesPage = lazy(() => import('./pages/MessagesPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const ReportPage = lazy(() => import('./pages/ReportPage'))
+
+const routeLoading = <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading…</div>
 
 function LegacyClientRoute({ section }) {
   const { id } = useParams()
@@ -44,7 +47,7 @@ function Shell() {
       <ModalProvider>
         <ClipboardProvider>
         <BrowserRouter>
-          <Routes>
+          <Suspense fallback={routeLoading}><Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/clients" element={<ClientsPage />} />
@@ -69,7 +72,7 @@ function Shell() {
               <Route path="/messages" element={<MessagesPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
-          </Routes>
+          </Routes></Suspense>
         </BrowserRouter>
         </ClipboardProvider>
       </ModalProvider>
@@ -87,8 +90,8 @@ function Gate() {
   if (!session) return <AuthPage />
   if (!profileReady) return loading
   if (!role || role === 'pending') return <RoleOnboarding />
-  if (role === 'admin') return <AdminPortal />
-  if (role === 'athlete') return <AthletePortal />
+  if (role === 'admin') return <Suspense fallback={routeLoading}><AdminPortal /></Suspense>
+  if (role === 'athlete') return <Suspense fallback={routeLoading}><AthletePortal /></Suspense>
   return <Shell />
 }
 

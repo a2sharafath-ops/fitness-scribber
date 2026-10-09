@@ -56,7 +56,7 @@ talks only to `server/`; `server/` is the only thing that touches SQLite.
 src/
   components/
     atoms/        # smallest UI units — Button, Input, Badge, Icon, Spinner
-    molecules/    # small combos of atoms — Field, StatCard, SetRow, RiskDot
+    molecules/    # small combos of atoms — SetRow, ReadinessTag, ConcernCard
     organisms/    # feature sections — WorkoutForm, WeightChart, ExerciseList
     templates/    # page skeletons / layout — AppShell, PageHeader, two-column
   pages/          # one component per route, composes organisms

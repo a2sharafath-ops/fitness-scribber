@@ -211,7 +211,7 @@ test('trainer shortcuts to routed destinations are links', () => {
   const db = fixture()
   const overview = renderRoutedSection('/clients/a', db)
   const training = renderRoutedSection('/clients/a/training', db)
-  assert.match(overview, /href="\/clients\/a\/training"[^>]*>Plan a session/)
+  assert.match(overview, /href="\/clients\/a\/training\?date=\d{4}-\d{2}-\d{2}"[^>]*>Plan workout/)
   assert.match(overview, /href="\/clients\/a\/check-ins"[^>]*>View check-ins/)
   assert.match(training, /href="\/workouts"[^>]*>Programme library/)
 })
@@ -685,4 +685,82 @@ test('new logging rows support warm-up purpose without silently relabeling exist
   assert.equal(setRowFromPrescribed({}).purpose, 'working')
   assert.equal(ensureSetRows({ sets: 2 })[0].purpose, 'working')
   assert.equal(ensureSetRows({ setRows: [{ done: true, reps: 5, load: 20 }] })[0].purpose, undefined)
+})
+
+const { wellnessBaseline } = await load('lib/wellnessBaseline.js')
+const { default: OverviewTraining } = await load('components/organisms/OverviewTraining.jsx')
+const { WellnessForm } = await load('components/organisms/forms/LogForms.jsx')
+
+test('wellness baseline uses unique earlier client dates and sample SD, with consistent direction', () => {
+  const date = '2026-10-09'
+  const records = Array.from({ length: 7 }, (_, index) => ({ clientId: 'a', date: addDays(date, -index - 1), sleep: index + 1, stress: index + 1, fatigue: index + 1, soreness: index + 1 }))
+  records.push({ ...records[0] }, { ...records[0], clientId: 'b' }, { ...records[0], date: addDays(date, -29) }, { ...records[0], date: addDays(date, 1) }, { ...records[0], date: '2026-02-30' }, { clientId: 'a', date, sleep: 7, stress: 7, fatigue: 4, soreness: 1 })
+  const result = wellnessBaseline(records, 'a', date)
+  assert.equal(result.latest.date, date)
+  for (const metric of result.metrics) {
+    assert.equal(metric.count, 7)
+    assert.equal(metric.mean, 4)
+    assert.equal(metric.sd, Math.sqrt(28 / 6))
+  }
+  assert.equal(result.metrics[0].z, -3 / Math.sqrt(28 / 6))
+  assert.equal(result.metrics[1].z, 3 / Math.sqrt(28 / 6))
+  assert.equal(result.metrics[2].z, 0)
+  assert.equal(result.metrics[3].z, -3 / Math.sqrt(28 / 6))
+})
+
+test('wellness baseline keeps sparse, missing and constant ratings unavailable', () => {
+  const date = '2026-10-09'
+  const records = Array.from({ length: 7 }, (_, index) => ({ clientId: 'a', date: addDays(date, -index - 1), sleep: 4, stress: index + 1, fatigue: index + 1, soreness: index + 1 }))
+  records[0].stress = ''
+  records.push({ clientId: 'a', date, sleep: 6, stress: 6, fatigue: '', soreness: 8 })
+  const result = wellnessBaseline(records, 'a', date)
+  assert.deepEqual(result.metrics.map((metric) => metric.reason), ['no-variation', 'insufficient-history', 'missing-rating', 'missing-rating'])
+  assert.equal(result.metrics[1].needed, 1)
+  assert.ok(result.metrics.every((metric) => metric.z === null))
+  assert.equal(wellnessBaseline([], 'a', date).latest, null)
+})
+
+test('Overview training has one primary date-scoped action in every workout state', () => {
+  const date = todayISO('UTC')
+  const db = fixture()
+  const render = () => renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db }, React.createElement(MemoryRouter, null, React.createElement(OverviewTraining, { clientId: 'a', today: date }))))
+  assert.match(render(), /Plan workout/)
+  db.prescriptions.push({ id: 'p', clientId: 'a', date, name: 'Upper body', items: [{ exercise: 'Bench press', sets: 3, reps: 8 }] })
+  assert.match(render(), /Start workout/)
+  assert.match(render(), new RegExp(`href="/clients/a/training\\?date=${date}&amp;run=1"`))
+  db.workouts.push({ id: 'w', clientId: 'a', date, status: 'in_progress', title: 'Upper body', main: [] })
+  assert.match(render(), /Resume workout/)
+  db.workouts[0].status = 'completed'
+  const completed = render()
+  assert.match(completed, /Review workout/)
+  assert.doesNotMatch(completed, /Start workout|Resume workout|run=1/)
+  assert.equal((completed.match(/class="btn/g) || []).length, 1)
+})
+
+test('Overview booking routes use the booked date and recent activity stays client-owned', () => {
+  const db = fixture(), today = todayISO('UTC'), future = addDays(today, 2)
+  db.sessions.push({ id: 's', clientId: 'a', date: future, time: '10:00', dur: 60, type: 'Strength', status: 'Confirmed' })
+  db.workouts.push({ id: 'wa', clientId: 'a', date: addDays(today, -1), status: 'completed', title: 'Avery workout', main: [] }, { id: 'wb', clientId: 'b', date: today, status: 'completed', title: 'Blair workout', main: [] })
+  const page = renderRoutedSection('/clients/a', db)
+  assert.match(page, new RegExp(`href="/clients/a/training\\?date=${future}"[^>]*>Review workout`))
+  assert.match(page, /View booking/)
+  assert.match(page, /Avery workout/)
+  assert.doesNotMatch(page, /Blair workout/)
+})
+
+test('blank check-in sliders remain unrecorded and cannot save default midpoint values', () => {
+  const db = fixture()
+  const page = renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db }, React.createElement(ModalProvider, null, React.createElement(WellnessForm, { clientId: 'a' }))))
+  assert.equal((page.match(/type="range"/g) || []).length, 4)
+  assert.equal((page.match(/aria-valuetext="Not rated"/g) || []).length, 4)
+  assert.match(page, /disabled=""[^>]*>Save/)
+})
+
+test('Overview respects completed appointment closure without offering to start its prescription', () => {
+  const db = fixture(), date = todayISO('UTC')
+  db.sessions.push({ id: 's', clientId: 'a', date, status: 'Completed' })
+  db.prescriptions.push({ id: 'p', clientId: 'a', date, items: [{ exercise: 'Bench press', sets: 3, reps: 8 }] })
+  const page = renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db }, React.createElement(MemoryRouter, null, React.createElement(OverviewTraining, { clientId: 'a', today: date }))))
+  assert.match(page, /Review day/)
+  assert.doesNotMatch(page, /Start workout|run=1/)
 })

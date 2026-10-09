@@ -31,12 +31,12 @@ The app uses Supabase authentication and Postgres when `VITE_SUPABASE_URL` and `
 ```
 src/
   lib/         pure logic — calc (sRPE-TL, Volume Load, monotony, strain, ACWR,
-               readiness, baselines), metrics registry, dates, units, seed, storage
+               readiness, baselines), load response, dates, units, seed, storage
   store/       DataContext (localStorage-backed state + commit) and ModalContext
   hooks/       useFormat (unit-bound formatters)
   components/
-    atoms/       Avatar, Tag, Shape, Button, Card, Kpi, ProgressBar, Field, RangeSlider
-    molecules/   StatCard, ReadinessTag, ConcernCard, SegToggle, AnthroCell, ModalShell
+    atoms/       Avatar, Tag, Shape, Button, Card, Kpi, Field, RangeSlider
+    molecules/   ReadinessTag, ConcernCard, SegToggle, ModalShell
     organisms/   Sidebar, ClientTrainingLoad, StrengthDashboard, WorkoutPlanner,
                  AICoach, ProfilePanel, forms/*
     templates/   AppLayout, ClientLayout
