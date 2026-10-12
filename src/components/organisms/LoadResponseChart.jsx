@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ProgressInfo from '../atoms/ProgressInfo'
 import { Chart, Scatter } from 'react-chartjs-2'
 import { baseOptions, COLORS, shortLabel } from '../../lib/chartSetup'
 import { fmtDate } from '../../lib/dates'
@@ -22,7 +23,7 @@ function axis(metric, side, color) {
   return { ...baseOptions().scales.y, position: side, title: { display: true, text: `${metric.label} (${metric.unit})`, color }, grid: side === 'right' ? { drawOnChartArea: false } : baseOptions().scales.y.grid }
 }
 
-export default function LoadResponseChart({ db, clientId, today }) {
+export default function LoadResponseChart({ db, clientId, today, action }) {
   const [days, setDays] = useState(28)
   const [xMetric, setXMetric] = useState('date')
   const [primary, setPrimary] = useState('load')
@@ -92,25 +93,25 @@ export default function LoadResponseChart({ db, clientId, today }) {
     : (yValues[index].value != null || y2Values?.[index].value != null))
   const display = (value) => value.value == null ? '—' : `${formatValue(value.value)}${window ? ` (${value.count}/${window} observed days)` : ''}`
 
-  return <section className="progress-inset load-response" aria-labelledby="load-response-title">
-    <div className="load-response-heading"><h3 id="load-response-title">Load response</h3><span className="load-response-period">{fmtDate(rows[0].date)}–{fmtDate(today)}</span></div>
-    <details className="load-response-settings">
-      <summary><span className="load-response-settings-title">Customize chart</span><span className="load-response-settings-current">X: {scatter ? byId[xMetric].label : 'Date'} · Y: {byId[primary].label}{secondary ? ` + ${byId[secondary].label}` : ''} · {mode === 'raw' ? 'Raw' : `${mode}-day mean`} · {days} days</span></summary>
-      <div className="load-response-controls">
-        <label>X-axis<select value={xMetric} onChange={(event) => setXMetric(event.target.value)}><MetricOptions includeDate /></select></label>
-        <label>Y-axis<select value={primary} onChange={(event) => setPrimary(event.target.value)}><MetricOptions /></select></label>
-        <label>Second Y-axis<select value={secondary} onChange={(event) => setSecondary(event.target.value)}><MetricOptions includeNone /></select></label>
-        <label>Y display<select value={scatter ? 'dot' : primaryStyle} disabled={scatter} onChange={(event) => setPrimaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Second Y display<select value={scatter ? 'dot' : secondaryStyle} disabled={scatter || !secondary} onChange={(event) => setSecondaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Values<select value={mode} onChange={(event) => setMode(event.target.value)}>{modeChoices.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Period<select value={days} onChange={(event) => setDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option><option value={180}>180 days</option></select></label>
-      </div>
-      {scatter && <p className="load-response-hint">Metric X-axis uses same-date pairs as dots. Line and column styles apply to the date view only.</p>}
-    </details>
+  return <section className="card load-response" aria-labelledby="load-response-title">
+    <div className="load-response-heading"><h2 id="load-response-title">Load response <ProgressInfo label="load response" text="Session load is RPE × duration in minutes (AU). Missing days remain blank. Display choices do not change the load calculations." /></h2>{action}</div>
+    <div className="progress-load-primary-controls"><label>Show <select value={primary} onChange={(event) => setPrimary(event.target.value)}><MetricOptions /></select></label><label>Period <select value={days} onChange={(event) => setDays(Number(event.target.value))}>{[28,56,84,180].map(n => <option key={n} value={n}>{n} days</option>)}</select></label></div>
     <div className="load-response-canvas">{scatter
       ? <Scatter data={chartData} options={options} role="img" aria-label={`Load response scatter chart, ${plotted}. X-axis ${byId[xMetric].label}; Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />
       : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}{!hasData && <p className="load-response-empty-label">{emptyLabel}</p>}</div>
     {hasData && <div className="load-response-status">{(scatter || primary !== 'load' || secondary) && <span>{plotted}</span>}<span>Session RPE: {logged}/{days} days</span><span>Unlogged days are unknown</span></div>}
+    <div className="progress-card-foot"><span>{fmtDate(rows[0].date)}–{fmtDate(today)}</span><span>Gaps = unrecorded days</span></div>
+    <details className="load-response-settings">
+      <summary><span className="load-response-settings-title">Customize chart</span><span className="load-response-settings-current">X: {scatter ? byId[xMetric].label : 'Date'} · Y: {byId[primary].label}{secondary ? ` + ${byId[secondary].label}` : ''} · {mode === 'raw' ? 'Raw' : `${mode}-day mean`} · {days} days</span></summary>
+      <div className="load-response-controls">
+        <label>X-axis<select value={xMetric} onChange={(event) => setXMetric(event.target.value)}><MetricOptions includeDate /></select></label>
+        <label>Second Y-axis<select value={secondary} onChange={(event) => setSecondary(event.target.value)}><MetricOptions includeNone /></select></label>
+        <label>Y display<select value={scatter ? 'dot' : primaryStyle} disabled={scatter} onChange={(event) => setPrimaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>Second Y display<select value={scatter ? 'dot' : secondaryStyle} disabled={scatter || !secondary} onChange={(event) => setSecondaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>Values<select value={mode} onChange={(event) => setMode(event.target.value)}>{modeChoices.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+      </div>
+      {scatter && <p className="load-response-hint">Metric X-axis uses same-date pairs as dots. Line and column styles apply to the date view only.</p>}
+    </details>
     {secondary && <p className="load-response-hint">Separate Y scales: compare values, not line crossings.</p>}
     {tableRows.length > 0 && <details className="progress-derived-table"><summary>Show dated values and sources</summary><div className="progress-derived-detail"><div className="checkins-table-scroll" role="region" aria-label="Load response table; scroll horizontally for more columns" tabIndex={0}><table className="checkins-table"><caption className="sr-only">Load response recorded dates, selected values, and sources</caption><thead><tr><th scope="col">Date</th>{scatter && <th scope="col">{byId[xMetric].label} ({byId[xMetric].unit})</th>}<th scope="col">{byId[primary].label} ({byId[primary].unit})</th>{secondary && <th scope="col">{byId[secondary].label} ({byId[secondary].unit})</th>}<th scope="col">Sources on date</th></tr></thead><tbody>
       {tableRows.map((row) => { const index = rows.indexOf(row); return <tr key={row.date}><th scope="row">{fmtDate(row.date)}</th>{scatter && <td>{display(xValues[index])}</td>}<td>{display(yValues[index])}</td>{secondary && <td>{display(y2Values[index])}</td>}<td>{[...new Set([xMetric, primary, secondary].filter(Boolean).map((metric) => row.sources[metric]).filter(Boolean))].join(', ') || 'Source not recorded'}</td></tr> })}

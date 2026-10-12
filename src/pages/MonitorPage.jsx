@@ -9,6 +9,7 @@ import { WellnessForm, WearableForm } from '../components/organisms/forms/LogFor
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { callFunction, hasBackend } from '../api/functions'
+import { beginWearableConnection } from '../api/wearable'
 import { addDays, fmtDate, lastNDates, todayISO } from '../lib/dates'
 import { baseOptions, COLORS, shortLabel } from '../lib/chartSetup'
 import { readinessParts, rolling30Baseline } from '../lib/calc'
@@ -132,7 +133,7 @@ function ConnectDevices({ clientId }) {
   const [busy, setBusy] = useState(false)
   const connect = async (provider) => {
     setBusy(true)
-    try { const { url } = await callFunction('wearable-connect', { provider, clientId }); if (url) window.location.href = url }
+    try { await beginWearableConnection(provider, clientId) }
     catch (error) { toast('Connect failed: ' + (error.message || 'function not deployed'), 'error') } finally { setBusy(false) }
   }
   const sync = async () => {

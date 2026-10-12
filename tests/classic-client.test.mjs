@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { createServer } from 'vite'
 
-const vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' })
+const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' })
 after(() => vite.close())
 const load = (path) => vite.ssrLoadModule(`/src/${path}`)
 const { TABLES } = await load('lib/supabase.js')
@@ -16,7 +16,8 @@ const { saveAssessmentRecord } = await load('lib/assessmentWrite.js')
 const { getWorkoutDraft, setWorkoutDraft, clearWorkoutDraft } = await load('lib/workoutDraft.js')
 const { removeWorkoutStrength, absolute1RM } = await load('lib/program.js')
 const { isClosedTrainingDay, writePrescription, buildClip, pasteClip } = await load('lib/planner.js')
-const { dailySum, dayMetrics, readinessFor } = await load('lib/calc.js')
+const { dailySum, dayMetrics, readinessFor, calcWellness } = await load('lib/calc.js')
+const { trainingDay } = await load('lib/trainingDay.js')
 const { forClient, formalAssessments } = await load('lib/assessment.js')
 const { compareToObservedBand, observedReferenceBand, trailingObservedBands } = await load('lib/progress.js')
 const { performedLiftHistory, performedLiftOptions } = await load('lib/performedLifts.js')
@@ -35,12 +36,120 @@ const { default: CompletedWorkoutEditor } = await load('components/organisms/wor
 const { default: MonitorPage } = await load('pages/MonitorPage.jsx')
 const { default: ClientProgressPage } = await load('pages/ClientProgressPage.jsx')
 const { default: AssessmentsPage } = await load('pages/AssessmentsPage.jsx')
+const { default: ScreeningReview } = await load('components/organisms/screening/ScreeningReview.jsx')
 const { default: AssessmentDetailPage } = await load('pages/AssessmentDetailPage.jsx')
 const { default: ClientProfilePage } = await load('pages/ClientProfilePage.jsx')
 const { default: MetricDetailPage } = await load('pages/MetricDetailPage.jsx')
 const { muscleVolume, reviewMuscleSet } = await load('lib/muscleVolume.js')
 const { setRowFromPrescribed, ensureSetRows, summarize: summarizeWorkout } = await load('lib/workout.js')
 const { default: RPEModal } = await load('components/organisms/workout/RPEModal.jsx')
+
+test('Profile preserves client-owned goals, preference provenance and recorded measurement sources', () => {
+  const db = fixture()
+  let html = renderRoutedSection('/clients/a/profile', db)
+  assert.match(html, /No goals recorded/)
+  assert.match(html, /No lifestyle records/)
+  assert.match(html, /No measurements recorded/)
+  assert.doesNotMatch(html, /Goal history ·|History · 0|Sources &amp; dates/)
+  assert.match(html, /<details[^>]*id="profile-administration"/)
+  assert.doesNotMatch(html, /<details[^>]*open=""[^>]*id="profile-administration"/)
+  db.clients[0].intake = { profilePreferences: { values: { enjoys: 'Swimming' }, dates: { enjoys: '2026-10-01' } } }
+  db.clients[0].anthro = { age: 32, _sources: { age: { kind: 'profile', date: '2026-09-01' } } }
+  db.screenings = [{ id: 'screen-a', clientId: 'a', status: 'complete', completedOn: '2026-09-01', goals: { prefs: { enjoys: 'Walking', hardNo: 'Contact sports' }, availability: { daysPerWeek: 3 } } }]
+  db.assessments = [
+    { id: 'goal-old', clientId: 'a', type: 'goals', date: '2026-10-01', createdAt: '2026-10-01T08:00:00Z', data: { shortTerm: [{ text: 'Older goal' }] } },
+    { id: 'goal-new', clientId: 'a', type: 'goals', date: '2026-10-01', createdAt: '2026-10-01T10:00:00Z', data: { self: true, shortTerm: [{ text: 'Current goal', target: '3 sessions', by: '2000-01-01' }], longTerm: [{ text: 'Go hiking' }], why: 'Feel energetic' } },
+    { id: 'lifestyle-a', clientId: 'a', type: 'lifestyle', date: '2026-10-01', data: { hydrationL: 0, steps: 0, sleepHrs: 7, sleepQuality: 6, stress: 2, activityLevel: 'Moderate' } },
+    { id: 'body-a', clientId: 'a', type: 'body_comp', date: '2026-09-28', data: { massKg: 76.2, bodyFatPct: 22.1, method: 'BIA' } },
+    { id: 'private-goal', clientId: 'b', type: 'goals', date: '2099-01-01', data: { shortTerm: [{ text: 'PRIVATE OTHER CLIENT' }] } },
+  ]
+  db.concerns = [{ id: 'concern-a', clientId: 'a', status: 'Open', date: '2026-10-01' }, { id: 'concern-b', clientId: 'b', status: 'Open' }]
+  html = renderRoutedSection('/clients/a/profile', db)
+  assert.match(html, /Current goal/)
+  assert.doesNotMatch(html, /Older goal|PRIVATE OTHER CLIENT|Walking/)
+  assert.match(html, /Goal history · 2/)
+  assert.match(html, /Past target date; completion not recorded/)
+  assert.match(html, /Swimming/)
+  assert.match(html, /Profile update/)
+  assert.match(html, /Health screening/)
+  assert.match(html, /Contact sports/)
+  assert.match(html, /Profile entry/)
+  assert.match(html, /Body composition · BIA/)
+  assert.match(html, /76\.2<small>kg<\/small>/)
+  assert.match(html, />0<small>L\/day<\/small>/)
+  assert.match(html, />0<small>\/day<\/small>/)
+  assert.match(html, /1 open concern/)
+  assert.match(html, /href="\/clients\/a\/progress#outcomes"/)
+  assert.match(html, /href="\/clients\/a\/check-ins\?view=concerns"/)
+  db.settings.units = 'lb'
+  assert.match(renderRoutedSection('/clients/a/profile', db), /168<small>lb<\/small>/)
+  const history = renderRoutedSection('/clients/a/profile/goals?record=goal-new#assessment-record-goal-new', db)
+  assert.match(history, /class="ad-entry open" id="assessment-record-goal-new"/)
+  assert.match(history, /Current goal/)
+})
+
+test('Assessments offers one baseline action per missing category and counts formal client-owned baselines', () => {
+  const db = fixture()
+  let html = renderRoutedSection('/clients/a/assessments', db)
+  assert.equal((html.match(/>Add baseline<\/button>/g) || []).length, 3)
+  assert.match(html, /0\/3 baselines/)
+  assert.doesNotMatch(html, /History ·|Assessment history|Open history/)
+  db.assessments = [
+    { id: 'body-base', clientId: 'a', type: 'body_comp', date: '2026-09-25', phase: 'baseline', data: { massKg: 76, method: 'BIA', source: 'Coach entry' } },
+    { id: 'movement-repeat', clientId: 'a', type: 'movement', date: '2026-09-25', phase: 'reassessment', data: { protocol: 'nasm', findings: {} } },
+    { id: 'pain', clientId: 'a', type: 'pain', date: '2026-09-26', phase: 'baseline', data: { sites: [], self: true } },
+    { id: 'goals', clientId: 'a', type: 'goals', date: '2026-09-26', phase: 'baseline', data: {} },
+    { id: 'other-client', clientId: 'b', type: 'fitness', date: '2026-09-26', phase: 'baseline', data: { source: 'PRIVATE OTHER CLIENT' } },
+    { id: 'derived', clientId: 'a', type: 'fitness', date: '2026-09-26', data: { auto: true, sourceWorkoutId: 'workout', strength: [{ lift: 'OTHER AUTO LIFT', valueKg: 100 }] } },
+  ]
+  html = renderRoutedSection('/clients/a/assessments#formal-assessments', db)
+  assert.match(html, /1\/3 baselines/)
+  assert.equal((html.match(/>Add baseline<\/button>/g) || []).length, 2)
+  assert.equal((html.match(/>Record reassessment<\/button>/g) || []).length, 1)
+  assert.match(html, /3 records/)
+  assert.match(html, /Athlete self-report/)
+  assert.doesNotMatch(html, /PRIVATE OTHER CLIENT|OTHER AUTO LIFT/)
+  assert.match(html, /assessments\/body_comp\?record=body-base#assessment-record-body-base/)
+  assert.match(html, /href="\/clients\/a\/progress#outcomes"/)
+  const detail = renderRoutedSection('/clients/a/assessments/body_comp?record=body-base#assessment-record-body-base', db)
+  assert.match(detail, /class="ad-entry open" id="assessment-record-body-base"/)
+  assert.match(detail, /aria-expanded="true"/)
+  assert.match(detail, /Coach entry/)
+})
+
+test('Assessment screening summary preserves draft, expired and major-flag clearance states', () => {
+  const db = fixture()
+  db.screenings = [{ id: 'draft-a', clientId: 'a', status: 'draft' }, { id: 'private-b', clientId: 'b', status: 'complete', outcome: 'C', completedOn: '2026-09-27' }]
+  let html = renderRoutedSection('/clients/a/assessments', db)
+  assert.match(html, /Draft saved/)
+  assert.match(html, /Continue screening/)
+  assert.doesNotMatch(html, /Review clearance|PAR-Q\+ C/)
+  const row = { id: 'screen-a', clientId: 'a', status: 'complete', outcome: 'A', completedOn: '2025-01-01', validUntil: '2025-12-31', hhq: { symptoms: { chest_pain: true } }, clearance: { status: 'requested' }, parq: {} }
+  db.screenings.push(row)
+  html = renderRoutedSection('/clients/a/assessments', db)
+  assert.match(html, /Review required · Program gated/)
+  assert.match(html, /Screening expired/)
+  assert.match(html, /1 major review flag/)
+  assert.match(html, /Review clearance/)
+  assert.match(html, /New draft saved/)
+  assert.doesNotMatch(html, /Previous screenings/)
+  row.clearance.status = 'received'
+  html = renderRoutedSection('/clients/a/assessments', db)
+  assert.doesNotMatch(html, /Program ready|Program gated/)
+  assert.match(html, /Screening expired/)
+  assert.match(html, /Clearance received/)
+  row.validUntil = '2099-01-01'
+  html = renderRoutedSection('/clients/a/assessments', db)
+  assert.match(html, /Program ready/)
+  assert.doesNotMatch(html, /Screening expired/)
+  const clearance = renderToStaticMarkup(React.createElement(ScreeningReview, { screening: row, clearanceOnly: true, onClearance: () => {} }))
+  assert.match(clearance, /Date cleared|Clearance letter/)
+  assert.doesNotMatch(clearance, /Red-flag rollup|Recommendation/)
+  const historical = renderToStaticMarkup(React.createElement(ScreeningReview, { screening: row, historical: true }))
+  assert.match(historical, /Red-flag rollup/)
+  assert.match(historical, /Recorded clearance decision/)
+  assert.doesNotMatch(historical, /<select/)
+})
 
 test('client deletion uses one RPC and propagates a rejected transaction', async () => {
   const calls = []
@@ -213,20 +322,23 @@ test('trainer shortcuts to routed destinations are links', () => {
   const training = renderRoutedSection('/clients/a/training', db)
   assert.match(overview, /href="\/clients\/a\/training\?date=\d{4}-\d{2}-\d{2}"[^>]*>Plan workout/)
   assert.match(overview, /href="\/clients\/a\/check-ins"[^>]*>View check-ins/)
-  assert.match(training, /href="\/workouts"[^>]*>Programme library/)
+  assert.match(training, /href="\/workouts\?clientId=[^"]+"[^>]*>Program library/)
 })
 
 test('training page keeps day details in the calendar until logging is requested', () => {
   const db = fixture()
   const today = todayISO('UTC')
   const page = renderRoutedSection(`/clients/a/training?date=${today}`, db)
-  assert.match(page, /No programme assigned/)
+  assert.match(page, /No program assigned/)
   assert.match(page, /Workout calendar/)
   assert.match(page, /<details class="card training-history">/)
   assert.doesNotMatch(page, /Plan sessions, record actual work|Week of|select a day to review or plan|Blue: prescribed|Today’s session|Today&#x27;s Workout|id="workout-log"/)
   const logging = renderRoutedSection(`/clients/a/training?date=${today}&run=1`, db)
-  assert.match(logging, /id="workout-log"/)
-  assert.match(logging, /No workout logged|Rest day/)
+  assert.doesNotMatch(logging, /id="workout-log"/)
+  assert.match(logging, /Plan workout/)
+  db.prescriptions.push({ id: 'today-plan', clientId: 'a', date: today, name: 'Strength', items: [{ exercise: 'Squat', sets: 3, reps: 5 }] })
+  assert.match(renderRoutedSection(`/clients/a/training?date=${today}&run=1`, db), /id="workout-log"/)
+  assert.doesNotMatch(page, /Coach assistance|training-assistance/)
 })
 
 test('planner week and month show only this client’s completed workout logs, distinct from prescriptions', () => {
@@ -248,21 +360,84 @@ test('planner week and month show only this client’s completed workout logs, d
   ))
   for (const view of ['week', 'month']) {
     const html = renderPlanner(view)
-    assert.match(html, /class="plan-completed-status"[^>]*>.*Completed/)
-    assert.match(html, /class="plan-completed-name">Squat Demo/)
-    assert.match(html, /Review day in workout builder/)
-    assert.match(html, /Appt done<\/span><span>No log/)
-    assert.match(html, view === 'week' ? /Review or plan Mon 2026-09-28/ : /Review or plan 2026-09-28/)
+    assert.match(html, /class="training-calendar-status completed">Completed/)
+    assert.match(html, /class="training-calendar-name">Squat Demo/)
+    assert.match(html, /aria-label="Mon, Sep 28: Completed, Squat Demo"/)
+    assert.match(html, /class="training-calendar-status appointment">Appt done/)
+    assert.match(html, /class="training-calendar-name">No workout log/)
     assert.match(html, /In progress.*Unfinished Workout/)
     assert.doesNotMatch(html, /Other Client Workout/)
+    assert.doesNotMatch(html, /ACWR|MONO|STRAIN|Planned VL/)
   }
 })
 
-test('session names persist separately from notes and completed days cannot receive new plans', () => {
+test('Training date eligibility separates plans, actual logs, and appointment completion', () => {
+  const db = fixture(), today = todayISO('UTC'), future = addDays(today, 1), past = addDays(today, -1)
+  const prescription = { id: 'p', clientId: 'a', date: today, name: 'Strength', items: [{ exercise: 'Squat', sets: 3, reps: 5 }] }
+  db.prescriptions.push(prescription)
+  assert.equal(trainingDay(db, 'a', today, today).canRun, true)
+  assert.equal(trainingDay(db, 'b', today, today).canPlan, true)
+  prescription.date = future
+  assert.equal(trainingDay(db, 'a', future, today).canRun, false)
+  assert.equal(trainingDay(db, 'a', future, today).canEditPlan, true)
+  prescription.date = past
+  assert.equal(trainingDay(db, 'a', past, today).canRun, false)
+  assert.equal(trainingDay(db, 'a', past, today).canEditPlan, true)
+  assert.equal(trainingDay(db, 'a', past, today).canDeletePlan, false)
+  db.workouts.push({ id: 'running', clientId: 'a', date: past, status: 'in_progress' })
+  assert.equal(trainingDay(db, 'a', past, today).canRun, true)
+  db.workouts[0].status = 'completed'
+  assert.equal(trainingDay(db, 'a', past, today).canRun, false)
+  assert.equal(trainingDay(db, 'a', past, today).canEditPlan, false)
+  db.sessions.push({ id: 'appt', clientId: 'a', date: future, status: 'Completed' })
+  const appointmentDay = trainingDay(db, 'a', future, today)
+  assert.equal(appointmentDay.status, 'appointment')
+  assert.equal(appointmentDay.completed.length, 0)
+  assert.equal(appointmentDay.canRun, false)
+  assert.equal(appointmentDay.canEditPlan, false)
+})
+
+test('Training selected-day review never substitutes prescribed targets for missing actuals', () => {
+  const db = fixture(), date = addDays(todayISO('UTC'), -1)
+  db.prescriptions.push({ id: 'p', clientId: 'a', date, name: 'Original plan', items: [{ exercise: 'Squat', sets: 3, reps: 99, load: 999 }] })
+  db.workouts.push({ id: 'done', clientId: 'a', date, title: 'Actual workout', status: 'completed', warmup: [], cooldown: [], main: [
+    { id: 'lift', name: 'Squat', setRows: [{ n: 1, done: true, reps: null, load: null, pReps: 99, pLoadKg: 999 }] },
+  ] })
+  const page = renderRoutedSection(`/clients/a/training?date=${date}`, db)
+  assert.match(page, /Logged workout/)
+  assert.match(page, /Original plan/)
+  assert.match(page, /Reps not recorded · Load not recorded/)
+  assert.match(page, /Edit logged details/)
+  assert.doesNotMatch(page, /99 reps|999 kg|Start workout|Plan workout|Delete plan/)
+})
+
+test('Training blocks run deep links on empty, future, and completed dates', () => {
+  const db = fixture(), today = todayISO('UTC'), future = addDays(today, 1)
+  db.prescriptions.push({ id: 'p', clientId: 'a', date: future, name: 'Future plan', items: [{ exercise: 'Squat', sets: 3, reps: 5 }] })
+  assert.doesNotMatch(renderRoutedSection(`/clients/a/training?date=${future}&run=1`, db), /id="workout-log"|Start workout/)
+  db.sessions.push({ id: 'appt', clientId: 'a', date: today, status: 'Completed' })
+  const page = renderRoutedSection(`/clients/a/training?date=${today}&run=1`, db)
+  assert.match(page, /Appointment complete · No workout log/)
+  assert.doesNotMatch(page, /id="workout-log"|Start workout|Plan workout/)
+})
+
+test('Training history targets the chosen log when a date has multiple client-owned records', () => {
+  const db = fixture(), date = addDays(todayISO('UTC'), -1)
+  const log = (id, clientId, title, reps) => ({ id, clientId, date, title, status: 'completed', warmup: [], cooldown: [], main: [
+    { id: `lift-${id}`, name: 'Squat', setRows: [{ n: 1, done: true, reps, load: 50 }] },
+  ] })
+  db.workouts.push(log('first', 'a', 'First log', 5), log('second', 'a', 'Second log', 7), log('other', 'b', 'Private other log', 99))
+  const page = renderRoutedSection(`/clients/a/training?date=${date}&workout=second`, db)
+  assert.match(page, /id="selected-day-title"[^>]*>Second log/)
+  assert.match(page, /1 × 7 reps · 50 kg/)
+  assert.doesNotMatch(page, /99 reps|Private other log/)
+})
+
+test('session names persist separately from notes and completed days cannot receive new plans', async () => {
   const db = fixture()
   const past = addDays(todayISO('UTC'), -1)
   const future = addDays(todayISO('UTC'), 1)
-  writePrescription(db, 'a', future, [], 'Trainer notes', 'Lower-body strength')
+  writePrescription(db, 'a', future, (await load('lib/program.js')).itemsToBlocks([{ exercise: 'Squat', sets: 3, reps: 6, load: 70 }]), 'Trainer notes', 'Lower-body strength')
   assert.equal(db.prescriptions[0].name, 'Lower-body strength')
   assert.equal(db.prescriptions[0].notes, 'Trainer notes')
   db.prescriptions[0].items = [{ exercise: 'Squat', sets: 3, reps: 6, load: 70 }]
@@ -394,7 +569,7 @@ test('empty Check-ins and Progress views disclose missing observations for the s
   assert.match(load, /Load response date chart, 0 plotted days/)
   assert.match(load, /Session load \(AU\) will appear here/)
   assert.match(load, /No session RPE in the past 28 days/)
-  assert.equal((load.match(/Not available/g) || []).length, 3)
+  assert.equal((load.match(/<strong>—<\/strong>/g) || []).length, 3)
   assert.doesNotMatch(load, /No comparison/)
   assert.doesNotMatch(load, /No recorded values for this selection|Unlogged days are unknown/)
   assert.doesNotMatch(load, /Data coverage/)
@@ -403,6 +578,47 @@ test('empty Check-ins and Progress views disclose missing observations for the s
   assert.match(outcomes, /No formal fitness assessment yet/)
   assert.doesNotMatch(outcomes, /Load response/)
   assert.doesNotMatch(wellness + load + outcomes, /Blair/)
+})
+
+test('Strength retains an empty chart and distinguishes missing load from recorded bodyweight', () => {
+  const db = fixture()
+  const empty = renderClientPage('/clients/a/progress', db, ClientProgressPage)
+  assert.match(empty, /Estimated 1RM chart, 0 recorded values/)
+  assert.match(empty, /Complete a set to start this chart/)
+  const date = todayISO('UTC')
+  db.resistance.push(
+    { id: 'zero', clientId: 'a', date: addDays(date, -1), exercise: 'Goblet Squat', sets: 3, reps: 8, weight: 0 },
+    { id: 'missing', clientId: 'a', date, exercise: 'Goblet Squat', sets: 3, reps: 8, weight: null },
+    { id: 'other', clientId: 'b', date, exercise: 'Goblet Squat', sets: 30, reps: 99, weight: 999 },
+  )
+  const recorded = renderClientPage('/clients/a/progress', db, ClientProgressPage)
+  assert.match(recorded, /Latest recorded load<\/span><strong>Not recorded/)
+  assert.match(recorded, /Recorded set load chart, 1 recorded values/)
+  assert.match(recorded, /No external load/)
+  assert.match(recorded, /1 more dated record needed/)
+  assert.doesNotMatch(recorded, /999 kg/)
+})
+
+test('Completion separates past bookings, cancellations, today and completed workout logs', () => {
+  const db = fixture(), today = todayISO('UTC'), yesterday = addDays(today, -1)
+  db.sessions.push(
+    { id: 'done', clientId: 'a', date: yesterday, status: 'Completed' },
+    { id: 'pending', clientId: 'a', date: yesterday, status: 'Confirmed' },
+    { id: 'cancelled', clientId: 'a', date: yesterday, status: 'Cancelled' },
+    { id: 'today', clientId: 'a', date: today, status: 'Completed' },
+    { id: 'other', clientId: 'b', date: yesterday, status: 'Completed' },
+  )
+  db.workouts.push({ id: 'done-log', clientId: 'a', date: yesterday, status: 'completed', main: [] }, { id: 'unfinished', clientId: 'a', date: today, status: 'in_progress', main: [] })
+  const html = renderClientPage('/clients/a/progress#attendance', db, ClientProgressPage)
+  assert.match(html, /aria-valuenow="50"/)
+  assert.match(html, /1 of 2 bookings/)
+  assert.match(html, /<strong>1<\/strong><span>Awaiting status/)
+  assert.match(html, /<strong>1<\/strong><span>Cancelled · excluded/)
+  assert.match(html, /1 completed today · outside the past-booking rate/)
+  assert.match(html, /Completed workout logs[\s\S]*?<strong>1<\/strong>/)
+  assert.match(html, /training\?history=workouts#training-history-title/)
+  const history = renderRoutedSection('/clients/a/training?history=workouts#training-history-title', db)
+  assert.match(history, /<details class="card training-history" open=""/)
 })
 
 test('Check-ins shows the existing score requirement only when an observation cannot produce a score', () => {
@@ -426,7 +642,7 @@ test('load cards keep comparison short while exposing sparse and stale details t
   const sparse = fixture()
   sparse.srpe.push({ id: 'a-one', clientId: 'a', date, rpe: 5, duration: 30, tl: 150, source: 'Coach manual' })
   const sparsePage = renderClientPage('/clients/a/progress#training-load', sparse, ClientProgressPage)
-  assert.match(sparsePage, /Not available/)
+  assert.match(sparsePage, /<strong>—<\/strong>/)
   assert.match(sparsePage, /1\/3 positive-load days needed by the existing 28-day calculation/)
   assert.match(sparsePage, /1\/7 days logged; other days unconfirmed/)
   assert.match(sparsePage, /<small class="progress-derived-trend">— Baseline unavailable<\/small>/)
@@ -434,14 +650,14 @@ test('load cards keep comparison short while exposing sparse and stale details t
   const zero = fixture()
   zero.srpe.push({ id: 'a-zero', clientId: 'a', date, rpe: 0, duration: 30, tl: 0, source: 'Coach manual' })
   const zeroPage = renderClientPage('/clients/a/progress#training-load', zero, ClientProgressPage)
-  assert.equal((zeroPage.match(/Not available/g) || []).length, 3)
+  assert.equal((zeroPage.match(/<strong>—<\/strong>/g) || []).length, 3)
   assert.match(zeroPage, /No variation in the 7-day daily loads/)
   assert.match(zeroPage, /7-day monotony is unavailable/)
 
   const stale = fixture()
   stale.srpe.push({ id: 'a-old', clientId: 'a', date: addDays(date, -30), rpe: 5, duration: 30, tl: 150, source: 'Coach manual' })
   const stalePage = renderClientPage('/clients/a/progress#training-load', stale, ClientProgressPage)
-  assert.equal((stalePage.match(/Not available/g) || []).length, 3)
+  assert.equal((stalePage.match(/<strong>—<\/strong>/g) || []).length, 3)
   assert.match(stalePage, /No session RPE in the past 28 days/)
 })
 
@@ -473,7 +689,7 @@ test('Progress owns dated load history and excludes another client', () => {
   assert.match(load, /Monotony/)
   assert.match(load, /Strain/)
   assert.doesNotMatch(load, /Show dated table view/)
-  assert.ok(load.indexOf('Load calculations') < load.indexOf('Load response'))
+  assert.ok(load.indexOf('Load response') < load.indexOf('Load calculations'))
   assert.match(load, /Open ACWR graph and table/)
   assert.doesNotMatch(load, /Advanced load calculations/)
   assert.doesNotMatch(load, /900 AU|Blair-only source/)
@@ -687,7 +903,7 @@ test('new logging rows support warm-up purpose without silently relabeling exist
   assert.equal(ensureSetRows({ setRows: [{ done: true, reps: 5, load: 20 }] })[0].purpose, undefined)
 })
 
-const { wellnessBaseline } = await load('lib/wellnessBaseline.js')
+const { wellnessBaseline, wellnessZBand } = await load('lib/wellnessBaseline.js')
 const { default: OverviewTraining } = await load('components/organisms/OverviewTraining.jsx')
 const { WellnessForm } = await load('components/organisms/forms/LogForms.jsx')
 
@@ -702,10 +918,10 @@ test('wellness baseline uses unique earlier client dates and sample SD, with con
     assert.equal(metric.mean, 4)
     assert.equal(metric.sd, Math.sqrt(28 / 6))
   }
-  assert.equal(result.metrics[0].z, -3 / Math.sqrt(28 / 6))
-  assert.equal(result.metrics[1].z, 3 / Math.sqrt(28 / 6))
+  assert.equal(result.metrics[0].z, 3 / Math.sqrt(28 / 6))
+  assert.equal(result.metrics[1].z, -3 / Math.sqrt(28 / 6))
   assert.equal(result.metrics[2].z, 0)
-  assert.equal(result.metrics[3].z, -3 / Math.sqrt(28 / 6))
+  assert.equal(result.metrics[3].z, 3 / Math.sqrt(28 / 6))
 })
 
 test('wellness baseline keeps sparse, missing and constant ratings unavailable', () => {
@@ -763,4 +979,80 @@ test('Overview respects completed appointment closure without offering to start 
   const page = renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db }, React.createElement(MemoryRouter, null, React.createElement(OverviewTraining, { clientId: 'a', today: date }))))
   assert.match(page, /Review day/)
   assert.doesNotMatch(page, /Start workout|run=1/)
+})
+
+test('favourable Z direction agrees with actual wellness total for every metric', () => {
+  const date = '2026-10-09'
+  const previous = Array.from({ length: 8 }, (_, index) => ({ clientId: 'a', date: addDays(date, -index - 1), sleep: index % 2 ? 3 : 5, stress: index % 2 ? 3 : 5, fatigue: index % 2 ? 3 : 5, soreness: index % 2 ? 3 : 5 }))
+  const base = { clientId: 'a', date, sleep: 4, stress: 4, fatigue: 4, soreness: 4 }
+  const total = row => calcWellness(row.sleep, row.stress, row.fatigue, row.soreness)
+  for (const [key, best, worst] of [['sleep', 7, 1], ['stress', 1, 7], ['fatigue', 1, 7], ['soreness', 1, 7]]) {
+    for (const value of [best, worst]) {
+      const latest = { ...base, [key]: value }
+      const metric = wellnessBaseline([...previous, latest], 'a', date).metrics.find(item => item.key === key)
+      assert.equal(Math.sign(metric.z), Math.sign(total(latest) - total(base)), key)
+      assert.equal(metric.band, value === best ? 'favourable' : 'unfavourable', key)
+    }
+  }
+})
+
+test('Z band boundaries are descriptive, include ±1, and preserve unavailable results', () => {
+  for (const z of [-1, -0.5, 0, 0.5, 1]) assert.equal(wellnessZBand(z), 'near-baseline')
+  for (const z of [1.001, 2, 9]) assert.equal(wellnessZBand(z), 'favourable')
+  for (const z of [-1.001, -2, -9]) assert.equal(wellnessZBand(z), 'unfavourable')
+  for (const z of [null, undefined, NaN, Infinity]) assert.equal(wellnessZBand(z), 'unavailable')
+})
+
+test('Overview draws direction-aware bands and withholds coloured evidence without a baseline', () => {
+  const db = fixture(), date = todayISO('UTC')
+  const empty = renderRoutedSection('/clients/a', db)
+  assert.equal((empty.match(/class="overview-z-track unavailable"/g) || []).length, 4)
+  assert.doesNotMatch(empty, /class="overview-z-dot/)
+  assert.match(empty, /← Less favourable/)
+  assert.match(empty, /More favourable →/)
+  assert.match(empty, /Within ±1 SD/)
+  db.wellness = Array.from({ length: 8 }, (_, index) => ({ clientId: 'a', date: addDays(date, -index - 1), sleep: index % 2 ? 3 : 5, stress: index % 2 ? 3 : 5, fatigue: index % 2 ? 3 : 5, soreness: index % 2 ? 3 : 5 }))
+  db.wellness.push({ clientId: 'a', date, sleep: 7, stress: 7, fatigue: 4, soreness: 1 })
+  const page = renderRoutedSection('/clients/a', db)
+  assert.equal((page.match(/class="overview-z-dot favourable"/g) || []).length, 2)
+  assert.equal((page.match(/class="overview-z-dot unfavourable"/g) || []).length, 1)
+  assert.equal((page.match(/class="overview-z-dot near-baseline"/g) || []).length, 1)
+})
+
+test('combined percentage and RIR prescriptions survive cloning and reach the runner without changing load', async () => {
+  const { newSet, newProgExercise, newBlock, cloneBlocksFresh, blocksToItems, itemsToBlocks } = await load('lib/program.js')
+  const { setRowFromPrescribed } = await load('lib/workout.js')
+  const { default: DayBlockReview } = await load('components/organisms/program/DayBlockReview.jsx')
+  const sets = [1, 2, 3].map(n => newSet(n, { reps: 5, intensity: 80, rir: 2 }))
+  const blocks = [{ ...newBlock(), exercises: [newProgExercise('Squat', { intensityType: '%1RM', sets })] }]
+  const copy = cloneBlocksFresh(blocks)
+  assert.notEqual(copy[0].exercises[0].sets[0].setId, sets[0].setId)
+  assert.equal(copy[0].exercises[0].sets[0].prescribedRir, 2)
+  const row = setRowFromPrescribed(copy[0].exercises[0].sets[0], 0, '%1RM', 100)
+  assert.equal(row.pLoadKg, 80)
+  assert.equal(row.pRir, 2)
+  assert.equal(row.effort, null)
+  assert.equal(setRowFromPrescribed(newSet(1, { intensity: 80, rir: 0 }), 0, '%1RM', null).pRir, 0)
+  assert.equal(setRowFromPrescribed(sets[0], 0, '%1RM', null).pLoadKg, null)
+  assert.equal(setRowFromPrescribed(newSet(1, { intensity: 2 }), 0, 'RIR', 100).pRir, 2)
+  assert.equal(itemsToBlocks(blocksToItems(blocks))[0].exercises[0].sets[0].prescribedRir, 2)
+  const html = renderToStaticMarkup(React.createElement(DayBlockReview, { prescription: { blocks }, compact: true }))
+  assert.match(html, /80% 1RM/)
+  assert.match(html, /2 RIR/)
+})
+
+test('marking a set done never invents an actual effort from percentage or RIR targets', async () => {
+  const { default: SetLogRow } = await load('components/molecules/SetLogRow.jsx')
+  for (const type of ['%1RM', 'RIR']) {
+    let patch
+    const tree = SetLogRow({ row: { n: 1, pReps: 5, pIntensityType: type, pIntensityValue: 80, pRir: 2 }, onChange: value => { patch = value } })
+    function find(node) {
+      if (!node || typeof node !== 'object') return null
+      if (node.props?.['aria-label'] === 'Set 1 done') return node
+      return React.Children.toArray(node.props?.children).map(find).find(Boolean)
+    }
+    find(tree).props.onChange({ target: { checked: true } })
+    assert.equal(patch.effort, null)
+    assert.equal(patch.reps, 5)
+  }
 })

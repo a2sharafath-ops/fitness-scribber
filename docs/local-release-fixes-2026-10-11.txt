@@ -1,0 +1,86 @@
+LOCAL RELEASE FIXES — 2026-10-11
+
+1. Callback screen: FIXED LOCALLY
+App Gate captures the initial wearable-return mode. Removing the OAuth fragment
+no longer lets auth/profile rerenders replace the result screen with Dashboard.
+Real React DOM regression test covers failure, pending completion, success,
+fragment removal, repeated auth updates, one completion call and Continue target.
+Built preview: failure screen persists, and Continue returns to Dashboard.
+Real vendor OAuth remains deferred; no wearable credentials were configured.
+
+2. Dependencies: FIXED LOCALLY
+react-router-dom/react-router 7.18.4, postcss 8.5.29, nanoid 3.3.20,
+source-map-js 1.2.2. npm audit reports 0 vulnerabilities (previously 5 high).
+Pinned jsdom and PGlite development dependencies make DOM and isolated SQL tests
+repeatable. They are not frontend runtime dependencies.
+
+3. Program schema: INSTALLED AND VERIFIED IN PRODUCTION
+Project haxxetirrcrwzwdzsdui / Cureocity Fitness Partner.
+Created programs and programAssignments with RLS and owner policies; added
+sessions.name; installed assign_program, assign_program_scheduled,
+save_schedule_booking and save_training_plan_batch. All four are SECURITY INVOKER.
+Anonymous EXECUTE and table SELECT are denied; authenticated access is enabled.
+The prescription coach/client/date uniqueness index is installed.
+Signed-in built preview now loads Dashboard and Programs without the prior
+missing-table banner. Real successful program writes were tested in isolated
+PostgreSQL, not by adding records to production clients.
+
+Approved duplicate cleanup:
+- Client ihw9kzb (Sharafath Client), July 21, 23 and 24, 2026.
+- Removed x10w7ic, xy6i31n, wi3x83n, sd50-presc-34, sd50-presc-36, sd50-presc-37.
+- Full original rows are in app_private.release_prescription_backup (6 rows).
+- Backup SELECT is denied to authenticated browser users; RLS is enabled.
+- No direct foreign keys or workout planId references pointed at those rows.
+- No clients, workouts, logs, bookings or unrelated prescriptions were deleted.
+- Existing protection triggers stayed enabled. Row fingerprints prevented stale
+  cleanup. Backup, deletion and installation ran in one transaction.
+- Live verification: 6 backups, 0 target prescriptions, 0 duplicate plan dates.
+Administrator restoration requires deliberate review because restoring both
+plans to the same date would violate the new uniqueness rule.
+
+4. Database advisors: REVIEWED; NARROW FIX APPLIED
+Before: 0 errors, 58 warnings. After: 0 errors, 53 warnings.
+Removed PUBLIC/anon EXECUTE from become_coach, redeem_invite and is_admin while
+preserving authenticated calls. Removed PUBLIC/anon/authenticated EXECUTE from
+rls_auto_enable; the owner's event trigger remains intact.
+Live anonymous Data API checks return 401 for the three onboarding helpers,
+all four new program/schedule RPCs, and both new tables.
+
+Remaining 53 warnings:
+- 52 signed-in SECURITY DEFINER notices: 48 existing pooling functions plus
+  become_coach, redeem_invite, is_admin and delete_client_and_data.
+- 1 leaked-password-protection warning. Supabase requires Pro or above; the
+  organization is on Free. No paid upgrade or authentication-policy change made.
+
+Function review:
+The onboarding functions check an invitation or the caller's profile; deletion
+checks auth.uid and ownership. Their signed-in access is required by the app.
+Existing pooling data/mutation entry points inspected have owner/linked-client
+checks, directly or via source_inventory/runtime/assignment helpers. Test-slot
+wrappers delegate to a role/allowlist/expiry-checked implementation. Some boolean
+pooling feature/policy helpers intentionally return metadata to signed-in callers
+without a per-client ownership guard. These remain a separate hardening decision;
+they were not broadly revoked because other deployed workflows/RLS may use them.
+This was a source/privilege review, not a full adversarial runtime audit of the
+legacy pooling subsystem. Its SQL is not maintained in this workspace. Remaining
+notices were not suppressed or presented as cleared.
+Docs: https://supabase.com/docs/guides/observability/advisors?queryGroups=lint&lint=0029_authenticated_security_definer_function_executable
+Docs: https://supabase.com/docs/guides/auth/password-security
+
+5. Final verification
+- npm test: 175 passed, 0 failed/skipped.
+- npm run lint: passed.
+- npm run build: passed (293 modules).
+- npm audit: 0 vulnerabilities.
+- Isolated program SQL: assignment/retry/RLS/conflict/rollback checks passed.
+- Isolated schedule SQL: move/resize/conflict/stale/owner checks passed.
+- Exact release SQL with synthetic fixtures: stale-row rejection, full rollback,
+  six-row backup/deletion, unrelated-plan preservation, permissions and RPC
+  installation passed. Run all three with npm run test:sql.
+- git diff --check: passed; prior blank EOF lines removed.
+- Some parallel Vite SSR tests still log websocket port contention despite
+  hmr:false. Assertions pass; Node's TypeScript stripping warning is experimental.
+
+No Git commit/push and no frontend deployment performed. The built release
+preview remains at http://127.0.0.1:5180. Production database changes above were
+explicitly approved; frontend changes remain local.

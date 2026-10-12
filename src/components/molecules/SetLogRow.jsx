@@ -6,7 +6,7 @@ import { toDisp, dispToKg, unitName } from '../../lib/units'
 // "done" pre-fills the actuals from the prescription so only differences need
 // typing. Presentational — all state changes are raised via onChange(patch).
 const RPE_SCALE = [10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5]
-const RIR_SCALE = [0, 1, 2, 3, 4, 5, 6]
+const RIR_SCALE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 export default function SetLogRow({ row, units, onChange, warmupBlock = false }) {
   const effortType = row.effortType === 'RPE' ? 'RPE' : 'RIR'
@@ -15,8 +15,9 @@ export default function SetLogRow({ row, units, onChange, warmupBlock = false })
   // Prescribed-target hint, e.g. "5 reps @ 2 RIR · 100 kg".
   const intUnit = row.pIntensityType === 'RIR' ? ' RIR' : row.pIntensityType === 'RPE' ? ' RPE' : row.pIntensityType === '%1RM' ? '% 1RM' : ''
   const target = [
-    row.pReps != null && row.pReps !== '' ? `${row.pReps} reps` : null,
+    row.pReps != null && row.pReps !== '' ? `${row.pReps}${row.pRepsMax != null && row.pRepsMax !== row.pReps ? `–${row.pRepsMax}` : ''} reps` : null,
     row.pIntensityValue != null ? `@ ${row.pIntensityValue}${intUnit}` : null,
+    row.pRir != null && row.pIntensityType !== 'RIR' ? `${row.pRir} RIR` : null,
     row.pLoadKg != null ? `${toDisp(row.pLoadKg, units)} ${unitName(units)}` : null,
   ].filter(Boolean).join(' · ') || 'log your set'
 
@@ -26,7 +27,7 @@ export default function SetLogRow({ row, units, onChange, warmupBlock = false })
       done: true,
       load: row.load ?? row.pLoadKg ?? null,
       reps: row.reps ?? (row.pReps != null && !Number.isNaN(+row.pReps) ? +row.pReps : null),
-      effort: row.effort ?? row.pIntensityValue ?? null,
+      effort: row.effort ?? null,
     }
     : { done: false })
 

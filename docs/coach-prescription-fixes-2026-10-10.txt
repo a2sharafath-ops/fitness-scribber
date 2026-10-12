@@ -1,0 +1,80 @@
+Coach prescription fixes — 10 October 2026
+
+The 11 audit issues were addressed sequentially. After each numbered change,
+node --test tests/builder.test.mjs was run; each new regression check and all
+earlier checks passed before proceeding to the next change.
+
+1 PASS — Percentage progression rejects RIR, RPE, timed and weight metrics.
+   Valid percentage progression changes the percentage and retains optional RIR.
+
+2 PASS — Progressed percentages remain relative through JSON persistence and
+   copying: an 85% target resolves to 85 kg at TM 100 and 170 kg at TM 200.
+   Percentage progression explicitly clears fixed-weight overrides. Ordinary
+   copying keeps intentional fixed weights; historical unlabelled weights cannot
+   be distinguished automatically from old calculated weights. Clear the weight
+   field or apply percentage progression to restore a relative target.
+
+3 PASS — Shared validation covers save and every prescription write/copy path.
+   Missing names/sets, invalid numbers and unsupported targets are rejected.
+   Zero bodyweight load, zero RIR and timed targets with no reps remain valid.
+   Percentage targets must be >0 and <=100; RIR is integer 0–10; RPE is 1–10
+   in half-point increments. Error messages identify the exercise and set.
+
+4 PASS — Metric changes clear incompatible intensity values; equivalent RIR
+   targets can move between RIR-only and combined prescriptions. Reps and manual
+   weight are preserved. Overrides for a cleared intensity field are reset.
+
+5 PASS — Bulk progression asks before replacing plans and identifies affected
+   clients/dates. Cancellation performs no writes.
+
+6 PASS — Dates with ready, in-progress or completed workouts, or completed
+   appointments, reject prescription replacement at the write boundary.
+   Whole span copies preflight all destinations before changing the first plan.
+   UI copy paths continue to guard against past dates. Runner resume behavior
+   retains its existing day-eligibility rules.
+
+7 PASS — Exercise progression defaults follow their intensity: percentage
+   prescriptions use percentage progression; explicit weights support load
+   progression. Unsupported rules and fractional set/rep increments report errors.
+
+8 PASS — Local dictation and AI JSON normalization retain combined percentage
+   or weight + RIR, including zero RIR and spoken corrections. The cloud parser
+   schema/prompt and dictation preview are updated in source.
+   Deployed cloud parsing remains unverified until the function is deployed.
+
+9 PASS — Planned volume resolves percentage/effort targets against Training Max.
+   Relative load is labelled estimated; missing weight stays unavailable/partial;
+   known bodyweight zero remains zero; timed/HR targets do not fabricate volume.
+
+10 PASS — Lower-set overrides are tracked by field. Editing rest does not block
+    RIR propagation. Reset-to-set-1 restores pending target fields while retaining
+    identities and completed evidence. Existing whole-row legacy overrides remain
+    protected until explicitly reset.
+
+11 PASS — Builder and planner copy success waits for confirmed persistence.
+    Builder actions are disabled while saving; errors keep the draft available.
+    Local save messages explicitly identify device storage. Remote write retries
+    use the last successful snapshot, so unchanged failed rows are resent.
+    Tests cover delay, rejection, exceptions, recovery and failed local storage.
+
+Additional passing integration checks:
+- Dictation -> per-set customization -> percentage progression -> JSON save ->
+  copy to another client -> workout runner. Targets, RIR and rest remain correct
+  for both clients; actual reps/effort remain blank.
+- Actual DataProvider local commit reports storage failure and successfully
+  retries the same prescription without duplicate records.
+
+Final verification:
+node --test --test-concurrency=1 tests/*.test.mjs: 78 passed, 0 failed.
+npm run lint: passed, no warnings.
+npm run build: passed.
+git diff --check: passed.
+
+Live browser clicking, dragging, mobile layout, production save/reopen and
+deployed cloud dictation were not verified. The previous browser request was
+blocked by its URL security policy. Backend persistence tests use controlled
+failures rather than production data. No production records were changed.
+
+Changes remain local and have not been pushed or deployed.
+Regression source: tests/builder.test.mjs.
+Convenience command: node docs/coach-prescription-audit.mjs.

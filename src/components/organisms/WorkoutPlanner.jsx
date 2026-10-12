@@ -2,52 +2,34 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../atoms/Button'
 import SegToggle from '../molecules/SegToggle'
-import DayMetrics from '../molecules/DayMetrics'
 import WorkoutBuilderModal from './program/WorkoutBuilderModal'
 import PastePlanModal from './program/PastePlanModal'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { useClipboard } from '../../store/ClipboardContext'
-import { useFormat } from '../../hooks/useFormat'
-import { dailySum, dayMetrics } from '../../lib/calc'
-import { programStats } from '../../lib/program'
-import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession, deleteSpan, completedWorkoutsByDate, isClosedTrainingDay } from '../../lib/planner'
-import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths, datesBetween } from '../../lib/dates'
+import { trainingDay } from '../../lib/trainingDay'
+import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession, deleteSpan, isPlanTargetBlocked } from '../../lib/planner'
+import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths, addDays, datesBetween } from '../../lib/dates'
+import { confirmedPlanWrite } from '../../lib/confirmedPersistence'
 import { toast, confirmDialog } from '../../lib/toast'
 import { cloneBlocksFresh, itemsToBlocks } from '../../lib/program'
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const weekOffset = (date, tz) => Math.floor((Date.parse(date) - Date.parse(weekDates(0, tz)[0])) / (7 * 86400000)) * 7
 
-export default function WorkoutPlanner({ client, featured = false, size, initialView, onDay, focusDate, title = 'Workout Planner', compactCopy = false }) {
-  const sz = size || (featured ? 'featured' : 'default')
-  const isFeatured = sz === 'featured'
-  const isMedium = sz === 'medium'
-  const { db, commit, tz } = useData()
+export default function WorkoutPlanner({ client, initialView = 'week', focusDate, onSelectDate, title = 'Workout calendar', children }) {
+  const { db, commit, saveTrainingPlans, tz } = useData()
   const navigate = useNavigate()
   const { openModal } = useModal()
   const { clip, setClip, clearClip } = useClipboard()
-  const { fmtVL } = useFormat()
-  const [view, setView] = useState(initialView || (isFeatured ? 'month' : 'week'))
-  const [anchor, setAnchor] = useState(focusDate || todayISO(tz)) // any date within the shown month
-  const [weekStart, setWeekStart] = useState(focusDate ? weekOffset(focusDate, tz) : 0)
-  const [collapsed, setCollapsed] = useState(false)
-  const [sel, setSel] = useState(null)      // { from, to } — drag-selected span
-  const [dropDt, setDropDt] = useState(null) // day currently hovered by a chip drag
-  const [hoverDt, setHoverDt] = useState(null) // day hovered while a clip is held
-  const drag = useRef(null)                  // { from, moved } while range-selecting
-  const chip = useRef(null)                  // source date of a chip drag
-  const suppress = useRef(false)             // swallow the click that ends a drag
   const today = todayISO(tz)
-
-  useEffect(() => {
-    if (!focusDate) return
-    setAnchor(focusDate)
-    setWeekStart(weekOffset(focusDate, tz))
-  }, [focusDate, tz])
-
-  // A range-select ends on mouseup anywhere — a plain click (no movement)
-  // clears the selection and falls through to the normal prescribe click.
+  const [view, setView] = useState(initialView)
+  const [anchor, setAnchor] = useState(focusDate || today)
+  const [sel, setSel] = useState(null)
+  const [dropDate, setDropDate] = useState(null)
+  const [hoverDate, setHoverDate] = useState(null)
+  const drag = useRef(null), chip = useRef(null), suppress = useRef(false)
+  useEffect(() => { if (focusDate) setAnchor(focusDate) }, [focusDate])
   useEffect(() => {
     const up = () => {
       if (!drag.current) return
@@ -59,292 +41,88 @@ export default function WorkoutPlanner({ client, featured = false, size, initial
     window.addEventListener('mouseup', up)
     return () => window.removeEventListener('mouseup', up)
   }, [])
-
-  const intMap = dailySum(db.srpe, client.id, 'tl')
-  const prescribe = (dt) => openModal(<WorkoutBuilderModal clientId={client.id} date={dt} review
-    onLog={(date) => navigate(`/clients/${client.id}/training?date=${date}&run=1#workout-log`)} />, 'xl')
-  const prescOn = (dt) => db.prescriptions.find((p) => p.clientId === client.id && p.date === dt)
-  const dayData = (dt) => {
-    const presc = db.prescriptions.filter((p) => p.clientId === client.id && p.date === dt)
-    const stats = presc.map(programStats).reduce((a, s) => ({ exercises: a.exercises + s.exercises, sets: a.sets + s.sets, volume: a.volume + s.volume }), { exercises: 0, sets: 0, volume: 0 })
-    const names = presc.map((p) => (p.name || '').trim()).filter(Boolean)
-    const name = names.length ? names.join(' · ') : (stats.exercises ? `Session · ${stats.exercises} ex / ${stats.sets} sets` : null)
-    return { vl: Math.round(stats.volume), name }
+  const dates = view === 'month' ? monthGridDates(anchor) : weekDates(weekOffset(anchor, tz), tz)
+  const days = dates.map((date) => ({ date, ...trainingDay(db, client.id, date, today) }))
+  const period = days.filter((day) => view === 'week' || day.date.slice(0, 7) === anchor.slice(0, 7))
+  const logCount = period.reduce((count, day) => count + day.completed.length, 0)
+  const selection = sel ? datesBetween(sel.from, sel.to) : []
+  const sessions = selection.filter((date) => db.prescriptions.some((row) => row.clientId === client.id && row.date === date && isSession(row)))
+  const selectionClosed = selection.some((date) => isPlanTargetBlocked(db, client.id, date, today))
+  const targets = clip && hoverDate ? clipTargets(clip, hoverDate) : []
+  const selectDate = (date) => {
+    setAnchor(date)
+    if (onSelectDate) onSelectDate(date)
+    else openModal(<WorkoutBuilderModal clientId={client.id} date={date} review
+      onLog={(day) => navigate(`/clients/${client.id}/training?date=${day}&run=1#workout-log`)} />, 'xl')
   }
-
-  const shownDates = view === 'month' ? monthGridDates(anchor) : weekDates(weekStart, tz)
-  const prescribedDates = new Set(db.prescriptions.filter((p) => p.clientId === client.id && isSession(p)).map((p) => p.date))
-  const completedByDate = completedWorkoutsByDate(db.workouts, client.id)
-  const pendingByDate = new Map((db.workouts || [])
-    .filter((item) => item.clientId === client.id && item.status !== 'completed')
-    .map((item) => [item.date, item]))
-  const completedAppointments = new Set((db.sessions || []).filter((item) => item.clientId === client.id && String(item.status).toLowerCase() === 'completed').map((item) => item.date))
-  const periodDates = view === 'month' ? shownDates.filter((d) => d.slice(0, 7) === anchor.slice(0, 7)) : shownDates
-  const plannedDays = periodDates.filter((d) => prescribedDates.has(d)).length
-  const completedDays = periodDates.filter((d) => completedByDate.has(d)).length
-  const nextDate = [...prescribedDates].filter((d) => d >= today).sort()[0]
-  const summary = `${plannedDays} prescribed · ${completedDays} completed ${view === 'month' ? 'this month' : 'this week'}${nextDate ? ` · next ${fmtDay(nextDate)}` : ''}`
-
-  // ---- Selection -----------------------------------------------------------
-  const selDates = sel ? datesBetween(sel.from, sel.to) : []
-  const selSessions = selDates.filter((d) => prescribedDates.has(d)).length
-  const inSel = (dt) => selDates.includes(dt)
-
-  const doCopy = () => {
-    const c = buildClip(db, client, selDates)
-    if (!c) return toast('Nothing to copy — no sessions in that span.', 'error')
-    setClip(c)
-    setSel(null)
-    toast(`Copied ${c.days.length} session${c.days.length === 1 ? '' : 's'} — click a day to paste.`, 'info')
+  const copy = () => {
+    const copied = buildClip(db, client, selection)
+    if (!copied) return
+    setClip(copied); setSel(null)
+    toast(`Copied ${copied.days.length} session${copied.days.length === 1 ? '' : 's'}. Select an open date to paste.`, 'info')
   }
-
-  // Clearing a span is destructive and can span weeks, so the confirmation
-  // names the count and the range rather than asking a generic "are you sure".
-  const doDelete = async () => {
-    if (!selSessions) return
-    const span = `${fmtDay(selDates[0])} – ${fmtDay(selDates[selDates.length - 1])}`
-    if (!await confirmDialog({
-      title: 'Delete sessions',
-      message: `Delete ${selSessions} prescribed session${selSessions === 1 ? '' : 's'} between ${span}? This can't be undone.`,
-      confirmLabel: 'Delete',
-      danger: true,
-    })) return
-    commit((d) => deleteSpan(d, client.id, selDates))
-    setSel(null)
-    toast(`Deleted ${selSessions} session${selSessions === 1 ? '' : 's'}.`)
+  const remove = async () => {
+    if (!sessions.length || selectionClosed) return
+    if (!await confirmDialog({ title: 'Delete plans', message: `Delete ${sessions.length} planned session${sessions.length === 1 ? '' : 's'} between ${fmtDay(selection[0])} and ${fmtDay(selection.at(-1))}? Workout logs are kept.`, confirmLabel: 'Delete', danger: true })) return
+    commit((data) => deleteSpan(data, client.id, selection))
+    setSel(null); toast('Selected plans deleted.')
   }
-
-  // ---- Paste ---------------------------------------------------------------
-  // Live preview: hovering a day dashes-outline every day the clip would land on,
-  // so the whole pattern (and its gaps) is visible before committing.
-  const pasteTargets = clip && hoverDt ? clipTargets(clip, hoverDt) : []
-  const pasteAt = async (dt) => {
-    if (clipTargets(clip, dt).some((target) => isClosedTrainingDay(db, client.id, target, today))) return toast('A target day is already past or completed. Choose open dates.', 'error')
-    const clash = clipClashes(db, clip, client.id, dt)
-    if (clash.length && !await confirmDialog({
-      title: 'Overwrite sessions',
-      message: `${clash.length} day${clash.length === 1 ? '' : 's'} in the target already ${clash.length === 1 ? 'has a session' : 'have sessions'} — overwrite?`,
-      confirmLabel: 'Overwrite',
-    })) return
-    commit((d) => pasteClip(d, clip, client.id, dt))
-    toast(`Pasted ${clip.days.length} session${clip.days.length === 1 ? '' : 's'} from ${fmtDay(dt)}.`)
+  const paste = async (date) => {
+    if (clipTargets(clip, date).some((target) => isPlanTargetBlocked(db, client.id, target, today))) return toast('Choose a current or future date without an existing workout or completed appointment.', 'error')
+    const clashes = clipClashes(db, clip, client.id, date)
+    if (clashes.length && !await confirmDialog({ title: 'Replace plans?', message: `${clashes.length} target day${clashes.length === 1 ? ' already has' : 's already have'} a plan. Replace?`, confirmLabel: 'Replace' })) return
+    try { await confirmedPlanWrite(saveTrainingPlans, (data) => pasteClip(data, clip, client.id, date)) }
+    catch (error) { return toast(error.message, 'error') }
+    clearClip(); selectDate(date); toast('Plans pasted.')
   }
-
-  // ---- Chip drag-and-drop (single day → another day) ------------------------
-  const dropOn = async (dt) => {
-    const src = chip.current
-    chip.current = null
-    setDropDt(null)
-    if (!src || src === dt) return
-    if (isClosedTrainingDay(db, client.id, dt, today)) return toast('This day is closed to new planning.', 'error')
-    const p = prescOn(src)
-    if (!isSession(p)) return
-    if (prescribedDates.has(dt) && !await confirmDialog({
-      title: 'Overwrite session',
-      message: `${fmtDay(dt)} already has a session — overwrite it?`,
-      confirmLabel: 'Overwrite',
-    })) return
-    const blocks = p.blocks?.length ? p.blocks : itemsToBlocks(p.items)
-    commit((d) => writePrescription(d, client.id, dt, cloneBlocksFresh(blocks), p.notes || '', p.name || ''))
-    toast(`Copied ${fmtDay(src)} → ${fmtDay(dt)}.`)
+  const drop = async (date) => {
+    const source = chip.current
+    chip.current = null; setDropDate(null)
+    if (!source || source === date) return
+    if (isPlanTargetBlocked(db, client.id, date, today)) return toast('Choose an open day to copy the plan.', 'error')
+    const prescription = db.prescriptions.find((row) => row.clientId === client.id && row.date === source)
+    if (!isSession(prescription)) return
+    if (db.prescriptions.some((row) => row.clientId === client.id && row.date === date && isSession(row)) && !await confirmDialog({ title: 'Replace plan?', message: `${fmtDay(date)} already has a plan. Replace it?`, confirmLabel: 'Replace' })) return
+    try { await confirmedPlanWrite(saveTrainingPlans, (data) => writePrescription(data, client.id, date, cloneBlocksFresh(prescription.blocks?.length ? prescription.blocks : itemsToBlocks(prescription.items)), prescription.notes || '', prescription.name || '')) }
+    catch (error) { return toast(error.message, 'error') }
+    selectDate(date); toast('Plan copied.')
   }
-
-  const activateDate = (dt) => {
-    if (suppress.current) return
-    if (clip) return pasteAt(dt)
-    prescribe(dt)
-  }
-
-  // Shared pointer handlers for a day cell in either view. The date button
-  // supplies keyboard access; a separate link opens a completed workout.
-  const cell = (dt) => ({
-    onMouseDown: (e) => {
-      if (e.button !== 0 || clip) return // paste mode: a click pastes, no range-select
-      drag.current = { from: dt, moved: false }
-      setSel({ from: dt, to: dt })
-    },
-    onMouseEnter: () => {
-      if (clip) return setHoverDt(dt)
-      if (!drag.current) return
-      drag.current.moved = true
-      setSel({ from: drag.current.from, to: dt })
-    },
-    onMouseLeave: () => { if (clip) setHoverDt((h) => (h === dt ? null : h)) },
-    onClick: () => activateDate(dt),
-    onDragOver: (e) => { if (chip.current) { e.preventDefault(); setDropDt(dt) } },
-    onDrop: (e) => { e.preventDefault(); dropOn(dt) },
-  })
-
-  // The draggable session chip. Stops mousedown so grabbing it doesn't start a
-  // range-select on the cell underneath.
-  const sessionChip = (dt, name) => (
-    <div className="plan-session" title={`${name} — drag onto another day to copy`}
-      draggable onMouseDown={(e) => e.stopPropagation()}
-      onDragStart={(e) => { chip.current = dt; e.dataTransfer.effectAllowed = 'copy'; e.dataTransfer.setData('text/plain', dt) }}
-      onDragEnd={() => { chip.current = null; setDropDt(null) }}>
-      Plan · {name}
-    </div>
-  )
-
-  const completedChip = (dt, workouts) => workouts.length ? (
-    <button type="button" className="plan-completed" onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
-      title={`${workouts.length === 1 ? workouts[0].title || 'Workout' : `${workouts.length} workouts`} · completed workout log`}
-      aria-label={`${dt}: ${workouts.length} completed workout ${workouts.length === 1 ? workouts[0].title || 'Workout' : 'logs'}. Review day in workout builder`}
-      onMouseDown={(event) => event.stopPropagation()}>
-      <span className="plan-completed-status"><span aria-hidden="true">✓ </span>{workouts.length === 1 ? 'Completed' : `${workouts.length} completed`}</span>
-      <span className="plan-completed-name">{workouts.length === 1 ? workouts[0].title || 'Workout' : 'Workout logs'}</span>
-    </button>
-  ) : null
-
-  const pendingChip = (dt, workout) => workout ? (
-    <button type="button" className="plan-pending" onMouseDown={(event) => event.stopPropagation()}
-      onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
-      aria-label={`${dt}: ${workout.status === 'in_progress' ? 'workout in progress' : 'workout ready'}, ${workout.title || 'Workout'}. Review day`}>
-      <span>{workout.status === 'in_progress' ? 'In progress' : 'Ready'}</span>
-      <span>{workout.title || 'Workout'}</span>
-    </button>
-  ) : null
-
-  const appointmentChip = (dt, workouts, pending) => !workouts.length && !pending && completedAppointments.has(dt) ? (
-    <button type="button" className="plan-appointment" onMouseDown={(event) => event.stopPropagation()}
-      onClick={(event) => { event.stopPropagation(); prescribe(dt) }}
-      title="Completed appointment · no workout log"
-      aria-label={`${dt}: completed appointment; no workout log. Review day`}>
-      <span>Appt done</span><span>No log</span>
-    </button>
-  ) : null
-
-  const cls = (dt, base) =>
-    base
-    + (dt === today ? ' today' : '')
-    + (dt === focusDate ? ' focused' : '')
-    + (inSel(dt) ? ' sel' : '')
-    + (dropDt === dt ? ' drop' : '')
-    + (clip && pasteTargets.includes(dt) ? ' paste-hint' : '')
-
-  return (
-    <div className={'card' + (isFeatured ? ' planner-featured' : '') + (isMedium ? ' planner-medium' : '')}>
-      <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
-          <button className="planner-collapse" onClick={() => setCollapsed((v) => !v)}
-            aria-expanded={!collapsed} aria-label={collapsed ? 'Expand workout planner' : 'Collapse workout planner'}>
-            <span className="pc-caret" aria-hidden="true">{collapsed ? '▸' : '▾'}</span>
-            <span className="section-title" style={{ margin: 0, fontSize: isFeatured ? 19 : undefined }}>{title}</span>
-          </button>
-        {collapsed ? (
-          <span className="planner-summary muted">{summary}</span>
-        ) : (
-          <div className="flex gap" style={{ flexWrap: 'wrap' }}>
-            <SegToggle options={onDay ? [['day', 'Day'], ['week', 'Week'], ['month', 'Month']] : [['week', 'Week'], ['month', 'Month']]} value={view} onChange={(v) => (v === 'day' ? onDay() : setView(v))} ariaLabel="Calendar view" />
-            {view === 'month' ? (
-              <div className="flex gap">
-                <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(anchor, -1))} aria-label="Previous month">←</Button>
-                <Button variant="ghost" size="sm" onClick={() => setAnchor(today)}>Today</Button>
-                <Button variant="ghost" size="sm" onClick={() => setAnchor(addMonths(anchor, 1))} aria-label="Next month">→</Button>
-              </div>
-            ) : (
-              <div className="flex gap">
-                <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStart - 7)} aria-label="Previous week">←</Button>
-                <Button variant="ghost" size="sm" onClick={() => setWeekStart(0)}>This week</Button>
-                <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStart + 7)} aria-label="Next week">→</Button>
-              </div>
-            )}
-          </div>
-        )}
+  return <section className="card training-calendar" aria-labelledby="training-calendar-title">
+    <div className="training-calendar-head"><h2 id="training-calendar-title">{title}</h2><div className="training-calendar-toolbar">
+      <SegToggle options={[[ 'week', 'Week' ], [ 'month', 'Month' ]]} value={view} onChange={setView} ariaLabel="Calendar view" />
+      <div className="training-period-nav">
+        <Button variant="ghost" size="sm" aria-label={`Previous ${view}`} onClick={() => selectDate(view === 'month' ? addMonths(anchor, -1) : addDays(anchor, -7))}>←</Button>
+        <Button variant="ghost" size="sm" onClick={() => selectDate(today)}>Today</Button>
+        <Button variant="ghost" size="sm" aria-label={`Next ${view}`} onClick={() => selectDate(view === 'month' ? addMonths(anchor, 1) : addDays(anchor, 7))}>→</Button>
       </div>
-
-      {/* Selection bar — appears while a dragged span is held */}
-      {!collapsed && !clip && selDates.length > 1 && (
-        <div className="plan-bar sel">
-          <span><b>{selDates.length}</b> days selected · <b>{selSessions}</b> session{selSessions === 1 ? '' : 's'}</span>
-          <div className="nav-spacer" />
-          <Button size="sm" disabled={!selSessions} onClick={doCopy}>Copy</Button>
-          <Button variant="ghost" size="sm" className="plan-del" disabled={!selSessions} onClick={doDelete}>Delete</Button>
-          <Button variant="ghost" size="sm" onClick={() => setSel(null)}>Clear</Button>
-        </div>
-      )}
-
-      {/* Clipboard bar — click any day to paste, or fan out to other clients */}
-      {!collapsed && clip && (
-        <div className="plan-bar clip">
-          <span>
-            <b>{clip.days.length}</b> session{clip.days.length === 1 ? '' : 's'} copied
-            {clip.sourceClientId !== client.id ? <> from <b>{clip.sourceClientName}</b></> : null} — click a day to paste
-          </span>
-          <div className="nav-spacer" />
-          <Button variant="ghost" size="sm" onClick={() => openModal(<PastePlanModal clip={clip} />)}>Paste to clients…</Button>
-          <Button variant="ghost" size="sm" onClick={clearClip}>Cancel</Button>
-        </div>
-      )}
-
-      {collapsed ? null : view === 'month' ? (
-        <>
-          <div style={{ margin: '10px 0 8px', fontSize: 14, fontWeight: 700 }}>
-            {monthLabel(anchor)} {!compactCopy && <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
-              — {clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
-            </span>}
-          </div>
-          {!compactCopy && <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>}
-          <p className="planner-scroll-hint">Scroll sideways to review the month calendar.</p>
-          <div className="plan-month-scroll" role="region" aria-label="Month calendar; scroll horizontally for all days" tabIndex={0}>
-          <div className="plan-dow">{DOW.map((d) => <div key={d}>{d}</div>)}</div>
-          <div className="plan-month">
-            {monthGridDates(anchor).map((dt) => {
-              const { vl, name } = dayData(dt)
-              const logged = completedByDate.get(dt) || []
-              const pending = pendingByDate.get(dt)
-              return (
-                <div key={dt} className={cls(dt, 'plan-cell') + (logged.length || completedAppointments.has(dt) ? ' has-record' : '') + (dt.slice(0, 7) !== anchor.slice(0, 7) ? ' out' : '')}
-                  role="group" aria-label={`${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : completedAppointments.has(dt) ? ', completed appointment with no workout log' : ''}`} {...cell(dt)}>
-                  <button type="button" className="pc-date plan-date-trigger" aria-label={`${clip ? 'Paste to' : 'Review or plan'} ${dt}${dt === today ? ' (today)' : ''}`}
-                    onClick={(event) => { event.stopPropagation(); activateDate(dt) }}>{+dt.slice(8, 10)}{dt === today && <span className="pc-today">today</span>}</button>
-                  {name && sessionChip(dt, name)}
-                  {completedChip(dt, logged)}
-                  {!logged.length && pendingChip(dt, pending)}
-                  {appointmentChip(dt, logged, pending)}
-                  {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : null}
-                  {/* Load metrics for a day exist only once its session RPE is logged;
-                      future days therefore show no ACWR/Mono/Strain projections. */}
-                  {(dt === today || (dt > today && intMap[dt] !== undefined)) && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
-                </div>
-              )
-            })}
-          </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {!compactCopy && <>
-            <div style={{ fontSize: 12, color: 'var(--muted)', margin: '8px 0' }}>
-              Week of {fmtDate(weekDates(weekStart, tz)[0])}
-              {' — '}{clip ? 'click an open day to paste' : 'select a day to review or plan · drag across days to select · drag a session onto an open day to copy'}
-            </div>
-            <p className="plan-source-key">Blue: prescribed · Green: completed workout log</p>
-          </>}
-          <div className="plan-week">
-            {weekDates(weekStart, tz).map((dt, i) => {
-              const { vl, name } = dayData(dt)
-              const logged = completedByDate.get(dt) || []
-              const pending = pendingByDate.get(dt)
-              return (
-                <div key={dt} className={cls(dt, 'plan-day')}
-                  role="group" aria-label={`${DOW[i]} ${dt}${logged.length ? `, ${logged.length} completed workout ${logged.length === 1 ? 'log' : 'logs'}` : completedAppointments.has(dt) ? ', completed appointment with no workout log' : ''}`} {...cell(dt)}>
-                  <button type="button" className="pd-date plan-date-trigger" aria-label={`${clip ? 'Paste to' : 'Review or plan'} ${DOW[i]} ${dt}${dt === today ? ' (today)' : ''}`}
-                    onClick={(event) => { event.stopPropagation(); activateDate(dt) }}>{DOW[i]} {+dt.slice(8, 10)}{dt === today && <span className="plan-today-label">Today</span>}</button>
-                  {name && sessionChip(dt, name)}
-                  {completedChip(dt, logged)}
-                  {!logged.length && pendingChip(dt, pending)}
-                  {appointmentChip(dt, logged, pending)}
-                  {!name && !logged.length && !pending && !completedAppointments.has(dt) && <div className="plan-rest muted">Unplanned / no log</div>}
-                  {vl ? <div className="plan-vl">Planned VL {fmtVL(vl)}</div> : !logged.length && !pending && <div className="plan-vl" style={{ color: 'var(--muted)' }}>—</div>}
-                  {/* Load metrics for a day exist only once its session RPE is logged;
-                      future days therefore show no ACWR/Mono/Strain projections. */}
-                  {(dt === today || (dt > today && intMap[dt] !== undefined)) && <DayMetrics {...dayMetrics(db, client.id, dt, intMap)} />}
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
-    </div>
-  )
+    </div></div>
+    <div className="training-calendar-period"><strong>{view === 'month' ? monthLabel(anchor) : `${fmtDate(dates[0])}–${fmtDate(dates[6])}`}</strong>
+      <span>{period.filter((day) => day.status === 'planned').length} planned · {logCount} workout log{logCount === 1 ? '' : 's'}</span></div>
+    {selection.length > 1 && !clip && <div className="training-calendar-selection" role="status"><span>{selection.length} dates · {sessions.length} plans</span><div className="flex gap">
+      <Button size="sm" disabled={!sessions.length} onClick={copy}>Copy</Button>
+      <Button variant="danger" size="sm" disabled={!sessions.length || selectionClosed} onClick={remove}>Delete plans</Button>
+      <Button variant="ghost" size="sm" onClick={() => setSel(null)}>Clear</Button>
+    </div></div>}
+    {clip && <div className="training-calendar-selection" role="status"><span>{clip.days.length} plans copied · Select an open date to paste</span><div className="flex gap">
+      <Button variant="ghost" size="sm" onClick={() => openModal(<PastePlanModal clip={clip} />)}>Paste to clients…</Button>
+      <Button variant="ghost" size="sm" onClick={clearClip}>Cancel copy</Button>
+    </div></div>}
+    {view === 'month' && <div className="training-calendar-dow" aria-hidden="true">{DOW.map((day) => <span key={day}>{day}</span>)}</div>}
+    <div className={`training-calendar-dates ${view}`} role="group" aria-label={`${view === 'month' ? 'Month' : 'Week'} dates`}>{days.map((day) => <button type="button" key={day.date}
+      className={'training-calendar-day' + (day.date === today ? ' today' : '') + (view === 'month' && day.date.slice(0, 7) !== anchor.slice(0, 7) ? ' outside' : '') + (selection.includes(day.date) ? ' selected-range' : '') + (targets.includes(day.date) || dropDate === day.date ? ' paste-target' : '')}
+      aria-pressed={day.date === focusDate} aria-label={`${fmtDay(day.date)}${day.date === today ? ', today' : ''}: ${day.label}${day.status !== 'empty' ? `, ${day.title}` : ''}`} title={`${fmtDate(day.date)} · ${day.label} · ${day.title}. Shift-click another date to select a range.`}
+      onClick={(event) => { if (!suppress.current) { if (clip) paste(day.date); else if (event.shiftKey) setSel({ from: sel?.from || focusDate || day.date, to: day.date }); else selectDate(day.date) } }}
+      onMouseDown={(event) => { if (event.button === 0 && !clip && !event.shiftKey) { drag.current = { from: day.date, moved: false }; setSel({ from: day.date, to: day.date }) } }}
+      onMouseEnter={() => { if (clip) setHoverDate(day.date); else if (drag.current) { drag.current.moved = true; setSel({ from: drag.current.from, to: day.date }) } }}
+      onMouseLeave={() => { if (clip) setHoverDate(null) }} draggable={Boolean(day.prescription) && !clip}
+      onDragStart={(event) => { chip.current = day.date; drag.current = null; setSel(null); event.dataTransfer.effectAllowed = 'copy'; event.dataTransfer.setData('text/plain', day.date) }}
+      onDragEnd={() => { chip.current = null; setDropDate(null) }}
+      onDragOver={(event) => { if (chip.current) { event.preventDefault(); setDropDate(day.date) } }}
+      onDrop={(event) => { event.preventDefault(); drop(day.date) }}>
+      <span className="training-calendar-date">{view === 'week' && <span>{fmtDay(day.date).split(',')[0]}</span>}<strong>{Number(day.date.slice(8))}</strong>{day.date === today && <small>Today</small>}</span>
+      <span className={`training-calendar-status ${day.status}`}>{day.label}</span><span className="training-calendar-name">{day.status === 'empty' ? '—' : day.status === 'appointment' ? 'No workout log' : day.title}</span>
+    </button>)}</div>
+    <div className="training-calendar-legend" aria-hidden="true"><span className="planned">Planned</span><span className="completed">Completed log</span><span className="progress">In progress</span><span className="appointment">Appt done</span></div>
+    {children}
+  </section>
 }

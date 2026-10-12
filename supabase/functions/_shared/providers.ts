@@ -12,6 +12,7 @@ export interface Provider {
   scope: string
   clientIdEnv: string
   clientSecretEnv: string
+  pkce?: boolean
   fetchReading: (accessToken: string, date: string) => Promise<Reading>
 }
 
@@ -24,6 +25,7 @@ const getJson = async (url: string, token: string) => {
 export const PROVIDERS: Record<string, Provider> = {
   oura: {
     id: 'oura',
+    pkce: true,
     authorizeUrl: 'https://cloud.ouraring.com/oauth/authorize',
     tokenUrl: 'https://api.ouraring.com/oauth/token',
     scope: 'daily heartrate',
@@ -50,6 +52,7 @@ export const PROVIDERS: Record<string, Provider> = {
   },
   fitbit: {
     id: 'fitbit',
+    pkce: true,
     authorizeUrl: 'https://www.fitbit.com/oauth2/authorize',
     tokenUrl: 'https://api.fitbit.com/oauth2/token',
     scope: 'heartrate sleep',

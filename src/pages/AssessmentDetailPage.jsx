@@ -29,12 +29,12 @@ function DeltaRow({ r }) {
 }
 
 // One entry: date + time header that expands to the full recorded data.
-function EntryRow({ rec, onEdit, onDelete }) {
-  const [open, setOpen] = useState(false)
+function EntryRow({ rec, onEdit, onDelete, initiallyOpen = false }) {
+  const [open, setOpen] = useState(initiallyOpen)
   const detail = describe(rec)
   const toggle = () => setOpen((o) => !o)
   return (
-    <div className={'ad-entry' + (open ? ' open' : '')}>
+    <div className={'ad-entry' + (open ? ' open' : '')} id={`assessment-record-${rec.id}`}>
       <div className="ad-entry-head">
         <button type="button" className="ad-entry-toggle" aria-expanded={open} onClick={toggle}>
           <span className="asr-caret" aria-hidden="true">{open ? '▾' : '▸'}</span>
@@ -223,7 +223,7 @@ export default function AssessmentDetailPage() {
         {recs.length ? (
           <>
             <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Newest assessment date first · select an entry to see its recorded data</div>
-            {recs.map((a) => <EntryRow key={a.id} rec={a} onEdit={() => editRec(a)} onDelete={() => del(a)} />)}
+            {recs.map((a) => <EntryRow key={`${a.id}-${location.search}`} rec={a} initiallyOpen={new URLSearchParams(location.search).get('record') === a.id} onEdit={() => editRec(a)} onDelete={() => del(a)} />)}
           </>
         ) : (
           <div className="empty" style={{ padding: 24 }}>

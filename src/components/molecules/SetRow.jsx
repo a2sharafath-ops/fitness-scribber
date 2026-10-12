@@ -18,7 +18,8 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
   // rep-aware value (NSCA Table 18.8): reps-to-failure = prescribed reps + reps
   // in reserve → an exact %1RM and single target load, just like a %1RM entry.
   // With no rep target we fall back to the Table 18.10 effort band.
-  const subjective = intensityType === 'RPE' || intensityType === 'RIR'
+  const ranged = set.prescribedRepsMax != null && set.prescribedRepsMax !== set.prescribedReps
+  const subjective = !ranged && (intensityType === 'RPE' || intensityType === 'RIR')
   const effort = subjective ? subjectiveEffort(intensityType, set.prescribedIntensityValue) : null
   const repAware = subjective ? subjectivePctFromReps(intensityType, set.prescribedIntensityValue, set.prescribedReps) : null
   const pctCalc = intensityType === '%1RM' ? targetKg(tmKg, set.prescribedIntensityValue) : null
@@ -93,7 +94,7 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
           <input type="number" min="0" step="0.5" value={set.prescribedIntensityValue ?? ''} aria-label="Duration in minutes" onChange={num('prescribedIntensityValue')} /></label>
       )}
       {intensityType === 'Load' && (
-        <label className="sf"><span>Load ({unitName()})</span>
+        <label className="sf" title="An entered weight overrides the calculated percentage or effort target."><span>Load ({unitName()})</span>
           <input type="number" value={toDisp(set.prescribedLoadKg) ?? ''} aria-label="Prescribed load" onChange={kg('prescribedLoadKg')} /></label>
       )}
       {intensityType === 'Target HR' && (
@@ -106,9 +107,19 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
 
       <label className="sf"><span>Reps</span>
         <input type="number" value={set.prescribedReps ?? ''} aria-label="Prescribed reps" onChange={num('prescribedReps')} /></label>
+      {['%1RM', 'Load', 'RPE', 'RIR'].includes(intensityType) && <label className="sf"><span>Max reps (optional)</span><input type="number" min={set.prescribedReps || 1} value={set.prescribedRepsMax ?? ''} aria-label="Maximum prescribed reps" onChange={num('prescribedRepsMax')} /></label>}
       {['%1RM', 'RPE', 'RIR', 'Seconds', 'Minutes'].includes(intensityType) && (
         <label className="sf"><span>Load ({unitName()})</span>
           <input type="number" value={toDisp(set.prescribedLoadKg) ?? ''} aria-label="Working load" onChange={kg('prescribedLoadKg')} placeholder={loadHint} /></label>
+      )}
+      {['%1RM', 'Load'].includes(intensityType) && (
+        <label className="sf" title="Target reps remaining at the end of this set">
+          <span>RIR (optional)</span>
+          <select value={set.prescribedRir ?? ''} aria-label="Target reps in reserve" onChange={num('prescribedRir')}>
+            <option value="">—</option>
+            {RIR_SCALE.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </label>
       )}
       <label className="sf sf-sm"><span>Tempo</span>
         <input value={set.prescribedTempo || ''} placeholder="31X1" aria-label="Tempo" onChange={(e) => onChange('prescribedTempo', e.target.value)} /></label>

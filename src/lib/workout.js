@@ -13,6 +13,7 @@ export function targetLoadKg(intensityType, s = {}, tmKg = null) {
   if (!(tmKg > 0)) return null
   if (intensityType === '%1RM') return targetKg(tmKg, s.prescribedIntensityValue)
   if (intensityType === 'RIR' || intensityType === 'RPE') {
+    if (s.prescribedRepsMax != null && s.prescribedRepsMax !== s.prescribedReps) return null
     const exact = subjectiveTargetFromReps(tmKg, intensityType, s.prescribedIntensityValue, s.prescribedReps)
     if (exact != null) return exact
     const band = subjectiveTargetBand(tmKg, intensityType, s.prescribedIntensityValue)
@@ -62,6 +63,9 @@ export const setRowFromPrescribed = (s = {}, i = 0, intensityType = null, tmKg =
     n: i + 1,
     purpose: s.purpose || 'working',
     pReps: s.prescribedReps ?? null,
+    pRepsMax: s.prescribedRepsMax ?? null,
+    pRir: intensityType === 'RIR' ? s.prescribedIntensityValue ?? null
+      : ['%1RM', 'Load'].includes(intensityType) ? s.prescribedRir ?? null : null,
     pIntensityType: intensityType,
     pIntensityValue: s.prescribedIntensityValue ?? null,
     pLoadKg: target,           // target working load (from explicit load, %1RM, or RIR/RPE)
@@ -103,7 +107,7 @@ export function normalizeRunItem(it, resolveTm) {
   const rows = ensureSetRows(it)
   const tmKg = resolveTm ? resolveTm(it.name) : null
   const setRows = rows.map((r) => {
-    const target = targetLoadKg(r.pIntensityType, { prescribedIntensityValue: r.pIntensityValue, prescribedReps: r.pReps, prescribedLoadKg: r.pLoadKg }, tmKg)
+    const target = targetLoadKg(r.pIntensityType, { prescribedIntensityValue: r.pIntensityValue, prescribedReps: r.pReps, prescribedRepsMax: r.pRepsMax, prescribedLoadKg: r.pLoadKg }, tmKg)
     if (target == null) return r
     return { ...r, pLoadKg: r.pLoadKg ?? target, load: r.load ?? target }
   })
@@ -212,10 +216,10 @@ export function buildFromPrescription(presc, { clientId, date, resolveTm }) {
     .filter((b) => b.blockType !== 'Warm-up' && b.blockType !== 'Cool-down')
     .flatMap((b) => b.exercises.map((e) => toItem(e, b.blockType)))
   const w = base({ clientId, date, title: presc?.name?.trim() || 'Prescribed workout', source: 'prescribed', planId: null, main, note: presc?.notes || 'Assigned in the workout planner' })
-  const warmup = section('Warm-up')
-  const cooldown = section('Cool-down')
-  if (warmup.length) w.warmup = warmup
-  if (cooldown.length) w.cooldown = cooldown
+  // A prescription is the coach's complete plan, including intentionally empty
+  // sections. Generic suggestions belong only to non-prescribed workouts.
+  w.warmup = section('Warm-up')
+  w.cooldown = section('Cool-down')
   return w
 }
 

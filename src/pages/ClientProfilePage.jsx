@@ -1,6 +1,10 @@
+import TrainingScheduleForm from '../components/organisms/forms/TrainingScheduleForm'
+import { trainingSchedule, formatTrainingTime } from '../lib/trainingSchedule'
 import { Link, useParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
+import Icon from '../components/atoms/Icon'
 import Tag from '../components/atoms/Tag'
+import ModalShell from '../components/molecules/ModalShell'
 import { ClientForm, UpgradePackageForm } from '../components/organisms/forms/ClientForms'
 import { EditProfileForm } from '../components/organisms/ProfilePanel'
 import ProfilePreferencesForm from '../components/organisms/forms/ProfilePreferencesForm'
@@ -12,165 +16,183 @@ import { fmtDate, todayISO } from '../lib/dates'
 import { forClient, latest, resolveAnthroDetails, summarize } from '../lib/assessment'
 import { screeningsFor } from '../lib/screening'
 import { PREFERENCE_FIELDS, preferenceDetails } from '../lib/profile'
+import './ClientProfilePage.css'
 
 const LEVEL = { Beginner: 'blue', Intermediate: 'purple', Advanced: 'orange' }
-const known = (value) => value == null || value === '' ? 'Not recorded' : value
-const sourceOf = (record) => record.data?.self ? 'Athlete self-report' : record.data?.source || 'Source not recorded'
+const known = value => value == null || value === '' ? 'Not recorded' : value
+const sourceOf = record => record.data?.self ? 'Athlete self-report' : record.data?.source || 'Source not recorded'
 const byDate = (a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || '')
+const recordPath = (id, type, recordId) => `/clients/${id}/profile/${type}?record=${encodeURIComponent(recordId)}#assessment-record-${recordId}`
 
+function SectionMark({ name }) {
+  return <span className="cp-mark" aria-hidden="true"><Icon name={name} size={18} /></span>
+}
 function SourceText({ source, date }) {
-  return <small className="profile-source">{source}{date ? ` · ${fmtDate(date)}` : ''}</small>
+  return <small>{source}{date ? ` · ${fmtDate(date)}` : ''}</small>
 }
-
-function ProfileField({ label, value, source, date }) {
-  return <div className="profile-field"><span>{label}</span><strong>{known(value)}</strong>{source && source !== 'Not recorded' && <SourceText source={source} date={date} />}</div>
+function Empty({ children }) {
+  return <p className="cp-empty">{children}</p>
 }
-
-function RecordHistory({ records, label, path }) {
-  if (!records.length) return null
-  return <details className="profile-history">
-    <summary>View {records.length} dated {label} record{records.length === 1 ? '' : 's'}</summary>
-    <div className="profile-history-list">{records.map((record) => <div key={record.id} className="profile-history-row">
-      <div><strong>{fmtDate(record.date)}</strong><SourceText source={sourceOf(record)} /><span>{summarize(record)}</span></div>
-      <Link to={path}>Full entry →</Link>
-    </div>)}</div>
-  </details>
+function Field({ label, value }) {
+  return <div><dt>{label}</dt><dd>{known(value)}</dd></div>
 }
-
-function GoalList({ title, goals, today }) {
+function Sources({ children }) {
+  return <details className="cp-sources"><summary>Sources &amp; dates</summary><div>{children}</div></details>
+}
+function RecordHistoryDialog({ clientId, type }) {
+  const { db } = useData()
+  const { closeModal } = useModal()
+  const records = forClient(db.assessments, clientId).filter(row => row.type === type).sort(byDate)
+  return <ModalShell title={type === 'goals' ? 'Goal history' : 'Lifestyle history'} onClose={closeModal}
+    footer={<Button variant="ghost" onClick={closeModal}>Close</Button>}>
+    <div className="cp-history-dialog" tabIndex={0} aria-label="Dated records">
+      {records.map(row => <div className="cp-history-row" key={row.id}>
+        <div><strong>{fmtDate(row.date)}</strong><SourceText source={sourceOf(row)} /><p>{summarize(row)}</p></div>
+        <Link to={recordPath(clientId, type, row.id)} onClick={closeModal}>Full entry →</Link>
+      </div>)}
+    </div>
+  </ModalShell>
+}
+function GoalPanel({ title, goals, today }) {
   if (!goals?.length) return null
-  return <div className="profile-goal-list"><strong>{title}</strong><ul>{goals.map((goal, index) =>
-    <li key={`${goal.text}-${index}`}>{goal.text || 'Goal text not recorded'}{goal.target ? ` · target ${goal.target}` : ''}{goal.by ? ` · by ${fmtDate(goal.by)}` : ''}{goal.by && goal.by < today && <span className="profile-past-goal"> · Past target date; completion not recorded</span>}</li>)}</ul></div>
+  return <div className="cp-goal-panel"><h3>{title}</h3><ul>{goals.map((goal, index) =>
+    <li key={`${goal.text}-${index}`}><strong>{goal.text || 'Goal text not recorded'}</strong>
+      {(goal.target || goal.by) && <small>{goal.target ? `Target ${goal.target}` : ''}{goal.target && goal.by ? ' · ' : ''}{goal.by ? `By ${fmtDate(goal.by)}` : ''}</small>}
+      {goal.by && goal.by < today && <small className="cp-past-goal">Past target date; completion not recorded</small>}
+    </li>)}</ul></div>
+}
+function SnapshotValue({ label, value, word }) {
+  return <div><span>{label}</span><strong className={word || value == null || value === '' ? 'cp-word-value' : ''}>{known(value)}</strong></div>
 }
 
 export default function ClientProfilePage() {
   const { id } = useParams()
   const { db, tz } = useData()
   const { openModal } = useModal()
-  const { fmtWt } = useFormat()
-  const client = db.clients.find((item) => item.id === id)
+  const { toDisp, unitName } = useFormat()
+  const client = db.clients.find(item => item.id === id)
   if (!client) return <Link className="btn ghost" to="/clients">← Clients</Link>
 
   const screening = screeningsFor(db.screenings, id).complete
   const preferences = preferenceDetails(client, screening)
   const measurements = resolveAnthroDetails(db, client)
   const records = forClient(db.assessments, id)
-  const goals = records.filter((record) => record.type === 'goals').sort(byDate)
-  const lifestyle = records.filter((record) => record.type === 'lifestyle').sort(byDate)
+  const goals = records.filter(row => row.type === 'goals').sort(byDate)
+  const lifestyle = records.filter(row => row.type === 'lifestyle').sort(byDate)
   const currentGoals = latest(goals, 'goals')
   const currentLifestyle = latest(lifestyle, 'lifestyle')
   const today = todayISO(tz)
-  const concerns = (db.concerns || []).filter((item) => item.clientId === id && item.status === 'Open')
+  const concerns = (db.concerns || []).filter(row => row.clientId === id && row.status === 'Open').sort(byDate)
   const record = (type, hasEntries) => openModal(assessmentForm(type, id, undefined, hasEntries ? 'reassessment' : 'baseline'))
+  const history = type => openModal(<RecordHistoryDialog clientId={id} type={type} />)
   const screeningPath = `/clients/${id}/assessments#health-screening`
   const measurementFields = [
-    ['age', 'Recorded age', ' yr'], ['heightCm', 'Height', ' cm'],
     ['massKg', 'Body mass', ''], ['bodyFatPct', 'Body fat', '%'], ['leanMassKg', 'Lean mass', ''],
-  ]
-  const recordedMeasurements = measurementFields.filter(([field]) => measurements[field].value != null)
-  const displayMeasurement = (field, value, unit) => value == null ? 'Not recorded'
-    : ['massKg', 'leanMassKg'].includes(field) ? fmtWt(value) : `${value}${unit}`
-  const pref = (field, label) => <ProfileField key={field} label={label} value={preferences[field].value}
-    source={preferences[field].source} date={preferences[field].date} />
+    ['heightCm', 'Height', ' cm'], ['age', 'Recorded age', ' yr'],
+  ].filter(([field]) => measurements[field].value != null)
+  const displayMeasurement = (field, value, unit) => ['massKg', 'leanMassKg'].includes(field)
+    ? <>{toDisp(value).toLocaleString()}<small>{unitName()}</small></>
+    : <>{value}<small>{unit.trim()}</small></>
   const trainingPreferences = PREFERENCE_FIELDS.slice(0, 3).filter(([field]) => preferences[field].value !== '')
   const schedulePreferences = PREFERENCE_FIELDS.slice(3).filter(([field]) => preferences[field].value !== '')
-  const hasTrainingPreferences = trainingPreferences.length > 0 || Boolean(screening?.goals?.prefs?.hardNo)
-  const hasSchedulePreferences = schedulePreferences.length > 0
+  const hardNo = screening?.goals?.prefs?.hardNo
+  const preferenceSources = fields => fields.map(([field, label]) => <p key={field}><strong>{label}</strong><SourceText source={preferences[field].source} date={preferences[field].date} /></p>)
+  const pref = ([field, label]) => <Field key={field} label={label} value={preferences[field].value} />
+  const l = currentLifestyle?.data || {}
+  const unitValue = (value, unit) => value == null || value === '' ? null : <>{value}<small>{unit}</small></>
 
-  return <>
-    <div className="topbar profile-title">
-      <h1>Profile</h1>
-      <Button onClick={() => openModal(<ClientForm client={client} />)}>Edit contact &amp; admin</Button>
+  return <div className="client-profile">
+    <div className="cp-title"><h1>Profile</h1><Tag color={client.status === 'Active' ? 'green' : 'gray'}>{known(client.status)}</Tag></div>
+
+    <section className="card cp-card cp-goals" aria-labelledby="cp-goals-title">
+      <div className="cp-head"><h2 id="cp-goals-title"><SectionMark name="target" />Goals</h2>
+        <Button onClick={() => record('goals', goals.length)}>{currentGoals ? 'Record goal update' : 'Record goals'}</Button></div>
+      {currentGoals ? <>
+        <p className="cp-meta cp-goal-meta"><SourceText source={sourceOf(currentGoals)} date={currentGoals.date} /></p>
+        {currentGoals.data?.shortTerm?.length || currentGoals.data?.longTerm?.length ? <div className="cp-goal-scroll" tabIndex={0} aria-label="Current goals">
+          <GoalPanel title="Short-term" goals={currentGoals.data?.shortTerm} today={today} />
+          <GoalPanel title="Long-term" goals={currentGoals.data?.longTerm} today={today} />
+        </div> : <Empty>No goals recorded in this entry.</Empty>}
+        {currentGoals.data?.why && <div className="cp-why" tabIndex={0}><strong>Why it matters</strong><p>{currentGoals.data.why}</p></div>}
+        <div className="cp-foot"><small>Latest goal record</small><button className="cp-link" onClick={() => history('goals')}>Goal history · {goals.length} →</button></div>
+      </> : <Empty>No goals recorded.</Empty>}
+    </section>
+
+    <section className="card cp-card" aria-labelledby="cp-training-time-title" id="training-time">
+      <div className="cp-head"><h2 id="cp-training-time-title"><SectionMark name="calendar" />Usual training time</h2><Button variant="ghost" size="sm" onClick={() => openModal(<TrainingScheduleForm client={client} />)}>Edit training time</Button></div>
+      {trainingSchedule(client) ? <dl className="cp-fields"><Field label="Start time" value={formatTrainingTime(trainingSchedule(client).time)} /><Field label="Duration" value={trainingSchedule(client).duration + ' min'} /><Field label="Time zone" value={tz || 'UTC'} /></dl> : <Empty>No automatic booking time set.</Empty>}
+      <p className="muted">Applies to planned workouts. Save to add missing future bookings; adjust individual times in Schedule.</p>
+    </section>
+    <section aria-labelledby="cp-preferences-title">
+      <div className="cp-caption"><h2 id="cp-preferences-title">Preferences &amp; availability</h2>
+        <Button variant="ghost" size="sm" onClick={() => openModal(<ProfilePreferencesForm client={client} screening={screening} />)}>Edit preferences</Button></div>
+      <div className="cp-grid">
+        <div className="card cp-card"><h3 className="cp-subhead"><SectionMark name="dumbbell" />Training preferences</h3>
+          {trainingPreferences.length || hardNo ? <>
+            <dl className="cp-fields" tabIndex={0} aria-label="Training preferences">{trainingPreferences.map(pref)}{hardNo && <Field label="Hard no at intake" value={hardNo} />}</dl>
+            <Sources>{preferenceSources(trainingPreferences)}{hardNo && <p><strong>Hard no at intake</strong><SourceText source="Health screening" date={screening.completedOn} /></p>}
+              {screening && <Link className="cp-link" to={screeningPath}>View signed intake →</Link>}</Sources>
+          </> : <Empty>No preferences recorded.</Empty>}
+        </div>
+        <div className="card cp-card"><h3 className="cp-subhead"><SectionMark name="calendar" />Schedule &amp; environment</h3>
+          {schedulePreferences.length ? <><dl className="cp-fields" tabIndex={0} aria-label="Schedule and environment">{schedulePreferences.map(pref)}</dl>
+            <Sources>{preferenceSources(schedulePreferences)}{screening && <Link className="cp-link" to={screeningPath}>View signed intake →</Link>}</Sources>
+          </> : <Empty>No availability recorded.</Empty>}
+        </div>
+      </div>
+    </section>
+
+    <div className="cp-grid">
+      <section className="card cp-card" aria-labelledby="cp-lifestyle-title">
+        <div className="cp-head"><h2 id="cp-lifestyle-title"><SectionMark name="activity" />Lifestyle</h2>
+          <Button variant="ghost" size="sm" aria-label="Record lifestyle update" onClick={() => record('lifestyle', lifestyle.length)}>Record update</Button></div>
+        {currentLifestyle ? <>
+          <p className="cp-meta"><SourceText source={sourceOf(currentLifestyle)} date={currentLifestyle.date} /></p>
+          <div className="cp-snapshot cp-grow">
+            <SnapshotValue label="Sleep" value={unitValue(l.sleepHrs, 'h/night')} />
+            <SnapshotValue label="Sleep quality" value={unitValue(l.sleepQuality, '/7')} />
+            <SnapshotValue label="Stress" value={unitValue(l.stress, '/7')} />
+            <SnapshotValue label="Hydration" value={unitValue(l.hydrationL, 'L/day')} />
+            <SnapshotValue label="Steps" value={unitValue(l.steps == null || l.steps === '' ? null : Number(l.steps).toLocaleString(), '/day')} />
+            <SnapshotValue label="Activity" value={l.activityLevel} word />
+          </div>
+          <div className="cp-foot"><small>Latest record</small><button className="cp-link" onClick={() => history('lifestyle')}>History · {lifestyle.length} →</button></div>
+        </> : <Empty>No lifestyle records.</Empty>}
+      </section>
+      <section className="card cp-card" aria-labelledby="cp-measurements-title">
+        <div className="cp-head"><h2 id="cp-measurements-title"><SectionMark name="scale" />Measurements</h2>
+          <Button variant="ghost" size="sm" aria-label="Edit measurements" onClick={() => openModal(<EditProfileForm client={client} />, true)}>Edit</Button></div>
+        {measurementFields.length ? <>
+          <div className="cp-snapshot cp-grow">{measurementFields.map(([field, label, unit]) => <SnapshotValue key={field} label={label} value={displayMeasurement(field, measurements[field].value, unit)} />)}</div>
+          <Sources>{measurementFields.map(([field, label]) => {
+            const item = measurements[field]
+            const path = item.kind === 'body_comp' ? `/clients/${id}/assessments/body_comp` : item.kind === 'screening' ? screeningPath : null
+            return <p key={field}><strong>{label}</strong><SourceText source={item.label} date={item.date} />{path && <Link className="cp-link" to={path}>View source →</Link>}</p>
+          })}</Sources>
+          <div className="cp-foot"><Link className="cp-link" to={`/clients/${id}/progress#outcomes`}>View progress →</Link></div>
+        </> : <Empty>No measurements recorded.</Empty>}
+      </section>
     </div>
 
-    <section className="profile-section" aria-labelledby="profile-goals-title">
-      <div className="profile-section-head"><h2 id="profile-goals-title">Goals</h2>
-        <Button onClick={() => record('goals', goals.length)}>＋ Record goal update</Button></div>
-      <div className="card profile-card">
-        {currentGoals ? <>
-          <div className="profile-record-meta">{fmtDate(currentGoals.date)} · {sourceOf(currentGoals)}</div>
-          <GoalList title="Short-term" goals={currentGoals.data?.shortTerm} today={today} />
-          <GoalList title="Long-term" goals={currentGoals.data?.longTerm} today={today} />
-          {currentGoals.data?.why && <ProfileField label="Why it matters" value={currentGoals.data.why} />}
-          {!currentGoals.data?.shortTerm?.length && !currentGoals.data?.longTerm?.length && <p className="muted">No goals recorded in this entry.</p>}
-        </> : <p className="muted">No dated goals yet.</p>}
-        <RecordHistory records={goals} label="goal" path={`/clients/${id}/profile/goals`} />
-      </div>
-    </section>
+    <details className="card cp-admin" id="profile-administration">
+      <summary><span>Contact &amp; administration<small>{known(client.level)} · {known(client.plan)}</small></span><span className="cp-expand" aria-hidden="true" /></summary>
+      <div className="cp-admin-body"><div className="cp-admin-grid">
+        <section aria-labelledby="cp-contact-title"><div className="cp-head"><h3 id="cp-contact-title">Contact</h3>
+          <Button variant="ghost" size="sm" onClick={() => openModal(<ClientForm client={client} />)}>Edit contact &amp; admin</Button></div>
+          <dl className="cp-fields"><Field label="Email" value={client.email} /><Field label="Phone" value={client.phone} />
+            <Field label="Member since" value={client.joined ? fmtDate(client.joined) : null} /><Field label="Status" value={<Tag color={client.status === 'Active' ? 'green' : 'gray'}>{known(client.status)}</Tag>} /></dl>
+        </section>
+        <section aria-labelledby="cp-coaching-title"><div className="cp-head"><h3 id="cp-coaching-title">Coaching &amp; package</h3>
+          <Button variant="ghost" size="sm" onClick={() => openModal(<UpgradePackageForm client={client} />)}>Change package</Button></div>
+          <dl className="cp-fields"><Field label="Level" value={<Tag color={LEVEL[client.level] || 'gray'}>{known(client.level)}</Tag>} /><Field label="Package" value={client.plan} /></dl>
+          <h4 className="cp-note-label">Coach notes</h4><div className="cp-notes" tabIndex={0} aria-label="Coach notes">{client.notes || 'No notes recorded.'}</div>
+        </section>
+      </div></div>
+    </details>
 
-    <section className="profile-section" aria-labelledby="profile-preferences-title">
-      <div className="profile-section-head"><h2 id="profile-preferences-title">Preferences &amp; availability</h2>
-        <Button variant="ghost" onClick={() => openModal(<ProfilePreferencesForm client={client} screening={screening} />)}>Edit preferences</Button></div>
-      <div className={'profile-preference-grid' + (!(hasTrainingPreferences && hasSchedulePreferences) ? ' single' : '')}>
-        {hasTrainingPreferences && <div className="card profile-card"><h3>Training preferences</h3>
-          {trainingPreferences.map(([field, label]) => pref(field, label))}
-          {screening?.goals?.prefs?.hardNo && <ProfileField label="Stated hard no at intake" value={screening.goals.prefs.hardNo} source="Health screening" date={screening.completedOn} />}
-        </div>}
-        {hasSchedulePreferences && <div className="card profile-card"><h3>Schedule &amp; environment</h3>
-          {schedulePreferences.map(([field, label]) => pref(field, label))}
-        </div>}
-        {!hasTrainingPreferences && !hasSchedulePreferences && <div className="card profile-card"><p className="muted">No preferences recorded yet.</p></div>}
-      </div>
-      {screening && <Link className="profile-source-link" to={screeningPath}>View signed intake →</Link>}
+    <section className="card cp-health" aria-label="Health and concerns"><div><h2>Health screening &amp; concerns</h2>
+      {concerns.length > 0 && <p>{concerns.length} open concern{concerns.length === 1 ? '' : 's'}{concerns[0].date ? ` · ${fmtDate(concerns[0].date)}` : ''}</p>}</div>
+      <div><Link className="cp-link" to={screeningPath}>Health screening →</Link><Link className="cp-link" to={`/clients/${id}/check-ins?view=concerns`}>Concerns →</Link></div>
     </section>
-
-    <section className="profile-section" aria-labelledby="profile-lifestyle-title">
-      <div className="profile-section-head"><h2 id="profile-lifestyle-title">Lifestyle history</h2>
-        <Button variant="ghost" onClick={() => record('lifestyle', lifestyle.length)}>＋ Record lifestyle update</Button></div>
-      <div className="card profile-card">
-        {currentLifestyle ? <>
-          <div className="profile-record-meta">{fmtDate(currentLifestyle.date)} · {sourceOf(currentLifestyle)}</div>
-          <div className="profile-data-grid">
-            <ProfileField label="Sleep" value={currentLifestyle.data?.sleepHrs == null ? null : `${currentLifestyle.data.sleepHrs} h/night`} />
-            <ProfileField label="Sleep quality" value={currentLifestyle.data?.sleepQuality == null ? null : `${currentLifestyle.data.sleepQuality}/7`} />
-            <ProfileField label="Stress" value={currentLifestyle.data?.stress == null ? null : `${currentLifestyle.data.stress}/7`} />
-            <ProfileField label="Hydration" value={currentLifestyle.data?.hydrationL == null ? null : `${currentLifestyle.data.hydrationL} L/day`} />
-            <ProfileField label="Activity" value={currentLifestyle.data?.activityLevel} />
-            <ProfileField label="Average steps" value={currentLifestyle.data?.steps} />
-          </div>
-        </> : <p className="muted">No lifestyle records yet.</p>}
-        <RecordHistory records={lifestyle} label="lifestyle" path={`/clients/${id}/profile/lifestyle`} />
-      </div>
-    </section>
-
-    <section className="profile-section" aria-labelledby="profile-measurements-title">
-      <div className="profile-section-head"><h2 id="profile-measurements-title">Measurement snapshot</h2>
-        <Button variant="ghost" onClick={() => openModal(<EditProfileForm client={client} />, true)}>Edit measurements</Button></div>
-      <div className="card profile-card">
-        {recordedMeasurements.length ? <><div className="profile-measure-grid">{recordedMeasurements.map(([field, label, unit]) => {
-          const item = measurements[field]
-          const path = item.kind === 'body_comp' ? `/clients/${id}/assessments/body_comp` : item.kind === 'screening' ? screeningPath : null
-          return <div className="profile-measure" key={field}><span>{label}</span><strong>{displayMeasurement(field, item.value, unit)}</strong>
-            <SourceText source={item.label} date={item.date} />{path && <Link to={path}>View source →</Link>}
-          </div>
-        })}</div>
-        <div className="profile-measure-links"><Link to={`/clients/${id}/progress`}>View measurement progress →</Link><Link to={`/clients/${id}/assessments/body_comp`}>Body composition records →</Link></div></> : <p className="muted">No measurements recorded yet.</p>}
-      </div>
-    </section>
-
-    <section className="profile-section" aria-labelledby="profile-admin-title">
-      <div className="profile-section-head"><h2 id="profile-admin-title">Contact &amp; administration</h2></div>
-      <div className="profile-admin-grid">
-        <div className="card profile-card"><h3>Contact</h3>
-          <ProfileField label="Email" value={client.email} /><ProfileField label="Phone" value={client.phone} />
-          <ProfileField label="Member since" value={fmtDate(client.joined)} />
-          <ProfileField label="Status" value={<Tag color={client.status === 'Active' ? 'green' : 'gray'}>{known(client.status)}</Tag>} />
-        </div>
-        <div className="card profile-card"><h3>Coaching &amp; package</h3>
-          <ProfileField label="Level" value={<Tag color={LEVEL[client.level] || 'gray'}>{known(client.level)}</Tag>} />
-          <ProfileField label="Package" value={known(client.plan)} />
-          <ProfileField label="Coach notes" value={client.notes} />
-          <Button variant="ghost" onClick={() => openModal(<UpgradePackageForm client={client} />)}>Change package</Button>
-        </div>
-      </div>
-    </section>
-
-    <section className="card profile-health-link" aria-label="Health and concerns">
-      <div><h2>Health screening &amp; concerns</h2>
-        {concerns.length > 0 && <p className="profile-concern-count">{concerns.length} open concern{concerns.length === 1 ? '' : 's'} · last recorded {fmtDate([...concerns].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0].date)}</p>}
-      </div>
-      <div className="profile-health-actions"><Link className="btn ghost" to={screeningPath}>Health screening →</Link>
-        <Link className="btn ghost" to={concerns.length ? `/clients/${id}#open-concerns` : `/clients/${id}/check-ins?view=concerns`}>Concerns →</Link></div>
-    </section>
-  </>
+  </div>
 }

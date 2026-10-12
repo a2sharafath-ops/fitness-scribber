@@ -5,14 +5,15 @@ import Field from '../../atoms/Field'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { fmtDay, todayISO } from '../../../lib/dates'
-import { clipTargets, clipClashes, pasteClip, isClosedTrainingDay } from '../../../lib/planner'
+import { clipTargets, clipClashes, pasteClip, isPlanTargetBlocked } from '../../../lib/planner'
+import { confirmedPlanWrite } from '../../../lib/confirmedPersistence'
 import { toast, confirmDialog } from '../../../lib/toast'
 
 // Fan a copied span of planner days out to several clients at once. The clip's
 // pattern is preserved: sessions land at the same relative offsets from the
 // chosen start date, so a Mon/Wed/Fri block stays a Mon/Wed/Fri block.
 export default function PastePlanModal({ clip }) {
-  const { db, commit, tz } = useData()
+  const { db, saveTrainingPlans, tz } = useData()
   const { closeModal } = useModal()
   const [ids, setIds] = useState(new Set())
   const [start, setStart] = useState(clip.anchor)
@@ -25,8 +26,8 @@ export default function PastePlanModal({ clip }) {
   const apply = async () => {
     const list = [...ids]
     if (!list.length || !start) return
-    if (list.some((cid) => targets.some((date) => isClosedTrainingDay(db, cid, date, todayISO(tz))))) {
-      toast('One or more target days are past or completed. Choose open dates.', 'error')
+    if (list.some((cid) => targets.some((date) => isPlanTargetBlocked(db, cid, date, todayISO(tz))))) {
+      toast('Choose current or future dates without existing workouts or completed appointments.', 'error')
       return
     }
     const clash = list.filter((cid) => clipClashes(db, clip, cid, start).length)
@@ -35,7 +36,8 @@ export default function PastePlanModal({ clip }) {
       message: `${clash.length} of the selected client${clash.length === 1 ? ' already has a session' : 's already have sessions'} on those dates — overwrite?`,
       confirmLabel: 'Overwrite',
     })) return
-    commit((d) => list.forEach((cid) => pasteClip(d, clip, cid, start)))
+    try { await confirmedPlanWrite(saveTrainingPlans, (d) => list.forEach((cid) => pasteClip(d, clip, cid, start))) }
+    catch (error) { return toast(error.message, 'error') }
     closeModal()
     toast(`Pasted ${clip.days.length} session${clip.days.length === 1 ? '' : 's'} to ${list.length} client${list.length === 1 ? '' : 's'}.`)
   }

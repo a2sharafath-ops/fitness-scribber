@@ -1,12 +1,11 @@
 import { useId, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
-import InfoTip from '../atoms/InfoTip'
+import ProgressInfo from '../atoms/ProgressInfo'
 import ModalShell from '../molecules/ModalShell'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { MUSCLES, WORKING_GROUPS, muscleVolume, reviewMuscleSet } from '../../lib/muscleVolume'
-import { addMuscleVolumeDemo, isMuscleVolumeDemo } from '../../lib/muscleVolumeDemo'
 import bodyImage from '../../assets/muscle-body-outline.png'
 import regions from '../../assets/muscle-body-regions.json'
 import './ClientMuscleVolume.css'
@@ -56,9 +55,8 @@ function MuscleDetailModal({ muscle, metric, start, end }) {
 }
 
 export default function ClientMuscleVolume({ clientId }) {
-  const navigate = useNavigate()
   const { openModal } = useModal()
-  const { db, tz, dbIssues, saveStatus, refresh, commit } = useData()
+  const { db, tz, dbIssues, saveStatus, refresh } = useData()
   const today = todayISO(tz)
   const [anchor, setAnchor] = useState(today)
   const [metric, setMetric] = useState('sets')
@@ -89,21 +87,16 @@ export default function ClientMuscleVolume({ clientId }) {
   const review = report.excluded.filter((r) => r.reviewable)
   const missing = report.observations.filter((r) => r.volume == null).reduce((sum, r) => sum + r.sets, 0)
   const issue = dbIssues?.some((i) => ['workouts', 'exercises', 'database connection', 'local storage'].includes(i.table))
-  const demoClient = (db.clients || []).find(isMuscleVolumeDemo)
-  const createDemo = () => {
-    let demoId
-    commit((draft) => { demoId = addMuscleVolumeDemo(draft, today) })
-    if (demoId) navigate(`/clients/${demoId}/progress#training-load`)
-  }
   const retry = async () => { setRetrying(true); setRetryError(''); try { await refresh() } catch (e) { setRetryError(e.message || 'Could not refresh data') } finally { setRetrying(false) } }
 
   return <section className="muscle-report" aria-labelledby={`${id}-title`}>
-    <header className="muscle-report-head"><h3 id={`${id}-title`} className="muscle-report-title">Weekly muscle volume <InfoTip term="Muscle volume" text="Completed Power, Main and Accessory working sets only. Warm-ups are excluded. Volume load is recorded reps × external kg; missing load stays unknown. Muscle totals may overlap." symbol="i" /></h3>
+    <header className="muscle-report-head"><h3 id={`${id}-title`} className="muscle-report-title">Weekly muscle volume <ProgressInfo term="Muscle volume" text="Completed Power, Main and Accessory working sets only. Warm-ups are excluded. Volume load is recorded reps × external kg; missing load stays unknown. Muscle totals may overlap." /></h3>
       <div className="muscle-week"><button type="button" aria-label="Previous muscle-volume week" onClick={() => setAnchor(addDays(start, -7))}>←</button><label><span className="sr-only">Week containing</span><input type="date" aria-label="Muscle-volume week containing" value={anchor} max={today} onChange={(e) => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value) && e.target.value <= today) setAnchor(e.target.value) }} /></label><button type="button" aria-label="Next muscle-volume week" disabled={end >= today} onClick={() => setAnchor(addDays(start, 7))}>→</button></div>
     </header>
     {issue ? <div role="alert" className="muscle-notice">Some workout or exercise data could not be loaded or saved. Totals may be incomplete. <button type="button" onClick={retry} disabled={retrying}>{retrying ? 'Retrying…' : 'Retry data load'}</button>{retryError && <p>{retryError}</p>}</div> : null}
     <div className="muscle-toolbar"><div className="muscle-metrics" role="group" aria-label="Muscle-volume metric"><button type="button" aria-pressed={metric === 'sets'} onClick={() => setMetric('sets')}>Sets</button><button type="button" aria-pressed={metric === 'load'} onClick={() => setMetric('load')}>Volume load</button></div><span>{fmtDate(start)}–{fmtDate(end)}</span></div>
-    {report.totalSets === 0 && !issue && <div className="muscle-empty-explain"><strong>No classified working sets this week.</strong><p>Complete a Power, Main or Accessory working set to populate the map.</p>{demoClient && demoClient.id !== clientId ? <Link className="btn" to={`/clients/${demoClient.id}/progress#training-load`}>View sample demo client</Link> : !demoClient ? <button type="button" className="btn" onClick={createDemo}>Create sample demo client</button> : null}</div>}
+    {report.totalSets === 0 && !issue && <p className="progress-footnote">No classified working sets this week.</p>}
+    <div className="progress-muscle-layout">
     <div className="muscle-map-panel">
       <div className="muscle-body">
         <img src={bodyImage} alt="Front and back muscle outlines" />
@@ -117,8 +110,9 @@ export default function ClientMuscleVolume({ clientId }) {
       <div className="muscle-legend" aria-label={`Relative weekly scale, zero to ${fmt(max)} ${metric === 'sets' ? 'sets' : 'kg repetitions'}`}><span>Low</span>{palette.map((color) => <i key={color} style={{ background: color }} />)}<span>{fmt(max)} {metric === 'sets' ? 'sets' : 'kg·reps'}</span></div>
       <p className="muscle-caption">Gray: no direct sets{metric === 'load' ? ' · Stripes: unknown load · White: zero external load' : ''}</p>
     </div>
+    <div className="progress-muscle-list"><h4>Select a muscle</h4><div className="muscle-list">{muscles.map((m) => <button key={m.muscle} type="button" onClick={() => showDetail(m.muscle)}><span>{m.muscle}{!surfaceNames.has(m.muscle) && <small>List only</small>}{partial(m) && <small>Load incomplete</small>}</span><strong>{fmt(value(m))} <small>{metric === 'sets' ? 'sets' : 'kg·reps'}</small></strong><span className="progress-muscle-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, (value(m) || 0) / (max || 1) * 100)}%` }} /></span></button>)}</div></div>
+    </div>
     {report.totalSets > 0 && <p className="muscle-coverage">{report.totalSets} working sets · {report.totalSets - missing}/{report.totalSets} with known volume load{report.unmapped.length ? ` · ${report.unmapped.reduce((s, r) => s + r.sets, 0)} unmapped sets` : ''}</p>}
-    <details className="muscle-list-disclosure"><summary>All muscle groups</summary><div className="muscle-list">{muscles.map((m) => <button key={m.muscle} type="button" onClick={() => showDetail(m.muscle)}><span>{m.muscle}{!surfaceNames.has(m.muscle) && <small>List only</small>}{partial(m) && <small>Load incomplete</small>}</span><strong>{fmt(value(m))}</strong></button>)}</div></details>
     {(review.length > 0 || report.unmapped.length > 0) && <details className="muscle-method"><summary>{review.length ? `Review classifications (${review.length})` : `Assign muscles (${report.unmapped.length})`}</summary>
       {!!report.unmapped.length && <div className="muscle-notice"><strong>Muscle assignments needed</strong><ul>{report.unmapped.map((r) => <li key={r.key}>{r.name} · {fmtDate(r.date)} · {r.sets} sets</li>)}</ul><Link to="/workouts">Open Exercise Library</Link></div>}
       {!!review.length && review.map((r) => <ReviewSet key={r.key} record={r} clientId={clientId} />)}

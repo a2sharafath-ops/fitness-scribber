@@ -1,14 +1,19 @@
+import { prepareTrainingPlanSave } from '../lib/trainingSchedule'
+import { applyAssignment } from '../lib/programLibrary'
+import { todayISO, coachTimeZone } from '../lib/dates'
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { loadDB, saveDB } from '../lib/storage'
+import { loadDB, saveDB, readStoredDB, localStorageKey } from '../lib/storage'
 import { hasBackend } from '../lib/supabase'
-import { fetchAll, persistDiff, deleteClientRemote } from '../api/sync'
+import { fetchAll, persistDiff, deleteClientRemote, saveScheduleRemote, saveAssignmentRemote, saveTrainingPlansRemote } from '../api/sync'
+import { createSnapshotQueue } from '../lib/confirmedPersistence'
+import { applyScheduleRequest } from '../lib/schedule'
 
 const DataContext = createContext(null)
 
 const removeClientFromSnapshot = (snapshot, clientId) => {
   snapshot.clients = snapshot.clients.filter((c) => c.id !== clientId)
   ;['sessions', 'logs', 'wellness', 'srpe', 'resistance', 'cardio', 'wearable',
-    'concerns', 'prescriptions', 'workouts', 'maxes', 'assessments', 'screenings']
+    'concerns', 'programAssignments', 'prescriptions', 'workouts', 'maxes', 'assessments', 'screenings']
     .forEach((key) => {
       if (snapshot[key]) snapshot[key] = snapshot[key].filter((row) => row.clientId !== clientId)
     })
@@ -24,16 +29,28 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   const writeQueueRef = useRef(Promise.resolve())
   const pendingWritesRef = useRef(0)
   const writeFailedRef = useRef(false)
-  const localSavePendingRef = useRef(false)
+  const persistenceRef = useRef(null)
   const commitVersionRef = useRef(0)
+  const scheduleSavingRef = useRef(false)
   // Authoritative latest snapshot, so commit() never relies on the updater running
   // (React StrictMode double-invokes updaters in dev — side effects must stay out of them).
   const dbRef = useRef(db)
   useEffect(() => { dbRef.current = db }, [db])
 
+  useEffect(() => {
+    if (backend) return undefined
+    const changed = e => {
+      if (e.key !== localStorageKey || !e.newValue || scheduleSavingRef.current) return
+      try { const latest = readStoredDB(); dbRef.current = latest; setDb(latest) } catch { /* Retain visible data if storage becomes unavailable. */ }
+    }
+    window.addEventListener('storage', changed)
+    return () => window.removeEventListener('storage', changed)
+  }, [backend])
+
   // Re-pull the whole dataset from the backend (used after seeding / wearable sync
   // so we never need a full window.location.reload()). No-op in local mode.
   const refresh = useCallback(() => {
+    if (scheduleSavingRef.current) return Promise.reject(new Error('Wait for the booking to finish saving.'))
     if (!backend) return Promise.resolve()
     return writeQueueRef.current.then(() => {
       if (writeFailedRef.current) throw new Error('Unsaved changes are still shown locally. Resolve the save issue before reloading data.')
@@ -44,6 +61,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
       })
     }).then((d) => {
       dbRef.current = d
+      persistenceRef.current?.reset(d)
       writeFailedRef.current = false
       setWriteIssues([])
       setSaveStatus('idle')
@@ -55,7 +73,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   useEffect(() => {
     if (!backend) return undefined
     let active = true
-    fetchAll().then((d) => { if (active) { dbRef.current = d; setLoadError(null); setDb(d) } })
+    fetchAll().then((d) => { if (active) { dbRef.current = d; persistenceRef.current?.reset(d); setLoadError(null); setDb(d) } })
       .catch((e) => { if (active) { console.error('load failed', e); setLoadError(e) } })
     return () => { active = false }
   }, [backend])
@@ -64,12 +82,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   useEffect(() => {
     if (!backend && db) {
       const saved = saveDB(db)
-      if (localSavePendingRef.current) {
-        localSavePendingRef.current = false
-        setSaveStatus(saved ? 'saved' : 'failed')
-        if (saved) setWriteIssues([])
-        else setWriteIssues([{ table: 'local storage', message: 'Browser storage is unavailable', kind: 'write' }])
-      } else if (!saved) {
+      if (!saved) {
         setSaveStatus('failed')
         setWriteIssues([{ table: 'local storage', message: 'Browser storage is unavailable', kind: 'write' }])
       }
@@ -77,8 +90,9 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   }, [backend, db])
 
   const commit = useCallback((mutator) => {
+    if (scheduleSavingRef.current) throw new Error('A booking is saving. Please wait, then try again.')
     const prev = dbRef.current
-    if (!prev) return
+    if (!prev) return Promise.resolve({ saved: false, issues: [] })
     const next = structuredClone(prev)
     mutator(next)
     commitVersionRef.current += 1
@@ -87,32 +101,98 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     setSaveStatus('saving')
     if (backend) {
       pendingWritesRef.current += 1
-      writeQueueRef.current = writeQueueRef.current
-        .then(() => persistDiff(prev, next))
-        .then((issues) => {
-          if (issues?.length) {
-            writeFailedRef.current = true
-            setWriteIssues((current) => [...current.filter((item) => !issues.some((issue) => issue.table === item.table)), ...issues])
-            setSaveStatus('failed')
-          }
-        })
-        .catch((error) => {
-          console.error('persist failed', error)
-          writeFailedRef.current = true
-          setWriteIssues((current) => [...current.filter((item) => item.table !== 'database connection'),
-            { table: 'database connection', message: error?.message || 'Save failed', kind: 'write' }])
-          setSaveStatus('failed')
-        })
-        .finally(() => {
-          pendingWritesRef.current -= 1
-          if (pendingWritesRef.current === 0) setSaveStatus(writeFailedRef.current ? 'failed' : 'saved')
-        })
-    } else {
-      localSavePendingRef.current = true
+      if (!persistenceRef.current) persistenceRef.current = createSnapshotQueue(prev, persistDiff)
+      const result = persistenceRef.current.enqueue(next)
+      writeQueueRef.current = result.then((outcome) => {
+        writeFailedRef.current = !outcome.saved
+        setWriteIssues(outcome.issues)
+        if (!outcome.saved) setSaveStatus('failed')
+        return outcome
+      }).finally(() => {
+        pendingWritesRef.current -= 1
+        if (pendingWritesRef.current === 0) setSaveStatus(writeFailedRef.current ? 'failed' : 'saved')
+      })
+      return writeQueueRef.current
     }
+    const saved = saveDB(next)
+    setSaveStatus(saved ? 'saved' : 'failed')
+    const issues = saved ? [] : [{ table: 'local storage', message: 'Browser storage is unavailable', kind: 'write' }]
+    setWriteIssues(issues)
+    return Promise.resolve({ saved, local: true, issues })
+  }, [backend])
+
+  // A calendar move can update three collections. Publish only after the whole
+  // transaction succeeds, and prevent an unrelated optimistic edit racing it.
+  const saveSchedule = useCallback(async (request) => {
+    if (scheduleSavingRef.current) throw new Error('A booking is already saving. Please wait.')
+    scheduleSavingRef.current = true
+    try {
+      await writeQueueRef.current
+      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before changing the schedule.')
+      const next = backend ? structuredClone(dbRef.current) : readStoredDB()
+      applyScheduleRequest(next, request)
+      setSaveStatus('saving')
+      if (backend) await saveScheduleRemote(request)
+      else if (!saveDB(next)) throw new Error('Browser storage is unavailable. The booking was not changed.')
+      commitVersionRef.current += 1
+      persistenceRef.current?.reset(next)
+      dbRef.current = next
+      setDb(next)
+      setSaveStatus('saved')
+      return { saved: true }
+    } catch (error) {
+      setSaveStatus(writeFailedRef.current ? 'failed' : 'idle')
+      throw error
+    } finally { scheduleSavingRef.current = false }
+  }, [backend])
+
+  const saveProgramAssignment = useCallback(async (prepared) => {
+    if (scheduleSavingRef.current) throw new Error('A program assignment is already saving. Please wait.')
+    scheduleSavingRef.current = true
+    try {
+      await writeQueueRef.current
+      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before changing the schedule.')
+      const next = backend ? structuredClone(dbRef.current) : readStoredDB()
+      applyAssignment(next, prepared, todayISO(next.settings?.tz))
+      setSaveStatus('saving')
+      if (backend) await saveAssignmentRemote(prepared)
+      else if (!saveDB(next)) throw new Error('Browser storage is unavailable. The program assignment was not changed.')
+      commitVersionRef.current += 1
+      persistenceRef.current?.reset(next)
+      dbRef.current = next
+      setDb(next)
+      setSaveStatus('saved')
+      return { saved: true }
+    } catch (error) {
+      setSaveStatus(writeFailedRef.current ? 'failed' : 'idle')
+      throw error
+    } finally { scheduleSavingRef.current = false }
+  }, [backend])
+
+  const saveTrainingPlans = useCallback(async (mutate, syncClientIds = []) => {
+    if (scheduleSavingRef.current) throw new Error('A schedule update is saving. Please wait.')
+    scheduleSavingRef.current = true
+    try {
+      await writeQueueRef.current
+      if (writeFailedRef.current) throw new Error('Resolve the existing save issue first.')
+      const previous = backend ? structuredClone(dbRef.current) : readStoredDB()
+      const next = structuredClone(previous)
+      mutate(next)
+      const request = prepareTrainingPlanSave(previous, next, syncClientIds)
+      setSaveStatus('saving')
+      if (backend) await saveTrainingPlansRemote(request)
+      else if (!saveDB(next)) throw new Error('Browser storage is unavailable. Nothing was changed.')
+      commitVersionRef.current += 1
+      persistenceRef.current?.reset(next)
+      dbRef.current = next; setDb(next); setSaveStatus('saved')
+      return { saved: true, local: !backend, bookings: request.bookings.length }
+    } catch(error) {
+      setSaveStatus(writeFailedRef.current ? 'failed' : 'idle'); throw error
+    } finally { scheduleSavingRef.current = false }
   }, [backend])
 
   const deleteClient = useCallback(async (clientId) => {
+    if (scheduleSavingRef.current) throw new Error('Wait for the booking to finish saving.')
     if (!backend) {
       commit((current) => removeClientFromSnapshot(current, clientId))
       return
@@ -144,8 +224,8 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     for (const i of [...(db?._loadIssues || []), ...writeIssues]) {
       byTable.set(i.table, { table: i.table, message: i.message, kind: i.kind || 'load' })
     }
-    return { db, commit, deleteClient, refresh, saveStatus, tz: db?.settings?.tz, units: db?.settings?.units, dbIssues: [...byTable.values()] }
-  }, [db, commit, deleteClient, refresh, saveStatus, writeIssues])
+    return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
+  }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, deleteClient, refresh, saveStatus, writeIssues])
 
   if (backend && !db) {
     if (loadError) {

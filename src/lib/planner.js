@@ -11,6 +11,7 @@
 import { uid } from './format'
 import { addDays, daysBetween } from './dates'
 import { blocksToItems, itemsToBlocks, cloneBlocksFresh, programStats } from './program'
+import { validatePrescription } from './prescription'
 
 // The blocks of a prescription, migrating legacy item-shaped rows on the way.
 const blocksOf = (p) => (p?.blocks?.length ? p.blocks : itemsToBlocks(p?.items))
@@ -18,12 +19,34 @@ const blocksOf = (p) => (p?.blocks?.length ? p.blocks : itemsToBlocks(p?.items))
 // A prescription only counts as a "session" once it actually holds exercises.
 export const isSession = (p) => !!p && programStats(p).exercises > 0
 
+// Shared preflight for bulk writes: the caller must await approval before commit.
+export async function approvePlanReplacement(db, targets, confirm) {
+  const clashes = targets.filter(target => db.prescriptions.some(plan => plan.clientId === target.clientId && plan.date === target.date))
+  if (!clashes.length) return true
+  const rows = clashes.map(target => `${db.clients?.find(client => client.id === target.clientId)?.name || 'Client'} · ${target.date}`)
+  return !!await confirm({
+    title: 'Replace existing plans?',
+    message: `${clashes.length} existing plan${clashes.length === 1 ? '' : 's'} will be replaced: ${rows.slice(0, 6).join('; ')}${rows.length > 6 ? `; and ${rows.length - 6} more` : ''}.`,
+    confirmLabel: 'Replace plans',
+  })
+}
+
 // A past date or a completed appointment/workout is closed to new planning.
 // An existing prescription may still be reviewed (and corrected separately).
 export function isClosedTrainingDay(db, clientId, date, today) {
   return date < today
     || (db.workouts || []).some((w) => w.clientId === clientId && w.date === date && w.status === 'completed')
     || (db.sessions || []).some((s) => s.clientId === clientId && s.date === date && String(s.status).toLowerCase() === 'completed')
+}
+
+export const isPlanTargetBlocked = (db, clientId, date, today) => isClosedTrainingDay(db, clientId, date, today)
+  || (db.workouts || []).some(workout => workout.clientId === clientId && workout.date === date)
+
+export function assertPrescriptionWritable(db, clientId, date) {
+  if ((db.workouts || []).some(workout => workout.clientId === clientId && workout.date === date)
+    || (db.sessions || []).some(session => session.clientId === clientId && session.date === date && String(session.status).toLowerCase() === 'completed')) {
+    throw new Error(`${date}: this date already has a workout or completed appointment. Its prescription is protected.`)
+  }
 }
 
 // A workout log is evidence of performed work, not a prescription. Calendar
@@ -74,6 +97,10 @@ export const clipClashes = (db, clip, clientId, startDate) =>
 
 // Write (or overwrite) one prescription on a client's calendar.
 export function writePrescription(draft, clientId, date, blocks, notes = '', name = '') {
+  assertPrescriptionWritable(draft, clientId, date)
+  // Legacy unnamed plans get a visible name when copied through the planner.
+  name = name.trim() || 'Workout'
+  validatePrescription(name, blocks)
   const items = blocksToItems(blocks)
   const ex = draft.prescriptions.find((p) => p.clientId === clientId && p.date === date)
   if (ex) { ex.blocks = blocks; ex.items = items; ex.notes = notes; ex.name = name }
@@ -102,6 +129,11 @@ export function deleteSpan(draft, clientId, dates) {
 // deep copy with brand-new block/exercise/set ids, so the pasted sessions are
 // independent of the source. Returns the dates written.
 export function pasteClip(draft, clip, clientId, startDate) {
+  // Preflight the whole span before mutating even the first destination.
+  for (const day of clip?.days || []) {
+    assertPrescriptionWritable(draft, clientId, addDays(startDate, day.offset))
+    validatePrescription(day.name || 'Workout', day.blocks)
+  }
   const written = []
   for (const d of clip?.days || []) {
     const date = addDays(startDate, d.offset)

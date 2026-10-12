@@ -5,17 +5,18 @@
 // of that block's exercises at once. Unchecked exercises stay static.
 import { useState } from 'react'
 import Button from '../../atoms/Button'
-import { defaultRuleFor } from '../../../lib/program'
+import { defaultRuleFor, defaultRuleForExercise, progressionTypesFor } from '../../../lib/program'
 import { fmtDay } from '../../../lib/dates'
 
 const TYPE_LABEL = { load: '(+) Load', percentage: '(+) Percentage', reps: '(+) Reps', sets: '(+) Sets' }
 const UNIT_HINT = { load: 'kg', percentage: '% points', reps: 'reps', sets: 'sets' }
 
-const TypeValue = ({ rule, ariaBase, onChange }) => (
+const TypeValue = ({ rule, ariaBase, onChange, types = Object.keys(TYPE_LABEL) }) => (
   <>
     <label className="sf"><span>Type</span>
       <select value={rule.type} aria-label={`${ariaBase} progression type`} onChange={(e) => onChange({ type: e.target.value })}>
-        {Object.entries(TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        {!types.includes(rule.type) && <option value={rule.type} disabled>{TYPE_LABEL[rule.type]} — unavailable</option>}
+        {types.map(k => <option key={k} value={k}>{TYPE_LABEL[k]}</option>)}
       </select></label>
     <label className="sf"><span>Value (+{UNIT_HINT[rule.type]})</span>
       <input type="number" step="0.5" value={rule.value} aria-label={`${ariaBase} progression value`}
@@ -30,7 +31,7 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
       return [b.blockId, {
         enabled: b.blockType !== 'Warm-up' && b.blockType !== 'Cool-down',
         type: d.type, value: d.value,
-        exercises: Object.fromEntries(b.exercises.map((e) => [e.exerciseId, { enabled: true, type: d.type, value: d.value }])),
+        exercises: Object.fromEntries(b.exercises.map((e) => [e.exerciseId, { enabled: true, ...defaultRuleForExercise(b.blockType, e) }])),
       }]
     })))
 
@@ -51,6 +52,7 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
       <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
         Cloning to {dates.length} date{dates.length === 1 ? '' : 's'}: {dates.map(fmtDay).join(' · ')}
       </div>
+      <p className="muted">Percentage progression replaces fixed weights with targets based on each client’s Training Max.</p>
       {blocks.map((b) => {
         const r = rules[b.blockId]
         return (
@@ -58,9 +60,6 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
             <label className="prog-head">
               <input type="checkbox" checked={r.enabled} onChange={(e) => updBlock(b.blockId, { enabled: e.target.checked })} />
               <strong>{b.blockType} Block</strong>
-              <span className="muted" style={{ fontSize: 11 }}>
-                (default: {defaultRuleFor(b.blockType).type === 'load' ? 'Load' : 'Rep'} progression)
-              </span>
             </label>
             {r.enabled && (
               <>
@@ -79,7 +78,7 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
                           {e.exerciseName || 'Unnamed exercise'}
                         </label>
                         {er.enabled
-                          ? <span className="prog-ex-rule"><TypeValue rule={er} ariaBase={e.exerciseName || 'exercise'} onChange={setExRule(b.blockId, e.exerciseId)} /></span>
+                          ? <span className="prog-ex-rule"><TypeValue rule={er} types={progressionTypesFor(e)} ariaBase={e.exerciseName || 'exercise'} onChange={setExRule(b.blockId, e.exerciseId)} /></span>
                           : <span className="muted" style={{ fontSize: 10 }}>stays static</span>}
                       </div>
                     )

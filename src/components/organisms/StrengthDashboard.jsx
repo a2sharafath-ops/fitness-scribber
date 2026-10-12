@@ -1,86 +1,77 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
-import Icon from '../atoms/Icon'
-import InfoTip from '../atoms/InfoTip'
+import ProgressInfo from '../atoms/ProgressInfo'
 import { useData } from '../../store/DataContext'
 import { useFormat } from '../../hooks/useFormat'
 import { baseOptions, COLORS, shortLabel } from '../../lib/chartSetup'
-import { fmtDate } from '../../lib/dates'
+import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { LIFT_GROUPS, performedLiftHistory, performedLiftOptions } from '../../lib/performedLifts'
 
 const newest = (rows) => [...rows].sort((a, b) => b.date.localeCompare(a.date))[0] || null
 const sameLift = (a, b) => String(a || '').trim().replace(/\s+/g, ' ').toLowerCase() === String(b || '').trim().replace(/\s+/g, ' ').toLowerCase()
+const loadText = (load, fmt) => load == null ? 'Not recorded' : load > 0 ? fmt(load) : 'No external load'
 
 export default function StrengthDashboard({ client }) {
-  const { db } = useData()
+  const { db, tz } = useData()
   const { fmtWt, toDisp, unitName } = useFormat()
-  const options = performedLiftOptions(db, client.id)
-  const history = performedLiftHistory(db, client.id)
-  const records = (db.maxes || []).filter((m) => m.clientId === client.id)
   const [selected, setSelected] = useState('')
+  const [chart, setChart] = useState('estimate')
+  const options = performedLiftOptions(db, client.id)
   const choice = options.find((option) => option.name === selected) || options[0]
   const lift = choice?.name
-
-  if (!lift) return <div className="progress-strength">
-    <div className="progress-section-head"><div><span className="progress-eyebrow">01 / Recorded performance</span><h2 id="progress-strength-title">Strength</h2><p>Choose from lifts this client has actually completed.</p></div></div>
-    <p className="progress-empty">No performed lifts recorded yet. Complete a workout set or add a resistance log to build this list.</p>
-  </div>
-
-  const work = history.filter((row) => sameLift(row.name, lift))
-  const loaded = [...work].filter((row) => row.loadKg > 0).reverse()
+  const work = performedLiftHistory(db, client.id).filter((row) => sameLift(row.name, lift))
+  // Zero external load is a recorded value; missing load stays unknown.
+  const loaded = [...work].filter((row) => row.loadKg != null).reverse()
   const latestWork = work[0]
-  const own = records.filter((m) => sameLift(m.exercise, lift))
+  const own = (db.maxes || []).filter((m) => m.clientId === client.id && sameLift(m.exercise, lift))
   const estimates = own.filter((m) => m.kind === 'e1rm' && m.source === 'auto').sort((a, b) => a.date.localeCompare(b.date))
-  const entered = own.filter((m) => m.kind === 'e1rm' && m.source !== 'auto')
-  const tm = own.filter((m) => m.kind === 'tm')
-  const firstEstimate = estimates[0]
   const lastEstimate = estimates.at(-1)
-  const lastEntered = newest(entered)
-  const lastTm = newest(tm)
-  const hasMaxRecords = choice.group === 'Main Lift' && (lastEstimate || lastEntered || lastTm)
-  const showEstimateTrend = choice.group === 'Main Lift' && estimates.length >= 2
-  const showLoadTrend = !showEstimateTrend && loaded.length >= 2
-  const firstTrend = showEstimateTrend ? firstEstimate : loaded[0]
-  const lastTrend = showEstimateTrend ? lastEstimate : loaded.at(-1)
-  const trendField = showEstimateTrend ? 'valueKg' : 'loadKg'
-  const change = firstTrend && lastTrend ? +(lastTrend[trendField] - firstTrend[trendField]).toFixed(1) : null
+  const lastEntered = newest(own.filter((m) => m.kind === 'e1rm' && m.source !== 'auto'))
+  const lastTm = newest(own.filter((m) => m.kind === 'tm'))
+  const main = !lift || choice.group === 'Main Lift'
+  const estimateChart = main && chart === 'estimate'
+  const trend = estimateChart ? estimates : loaded
+  const field = estimateChart ? 'valueKg' : 'loadKg'
+  const first = trend[0], last = trend.at(-1)
+  const change = trend.length >= 2 ? +(last[field] - first[field]).toFixed(1) : null
+  const today = todayISO(tz)
+  const dates = trend.length ? trend.map((row) => row.date) : Array.from({ length: 28 }, (_, i) => addDays(today, i - 27))
   const opts = baseOptions()
   opts.plugins.legend.display = false
   opts.scales.y.title = { display: true, text: unitName() }
+  if (!trend.length) opts.scales.y.ticks = { ...opts.scales.y.ticks, display: false }
+  const metric = (label, value, note) => <div className="progress-metric"><span>{label}</span><strong>{value}</strong><small>{note}</small></div>
 
   return <div className="progress-strength">
-    <div className="progress-section-head">
-      <div><span className="progress-eyebrow">01 / Recorded performance</span><h2 id="progress-strength-title">Strength</h2></div>
-      <label className="progress-lift-select">Performed lift <select value={lift} onChange={(event) => setSelected(event.target.value)}>{LIFT_GROUPS.map((group) => {
-        const members = options.filter((option) => option.group === group)
-        return members.length ? <optgroup key={group} label={group}>{members.map((option) => <option key={option.name} value={option.name}>{option.name}</option>)}</optgroup> : null
-      })}</select><span className="progress-lift-category" aria-hidden="true">{choice.group}</span></label>
-    </div>
-    {hasMaxRecords ? <div className="progress-metric-grid">
-      <div className="progress-metric"><span>Estimated 1RM · completed set</span><strong>{lastEstimate ? fmtWt(lastEstimate.valueKg) : '—'}</strong><small>{lastEstimate ? `${fmtDate(lastEstimate.date)} · Epley estimate` : 'No completed-set estimate'}</small></div>
-      <div className="progress-metric"><span>Coach-entered 1RM</span><strong>{lastEntered ? fmtWt(lastEntered.valueKg) : '—'}</strong><small>{lastEntered ? `${fmtDate(lastEntered.date)} · coach entry · test status not recorded` : 'No coach entry recorded'}</small></div>
-      <div className="progress-metric"><span>Training max · programming</span><strong>{lastTm ? fmtWt(lastTm.valueKg) : '—'}</strong><small>{lastTm ? `${fmtDate(lastTm.date)} · ${lastTm.source === 'block-start' ? 'block-start checkpoint' : lastTm.source || 'recorded checkpoint'}` : 'No explicit checkpoint'}</small></div>
-    </div> : <div className="progress-metric-grid">
-      <div className="progress-metric"><span>Recorded entries</span><strong>{work.length}</strong></div>
-      <div className="progress-metric"><span>Latest recorded load</span><strong>{latestWork.loadKg > 0 ? fmtWt(latestWork.loadKg) : 'No external load'}</strong><small>{fmtDate(latestWork.date)}</small></div>
-      <div className="progress-metric"><span>Latest recorded reps</span><strong>{latestWork.reps ?? '—'}</strong><small>{fmtDate(latestWork.date)} · {latestWork.sets ?? '—'} set{latestWork.sets === 1 ? '' : 's'}</small></div>
-    </div>}
-    <div className="progress-strength-detail">
-      <div className="progress-inset">
-        <h3 className="progress-chart-heading">{showEstimateTrend ? 'Estimated 1RM over time' : 'Recorded set load over time'} <InfoTip
-          label="strength chart context" symbol="i"
-          text={`${showEstimateTrend ? 'Same lift · Epley estimated 1RM · ' : 'Same lift · recorded set load; changes in reps can affect interpretation · '}${unitName()}`} /></h3>
-        {showEstimateTrend || showLoadTrend ? <>
-          <div className="progress-compare-line"><Icon name="chart" size={15} /> {fmtWt(firstTrend[trendField])} on {fmtDate(firstTrend.date)} → {fmtWt(lastTrend[trendField])} on {fmtDate(lastTrend.date)} <b>({change > 0 ? '+' : ''}{toDisp(change)} {unitName()})</b></div>
-          <div className="progress-chart"><Line data={{ labels: (showEstimateTrend ? estimates : loaded).map((row) => shortLabel(row.date)), datasets: [{ label: `${showEstimateTrend ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: (showEstimateTrend ? estimates : loaded).map((row) => toDisp(row[trendField])), borderColor: COLORS.blue, backgroundColor: 'rgba(11,135,201,.09)', fill: true, tension: 0.15, pointRadius: 5 }] }} options={opts} /></div>
-        </> : <p className="progress-empty">{choice.group === 'Main Lift' && lastEstimate ? 'One estimate recorded. A second dated estimate will show change over time.' : loaded.length === 1 ? 'One loaded entry recorded. A second dated entry will show change over time.' : 'No comparable loaded entries yet. Recorded sets and reps remain available below.'}</p>}
+    <section className="card progress-performance">
+      <div className="progress-section-head"><h2 id="progress-strength-title">Lift performance</h2>
+        <label className="progress-lift-select">Performed lift <select value={lift || ''} disabled={!lift} onChange={(event) => { setSelected(event.target.value); setChart('estimate') }}>
+          {!lift && <option value="">No performed lifts</option>}
+          {LIFT_GROUPS.map((group) => { const members = options.filter((option) => option.group === group); return members.length ? <optgroup key={group} label={group}>{members.map((option) => <option key={option.name} value={option.name}>{option.name}</option>)}</optgroup> : null })}
+        </select></label>
       </div>
-      <aside className="progress-inset progress-read-note" aria-label="How to read strength results">
-        <h3>How to read this</h3>
-        <p className="progress-explain">{showEstimateTrend ? 'A completed-set estimate is not a tested maximum. The training max is a programming reference.' : 'Recorded load shows what was logged, not power output or a tested maximum. Compare reps and source before interpreting change.'}</p>
-        <dl><div><dt>Latest source</dt><dd>{showEstimateTrend ? `${fmtDate(lastEstimate.date)} · completed-set estimate` : `${fmtDate(latestWork.date)} · ${latestWork.source}`}</dd></div><div><dt>Comparison</dt><dd>{change == null ? 'A second comparable record is needed' : showEstimateTrend ? 'First and latest recorded estimates' : 'First and latest loaded entries'}</dd></div><div><dt>Next action</dt><dd>Review the source set before changing targets.</dd></div></dl>
-      </aside>
-    </div>
-    <details className="progress-disclosure progress-strength-logs"><summary>View {work.length} recorded {lift} entr{work.length === 1 ? 'y' : 'ies'}</summary><div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table; scroll horizontally for more columns`} tabIndex={0}><table className="checkins-table"><caption className="sr-only">Recorded {lift} work</caption><thead><tr><th scope="col">Date</th><th scope="col">Source</th><th scope="col">Sets</th><th scope="col">Reps</th><th scope="col">Recorded load</th></tr></thead><tbody>{work.map((row, index) => <tr key={`${row.date}-${row.source}-${index}`}><th scope="row">{fmtDate(row.date)}</th><td>{row.source}</td><td>{row.sets ?? '—'}</td><td>{row.reps ?? '—'}</td><td>{row.loadKg == null ? 'Not recorded' : row.loadKg > 0 ? fmtWt(row.loadKg) : 'No external load'}</td></tr>)}</tbody></table></div></details>
+      <div className="progress-metric-grid">
+        {main ? <>
+          {metric('Estimated 1RM', lastEstimate ? fmtWt(lastEstimate.valueKg) : '—', lastEstimate ? `Completed set · ${fmtDate(lastEstimate.date)}` : 'No completed-set estimate')}
+          {metric('Coach-entered 1RM', lastEntered ? fmtWt(lastEntered.valueKg) : '—', lastEntered ? `Coach entry · ${fmtDate(lastEntered.date)}` : 'No coach entry')}
+          {metric('Training max', lastTm ? fmtWt(lastTm.valueKg) : '—', lastTm ? `Programming · ${fmtDate(lastTm.date)}` : 'No checkpoint')}
+        </> : <>
+          {metric('Recorded entries', work.length, '')}
+          {metric('Latest recorded load', loadText(latestWork?.loadKg, fmtWt), latestWork ? fmtDate(latestWork.date) : '')}
+          {metric('Latest recorded reps', latestWork?.reps ?? '—', latestWork ? `${fmtDate(latestWork.date)} · ${latestWork.sets ?? '—'} sets` : '')}
+        </>}
+      </div>
+      <div className="progress-chart-toolbar"><h3>{estimateChart ? 'Estimated 1RM over time' : 'Recorded set load over time'} <ProgressInfo label="strength chart context" text={estimateChart ? 'Epley estimates from completed sets. Estimates are not tested maxima; training max is a programming reference.' : 'External load recorded for the same lift. Compare reps and source before interpreting change. Zero means no external load; missing values remain blank.'} /></h3>
+        {main && <div className="progress-chart-switch" role="group" aria-label="Strength chart"><button type="button" aria-pressed={chart === 'estimate'} onClick={() => setChart('estimate')}>Estimated 1RM</button><button type="button" aria-pressed={chart === 'load'} onClick={() => setChart('load')}>Set load</button></div>}
+      </div>
+      <div className="progress-chart progress-strength-canvas"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: trend.length ? trend.map((row) => toDisp(row[field])) : dates.map(() => null), borderColor: COLORS.blue, tension: 0.15, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
+        {!trend.length && <p className="load-response-empty-label">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates yet.' : 'No recorded loads yet.'}</p>}
+      </div>
+      <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
+    </section>
+    <details className="card progress-disclosure progress-strength-logs"><summary>Recorded sets <span>{work.length} entries</span></summary>
+      {work.length ? <div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table; scroll horizontally for more columns`} tabIndex={0}><table className="checkins-table"><caption className="sr-only">Recorded {lift} work</caption><thead><tr><th scope="col">Date</th><th scope="col">Source</th><th scope="col">Sets</th><th scope="col">Reps</th><th scope="col">Recorded load</th><th scope="col">Record</th></tr></thead><tbody>{work.map((row, index) => <tr key={`${row.date}-${row.source}-${index}`}><th scope="row">{fmtDate(row.date)}</th><td>{row.source}</td><td>{row.sets ?? '—'}</td><td>{row.reps ?? '—'}</td><td>{loadText(row.loadKg, fmtWt)}</td><td>{row.source === 'Completed workout' ? <Link to={`/clients/${client.id}/training?date=${row.date}`}>View day →</Link> : '—'}</td></tr>)}</tbody></table></div> : <p className="progress-empty">No recorded sets.</p>}
+    </details>
   </div>
 }

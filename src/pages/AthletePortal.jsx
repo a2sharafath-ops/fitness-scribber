@@ -13,6 +13,7 @@ import RPEModal from '../components/organisms/workout/RPEModal'
 import { useAuth } from '../store/AuthContext'
 import { supabase } from '../lib/supabase'
 import { callFunction } from '../api/functions'
+import { beginWearableConnection } from '../api/wearable'
 import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
@@ -33,9 +34,17 @@ export default function AthletePortal() {
     const client = clients?.[0]
     if (!client) { setState({ client: null }); return }
     const out = {}
-    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'wearable_tokens', 'workouts', 'assessments', 'screenings', 'maxes']) {
+    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'workouts', 'assessments', 'screenings', 'maxes']) {
       const { data } = await supabase.from(t).select('*').eq('clientId', client.id)
       out[t] = data || []
+    }
+    // Only connection metadata crosses the server boundary.
+    try {
+      const result = await callFunction('wearable-connections', { clientId: client.id, action: 'list' })
+      out.wearableConnections = result.connections || []
+    } catch {
+      out.wearableConnections = []
+      out.wearableConnectionError = 'Device connections could not be loaded. Try again later.'
     }
     // Coach-owned library (RLS lets the linked athlete read it); not clientId-scoped.
     const [{ data: plans }, { data: exercises }] = await Promise.all([
@@ -54,7 +63,7 @@ export default function AthletePortal() {
       alert('Wearable connected — tap “Sync now” to pull your latest reading.')
     } else if (p.get('wearable') === 'error') {
       window.history.replaceState({}, '', window.location.pathname)
-      alert('Wearable connection failed: ' + (p.get('msg') || 'unknown error'))
+      alert('Wearable connection failed. Please try connecting again.')
     }
   }, [])
 
@@ -196,7 +205,8 @@ export default function AthletePortal() {
           onSave={saveScreening} onComplete={completeScreening} />
         <WearableSection
           clientId={client.id}
-          tokens={state.wearable_tokens || []}
+          connections={state.wearableConnections || []}
+          connectionError={state.wearableConnectionError}
           latest={[...state.wearable].sort((a, b) => b.date.localeCompare(a.date))[0]}
           onChange={load}
         />
@@ -241,21 +251,23 @@ export default function AthletePortal() {
 
 const WEARABLES = [['oura', 'Oura'], ['whoop', 'Whoop'], ['fitbit', 'Fitbit']]
 
-function WearableSection({ clientId, tokens, latest, onChange }) {
+function WearableSection({ clientId, connections, connectionError, latest, onChange }) {
   const [busy, setBusy] = useState(false)
-  const connected = tokens.map((t) => t.provider)
+  const connected = connections.map((t) => t.provider)
 
   const connect = async (provider) => {
     setBusy(true)
-    try { const { url } = await callFunction('wearable-connect', { provider, clientId }); if (url) window.location.href = url }
+    try { await beginWearableConnection(provider, clientId) }
     catch (e) { alert('Connect failed: ' + (e.message || 'wearable functions not deployed yet')) } finally { setBusy(false) }
   }
   const disconnect = async (provider) => {
     if (!confirm('Disconnect ' + provider + '?')) return
     setBusy(true)
-    const { error } = await supabase.from('wearable_tokens').delete().eq('clientId', clientId).eq('provider', provider)
-    setBusy(false)
-    if (error) alert(error.message); else onChange()
+    try {
+      await callFunction('wearable-connections', { clientId, provider, action: 'disconnect' })
+      await onChange()
+    } catch { alert('Device could not be disconnected. Please try again.') }
+    finally { setBusy(false) }
   }
   const sync = async () => {
     setBusy(true)
@@ -266,6 +278,7 @@ function WearableSection({ clientId, tokens, latest, onChange }) {
   return (
     <Card style={{ marginTop: 16 }}>
       <div className="section-title" style={{ margin: '0 0 4px' }}>My wearable</div>
+      {connectionError && <p role="alert">{connectionError} <Button variant="ghost" onClick={onChange}>Retry</Button></p>}
       <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
         Connect a device to automatically share your morning HRV, resting HR &amp; sleep with your coach.
       </p>
@@ -280,7 +293,7 @@ function WearableSection({ clientId, tokens, latest, onChange }) {
           connected.includes(id) ? (
             <Button key={id} variant="ghost" size="sm" disabled={busy} onClick={() => disconnect(id)}>✓ {label} · Disconnect</Button>
           ) : (
-            <Button key={id} variant="ghost" size="sm" disabled={busy} onClick={() => connect(id)}>Connect {label}</Button>
+            <Button key={id} variant="ghost" size="sm" disabled={busy || !!connectionError} onClick={() => connect(id)}>Connect {label}</Button>
           ),
         )}
         {connected.length > 0 && <Button size="sm" disabled={busy} onClick={sync}>⟳ Sync now</Button>}

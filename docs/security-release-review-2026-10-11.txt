@@ -1,0 +1,176 @@
+SECURITY AND RELEASE REVIEW — 2026-10-11
+
+Status: reviewed hardening APPLIED to production with user approval, 2026-10-11.
+No Git commit, push, frontend deployment, client-data change or paid upgrade.
+Project inspected: Cureocity Fitness Partner (haxxetirrcrwzwdzsdui).
+
+RELEASE RECOMMENDATION
+The catalogue audit-data exposure below is fixed. The narrow patch was applied
+and read-only production authorization checks passed. The current frontend has no pooling RPC
+calls, but this does not establish that other deployments have stopped using it.
+Do not revoke every SECURITY DEFINER function merely to remove advisor notices.
+
+LIVE PERMISSION INVENTORY
+87 public SECURITY DEFINER functions; 52 callable by authenticated; none by anon.
+72 public RLS policies and 76 non-system triggers inventoried.
+authenticated cannot CREATE in public.
+The 52 function notices are permission-review prompts, not 52 proven exploits.
+The previous advisor result also includes leaked-password protection: total 53.
+This turn verified current privileges, rather than claiming a new advisor run.
+
+P1 — CONFIRMED CATALOGUE AUDIT EXPOSURE; PROPOSED FIX TESTED
+pooling_submit_catalogue accepts a user-supplied manifest ID in a coach-owned
+client's submission. pooling_read_catalogue_admin then uses that ID to return
+whole matching release-event rows, including evidence_id and reason. There is
+no release-operator requirement for those rows. Knowing a manifest ID lets an
+ordinary coach fetch matching audit details through their own client.
+Reproduced using the exact captured function bodies and entirely fictional
+tables/data in isolated PGlite. No other coach's production records were queried.
+
+supabase/schema_pooling_security.sql requires current, non-revoked, unexpired
+release-operator authorization with an evidence reference for the events field.
+Ordinary coaches retain their own submissions and receive events: []. Existing
+client-ownership checks and operator matching-event behavior are preserved.
+This deliberately changes the older catalogue UI's event visibility; it does
+not grant anyone new release authority or affect prescriptions/scheduling.
+
+P2 — SEVEN INTERNAL PREDICATES HAVE UNNECESSARY DIRECT EXECUTE
+The proposed SQL revokes PUBLIC/anon/authenticated direct execution from the
+seven predicates listed below. Their owner can still call them from SECURITY
+DEFINER functions. None is named directly in the inspected RLS policies; policies
+use pooling_linked and pooling_governed_client, both kept accessible.
+Real nested helper definitions plus an athlete RLS policy were tested locally:
+direct helper calls fail, classic linked-client reads succeed, and enabling the
+governed flag still hides those classic records.
+
+KEEP THE REQUIRED ENTRY POINTS
+become_coach: invitation-gated onboarding.
+redeem_invite: claim an unclaimed client using its invitation code.
+is_admin: current profile role; referenced by 21 inspected policies.
+delete_client_and_data: authenticated owning-coach check and atomic deletion.
+pooling_linked / pooling_governed_client: athlete RLS predicates.
+These require signed-in access; converting them blindly to SECURITY INVOKER
+would change their behavior and may cause RLS recursion or permission failures.
+
+RETAIN OTHER LEGACY ENTRY POINTS PENDING DEDICATED COMPATIBILITY REVIEW
+The remaining pooling entry points have caller/owner/linked-client checks or
+delegate to checked helpers. Test-workspace creation delegates to role,
+allowlist, expiry and slot checks. This is a source/permission review, not a
+complete adversarial integration test of that older subsystem. Its migrations
+are not maintained here. The retained notices have not been suppressed.
+
+FUTURE PRIVILEGES
+The live default privileges still grant authenticated and anon execution on
+new public functions created by postgres/supabase_admin. Existing grants do
+not imply future functions will be protected. Every new RPC migration should
+explicitly revoke PUBLIC/anon and grant only intended roles in one transaction.
+A default-privilege change needs a separate coordinated migration review; it
+has not been bundled into the narrow proposal or applied to managed roles.
+
+PASSWORD PROTECTION
+The organization is on Free. Supabase's leaked-password protection requires Pro
+or above. This is a paid-plan decision, not an application code fix. No upgrade
+or account policy change made. Other password/authentication controls remain.
+
+RELEASE DIFF SCOPE
+Reviewed the changed persistence/atomic RPC boundaries, caller ownership and
+public environment-variable boundary, callback handling and sanitized server
+errors, alongside the live function/RLS inventory. This is not a claim of a
+line-by-line security audit of every accumulated UI change and legacy function.
+Previously verified: build, three program/schedule SQL suites and signed-in
+coach workflow, followed by the timezone and prescribed-runner fixes. Real
+wearable-provider OAuth remains unverified and deferred by the user.
+
+VALIDATION FOR THIS PROPOSAL
+- Isolated production-definition reproduction: exposure confirmed before fix.
+- After fix: ordinary coach retains submissions but gets no release evidence.
+- Unrelated coach, linked athlete and null caller denied; anon lacks EXECUTE.
+- Valid operator allowed; revoked, expired and empty-evidence operators denied.
+- Proposed SQL can be applied twice without broadening privileges.
+- Seven direct helper calls denied; real nested RLS predicate calls still work.
+- Full application test suite: 180 passed, 0 failed or skipped.
+- Lint and git diff --check: passed.
+- Build and the three broader program/schedule SQL suites passed in the previous
+  release check; not repeated for this documentation/test-only local proposal.
+
+Documentation:
+https://supabase.com/docs/guides/observability/advisors?queryGroups=lint&lint=0029_authenticated_security_definer_function_executable
+https://supabase.com/docs/guides/auth/password-security
+https://supabase.com/changelog
+
+FUNCTION-BY-FUNCTION DISPOSITION (52 PRE-PATCH AUTHENTICATED GRANTS)
+become_coach() | KEEP required entry point
+delete_client_and_data(text) | KEEP required entry point
+is_admin() | KEEP required entry point
+pooling_actor_runtime() | RETAIN legacy entry point; deeper integration audit deferred
+pooling_approve(text,bigint,bigint,bigint,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_approve_batch(text,bigint,text,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_approve_week(text,bigint,bigint,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_athlete_snapshot() | RETAIN legacy entry point; deeper integration audit deferred
+pooling_client_home(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_client_runtime(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_client_runtime_a34(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_coach_sessions() | RETAIN legacy entry point; deeper integration audit deferred
+pooling_confirm_source(text,bigint,text,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_create_engineering_secondary(boolean) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_create_test_workspace(boolean) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_development_context(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_development_enabled(text) | APPLIED restrict to internal calls
+pooling_enabled() | APPLIED restrict to internal calls
+pooling_execution(bigint,bigint,text,text,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_governed_client(text) | KEEP required entry point
+pooling_governed_client_a34(text) | APPLIED restrict to internal calls
+pooling_linked(text) | KEEP required entry point
+pooling_manifest_allowed(text,text) | APPLIED restrict to internal calls
+pooling_manifest_allowed_a34(text,text) | APPLIED restrict to internal calls
+pooling_module_enabled(text,text) | APPLIED restrict to internal calls
+pooling_module_enabled_a34(text,text) | APPLIED restrict to internal calls
+pooling_operation_status(text,text,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_operation_status_a34(text,text,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_prepare_client(text,bigint,text,jsonb,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_assignments(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_assignments_a34(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_catalogue_admin(text) | FIXED release-event authorization
+pooling_read_extensions(text,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_governance(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_reassessments(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_source_review(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_suggestions(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_read_weeks(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_record_consent(text,text,text,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_request_extension(text,bigint,text,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_request_reassessment(text,text,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_review_extension(text,bigint,bigint,text,text,text,bigint,jsonb) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_review_workspace(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_revoke_test_workspace(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_save_draft(text,bigint,text,jsonb,bigint) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_set_development(text,boolean,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_stop_legacy(text,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_submit_catalogue(text,text,jsonb,text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_submit_report(text,bigint,text,text,jsonb,timestamp with time zone) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_test_scenario(text) | RETAIN legacy entry point; deeper integration audit deferred
+pooling_test_status() | RETAIN legacy entry point; deeper integration audit deferred
+redeem_invite(text) | KEEP required entry point
+
+PRODUCTION APPLICATION AND VERIFICATION
+- Approved by the user after reviewing the proposed SQL; applied 2026-10-11.
+- Preflight: eight target definitions matched the reviewed bodies; all owned by
+  postgres; no RLS policy directly called the seven restricted helpers.
+- Original function definitions and ACLs saved outside the repository as backup.
+- Applied in one transaction with lock/statement timeouts and definition hashes.
+- Initial guard attempt aborted before mutations: rendered browser cell text had
+  collapsed whitespace. Confirmed exact DOM text matches database hashes, rolled
+  back, then applied using those exact hashes. No partial change was committed.
+- Live: seven helpers deny authenticated/anon execution; required public entry
+  points retain authenticated access. All 72 RLS policies are unchanged.
+- Live read-only signed-in test using the demo owner: seven direct helper calls
+  denied; nested RLS helpers run; own demo client loads; catalogue events empty
+  for the ordinary coach; missing identity rejected. No business data changed.
+- Refreshed Supabase Security Advisor: 0 errors, 46 warnings (previously 53).
+  Remaining: 45 signed-in SECURITY DEFINER notices and leaked-password protection.
+- No anonymous public SECURITY DEFINER execution found (87 functions inspected).
+- Both targeted isolated security tests pass again. Prior full suite: 180 pass.
+- No Git commit/push, frontend deployment, paid upgrade or provider setup.
+- Entire older pooling subsystem was not end-to-end tested; its retained entry
+  points and future default privileges remain the documented follow-up scope.
+- Signed-in built app reloaded successfully at port 5180: Schedule loaded both clients and existing weekly bookings without a data-warning banner.

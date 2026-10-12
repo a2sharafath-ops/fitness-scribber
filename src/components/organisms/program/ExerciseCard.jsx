@@ -5,6 +5,7 @@
 import SetRow from '../../molecules/SetRow'
 import Autocomplete from '../../molecules/Autocomplete'
 import { INTENSITY_TYPES, SUPERSET_GROUPS, newSet } from '../../../lib/program'
+import { changeIntensity, editPrescribedSet, followFirstSet } from '../../../lib/prescription'
 
 export default function ExerciseCard({
   ex, exercises, tmKg, tmInfo, maxHr,
@@ -16,14 +17,9 @@ export default function ExerciseCard({
   // Set 1 acts as the template row: edits to its prescription fields
   // auto-fill every later set that hasn't been edited individually
   // (copy-paste ergonomics). Touching a lower set opts it out.
-  const PROPAGATE = ['prescribedReps', 'prescribedIntensityValue', 'prescribedLoadKg', 'prescribedTempo', 'prescribedRestSeconds']
   const setSet = (si) => (k, v) =>
     onChange({
-      sets: ex.sets.map((s, j) => {
-        if (j === si) return { ...s, [k]: v, ...(si > 0 && PROPAGATE.includes(k) ? { touched: true } : {}), ...(k === 'status' ? { flagged: false, e1rmApplied: false } : {}) }
-        if (si === 0 && j > 0 && !s.touched && s.status === 'Pending' && PROPAGATE.includes(k)) return { ...s, [k]: v }
-        return s
-      }),
+      sets: editPrescribedSet(ex.sets, si, k, v),
     })
   const addSet = () => {
     const last = ex.sets[ex.sets.length - 1]
@@ -46,7 +42,7 @@ export default function ExerciseCard({
           onChange={(v) => onChange({ exerciseName: v, unmapped: false, exerciseDbRef: null })}
         />
         <label className="sf"><span>Intensity</span>
-          <select value={ex.intensityType} aria-label="Intensity metric" onChange={(e) => onChange({ intensityType: e.target.value })}>
+          <select value={ex.intensityType} aria-label="Intensity metric" title="Changing the metric clears incompatible intensity targets." onChange={(e) => onChange(changeIntensity(ex, e.target.value))}>
             {INTENSITY_TYPES.map((t) => <option key={t}>{t}</option>)}
           </select></label>
         <label className="sf"><span>Superset</span>
@@ -86,7 +82,8 @@ export default function ExerciseCard({
           onChange={setSet(si)} onRemove={removeSet(si)} />
       ))}
       <button type="button" className="link-btn" onClick={addSet}>＋ Add set</button>
-      {ex.sets.length > 1 && <span className="muted" style={{ fontSize: 10, marginLeft: 8 }}>set 1 auto-fills the sets below until they’re edited</span>}
+      {ex.sets.length > 1 && <span className="muted" style={{ fontSize: 10, marginLeft: 8 }}>set 1 fills unchanged fields below</span>}
+      {ex.sets.some(set => set.touched || Object.values(set.touchedFields || {}).some(Boolean)) && <button type="button" className="link-btn" onClick={() => onChange({ sets: followFirstSet(ex.sets) })}>Reset targets to set 1</button>}
     </div>
   )
 }

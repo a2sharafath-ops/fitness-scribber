@@ -1,0 +1,92 @@
+/* Client Progress uses the same card rhythm as Overview and Training. */
+html:has(.client-progress){overflow-x:visible}
+.client-progress .progress-index{display:flex;gap:24px;border-bottom:1px solid var(--border);overflow-x:auto;margin-bottom:20px}
+.client-progress .progress-index button{width:auto;flex:0 0 auto;min-height:48px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;box-shadow:none;padding:10px 2px;color:var(--muted)}
+.client-progress .progress-index button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--text)}
+.client-progress .progress-index strong{font-size:13px}
+.client-progress .progress-index strong::after{content:none!important}
+.client-progress .progress-panel{padding:0;overflow:visible}
+.client-progress .card,.client-progress .progress-outcome,.client-progress .muscle-report{padding:22px;border-radius:20px;background:var(--surface);border:1px solid var(--border);margin:0 0 16px}
+.client-progress .progress-section-head{align-items:center;margin-bottom:18px}
+.client-progress .progress-section-head h2,.client-progress .load-response h2{font-size:19px;line-height:1.4;margin:0;display:flex;align-items:center;gap:8px}
+.client-progress .progress-title .btn{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.client-progress .progress-lift-select{font-weight:500}
+.client-progress .progress-metric-grid{gap:12px;margin:18px 0 22px}
+.client-progress .progress-metric{border:0;padding:16px;min-height:112px}
+.client-progress .progress-metric>span{font-size:11px;font-weight:500}
+.client-progress .progress-metric strong{font-size:28px;overflow-wrap:anywhere}
+.client-progress .progress-metric small{font-size:11px}
+.progress-chart-toolbar{display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.progress-chart-toolbar h3{margin:0;display:flex;gap:8px;align-items:center;font-size:15px}
+.progress-chart-switch{display:flex;gap:2px;padding:3px;background:var(--surface2);border-radius:24px}
+.progress-chart-switch button{font:inherit;font-size:11px;min-height:34px;padding:7px 12px;border:0;border-radius:22px;background:transparent;color:var(--muted);cursor:pointer}
+.progress-chart-switch button[aria-pressed=true]{background:var(--surface);color:var(--text);box-shadow:0 1px 4px #0001;font-weight:700}
+.client-progress .progress-strength-canvas{height:270px;position:relative}
+.progress-card-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:11px;margin-top:16px}
+.progress-card-foot strong{color:var(--blue)}
+.progress-card-foot a{color:var(--accent);font-size:12px;font-weight:700;min-height:44px;display:inline-flex;align-items:center}
+.progress-info{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--muted);font:700 13px Georgia,serif;cursor:pointer;flex:0 0 auto}
+.progress-info:hover{color:var(--accent);border-color:var(--accent)}
+.progress-info:focus-visible,.progress-chart-switch button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.progress-info-text{font-size:14px;line-height:1.6;color:var(--muted)}
+.client-progress .progress-disclosure>summary{display:flex;justify-content:space-between;gap:12px;align-items:center;list-style:none;padding:0;min-height:36px;font-size:14px;color:var(--text)}
+.client-progress .progress-disclosure>summary::-webkit-details-marker{display:none}
+.client-progress .progress-disclosure>summary::after{content:'+';font-size:22px;color:var(--muted)}
+.client-progress .progress-disclosure[open]>summary::after{content:'−'}
+.client-progress .progress-disclosure>summary span{margin-left:auto;font-size:11px;font-weight:500;color:var(--muted)}
+.client-progress .progress-disclosure[open]>summary{margin-bottom:14px}
+.client-progress .progress-disclosure>.card{padding:0;border:0;margin:0}
+.client-progress .checkins-table-scroll{max-height:290px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.client-progress .checkins-table th{position:sticky;top:0;background:var(--surface);z-index:1}
+.client-progress .checkins-table tbody th{position:static;background:transparent}
+.client-progress .load-response{margin-top:0}
+.client-progress .load-response-heading{align-items:center;margin-bottom:18px}
+.progress-load-primary-controls{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.progress-load-primary-controls label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.progress-load-primary-controls select{width:auto;min-height:42px;max-width:230px}
+.client-progress .load-response-canvas{height:270px}
+.client-progress .load-response-status span{padding:0;background:transparent}
+.client-progress .load-response-status{gap:12px}
+.client-progress .progress-derived{margin-bottom:16px}
+.client-progress .progress-derived-status{font-size:11px;line-height:1.5;color:var(--muted)}
+.client-progress .progress-derived-card strong{font-size:28px}
+.client-progress .progress-load-logs{display:flex;flex-direction:column;margin-top:0;gap:0}
+.client-progress .progress-log-card{border:0;border-radius:0;padding:16px 0;border-bottom:1px solid var(--border)}
+.client-progress .progress-log-card:last-child{border-bottom:0;padding-bottom:0}
+.client-progress .progress-log-card .checkins-empty{padding:0;margin:6px 0 12px;font-size:12px}
+.client-progress .progress-outcome-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.client-progress .progress-outcome{margin:0;min-height:260px}
+.client-progress .progress-outcome h3{font-size:17px}
+.client-progress .progress-outcome>.muted{padding:26px 0;flex:1}
+.client-progress .progress-body{grid-column:1/-1;min-height:0}
+.client-progress .progress-body-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.client-progress .progress-body-metric{display:flex;flex-direction:column;background:var(--surface2);padding:16px;border-radius:12px}
+.client-progress .progress-body-metric strong{font-size:26px;text-align:left}
+.client-progress .progress-source-link{color:var(--accent);padding-top:14px}
+.client-progress .progress-attendance-layout{grid-template-columns:160px minmax(0,1fr);margin:22px 0;gap:24px}
+.progress-completion-ring{width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--green) var(--completion),var(--surface2) 0);display:grid;place-items:center}
+.progress-completion-ring>div{height:124px;width:124px;border-radius:50%;background:var(--surface);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:8px}
+.progress-completion-ring strong{font-size:33px}
+.progress-completion-ring span{font-size:10px;color:var(--muted)}
+.progress-completion-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.progress-completion-counts strong{display:block;font-size:25px}
+.progress-completion-counts span{font-size:11px;color:var(--muted)}
+.progress-workout-completion{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.progress-workout-completion h3{font-size:16px;margin:0}
+.progress-workout-completion p{font-size:12px;color:var(--muted);margin:5px 0 0}
+.progress-workout-completion>strong{font-size:28px}
+.progress-workout-completion .progress-card-foot{grid-column:1/-1}
+.client-progress .muscle-report{margin-top:0}
+.client-progress .muscle-report h3{font-size:19px}
+.client-progress .muscle-report h4{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0 0 8px}
+.client-progress .muscle-report .progress-info{padding:0;min-height:28px;color:var(--muted);border-radius:50%}
+.progress-muscle-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:center}
+.client-progress .muscle-map-panel{width:100%;max-width:360px;margin:0 auto}
+.client-progress .muscle-list{display:flex;flex-direction:column;gap:0;max-height:285px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.client-progress .muscle-list button{border:0;border-bottom:1px solid var(--border);border-radius:0;padding:12px 4px;display:grid;grid-template-columns:1fr auto;gap:5px;width:100%}
+.client-progress .muscle-list strong{text-align:right}
+.client-progress .muscle-list strong small{display:inline;font-weight:500}
+.progress-muscle-bar{grid-column:1/-1;height:5px;background:var(--surface2);border-radius:3px}
+.progress-muscle-bar i{display:block;height:100%;background:#21876e;border-radius:3px}
+@media(max-width:700px){.client-progress .progress-index{gap:20px}.client-progress .progress-index strong{font-size:12px}.client-progress .card,.client-progress .progress-outcome,.client-progress .muscle-report{padding:20px}.client-progress .progress-metric-grid{gap:8px}.client-progress .progress-metric{padding:12px}.client-progress .progress-metric strong{font-size:24px}.client-progress .progress-title-actions{width:auto}.client-progress .progress-section-head .btn{width:auto}}
+@media(max-width:520px){.client-progress .progress-index{gap:10px}.client-progress .progress-index strong{font-size:11px}.client-progress .card,.client-progress .progress-outcome,.client-progress .muscle-report{padding:18px;border-radius:17px}.client-progress .progress-metric-grid{gap:0;border-radius:12px;overflow:hidden}.client-progress .progress-metric{display:grid;grid-template-columns:1fr auto;gap:3px;border-radius:0;min-height:75px;border-bottom:1px solid var(--border);padding:12px 15px;align-items:center}.client-progress .progress-metric strong{grid-column:2;grid-row:1/3;max-width:145px;font-size:22px;text-align:right}.client-progress .progress-metric small{grid-column:1}.client-progress .progress-body-metrics,.client-progress .progress-outcome-grid{grid-template-columns:1fr}.client-progress .progress-body{grid-column:auto}.client-progress .progress-strength-canvas,.client-progress .load-response-canvas{height:240px}.client-progress .progress-derived-card{min-height:100px}.client-progress .progress-attendance-layout{grid-template-columns:1fr;justify-items:center}.progress-completion-counts{width:100%;text-align:center}.progress-muscle-layout{grid-template-columns:1fr;gap:18px}.client-progress .muscle-map-panel{max-width:300px}.client-progress .muscle-list{max-height:210px}.progress-load-primary-controls{align-items:stretch}.progress-load-primary-controls label{width:100%;justify-content:space-between}.progress-load-primary-controls select{max-width:75%}.client-progress .load-response-settings-current{display:none}.client-progress .progress-section-head h2,.client-progress .load-response h2{font-size:18px}.client-progress .progress-title .btn{font-size:12px}.client-progress .progress-title-actions{flex:0 0 auto}}

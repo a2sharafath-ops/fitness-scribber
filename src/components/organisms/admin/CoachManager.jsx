@@ -40,7 +40,7 @@ export default function CoachManager({ users, clientCounts, currentUserId, busy,
             {mode === 'create' && (
               <>
                 <Field label="Display name (optional)"><input value={name} onChange={(e) => setName(e.target.value)} /></Field>
-                <Field label="Temporary password"><input type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="min 6 characters" /></Field>
+                <Field label="Temporary password"><input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="min 6 characters" /></Field>
               </>
             )}
             <div className="flex gap">

@@ -28,6 +28,8 @@ export const newSet = (n = 1, o = {}) => ({
   setId: uid(),
   setNumber: n,
   prescribedReps: o.reps ?? 10,
+  prescribedRepsMax: o.repsMax ?? null,
+  prescribedRir: o.rir ?? null,
   prescribedIntensityValue: o.intensity ?? null,
   prescribedLoadKg: o.loadKg ?? null,
   prescribedTempo: o.tempo ?? '',
@@ -331,8 +333,9 @@ export const blocksToItems = (blocks) =>
       const reps = +e.sets[0]?.prescribedReps || 0
       const load = +e.sets[0]?.prescribedLoadKg || 0
       return {
-        exercise: e.exerciseName, sets, reps, load,
+        exercise: e.exerciseName, sets, reps, repsMax: e.sets[0]?.prescribedRepsMax ?? null, load,
         intensity: +e.sets[0]?.prescribedIntensityValue || 0,
+        rir: e.sets[0]?.prescribedRir ?? null,
         intensityType: e.intensityType, group: e.supersetLinkId || '', mode: 'Straight',
         tempo: e.sets[0]?.prescribedTempo || '',
         volumeLoad: e.sets.reduce((v, s) => v + setLoad(s) * setReps(s), 0),
@@ -349,7 +352,9 @@ export function itemsToBlocks(items) {
     const sets = Array.from({ length: count }, (_, j) =>
       newSet(j + 1, {
         reps: +it.reps || 10,
+        repsMax: it.repsMax ?? null,
         intensity: it.intensity ?? null,
+        rir: it.rir ?? null,
         loadKg: +it.load || null,
         tempo: it.tempo || '',
       }))
@@ -520,8 +525,23 @@ export const defaultRuleFor = (blockType) =>
     ? { type: 'load', value: 2.5 }
     : { type: 'reps', value: 1 }
 
+export const progressionTypesFor = exercise => [
+  ...(exercise.intensityType === '%1RM' ? ['percentage'] : []),
+  ...(exercise.sets?.length && exercise.sets.every(set => set.prescribedLoadKg != null) ? ['load'] : []),
+  ...(!['Seconds', 'Minutes', 'Target HR'].includes(exercise.intensityType) ? ['reps'] : []),
+  'sets',
+]
+export function defaultRuleForExercise(blockType, exercise) {
+  if (exercise.intensityType === '%1RM') return { type: 'percentage', value: 2.5 }
+  const rule = defaultRuleFor(blockType)
+  return progressionTypesFor(exercise).includes(rule.type) ? rule
+    : { type: progressionTypesFor(exercise).includes('reps') ? 'reps' : 'sets', value: 1 }
+}
+
 // Apply one progression scheme to an exercise's sets.
-function progressSets(e, type, value, resolveTm) {
+function progressSets(e, type, value) {
+  if (!Number.isFinite(+value) || ((type === 'sets' || type === 'reps') && !Number.isInteger(+value)) || (type === 'sets' && +value < 0)) throw new Error(`${e.exerciseName}: use a valid progression increment (whole numbers for reps and sets).`)
+  if (!progressionTypesFor(e).includes(type)) throw new Error(`${e.exerciseName}: ${type === 'percentage' ? 'percentage progression requires a %1RM prescription' : `${type} progression is unavailable for these targets`}.`)
   let sets = e.sets.map((s) => ({ ...s }))
   if (type === 'load') {
     sets = sets.map((s) => (s.prescribedLoadKg != null
@@ -529,16 +549,16 @@ function progressSets(e, type, value, resolveTm) {
   } else if (type === 'percentage') {
     sets = sets.map((s) => {
       const pct = s.prescribedIntensityValue != null ? +s.prescribedIntensityValue + +value : null
-      const tm = resolveTm(e.exerciseName)
       return {
         ...s,
         prescribedIntensityValue: pct ?? s.prescribedIntensityValue,
-        prescribedLoadKg: e.intensityType === '%1RM' && pct != null && tm
-          ? targetKg(tm, pct) : s.prescribedLoadKg,
+        // Percentage progression deliberately replaces a fixed-load override.
+        // Resolve kilograms for the destination client when displaying/running.
+        prescribedLoadKg: null,
       }
     })
   } else if (type === 'reps') {
-    sets = sets.map((s) => ({ ...s, prescribedReps: (+s.prescribedReps || 0) + +value }))
+    sets = sets.map((s) => ({ ...s, prescribedReps: (+s.prescribedReps || 0) + +value, prescribedRepsMax: s.prescribedRepsMax == null ? null : s.prescribedRepsMax + +value }))
   } else if (type === 'sets') {
     for (let i = 0; i < +value; i++) {
       const last = sets[sets.length - 1]
@@ -553,9 +573,8 @@ function progressSets(e, type, value, resolveTm) {
 //   { enabled, type, value } (own scheme), a bare boolean (legacy:
 //   false = stays static, true = inherit block default), or absent
 //   (inherit block default). types: 'load'|'percentage'|'reps'|'sets'.
-// resolveTm(exerciseName) supplies the Training Max so %1RM rows can
-// re-evaluate absolute target weights after a percentage bump.
-export function applyProgression(blocks, rules, resolveTm = () => null) {
+// Percentage targets stay relative; their weights resolve for the client at use time.
+export function applyProgression(blocks, rules, _resolveTm = () => null) {
   return (blocks || []).map((b) => {
     const rule = rules[b.blockId]
     if (!rule?.enabled) return b
@@ -566,7 +585,7 @@ export function applyProgression(blocks, rules, resolveTm = () => null) {
         if (exR === false || exR?.enabled === false) return e
         const type = exR?.type ?? rule.type
         const value = exR?.value ?? rule.value
-        return { ...e, sets: progressSets(e, type, value, resolveTm) }
+        return { ...e, sets: progressSets(e, type, value) }
       }),
     }
   })

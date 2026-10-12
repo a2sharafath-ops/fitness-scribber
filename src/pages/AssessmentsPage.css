@@ -1,0 +1,70 @@
+html:has(.client-assessments){overflow-y:scroll;scrollbar-gutter:stable}
+.client-assessments{min-width:0}
+.client-assessments .card{border-radius:20px;padding:22px}
+.client-assessments .assess-title{margin-bottom:18px}
+.client-assessments .assess-jump{gap:22px;border-bottom:1px solid var(--border);margin:0 0 20px}
+.client-assessments .assess-jump a{background:none;border-radius:0;padding:10px 0;font-size:12px;border-bottom:2px solid transparent;color:var(--text)}
+.client-assessments .assess-jump a[aria-current=location]{border-bottom-color:var(--text)}
+.client-assessments h2{font-size:19px;letter-spacing:-.35px;margin:0}
+.client-assessments h3{font-size:16px;margin:0}
+.client-assessments .assessment-screen-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.client-assessments .assessment-eyebrow{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 4px}
+.client-assessments .assessment-screen-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
+.client-assessments .assessment-badge{display:inline-flex;align-items:center;padding:4px 8px;background:var(--surface2);border-radius:7px;color:var(--muted);font-size:11px;font-weight:600}
+.client-assessments .assessment-badge.green{background:var(--tint-green);color:var(--green)}
+.client-assessments .assessment-badge.red{background:var(--tint-red);color:var(--accent)}
+.client-assessments .assessment-badge.amber{background:var(--tint-amber);color:var(--accent2)}
+.client-assessments .assessment-screen-date{font-size:12px;color:var(--muted);margin:10px 0 0}
+.client-assessments .assessment-review-strip{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;background:var(--tint-amber);border-radius:10px;margin-top:16px;font-size:12px}
+.client-assessments .assessment-review-strip .btn{font-size:12px}
+.client-assessments .assessment-screen-foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.client-assessments .assessment-link{display:inline-flex;align-items:center;min-height:40px;background:none;border:0;padding:4px 0;color:var(--accent);font:inherit;font-size:12px;font-weight:600;cursor:pointer;line-height:1.5;text-align:left;text-decoration:none}
+.client-assessments .assessment-link:hover{text-decoration:underline}
+.client-assessments .assessment-concern{margin-left:auto}
+.client-assessments .assessment-section{margin-top:26px;scroll-margin-top:20px}
+.client-assessments .assessment-screen-summary{scroll-margin-top:20px}
+.client-assessments .assessment-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.client-assessments .assessment-title-group{display:flex;align-items:center;gap:7px}
+.client-assessments .progress-info{border:1px solid var(--border);background:var(--surface);border-radius:50%;width:32px;height:32px;padding:0;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;flex-shrink:0}
+.client-assessments .assessment-baseline-count{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+.client-assessments .assessment-mini-track{width:70px;height:5px;background:var(--border);border-radius:9px;overflow:hidden}
+.client-assessments .assessment-mini-track>span{display:block;height:100%;background:var(--green)}
+.client-assessments .assessment-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.client-assessments .assessment-category{display:flex;flex-direction:column;min-width:0;min-height:300px;padding:20px}
+.client-assessments .assessment-type-icon{display:grid;place-items:center;width:34px;height:34px;background:var(--surface2);border-radius:10px;margin-bottom:14px}
+.client-assessments .assessment-category h3{margin-bottom:6px}
+.client-assessments .assessment-category-body{flex:1;margin:14px 0 20px;min-width:0}
+.client-assessments .assessment-result{font-size:22px;font-weight:700;letter-spacing:-.6px;line-height:1.35;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
+.client-assessments .assessment-source{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.client-assessments .assessment-review-date{font-size:11px;color:var(--muted);margin-top:12px}
+.client-assessments .assessment-review-date.overdue{color:var(--accent2)}
+.client-assessments .assessment-empty{font-size:13px;color:var(--muted);padding:12px 0}
+.client-assessments .assessment-category-actions{display:grid;gap:6px}
+.client-assessments .assessment-category-actions .btn{width:100%;justify-content:center;font-size:12px;min-height:42px}
+.client-assessments .assessment-category-actions .assessment-link{justify-self:center}
+.client-assessments .assessment-history-space{height:44px}
+.client-assessments .assessment-pain{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:16px}
+.client-assessments .assessment-pain p{font-size:12px;color:var(--muted);margin-top:6px;overflow-wrap:anywhere}
+.client-assessments .assessment-pain-actions{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.client-assessments .assessment-history{padding:0;margin-top:20px}
+.client-assessments .assessment-history>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;list-style:none;min-height:64px;padding:20px 22px;font-weight:600}
+.client-assessments .assessment-history>summary::-webkit-details-marker{display:none}
+.client-assessments .assessment-history>summary:after{content:'+';font-size:20px;color:var(--muted)}
+.client-assessments .assessment-history[open]>summary:after{content:'−'}
+.client-assessments .assessment-history>summary .assessment-badge{margin-left:auto}
+.client-assessments .assessment-history-body{padding:0 22px 20px}
+.client-assessments .assessment-filter{display:grid;gap:6px;font-size:12px;color:var(--muted);margin-bottom:12px;max-width:280px}
+.client-assessments .assessment-history-scroll{max-height:280px;overflow:auto;overscroll-behavior:contain}
+.client-assessments .assessment-history-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--border)}
+.client-assessments .assessment-history-row>div{min-width:0;overflow-wrap:anywhere}
+.client-assessments .assessment-history-row strong{font-size:12px;display:block}
+.client-assessments .assessment-history-row small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.client-assessments .assessment-history-row .assessment-link{flex-shrink:0}
+.client-assessments .assessment-bottom-links{display:flex;gap:20px;flex-wrap:wrap;margin:20px 2px}
+.assessment-screen-dialog>.card,.assessment-screen-dialog>.assess-disclosure>.card{border:0;padding:0;background:none}
+.assessment-screen-dialog .assess-disclosure{margin:14px 0}
+.assessment-screen-dialog .assess-disclosure>summary{padding:12px 0}
+.assessment-screen-dialog .intake-block{overflow-wrap:anywhere}
+@media(max-width:1100px){.client-assessments .assessment-category-grid{gap:12px}.client-assessments .assessment-category{padding:18px}.client-assessments .assessment-category h3{font-size:14px}}
+@media(max-width:760px){.client-assessments .assessment-category-grid{grid-template-columns:1fr}.client-assessments .assessment-category{display:grid;grid-template-columns:1fr auto;column-gap:16px;min-height:0;padding:20px}.client-assessments .assessment-type-icon{display:none}.client-assessments .assessment-category-top,.client-assessments .assessment-category-body{grid-column:1}.client-assessments .assessment-category h3{font-size:16px}.client-assessments .assessment-category-body{margin:12px 0 0}.client-assessments .assessment-category-actions{grid-column:2;grid-row:1 / span 2;align-self:center;min-width:150px}.client-assessments .assessment-history-space{display:none}.client-assessments .assessment-pain-actions{flex-shrink:1}.client-assessments .assessment-section-head{align-items:flex-start}.client-assessments .assessment-concern{margin-left:0}}
+@media(max-width:520px){.client-assessments .card{padding:18px}.client-assessments .assessment-category{display:flex;min-height:228px}.client-assessments .assessment-category-body{margin:16px 0}.client-assessments .assessment-category-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:auto;min-width:0}.client-assessments .assessment-category-actions .btn{width:auto}.client-assessments .assessment-category-actions .assessment-link{white-space:nowrap}.client-assessments .assessment-pain{flex-direction:column;align-items:flex-start;gap:14px}.client-assessments .assessment-pain-actions{width:100%;justify-content:space-between}.client-assessments .assessment-history{padding:0}.client-assessments .assessment-history>summary{padding:18px}.client-assessments .assessment-history-body{padding:0 18px 18px}.client-assessments .assessment-screen-head .btn{font-size:12px}.client-assessments .assessment-review-strip{flex-direction:column;align-items:flex-start;gap:6px}.client-assessments .assessment-title-group h2{font-size:17px}.client-assessments .assessment-mini-track{width:50px}.client-assessments .assessment-bottom-links{gap:12px}}

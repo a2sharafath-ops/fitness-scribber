@@ -1,0 +1,115 @@
+Coach prescription builder audit — 10 October 2026
+
+Historical findings: see coach-prescription-fixes-2026-10-10.txt for implemented
+fixes and the latest verification. The diagnostic command now runs regression
+checks for the corrected behavior rather than reproducing the old defects.
+
+Scope: current local working tree, including the Training redesign and combined
+percentage/weight + RIR support. No application fixes or backend writes were made.
+
+Verification:
+- Existing suite: 65 tests passed with node --test --test-concurrency=1 tests/*.test.mjs.
+- Additional diagnostic: node docs/coach-prescription-audit.mjs.
+  Assertions reproduce current defects; this is a diagnostic, not a regression
+  suite asserting desired behavior. It operates on in-memory fictional data.
+- Reviewed builder save/copy/bulk handlers, set propagation, progression,
+  load resolution, JSON plan copying, voice normalization and persistence status.
+- Browser interaction was blocked by URL security policy. Visual layout,
+  drag-and-drop, native input events, focus, real save/reopen and production
+  backend behavior remain unverified in this audit.
+
+FIX FIRST — prescription integrity
+
+1. Percentage progression can change subjective intensity.
+   Reproduced: +5 percentage points applied to a RIR-only set changes 2 RIR to 7.
+   progressSets updates prescribedIntensityValue regardless of intensityType.
+   Restrict percentage progression to percentage exercises and reject mismatches.
+   Source: src/lib/program.js, progressSets.
+
+2. Progressed percentage targets can retain another client's calculated weight.
+   Reproduced: 85% progressed against TM 100 stores 85 kg. Cloning to a client
+   with TM 200 still resolves to 85 kg, although 85% would imply 170 kg.
+   Explicit prescribedLoadKg always wins, and the source of this value is not
+   recorded. Separate calculated targets from intentional fixed-weight overrides.
+   Source: src/lib/program.js progressSets; src/lib/workout.js targetLoadKg.
+
+3. Save validation is incomplete; copy routes bypass even existing validation.
+   Code inspection: save checks session name, any exercise, and unmapped voice
+   entries. It does not require an exercise name, at least one set per exercise,
+   or valid positive/integer targets. Negative values survive model creation.
+   Quick clone, bulk apply and copy-to-clients do not use those save checks.
+   Add one shared prescription validator before every write, with contextual
+   rules for bodyweight zero, timed exercise targets and subjective scales.
+   Source: WorkoutBuilderModal.jsx save, quickClone, bulkApply, copyToClients.
+
+4. Switching intensity type reinterprets old numeric targets.
+   Code inspection: changing %1RM to RIR updates intensityType only. Existing 80
+   remains prescribedIntensityValue=80, outside the RIR selector's 0–10 options.
+   Reset incompatible targets or require explicit conversion/re-entry.
+   Source: ExerciseCard.jsx intensity selector.
+
+5. Bulk progression overwrites existing plans without a conflict confirmation.
+   Code inspection: target picker marks existing sessions, but bulkApply writes
+   to all selected dates directly. Quick clone and copy-to-clients do confirm.
+   Require a list of affected plans and confirmation before replacing them.
+   Source: WorkoutBuilderModal.jsx bulkApply; molecules/MultiDatePicker.jsx.
+
+6. Copy protection does not include ready or in-progress workouts.
+   Reproduced: isClosedTrainingDay returns false for an in-progress target date;
+   copying writes a new prescription beside its existing workout snapshot.
+   The running workout is not rewritten, so coach plan and runner can diverge.
+   Block prescription replacement on such dates or provide an explicit controlled
+   workflow for changing the pending workout as well.
+   Source: lib/planner.js isClosedTrainingDay; builder copy handlers.
+
+FIX NEXT — coach expectation and feedback
+
+7. Default load progression silently does nothing for percentage-only sets.
+   Reproduced: 3 x 5 at 80%, TM 100, default +2.5 kg remains 80 kg.
+   Load progression requires an explicit prescribedLoadKg. Choose a compatible
+   default by exercise intensity or explain/disable unsupported operations.
+   Source: lib/program.js defaultRuleFor and progressSets.
+
+8. Dictation drops the new combined RIR target.
+   Reproduced: 'Squat three sets of five at 80 percent with 2 RIR' retains 80%
+   but loses RIR. normalizeParsed also drops supplied prescribedRir from AI JSON.
+   Update local parsing, normalization, preview and deployed edge-function schema
+   together. Cloud parser deployment is required to verify the live voice path.
+   Source: lib/voiceParse.js; program/DictationPanel.jsx;
+   supabase/functions/parse-workout/index.ts.
+
+9. Calculated percentage volume is presented as zero.
+   Reproduced: 3 x 5 at 80%, TM 100 displays 0 session volume; implied weight-based
+   volume is 1200 kg. blocksVolume only uses explicitly stored weights.
+   Show estimated volume using resolved targets, or indicate unavailable/partial
+   volume. Distinguish estimates from actual performed volume.
+   Source: lib/program.js blocksVolume; WorkoutBuilderModal.jsx volume summary.
+
+10. Editing one lower-set field disables all future auto-fill for that set.
+    Reproduced: set 2 rest changed to 120; then set 1 RIR changed from 2 to 3;
+    resulting RIR targets are [3,2,3]. Whole-row touched status is the documented
+    existing behavior, but surprising for coaches. Track touched fields separately
+    or make the opt-out visible and provide a reset to follow set 1.
+    Source: program/ExerciseCard.jsx PROPAGATE and touched handling.
+
+11. 'Workout saved' can precede remote persistence success.
+    Code inspection: builder closes and toasts immediately; DataContext queues
+    asynchronous writes and reports failures globally later. The warning system
+    exists, but the immediate confirmation can mislead a coach.
+    Distinguish saved locally/pending sync from confirmed remote save.
+    Source: WorkoutBuilderModal.jsx save; store/DataContext.jsx commit.
+
+CURRENTLY WORKING / KEEP
+- Percentage + optional RIR stays separate from actual effort.
+- Percentage progression retains the supplementary RIR target.
+- Clipboard copies preserve targets and generate independent block/exercise/set IDs.
+- Marking a set done does not invent an actual effort value.
+- Percentage load is unavailable without a Training Max; the builder shows no TM.
+- Completed workout/appointment dates and past dates are guarded against new plans.
+- Quick clone and copy-to-clients ask before replacing an existing prescription.
+- Unsaved builder edits have a discard guard.
+
+Remaining verification after fixes:
+Live UI create -> edit -> save -> reopen; keyboard and mobile layout; dragging;
+each copy path with target collisions; two clients with different Training Maxes;
+runner targets versus recorded actuals; backend write rejection; deployed voice.

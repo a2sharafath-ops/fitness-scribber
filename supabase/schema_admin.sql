@@ -17,6 +17,8 @@ create or replace function is_admin()
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from profiles where id = auth.uid() and role = 'admin')
 $$;
+revoke execute on function is_admin() from public, anon;
+grant execute on function is_admin() to authenticated;
 
 -- New self-signups must NOT default to coach anymore.
 alter table profiles alter column "role" set default 'pending';
@@ -64,6 +66,7 @@ begin
     on conflict (id) do update set role = 'coach';
   return 'ok';
 end $$;
+revoke execute on function become_coach() from public, anon;
 grant execute on function become_coach() to authenticated;
 
 -- ---- Admin read access to all coach data ------------------------------

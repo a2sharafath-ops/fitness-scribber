@@ -2,9 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 
 // When env vars are present the app runs in "backend mode" (Supabase: auth + Postgres).
 // When absent it falls back to local mode (localStorage) so the app still works standalone.
-const env = import.meta.env || {}
-const url = env.VITE_SUPABASE_URL
-const key = env.VITE_SUPABASE_ANON_KEY
+// Read only the explicitly public settings, not the entire exposed env object.
+export const isLocalBuilderQA = !!import.meta.env.DEV && import.meta.env.VITE_LOCAL_BUILDER_QA === 'true'
+const url = isLocalBuilderQA ? '' : import.meta.env.VITE_SUPABASE_URL
+const key = isLocalBuilderQA ? '' : import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = url && key ? createClient(url, key) : null
 export const hasBackend = !!supabase
@@ -13,5 +14,5 @@ export const hasBackend = !!supabase
 export const TABLES = [
   'clients', 'exercises', 'plans', 'sessions', 'logs', 'wellness',
   'srpe', 'resistance', 'cardio', 'wearable', 'concerns', 'prescriptions', 'templates', 'workouts', 'assessments',
-  'screenings', 'maxes', 'synonyms',
+  'screenings', 'maxes', 'synonyms', 'programs', 'programAssignments',
 ]

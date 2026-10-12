@@ -2,7 +2,7 @@ import test, { after } from 'node:test'
 import assert from 'node:assert/strict'
 import { createServer } from 'vite'
 
-const vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' })
+const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' })
 after(() => vite.close())
 const { clientReport, reportPreferences } = await vite.ssrLoadModule('/src/lib/clientReport.js')
 

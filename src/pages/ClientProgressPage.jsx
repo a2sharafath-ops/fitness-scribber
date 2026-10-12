@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import './ClientProgressPage.css'
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import StrengthDashboard from '../components/organisms/StrengthDashboard'
 import CurrentLiftsPerformance from '../components/organisms/CurrentLiftsPerformance'
@@ -6,7 +7,8 @@ import ClientTrainingLoad from '../components/organisms/ClientTrainingLoad'
 import { useData } from '../store/DataContext'
 import { useFormat } from '../hooks/useFormat'
 import { compare, formalAssessments, movementScore, summarize } from '../lib/assessment'
-import { fmtDate, todayISO } from '../lib/dates'
+import ProgressInfo from '../components/atoms/ProgressInfo'
+import { addDays, fmtDate, todayISO } from '../lib/dates'
 import { appointmentCompletion, assessmentPair } from '../lib/progress'
 
 const signed = (value, suffix) => value == null ? '—' : `${value > 0 ? '+' : ''}${value} ${suffix}`
@@ -35,9 +37,9 @@ function OutcomeCard({ title, path, first, last, comparable, children, empty }) 
     {!last ? <p className="muted">{empty}</p> : <>
       <div className="progress-date-pair"><span>Baseline: {fmtDate(first.date)}</span><span>Latest: {fmtDate(last.date)}</span></div>
       {children}
-      {!comparable && <p className="progress-footnote">Reassessment needed to compare.</p>}
+      {!comparable && <p className="progress-footnote">1 reassessment needed to compare.</p>}
     </>}
-    <Link className="progress-source-link" to={path}>Assessment history →</Link>
+    <Link className="progress-source-link" to={path}>{last ? 'Assessment history' : 'Record baseline'} →</Link>
   </article>
 }
 
@@ -77,30 +79,29 @@ export default function ClientProgressPage() {
   const attendance = appointmentCompletion(db.sessions, id, today, days)
   const completedWorkouts = (db.workouts || []).filter((w) => w.clientId === id && w.status === 'completed' && w.date >= attendance.start && w.date <= today).length
 
-  return <>
+  return <div className="client-progress">
     <div className="topbar progress-title">
       <h1>Progress</h1>
-      <div className="progress-title-actions"><Link className="btn" to={`/clients/${id}/training`}>Log training</Link></div>
+      <div className="progress-title-actions"><Link className="btn" to={`/clients/${id}/training`}>Open Training →</Link></div>
     </div>
 
     <div className="progress-index" role="tablist" aria-label="Progress views">
       {progressViews.map((view, index) => <button key={view.id} type="button" role="tab" id={view.id} aria-selected={activeView === view.id} aria-controls={`progress-panel-${view.id}`} tabIndex={activeView === view.id ? 0 : -1} onClick={() => selectView(view.id)} onKeyDown={(event) => onViewKeyDown(event, index)}><strong>{view.label}</strong></button>)}
     </div>
 
-    <section id="progress-panel-strength" className="card progress-panel" role="tabpanel" aria-labelledby="strength" tabIndex={0} hidden={activeView !== 'strength'}>
+    <section id="progress-panel-strength" className="progress-panel" role="tabpanel" aria-labelledby="strength" tabIndex={0} hidden={activeView !== 'strength'}>
       {activeView === 'strength' && <>
       <StrengthDashboard client={client} />
-      <details className="progress-disclosure"><summary>1RM history and coach entries</summary><CurrentLiftsPerformance client={client} /></details>
+      <details className="card progress-disclosure"><summary>1RM records &amp; coach entries</summary><CurrentLiftsPerformance client={client} /></details>
       </>}
     </section>
 
-    <section id="progress-panel-training-load" className="card progress-panel" role="tabpanel" aria-labelledby="training-load" tabIndex={0} hidden={activeView !== 'training-load'}>
+    <section id="progress-panel-training-load" className="progress-panel" role="tabpanel" aria-labelledby="training-load" tabIndex={0} hidden={activeView !== 'training-load'}>
       {activeView === 'training-load' && <ClientTrainingLoad client={client} />}
     </section>
 
-    <section id="progress-panel-outcomes" className="card progress-panel" role="tabpanel" aria-labelledby="outcomes" tabIndex={0} hidden={activeView !== 'outcomes'}>
+    <section id="progress-panel-outcomes" className="progress-panel" role="tabpanel" aria-labelledby="outcomes" tabIndex={0} hidden={activeView !== 'outcomes'}>
       {activeView === 'outcomes' && <>
-      <div className="progress-section-head"><div><span className="progress-eyebrow">03 / Reassessments</span><h2 id="progress-outcomes-title">Outcomes</h2></div></div>
       <div className="progress-outcome-grid">
         <article className="progress-outcome progress-body"><h3>Body measurements</h3>
           {body.last ? <>
@@ -110,10 +111,10 @@ export default function ClientProgressPage() {
               <BodyMetric label="Body fat" field="bodyFatPct" first={body.first} last={body.last} comparable={body.comparable} format={format} />
               <BodyMetric label="Lean mass" field="leanMassKg" first={body.first} last={body.last} comparable={body.comparable} weight format={format} />
             </div>
-            {!body.comparable && <p className="progress-footnote">Reassessment needed to compare.</p>}
+            {!body.comparable && <p className="progress-footnote">1 reassessment needed to compare.</p>}
             {body.comparable && body.first.data?.method !== body.last.data?.method && <p className="progress-caution">Methods differ or are missing; compare with care.</p>}
           </> : <p className="muted">No body composition assessment yet.</p>}
-          <Link className="progress-source-link" to={`/clients/${id}/assessments/body_comp`}>Assessment history →</Link>
+          <Link className="progress-source-link" to={`/clients/${id}/assessments/body_comp`}>{body.last ? 'Assessment history' : 'Record baseline'} →</Link>
         </article>
         <OutcomeCard title="Movement" path={`/clients/${id}/assessments/movement`} {...movement} empty="No movement screen yet.">
           {movementNow && <div className="progress-outcome-value">{movementNow.score}/{movementNow.max}<span>Latest {movementNow.protocol === 'nasm' ? 'movement quality' : 'screen score'}</span></div>}
@@ -127,14 +128,19 @@ export default function ClientProgressPage() {
       </>}
     </section>
 
-    <section id="progress-panel-attendance" className="card progress-panel progress-attendance" role="tabpanel" aria-labelledby="attendance" tabIndex={0} hidden={activeView !== 'attendance'}>
+    <section id="progress-panel-attendance" className="progress-panel progress-attendance" role="tabpanel" aria-labelledby="attendance" tabIndex={0} hidden={activeView !== 'attendance'}>
       {activeView === 'attendance' && <>
-      <div className="progress-section-head"><div><span className="progress-eyebrow">04 / Follow-through</span><h2 id="progress-attendance-title">Booked session completion</h2></div><label className="progress-lift-select">Period <select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></select></label></div>
-      <div className="progress-attendance-layout"><div className="progress-attendance-main"><strong>{attendance.percent == null ? '—' : `${attendance.percent}%`}</strong><span>{attendance.total ? `${attendance.completed} of ${attendance.total} past bookings completed` : 'No past bookings'}</span></div><div className="progress-attendance-track">{attendance.total > 0 && <div className="progress-bar" role="progressbar" aria-label="Booked session completion" aria-valuenow={attendance.percent} aria-valuemin={0} aria-valuemax={100}><div style={{ width: `${attendance.percent}%` }} /></div>}
-      {(attendance.unresolved > 0 || attendance.cancelled > 0 || attendance.todayCompleted > 0) && <div className="progress-attendance-details">{attendance.unresolved > 0 && <span>{attendance.unresolved} awaiting status</span>}{attendance.cancelled > 0 && <span>{attendance.cancelled} cancelled excluded</span>}{attendance.todayCompleted > 0 && <span>{attendance.todayCompleted} completed today (outside rate)</span>}</div>}
-      </div></div>
-      {completedWorkouts > 0 && <p className="progress-footnote">Workout logs: {completedWorkouts} completed · <Link to={`/clients/${id}/training`}>View Training →</Link></p>}
+      <section className="card">
+        <div className="progress-section-head"><h2 id="progress-attendance-title">Booked session completion <ProgressInfo label="booking completion" text="The rate uses past, non-cancelled bookings. Bookings awaiting status remain in the denominator. Today's bookings and workout logs are counted separately." /></h2><label className="progress-lift-select">Period <select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></select></label></div>
+        <div className="progress-attendance-layout">
+          <div className="progress-completion-ring" style={{ '--completion': `${attendance.percent ?? 0}%` }} role={attendance.total ? 'progressbar' : undefined} aria-label="Booked session completion" aria-valuenow={attendance.percent ?? undefined} aria-valuemin={attendance.total ? 0 : undefined} aria-valuemax={attendance.total ? 100 : undefined}><div><strong>{attendance.percent == null ? '—' : `${attendance.percent}%`}</strong><span>{attendance.total ? `${attendance.completed} of ${attendance.total} bookings` : 'No past bookings'}</span></div></div>
+          <div className="progress-completion-counts"><div><strong>{attendance.completed}</strong><span>Completed</span></div><div><strong>{attendance.unresolved}</strong><span>Awaiting status</span></div><div><strong>{attendance.cancelled}</strong><span>Cancelled · excluded</span></div></div>
+        </div>
+        {attendance.todayCompleted > 0 && <p className="progress-footnote">{attendance.todayCompleted} completed today · outside the past-booking rate</p>}
+        <div className="progress-card-foot"><span>{fmtDate(attendance.start)}–{fmtDate(addDays(today, -1))} · past bookings</span><Link to="/schedule">{attendance.unresolved ? 'Review booking status' : 'Open schedule'} →</Link></div>
+      </section>
+      <section className="card progress-workout-completion"><div><h3>Completed workout logs</h3><p>Counted separately from bookings</p></div><strong>{completedWorkouts}</strong><div className="progress-card-foot"><span>Through {fmtDate(today)}</span><Link to={`/clients/${id}/training?history=workouts#training-history-title`}>View workout history →</Link></div></section>
       </>}
     </section>
-  </>
+  </div>
 }

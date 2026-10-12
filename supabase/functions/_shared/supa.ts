@@ -13,6 +13,3 @@ export async function userFromRequest(req: Request) {
   const { data } = await client.auth.getUser()
   return data.user
 }
-
-export const enc = (o: unknown) => btoa(JSON.stringify(o))
-export const dec = (s: string) => JSON.parse(atob(s))

@@ -1,0 +1,87 @@
+Coach workflow release check — 2026-10-11
+
+Environment
+Production-built local preview: http://127.0.0.1:5180
+Signed-in app connected to production Supabase. Only Feature Demo Client
+(feature_demo_20261005) was changed. No commit, push or frontend deployment.
+
+Passed through the real UI
+1. Saved the demo client's usual training time: 10:00, 60 minutes.
+2. Assignment beginning October 12 was blocked by an existing October 15
+   prescription and booking. The Assign button was disabled and resolution
+   links were shown. Existing training was not replaced.
+3. Assigned two weeks of Full-body Foundation beginning October 19:
+   October 19, 22, 26 and 29. Success reported four saved sessions.
+   Client assignment: nc7dujc. The library template was not edited.
+4. Navigation reloaded the app and showed the saved client assignment and
+   prescription. Calendar showed 10:00–11:00 automatic bookings.
+5. Dragged October 19 from 10:00 to 10:30 and confirmed the review dialog.
+   Changed duration to 45 minutes through the accessible booking editor;
+   then dragged its bottom edge to restore 60 minutes and saved.
+   Final October 19 booking: 10:30–11:30. Other assigned times remain 10:00.
+6. Dragging that booking to October 22 was blocked by both occupied coach
+   time and the client's existing prescription. The dialog stated nothing
+   changed and offered alternative dates. Cancelled the blocked attempt.
+7. Open session from Schedule reached the correct Training date. Its five
+   exercises, ten prescribed sets and 3-RIR targets remained intact.
+8. Created a separate October 11 plan titled 'Release check — fictional
+   workout': Bench Press, 3 x 10 at 20 kg, 3 RIR. Notes identify fictional data.
+9. Started the workout, skipped wellness, recorded all three bench sets
+   with 10 reps and 3 RIR, and completed with RPE 5 and duration 30 minutes.
+10. Waited for Changes saved, then reloaded the app. Completed workout and
+    all three recorded sets persisted.
+11. Progress showed 26.7 kg estimated 1RM for Bench Press, three chest sets,
+    and October 11 session load 150 AU with source Workout completion.
+
+Follow-ups found in the original verification pass (fixed locally below)
+1. Timezone fallback mismatch: Profile, training-time editor and assignment
+   show UTC when settings.tz is absent; Schedule says Local time and its
+   clock falls back to the browser timezone. The displayed UTC was a fallback,
+   not proof the coach explicitly selected UTC. Standardize the fallback and
+   label before interpreting 10:00 across devices/timezones.
+   Sources: src/components/organisms/forms/TrainingScheduleForm.jsx:31,
+   src/pages/ClientProfilePage.jsx:123,
+   src/components/organisms/program/ProgramsLibrary.jsx:159,
+   src/pages/SchedulePage.jsx:137, src/lib/dates.js:2.
+2. Starting a prescribed workout inserts generic warm-up and cool-down
+   exercises when those sections are empty. The one-exercise plan became
+   three runner blocks. These extra exercises stayed uncompleted, so they
+   did not affect the three recorded resistance sets in this test.
+   Source: src/lib/workout.js:142 and buildFromPrescription at lines 218–222.
+   Recommendation: preserve intentionally empty prescribed sections; reserve
+   generic suggestions for an explicit coach action or an unplanned workout.
+
+Boundaries
+This verifies a representative coach workflow, not a complete application or
+adversarial security audit. Cross-device timezone behavior, concurrent live
+editing, wearable provider OAuth and every program-copy edit path were not
+tested here. Existing automated release results remain documented in
+local-release-fixes-2026-10-11.txt. No source changes required those tests to rerun.
+The remaining 52 authenticated SECURITY DEFINER advisor warnings and disabled
+leaked-password protection remain open as described in that report.
+
+Test records above remain available for inspection. No clients were deleted.
+
+Follow-up fixes — 2026-10-11
+1. Added a shared coachTimeZone fallback (UTC), used by the app context,
+   civil-date helper and schedule/dashboard clock. Settings now labels the
+   unset choice UTC (default), and Schedule displays the actual effective zone.
+   Explicit coach zones remain unchanged. This matches the existing SQL UTC
+   fallback without changing any database settings or stored booking times.
+   Targeted verification: 32 schedule/dashboard tests passed, including unset
+   and explicit zones on Los Angeles and Dubai devices, midnight and DST.
+2. buildFromPrescription now uses only the prescribed warm-up and cool-down
+   sections, including empty arrays. Previously saved workouts are not rewritten.
+   Targeted verification: 67 builder/classic-client tests passed, including
+   absent/empty sections, explicit sections and preservation of set targets.
+3. Full suite: 178 passed, none failed/skipped. Lint, build and diff check passed.
+   All three isolated SQL suites passed (program, schedule and release transaction).
+   Existing parallel Vite websocket-port warnings remain non-failing.
+4. Browser verification: rebuilt signed-in preview at port 5180 displays UTC
+   in Schedule. Offline builder app at port 5178 started today's existing
+   one-exercise prescription as Main Lifts only (Block 1 of 1), with all three
+   80%-1RM / 2-RIR targets intact. Saved and exited without recording any sets.
+   That local QA workout remains in progress for inspection; no production
+   records were changed during this follow-up fix.
+
+No commit, push, frontend deployment or live SQL change was made.

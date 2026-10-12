@@ -16,7 +16,7 @@ async function anthropic(summary: string) {
     body: JSON.stringify({ model: Deno.env.get('ANTHROPIC_MODEL') ?? 'claude-sonnet-4-6', max_tokens: 500, system: SYSTEM, messages: [{ role: 'user', content: summary }] }),
   })
   const d = await r.json()
-  if (!r.ok) throw new Error(JSON.stringify(d))
+  if (!r.ok) throw new Error('Upstream provider request failed')
   return d.content?.[0]?.text ?? ''
 }
 
@@ -27,7 +27,7 @@ async function openai(summary: string) {
     body: JSON.stringify({ model: Deno.env.get('OPENAI_MODEL') ?? 'gpt-4o-mini', messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: summary }] }),
   })
   const d = await r.json()
-  if (!r.ok) throw new Error(JSON.stringify(d))
+  if (!r.ok) throw new Error('Upstream provider request failed')
   return d.choices?.[0]?.message?.content ?? ''
 }
 
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     const provider = (Deno.env.get('LLM_PROVIDER') ?? 'anthropic').toLowerCase()
     const text = provider === 'openai' ? await openai(summary) : await anthropic(summary)
     return json({ text })
-  } catch (e) {
-    return json({ error: String(e) }, 500)
+  } catch {
+    return json({ error: 'Coaching guidance is unavailable. Please try again later.' }, 500)
   }
 })

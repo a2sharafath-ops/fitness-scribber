@@ -251,26 +251,6 @@ canvas{max-width:100%}
 .ai-msg.good{border-left:3px solid var(--chart-green)}
 .ai-msg.info{border-left:3px solid var(--blue)}
 .ai-foot{padding:11px 14px;border-top:1px solid var(--border)}
-.plan-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
-.plan-day{background:var(--surface2);border:1px solid var(--border);border-radius:12px;min-height:120px;min-width:0;padding:9px;cursor:pointer;transition:.12s}
-.plan-day:hover{border-color:var(--accent)}
-.plan-day.today{border-color:var(--accent)}
-.plan-day .pd-date{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px}
-.plan-ex{font-size:10px;background:var(--tint-blue);color:var(--blue);padding:3px 5px;border-radius:5px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.plan-vl{font-size:10px;color:var(--muted);margin-top:4px;font-weight:700}
-/* Single session-name label per day (replaces the per-exercise list) */
-.plan-session{font-size:11px;font-weight:700;color:var(--blue);background:var(--tint-blue);border-radius:6px;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.plan-source-key{font-size:11px;color:var(--muted);margin:0 0 8px}
-.plan-date-trigger{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;background:none;border:0;text-align:left;cursor:pointer;font:inherit}
-.plan-date-trigger:focus-visible,.plan-completed:focus-visible,.plan-pending:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.plan-completed{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;width:100%;min-width:0;min-height:44px;margin-top:5px;padding:5px 7px;border:0;border-radius:6px;background:var(--tint-green);color:var(--green);font:inherit;font-size:11px;font-weight:750;line-height:1.25;text-align:left;cursor:pointer}
-.plan-completed:hover{background:#d5efdc}
-.plan-completed-status{white-space:nowrap}
-.plan-completed-name{max-width:100%;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}
-.plan-pending{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;width:100%;min-height:44px;margin-top:5px;padding:5px 7px;border:1px solid var(--blue);border-radius:6px;background:var(--tint-blue);color:var(--blue);font:inherit;font-size:11px;font-weight:700;line-height:1.25;text-align:left;cursor:pointer}
-.plan-pending span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.plan-appointment{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;width:100%;min-height:44px;margin-top:5px;padding:6px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font:inherit;font-size:11px;font-weight:700;line-height:1.25;text-align:left;cursor:pointer}
-.plan-appointment:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .training-day-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .training-day-review-head h2{font-size:20px;margin:5px 0}
 .training-day-review-head p{margin:0 0 4px}
@@ -293,31 +273,12 @@ canvas{max-width:100%}
 .training-completed-preview{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .training-completed-preview p{font-size:13px;margin:4px 0 0}
 @media(max-width:600px){.training-day-legacy-fields{grid-template-columns:1fr}.training-day-block{padding:10px}.training-day-review-head h2{font-size:18px}}
-.plan-rest{font-size:10px;font-style:italic;padding:2px 0}
-.planner-featured .plan-session,.planner-medium .plan-session{font-size:12px}
-/* Per-day load-response metrics inside a planner cell */
-.day-metrics{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
-.dm-chip{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;line-height:1;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 4px}
-.dm-chip .dm-k{font-size:8px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
-.planner-featured .dm-chip,.planner-medium .dm-chip{font-size:10px;padding:3px 5px}
-/* Featured (primary) planner on the client page */
-.planner-featured{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset, 0 8px 24px rgba(21,22,26,.06)}
-.planner-featured .plan-day{min-height:168px}
-.planner-featured .plan-week{gap:10px}
-/* Medium — between default and featured: a touch larger, subtle accent, no heavy shadow */
-.planner-medium{border-color:var(--accent)}
-.planner-medium .plan-day{min-height:120px}
-.planner-medium .plan-cell{min-height:94px}
-/* Collapsible header */
-.planner-collapse{background:none;border:0;padding:0;margin:0;display:flex;align-items:center;gap:7px;cursor:pointer;color:inherit}
-.planner-collapse .pc-caret{font-size:11px;color:var(--muted);line-height:1}
-.planner-summary{font-size:12px;font-weight:600}
 /* Month calendar */
 .plan-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:6px}
 .plan-dow>div{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:center}
-/* ---- Planner copy/paste: drag-select, chip drag-and-drop, action bars ---- */
-/* No text selection while dragging a span across the calendar */
-.plan-week,.plan-month{user-select:none;-webkit-user-select:none}
+.plan-month{user-select:none;-webkit-user-select:none}
+.plan-cell.sel{border-color:var(--accent);background:var(--tint-red);box-shadow:inset 0 0 0 1px var(--accent)}
+.plan-month{user-select:none;-webkit-user-select:none}
 /* A session chip is grabbable — drag it onto another day to copy that session */
 .plan-session{cursor:grab}
 .plan-session:active{cursor:grabbing}
@@ -340,11 +301,7 @@ canvas{max-width:100%}
 .plan-cell:hover{border-color:var(--accent)}
 .plan-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .plan-cell.out{opacity:.45}
-.plan-cell.has-record{min-height:120px}
 .plan-cell .pc-date{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
-.plan-cell .pc-today{font-size:8px;font-weight:800;letter-spacing:.4px;color:var(--accent);text-transform:uppercase}
-.plan-cell .pc-more{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px}
-.planner-featured .plan-cell{min-height:120px}
 .presc-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px}
 .presc-card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .presc-ex{flex:1;font-weight:600;font-size:14px}
@@ -621,49 +578,7 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .assess-derived-row span:last-child{color:var(--muted);text-align:right}
 @media(max-width:700px){.assess-task-grid{grid-template-columns:1fr}.assess-task-actions .btn{flex:1;justify-content:center}.ac-row{flex-wrap:wrap}.ac-meta{flex-wrap:wrap}.ad-entry-toggle{flex-wrap:wrap}.ad-entry-when{white-space:normal}.assess-derived-row{flex-direction:column;gap:3px}.assess-derived-row span:last-child{text-align:left}}
 
-/* Profile: stable client context, dated histories, and per-value provenance. */
-.profile-title{margin-bottom:20px}
-.profile-section{margin-bottom:25px}
-.profile-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:11px}
-.profile-section-head h2,.profile-health-link h2{font-size:19px;line-height:1.3;margin:0}
-.profile-section-head p,.profile-health-link p{font-size:12px;color:var(--muted);line-height:1.5;margin:4px 0 0}
-.profile-section-head .btn{min-height:42px}
-.profile-card h3{font-size:15px;margin:0 0 8px}
-.profile-field{display:flex;flex-direction:column;gap:3px;padding:8px 0;border-bottom:1px solid var(--border);min-width:0}
-.profile-field:last-child{border-bottom:0}
-.profile-field>span{font-size:11px;font-weight:700;color:var(--muted)}
-.profile-field>strong{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
-.profile-source,.profile-form-source{display:block;font-size:11px;line-height:1.45;color:var(--muted);font-weight:500}
-.profile-form-source{margin-top:4px}
-.profile-record-meta{font-size:11px;font-weight:700;color:var(--muted);margin:12px 0}
-.profile-goal-list{margin:9px 0}
-.profile-goal-list>strong{font-size:12px}
-.profile-goal-list ul{margin:5px 0 0;padding-left:19px;font-size:13px;line-height:1.55}
-.profile-goal-list li{margin-bottom:4px}
-.profile-past-goal{color:var(--accent2);font-weight:700;font-size:11px}
-.profile-history{margin-top:13px;border-top:1px solid var(--border);padding-top:7px}
-.profile-history summary{font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;min-height:35px;padding:7px 0}
-.profile-history-list{display:grid;gap:7px}
-.profile-history-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface2);border-radius:8px;padding:9px 10px;font-size:12px}
-.profile-history-row>div{display:flex;flex-direction:column;gap:2px;min-width:0}
-.profile-history-row a,.profile-source-link,.profile-measure a,.profile-measure-links a{color:var(--accent);font-size:11px;font-weight:700}
-.profile-history-row a{white-space:nowrap}
-.profile-preference-grid,.profile-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.profile-preference-grid.single{grid-template-columns:1fr}
-.profile-source-link{display:inline-block;margin-top:10px;font-size:12px}
-.profile-data-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 16px}
-.profile-measure-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.profile-measure{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.profile-measure>span{font-size:11px;font-weight:700;color:var(--muted)}
-.profile-measure>strong{font-size:21px;overflow-wrap:anywhere}
-.profile-measure-links{display:flex;gap:8px 18px;flex-wrap:wrap;margin-top:12px}
-.profile-health-link{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
-.profile-health-link>div:first-child{max-width:570px}
-.profile-health-link .profile-concern-count{font-weight:700;color:var(--accent)}
-.profile-health-actions{display:flex;gap:8px;flex-wrap:wrap}
-.profile-health-actions .btn{min-height:42px}
-@media(max-width:750px){.profile-preference-grid,.profile-admin-grid{grid-template-columns:1fr}.profile-data-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-measure-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:500px){.profile-title .btn,.profile-section-head .btn{width:100%;justify-content:center}.profile-data-grid,.profile-measure-grid{grid-template-columns:1fr}.profile-history-row{align-items:flex-start;flex-direction:column}.profile-health-actions,.profile-health-actions .btn{width:100%;justify-content:center}}
+.profile-form-source{display:block;font-size:11px;line-height:1.45;color:var(--muted);font-weight:500;margin-top:4px}
 @media(max-width:820px){.msg-layout{grid-template-columns:1fr}}
 /* Broadcast composer */
 .bc-all{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer}
@@ -705,6 +620,7 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .ex-validate select{width:auto;font-size:12px}
 .set-row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed var(--border)}
 .set-row.ok{background:rgba(52,199,89,.06)}
+.builder-fields{border:0;padding:0;margin:0;min-width:0}
 .set-row.fail{background:rgba(251,64,74,.06)}
 .set-n{font-size:11px;font-weight:800;color:var(--muted);width:16px;align-self:center;text-align:center}
 .sf{display:flex;flex-direction:column;gap:3px;width:84px}
@@ -1256,11 +1172,17 @@ html:has(.progress-index){overflow-x:clip}
 .overview-chart-caption{font-size:12px;line-height:1.5;color:var(--muted);min-height:36px;margin:8px 0}
 .overview-chart-direction{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:0 42px 8px 70px;gap:8px}
 .overview-z-row{display:grid;grid-template-columns:60px minmax(0,1fr) 32px;gap:10px;align-items:center;margin:14px 0;font-size:12px}
-.overview-z-track{position:relative;height:26px;border-radius:6px;background:linear-gradient(to right,transparent 33.33%,var(--surface2) 33.33%,var(--surface2) 66.66%,transparent 66.66%);border-bottom:1px solid var(--border)}
+.overview-z-track{position:relative;height:26px;border-radius:6px;background:linear-gradient(to right,#f9e9df 0%,#f9e9df 33.333%,#eceae7 33.333%,#eceae7 66.667%,#e2f2eb 66.667%,#e2f2eb 100%);border:1px solid var(--border)}
+.overview-z-track.unavailable{background:var(--surface2)}
 .overview-z-track:after{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed var(--muted)}
-.overview-z-bar{position:absolute;top:7px;height:12px;background:#188875;border-radius:4px}.overview-z-dot{position:absolute;top:6px;width:14px;height:14px;border:2px solid var(--surface);border-radius:50%;background:#188875;transform:translateX(-50%);z-index:1}
-.overview-z-bar.more,.overview-z-dot.more{background:#ba6534}.overview-z-value{text-align:right;font-variant-numeric:tabular-nums}
+.overview-z-bar{position:absolute;top:6px;height:12px;background:#747976;border-radius:4px}.overview-z-dot{position:absolute;top:5px;width:14px;height:14px;border:2px solid var(--surface);border-radius:50%;background:#747976;transform:translateX(-50%);z-index:1}
+.overview-z-bar.favourable,.overview-z-dot.favourable{background:#188875}
+.overview-z-bar.unfavourable,.overview-z-dot.unfavourable{background:#ba6534}.overview-z-value{text-align:right;font-variant-numeric:tabular-nums}
 .overview-z-axis{display:flex;justify-content:space-between;margin-left:70px;margin-right:42px;font-size:10px;color:var(--muted)}
+.overview-z-legend{display:flex;justify-content:space-between;gap:8px;margin:12px 42px 0 70px;font-size:10px;color:var(--muted)}
+.overview-z-legend span{display:inline-flex;align-items:center;gap:5px}.overview-z-legend span:before{content:'';width:8px;height:8px;border-radius:2px;background:#747976;flex:none}
+.overview-z-legend .favourable:before{background:#188875}.overview-z-legend .unfavourable:before{background:#ba6534}
+@media(max-width:600px){.overview-z-legend{margin-left:0;margin-right:0;gap:6px;flex-wrap:wrap}}
 .overview-latest-ratings{border:1px solid var(--border);border-radius:12px;background:var(--surface2);padding:16px}.overview-rating{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;font-size:12px;border-top:1px solid var(--border)}
 .overview-rating strong{font-size:18px;white-space:nowrap}.overview-rating small{font-size:11px;color:var(--muted);font-weight:400}
 .overview-device{border-top:1px solid var(--border);margin-top:16px;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted)}.overview-device strong{color:var(--text)}
@@ -1284,7 +1206,7 @@ html:has(.progress-index){overflow-x:clip}
 /* Training shows a compact programme summary; the calendar owns day details. */
 .training-topbar{margin-bottom:16px}
 .training-program{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:12px 16px}
-.training-program-copy{display:flex;align-items:baseline;gap:8px 12px;flex-wrap:wrap;min-width:0}
+.training-program-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
 .training-program .overview-eyebrow{margin:0}
 .training-program h2{font-size:15px;line-height:1.3;margin:0}
 .training-section-head h2{font-size:18px;line-height:1.3;margin:0 0 4px}
@@ -1293,7 +1215,6 @@ html:has(.progress-index){overflow-x:clip}
 .training-session,.training-planner,.training-history{margin-bottom:20px}
 .training-runner-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--muted)}
 .training-save-note{font-size:12px;font-weight:700;color:var(--accent);margin-top:10px}
-.training-history-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .training-history summary{cursor:pointer;font-weight:700}
 .training-history[open] summary{margin-bottom:16px}
 .training-history h3{font-size:13px;margin:0 0 10px}
@@ -1304,12 +1225,31 @@ html:has(.progress-index){overflow-x:clip}
 .training-history-row:hover strong{color:var(--accent)}
 .training-history-row.static{cursor:default}
 .training-history-row.static>span:last-child{color:var(--muted)}
-.training-assistance{margin-bottom:20px}
-.training-assistance summary{font-weight:700;cursor:pointer}
-.training-assistance>p{font-size:12px;margin:8px 0 12px}
-.plan-day.focused,.plan-cell.focused{box-shadow:inset 0 0 0 2px var(--blue)}
-@media(max-width:800px){.training-history-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.training-program .btn{width:100%;justify-content:center}}
+.training-calendar{margin-bottom:20px;min-width:0}
+.training-calendar-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.training-calendar-head h2{margin:0;font-size:18px}
+.training-calendar-toolbar,.training-period-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.training-period-nav{gap:5px}.training-period-nav .btn{min-width:36px}
+.training-calendar-period{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:18px 0 12px;font-size:12px}.training-calendar-period>span{font-size:11px;color:var(--muted)}
+.training-calendar-dates,.training-calendar-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.training-calendar-dow{text-align:center;color:var(--muted);font-size:11px;margin-bottom:8px}
+.training-calendar-day{border:1px solid transparent;border-radius:12px;background:var(--surface2);font:inherit;text-align:left;padding:10px 8px;height:132px;min-width:0;display:flex;flex-direction:column;gap:7px;cursor:pointer;color:var(--text)}
+.training-calendar-day:hover{border-color:var(--muted)}.training-calendar-day[aria-pressed=true]{border:2px solid var(--text);padding:9px 7px;background:var(--surface)}.training-calendar-day.today .training-calendar-date{color:var(--accent)}.training-calendar-day.outside{opacity:.45}
+.training-calendar-day.selected-range{box-shadow:inset 0 0 0 2px var(--blue)}.training-calendar-day.paste-target{outline:2px dashed var(--green);outline-offset:-2px}
+.training-calendar-date{display:flex;gap:5px;align-items:center;font-size:12px;font-weight:600}.training-calendar-date strong{font-size:16px}.training-calendar-date small{margin-left:auto;font-size:9px}
+.training-calendar-status{font-size:10px;padding:3px 6px;border-radius:5px;font-weight:700;align-self:flex-start;white-space:nowrap;max-width:100%}.training-calendar-status.planned,.training-calendar-status.ready{color:#276285;background:#eaf3fa}.training-calendar-status.completed{color:#196b47;background:#edf7f0}.training-calendar-status.progress{color:#805917;background:#fbf2df}.training-calendar-status.appointment,.training-calendar-status.empty{color:var(--muted);background:var(--border)}
+.training-calendar-name{font-size:10px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;line-height:1.5;min-height:30px}
+.training-calendar-dates.month .training-calendar-day{height:88px;gap:5px}.training-calendar-dates.month .training-calendar-date strong{font-size:13px}.training-calendar-dates.month .training-calendar-name,.training-calendar-dates.month .training-calendar-date small{display:none}
+.training-calendar-legend{display:flex;gap:15px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:var(--muted)}.training-calendar-legend span{display:inline-flex;gap:5px;align-items:center}.training-calendar-legend span:before{content:'';width:7px;height:7px;border-radius:50%;background:#276285}.training-calendar-legend .completed:before{background:#196b47}.training-calendar-legend .progress:before{background:#805917}.training-calendar-legend .appointment:before{background:#777}
+.training-calendar-selection{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;background:var(--surface2);border-radius:10px;padding:12px;margin:12px 0;font-size:12px}
+.training-selected-day{border-top:1px solid var(--border);margin-top:20px;padding-top:20px}.training-selected-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start;min-height:78px}.training-selected-head h3{font-size:20px;margin:7px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.training-selected-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:280px}.training-selected-actions .btn:not(.ghost){min-width:144px;text-align:center;justify-content:center}
+.training-selected-body{height:308px;display:flex;flex-direction:column;min-height:0;gap:0}.training-selected-body>.seg{flex:none;align-self:flex-start;margin-bottom:12px}.training-selected-notice{font-size:11px;color:var(--muted);min-height:30px;margin:0;padding-bottom:10px;flex:none}
+.training-selected-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border:1px solid var(--border);border-radius:12px}.training-exercise-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-height:56px;padding:12px 15px;border-bottom:1px solid var(--border);font-size:12px}.training-exercise-row:last-child{border:0}.training-exercise-row>div{min-width:0}.training-exercise-row strong{display:block;font-size:13px;overflow-wrap:anywhere}.training-exercise-row small{display:block;font-size:10px;color:var(--muted);margin-top:3px}.training-exercise-row>span{font-size:12px;color:var(--muted);text-align:right;max-width:320px;overflow-wrap:anywhere}
+.training-selected-empty{flex:1;min-height:0;border:1px dashed var(--border);border-radius:12px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:8px}.training-selected-empty strong{font-size:14px}.training-selected-empty p{font-size:12px;color:var(--muted);max-width:330px;margin:0}.training-selected-notes{font-size:12px;color:var(--muted);padding:12px 15px;border-top:1px solid var(--border);margin:0}
+.training-selected-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:49px;border-top:1px solid var(--border);padding-top:12px;margin-top:14px;font-size:11px;color:var(--muted)}.training-more{position:relative;margin-left:auto}.training-more summary{cursor:pointer;list-style:none;padding:7px 11px;border:1px solid var(--border);border-radius:20px;min-height:34px;color:var(--text);font-size:11px;font-weight:700}.training-more summary::-webkit-details-marker{display:none}.training-more summary:after{content:' ▾'}.training-more-menu{position:absolute;right:0;bottom:40px;min-width:175px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:7px;box-shadow:0 8px 24px #0002;z-index:4;display:grid;gap:4px}.training-more-menu .btn{border:0;justify-content:flex-start;border-radius:7px;font-size:11px;min-height:36px}
+.training-log-picker{display:flex;gap:8px;align-items:center;font-size:11px;margin-bottom:10px;flex:none}.training-log-picker select{min-width:0;max-width:70%}.training-copy-note{font-size:12px;margin:0 0 16px}
+.training-history summary{display:flex;justify-content:space-between;align-items:center;list-style:none;min-height:30px}.training-history summary::-webkit-details-marker{display:none}.training-history summary:after{content:'+';font-size:20px;color:var(--muted)}.training-history[open] summary:after{content:'−'}.training-history-list{max-height:310px;overflow:auto;overscroll-behavior:contain;margin-top:12px}.training-history-list>p{font-size:12px}
+@media(max-width:1100px){.training-calendar-day{height:116px;padding:9px 6px}.training-calendar-day[aria-pressed=true]{padding:8px 5px}.training-calendar-date small{display:none}}
+@media(max-width:820px){.training-calendar-toolbar{width:100%;justify-content:space-between}.training-calendar-dates{gap:5px}.training-calendar-day{height:108px}.training-calendar-name{font-size:9px}.training-calendar-status{font-size:9px;padding:2px 4px}.training-calendar-date{flex-wrap:wrap;gap:3px;font-size:10px}.training-selected-head{grid-template-columns:1fr;min-height:132px;gap:10px}.training-selected-actions{justify-content:flex-start;max-width:none;align-self:end}.training-selected-head h3{font-size:18px}}
+@media(max-width:600px){.training-calendar{padding:16px}.training-program .btn{justify-content:center}.training-calendar-dates{gap:4px}.training-calendar-day{height:73px;align-items:center;padding:5px 2px;border-radius:9px;gap:5px}.training-calendar-day[aria-pressed=true]{padding:4px 1px}.training-calendar-date{flex-direction:column;gap:0;line-height:1.3;font-size:9px}.training-calendar-date strong{font-size:14px}.training-calendar-name{display:none}.training-calendar-status{padding:0;width:7px;height:7px;border-radius:50%;font-size:0;overflow:hidden;min-height:7px;align-self:center}.training-calendar-status.planned,.training-calendar-status.ready{background:#276285}.training-calendar-status.completed{background:#196b47}.training-calendar-status.progress{background:#805917}.training-calendar-status.appointment{background:#777}.training-calendar-status.empty{background:transparent}.training-calendar-dates.month .training-calendar-day{height:55px}.training-calendar-dates.month .training-calendar-date{flex-direction:row}.training-calendar-legend{gap:8px;font-size:9px}.training-calendar-period{font-size:11px}.training-calendar-period>span{font-size:10px}.training-exercise-row{padding:11px;grid-template-columns:1fr;gap:3px}.training-exercise-row>span{text-align:left;font-size:11px}.training-exercise-row strong{font-size:12px}.training-selected-actions .btn:not(.ghost){min-width:132px}.training-history .seg{flex-wrap:wrap}}
 /* Client overview bar + inline analytics (Figma: Client Overview design) */
 .overview-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;margin-bottom:16px}
 .overview-bar .mini-profile{background:var(--surface2)}
@@ -1353,10 +1293,9 @@ html:has(.progress-index){overflow-x:clip}
   .asr-row{grid-template-columns:1fr 1fr;row-gap:2px}
   .asf-row3{grid-template-columns:1fr 1fr}
   /* week / month planners: readable cells, wrap text instead of ellipsis */
-  .plan-week,.plan-month,.cal-grid{gap:4px}
-  .plan-day,.plan-cell{min-height:auto;padding:5px}
-  .planner-featured .plan-day,.planner-featured .plan-cell{min-height:auto}
-  .plan-session,.plan-ex,.cal-evt{white-space:normal}
+  .plan-month,.cal-grid{gap:4px}
+  .plan-cell{min-height:auto;padding:5px}
+  .cal-evt{white-space:normal}
   .cal-cell{min-height:64px}
   .modal{padding:18px}
   .modal-foot{flex-wrap:wrap}
@@ -1449,16 +1388,6 @@ html:has(.progress-index){overflow-x:clip}
 .pkg-tier-b{font-size:12px;margin-top:4px;line-height:1.45}
 /* AI assistant header spark chip (Figma) */
 .ai-spark{width:28px;height:28px;border-radius:10px;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none}
-
-/* Client planner targets remain reachable when the available width is narrow. */
-.plan-month-scroll{max-width:100%;overflow-x:auto}
-.plan-month-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.planner-scroll-hint{display:none;color:var(--muted);font-size:12px;margin:6px 0}
-@media(max-width:600px){
-  .client-workspace .plan-week{grid-template-columns:repeat(3,minmax(44px,1fr))}
-  .client-workspace .plan-dow,.client-workspace .plan-month{min-width:420px}
-  .planner-scroll-hint{display:block}
-}
 
 /* Exercise library mapping: readable on desktop and horizontally navigable on mobile. */
 .exercise-library-tools { display: flex; gap: 16px; align-items: end; flex-wrap: wrap; padding: 20px; }

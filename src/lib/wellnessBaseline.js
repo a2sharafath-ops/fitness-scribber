@@ -2,12 +2,21 @@ import { addDays } from './dates'
 
 export const WELLNESS_BASELINE_DAYS = 28
 export const MIN_WELLNESS_BASELINE_DAYS = 7
+export const WELLNESS_Z_REFERENCE_WIDTH = 1
+// Match calcWellness: higher sleep is better; the other raw ratings are
+// reversed (8 - rating). Positive Z therefore always means more favourable.
 export const WELLNESS_METRICS = [
-  { key: 'sleep', label: 'Sleep', direction: -1 },
-  { key: 'stress', label: 'Stress', direction: 1 },
-  { key: 'fatigue', label: 'Fatigue', direction: 1 },
-  { key: 'soreness', label: 'Soreness', direction: 1 },
+  { key: 'sleep', label: 'Sleep', direction: 1 },
+  { key: 'stress', label: 'Stress', direction: -1 },
+  { key: 'fatigue', label: 'Fatigue', direction: -1 },
+  { key: 'soreness', label: 'Soreness', direction: -1 },
 ]
+
+export function wellnessZBand(z) {
+  if (z === null || !Number.isFinite(z)) return 'unavailable'
+  return z > WELLNESS_Z_REFERENCE_WIDTH ? 'favourable'
+    : z < -WELLNESS_Z_REFERENCE_WIDTH ? 'unfavourable' : 'near-baseline'
+}
 
 const validDate = (date) => /^\d{4}-\d{2}-\d{2}$/.test(date || '')
   && Number.isFinite(Date.parse(date)) && new Date(date).toISOString().slice(0, 10) === date
@@ -31,8 +40,9 @@ export function wellnessBaseline(records, clientId, throughDate) {
     const mean = count ? values.reduce((sum, number) => sum + number, 0) / count : null
     const sd = count > 1 ? Math.sqrt(values.reduce((sum, number) => sum + (number - mean) ** 2, 0) / (count - 1)) : null
     const reason = value === null ? 'missing-rating' : count < MIN_WELLNESS_BASELINE_DAYS ? 'insufficient-history' : !(sd > 0) ? 'no-variation' : null
+    const z = reason ? null : (metric.direction * (value - mean) / sd || 0)
     return { ...metric, value, count, mean, sd, needed: Math.max(0, MIN_WELLNESS_BASELINE_DAYS - count), reason,
-      z: reason ? null : metric.direction * (value - mean) / sd }
+      z, band: wellnessZBand(z) }
   })
   return { latest, start, end: latest ? addDays(latest.date, -1) : null, metrics }
 }

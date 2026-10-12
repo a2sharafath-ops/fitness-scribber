@@ -1,7 +1,10 @@
 // Timezone-aware "civil date" helpers. The day boundary follows the configured zone.
+// Match the server's settings.tz fallback; never infer a coach zone from a device.
+export const coachTimeZone = (tz) => tz || 'UTC'
+
 export const todayISO = (tz) => {
   try {
-    return new Date().toLocaleDateString('en-CA', tz ? { timeZone: tz } : undefined)
+    return new Date().toLocaleDateString('en-CA', { timeZone: coachTimeZone(tz) })
   } catch {
     return new Date().toISOString().slice(0, 10)
   }

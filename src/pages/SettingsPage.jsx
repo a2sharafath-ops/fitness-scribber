@@ -41,8 +41,8 @@ export default function SettingsPage() {
           <Field label="Weight units">
             <select value={f.units} onChange={set('units')}><option value="kg">Metric (kg)</option><option value="lb">Imperial (lb)</option></select>
           </Field>
-          <Field label="Timezone (day boundary for check-ins)">
-            <select value={f.tz} onChange={set('tz')}>{TZS.map((t) => <option key={t} value={t}>{t || 'Device default'}</option>)}</select>
+          <Field label="Coach timezone">
+            <select value={f.tz || ''} onChange={set('tz')}>{TZS.map((t) => <option key={t} value={t}>{t || 'UTC (default)'}</option>)}</select>
           </Field>
         </div>
         <div className="muted" style={{ fontSize: 12 }}>Today resolves to: <strong>{fmtDate(todayISO(f.tz))}</strong></div>

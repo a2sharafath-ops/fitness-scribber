@@ -1,0 +1,51 @@
+Schedule redesign — local testing
+
+Open http://127.0.0.1:5178/schedule
+The 5178 app remains in local builder QA mode. Nothing has been pushed or deployed.
+
+Implemented
+- Week / Day timelines, Month grid and Agenda; stable calendar and selected-day panels.
+- Drag shows a full-size landing block, proposed time and duration; invalid destinations turn red.
+- Bottom-edge resize, 15-minute snapping, edge scrolling, Escape cancellation and form alternative.
+- Review before a move is saved. Conflicts identify the issue, link to the existing client/day and offer available slots.
+- Training bookings open the matching client/date in Training; other appointment types open their relevant client section.
+- Cross-day moves carry the unique client/day prescription and update its assigned-program schedule date. Exercise content, template, set IDs and other clients are preserved.
+- Completed/started/past bookings and workout records are protected. Status updates remain separate from moving.
+- Incomplete legacy timing is displayed explicitly; no fabricated duration is used.
+
+Data limitations
+- Existing bookings have no prescription ID. The safe link is a unique training booking plus unique prescription for that client/date. Ambiguous legacy days are blocked rather than guessed.
+- This calendar books appointments; assigning a program does not automatically book appointment times.
+- Recurring usual training times are not part of this version.
+- Coach-time conflicts currently apply across all clients in this coach's account. Group attendance and parallel coaches do not have separate calendar resources.
+
+Backend release requirement
+Apply supabase/migrations/20261011102502_protected_schedule.sql after the existing program-library schema before deploying this UI to the connected app.
+It adds save_schedule_booking, an owner-scoped SECURITY INVOKER RPC. One database transaction checks current bookings/workouts/prescriptions and writes the booking, prescription date and assigned-program date together. Existing prescription content is never upserted by this RPC.
+No migration was applied to a live database. Without the RPC, connected booking updates fail safely with an installation message.
+The RPC takes brief table write locks to protect against older writers. A high-volume multi-coach deployment should revisit that lock scope.
+
+Verification
+- Unit and rendering tests: tests/schedule.test.mjs.
+- Isolated PostgreSQL checks: tests/schedule-sql-check.mjs (PGLITE_MODULE points at temporary PGlite installation).
+- Browser: future booking, blocked drag to prescribed date, resize 60 to 30, valid Week move, correct Training route and prescription, Month move back, booking cancellation, mobile layouts at 390px and 320px.
+- The QA move was reversed. The temporary Nov 2 booking was cancelled; the original workout was restored to Nov 2.
+
+Profile automatic timing (2026-10-11)
+- Profile > Usual training time: enable automatic scheduling, choose time and duration in the coach time zone.
+- Every new program day receives one Confirmed Personal training appointment. Rest days receive none.
+- Assignment review displays the saved time; no repeated builder entry. Missing default keeps date-only assignments.
+- Any timing or protected-date conflict blocks the whole assignment. Links lead to Profile timing, Schedule, and Training.
+- Local assignment rereads storage before validation and saves once; backend uses assign_program_scheduled atomically.
+- Profile default changes affect only new assignments. Existing assigned workouts and bookings are not backfilled or retimed.
+- Schedule moves/resizes retain all existing protection rules and do not change Profile defaults.
+- Apply 20261011122215_program_training_times.sql after the protected schedule migration before live use. Neither migration was deployed by this change.
+
+Training timing sync correction (2026-10-11)
+- Profile uses explicit 12-hour Hour / Minute / AM or PM controls. Noon and midnight convert correctly to stored HH:mm.
+- Saving Profile timing now adds missing bookings for every eligible existing future plan (including assigned programs).
+- Individual builder saves, clones, copy/paste and multi-client copies use saveTrainingPlans and the client default.
+- Existing training bookings, including cancellations and coach overrides, are retained; recorded/past training is skipped.
+- All changed plans, Profile timing and generated bookings save together, after conflict checks against the latest local data.
+- Live backend requires 20261011123312_training_plan_sync.sql, not applied to production.
+- TM 100 existing future plans were reconciled to the user-selected 10:00 AM / 60 minutes; Nov 7 verified in Schedule.

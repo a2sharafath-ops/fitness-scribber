@@ -1,0 +1,118 @@
+FOLLOW-UP: see docs/local-release-fixes-2026-10-11.txt for resolved findings and current status.
+
+LOCAL RELEASE CHECK — 11 October 2026 (Asia/Dubai)
+
+Scope
+Current working tree, including the uncommitted UI, program, schedule and
+wearable security changes. No commit, push, frontend deployment, package update
+or database mutation was performed during this check.
+
+Result: automated checks pass; HOLD RELEASE due to connected schema errors and
+a reproduced OAuth return-screen lifecycle bug.
+
+PASSED
+- npm test: 173 passed, 0 failed, 0 skipped.
+  Includes prescription validation and RIR, program copy/assignment protection,
+  schedule conflicts, persistence failures, client isolation, tracked metrics,
+  OAuth state/replay/ownership checks and browser environment credential guards.
+  OAuth tests use isolated database/provider doubles, not real device accounts.
+- npm run lint: exit 0.
+- npm run build: exit 0; 293 modules; generated 69 files in dist.
+- Built-output pattern scan: no detected private keys, provider secrets,
+  privileged Supabase JWTs, sb_secret keys, GitHub/AWS keys or credential-bearing
+  database connection strings. One expected public anon JWT occurrence; no maps.
+  This is a targeted scan, not a guarantee that every possible secret format is absent.
+- Source scan: no wearable_tokens, accessToken, refreshToken, CLIENT_SECRET or
+  SERVICE_ROLE_KEY references in src or public.
+- Browser smoke checks on offline QA app at http://127.0.0.1:5178:
+  dashboard, two-client roster, client overview, training, profile, assessments,
+  schedule, program library, global progress, wearable empty state all rendered.
+  Tracked-metrics editor, program-assignment wizard, workout builder and manual
+  wearable entry opened and were cancelled without saving test changes.
+  Builder showed 3 x 5 at 80% 1RM plus 2 RIR, with 80 kg calculated from TM 100.
+  Profile showed 10:00 AM / 60 minutes / Asia/Dubai.
+  Schedule showed the default 05:00–22:00 time grid.
+  Client training-load chart and ACWR history retained visible empty graphs;
+  the expanded ACWR information stayed inside the modal in the narrow viewport.
+  No browser error-level logs were captured during these checks.
+- Production-built local preview at http://127.0.0.1:5180 renders the login gate;
+  no offline QA banner or client data is shown before authentication.
+- User signed into the built preview. Dashboard and Clients then loaded both
+  Feature Demo Client and Sharafath Client. The demo wearable page rendered its
+  no-data state with sync still off; no consent, connection or record was changed.
+
+DEPENDENCY AUDIT — ACTION BEFORE RELEASE RECOMMENDED
+npm audit returned five high-severity package findings (not five independent
+application vulnerabilities). No critical findings. Patches are available.
+- react-router-dom 7.18.0 / react-router 7.18.0: one shared advisory, fixed in
+  7.18.2. The advisory affects unstable RSC APIs. This app uses BrowserRouter in
+  a static Vite SPA; no use of those APIs was found. No applicable exploit path
+  was demonstrated, but updating to a patched compatible version is recommended.
+  https://github.com/advisories/GHSA-qwww-vcr4-c8h2
+- postcss 8.5.15: build dependency via Vite; source-map file disclosure findings.
+  Current audit marks versions through 8.5.22 affected. Update to a patched version.
+  https://github.com/advisories/GHSA-fxqj-rqcc-2cmp
+  https://github.com/advisories/GHSA-r28c-9q8g-f849
+- nanoid 3.3.15: transitive build dependency via PostCSS; invalid generator size
+  can loop indefinitely. Use a patched compatible version (at least 3.3.18).
+  https://github.com/advisories/GHSA-28wg-ghj8-5hjv
+  https://github.com/advisories/GHSA-2v37-7h3g-55p8
+- source-map-js 1.2.1: transitive build dependency via PostCSS; indexed source-map
+  offsets can cause denial of service. Patched range begins at 1.2.2.
+  https://github.com/advisories/GHSA-68fv-2mgg-jv7q
+These build-time packages are not evidence of an exposed browser vulnerability.
+Re-run the full checks after patching; do not blindly run audit fix --force.
+
+RELEASE GATES / UNVERIFIED
+- BLOCKER, confirmed after sign-in: Data API cannot find public.programs or
+  public.programAssignments in its schema cache. Both warnings were captured
+  from the built browser app, and the persistent data-warning banner is visible.
+  Verify the installed schema/cache and complete the pending program-library
+  setup before deploying the full frontend. Other collections and clients load.
+- FRONTEND BUG, reproduced on signed-in cold navigation to
+  http://127.0.0.1:5180/#wearable=error: the fragment is cleared, then the page
+  transitions through loading into Dashboard instead of retaining the failure
+  message and Continue action. src/App.jsx:93 re-reads wearableReturn() from the
+  live hash on every Gate render; src/api/wearable.js:28 clears that hash in the
+  completion effect. AuthContext profile-loading updates then unmount the result
+  component. Capture the callback mode for the lifetime of the return flow and
+  add a regression test that includes auth/profile-loading rerenders. Success
+  completion has the same lifecycle risk but was not tested with real credentials.
+- Signed-in client loading and the inactive wearable view were checked; actual
+  cloud writes, role-isolation sessions and successful device linking were not.
+- Offline QA cannot prove that production migrations exist. Local rollout notes
+  say program-library and scheduling SQL were not applied by those UI changes.
+  Before a full frontend release, verify/install in the documented dependency order:
+    supabase/schema_program_library.sql
+    supabase/schema_session_name.sql (if not already present)
+    supabase/migrations/20261011102502_protected_schedule.sql
+    supabase/migrations/20261011122215_program_training_times.sql
+    supabase/migrations/20261011123312_training_plan_sync.sql
+  Required RPCs: assign_program, save_schedule_booking,
+  assign_program_scheduled, save_training_plan_batch.
+  Missing RPCs intentionally fail safely; they do not fall back to partial writes.
+- Optional standalone PostgreSQL/PGlite integration scripts were not rerun:
+  no PGLITE_MODULE was configured. The 173-test suite does not include those files.
+- The 58 previously reported production Security Advisor warnings are NOT cleared
+  by this local check. Local SQL contains public SECURITY DEFINER functions;
+  is_admin is caller-scoped, become_coach checks an invite, and redeem_invite
+  matches a code. Their live grants and complete deployed definitions still need
+  review. Local files are insufficient to audit all live pooling functions.
+- Real wearable OAuth remains intentionally deferred; no provider credentials.
+  APP_URL targets production, so a connection started locally would return to a
+  different origin and cannot reuse its local sessionStorage proof.
+
+MINOR WARNINGS
+- Some SSR test harnesses enable Vite HMR and contend for port 24678. Tests still
+  pass; align builder/classic-client/client-report harnesses with hmr:false later.
+- git diff --check reports a trailing blank line at EOF in:
+    src/pages/SchedulePage.jsx:155
+    supabase/functions_schema.sql:51
+  No whitespace-only edits were made during this audit.
+
+Recommended order
+1. Fix the OAuth result-screen lifecycle and add a regression test.
+2. Patch flagged compatible dependencies and rerun tests/lint/build/audit.
+3. Resolve the confirmed program schema/cache failure and verify all required RPCs.
+4. Review the outstanding production database access warnings.
+5. Review the final diff and obtain deployment approval. No push is performed here.

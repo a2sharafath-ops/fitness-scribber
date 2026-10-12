@@ -14,11 +14,14 @@ const SYSTEM =
   'previous value and capture the final state.\n\n' +
   'Return ONLY a JSON object (no markdown fences, no commentary) of the shape:\n' +
   '{"blocks":[{"blockType":"Warm-up"|"Main Lifts"|"Assisted"|"Core/Others"|"Cool-down",' +
-  '"autoCalculate1RM":boolean,"exercises":[{"exerciseName":string,"intensityType":"%1RM"|"RPE"|"Load"|"Target HR",' +
+  '"autoCalculate1RM":boolean,"exercises":[{"exerciseName":string,"intensityType":"%1RM"|"RIR"|"RPE"|"Load"|"Target HR",' +
   '"supersetLinkId":string|null,"setCount":number,"prescribedReps":number,' +
-  '"prescribedIntensityValue":number|null,"prescribedLoadKg":number|null}]}]}\n' +
+  '"prescribedIntensityValue":number|null,"prescribedRir":number|null,"prescribedLoadKg":number|null}]}]}\n' +
   'Defaults when unstated: blockType "Main Lifts", intensityType "Load", setCount 3, prescribedReps 10. ' +
-  'Weights are kilograms. RPE is 1–10. %1RM values are percentages (e.g. 80).'
+  'Weights are kilograms. RPE is 1–10. RIR is an integer from 0 to 10. %1RM values are percentages (e.g. 80). ' +
+  'For combined percentage or weight + RIR targets, keep the load intensityType and store RIR separately in prescribedRir. ' +
+  'Example: 3 sets of 5 at 80% with 2 RIR means intensityType %1RM, prescribedIntensityValue 80, prescribedRir 2. ' +
+  'For RIR-only prescriptions use intensityType RIR and prescribedIntensityValue for RIR. Unstated prescribedRir is null.'
 
 async function anthropic(transcript: string) {
   const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -27,7 +30,7 @@ async function anthropic(transcript: string) {
     body: JSON.stringify({ model: Deno.env.get('ANTHROPIC_MODEL') ?? 'claude-sonnet-4-6', max_tokens: 2000, system: SYSTEM, messages: [{ role: 'user', content: transcript }] }),
   })
   const d = await r.json()
-  if (!r.ok) throw new Error(JSON.stringify(d))
+  if (!r.ok) throw new Error('Upstream provider request failed')
   return d.content?.[0]?.text ?? ''
 }
 
@@ -42,7 +45,7 @@ async function openai(transcript: string) {
     }),
   })
   const d = await r.json()
-  if (!r.ok) throw new Error(JSON.stringify(d))
+  if (!r.ok) throw new Error('Upstream provider request failed')
   return d.choices?.[0]?.message?.content ?? ''
 }
 
@@ -62,7 +65,7 @@ Deno.serve(async (req) => {
     const provider = (Deno.env.get('LLM_PROVIDER') ?? 'anthropic').toLowerCase()
     const text = provider === 'openai' ? await openai(transcript) : await anthropic(transcript)
     return json(toJson(text))
-  } catch (e) {
-    return json({ error: String(e) }, 500)
+  } catch {
+    return json({ error: 'Workout parsing is unavailable. Please try again later.' }, 500)
   }
 })

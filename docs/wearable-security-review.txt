@@ -1,0 +1,138 @@
+Current production status — 11 October 2026
+The user explicitly approved production SQL and the five function deployments.
+The SQL is applied and verified on haxxetirrcrwzwdzsdui.
+Deployed with gateway JWT verification enabled:
+wearable-connections, wearable-connect, wearable-complete, wearable-sync.
+wearable-callback is deployed with gateway JWT verification disabled for this
+callback only, following explicit user approval of the two-step dashboard setup.
+All five wearable functions are now deployed. The callback validates OAuth state;
+token completion remains a separate authenticated operation.
+
+Live verification:
+- RLS is enabled on both wearable tables.
+- anon and authenticated have no table/column SELECT or INSERT/UPDATE/DELETE.
+- service_role has server access to both tables.
+- All four deployed endpoints returned 401 both without authorization and with
+  only the public anon key (eight denial checks).
+- REST reads of both tables with the anon key returned 401 (no data retrieved).
+- The public callback returned 400 for missing and invalid state and 405 for
+  an unsupported method. All three non-mutating callback checks passed.
+- Security Advisor rerun: zero errors, 58 warnings for existing database code;
+  these warnings require a separate review and were not changed in this rollout.
+- APP_URL is configured as https://fitness-scribber-kq6i.vercel.app.
+  Missing and invalid callback state now return 303 to /#wearable=error on that
+  origin, with no-store and no-referrer headers; both live checks passed.
+  The earlier 400 checks above were before APP_URL was configured.
+- Vendor credentials remain unconfigured. The user chose to defer wearable
+  setup and complete only the app URL configuration. Real OAuth is not tested.
+- No frontend deployment, Git commit or push was performed.
+The earlier proposal/preflight notes below are historical.
+
+Wearable security changes — local review, 11 October 2026
+
+Status
+Code is implemented locally. No SQL was executed, no functions were deployed,
+and no changes were committed or pushed. wearable-security.proposed.sql is a
+review proposal, deliberately outside the automatic migrations directory.
+
+What changed
+- Connect, complete, sync, metadata and disconnect require a signed-in coach
+  who owns the client or the athlete linked to that client.
+- Connection state is random, expires after ten minutes, and is stored as a
+  hash. The callback stores the provider code once; it cannot save tokens.
+- Completion requires the initiating user and proof kept in that browser tab.
+  One conditional DELETE RETURNING consumes the pending request before exchange.
+- Oura and Fitbit use S256 PKCE. WHOOP uses its documented confidential-client
+  exchange, with the same state, browser-proof and user checks in this app.
+- Callbacks use provider-specific redirect paths. Neither provider codes nor
+  access/refresh tokens are returned to the frontend.
+- Sync attributes data to the client's coach, including when an athlete syncs.
+  Provider and database failures return sanitized errors instead of success.
+- The browser reads connection metadata through wearable-connections only.
+
+Database proposal
+The proposed SQL creates a server-only table for short-lived OAuth requests.
+It also removes known browser policies and browser table/column privileges on
+wearable_tokens, retaining access for service_role. Per-client OAuth tokens
+belong in this restricted storage; shared vendor secrets belong in server-side
+function environment variables. Supabase's public URL and anon/publishable key
+remain browser configuration, protected by authentication and database policies.
+
+Before approving SQL, inspect existing grants, inherited roles, views and RPCs
+that might expose either table. Check existing table names and dependencies.
+This proposal intentionally fails if the request table already exists, rather
+than silently accepting an unknown schema. The legacy functions_schema.sql
+still contains browser-read policies: do not rerun it after hardening. Align the
+bootstrap schema as part of the separately approved database rollout.
+
+Later rollout — requires separate approval
+1. Pause wearable connection actions during the coordinated deployment.
+2. Review/apply the proposed SQL, after checking the deployed schema and grants.
+3. Configure vendor IDs/secrets in Supabase function secrets; use the placeholder
+   list in supabase/functions/.env.example. Never use VITE_ for private secrets.
+4. Set APP_URL to the app origin where the connection starts. localhost and
+   127.0.0.1 are different origins. The return must reach the same browser tab
+   and origin so sessionStorage proof is available. Use a separate backend/app
+   configuration for local integration testing instead of changing production.
+5. Register the exact vendor redirect URIs:
+   https://<project>.supabase.co/functions/v1/wearable-callback/oura
+   https://<project>.supabase.co/functions/v1/wearable-callback/whoop
+   https://<project>.supabase.co/functions/v1/wearable-callback/fitbit
+6. Deploy wearable-connections, wearable-connect, wearable-complete and
+   wearable-sync with authenticated access. Only wearable-callback must accept
+   public vendor GET redirects (deploy that callback with --no-verify-jwt).
+   Authenticated handlers also validate the caller through auth.getUser.
+7. Deploy the matching frontend. Do not mix the legacy callback with the new
+   frontend. In-flight legacy connections must be restarted.
+8. Verify connect, cancellation, reconnect, sync and disconnect using approved
+   vendor test accounts. Verify an unrelated account cannot operate on a client,
+   and browser roles cannot read the token/request tables directly.
+9. Arrange server-only cleanup of expired requests; expiry already blocks use,
+   but deletion is needed to avoid retaining old authorization codes indefinitely.
+
+If rollout fails, pause wearable connections; do not restore browser token access.
+The current sync endpoint is user-authorized. An unattended cron worker would
+need a separate authorization design; do not store a coach's login token in cron.
+
+Validation and limits
+173 tests pass; lint and production build pass. Security tests execute the Edge
+Function handlers against database/provider doubles and test the browser helper.
+They cover ownership, expiry, wrong proof/user, callback replay, provider mixup,
+PKCE, invalid token responses and database failures. Tests simulate atomic delete
+behavior; actual Postgres permissions/concurrency and live vendor exchanges have
+not been exercised. Edge handlers are not checked by the frontend linter.
+The suite reports existing Vite HMR port-in-use warnings while the local app is
+running; these did not fail the tests.
+
+The new connection flow will fail closed until the request table and matching
+functions exist. Existing production behavior is unchanged by these local files.
+Vendor reading field mappings/scopes still need real integration verification.
+Ownership is checked before exchange and again before writes; those checks and
+the writes are separate statements, not a database lock on client reassignment.
+Strict concurrent-reassignment guarantees would need a separately reviewed RPC.
+Concurrent refresh-token rotation also needs live vendor testing.
+
+Primary references reviewed
+https://www.rfc-editor.org/rfc/rfc9700.html
+https://supabase.com/docs/guides/functions/auth
+https://cloud.ouraring.com/docs/authentication
+https://developer.whoop.com/docs/developing/oauth/
+https://dev.fitbit.com/build/reference/web-api/developer-guide/authorization/
+
+Rollout attempt — 11 October 2026
+Read-only inspection through the signed-in Supabase dashboard confirmed:
+- Project haxxetirrcrwzwdzsdui (Cureocity Fitness Partner).
+- Neither wearable_tokens nor wearable_oauth_requests exists.
+- Client ID/coach/user columns match the expected text/uuid/uuid types.
+- No inherited role memberships for anon or authenticated were reported.
+- The one matching snapshot RPC returns an empty wearable_tokens array only.
+- No wearable Edge Functions are deployed (seven unrelated functions exist).
+
+Prepared wearable-security-install.sql to create the absent token table securely
+before the reviewed request-table and permission changes. Updated the local
+functions_schema.sql bootstrap to avoid restoring browser token access.
+Automatic approval review blocked SQL execution because the prior no-database
+instruction requires explicit approval to change production. No DDL ran and no
+functions were deployed. The connected Supabase MCP account lacks access to this
+project; the existing browser session does have access. Deployment bundles are
+prepared locally. Explicit production SQL/deployment approval is still needed.

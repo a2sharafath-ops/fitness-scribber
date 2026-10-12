@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
@@ -12,6 +12,8 @@ import AppLayout from './components/templates/AppLayout'
 import ClientLayout from './components/templates/ClientLayout'
 import Toaster from './components/organisms/Toaster'
 import { clientSectionPath } from './lib/clientRoutes'
+import { wearableReturn } from './api/wearable'
+import WearableReturn from './components/organisms/WearableReturn'
 
 const AthletePortal = lazy(() => import('./pages/AthletePortal'))
 const AdminPortal = lazy(() => import('./pages/AdminPortal'))
@@ -83,11 +85,15 @@ function Shell() {
 // In backend mode: require login, then branch by role. In local mode: straight through (coach app).
 function Gate() {
   const { ready, session, profileReady, role, recovery } = useAuth()
+  // Completion removes the sensitive URL fragment. Keep this screen mounted
+  // across the auth/profile updates that follow startup until Continue navigates.
+  const [isWearableReturn] = useState(() => hasBackend && wearableReturn())
   if (!hasBackend) return <Shell />
   const loading = <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Starting…</div>
   if (!ready) return loading
   if (recovery) return <ResetPasswordPage />
   if (!session) return <AuthPage />
+  if (isWearableReturn) return <WearableReturn />
   if (!profileReady) return loading
   if (!role || role === 'pending') return <RoleOnboarding />
   if (role === 'admin') return <Suspense fallback={routeLoading}><AdminPortal /></Suspense>

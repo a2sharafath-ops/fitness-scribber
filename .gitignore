@@ -31,3 +31,6 @@ dist-ssr
 *.sln
 *.sw?
 .recovery/
+
+# Supabase CLI local connection metadata.
+supabase/.temp/

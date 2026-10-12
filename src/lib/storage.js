@@ -1,8 +1,12 @@
 // localStorage persistence with forward-compatible migration of older saved data.
+import { ensureLibrary } from './programLibrary'
 import { seed } from './seed'
 import { ensureProgramShape } from './program'
+import { seedBuilderQA } from './builderQA'
+import { isLocalBuilderQA } from './supabase'
 
-const KEY = 'fitscribe_v1'
+const KEY = isLocalBuilderQA ? 'fitscribe_builder_qa_v1' : 'fitscribe_v1'
+export const localStorageKey = KEY
 
 function migrate(db) {
   if (!db.concerns) db.concerns = []
@@ -23,6 +27,7 @@ function migrate(db) {
   // Advanced Programming Platform: maxes/synonyms collections + lazy
   // items→blocks upgrade of prescriptions and templates.
   ensureProgramShape(db)
+  ensureLibrary(db)
   return db
 }
 
@@ -30,11 +35,19 @@ export function loadDB() {
   let db
   try {
     const raw = localStorage.getItem(KEY)
-    db = raw ? JSON.parse(raw) : seed()
+    db = raw ? JSON.parse(raw) : isLocalBuilderQA ? seedBuilderQA() : seed()
   } catch {
-    db = seed()
+    db = isLocalBuilderQA ? seedBuilderQA() : seed()
   }
   return migrate(db)
+}
+
+// Calendar writes must read the latest browser snapshot rather than overwrite
+// another open tab's newly saved clients or plans with an older in-memory copy.
+export function readStoredDB() {
+  const raw = localStorage.getItem(KEY)
+  if (!raw) throw new Error('Local data is unavailable. Reload the app before changing the schedule.')
+  return migrate(JSON.parse(raw))
 }
 
 export function saveDB(db) {

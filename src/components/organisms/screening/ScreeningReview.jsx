@@ -10,8 +10,7 @@ import './ScreeningFlow.css'
 // TRAINER-ONLY view of a completed screening: outcome, triggering answers, red
 // flags, risk factors, and the clearance workflow. None of this is ever shown to
 // the client — the trainer reviews here and communicates clearance personally.
-export default function ScreeningReview({ screening, draft, onClearance, onStart, historical = false }) {
-  const today = todayISO()
+export default function ScreeningReview({ screening, draft, onClearance, onStart, historical = false, clearanceOnly = false, today = todayISO() }) {
   if (!screening) {
     return (
       <div className="card">
@@ -35,6 +34,7 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
 
   return (
     <div className="card">
+      {!clearanceOnly && <>
       <div className="flex between" style={{ alignItems: 'flex-start' }}>
         <div className="section-title" style={{ margin: 0 }}>Health screening <Tag color="gray">Trainer-only</Tag></div>
         <div className="flex gap" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -82,6 +82,7 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
         <div className="i-b">{s.outcome === 'C' || flags.major.length > 0 ? TRAINER_ADVICE_REVIEW : TRAINER_ADVICE_CLEARED}</div>
       </div>
 
+      </>}
       {(s.outcome === 'C' || flags.major.length > 0) && !historical && (
         <div className="intake-block">
           <div className="i-h">✅ Clearance workflow — you decide and communicate this to the client</div>

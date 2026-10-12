@@ -66,4 +66,5 @@ begin
     on conflict (id) do update set role = 'athlete';
   return cid;
 end $$;
+revoke execute on function redeem_invite(text) from public, anon;
 grant execute on function redeem_invite(text) to authenticated;

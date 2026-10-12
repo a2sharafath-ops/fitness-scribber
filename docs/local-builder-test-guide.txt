@@ -1,0 +1,42 @@
+LOCAL BUILDER TESTING
+
+Open http://127.0.0.1:5178/clients/local-builder-100/training
+
+This mode uses a separate browser-storage dataset and cannot connect to Supabase.
+It contains two fictional clients: Builder Test TM 100 and Builder Test TM 200.
+No wearable readings are included. Refresh keeps your local edits.
+
+Test in this order:
+1. Today: edit Mixed prescription test. Bench Press is 3 x 5 at 80% with 2 RIR.
+   Calculated weights should be 80 kg; Goblet Squat has no Training Max and should
+   show no TM. Volume should be estimated and partial rather than zero.
+2. Set 2: change rest to 120 seconds. Set 1: change RIR to 3. All Bench Press sets
+   should show 3 RIR, and set 2 should retain its own rest. Save and reopen.
+3. Change percentage intensity to RPE. The percentage should clear. Enter a valid
+   RPE target or switch back and re-enter the percentage before saving.
+4. Try an empty exercise name, zero sets, negative reps or negative weight.
+   Save/copy should reject the draft with an exercise/set-specific explanation.
+5. Copy to the TM 200 client on today. There is an existing plan, so first cancel
+   the replacement prompt and verify it remains. Repeat and approve. Bench Press
+   should resolve to 160 kg at 80% (170 kg if progressed to 85%).
+6. Bulk paste to tomorrow, which already has a plan. It should ask before replacing.
+   Percentage exercises should default to percentage progression. A percentage
+   rule on a RIR-only exercise should be rejected; disable that exercise or choose
+   its compatible rule before applying.
+7. Two days ahead: copying to the TM 100 client should be blocked by its running
+   workout. Copying to the TM 200 client should be blocked by its completed booking.
+8. Dictate: type 'Bench Press three sets of five at 80 percent with 2 RIR' into the
+   transcript, parse and insert. Both the percentage and RIR should survive.
+9. Start today's workout. Targets should match the plan; actual effort should stay
+   blank until entered. Save and exit, then resume to verify local persistence.
+
+Failed backend saves are covered by automated tests; this offline mode does not
+connect to the deployed cloud dictation function or production database.
+
+Restart command from the repository:
+npm run dev -- --host 127.0.0.1 --port 5178 --strictPort --mode builder-qa
+
+Normal local data uses fitscribe_v1. This testing mode uses fitscribe_builder_qa_v1.
+To start over, remove only fitscribe_builder_qa_v1 through browser site-storage
+tools, then reload. Do not clear all site storage if you want to retain other local
+app data. Test-plan dates are set when this separate dataset is first initialized.

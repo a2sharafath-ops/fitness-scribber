@@ -18,14 +18,16 @@ import { useModal } from '../../../store/ModalContext'
 import { useFormat } from '../../../hooks/useFormat'
 import useDragReorder from '../../../hooks/useDragReorder'
 import { moveOrdered } from '../../../lib/arrange'
-import { uid } from '../../../lib/format'
 import { fmtDay, addDays, todayISO } from '../../../lib/dates'
-import { isClosedTrainingDay } from '../../../lib/planner'
+import { isClosedTrainingDay, isPlanTargetBlocked, writePrescription, approvePlanReplacement } from '../../../lib/planner'
 import { correctClassicWorkout } from '../../../lib/classicWorkflow'
 import {
-  newBlock, defaultBlocks, itemsToBlocks, blocksToItems, blocksVolume, cloneBlocksFresh,
-  applyProgression, resolveTrainingMax, hasUnmapped, resetTrainingMaxes, programStats,
+  newBlock, defaultBlocks, itemsToBlocks, cloneBlocksFresh,
+  applyProgression, resolveTrainingMax, resetTrainingMaxes, programStats,
 } from '../../../lib/program'
+import { validatePrescription } from '../../../lib/prescription'
+import { confirmedPlanWrite } from '../../../lib/confirmedPersistence'
+import { prescriptionVolume } from '../../../lib/prescriptionMetrics'
 import { toast, confirmDialog } from '../../../lib/toast'
 
 // Existing sessions load as saved; a fresh day opens with the standard
@@ -51,8 +53,8 @@ const fromExisting = (p, seedBlocks = []) => {
   return base
 }
 
-export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false, onLog }) {
-  const { db, commit, tz, units } = useData()
+export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false, onLog, initialMode, selectedWorkoutId }) {
+  const { db, commit, saveTrainingPlans, tz, units } = useData()
   const { closeModal, setCloseGuard } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
@@ -60,9 +62,9 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const unfinishedWorkout = (db.workouts || []).find((item) => item.clientId === clientId && item.date === date && item.status !== 'completed')
   const completedAppointment = (db.sessions || []).some((item) => item.clientId === clientId && item.date === date && String(item.status).toLowerCase() === 'completed')
   const closedDay = isClosedTrainingDay(db, clientId, date, todayISO(tz))
-  const [selectedLogId, setSelectedLogId] = useState(() => completed[0]?.id || null)
+  const [selectedLogId, setSelectedLogId] = useState(() => selectedWorkoutId || completed[0]?.id || null)
   const selectedLog = completed.find((item) => item.id === selectedLogId) || completed[0] || null
-  const [mode, setMode] = useState(() => completed.length || unfinishedWorkout || completedAppointment || (review && (existing || closedDay)) ? 'view' : 'edit')
+  const [mode, setMode] = useState(() => initialMode === 'edit-log' && completed.length ? 'edit-log' : completed.length || unfinishedWorkout || completedAppointment || (review && (existing || closedDay)) ? 'view' : 'edit')
   const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
   const [name, setName] = useState(existing?.name || '')
   const [notes, setNotes] = useState(() => {
@@ -72,19 +74,22 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   })
   const [blockStart, setBlockStart] = useState(false)
   const [step, setStep] = useState('edit') // edit | dates | progress | dictate | clients
+  const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
   const [targets, setTargets] = useState(new Set())
   const [clientTargets, setClientTargets] = useState(new Set())
   const initialDraftRef = useRef(null)
   if (initialDraftRef.current === null) initialDraftRef.current = JSON.stringify({ blocks, name, notes })
   const changed = mode === 'edit' && JSON.stringify({ blocks, name, notes }) !== initialDraftRef.current
   useEffect(() => {
+    if (saving) return setCloseGuard(() => false)
     if (!changed) return undefined
     return setCloseGuard(() => confirmDialog({
       title: 'Discard workout changes?',
       message: 'The unsaved prescription changes for this client and date will be lost.',
       confirmLabel: 'Discard changes', danger: true,
     }))
-  }, [changed, setCloseGuard])
+  }, [changed, saving, setCloseGuard])
 
   const client = db.clients.find((c) => c.id === clientId)
   const maxHr = 220 - (client?.anthro?.age || 30)
@@ -113,10 +118,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   // and the copy-to-clients step). Defaults to this client; pass `cid` to write
   // the same session onto another client's calendar.
   const writeTo = (d, dt, payload, cid = clientId) => {
-    const items = blocksToItems(payload)
-    const ex = d.prescriptions.find((p) => p.clientId === cid && p.date === dt)
-    if (ex) { ex.blocks = payload; ex.items = items; ex.name = name.trim(); ex.notes = notes }
-    else d.prescriptions.push({ id: uid(), clientId: cid, date: dt, name: name.trim(), notes, blocks: payload, items })
+    writePrescription(d, cid, dt, payload, notes, name.trim())
   }
 
   // Days this client already has a real (non-empty) session on — surfaced in the
@@ -124,6 +126,21 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const sessionDates = new Set(
     db.prescriptions.filter((p) => p.clientId === clientId && programStats(p).exercises > 0).map((p) => p.date),
   )
+
+  const persistPlan = async (mutate, message) => {
+    if (savingRef.current) return false
+    savingRef.current = true; setSaving(true)
+    try {
+      const result = await confirmedPlanWrite(saveTrainingPlans, mutate)
+      toast(result.local ? message.replace(/\.$/, '') + ' on this device.' : message)
+      return true
+    } catch (error) {
+      toast(error.message, 'error')
+      return false
+    } finally {
+      savingRef.current = false; setSaving(false)
+    }
+  }
 
   // ---- Copy this session onto other clients (same date) ----------------------
   const others = db.clients.filter((x) => x.id !== clientId)
@@ -133,10 +150,15 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     const n = new Set(s); if (n.has(cid)) n.delete(cid); else n.add(cid); return n
   })
   const leaveClients = () => { setStep('edit'); setClientTargets(new Set()) }
+  const validDraft = (payload = blocks) => {
+    try { validatePrescription(name, payload); return true }
+    catch (error) { toast(error.message, 'error'); return false }
+  }
   const copyToClients = async () => {
+    if (!validDraft()) return
     const ids = [...clientTargets]
     if (!ids.length) return
-    if (ids.some((cid) => isClosedTrainingDay(db, cid, date, todayISO(tz)))) return toast('A selected client has a closed training day. Choose an open date.', 'error')
+    if (ids.some((cid) => isPlanTargetBlocked(db, cid, date, todayISO(tz)))) return toast('A selected client has a closed training day. Choose an open date.', 'error')
     const clash = ids.filter(hasSession)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',
@@ -145,31 +167,34 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     })) return
     // Each client gets its own deep copy with brand-new ids; %1RM targets
     // re-resolve against that client's own Training Max when the card renders.
-    commit((d) => ids.forEach((cid) => writeTo(d, date, cloneBlocksFresh(blocks), cid)))
+    if (!await persistPlan((d) => ids.forEach((cid) => writeTo(d, date, cloneBlocksFresh(blocks), cid)), `Copied to ${ids.length} client${ids.length === 1 ? '' : 's'}.`)) return
     leaveClients()
-    toast(`Copied to ${ids.length} client${ids.length === 1 ? '' : 's'}.`)
   }
 
   // Spec 3.1 — quick clones duplicate the structure onto tomorrow / day after
   // with brand-new ids, no progression.
   const quickClone = async (offset) => {
+    if (!validDraft()) return
     const dt = addDays(date, offset)
-    if (isClosedTrainingDay(db, clientId, dt, todayISO(tz))) return toast('The target day is closed to new planning.', 'error')
+    if (isPlanTargetBlocked(db, clientId, dt, todayISO(tz))) return toast('The target day is closed to new planning.', 'error')
     if (db.prescriptions.some((p) => p.clientId === clientId && p.date === dt) &&
       !await confirmDialog({ title: 'Overwrite session', message: `${fmtDay(dt)} already has a session — overwrite it?`, confirmLabel: 'Overwrite' })) return
-    commit((d) => writeTo(d, dt, cloneBlocksFresh(blocks)))
-    toast(`Copied to ${fmtDay(dt)}.`)
+    await persistPlan((d) => writeTo(d, dt, cloneBlocksFresh(blocks)), `Copied to ${fmtDay(dt)}.`)
   }
 
   // Spec 3.2 — calendar duplication is gated behind the Progression Rule Window.
-  const bulkApply = (rules) => {
+  const bulkApply = async (rules) => {
+    if (!validDraft()) return
     const dates = [...targets].sort()
-    if (dates.some((dt) => isClosedTrainingDay(db, clientId, dt, todayISO(tz)))) return toast('The selected dates include a closed training day.', 'error')
-    const progressed = applyProgression(blocks, rules, resolveTm)
-    commit((d) => dates.forEach((dt) => writeTo(d, dt, cloneBlocksFresh(progressed))))
+    if (dates.some((dt) => isPlanTargetBlocked(db, clientId, dt, todayISO(tz)))) return toast('The selected dates include a closed training day.', 'error')
+    let progressed
+    try { progressed = applyProgression(blocks, rules, resolveTm) }
+    catch (error) { return toast(error.message, 'error') }
+    if (!validDraft(progressed)) return
+    if (!await approvePlanReplacement(db, dates.map(dt => ({ clientId, date: dt })), confirmDialog)) return
+    if (!await persistPlan((d) => dates.forEach((dt) => writeTo(d, dt, cloneBlocksFresh(progressed))), `Cloned with progression to ${dates.length} date${dates.length === 1 ? '' : 's'}.`)) return
     setStep('edit')
     setTargets(new Set())
-    toast(`Cloned with progression to ${dates.length} date${dates.length === 1 ? '' : 's'}.`)
   }
 
   const insertDictated = (parsed) => {
@@ -185,14 +210,12 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     setStep('edit')
   }
 
-  const save = () => {
+  const save = async () => {
     if (completed.length || completedAppointment || (closedDay && !existing)) return toast('This day is closed to new planning.', 'error')
-    if (hasUnmapped(blocks)) return toast('Some dictated exercises are unvalidated (orange) — pick their standard library term first.', 'error')
-    if (!name.trim()) return toast('Add a session name before saving.', 'error')
-    if (!blocks.some((block) => block.exercises.length)) return toast('Add an exercise before saving this session.', 'error')
+    if (!validDraft()) return
     const payload = blocks.map((b, i) => ({ ...b, order: i + 1 }))
     const events = []
-    commit((d) => {
+    if (!await persistPlan((d) => {
       const ex = d.prescriptions.find((p) => p.clientId === clientId && p.date === date)
       if (!payload.some((b) => b.exercises.length) && ex) {
         d.prescriptions = d.prescriptions.filter((p) => p !== ex)
@@ -205,16 +228,14 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         const reset = resetTrainingMaxes(d, clientId, payload, date)
         if (reset.length) events.push(`Training Max reset to rolling Absolute 1RM: ${reset.join(', ')}`)
       }
-    })
+    }, 'Workout saved.')) return
     closeModal({ force: true })
-    toast('Workout saved')
     if (events.length) events.forEach((e, i) => setTimeout(() => toast(e, 'info', 6000), i * 350))
   }
   const del = async () => {
     if (!await confirmDialog({ title: 'Delete workout', message: 'Delete this prescribed workout?', confirmLabel: 'Delete', danger: true })) return
-    commit((d) => { d.prescriptions = d.prescriptions.filter((p) => !(p.clientId === clientId && p.date === date)) })
+    if (!await persistPlan((d) => { d.prescriptions = d.prescriptions.filter((p) => !(p.clientId === clientId && p.date === date)) }, 'Workout deleted.')) return
     closeModal({ force: true })
-    toast('Workout deleted')
   }
 
   const openWorkoutLog = () => {
@@ -222,16 +243,18 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     onLog?.(date)
   }
 
-  const total = blocksVolume(blocks)
+  const volume = prescriptionVolume(blocks, resolveTm)
 
   return (
     <ModalShell title={'Session · ' + fmtDay(date)} onClose={closeModal}
       footer={mode === 'edit' && step === 'edit' && <>
-        {existing && <Button variant="danger" onClick={del}>Delete</Button>}
-        <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-        <Button onClick={save}>Save Workout</Button>
+        {existing && <Button variant="danger" disabled={saving} onClick={del}>Delete</Button>}
+        <Button variant="ghost" disabled={saving} onClick={closeModal}>Cancel</Button>
+        <Button disabled={saving} onClick={save}>{saving ? 'Saving…' : 'Save Workout'}</Button>
       </>}>
 
+      <fieldset disabled={saving} className="builder-fields">
+      {saving && <p role="status">Saving…</p>}
       {mode === 'view' && <div className="training-day-review">
         <div className="training-day-review-head">
           <div>
@@ -356,11 +379,13 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
             Start of a new programming block — reset Training Max up to the rolling 30-day Absolute 1RM on save
           </label>
           <div className="card" style={{ textAlign: 'center', padding: 12 }}>
-            <div className="muted" style={{ fontSize: 11 }}>SESSION VOLUME LOAD (Σ Reps×Load across blocks)</div>
-            <div style={{ fontSize: 26, fontWeight: 800 }}>{fmtVL(total)}</div>
+            <div className="muted" style={{ fontSize: 11 }}>{volume.hasRange ? 'MINIMUM TARGET' : volume.estimated ? 'ESTIMATED' : 'PLANNED'} VOLUME LOAD</div>
+            <div style={{ fontSize: 26, fontWeight: 800 }}>{volume.total == null ? 'Unavailable' : `${fmtVL(volume.total)}${volume.missing ? ' + unknown' : ''}`}</div>
+            {volume.missing > 0 && <small className="muted">Weight or Training Max needed for {volume.missing} set{volume.missing === 1 ? '' : 's'}.</small>}
           </div>
         </>
       )}
+      </fieldset>
     </ModalShell>
   )
 }

@@ -29,6 +29,8 @@ function parseExercise(clause, order) {
   if (!setsM) return null
   const repsM = last(allMatches(/(?:sets?\s*(?:of|x|by)\s*|x\s*)(\d+)(?:\s*reps?)?/g, t))
   const rpeM = last(allMatches(/rpe\s*(?:of\s*)?(\d+(?:\.\d)?)/g, t))
+  const rirM = last(allMatches(/(?:rir\s*(?:of\s*)?(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:rir|reps? in reserve))/g, t))
+  const rir = rirM ? +(rirM[1] ?? rirM[2]) : null
   const pctM = last(allMatches(/(\d+(?:\.\d)?)\s*(?:%|percent)/g, t))
   const loadM = last(allMatches(/(\d+(?:\.\d+)?)\s*(?:kg|kilo|kilos|kilograms)/g, t))
   const hrM = last(allMatches(/(\d+)\s*(?:bpm|beats)/g, t))
@@ -48,15 +50,16 @@ function parseExercise(clause, order) {
   const reps = repsM ? +repsM[1] : 10
   const rest = restM ? Math.round(+restM[1] * (restM[2].startsWith('min') ? 60 : 1)) : 90
   let intensityType = 'Load', intensity = null, loadKg = null
-  if (rpeM) { intensityType = 'RPE'; intensity = +rpeM[1] }
-  else if (pctM) { intensityType = '%1RM'; intensity = +pctM[1] }
+  if (pctM) { intensityType = '%1RM'; intensity = +pctM[1] }
+  else if (rir != null && !loadM) { intensityType = 'RIR'; intensity = rir }
+  else if (rpeM) { intensityType = 'RPE'; intensity = +rpeM[1] }
   else if (hrM) { intensityType = 'Target HR'; intensity = +hrM[1] }
   if (loadM) { loadKg = +loadM[1]; if (!rpeM && !pctM && !hrM) intensityType = 'Load' }
 
   return newProgExercise(name, {
     order,
     intensityType,
-    sets: Array.from({ length: count }, (_, i) => newSet(i + 1, { reps, intensity, loadKg, rest })),
+    sets: Array.from({ length: count }, (_, i) => newSet(i + 1, { reps, intensity, loadKg, rest, rir: ['%1RM', 'Load'].includes(intensityType) ? rir : null })),
   })
 }
 
@@ -116,6 +119,7 @@ export function normalizeParsed(raw) {
       if (Array.isArray(e.sets) && e.sets.length) {
         sets = e.sets.map((s, si) => newSet(si + 1, {
           reps: +s.prescribedReps || 10,
+          rir: s.prescribedRir != null ? +s.prescribedRir : null,
           intensity: s.prescribedIntensityValue != null ? +s.prescribedIntensityValue : null,
           loadKg: s.prescribedLoadKg != null ? +s.prescribedLoadKg : null,
           tempo: s.prescribedTempo || '',
@@ -125,6 +129,7 @@ export function normalizeParsed(raw) {
         const n = Math.max(1, +e.setCount || +e.sets || 3)
         sets = Array.from({ length: n }, (_, si) => newSet(si + 1, {
           reps: +e.prescribedReps || 10,
+          rir: e.prescribedRir != null ? +e.prescribedRir : null,
           intensity: e.prescribedIntensityValue != null ? +e.prescribedIntensityValue : null,
           loadKg: e.prescribedLoadKg != null ? +e.prescribedLoadKg : null,
         }))

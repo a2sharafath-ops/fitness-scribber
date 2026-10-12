@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Button from '../atoms/Button'
 import Icon from '../atoms/Icon'
+import ProgressInfo from '../atoms/ProgressInfo'
 import LiftDetailModal from './program/LiftDetailModal'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
@@ -40,9 +41,7 @@ export default function CurrentLiftsPerformance({ client }) {
     <div className="card">
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
         <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> 1RM records</div>
-        <span className="muted" style={{ fontSize: 11 }}>
-          Historical 1RM-only lifts stay here for review, but appear in the selector only after completed work is logged.
-        </span>
+        <ProgressInfo label="1RM records" text="Historical 1RM-only lifts stay here for review. A lift appears in the performance selector after completed work is logged. Coach entries and training maxes remain separate." />
       </div>
 
       {lifts.length ? (

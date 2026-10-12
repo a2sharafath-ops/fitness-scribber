@@ -1,0 +1,62 @@
+PROGRAMS IMPLEMENTATION — LOCAL TESTING
+
+Open http://127.0.0.1:5178/workouts
+This QA server saves on this device and does not use the live database.
+
+What is available
+- Programs replaces Workout Plans. Exercise Library remains separate.
+- Six editable starters, coach-created programs, week duplication, session editing.
+- Assign to client: select client, Monday start, template week range, weekdays,
+  then review the dated sessions and any conflicts before assigning.
+- Client-owned copies appear in Training. Open a program to edit its future
+  sessions with the existing builder. Changes do not propagate to the template.
+- Rep ranges, percentage prescriptions and optional RIR survive assignment,
+  copying, persistence and workout logging. Actual reps remain a single number.
+- RIR/RPE with a rep range does not invent one exact calculated load. Specify
+  the load yourself; explicit percentages still resolve against the client's TM.
+- Existing flat plans are retained under Previous workout plans. Conversion is
+  one session, preserves the original plan, and requires review for unknown names.
+
+Local QA examples created through the UI
+- Builder Test · TM 200: Five-day Hypertrophy, Oct 19–31, 2026, ten sessions.
+- Builder Test · TM 100: Five-day Hypertrophy, Nov 2–14, 2026, ten sessions.
+  Its first session is named Legs A · client adjustment, to demonstrate isolation.
+- Library Five-day Hypertrophy: first template session renamed
+  Legs A · template review. Existing client copies retain their own names.
+- Local Programs QA: two weeks, one session per week, Bench Press
+  3 x 5–8 at 80% with 2 RIR. This was built, duplicated, saved and reloaded.
+
+Verification
+- npm test: 93 tests passed.
+- npm run lint: no warnings.
+- npm run build: passed.
+- Browser: assignment, protected-date rejection, duplicate weekday validation,
+  real save confirmation, date entry, navigation to Training, client/template
+  isolation, new program creation, duplicate week, reload persistence, canceling
+  unsaved-change prompts, desktop and 390px mobile layouts.
+- Isolated PostgreSQL/PGlite: schema setup twice, atomic rollback on a later
+  protected session, explicit replacement, concurrent-change detection, stable
+  retry without overwriting later edits, changed retry rejection, coach RLS,
+  and cascading assignment cleanup when deleting a client.
+
+Database integration for a future release
+- supabase/schema_program_library.sql is prepared but NOT applied to the live DB.
+- Requires the existing schema.sql, schema_program.sql and schema_workouts.sql.
+- Adds programs/programAssignments, ownership policies, indexed unique calendar
+  dates, a short client-row lock trigger on calendar writes, and assign_program.
+- New assignments and their sessions use one transaction; a rejected assignment
+  never falls back to independent prescription upserts.
+- The setup intentionally fails if existing prescriptions have duplicate
+  coach/client/date keys. Review duplicates before applying, never auto-delete.
+- Local SQL checks use a temporary PGlite installation outside the project.
+  To rerun, set PGLITE_MODULE to its dist/index.js and run:
+  node tests/program-sql-check.mjs
+- Production migrations/deployment and production concurrency testing remain
+  separate release steps. Nothing has been pushed or deployed.
+
+Scope
+Assignment creates dated session copies, not booked appointments. Template edits
+do not resync copies. Editing a client session updates that calendar session.
+Started/completed workouts and past dates are protected during assignment.
+The selected template weeks share a weekday mapping by session position;
+unselected days remain unplanned/rest days, not completed sessions.
