@@ -3,13 +3,15 @@ import { Buffer } from 'node:buffer'
 import react from '@vitejs/plugin-react'
 
 const PUBLIC_ENV = new Set(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_LOCAL_BUILDER_QA'])
+// Retained Vercel flags from the older pooling branch. This app does not use them.
+const LEGACY_ENV = new Set(['VITE_POOLING_R1', 'VITE_POOLING_R2', 'VITE_POOLING_R3'])
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   for (const name of Object.keys(env)) {
     // Vercel injects build metadata under VITE_VERCEL_. Accept it for builds,
     // while envPrefix below keeps it outside the browser environment.
-    if (!PUBLIC_ENV.has(name) && !name.startsWith('VITE_VERCEL_')) throw new Error('Unreviewed browser environment variable: ' + name)
+    if (!PUBLIC_ENV.has(name) && !LEGACY_ENV.has(name) && !name.startsWith('VITE_VERCEL_')) throw new Error('Unreviewed browser environment variable: ' + name)
   }
   // Configuration guard, not JWT signature verification or authorization.
   const key = env.VITE_SUPABASE_ANON_KEY

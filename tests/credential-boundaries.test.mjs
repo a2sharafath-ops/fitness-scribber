@@ -108,11 +108,15 @@ test('actual Vite config accepts public keys and rejects privileged, malformed a
     [{ VITE_SUPABASE_ANON_KEY: jwt('anon') }, true],
     [{ VITE_SUPABASE_ANON_KEY: 'sb_publishable_testpublic' }, true],
     [{ VITE_VERCEL_GIT_REPO_ID: '123456', VITE_VERCEL_ENV: 'production', VITE_VERCEL_URL: 'deployment.example' }, true],
+    [{ VITE_POOLING_R1: 'false', VITE_POOLING_R2: 'false', VITE_POOLING_R3: 'false' }, true],
+    [{ VITE_POOLING_R1: 'true', VITE_POOLING_R2: 'true', VITE_POOLING_R3: 'true' }, true],
     [{ VITE_SUPABASE_ANON_KEY: jwt('service_role') }, false],
     [{ VITE_SUPABASE_ANON_KEY: 'sb_secret_privileged-test-value' }, false],
     [{ VITE_SUPABASE_ANON_KEY: 'malformed-private-value' }, false],
     [{ VITE_OPENAI_API_KEY: 'private-provider-value' }, false],
     [{ VITE_SUPABASE_ANON_KEY_SECRET: 'private-suffix-value' }, false],
+    [{ VITE_POOLING_API_KEY: 'private-pooling-value' }, false],
+    [{ VITE_POOLING_R1: 'true', VITE_SUPABASE_ANON_KEY: jwt('service_role') }, false],
   ]
   try {
     for (const [vars, accepted] of cases) {
@@ -129,7 +133,7 @@ test('actual Vite config accepts public keys and rejects privileged, malformed a
   }
 })
 
-test('production build accepts Vercel metadata and exposes only reviewed app variables, including whole-env access', () => {
+test('production build accepts Vercel metadata and legacy flags without exposing them, including whole-env access', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'fitness-public-env-build-'))
   const configPath = path.resolve('vite.config.js')
   const vars = {
@@ -140,10 +144,13 @@ test('production build accepts Vercel metadata and exposes only reviewed app var
     VITE_VERCEL_GIT_COMMIT_SHA: 'vercel-commit-marker',
     VITE_VERCEL_ENV: 'vercel-environment-marker',
     VITE_VERCEL_CUSTOM_SECRET: 'excluded-metadata-marker',
+    VITE_POOLING_R1: 'excluded-legacy-r1-marker',
+    VITE_POOLING_R2: 'excluded-legacy-r2-marker',
+    VITE_POOLING_R3: 'excluded-legacy-r3-marker',
     SERVER_ONLY_SECRET: 'excluded-server-marker',
   }
   try {
-    fs.writeFileSync(path.join(cwd, 'entry.js'), 'globalThis.probe = { env: import.meta.env, repository: import.meta.env.VITE_VERCEL_GIT_REPO_ID, server: import.meta.env.SERVER_ONLY_SECRET };')
+    fs.writeFileSync(path.join(cwd, 'entry.js'), 'globalThis.probe = { env: import.meta.env, repository: import.meta.env.VITE_VERCEL_GIT_REPO_ID, pooling: import.meta.env.VITE_POOLING_R1, server: import.meta.env.SERVER_ONLY_SECRET };')
     const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('VITE_')))
     const code = `import {build} from ${JSON.stringify(import.meta.resolve('vite'))};
       const result = await build({configFile:${JSON.stringify(configPath)},logLevel:'silent',build:{write:false,minify:false,lib:{entry:'entry.js',formats:['es']}}});
@@ -151,7 +158,7 @@ test('production build accepts Vercel metadata and exposes only reviewed app var
     const result = spawnSync(process.execPath, ['--input-type=module', '-e', code], { cwd, env: { ...env, ...vars }, encoding: 'utf8' })
     assert.equal(result.status, 0, result.stderr)
     for (const name of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_LOCAL_BUILDER_QA']) assert.ok(result.stdout.includes(vars[name]), name + ' must reach the browser')
-    for (const [name, value] of Object.entries(vars).filter(([name]) => name.startsWith('VITE_VERCEL_') || name === 'SERVER_ONLY_SECRET')) {
+    for (const [name, value] of Object.entries(vars).filter(([name]) => name.startsWith('VITE_VERCEL_') || name.startsWith('VITE_POOLING_') || name === 'SERVER_ONLY_SECRET')) {
       assert.ok(!result.stdout.includes(value), name + ' must stay out of the browser bundle')
     }
   } finally {
