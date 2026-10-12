@@ -107,10 +107,12 @@ test('actual Vite config accepts public keys and rejects privileged, malformed a
     [{}, true],
     [{ VITE_SUPABASE_ANON_KEY: jwt('anon') }, true],
     [{ VITE_SUPABASE_ANON_KEY: 'sb_publishable_testpublic' }, true],
+    [{ VITE_VERCEL_GIT_REPO_ID: '123456', VITE_VERCEL_ENV: 'production', VITE_VERCEL_URL: 'deployment.example' }, true],
     [{ VITE_SUPABASE_ANON_KEY: jwt('service_role') }, false],
     [{ VITE_SUPABASE_ANON_KEY: 'sb_secret_privileged-test-value' }, false],
     [{ VITE_SUPABASE_ANON_KEY: 'malformed-private-value' }, false],
     [{ VITE_OPENAI_API_KEY: 'private-provider-value' }, false],
+    [{ VITE_SUPABASE_ANON_KEY_SECRET: 'private-suffix-value' }, false],
   ]
   try {
     for (const [vars, accepted] of cases) {
@@ -123,6 +125,39 @@ test('actual Vite config accepts public keys and rejects privileged, malformed a
     const target = path.resolve(cwd)
     assert.equal(path.dirname(target), path.resolve(os.tmpdir()))
     assert.ok(path.basename(target).startsWith('fitness-public-env-'))
+    fs.rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('production build accepts Vercel metadata and exposes only reviewed app variables, including whole-env access', () => {
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'fitness-public-env-build-'))
+  const configPath = path.resolve('vite.config.js')
+  const vars = {
+    VITE_SUPABASE_URL: 'https://public-config.example',
+    VITE_SUPABASE_ANON_KEY: 'sb_publishable_testpublic',
+    VITE_LOCAL_BUILDER_QA: 'false',
+    VITE_VERCEL_GIT_REPO_ID: 'vercel-repository-marker',
+    VITE_VERCEL_GIT_COMMIT_SHA: 'vercel-commit-marker',
+    VITE_VERCEL_ENV: 'vercel-environment-marker',
+    VITE_VERCEL_CUSTOM_SECRET: 'excluded-metadata-marker',
+    SERVER_ONLY_SECRET: 'excluded-server-marker',
+  }
+  try {
+    fs.writeFileSync(path.join(cwd, 'entry.js'), 'globalThis.probe = { env: import.meta.env, repository: import.meta.env.VITE_VERCEL_GIT_REPO_ID, server: import.meta.env.SERVER_ONLY_SECRET };')
+    const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('VITE_')))
+    const code = `import {build} from ${JSON.stringify(import.meta.resolve('vite'))};
+      const result = await build({configFile:${JSON.stringify(configPath)},logLevel:'silent',build:{write:false,minify:false,lib:{entry:'entry.js',formats:['es']}}});
+      for (const output of (Array.isArray(result) ? result : [result])) for (const chunk of output.output) if (chunk.type === 'chunk') process.stdout.write(chunk.code);`
+    const result = spawnSync(process.execPath, ['--input-type=module', '-e', code], { cwd, env: { ...env, ...vars }, encoding: 'utf8' })
+    assert.equal(result.status, 0, result.stderr)
+    for (const name of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_LOCAL_BUILDER_QA']) assert.ok(result.stdout.includes(vars[name]), name + ' must reach the browser')
+    for (const [name, value] of Object.entries(vars).filter(([name]) => name.startsWith('VITE_VERCEL_') || name === 'SERVER_ONLY_SECRET')) {
+      assert.ok(!result.stdout.includes(value), name + ' must stay out of the browser bundle')
+    }
+  } finally {
+    const target = path.resolve(cwd)
+    assert.equal(path.dirname(target), path.resolve(os.tmpdir()))
+    assert.ok(path.basename(target).startsWith('fitness-public-env-build-'))
     fs.rmSync(target, { recursive: true, force: true })
   }
 })

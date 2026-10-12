@@ -7,7 +7,9 @@ const PUBLIC_ENV = new Set(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   for (const name of Object.keys(env)) {
-    if (!PUBLIC_ENV.has(name)) throw new Error('Unreviewed browser environment variable: ' + name)
+    // Vercel injects build metadata under VITE_VERCEL_. Accept it for builds,
+    // while envPrefix below keeps it outside the browser environment.
+    if (!PUBLIC_ENV.has(name) && !name.startsWith('VITE_VERCEL_')) throw new Error('Unreviewed browser environment variable: ' + name)
   }
   // Configuration guard, not JWT signature verification or authorization.
   const key = env.VITE_SUPABASE_ANON_KEY
@@ -19,5 +21,5 @@ export default defineConfig(({ mode }) => {
     } catch { /* Reject malformed or privileged credentials without logging values. */ }
     if (!publicKey) throw new Error('Browser Supabase key must be publishable or legacy anon. Never use a service-role or secret key.')
   }
-  return { plugins: [react()] }
+  return { plugins: [react()], envPrefix: [...PUBLIC_ENV] }
 })
