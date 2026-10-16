@@ -114,7 +114,7 @@ export default function ClientProfilePage() {
           <GoalPanel title="Long-term" goals={currentGoals.data?.longTerm} today={today} />
         </div> : <Empty>No goals recorded in this entry.</Empty>}
         {currentGoals.data?.why && <div className="cp-why" tabIndex={0}><strong>Why it matters</strong><p>{currentGoals.data.why}</p></div>}
-        <div className="cp-foot"><small>Latest goal record</small><button className="cp-link" onClick={() => history('goals')}>Goal history · {goals.length} →</button></div>
+        <div className="cp-foot"><Button variant="ghost" size="sm" onClick={() => openModal(assessmentForm('goals', id, currentGoals))}>Edit current goals</Button><button className="cp-link" onClick={() => history('goals')}>Goal history · {goals.length} →</button></div>
       </> : <Empty>No goals recorded.</Empty>}
     </section>
 

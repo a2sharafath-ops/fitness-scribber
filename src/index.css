@@ -404,11 +404,18 @@ canvas{max-width:100%}
 .asr-pain{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
 .asf-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;margin-bottom:6px}
 .asf-row3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:6px}
+.goal-form-group{border:0;padding:0;margin:10px 0;min-width:0}
+.goal-form-group legend{font-size:13px;font-weight:700;padding:0;margin-bottom:6px}
+.goal-form-group .asf-row3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 28px;align-items:start}
+.goal-form-group textarea{grid-column:1 / 3;resize:vertical;min-width:0;width:100%}
+.goal-form-group .asf-row3>.x{grid-column:3;grid-row:1}
 /* Strength → estimated-1RM grid (fitness assessment) */
-.asf-1rm-head,.asf-1rm-row{display:grid;grid-template-columns:1fr 92px 64px 78px auto;gap:8px;align-items:center}
-.asf-1rm-row{margin-bottom:6px}
-.asf-1rm-head{font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#9a9ba2;margin-bottom:4px}
-.asf-1rm-est{font-size:13px;font-weight:800;color:var(--accent2);text-align:right;white-space:nowrap}
+.asf-1rm-row{min-width:0;margin-bottom:12px;padding:12px;border:1px solid var(--border);border-radius:12px}
+.asf-lift-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;margin-bottom:6px}
+.asf-lift-name{font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin:6px 0 0;color:var(--muted)}
+.asf-lift-metrics{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:8px;align-items:start}
+.asf-lift-metrics .field{min-width:0;margin-bottom:0}
+.asf-1rm-est{display:block;padding:10px 0;font-size:13px;font-weight:800;color:var(--accent2);overflow-wrap:anywhere}
 /* NASM movement screen — postural / OHSA compensations */
 .pos-score{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--surface2);border-radius:10px;padding:9px 12px;margin:2px 0 10px;font-size:13px}
 .pos-score b{font-size:16px;color:var(--green)}
@@ -466,6 +473,14 @@ canvas{max-width:100%}
 .bc-import-msg svg{flex:none;margin-top:2px}
 .bc-import-msg b{font-weight:800}
 .bc-tag{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:4px;background:var(--tint-green);color:var(--green);font-size:9px;font-weight:800;letter-spacing:.4px;vertical-align:middle}
+.bc-template{display:inline-block;font-size:12px;margin-top:8px;color:var(--accent)}
+.bc-table-preview{margin-top:10px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);min-width:0}
+.bc-table-preview select{width:100%;min-width:0}
+.bc-table-preview dl{display:grid;gap:6px;margin:10px 0}
+.bc-table-preview dl>div{display:flex;justify-content:space-between;gap:12px;font-size:12px}
+.bc-table-preview dd{margin:0;font-weight:700}
+.bc-table-preview .flex{flex-wrap:wrap}
+.bc-row-label{font-size:12px;color:var(--muted);overflow-wrap:anywhere;margin:8px 0;line-height:1.5}
 input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 /* Exercise-library autocomplete (filtered suggestions dropdown) */
 .ac-wrap{position:relative;min-width:0}
@@ -488,7 +503,7 @@ input.bc-filled{border-color:var(--green);background:var(--tint-green)}
 .menu-item.danger{color:var(--accent)}
 .menu-item.danger:hover{background:var(--tint-red)}
 .ac-list{position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:60;margin:0;padding:4px;list-style:none;max-height:220px;overflow:auto;background:var(--surface);border:1px solid rgba(0,0,0,.12);border-radius:10px;box-shadow:0 10px 28px rgba(21,22,26,.18)}
-.ac-opt{padding:7px 9px;border-radius:7px;font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-opt{padding:9px;border-radius:7px;font-size:13px;line-height:1.5;cursor:pointer;white-space:normal;overflow-wrap:anywhere}
 .ac-opt.hi{background:var(--tint-red);color:var(--accent)}
 .cmp{margin:10px 0}
 .cmp-head,.cmp-row{display:grid;grid-template-columns:1.3fr .8fr 18px .8fr .9fr;gap:6px;align-items:center}

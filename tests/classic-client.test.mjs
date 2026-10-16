@@ -121,6 +121,9 @@ test('Assessment screening summary preserves draft, expired and major-flag clear
   const db = fixture()
   db.screenings = [{ id: 'draft-a', clientId: 'a', status: 'draft' }, { id: 'private-b', clientId: 'b', status: 'complete', outcome: 'C', completedOn: '2026-09-27' }]
   let html = renderRoutedSection('/clients/a/assessments', db)
+  const screenFirst = page => page.indexOf('id="health-screening"') < page.indexOf('id="formal-assessments"')
+  assert.equal(screenFirst(html), true)
+  assert.doesNotMatch(html, /aria-label="Assessment groups"/)
   assert.match(html, /Draft saved/)
   assert.match(html, /Continue screening/)
   assert.doesNotMatch(html, /Review clearance|PAR-Q\+ C/)
@@ -132,6 +135,7 @@ test('Assessment screening summary preserves draft, expired and major-flag clear
   assert.match(html, /1 major review flag/)
   assert.match(html, /Review clearance/)
   assert.match(html, /New draft saved/)
+  assert.equal(screenFirst(html), true)
   assert.doesNotMatch(html, /Previous screenings/)
   row.clearance.status = 'received'
   html = renderRoutedSection('/clients/a/assessments', db)
@@ -142,6 +146,16 @@ test('Assessment screening summary preserves draft, expired and major-flag clear
   html = renderRoutedSection('/clients/a/assessments', db)
   assert.match(html, /Program ready/)
   assert.doesNotMatch(html, /Screening expired/)
+  assert.equal(screenFirst(html), true, 'a new screening draft stays prominent')
+  db.screenings = db.screenings.filter(s => s.status !== 'draft')
+  html = renderRoutedSection('/clients/a/assessments', db)
+  assert.equal(screenFirst(html), false, 'valid cleared screening follows baseline cards')
+  assert.equal((html.match(/id="health-screening"/g) || []).length, 1)
+  row.validUntil = addDays(todayISO('UTC'), -2)
+  assert.equal(screenFirst(renderRoutedSection('/clients/a/assessments', db)), true, 'expired screening returns to the top')
+  row.validUntil = '2099-01-01'
+  row.clearance.status = 'requested'
+  assert.equal(screenFirst(renderRoutedSection('/clients/a/assessments', db)), true, 'clearance review stays prominent')
   const clearance = renderToStaticMarkup(React.createElement(ScreeningReview, { screening: row, clearanceOnly: true, onClearance: () => {} }))
   assert.match(clearance, /Date cleared|Clearance letter/)
   assert.doesNotMatch(clearance, /Red-flag rollup|Recommendation/)

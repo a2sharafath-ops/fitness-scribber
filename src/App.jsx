@@ -46,9 +46,9 @@ function LegacyClientRoute({ section }) {
 function Shell() {
   return (
     <DataProvider>
+      <BrowserRouter>
       <ModalProvider>
         <ClipboardProvider>
-        <BrowserRouter>
           <Suspense fallback={routeLoading}><Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
@@ -75,9 +75,9 @@ function Shell() {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Routes></Suspense>
-        </BrowserRouter>
         </ClipboardProvider>
       </ModalProvider>
+      </BrowserRouter>
     </DataProvider>
   )
 }

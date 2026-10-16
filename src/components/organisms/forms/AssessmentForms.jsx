@@ -12,6 +12,7 @@ import { toast } from '../../../lib/toast'
 import { ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax, movementScore, latest, forClient } from '../../../lib/assessment'
 import { SECTIONS, SEVERITY, itemsInSection, isPresent } from '../../../lib/posture'
 import { FIELD_LABELS, parseBodyComp } from '../../../lib/bodyCompPdf'
+import { BODY_COMP_ACCEPT, BODY_COMP_TEMPLATE, bodyCompFileKind, readBodyCompTable, fillBodyCompImport } from '../../../lib/bodyCompImport'
 import { screeningsFor, goalsFromScreening } from '../../../lib/screening'
 import Icon from '../../atoms/Icon'
 import Autocomplete from '../../molecules/Autocomplete'
@@ -65,7 +66,7 @@ function useSave(clientId, type, buildData, extra, record) {
   }
 }
 
-// ---- Movement screen — NASM static posture + OHSA + special tests ----------
+// ---- Movement screen — NASM static posture + OHSA --------------------------
 // Legacy 0–3 records still open in the old pattern editor; everything new is
 // captured as postural compensations (see lib/posture.js). One collapsible
 // section per assessment area; OHSA is open by default (highest yield).
@@ -81,7 +82,7 @@ function NasmMovementForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', posture: record?.data?.posture || '', nextReassessmentDate: record?.data?.nextReassessmentDate || '' })
   const [findings, setFindings] = useState(() => ({ ...(record?.data?.findings || {}) }))
-  const [open, setOpen] = useState({ ohsa: true, static: false, special: false })
+  const [open, setOpen] = useState({ ohsa: true, static: false })
 
   const setItem = (id, patch) => setFindings((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), ...patch } }))
   const data = () => ({ protocol: 'nasm', findings, posture: f.posture.trim() })
@@ -180,29 +181,42 @@ function LegacyMovementForm({ clientId, record, defaultPhase }) {
 // Upload control for a device report (InBody / DEXA / BIA printout, or a scan
 // or photo of one). Reading the file only pre-fills the form — nothing is
 // stored until the coach saves.
-function PdfImport({ pdf, imported, onPick }) {
+function ReportImport({ pdf, imported, importedSource, onPick, candidates, selectedIndex, onSelect, onApply, onCancel }) {
   const filled = imported.map((k) => FIELD_LABELS[k]).filter(Boolean)
+  const selected = candidates[Number(selectedIndex)]
   return (
     <div className="bc-import">
       <label className={'bc-drop' + (pdf.busy ? ' busy' : '')}>
-        <input type="file" accept="application/pdf,.pdf,image/*" disabled={pdf.busy}
+        <input type="file" aria-label="Upload body composition report" accept={BODY_COMP_ACCEPT} disabled={pdf.busy}
           onChange={(e) => { onPick(e.target.files?.[0]); e.target.value = '' }} />
         <span className="bc-drop-ic"><Icon name={pdf.busy ? 'activity' : 'clipboard'} size={18} /></span>
         <span className="bc-drop-txt">
-          <b>{pdf.busy ? (pdf.step || 'Reading report…') : 'Upload device report (PDF, scan or photo)'}</b>
-          <em>{pdf.busy ? pdf.name : 'InBody, DEXA or BIA — scanned reports are read automatically'}</em>
+          <b>{pdf.busy ? (pdf.step || 'Reading report…') : 'Import body composition report'}</b>
+          <em>{pdf.busy ? pdf.name : 'PDF, images, CSV, TSV, Excel (.xlsx) or TXT · up to 10 MB'}</em>
           {pdf.busy && pdf.pct > 0 && (
             <span className="bc-prog"><span className="bc-prog-fill" style={{ width: Math.round(pdf.pct * 100) + '%' }} /></span>
           )}
         </span>
       </label>
+      <a className="bc-template" href={'data:text/csv;charset=utf-8,' + encodeURIComponent(BODY_COMP_TEMPLATE)} download="body-composition-template.csv">CSV template</a>
+      {candidates.length > 0 && <div className="bc-table-preview">
+        <Field label={`Choose measurements · ${candidates.length} row${candidates.length === 1 ? '' : 's'}`}><select aria-label="Import measurement row" value={selectedIndex} onChange={e => onSelect(e.target.value)}>
+          <option value="">Select a row</option>{candidates.map((row, index) => <option key={index} value={String(index)}>{row.label}</option>)}
+        </select></Field>
+        {selectedIndex !== '' && selected && <>
+          <p className="bc-row-label">{selected.label}{selected.method ? ` · ${selected.method}` : ''}</p>
+          <dl>{selected.found.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd>{selected.values[key]}{['massKg', 'leanMassKg', 'skeletalMuscleKg'].includes(key) ? ' kg' : key === 'bodyFatPct' ? '%' : key === 'hydrationL' ? ' L' : ''}</dd></div>)}</dl>
+          {selected.warnings.map((warning, i) => <p className="bc-row-label" key={i}>{warning}</p>)}
+        </>}
+        <div className="flex gap"><Button size="sm" disabled={selectedIndex === '' || !selected} onClick={onApply}>Use selected measurements</Button><Button variant="ghost" size="sm" onClick={onCancel}>Cancel import</Button></div>
+      </div>}
       {pdf.error && <div className="bc-import-msg err" role="alert"><Icon name="alert" size={13} /> {pdf.error}</div>}
       {!pdf.error && filled.length > 0 && (
-        <div className={'bc-import-msg ' + (pdf.ocr ? 'warn' : 'ok')} role="status">
-          <Icon name={pdf.ocr ? 'alert' : 'check'} size={13} />
+        <div className={'bc-import-msg ' + (importedSource.ocr ? 'warn' : 'ok')} role="status">
+          <Icon name={importedSource.ocr ? 'alert' : 'check'} size={13} />
           <span>
-            Filled {filled.length} field{filled.length === 1 ? '' : 's'} from <b>{pdf.name}</b>: {filled.join(', ')}.
-            {pdf.ocr
+            Filled {filled.length} field{filled.length === 1 ? '' : 's'} from <b>{importedSource.name}</b>: {filled.join(', ')}.
+            {importedSource.ocr
               ? ' Read from a scan by text recognition, so digits can be misread — please check every value against the report before saving.'
               : ' Check them before saving.'}
           </span>
@@ -212,12 +226,12 @@ function PdfImport({ pdf, imported, onPick }) {
   )
 }
 
-// A body-comp number input that shows whether its value came from the PDF.
+// A body-comp number input that shows whether its value came from a report.
 function BcField({ label, k, f, set, imported, step = '0.1' }) {
-  const fromPdf = imported.includes(k)
+  const fromReport = imported.includes(k)
   return (
-    <Field label={<>{label}{fromPdf && <span className="bc-tag" title="Filled from the uploaded PDF">PDF</span>}</>}>
-      <input type="number" step={step} value={f[k]} onChange={set(k)} className={fromPdf ? 'bc-filled' : undefined} />
+    <Field label={<>{label}{fromReport && <span className="bc-tag" title="Filled from the imported report">Import</span>}</>}>
+      <input type="number" step={step} value={f[k]} onChange={set(k)} className={fromReport ? 'bc-filled' : undefined} />
     </Field>
   )
 }
@@ -231,14 +245,25 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
     massKg: d0.massKg ?? '', bodyFatPct: d0.bodyFatPct ?? '', leanMassKg: d0.leanMassKg ?? '',
     skeletalMuscleKg: d0.skeletalMuscleKg ?? '', visceralFat: d0.visceralFat ?? '', hydrationL: d0.hydrationL ?? '',
   })
-  // Which fields the last PDF import filled — drives the "from PDF" highlight.
+  // Keep the applied source separate from a new report being previewed.
   const [imported, setImported] = useState([])
+  const [importedSource, setImportedSource] = useState({ name: '', ocr: false })
   // Editing a field by hand makes it the coach's own value, so drop its flag.
   const set = (k) => (e) => {
     setF({ ...f, [k]: e.target.value })
     setImported((prev) => prev.filter((x) => x !== k))
   }
   const [pdf, setPdf] = useState({ busy: false, name: '', error: '', step: '', pct: 0, ocr: false })
+  const [candidates, setCandidates] = useState([])
+  const [selectedIndex, setSelectedIndex] = useState('')
+  const applyImport = () => {
+    const selected = candidates[Number(selectedIndex)]
+    if (selectedIndex === '' || !selected) return
+    setF(previous => fillBodyCompImport(previous, selected, imported, !!record))
+    setImported(selected.found)
+    setImportedSource({ name: pdf.name, ocr: false })
+    setCandidates([])
+  }
 
   // The OCR worker holds a few hundred MB of WASM heap; drop it with the modal.
   useEffect(() => () => { import('../../../lib/ocr').then((m) => m.releaseOcr()).catch(() => {}) }, [])
@@ -251,15 +276,27 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
   // slower and fallible, hence the explicit "check these" warning afterwards.
   const onPdf = async (file) => {
     if (!file) return
+    setCandidates([])
+    setSelectedIndex('')
     const busy = (step, pct = 0, ocr = false) => setPdf({ busy: true, name: file.name, error: '', step, pct, ocr })
     busy('Opening file…')
     try {
-      const { isImageFile, imagesToText } = await import('../../../lib/ocr')
-      const image = isImageFile(file)
+      const kind = bodyCompFileKind(file)
+      if (['csv', 'tsv', 'xlsx'].includes(kind)) {
+        const rows = await readBodyCompTable(file)
+        setCandidates(rows)
+        setSelectedIndex(rows.length === 1 ? '0' : '')
+        setPdf({ busy: false, name: file.name, error: '', step: '', pct: 0, ocr: false })
+        return
+      }
+      const image = kind === 'image'
       let text = ''
       let viaOcr = false
 
-      if (!image) {
+      if (kind === 'txt') {
+        text = await file.text()
+        if (!text.trim()) throw new Error('That text report is empty.')
+      } else if (!image) {
         // pdf.js is ~330 kB, so it loads only when a report is actually uploaded.
         const { extractPdfText } = await import('../../../lib/pdfText')
         busy('Reading PDF…')
@@ -267,8 +304,9 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
       }
 
       // No text layer (scan/photo) → OCR.
-      if (!text) {
+      if (!text && kind !== 'txt') {
         viaOcr = true
+        const { imagesToText } = await import('../../../lib/ocr')
         let sources
         if (image) {
           sources = [file]
@@ -286,7 +324,6 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
 
       const { values, found, method, date } = parseBodyComp(text, { ocr: viaOcr })
       if (!found.length) {
-        setImported([])
         setPdf({
           busy: false, name: file.name, step: '', pct: 0, ocr: viaOcr,
           error: viaOcr
@@ -295,16 +332,11 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
         })
         return
       }
-      setF((prev) => ({
-        ...prev,
-        ...Object.fromEntries(found.map((k) => [k, values[k]])),
-        ...(method ? { method } : {}),
-        ...(date && !record ? { date } : {}),
-      }))
+      setF(prev => fillBodyCompImport(prev, { values, found, method, date }, imported, !!record))
       setImported(found)
+      setImportedSource({ name: file.name, ocr: viaOcr })
       setPdf({ busy: false, name: file.name, error: '', step: '', pct: 0, ocr: viaOcr })
     } catch (err) {
-      setImported([])
       setPdf({ busy: false, name: file.name, step: '', pct: 0, ocr: false, error: err?.message || 'That file could not be read.' })
     }
   }
@@ -335,9 +367,9 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
   }, record)
   return (
     <ModalShell title={<><Icon name="tuning" size={16} /> Body composition</>} onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button disabled={pdf.busy || candidates.length > 0} onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
-      <PdfImport pdf={pdf} imported={imported} onPick={onPdf} />
+      <ReportImport pdf={pdf} imported={imported} importedSource={importedSource} onPick={onPdf} candidates={candidates} selectedIndex={selectedIndex} onSelect={setSelectedIndex} onApply={applyImport} onCancel={() => setCandidates([])} />
       <Field label="Method">
         <select value={f.method} onChange={set('method')}><option>InBody</option><option>BIA</option><option>Calipers</option><option>DEXA</option></select>
       </Field>
@@ -378,7 +410,7 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
     ? d0.mobility.map((m) => ({ joint: m.joint || '', value: m.value || '', side: m.side || '' }))
     : [{ joint: '', value: '', side: '' }])
   // Exercise-library names for the lift autocomplete, alphabetical.
-  const liftNames = [...db.exercises.map((e) => e.name)].sort((a, b) => a.localeCompare(b))
+  const liftNames = [...new Set(db.exercises.map((e) => e.name))].sort((a, b) => a.localeCompare(b))
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const updS = (i, k, v) => setStrength(strength.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
   const updM = (i, k, v) => setMobility(mobility.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
@@ -399,17 +431,19 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
 
       <div className="section-title" style={{ margin: '4px 0 2px', fontSize: 13 }}>Strength — estimated 1RM</div>
       <p className="muted" style={{ fontSize: 11.5, margin: '0 0 8px' }}>Enter a test weight and reps; we estimate the 1RM (1 rep = a true 1RM). These feed the workout builder's Training Max.</p>
-      <div className="asf-1rm-head"><span>Lift</span><span>Weight (kg)</span><span>Reps</span><span>Est. 1RM</span><span /></div>
       {strength.map((r, i) => {
         const est = estOneRepMax(r.weightKg, r.reps)
         return (
           <div className="asf-1rm-row" key={i}>
+            <div className="asf-lift-head"><span>Exercise {i + 1}</span><button className="x" aria-label={`Remove lift ${i + 1}`} onClick={() => setStrength(strength.filter((_, j) => j !== i))}>×</button></div>
             <Autocomplete value={r.lift} onChange={(v) => updS(i, 'lift', v)} options={liftNames}
-              placeholder="e.g. Barbell Back Squat" ariaLabel="Lift" />
-            <input type="number" step="0.5" min="0" value={r.weightKg} onChange={(e) => updS(i, 'weightKg', e.target.value)} placeholder="kg" aria-label="Test weight kg" />
-            <input type="number" step="1" min="1" value={r.reps} onChange={(e) => updS(i, 'reps', e.target.value)} placeholder="1" aria-label="Reps" />
-            <span className="asf-1rm-est">{est != null ? `${est} kg` : '—'}</span>
-            <button className="x" aria-label="Remove lift" onClick={() => setStrength(strength.filter((_, j) => j !== i))}>×</button>
+              placeholder="Search exercises" ariaLabel={`Lift ${i + 1}`} />
+            {r.lift && <p className="asf-lift-name">{r.lift}</p>}
+            <div className="asf-lift-metrics">
+              <Field label="Weight (kg)"><input type="number" step="0.5" min="0" value={r.weightKg} onChange={(e) => updS(i, 'weightKg', e.target.value)} placeholder="kg" aria-label={`Test weight kg ${i + 1}`} /></Field>
+              <Field label="Reps"><input type="number" step="1" min="1" value={r.reps} onChange={(e) => updS(i, 'reps', e.target.value)} placeholder="1" aria-label={`Reps ${i + 1}`} /></Field>
+              <Field label="Est. 1RM"><output className="asf-1rm-est" aria-live="polite">{est != null ? `${est} kg` : '—'}</output></Field>
+            </div>
           </div>
         )
       })}
@@ -522,23 +556,23 @@ export function GoalForm({ clientId, record, defaultPhase }) {
   const clean = (list) => list.filter((r) => r.text.trim()).map((r) => ({ text: r.text.trim(), target: r.target.trim(), by: r.by }))
   const data = () => ({ shortTerm: clean(shortTerm), longTerm: clean(longTerm), why: f.why.trim() })
   const save = useSave(clientId, 'goals', data, undefined, record)
-  const rows = (list, setter, label) => (
-    <>
-      <div className="section-title" style={{ margin: '8px 0 6px', fontSize: 13 }}>{label}</div>
+  const rows = (list, setter, label, prefix) => (
+    <fieldset className="goal-form-group">
+      <legend>{label}</legend>
       {list.map((r, i) => (
         <div className="asf-row3" key={i}>
-          <input value={r.text} onChange={(e) => updList(setter, list)(i, 'text', e.target.value)} placeholder="Goal" aria-label="Goal" />
-          <input value={r.target} onChange={(e) => updList(setter, list)(i, 'target', e.target.value)} placeholder="Target (e.g. -5 kg)" aria-label="Target" />
-          <input type="date" value={r.by} onChange={(e) => updList(setter, list)(i, 'by', e.target.value)} aria-label="By date" />
-          <button className="x" aria-label="Remove goal" onClick={() => setter(list.filter((_, j) => j !== i))}>×</button>
+          <textarea rows={2} value={r.text} onChange={(e) => updList(setter, list)(i, 'text', e.target.value)} placeholder="Goal" aria-label={`${prefix} goal ${i + 1}`} />
+          <input value={r.target} onChange={(e) => updList(setter, list)(i, 'target', e.target.value)} placeholder="Target (e.g. -5 kg)" aria-label={`${prefix} target ${i + 1}`} />
+          <input type="date" value={r.by} onChange={(e) => updList(setter, list)(i, 'by', e.target.value)} aria-label={`${prefix} target date ${i + 1}`} />
+          <button className="x" aria-label={`Remove ${prefix.toLowerCase()} goal ${i + 1}`} onClick={() => setter(list.filter((_, j) => j !== i))}>×</button>
         </div>
       ))}
-      <Button variant="ghost" size="sm" onClick={() => setter([...list, { text: '', target: '', by: '' }])}>＋ Add goal</Button>
-    </>
+      <Button variant="ghost" size="sm" onClick={() => setter([...list, { text: '', target: '', by: '' }])}>＋ Add {prefix.toLowerCase()} goal</Button>
+    </fieldset>
   )
   return (
-    <ModalShell title={<><Icon name="like" size={16} /> Goal setting</>} onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
+    <ModalShell title={<><Icon name="like" size={16} /> {record ? 'Edit goals' : 'Goal setting'}</>} onClose={closeModal}
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>{record ? 'Save changes' : 'Save goals'}</Button></>}>
       <MetaRow f={f} setF={setF} />
       {seed && (
         <div className="goal-seed">
@@ -551,8 +585,8 @@ export function GoalForm({ clientId, record, defaultPhase }) {
           <button className="goal-seed-btn" onClick={reimport}>{fromScreening ? 'Re-import' : 'Fill from screening'}</button>
         </div>
       )}
-      {rows(shortTerm, setShort, 'Short-term goals')}
-      {rows(longTerm, setLong, 'Long-term goals')}
+      {rows(shortTerm, setShort, 'Short-term goals', 'Short-term')}
+      {rows(longTerm, setLong, 'Long-term goals', 'Long-term')}
       <div style={{ marginTop: 10 }}><Field label="Why it matters"><input value={f.why} onChange={(e) => setF({ ...f, why: e.target.value })} placeholder="The deeper motivation…" /></Field></div>
     </ModalShell>
   )

@@ -2,9 +2,6 @@ html:has(.client-assessments){overflow-y:scroll;scrollbar-gutter:stable}
 .client-assessments{min-width:0}
 .client-assessments .card{border-radius:20px;padding:22px}
 .client-assessments .assess-title{margin-bottom:18px}
-.client-assessments .assess-jump{gap:22px;border-bottom:1px solid var(--border);margin:0 0 20px}
-.client-assessments .assess-jump a{background:none;border-radius:0;padding:10px 0;font-size:12px;border-bottom:2px solid transparent;color:var(--text)}
-.client-assessments .assess-jump a[aria-current=location]{border-bottom-color:var(--text)}
 .client-assessments h2{font-size:19px;letter-spacing:-.35px;margin:0}
 .client-assessments h3{font-size:16px;margin:0}
 .client-assessments .assessment-screen-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}

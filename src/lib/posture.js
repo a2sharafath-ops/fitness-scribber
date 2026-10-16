@@ -85,7 +85,7 @@ export const POSTURE_ITEMS = [
     overactive: ['Upper trapezius', 'Levator scapulae'],
     underactive: ['Mid/lower trapezius', 'Serratus anterior'] }),
 
-  // ---------------- Special / mobility tests -----------------------------
+  // Historical special/mobility findings remain readable in saved records.
   I({ id: 'hamstringLength', section: 'special', view: 'Test', group: 'Hamstring length test', kind: 'test',
     label: 'Positive (limited hamstring length)',
     overactive: ['Hamstrings'],
@@ -108,7 +108,6 @@ export const POSTURE_BY_ID = Object.fromEntries(POSTURE_ITEMS.map((x) => [x.id, 
 export const SECTIONS = [
   ['ohsa', 'Overhead Squat Assessment'],
   ['static', 'Static posture'],
-  ['special', 'Special / mobility tests'],
 ]
 export const itemsInSection = (section) => POSTURE_ITEMS.filter((x) => x.section === section)
 

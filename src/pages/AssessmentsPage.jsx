@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
 import ProgressInfo from '../components/atoms/ProgressInfo'
@@ -78,7 +78,6 @@ function AssessmentCard({ type, records, intervalDays, today, clientId, onAdd, o
 
 export default function AssessmentsPage() {
   const { id } = useParams()
-  const location = useLocation()
   const { db, tz } = useData()
   const { openModal } = useModal()
   const [historyType, setHistoryType] = useState('')
@@ -100,15 +99,8 @@ export default function AssessmentsPage() {
   const showScreen = (clearanceOnly = false) => openModal(<ScreeningRecordDialog screeningId={row.id} clearanceOnly={clearanceOnly} />, true)
   const history = records.filter((r) => !historyType || r.type === historyType)
     .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''))
-  const activeGroup = location.hash === '#formal-assessments' ? '#formal-assessments' : '#health-screening'
-
-  return <div className="client-assessments">
-    <div className="topbar assess-title"><h1>Assessments</h1><Button onClick={() => openModal(<NewAssessmentMenu clientId={id} types={TEST_TYPES.map((type) => type.key)} />)}>＋ New assessment</Button></div>
-    <nav className="assess-jump" aria-label="Assessment groups">
-      <a href="#health-screening" aria-current={activeGroup === '#health-screening' ? 'location' : undefined}>Health screening</a>
-      <a href="#formal-assessments" aria-current={activeGroup === '#formal-assessments' ? 'location' : undefined}>Baseline &amp; reassessment</a>
-    </nav>
-    <section className="card assessment-screen-summary" id="health-screening" aria-labelledby="assess-screen-title">
+  const screeningSettled = row?.validUntil && !expired && !gated && !screening.draft
+  const screeningCard = <section className="card assessment-screen-summary" id="health-screening" aria-labelledby="assess-screen-title">
       <div className="assessment-screen-head"><div><p className="assessment-eyebrow">Trainer-only</p><h2 id="assess-screen-title">Health screening</h2></div>
         <Button variant={row ? 'ghost' : 'primary'} onClick={() => openModal(<CoachScreeningModal client={client} />, true)}>{screening.draft ? 'Continue screening' : row ? 'Re-screen' : 'Record screening'}</Button>
       </div>
@@ -128,6 +120,10 @@ export default function AssessmentsPage() {
         <Link className="assessment-link assessment-concern" to={`/clients/${id}/check-ins?view=concerns`}>New concern →</Link>
       </div>}
     </section>
+
+  return <div className="client-assessments">
+    <div className="topbar assess-title"><h1>Assessments</h1><Button onClick={() => openModal(<NewAssessmentMenu clientId={id} types={TEST_TYPES.map((type) => type.key)} />)}>＋ New assessment</Button></div>
+    {!screeningSettled && screeningCard}
     <section className="assessment-section" id="formal-assessments" aria-labelledby="assess-tests-title">
       <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`Next reassessment uses the date saved on the latest record. Blank means not scheduled. Older records without a saved date show a suggested review using the ${intervalDays}-day Settings default. These are scheduling prompts, not clinical thresholds.`} /></div>
         <div className="assessment-baseline-count"><span>{progress.done}/{progress.total} baselines</span><span className="assessment-mini-track" aria-hidden="true"><span style={{ width: `${progress.done / progress.total * 100}%` }} /></span></div>
@@ -137,6 +133,7 @@ export default function AssessmentsPage() {
         <div className="assessment-pain-actions">{latestPain && <Link className="assessment-link" to={`/clients/${id}/assessments/pain`}>History · {pain.length} →</Link>}<Button variant="ghost" onClick={() => addType('pain', latestPain ? 'reassessment' : 'baseline')}>Record pain</Button></div>
       </article>
     </section>
+    {screeningSettled && screeningCard}
     {records.length > 0 && <details className="card assessment-history"><summary>Assessment history <span className="assessment-badge">{records.length} records</span></summary>
       <div className="assessment-history-body"><label className="assessment-filter">Assessment type<select value={historyType} onChange={(e) => setHistoryType(e.target.value)}><option value="">All types</option>{TEST_TYPES.map((type) => <option key={type.key} value={type.key}>{type.label}</option>)}</select></label>
         <div className="assessment-history-scroll" tabIndex={0} role="region" aria-label="Assessment history records">{history.length ? history.map((rec) => <div className="assessment-history-row" key={rec.id}><div><strong>{TEST_TYPES.find((t) => t.key === rec.type)?.label} · {fmtDate(rec.date)}</strong><small>{rec.phase === 'reassessment' ? 'Reassessment' : 'Baseline'} · {summarize(rec)}</small></div><Link className="assessment-link" to={recordPath(id, rec)} aria-label={`View ${rec.type} assessment from ${fmtDate(rec.date)}`}>View →</Link></div>) : <p className="assessment-empty">No records for this type.</p>}</div>

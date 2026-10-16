@@ -46,8 +46,9 @@ function EntryRow({ rec, onEdit, onDelete, initiallyOpen = false }) {
           <span className="ahr-sum">{summarize(rec)}</span>
         </button>
         <span>
+          {rec.type === 'goals' && <Button variant="ghost" size="sm" onClick={onEdit}>Edit goals</Button>}
           <Menu label="Record actions" items={[
-            { label: 'Edit', icon: 'settings', onClick: onEdit },
+            ...(rec.type === 'goals' ? [] : [{ label: 'Edit', icon: 'settings', onClick: onEdit }]),
             { label: 'Delete', icon: 'alert', danger: true, onClick: onDelete },
           ]} />
         </span>
