@@ -48,10 +48,10 @@ function ScreeningHistoryDialog({ records }) {
   </ModalShell>
 }
 
-function AssessmentCard({ type, records, intervalDays, clientId, onAdd }) {
+function AssessmentCard({ type, records, intervalDays, today, clientId, onAdd, onEdit }) {
   const current = latest(records, type.key)
   const hasBaseline = hasBaselineRecord(records, type.key)
-  const due = current ? dueStatus(records, type.key, intervalDays) : null
+  const due = current ? dueStatus(records, type.key, intervalDays, today) : null
   const summary = current && summarize(current)
   return <article className="card assessment-category">
     <div className="assessment-category-top">
@@ -63,7 +63,10 @@ function AssessmentCard({ type, records, intervalDays, clientId, onAdd }) {
       {current ? <>
         <p className="assessment-result" title={summary}>{summary === '—' ? 'No result recorded' : summary}</p>
         <p className="assessment-source">{sourceOf(current)}</p>
-        <p className={'assessment-review-date' + (due?.overdue ? ' overdue' : '')}>Latest {fmtDate(current.date)}<br />{due?.overdue ? 'Review due' : 'Review'} {fmtDate(due?.dueDate)}</p>
+        <p className={'assessment-review-date' + (due?.overdue ? ' overdue' : '')}>Latest {fmtDate(current.date)}<br />
+          {due?.dueDate ? `${due.kind === 'suggested' ? 'Suggested review' : 'Next reassessment'} ${fmtDate(due.dueDate)}` : 'Next reassessment not scheduled'}
+        </p>
+        <button type="button" className="assessment-link" onClick={() => onEdit(current)}>{due?.kind === 'scheduled' ? 'Edit reassessment date' : 'Set reassessment date'}</button>
       </> : <p className="assessment-empty">No assessment recorded.</p>}
     </div>
     <div className="assessment-category-actions">
@@ -126,10 +129,10 @@ export default function AssessmentsPage() {
       </div>}
     </section>
     <section className="assessment-section" id="formal-assessments" aria-labelledby="assess-tests-title">
-      <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`Review reminders follow the current ${intervalDays}-day setting. They are scheduling prompts, not clinical thresholds. Pain assessments are outside the three onboarding baselines.`} /></div>
+      <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`Next reassessment uses the date saved on the latest record. Blank means not scheduled. Older records without a saved date show a suggested review using the ${intervalDays}-day Settings default. These are scheduling prompts, not clinical thresholds.`} /></div>
         <div className="assessment-baseline-count"><span>{progress.done}/{progress.total} baselines</span><span className="assessment-mini-track" aria-hidden="true"><span style={{ width: `${progress.done / progress.total * 100}%` }} /></span></div>
       </div>
-      <div className="assessment-category-grid">{TEST_TYPES.filter((type) => ONBOARDING_TYPES.includes(type.key)).map((type) => <AssessmentCard key={type.key} type={type} records={records.filter((rec) => rec.type === type.key)} intervalDays={intervalDays} clientId={id} onAdd={addType} />)}</div>
+      <div className="assessment-category-grid">{TEST_TYPES.filter((type) => ONBOARDING_TYPES.includes(type.key)).map((type) => <AssessmentCard key={type.key} type={type} records={records.filter((rec) => rec.type === type.key)} intervalDays={intervalDays} today={todayISO(tz)} clientId={id} onAdd={addType} onEdit={(record) => openModal(assessmentForm(record.type, id, record))} />)}</div>
       <article className="card assessment-pain"><div><h3>Pain assessment</h3><p>{latestPain ? `${summarize(latestPain)} · ${fmtDate(latestPain.date)} · ${sourceOf(latestPain)}` : 'No pain assessment recorded.'}</p></div>
         <div className="assessment-pain-actions">{latestPain && <Link className="assessment-link" to={`/clients/${id}/assessments/pain`}>History · {pain.length} →</Link>}<Button variant="ghost" onClick={() => addType('pain', latestPain ? 'reassessment' : 'baseline')}>Record pain</Button></div>
       </article>

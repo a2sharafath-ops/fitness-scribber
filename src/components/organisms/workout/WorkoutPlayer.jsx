@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import Button from '../../atoms/Button'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import SetLogRow from '../../molecules/SetLogRow'
-import { newExercise, secToClock, workoutVolume, runBlocks, normalizeRunItem } from '../../../lib/workout'
+import { newExercise, secToClock, workoutVolume, runBlocks, normalizeRunItem, doneRowWork } from '../../../lib/workout'
+import { editRunSet } from '../../../lib/setAutofill'
 import { fmtVL } from '../../../lib/units'
 import { getWorkoutDraft, setWorkoutDraft, clearWorkoutDraft } from '../../../lib/workoutDraft'
 
@@ -71,7 +72,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
     const patchRow = (section, itemId, rowIndex, patch) => setW((x) => ({
       ...x,
       [section]: x[section].map((it) => (it.id !== itemId ? it
-        : { ...it, setRows: it.setRows.map((r, i) => (i === rowIndex ? { ...r, ...patch } : r)) })),
+        : { ...it, setRows: editRunSet(it.setRows, rowIndex, patch) })),
     }))
     const setNote = (section, itemId, note) => setW((x) => ({
       ...x, [section]: x[section].map((it) => (it.id === itemId ? { ...it, note } : it)),
@@ -91,7 +92,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
         <div className="wp-head">
           <div>
             <div className="wp-title">{w.title}</div>
-            <div className="muted" style={{ fontSize: 12 }}>Block {step + 1} of {blocks.length} · est. volume {fmtVL(workoutVolume(w), units)}</div>
+            <div className="muted" style={{ fontSize: 12 }}>Block {step + 1} of {blocks.length} · logged volume {fmtVL((w.main || []).reduce((total, item) => total + item.setRows.reduce((sum, row) => sum + doneRowWork(row), 0), 0), units)}</div>
           </div>
           <div className="wp-timer" role="timer" aria-label="Elapsed time">⏱ {secToClock(elapsed)}</div>
         </div>
@@ -111,6 +112,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
               <div className="wp-block-title">{cur.title}</div>
               <div className="wp-block-sub">{doneSets}/{totalSets} sets logged</div>
             </div>
+            <p className="muted">Load and reps fill matching sets below. Only checked sets count.</p>
             {cur.items.map((it) => (
               <div className="wp-ex" key={it.id}>
                 <div className="wp-ex-name">{it.name}</div>

@@ -8,10 +8,77 @@ after(() => vite.close())
 const load = path => vite.ssrLoadModule(`/src/${path}`)
 const p = await load('lib/program.js')
 const w = await load('lib/workout.js')
+const { editRunSet } = await load('lib/setAutofill.js')
 const planner = await load('lib/planner.js')
 const { validatePrescription, changeIntensity, editPrescribedSet, followFirstSet } = await load('lib/prescription.js')
 const example = (intensityType = '%1RM', set = {}) => [{ ...p.newBlock(), exercises: [p.newProgExercise('Squat', { intensityType, sets: [p.newSet(1, { reps: 5, intensity: intensityType === '%1RM' ? 80 : 2, rir: 2, ...set })] })] }]
 const rules = (blocks, type, value) => ({ [blocks[0].blockId]: { enabled: true, type, value } })
+
+const loggingRows = () => Array.from({ length: 4 }, (_, i) => w.setRowFromPrescribed({ prescribedReps: 5, prescribedLoadKg: 80, purpose: 'working' }, i, 'Load'))
+
+test('runner autofills matching later sets without counting unmarked sets', () => {
+  const original = loggingRows()
+  let rows = editRunSet(original, 0, { load: 85 })
+  rows = editRunSet(rows, 0, { reps: 6 })
+  assert.deepEqual(rows.map(r => [r.load, r.reps, r.done]), Array(4).fill([85, 6, false]))
+  assert.equal(original[0].load, 80)
+  const workout = () => ({ main: [{ name: 'Squat', setRows: rows }] })
+  let summary = w.summarize(workout())
+  for (const key of ['volume', 'sets', 'reps', 'doneMain', 'topWeight']) assert.equal(summary[key], 0)
+  assert.deepEqual(summary.muscleStrain, [])
+  rows = editRunSet(rows, 0, { done: true, load: 85, reps: 6, effort: null })
+  summary = w.summarize(workout())
+  assert.equal(summary.volume, 510)
+  assert.equal(summary.sets, 1)
+  assert.equal(summary.doneMain, 1)
+  rows = editRunSet(rows, 1, { done: true })
+  assert.equal(w.summarize(workout()).volume, 1020)
+  rows = editRunSet(rows, 0, { done: false })
+  assert.equal(w.summarize(workout()).volume, 510)
+})
+
+test('runner respects manual edits, completed rows, and later sources after resume', () => {
+  let rows = editRunSet(loggingRows(), 0, { load: 85, reps: 6 })
+  rows = editRunSet(rows, 1, { load: 90 })
+  rows = JSON.parse(JSON.stringify(rows))
+  rows = editRunSet(rows, 0, { load: 87.5, reps: 7 })
+  assert.deepEqual(rows.map(r => r.load), [87.5, 90, 90, 90])
+  assert.deepEqual(rows.map(r => r.reps), [7, 7, 7, 7])
+  rows = editRunSet(rows, 2, { done: true })
+  rows = editRunSet(rows, 1, { load: 92.5 })
+  assert.deepEqual(rows.map(r => r.load), [87.5, 92.5, 90, 92.5])
+  rows = editRunSet(rows, 3, { reps: null })
+  rows = editRunSet(rows, 0, { reps: 8 })
+  assert.deepEqual(rows.map(r => r.reps), [8, 8, 7, null])
+})
+
+test('runner keeps different prescriptions, warm-ups, effort and existing actuals independent', () => {
+  const rows = loggingRows()
+  rows[1].pLoadKg = 60
+  rows[1].load = 60
+  rows[2].purpose = 'warmup'
+  rows[3].reps = 4
+  rows[3].load = 95
+  const changed = editRunSet(rows, 0, { load: 85, reps: 6, effort: 2 })
+  assert.deepEqual(changed.slice(1), rows.slice(1))
+  assert.equal(changed[1].effort, null)
+  const variedReps = loggingRows()
+  variedReps[1].pReps = 8
+  assert.deepEqual(editRunSet(variedReps, 0, { reps: 6 })[1], variedReps[1])
+  assert.deepEqual(editRunSet(rows, 0, { done: true, load: 85, reps: 6 }).slice(1), rows.slice(1))
+})
+
+test('runner handles zero load, corrections and clearing without spreading invalid values', () => {
+  let rows = editRunSet(loggingRows(), 0, { load: 0, reps: 5 })
+  assert.deepEqual(rows.map(r => r.load), [0, 0, 0, 0])
+  rows = editRunSet(rows, 0, { load: 12.5 })
+  assert.deepEqual(rows.map(r => r.load), [12.5, 12.5, 12.5, 12.5])
+  rows = editRunSet(rows, 0, { load: null })
+  assert.deepEqual(rows.map(r => r.load), [null, null, null, null])
+  for (const reps of [-1, 1.5, NaN, Infinity]) {
+    assert.deepEqual(editRunSet(loggingRows(), 0, { reps }).slice(1), loggingRows().slice(1))
+  }
+})
 
 test('prescribed runner preserves absent and intentionally empty warm-up/cool-down sections', () => {
   const main = example('Load', { load: 20 })

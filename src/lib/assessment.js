@@ -1,7 +1,8 @@
-import { addDays } from './dates'
 import { screeningsFor } from './screening'
 import { epley1RM } from './program'
 import { postureFindings, SEVERITY_WEIGHT } from './posture'
+import { assessmentReview, DEFAULT_REASSESS_DAYS, isFormalReviewAssessment } from './assessmentReview'
+export { DEFAULT_REASSESS_DAYS }
 
 // Pure helpers for the Assessment module — no React, no I/O.
 // One record shape: { id, clientId, type, date, phase, data, notes }.
@@ -49,10 +50,7 @@ const byDateDesc = (a, b) => (b.date || '').localeCompare(a.date || '') ||
 
 // Tracked lift peaks are progress observations, not complete fitness tests.
 // Early backend imports retained their auto-update note but not sourceMaxId.
-export const isTrainingDerivedAssessment = (rec) => rec?.type === 'fitness' && (
-  !!rec.data?.sourceMaxId || !!rec.data?.sourceWorkoutId || rec.phase === 'progress' ||
-  /^(Auto-update: new estimated 1RM peak|Trainer-recorded 1RM:)/.test(rec.notes || '')
-)
+export const isTrainingDerivedAssessment = (rec) => rec?.type === 'fitness' && !isFormalReviewAssessment(rec)
 export const formalAssessments = (list) => (list || []).filter((a) => !isTrainingDerivedAssessment(a))
 
 export const forClient = (assessments, clientId) =>
@@ -173,7 +171,8 @@ export function describe(rec) {
       if (d.posture) out.push({ label: 'Posture', value: d.posture })
       return out
     }
-    case 'movement':
+    case 'movement': {
+      const posture = d.posture ? [{ label: 'Posture', value: d.posture }] : []
       if (d.protocol === 'nasm') {
         const m = movementScore(d)
         return [
@@ -182,9 +181,11 @@ export function describe(rec) {
             label: `${f.item.view} · ${f.item.label}`,
             value: `${f.item.kind === 'midline' ? 'present' : f.sides.join(' & ')} · ${f.severity}${f.pain ? ' · pain' : ''}${f.note ? ' — ' + f.note : ''}`,
           })),
+          ...posture,
         ]
       }
-      return (d.screens || []).map((s) => ({ label: s.pattern[0].toUpperCase() + s.pattern.slice(1), value: `${s.score}/3${s.pain ? ' · pain' : ''}` }))
+      return [...(d.screens || []).map((s) => ({ label: s.pattern[0].toUpperCase() + s.pattern.slice(1), value: `${s.score}/3${s.pain ? ' · pain' : ''}` })), ...posture]
+    }
     case 'body_comp':
       return kv([['Method', d.method], ['Body mass', d.massKg != null ? d.massKg + ' kg' : null], ['Body fat', d.bodyFatPct != null ? d.bodyFatPct + '%' : null],
         ['Lean mass', d.leanMassKg != null ? d.leanMassKg + ' kg' : null], ['Skeletal muscle', d.skeletalMuscleKg != null ? d.skeletalMuscleKg + ' kg' : null],
@@ -255,7 +256,6 @@ export function compare(type, b, l) {
 // types that get periodic reassessment reminders.
 export const ONBOARDING_TYPES = ['fitness', 'movement', 'body_comp']
 export const REASSESS_TYPES = ['fitness', 'movement', 'body_comp']
-export const DEFAULT_REASSESS_DAYS = 84 // 12 weeks
 export const hasBaselineRecord = (list, type) => formalAssessments(list).some((a) =>
   a.type === type && (a.phase === 'baseline' || !a.phase))
 
@@ -272,8 +272,9 @@ export function baselineProgress(list, types = ONBOARDING_TYPES) {
 export function dueStatus(list, type, intervalDays = DEFAULT_REASSESS_DAYS, now = new Date()) {
   const l = latest(formalAssessments(list), type)
   if (!l) return { has: false }
-  const today = todayLocal(now)
-  const dueDate = addDays(l.date, intervalDays)
+  const today = typeof now === 'string' ? now : todayLocal(now)
+  const { dueDate, kind } = assessmentReview(l, intervalDays)
+  if (!dueDate) return { has: true, last: l.date, dueDate: null, kind, overdue: false, daysLeft: null }
   const daysLeft = Math.round((Date.parse(dueDate) - Date.parse(today)) / 86400000)
-  return { has: true, last: l.date, dueDate, overdue: dueDate <= today, daysLeft }
+  return { has: true, last: l.date, dueDate, kind, overdue: dueDate <= today, daysLeft }
 }

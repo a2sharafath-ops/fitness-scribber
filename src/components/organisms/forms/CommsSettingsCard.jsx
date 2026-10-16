@@ -62,7 +62,7 @@ export default function CommsSettingsCard() {
       <label className="cs-row">
         <input type="checkbox" checked={f.nudgeReassess} onChange={setBool('nudgeReassess')} />
         <span>Reassessment reminder</span>
-        <span className="cs-inline">every
+        <span className="cs-inline">default interval
           <input type="number" min="7" value={f.reassessIntervalDays} onChange={setNum('reassessIntervalDays')} disabled={!f.nudgeReassess} /> days
         </span>
       </label>

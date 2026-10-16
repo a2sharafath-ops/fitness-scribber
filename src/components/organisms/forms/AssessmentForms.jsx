@@ -6,7 +6,9 @@ import RangeSlider from '../../atoms/RangeSlider'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
 import { saveAssessmentRecord } from '../../../lib/assessmentWrite'
-import { todayISO } from '../../../lib/dates'
+import { todayISO, addDays, fmtDate } from '../../../lib/dates'
+import { assessmentReview, isAssessmentDate, reassessmentDateError } from '../../../lib/assessmentReview'
+import { toast } from '../../../lib/toast'
 import { ACTIVE_TYPES, ACTIVITY_LEVELS, typeMeta, estOneRepMax, movementScore, latest, forClient } from '../../../lib/assessment'
 import { SECTIONS, SEVERITY, itemsInSection, isPresent } from '../../../lib/posture'
 import { FIELD_LABELS, parseBodyComp } from '../../../lib/bodyCompPdf'
@@ -18,9 +20,14 @@ const numOrNull = (v) => (v === '' || v == null || Number.isNaN(+v) ? null : +v)
 
 // Shared date + phase header for every assessment form.
 function MetaRow({ f, setF }) {
+  const { db } = useData()
+  const suggested = assessmentReview({ date: f.date, data: {} }, db.settings?.reassessIntervalDays)
+  const hasReviewDate = Object.hasOwn(f, 'nextReassessmentDate')
+  const error = hasReviewDate ? reassessmentDateError(f.date, f.nextReassessmentDate) : ''
   return (
+    <>
     <div className="row2">
-      <Field label="Date"><input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
+      <Field label="Assessment date"><input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label="Phase">
         <select value={f.phase} onChange={(e) => setF({ ...f, phase: e.target.value })}>
           <option value="baseline">Baseline (onboarding)</option>
@@ -28,6 +35,15 @@ function MetaRow({ f, setF }) {
         </select>
       </Field>
     </div>
+    {hasReviewDate && <div style={{ marginBottom: 12 }}>
+      <Field label="Next reassessment date"><input type="date" value={f.nextReassessmentDate} min={isAssessmentDate(f.date) ? addDays(f.date, 1) : undefined} aria-invalid={!!error} onChange={(e) => setF({ ...f, nextReassessmentDate: e.target.value })} /></Field>
+      <div className="flex between gap" style={{ flexWrap: 'wrap', marginTop: 6 }}>
+        <small className="muted">Optional · leave blank if not scheduled.</small>
+        {suggested.dueDate && <Button variant="ghost" size="sm" onClick={() => setF({ ...f, nextReassessmentDate: suggested.dueDate })}>Use {suggested.intervalDays}-day default · {fmtDate(suggested.dueDate)}</Button>}
+      </div>
+      {error && <p role="alert" style={{ color: 'var(--accent)', fontSize: 12 }}>{error}</p>}
+    </div>}
+    </>
   )
 }
 
@@ -37,6 +53,10 @@ function useSave(clientId, type, buildData, extra, record) {
   const { commit } = useData()
   const { closeModal } = useModal()
   return (f) => {
+    if (Object.hasOwn(f, 'nextReassessmentDate')) {
+      const error = reassessmentDateError(f.date, f.nextReassessmentDate)
+      if (error) { toast(error, 'error'); return }
+    }
     commit((d) => {
       const savedRecord = saveAssessmentRecord(d, { clientId, type, form: f, data: buildData(), record })
       if (savedRecord) extra?.(d, savedRecord)
@@ -59,12 +79,12 @@ export function MovementScreenForm({ clientId, record, defaultPhase }) {
 
 function NasmMovementForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '' })
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', posture: record?.data?.posture || '', nextReassessmentDate: record?.data?.nextReassessmentDate || '' })
   const [findings, setFindings] = useState(() => ({ ...(record?.data?.findings || {}) }))
   const [open, setOpen] = useState({ ohsa: true, static: false, special: false })
 
   const setItem = (id, patch) => setFindings((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), ...patch } }))
-  const data = () => ({ protocol: 'nasm', findings })
+  const data = () => ({ protocol: 'nasm', findings, posture: f.posture.trim() })
   const save = useSave(clientId, 'movement', data, undefined, record)
 
   const live = movementScore(data())
@@ -94,6 +114,7 @@ function NasmMovementForm({ clientId, record, defaultPhase }) {
         </div>
       ))}
 
+      <Field label="Posture"><input value={f.posture} onChange={(e) => setF({ ...f, posture: e.target.value })} placeholder="e.g. Mild anterior pelvic tilt" /></Field>
       <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Overall observations, cues, limitations…" /></Field>
     </ModalShell>
   )
@@ -132,10 +153,10 @@ function PostureRow({ item, f = {}, onChange }) {
 // Kept so historical 0–3 records stay editable exactly as before.
 function LegacyMovementForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
-  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '' })
+  const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', posture: record?.data?.posture || '', nextReassessmentDate: record?.data?.nextReassessmentDate || '' })
   const [screens, setScreens] = useState(record.data.screens.map((s) => ({ ...s })))
   const upd = (i, k, v) => setScreens(screens.map((s, j) => (j === i ? { ...s, [k]: v } : s)))
-  const save = useSave(clientId, 'movement', () => ({ screens }), undefined, record)
+  const save = useSave(clientId, 'movement', () => ({ screens, posture: f.posture.trim() }), undefined, record)
   return (
     <ModalShell title={<><Icon name="treadmill" size={16} /> Movement screen (legacy)</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
@@ -150,6 +171,7 @@ function LegacyMovementForm({ clientId, record, defaultPhase }) {
           <label className="asr-pain"><input type="checkbox" checked={s.pain} onChange={(e) => upd(i, 'pain', e.target.checked)} /> pain</label>
         </div>
       ))}
+      <Field label="Posture"><input value={f.posture} onChange={(e) => setF({ ...f, posture: e.target.value })} placeholder="e.g. Mild anterior pelvic tilt" /></Field>
       <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Compensations, cues, limitations…" /></Field>
     </ModalShell>
   )
@@ -205,7 +227,7 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const d0 = record?.data || {}
   const [f, setF] = useState({
-    date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', method: d0.method || 'InBody',
+    date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', method: d0.method || 'InBody', nextReassessmentDate: d0.nextReassessmentDate || '',
     massKg: d0.massKg ?? '', bodyFatPct: d0.bodyFatPct ?? '', leanMassKg: d0.leanMassKg ?? '',
     skeletalMuscleKg: d0.skeletalMuscleKg ?? '', visceralFat: d0.visceralFat ?? '', hydrationL: d0.hydrationL ?? '',
   })
@@ -334,7 +356,7 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
   )
 }
 
-// ---- Fitness (strength lifts + endurance + mobility + posture) ----
+// ---- Fitness (strength lifts + endurance + mobility) ----
 // The strength section is a 1RM-estimation surface: each lift takes a test
 // weight × reps, from which we compute an estimated 1RM (Epley; 1 rep = a true
 // 1RM). The estimates live on the assessment record itself; the workout
@@ -346,7 +368,7 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
   const d0 = record?.data || {}
   const [f, setF] = useState({
     date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '',
-    enduranceTest: d0.endurance?.test || '', enduranceResult: d0.endurance?.result || '', posture: d0.posture || '',
+    enduranceTest: d0.endurance?.test || '', enduranceResult: d0.endurance?.result || '', nextReassessmentDate: d0.nextReassessmentDate || '',
   })
   const [strength, setStrength] = useState(d0.strength?.length
     // Back-compat: older records stored only { lift, valueKg } (a stated 1RM).
@@ -368,7 +390,6 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
     strength: strengthOut(),
     endurance: f.enduranceTest.trim() ? { test: f.enduranceTest.trim(), result: f.enduranceResult.trim() } : null,
     mobility: mobility.filter((r) => r.joint.trim()).map((r) => ({ joint: r.joint.trim(), value: r.value.trim(), side: r.side.trim() })),
-    posture: f.posture.trim(),
   })
   const save = useSave(clientId, 'fitness', data, undefined, record)
   return (
@@ -411,9 +432,6 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
       ))}
       <Button variant="ghost" size="sm" onClick={() => setMobility([...mobility, { joint: '', value: '', side: '' }])}>＋ Add joint</Button>
 
-      <div style={{ marginTop: 12 }}>
-        <Field label="Posture"><input value={f.posture} onChange={set('posture')} placeholder="e.g. Mild anterior pelvic tilt" /></Field>
-      </div>
       <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Overall observations…" /></Field>
     </ModalShell>
   )

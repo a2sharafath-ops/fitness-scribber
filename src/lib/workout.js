@@ -274,7 +274,7 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
   const reps = main.reduce((t, m) => t + repsOf(m), 0)
   const sets = main.reduce((t, m) => t + (hasRows(m) ? doneRows(m).length : actualSets(m)), 0)
   const topWeight = main.reduce((mx, m) => Math.max(mx, hasRows(m)
-    ? m.setRows.reduce((x, r) => Math.max(x, +(r.load ?? r.pLoadKg) || 0), 0)
+    ? doneRows(m).reduce((x, r) => Math.max(x, +(r.load ?? r.pLoadKg) || 0), 0)
     : actualWeight(m)), 0)
 
   const met = 2 + intensity * 9
@@ -288,6 +288,7 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
   let muscular = 0, cardio = 0
   const byMuscle = {}
   for (const m of main) {
+    if (hasRows(m) && !doneRows(m).length) continue
     const itemWork = hasRows(m) ? doneRows(m).reduce((s, r) => s + doneRowWork(r), 0) : repsOf(m) * actualWeight(m)
     const work = itemWork || repsOf(m) || (hasRows(m) ? doneRows(m).length : actualSets(m)) || 1
     if (isCardioItem(m)) { cardio += work }

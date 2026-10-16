@@ -4,6 +4,7 @@ import { programStats } from './program'
 import { clientPrograms } from './clientPrograms'
 import { formalAssessments, latest, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, typeMeta } from './assessment'
 import { screeningsFor, programStatus, rescreenDue } from './screening'
+import { assessmentReview } from './assessmentReview'
 
 export function dashboardClock(now = new Date(), tz) {
   const options = { timeZone: coachTimeZone(tz) }
@@ -34,7 +35,8 @@ export function clientReviewItems(db, today, clients = db.clients.filter(c => c.
     for (const type of REASSESS_TYPES) {
       const last = latest(assessments, type)
       const interval = Number(db.settings?.reassessIntervalDays) || DEFAULT_REASSESS_DAYS
-      if (last && addDays(last.date, interval) <= today) add(c, 'followup', `${typeMeta(type).label} review due`, `Last recorded ${fmtDay(last.date)}`, '/assessments#formal-assessments')
+      const review = assessmentReview(last, interval)
+      if (review.dueDate && review.dueDate <= today) add(c, 'followup', `${typeMeta(type).label} review due`, `${review.kind === 'suggested' ? 'Suggested review' : 'Reassessment'} ${fmtDay(review.dueDate)}`, '/assessments#formal-assessments')
     }
   }
   reviews.sort((a, b) => a.priority - b.priority || a.client.name.localeCompare(b.client.name))

@@ -38,7 +38,7 @@ export default function ClientDetailPage() {
   const assessmentList = forClient(db.assessments, id)
   const baselines = baselineProgress(assessmentList)
   const interval = db.settings?.reassessIntervalDays || DEFAULT_REASSESS_DAYS
-  const dueTypes = REASSESS_TYPES.filter((type) => dueStatus(assessmentList, type, interval).overdue)
+  const dueTypes = REASSESS_TYPES.filter((type) => dueStatus(assessmentList, type, interval, today).overdue)
   const typeLabel = (type) => TYPES.find((item) => item.key === type)?.label || type
   const severityOrder = { High: 0, Medium: 1, Low: 2 }
   const openConcerns = db.concerns.filter((row) => row.clientId === id && row.status === 'Open')

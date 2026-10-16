@@ -8,6 +8,7 @@
 // Mirrors src/lib/nudges.js. Runs with the service role (bypasses RLS).
 import { admin } from '../_shared/supa.ts'
 import { cors, json } from '../_shared/cors.ts'
+import { assessmentReview, isFormalReviewAssessment } from '../_shared/assessment-review.js'
 
 type Row = Record<string, unknown>
 const def = <T,>(v: T | null | undefined, d: T): T => (v === undefined || v === null ? d : v)
@@ -34,12 +35,12 @@ Deno.serve(async (req) => {
 
     const [settingsR, clientsR, sessionsR, wellnessR, srpeR, workoutsR, assessmentsR, existingR] = await Promise.all([
       db.from('settings').select('*'),
-      db.from('clients').select('id, name'),
+      db.from('clients').select('id, name, coachId'),
       db.from('sessions').select('id, clientId, date, time, type, status'),
       db.from('wellness').select('clientId, date'),
       db.from('srpe').select('clientId, date'),
       db.from('workouts').select('id, clientId, date, status'),
-      db.from('assessments').select('id, clientId, type, date'),
+      db.from('assessments').select('id, clientId, type, date, phase, data, createdAt'),
       db.from('messages').select('broadcastId').eq('kind', 'system'),
     ])
 
@@ -117,16 +118,17 @@ Deno.serve(async (req) => {
     const latestAssess: Record<string, Row> = {}
     for (const aRow of assessmentsR.data ?? []) {
       const a = aRow as Row
-      if (!((a.type as string) in REASSESS) || !known.has(a.clientId as string)) continue
+      if (!isFormalReviewAssessment(a) || !known.has(a.clientId as string) || (a.date as string) > today) continue
       const k = `${a.clientId}|${a.type}`
-      if (!latestAssess[k] || (a.date as string) > (latestAssess[k].date as string)) latestAssess[k] = a
+      if (!latestAssess[k] || (a.date as string) > (latestAssess[k].date as string) || (a.date === latestAssess[k].date && String(a.createdAt || '') > String(latestAssess[k].createdAt || ''))) latestAssess[k] = a
     }
     for (const k of Object.keys(latestAssess)) {
       const a = latestAssess[k]
       const conf = cfg(a.clientId as string)
       if (!def(conf.nudgeReassess as boolean, true)) continue
       const interval = def(conf.reassessIntervalDays as number, 84)
-      if (addDays(a.date as string, interval) <= today) {
+      const review = assessmentReview(a, interval)
+      if (review.dueDate && review.dueDate <= today) {
         pending.push({ clientId: a.clientId as string, broadcastId: `nudge:reassess:${a.id}`,
           body: `📊 Time to reassess ${REASSESS[a.type as string]} — last done ${fmtDay(a.date as string)}. Book a reassessment to track progress.` })
       }

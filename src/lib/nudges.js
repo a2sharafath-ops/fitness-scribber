@@ -5,6 +5,7 @@
 // mirrors this logic for scheduled delivery; the frontend uses it in local
 // (no-backend) mode. No React, no I/O — data in, messages out.
 import { addDays, fmtDay } from './dates'
+import { assessmentReview, isFormalReviewAssessment } from './assessmentReview'
 
 const def = (v, d) => (v === undefined || v === null ? d : v)
 const localDate = (now) => new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
@@ -81,13 +82,14 @@ export function computeNudges(data, settings = {}, now = new Date()) {
     const REASSESS = { fitness: 'fitness', movement: 'movement screen', body_comp: 'body composition' }
     const latestOf = {}
     for (const a of assessments) {
-      if (!(a.type in REASSESS) || !known.has(a.clientId)) continue
+      if (!isFormalReviewAssessment(a) || !known.has(a.clientId) || a.date > today) continue
       const k = `${a.clientId}|${a.type}`
-      if (!latestOf[k] || a.date > latestOf[k].date) latestOf[k] = a
+      if (!latestOf[k] || a.date > latestOf[k].date || (a.date === latestOf[k].date && (a.createdAt || '') > (latestOf[k].createdAt || ''))) latestOf[k] = a
     }
     for (const k of Object.keys(latestOf)) {
       const a = latestOf[k]
-      if (addDays(a.date, reassessDays) <= today) {
+      const review = assessmentReview(a, reassessDays)
+      if (review.dueDate && review.dueDate <= today) {
         out.push({ clientId: a.clientId, broadcastId: `nudge:reassess:${a.id}`,
           body: `📊 Time to reassess ${REASSESS[a.type]} — last done ${fmtDay(a.date)}. Book a reassessment to track progress.` })
       }

@@ -1,13 +1,20 @@
 import { uid } from './format'
+import { reassessmentDateError } from './assessmentReview'
 
 export function saveAssessmentRecord(draft, { clientId, type, form, data, record }) {
+  const hasReviewDate = Object.hasOwn(form, 'nextReassessmentDate')
+  if (hasReviewDate) {
+    const error = reassessmentDateError(form.date, form.nextReassessmentDate)
+    if (error) throw new Error(error)
+    data = { ...data, nextReassessmentDate: form.nextReassessmentDate || null }
+  }
   if (record) {
     const saved = draft.assessments.find((row) => row.id === record.id && row.clientId === clientId)
     if (!saved) return null
     saved.date = form.date
     saved.phase = form.phase
     saved.notes = (form.notes || '').trim()
-    saved.data = { ...data, source: saved.data?.source || (saved.data?.self ? 'Athlete self-report' : 'Source not recorded') }
+    saved.data = { ...saved.data, ...data, source: saved.data?.source || (saved.data?.self ? 'Athlete self-report' : 'Source not recorded') }
     return saved
   }
   const saved = {

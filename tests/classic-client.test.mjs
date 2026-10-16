@@ -322,7 +322,7 @@ test('trainer shortcuts to routed destinations are links', () => {
   const training = renderRoutedSection('/clients/a/training', db)
   assert.match(overview, /href="\/clients\/a\/training\?date=\d{4}-\d{2}-\d{2}"[^>]*>Plan workout/)
   assert.match(overview, /href="\/clients\/a\/check-ins"[^>]*>View check-ins/)
-  assert.match(training, /href="\/workouts\?clientId=[^"]+"[^>]*>Program library/)
+  assert.match(training, /href="\/workouts\?clientId=[^"]+"[^>]*>Assign from library/)
 })
 
 test('training page keeps day details in the calendar until logging is requested', () => {
@@ -339,6 +339,24 @@ test('training page keeps day details in the calendar until logging is requested
   db.prescriptions.push({ id: 'today-plan', clientId: 'a', date: today, name: 'Strength', items: [{ exercise: 'Squat', sets: 3, reps: 5 }] })
   assert.match(renderRoutedSection(`/clients/a/training?date=${today}&run=1`, db), /id="workout-log"/)
   assert.doesNotMatch(page, /Coach assistance|training-assistance/)
+})
+
+test('Training keeps one program editor visible as client assignments grow', () => {
+  for (const count of [1, 20]) {
+    const db = fixture()
+    db.programAssignments = Array.from({ length: count }, (_, index) => ({
+      id: `assignment-${index}`, clientId: 'a', name: `Client program ${index}`,
+      data: { start: addDays('2026-10-01', index), weeks: 2 },
+    }))
+    db.programAssignments.push({ id: 'private-program', clientId: 'b', name: 'PRIVATE PROGRAM', data: { start: '2099-01-01', weeks: 4 } })
+    const html = renderRoutedSection('/clients/a/training', db)
+    assert.equal((html.match(/class="training-program-assignment"/g) || []).length, 1)
+    assert.equal((html.match(/>Edit client program →<\/a>/g) || []).length, 1)
+    assert.match(html, new RegExp(`href="/workouts\\?assignment=assignment-${count - 1}&amp;clientId=a"`))
+    assert.match(html, /<select[^>]*aria-label="Client program"/)
+    assert.equal((html.match(/<option value="assignment-/g) || []).length, count)
+    assert.doesNotMatch(html, /PRIVATE PROGRAM|private-program/)
+  }
 })
 
 test('planner week and month show only this client’s completed workout logs, distinct from prescriptions', () => {

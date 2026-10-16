@@ -12,6 +12,7 @@ import { correctivePlan } from '../lib/program'
 import { fmtDate, fmtDateTime, todayISO } from '../lib/dates'
 import { toast, confirmDialog } from '../lib/toast'
 import { assessmentCanonicalPath } from '../lib/clientRoutes'
+import { assessmentReview } from '../lib/assessmentReview'
 
 function DeltaRow({ r }) {
   const arrow = r.delta == null || r.delta === 0 ? '' : r.delta > 0 ? '▲' : '▼'
@@ -30,8 +31,10 @@ function DeltaRow({ r }) {
 
 // One entry: date + time header that expands to the full recorded data.
 function EntryRow({ rec, onEdit, onDelete, initiallyOpen = false }) {
+  const { db } = useData()
   const [open, setOpen] = useState(initiallyOpen)
   const detail = describe(rec)
+  const review = assessmentReview(rec, db.settings?.reassessIntervalDays)
   const toggle = () => setOpen((o) => !o)
   return (
     <div className={'ad-entry' + (open ? ' open' : '')} id={`assessment-record-${rec.id}`}>
@@ -53,6 +56,7 @@ function EntryRow({ rec, onEdit, onDelete, initiallyOpen = false }) {
         <div className="asr-detail">
           <div className="asr-kv"><span className="asr-k">Source</span><span className="asr-v">{rec.data?.self ? 'Athlete self-report' : rec.data?.source || 'Source not recorded'}</span></div>
           <div className="asr-kv"><span className="asr-k">Recorded in app</span><span className="asr-v">{fmtDateTime(rec.createdAt) || 'Not recorded'}</span></div>
+          {['fitness', 'movement', 'body_comp'].includes(rec.type) && <div className="asr-kv"><span className="asr-k">{review.kind === 'suggested' ? `Suggested review (${review.intervalDays}-day default)` : 'Next reassessment'}</span><span className="asr-v">{review.dueDate ? fmtDate(review.dueDate) : 'Not scheduled'}</span></div>}
           {detail.length ? detail.map((r, i) => (
             <div className="asr-kv" key={i}><span className="asr-k">{r.label}</span><span className="asr-v">{r.value}</span></div>
           )) : <div className="muted" style={{ fontSize: 12 }}>No details recorded.</div>}

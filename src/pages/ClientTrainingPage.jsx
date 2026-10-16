@@ -25,6 +25,7 @@ export default function ClientTrainingPage() {
   const [logging, setLogging] = useState(false)
   const [historyType, setHistoryType] = useState('workouts')
   const [historyRequest, setHistoryRequest] = useState(0)
+  const [selectedProgramId, setSelectedProgramId] = useState('')
   useEffect(() => {
     if (!historyRequest) return
     const heading = document.getElementById('selected-day-title')
@@ -37,6 +38,7 @@ export default function ClientTrainingPage() {
   const requestedDate = searchParams.get('date')
   const selectedDate = validDate(requestedDate) ? requestedDate : today
   const assignedPrograms = (db.programAssignments || []).filter(a => a.clientId === id).sort((a,b) => b.data.start.localeCompare(a.data.start))
+  const selectedProgram = assignedPrograms.find(a => a.id === selectedProgramId) || assignedPrograms[0]
   const plan = db.plans.find((item) => item.id === client.planId)
   const workouts = (db.workouts || []).filter((item) => item.clientId === id && item.status === 'completed').sort((a, b) => b.date.localeCompare(a.date))
   const appointments = db.sessions.filter((item) => item.clientId === id && String(item.status).toLowerCase() === 'completed').sort((a, b) => b.date.localeCompare(a.date))
@@ -51,10 +53,24 @@ export default function ClientTrainingPage() {
 
   return <>
     <div className="topbar training-topbar"><h1>Training</h1>{!logging && <Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>}</div>
-    <section className="card training-program" aria-labelledby="training-program-title"><div className="training-program-copy">
-      <span className="overview-eyebrow">Programs</span><h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
-      {assignedPrograms.map(a => <p key={a.id}><Link to={`/workouts?assignment=${a.id}&clientId=${id}`}>{a.name} →</Link><small> · {fmtDate(a.data.start)} · {a.data.weeks} weeks</small></p>)}
-    </div>{!logging && <Link className="btn ghost sm" to={`/workouts?clientId=${id}`}>Program library →</Link>}</section>
+    <section className="card training-program" aria-labelledby="training-program-title">
+      <div className="training-program-head"><div className="training-program-copy">
+        <span className="overview-eyebrow">Programs</span><h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
+      </div>{!logging && <Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link>}</div>
+      {assignedPrograms.length > 0 && <>
+        <div className="training-program-list"><div className="training-program-assignment">
+          <div className="training-program-copy">
+            <label className="training-program-copy-label" htmlFor="training-client-program">Client copy · {assignedPrograms.length} program{assignedPrograms.length === 1 ? '' : 's'}</label>
+            <select id="training-client-program" aria-label="Client program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
+              {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {fmtDate(a.data.start)}</option>)}
+            </select>
+            <small>Starts {fmtDate(selectedProgram.data.start)} · {selectedProgram.data.weeks} week{selectedProgram.data.weeks === 1 ? '' : 's'}</small>
+          </div>
+          {!logging && <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>}
+        </div></div>
+        <p className="training-program-note">Edits apply to this client only. The library template stays unchanged.</p>
+      </>}
+    </section>
     {showRunner && <section id="workout-log" className="training-session" aria-label={`Workout logging for ${fmtDate(selectedDate)}`}>
       <div className="training-runner-head"><span>Logging · {fmtDate(selectedDate)}</span>{!logging && <Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>}</div>
       <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} startOnOpen onRunStateChange={setLogging} onSessionComplete={closeRunner} />
