@@ -2,6 +2,8 @@
 // Direct = a principal mover targeted by the named variation; indirect = a
 // meaningful assistant/stabilizer. These are categorical, never EMG percentages.
 // Unknown/ambiguous names deliberately remain unassigned for coach review.
+import { EXERCISE_LIBRARY_EXPANSION } from './exerciseLibraryExpansion.js'
+const expandedMappings = new Map(EXERCISE_LIBRARY_EXPANSION.map(exercise => [exercise.name.toLowerCase(), exercise.muscleTargets]))
 const profile = (direct, indirect = []) => ({ direct, indirect: indirect.filter((m) => !direct.includes(m)), source: 'catalog' })
 const SQ = profile(['Quadriceps', 'Glutes'], ['Adductors', 'Spinal erectors'])
 const LUNGE = profile(['Quadriceps', 'Glutes'], ['Adductors', 'Hamstrings'])
@@ -43,6 +45,8 @@ export function recommendedMuscleTargets(name, mode = '') {
     if (/hamstring curl/.test(n)) return profile(['Hamstrings'])
     return null
   }
+  const expanded = expandedMappings.get(n)
+  if (expanded) return expanded
   if (/^bridge drop downs/.test(n)) return null // movement unclear from catalog label
   if (/^lateral bridge/.test(n)) return profile(['Abdominals', 'Hip abductors'], ['Glutes'])
   if (/^bridge lift and curl/.test(n)) return CURL_BRIDGE

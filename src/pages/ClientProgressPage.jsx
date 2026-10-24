@@ -10,6 +10,7 @@ import { compare, formalAssessments, movementScore, summarize } from '../lib/ass
 import ProgressInfo from '../components/atoms/ProgressInfo'
 import { addDays, fmtDate, todayISO } from '../lib/dates'
 import { appointmentCompletion, assessmentPair } from '../lib/progress'
+import { fitnessTestLabel, fitnessTestValue, compareFitnessTests } from '../lib/fitnessTests'
 
 const signed = (value, suffix) => value == null ? '—' : `${value > 0 ? '+' : ''}${value} ${suffix}`
 const progressViews = [
@@ -73,6 +74,7 @@ export default function ClientProgressPage() {
   // Automatically generated lift peaks are displayed in Strength, not treated
   // as a new complete fitness reassessment.
   const fitness = assessmentPair(formalAssessments(assessments), 'fitness')
+  const fitnessRows = fitness.comparable ? compareFitnessTests(fitness.first.data?.otherTests, fitness.last.data?.otherTests) : []
   const movementRows = movement.comparable ? compare('movement', movement.first, movement.last) : []
   const movementNow = movement.last ? movementScore(movement.last.data) : null
   const today = todayISO(tz)
@@ -123,6 +125,7 @@ export default function ClientProgressPage() {
         </OutcomeCard>
         <OutcomeCard title="Fitness tests" path={`/clients/${id}/assessments/fitness`} {...fitness} empty="No formal fitness assessment yet.">
           {fitness.last && <><p className="progress-fitness-summary">{summarize(fitness.last)}</p><div className="progress-compare-list">{(fitness.last.data?.strength || []).slice(0, 4).map((test) => <div key={test.lift}><span>{test.lift}</span><b>{test.valueKg != null ? format.fmtWt(test.valueKg) : '—'}</b></div>)}</div></>}
+          {fitness.last && <div className="progress-compare-list">{fitness.comparable ? fitnessRows.map((row, i) => <div key={i}><span>{row.label}</span><b>{row.from ?? '—'} → {row.to ?? '—'}{row.unit}</b></div>) : (fitness.last.data?.otherTests || []).map((test, i) => <div key={i}><span>{fitnessTestLabel(test)}</span><b>{fitnessTestValue(test)}</b></div>)}</div>}
         </OutcomeCard>
       </div>
       </>}

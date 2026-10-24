@@ -10,7 +10,9 @@ import { assessmentReview, reassessmentDateError, isFormalReviewAssessment } fro
 const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' })
 after(() => vite.close())
 const load = path => vite.ssrLoadModule(`/src/${path}`)
-const { dueStatus, describe, movementScore } = await load('lib/assessment.js')
+const { dueStatus, describe, summarize, compare, movementScore, movementPainFindings, movementPainReports } = await load('lib/assessment.js')
+const { gripStrengthTests } = await load('lib/fitnessTests.js')
+const { resolveTrainingMax } = await load('lib/program.js')
 const { saveAssessmentRecord } = await load('lib/assessmentWrite.js')
 const { computeNudges } = await load('lib/nudges.js')
 const { clientReviewItems } = await load('lib/dashboard.js')
@@ -98,6 +100,8 @@ test('Posture belongs to both movement editors, not Fitness, and recorded text d
   const movementForm = render(assessmentForm('movement', 'local-builder-100'), db)
   assert.match(movementForm, /Overhead Squat Assessment/)
   assert.match(movementForm, /Static posture/)
+  assert.ok(movementForm.indexOf('Static posture') < movementForm.indexOf('Overhead Squat Assessment'))
+  assert.match(movementForm, /aria-expanded="true"[^>]*><span>▾ Static posture/)
   assert.doesNotMatch(movementForm, /Special \/ mobility tests/)
   for (const rec of [undefined, record({ screens: [{ pattern: 'squat', score: 2, pain: false }], posture: 'Recorded posture' }, 'movement')]) {
     const html = render(assessmentForm('movement', 'local-builder-100', rec), db)
@@ -119,6 +123,75 @@ test('Posture belongs to both movement editors, not Fitness, and recorded text d
   }
 })
 
+test('movement pain retains flagged sides and notes without inventing a pain severity', () => {
+  const findings = movementPainFindings({ protocol: 'nasm', findings: {
+    kneesValgus: { l: true, r: true, pain: true, severity: 'marked', note: 'Pain on descent' },
+    forwardLean: { mid: true, pain: true },
+    shoulderElevation: { pain: true, l: false, r: false },
+    pesPlanus: { l: true, pain: false },
+  } })
+  assert.equal(findings.length, 2)
+  assert.equal(findings[0].side, 'Left & Right')
+  assert.equal(findings[0].note, 'Pain on descent')
+  assert.match(findings[0].label, /Knee.*valgus/)
+  assert.equal(findings[1].side, '')
+  assert.ok(findings.every(finding => !Object.hasOwn(finding, 'severity')))
+  assert.deepEqual(movementPainFindings({ screens: [{ pattern: 'squat', score: 1, pain: true }, { pattern: 'hinge', score: 2, pain: false }] }), [{ id: 'squat-0', label: 'Squat', side: '', note: '' }])
+  assert.deepEqual(movementPainFindings(), [])
+})
+
+test('Pain card and pain history include saved movement pain and follow edits, later screens and removal', async () => {
+  const db = fixture()
+  const old = record({ screens: [{ pattern: 'squat', score: 1, pain: true }] }, 'movement', { id: 'old-pain-screen' })
+  const current = record({ protocol: 'nasm', findings: { kneesValgus: { l: true, pain: true, severity: 'marked', note: 'QA knee discomfort' } } }, 'movement', { id: 'current-pain-screen', date: '2026-10-20', createdAt: '2026-10-20T08:00:00Z' })
+  const manual = record({ sites: [{ area: 'Wrist', severity: 4 }] }, 'pain', { id: 'manual-pain', date: '2026-10-19' })
+  const foreign = record({ protocol: 'nasm', findings: { kneesValgus: { l: true, pain: true, note: 'PRIVATE OTHER CLIENT' } } }, 'movement', { id: 'foreign', clientId: 'another-client', date: '2026-10-21' })
+  db.assessments = [old, current, manual, foreign]
+  const route = '/clients/local-builder-100/assessments'
+  let html = render(null, db, route)
+  assert.match(html, /1 pain flag · Movement screen · Oct 20, 2026/)
+  assert.match(html, /QA knee discomfort/)
+  assert.match(html, /Knee.*Left/)
+  assert.match(html, /1 site · Oct 19, 2026/)
+  assert.match(html, /History · 3 →/)
+  assert.match(html, /assessments\/movement\?record=current-pain-screen/)
+  assert.doesNotMatch(html, /PRIVATE OTHER CLIENT/)
+  let history = render(null, db, `${route}/pain?record=manual-pain`)
+  assert.match(history, /Pain reported in movement screens/)
+  assert.match(history, /QA knee discomfort/)
+  assert.match(history, /Earlier movement screen/)
+  assert.match(history, /Latest movement screen/)
+  assert.match(history, /4\/10/)
+  assert.doesNotMatch(history, /PRIVATE OTHER CLIENT|3\/10/)
+  const snapshot = structuredClone(db)
+  saveAssessmentRecord(db, { clientId: 'local-builder-100', type: 'movement', record: current,
+    form: { date: current.date, phase: 'reassessment', notes: '' }, data: { protocol: 'nasm', findings: { kneesValgus: { l: true, pain: false } } } })
+  assert.equal(db.assessments.length, 4, 'does not manufacture another pain assessment')
+  assert.deepEqual(db.assessments.find(row => row.id === 'manual-pain'), snapshot.assessments.find(row => row.id === 'manual-pain'))
+  html = render(null, db, route)
+  assert.match(html, /Latest movement screen: no pain flags · Oct 20, 2026/)
+  assert.doesNotMatch(html, /QA knee discomfort|1 pain flag · Movement screen/)
+  history = render(null, db, `${route}/pain`)
+  assert.match(history, /Squat/)
+  assert.doesNotMatch(history, /QA knee discomfort|current-pain-screen/)
+  const calls = []
+  assert.deepEqual(await persistDiff(snapshot, db, { from: table => ({ upsert: async rows => { calls.push({ table, rows }); return {} } }) }), [])
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].rows[0].id, current.id)
+  assert.equal(calls[0].rows[0].type, 'movement')
+  db.assessments = db.assessments.filter(row => row.id !== old.id)
+  assert.equal(movementPainReports(db.assessments.filter(row => row.clientId === 'local-builder-100')).length, 0)
+  html = render(null, db, route)
+  assert.doesNotMatch(html, /pain flag.*Movement screen/)
+  assert.equal(db.assessments.filter(row => row.type === 'pain').length, 1)
+  const later = record({ protocol: 'nasm', findings: {} }, 'movement', { id: 'same-day-later', date: '2026-10-20', createdAt: '2026-10-20T09:00:00Z' })
+  current.data.findings.kneesValgus.pain = true
+  db.assessments.push(later)
+  html = render(null, db, route)
+  assert.match(html, /Latest movement screen: no pain flags/)
+  assert.doesNotMatch(html, /1 pain flag · Movement screen/)
+})
+
 test('assessment cards and record history disclose saved, suggested and unscheduled review dates', () => {
   const db = fixture()
   db.assessments = [record({ nextReassessmentDate: '2026-11-05' }), record({}, 'movement', { id: 'movement' }), record({ nextReassessmentDate: null }, 'body_comp', { id: 'body' })]
@@ -130,6 +203,42 @@ test('assessment cards and record history disclose saved, suggested and unschedu
   const history = render(null, db, '/clients/local-builder-100/assessments/fitness?record=record-a')
   assert.match(history, /Next reassessment/)
   assert.match(history, /Nov 5, 2026/)
+})
+
+test('other fitness tests survive save, sync, edit and history without becoming Training Max values', async () => {
+  const db = fixture(), before = structuredClone(db)
+  const otherTests = gripStrengthTests().map((test, i) => ({ ...test, value: String(30 + i * 5), protocol: 'Device A; seated; best of 3' }))
+  const form = { date: '2026-10-01', phase: 'baseline', notes: 'Measured grip', nextReassessmentDate: '' }
+  const saved = saveAssessmentRecord(db, { clientId: 'local-builder-100', type: 'fitness', form, data: { otherTests, strength: [], posture: 'Legacy note' } })
+  const calls = []
+  assert.deepEqual(await persistDiff(before, db, { from: table => ({ upsert: async rows => { calls.push({ table, rows }); return {} } }) }), [])
+  assert.equal(calls[0].table, 'assessments')
+  assert.equal(calls[0].rows[0].data.otherTests[0].value, 30)
+  assert.equal(resolveTrainingMax(db, 'local-builder-100', 'Handgrip dynamometer', '2026-10-02').kg, null)
+  assert.match(summarize(saved), /2 other tests/)
+  assert.deepEqual(describe(saved).filter(row => /Handgrip/.test(row.label)).map(row => row.value), ['30 kgf', '35 kgf'])
+  const html = render(assessmentForm('fitness', 'local-builder-100', JSON.parse(JSON.stringify(saved))), db)
+  assert.match(html, /aria-label="Other test result 1" value="30"|value="30" aria-label="Other test result 1"/)
+  assert.match(html, /aria-label="Other test side 2"/)
+  assert.match(html, /＋ Left\/right grip/)
+  assert.match(html, /kgf/)
+  const snapshot = structuredClone(db)
+  assert.throws(() => saveAssessmentRecord(db, { clientId: 'local-builder-100', type: 'fitness', form, data: { otherTests: [{ ...otherTests[0], value: '' }] } }), /numeric result/)
+  assert.deepEqual(db, snapshot)
+  const reassess = saveAssessmentRecord(db, { clientId: 'local-builder-100', type: 'fitness', form: { ...form, date: '2026-10-20', phase: 'reassessment' }, data: { otherTests: otherTests.map(row => ({ ...row, value: +row.value + 2 })) } })
+  assert.deepEqual(compare('fitness', saved, reassess).map(row => row.delta), [2, 2])
+  const history = render(null, db, `/clients/local-builder-100/assessments/fitness?record=${reassess.id}`)
+  assert.match(history, /Baseline → latest/)
+  assert.match(history, /href="\/clients\/local-builder-100\/progress#outcomes"/)
+  assert.match(history, /32 kgf/)
+  const newForm = render(assessmentForm('fitness', 'local-builder-100', undefined, 'reassessment'), db)
+  assert.match(newForm, /Use previous tests/)
+  // Editing legacy fields preserves custom results; removing tests intentionally clears them.
+  saveAssessmentRecord(db, { clientId: 'local-builder-100', type: 'fitness', record: saved, form, data: { strength: [] } })
+  assert.equal(saved.data.otherTests.length, 2)
+  saveAssessmentRecord(db, { clientId: 'local-builder-100', type: 'fitness', record: saved, form, data: { otherTests: [] } })
+  assert.deepEqual(saved.data.otherTests, [])
+  assert.equal(saved.data.posture, 'Legacy note')
 })
 
 test('Dashboard and local nudges agree with scheduled dates, blank dates and derived exclusions', () => {

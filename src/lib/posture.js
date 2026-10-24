@@ -106,8 +106,8 @@ export const POSTURE_ITEMS = [
 
 export const POSTURE_BY_ID = Object.fromEntries(POSTURE_ITEMS.map((x) => [x.id, x]))
 export const SECTIONS = [
-  ['ohsa', 'Overhead Squat Assessment'],
   ['static', 'Static posture'],
+  ['ohsa', 'Overhead Squat Assessment'],
 ]
 export const itemsInSection = (section) => POSTURE_ITEMS.filter((x) => x.section === section)
 

@@ -17,6 +17,7 @@ export function ExerciseForm({ exercise, initialName = '' }) {
   const { closeModal } = useModal()
   const [f, setF] = useState(exercise || { name: initialName, muscle: 'Unspecified', equip: 'Barbell', difficulty: 'Beginner', video: '', thumb: '' })
   const targets = muscleTargets(f)
+  const equipmentOptions = [...new Set([...EQUIPS, ...db.exercises.map(item => item.equip), f.equip].filter(Boolean))].sort((a, b) => a.localeCompare(b))
   const setRole = (muscle, role) => setF((current) => {
     const previous = muscleTargets(current)
     return { ...current, muscleTargets: {
@@ -55,7 +56,7 @@ export function ExerciseForm({ exercise, initialName = '' }) {
       <Field label="Name"><input value={f.name} onChange={set('name')} placeholder="e.g. Incline Dumbbell Press" /></Field>
       <div className="row2">
         <Field label="Broad category (legacy)"><select value={f.muscle} onChange={set('muscle')}>{GROUPS.map((g) => <option key={g}>{g}</option>)}</select></Field>
-        <Field label="Equipment"><select value={f.equip} onChange={set('equip')}>{EQUIPS.map((q) => <option key={q}>{q}</option>)}</select></Field>
+        <Field label="Equipment"><select value={f.equip} onChange={set('equip')}>{equipmentOptions.map((q) => <option key={q}>{q}</option>)}</select></Field>
       </div>
       <details className="progress-disclosure" open={!!initialName}>
         <summary>Muscle assignments · {targets.direct.length} direct / {targets.indirect.length} indirect</summary>

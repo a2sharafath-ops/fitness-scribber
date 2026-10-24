@@ -394,9 +394,10 @@ export function ensureProgramShape(db, catalogOwnerId = null) {
 // Older behavior recreated ids on each load and erased muscle assignments.
 export function mergeExerciseLibrary(db, catalogOwnerId = null) {
   if (!db.exercises) db.exercises = []
-  const byName = new Map(db.exercises.map((e) => [String(e.name || '').trim().toLowerCase(), e]))
+  const catalogKey = name => String(name || '').trim().replace(/\s+/g, ' ').toLowerCase()
+  const byName = new Map(db.exercises.map((e) => [catalogKey(e.name), e]))
   const append = (x, corrective = false) => {
-    const key = x.name.trim().toLowerCase()
+    const key = catalogKey(x.name)
     const prior = byName.get(key)
     const defaults = {
       id: `catalog:${catalogOwnerId ? `${catalogOwnerId}:` : ''}${corrective ? 'corrective' : 'strength'}:${encodeURIComponent(key)}`,
@@ -406,7 +407,7 @@ export function mergeExerciseLibrary(db, catalogOwnerId = null) {
       relPct: x.relPct ?? null, relTo: x.relTo ?? null,
       muscleTargets: corrective ? recommendedMuscleTargets(x.name, x.mode) : x.muscleTargets,
       video: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + (corrective ? ' exercise how to' : ' proper form')),
-      thumb: '', source: corrective ? 'corrective-library' : 'stm-library',
+      thumb: '', source: corrective ? 'corrective-library' : x.source || 'stm-library',
     }
     if (prior) {
       // A saved empty assignment is intentional; only missing metadata gets a default.

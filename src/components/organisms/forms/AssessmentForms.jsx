@@ -16,6 +16,8 @@ import { BODY_COMP_ACCEPT, BODY_COMP_TEMPLATE, bodyCompFileKind, readBodyCompTab
 import { screeningsFor, goalsFromScreening } from '../../../lib/screening'
 import Icon from '../../atoms/Icon'
 import Autocomplete from '../../molecules/Autocomplete'
+import { blankFitnessTest, gripStrengthTests, fitnessTestsError, cleanFitnessTests } from '../../../lib/fitnessTests'
+import { matchesExerciseSearch, exerciseSearchRank, exerciseSuggestionDescription } from '../../../lib/exerciseSearch'
 
 const numOrNull = (v) => (v === '' || v == null || Number.isNaN(+v) ? null : +v)
 
@@ -69,7 +71,7 @@ function useSave(clientId, type, buildData, extra, record) {
 // ---- Movement screen — NASM static posture + OHSA --------------------------
 // Legacy 0–3 records still open in the old pattern editor; everything new is
 // captured as postural compensations (see lib/posture.js). One collapsible
-// section per assessment area; OHSA is open by default (highest yield).
+// section per assessment area; static posture comes first and opens by default.
 export function MovementScreenForm({ clientId, record, defaultPhase }) {
   // Historical 0–3 records open in the legacy editor; everything else is NASM.
   const isLegacy = record?.data && record.data.protocol !== 'nasm' && Array.isArray(record.data.screens)
@@ -82,7 +84,7 @@ function NasmMovementForm({ clientId, record, defaultPhase }) {
   const { closeModal } = useModal()
   const [f, setF] = useState({ date: record?.date || todayISO(), phase: record?.phase || defaultPhase || 'baseline', notes: record?.notes || '', posture: record?.data?.posture || '', nextReassessmentDate: record?.data?.nextReassessmentDate || '' })
   const [findings, setFindings] = useState(() => ({ ...(record?.data?.findings || {}) }))
-  const [open, setOpen] = useState({ ohsa: true, static: false })
+  const [open, setOpen] = useState({ static: true, ohsa: false })
 
   const setItem = (id, patch) => setFindings((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), ...patch } }))
   const data = () => ({ protocol: 'nasm', findings, posture: f.posture.trim() })
@@ -143,7 +145,7 @@ function PostureRow({ item, f = {}, onChange }) {
           <select value={f.severity || 'moderate'} onChange={(e) => onChange({ severity: e.target.value })} aria-label={item.label + ' severity'}>
             {SEVERITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
-          <label className="pos-pain"><input type="checkbox" checked={!!f.pain} onChange={(e) => onChange({ pain: e.target.checked })} /> pain</label>
+          <label className="pos-pain"><input type="checkbox" checked={!!f.pain} aria-label={`${item.label} pain`} onChange={(e) => onChange({ pain: e.target.checked })} /> pain</label>
           <input className="pos-note" value={f.note || ''} onChange={(e) => onChange({ note: e.target.value })} placeholder="note…" aria-label={item.label + ' note'} />
         </div>
       )}
@@ -169,7 +171,7 @@ function LegacyMovementForm({ clientId, record, defaultPhase }) {
           <select value={s.score} onChange={(e) => upd(i, 'score', +e.target.value)} aria-label={s.pattern + ' score'}>
             {[0, 1, 2, 3].map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
-          <label className="asr-pain"><input type="checkbox" checked={s.pain} onChange={(e) => upd(i, 'pain', e.target.checked)} /> pain</label>
+          <label className="asr-pain"><input type="checkbox" checked={s.pain} aria-label={`${s.pattern} pain`} onChange={(e) => upd(i, 'pain', e.target.checked)} /> pain</label>
         </div>
       ))}
       <Field label="Posture"><input value={f.posture} onChange={(e) => setF({ ...f, posture: e.target.value })} placeholder="e.g. Mild anterior pelvic tilt" /></Field>
@@ -409,8 +411,14 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
   const [mobility, setMobility] = useState(d0.mobility?.length
     ? d0.mobility.map((m) => ({ joint: m.joint || '', value: m.value || '', side: m.side || '' }))
     : [{ joint: '', value: '', side: '' }])
+  const [otherTests, setOtherTests] = useState(() => (d0.otherTests || []).map(test => ({ ...blankFitnessTest(), ...test })))
+  const [testsSubmitted, setTestsSubmitted] = useState(false)
+  const otherTestsError = fitnessTestsError(otherTests)
+  const previousTests = !record ? latest(forClient(db.assessments, clientId).filter(a => a.data?.otherTests?.length), 'fitness')?.data.otherTests : null
+  const updTest = (index, key, value) => setOtherTests(tests => tests.map((test, i) => i === index ? { ...test, [key]: value } : test))
   // Exercise-library names for the lift autocomplete, alphabetical.
   const liftNames = [...new Set(db.exercises.map((e) => e.name))].sort((a, b) => a.localeCompare(b))
+  const exerciseByName = new Map(db.exercises.map(exercise => [exercise.name, exercise]))
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const updS = (i, k, v) => setStrength(strength.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
   const updM = (i, k, v) => setMobility(mobility.map((r, j) => (j === i ? { ...r, [k]: v } : r)))
@@ -422,11 +430,13 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
     strength: strengthOut(),
     endurance: f.enduranceTest.trim() ? { test: f.enduranceTest.trim(), result: f.enduranceResult.trim() } : null,
     mobility: mobility.filter((r) => r.joint.trim()).map((r) => ({ joint: r.joint.trim(), value: r.value.trim(), side: r.side.trim() })),
+    otherTests: cleanFitnessTests(otherTests),
   })
   const save = useSave(clientId, 'fitness', data, undefined, record)
+  const submit = () => { setTestsSubmitted(true); if (!otherTestsError) save(f) }
   return (
     <ModalShell title={<><Icon name="dumbbellAlt" size={16} /> Fitness assessment</>} onClose={closeModal}
-      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>Save assessment</Button></>}>
+      footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={submit}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
 
       <div className="section-title" style={{ margin: '4px 0 2px', fontSize: 13 }}>Strength — estimated 1RM</div>
@@ -436,7 +446,9 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
         return (
           <div className="asf-1rm-row" key={i}>
             <div className="asf-lift-head"><span>Exercise {i + 1}</span><button className="x" aria-label={`Remove lift ${i + 1}`} onClick={() => setStrength(strength.filter((_, j) => j !== i))}>×</button></div>
-            <Autocomplete value={r.lift} onChange={(v) => updS(i, 'lift', v)} options={liftNames}
+            <Autocomplete value={r.lift} onChange={(v) => updS(i, 'lift', v)} options={liftNames} filterOption={(name, query) => matchesExerciseSearch(exerciseByName.get(name) || name, query)}
+              sortOptions={(a, b, query) => exerciseSearchRank(exerciseByName.get(a) || a, query) - exerciseSearchRank(exerciseByName.get(b) || b, query) || a.localeCompare(b)}
+              getOptionDescription={exerciseSuggestionDescription} showAllMatches
               placeholder="Search exercises" ariaLabel={`Lift ${i + 1}`} />
             {r.lift && <p className="asf-lift-name">{r.lift}</p>}
             <div className="asf-lift-metrics">
@@ -465,6 +477,29 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
         </div>
       ))}
       <Button variant="ghost" size="sm" onClick={() => setMobility([...mobility, { joint: '', value: '', side: '' }])}>＋ Add joint</Button>
+
+      <section className="fitness-other-tests" aria-label="Other fitness tests">
+        <div className="section-title" style={{ margin: '12px 0 6px', fontSize: 13 }}>Other tests</div>
+        <p className="muted" style={{ fontSize: 12 }}>Record measured results. Use the same unit and protocol when reassessing.</p>
+        {otherTests.map((test, i) => <fieldset className="asf-other-test" key={i}>
+          <legend>Test {i + 1}</legend>
+          <div className="asf-lift-head"><span>{test.name || 'New test'}</span><button type="button" className="x" aria-label={`Remove other test ${i + 1}`} onClick={() => setOtherTests(tests => tests.filter((_, index) => index !== i))}>×</button></div>
+          <Field label="Test name"><input value={test.name} aria-label={`Other test name ${i + 1}`} placeholder="e.g. Handgrip dynamometer" onChange={e => updTest(i, 'name', e.target.value)} /></Field>
+          <div className="asf-lift-metrics">
+            <Field label="Side"><select value={test.side} aria-label={`Other test side ${i + 1}`} onChange={e => updTest(i, 'side', e.target.value)}><option value="">Not specified</option><option>Left</option><option>Right</option><option>Both</option></select></Field>
+            <Field label="Result"><input type="number" step="any" value={test.value} aria-label={`Other test result ${i + 1}`} onChange={e => updTest(i, 'value', e.target.value)} /></Field>
+            <Field label="Unit"><input value={test.unit} aria-label={`Other test unit ${i + 1}`} placeholder="kgf, N, s, cm…" onChange={e => updTest(i, 'unit', e.target.value)} /></Field>
+          </div>
+          <Field label="Protocol / device"><input value={test.protocol} aria-label={`Other test protocol ${i + 1}`} placeholder="Device, position, trials and result used" onChange={e => updTest(i, 'protocol', e.target.value)} /></Field>
+          <Field label="Change to highlight"><select value={test.direction} aria-label={`Other test direction ${i + 1}`} onChange={e => updTest(i, 'direction', e.target.value)}><option value="none">No preferred direction</option><option value="up">Higher result</option><option value="down">Lower result</option></select></Field>
+        </fieldset>)}
+        <div className="flex gap" style={{ flexWrap: 'wrap' }}>
+          <Button variant="ghost" size="sm" onClick={() => setOtherTests(tests => [...tests, blankFitnessTest()])}>＋ Add test</Button>
+          <Button variant="ghost" size="sm" onClick={() => setOtherTests(tests => [...tests, ...gripStrengthTests()])}>＋ Left/right grip</Button>
+          {!otherTests.length && previousTests?.length > 0 && <Button variant="ghost" size="sm" onClick={() => setOtherTests(previousTests.map(test => ({ ...blankFitnessTest(), ...test, value: '' })))}>Use previous tests</Button>}
+        </div>
+        {testsSubmitted && otherTestsError && <p className="asf-test-error" role="alert">{otherTestsError}</p>}
+      </section>
 
       <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Overall observations…" /></Field>
     </ModalShell>

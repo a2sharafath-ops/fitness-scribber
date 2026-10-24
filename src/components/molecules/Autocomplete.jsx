@@ -4,16 +4,18 @@ import { useEffect, useId, useRef, useState } from 'react'
 // match against `options` (a string[]) — more reliable and consistent across
 // browsers than a native <datalist>. Free text is allowed: onChange fires on
 // every keystroke; picking a suggestion just sets the value.
-export default function Autocomplete({ value, onChange, options, placeholder, ariaLabel, max = 8, className, inputClassName }) {
+export default function Autocomplete({ value, onChange, options, placeholder, ariaLabel, max = 8, className, inputClassName, filterOption, sortOptions, getOptionDescription, showAllMatches = false }) {
   const [open, setOpen] = useState(false)
   const [hi, setHi] = useState(0)
   const listId = useId()
   const listRef = useRef(null)
+  const blurTimer = useRef(null)
+  useEffect(() => () => clearTimeout(blurTimer.current), [])
   const q = String(value || '').trim().toLowerCase()
   const uniqueOptions = [...new Set(options)]
-  const matches = q
-    ? uniqueOptions.filter((o) => o.toLowerCase().includes(q)).slice(0, max)
-    : uniqueOptions.slice(0, max)
+  const filtered = q ? uniqueOptions.filter((o) => filterOption ? filterOption(o, q) : o.toLowerCase().includes(q)) : uniqueOptions
+  if (q && sortOptions) filtered.sort((a, b) => sortOptions(a, b, q))
+  const matches = filtered.slice(0, q && showAllMatches ? filtered.length : max)
   // Hide once the text is an exact single match (nothing left to suggest).
   const show = open && matches.length > 0 && !(matches.length === 1 && matches[0].toLowerCase() === q)
   const activeIndex = Math.min(hi, matches.length - 1)
@@ -30,8 +32,8 @@ export default function Autocomplete({ value, onChange, options, placeholder, ar
         aria-controls={show ? listId : undefined} aria-activedescendant={show ? `${listId}-${activeIndex}` : undefined}
         title={value || undefined}
         onChange={(e) => { onChange(e.target.value); setOpen(true); setHi(0) }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        onFocus={() => { clearTimeout(blurTimer.current); setOpen(true) }}
+        onBlur={() => { clearTimeout(blurTimer.current); blurTimer.current = setTimeout(() => setOpen(false), 120) }}
         onKeyDown={(e) => {
           if (!show) return
           if (e.key === 'ArrowDown') { e.preventDefault(); setHi((h) => Math.min(h + 1, matches.length - 1)) }
@@ -42,14 +44,18 @@ export default function Autocomplete({ value, onChange, options, placeholder, ar
       />
       {show && (
         <ul ref={listRef} id={listId} className="ac-list" role="listbox" aria-label={`${ariaLabel || 'Text'} suggestions`}>
-          {matches.map((m, i) => (
+          {matches.map((m, i) => {
+            const description = getOptionDescription?.(m, q)
+            return (
             <li key={m} id={`${listId}-${i}`} role="option" aria-selected={i === activeIndex}
+              aria-label={m} aria-describedby={description ? `${listId}-${i}-description` : undefined}
               className={'ac-opt' + (i === activeIndex ? ' hi' : '')}
               onMouseEnter={() => setHi(i)}
               onMouseDown={(e) => { e.preventDefault(); pick(m) }}>
-              {m}
+              <span>{m}</span>
+              {description && <small id={`${listId}-${i}-description`} className="ac-alias">{description}</small>}
             </li>
-          ))}
+          )})}
         </ul>
       )}
     </div>

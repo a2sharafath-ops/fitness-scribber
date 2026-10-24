@@ -7,12 +7,13 @@ import { assessmentForm } from '../components/organisms/forms/AssessmentForms'
 import WorkoutBuilderModal from '../components/organisms/program/WorkoutBuilderModal'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
-import { ACTIVE_TYPES, forClient, formalAssessments, isTrainingDerivedAssessment, latest, baseline, summarize, describe, compare, movementDiff, typeMeta } from '../lib/assessment'
+import { ACTIVE_TYPES, forClient, formalAssessments, isTrainingDerivedAssessment, latest, baseline, summarize, describe, compare, movementDiff, typeMeta, movementPainReports } from '../lib/assessment'
 import { correctivePlan } from '../lib/program'
 import { fmtDate, fmtDateTime, todayISO } from '../lib/dates'
 import { toast, confirmDialog } from '../lib/toast'
 import { assessmentCanonicalPath } from '../lib/clientRoutes'
 import { assessmentReview } from '../lib/assessmentReview'
+import { compareFitnessTests } from '../lib/fitnessTests'
 
 function DeltaRow({ r }) {
   const arrow = r.delta == null || r.delta === 0 ? '' : r.delta > 0 ? '▲' : '▼'
@@ -149,10 +150,12 @@ export default function AssessmentDetailPage() {
 
   const list = forClient(db.assessments, id)
   const recs = formalAssessments(list).filter((a) => a.type === type).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''))
+  const movementPain = type === 'pain' ? movementPainReports(list) : []
+  const latestMovementId = type === 'pain' ? latest(list, 'movement')?.id : null
   const derived = type === 'fitness' ? list.filter(isTrainingDerivedAssessment).sort((a, b) => (b.date || '').localeCompare(a.date || '')) : []
   const b = baseline(recs, type)
   const l = latest(recs, type)
-  const rows = b && l && b.id !== l.id ? compare(type, b, l) : []
+  const rows = b && l && b.id !== l.id ? type === 'fitness' ? compareFitnessTests(b.data?.otherTests, l.data?.otherTests) : compare(type, b, l) : []
   const nasmRecs = type === 'movement'
     ? recs.filter((r) => r.data?.protocol === 'nasm').sort((a, z) => (a.createdAt || a.date).localeCompare(z.createdAt || z.date))
     : []
@@ -202,7 +205,7 @@ export default function AssessmentDetailPage() {
       <div className="topbar">
         <div>
           <h1 className="flex gap" style={{ alignItems: 'center' }}><Icon name={meta.icon} size={22} /> {meta.label}</h1>
-          <div className="sub">{c.name} · {recs.length} entr{recs.length === 1 ? 'y' : 'ies'}</div>
+          <div className="sub">{c.name} · {type === 'pain' ? `${recs.length} pain assessment${recs.length === 1 ? '' : 's'}` : `${recs.length} entr${recs.length === 1 ? 'y' : 'ies'}`}{movementPain.length > 0 ? ` · ${movementPain.length} movement screen${movementPain.length === 1 ? '' : 's'} with pain` : ''}</div>
         </div>
         {canAdd && (
           <Button onClick={() => add(recs.length ? 'reassessment' : 'baseline')}>＋ {recs.length ? 'Reassessment' : 'Baseline'}</Button>
@@ -210,9 +213,10 @@ export default function AssessmentDetailPage() {
       </div>
 
       {type === 'fitness' && <p className="assess-progress-link">Strength outcomes and tracked lift estimates are in <Link to={`/clients/${id}/progress`}>Progress →</Link></p>}
-      {rows.length && type !== 'fitness' ? (
+      {rows.length ? (
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="section-title" style={{ margin: '0 0 10px' }}>Baseline → latest <Link className="assess-inline-link" to={`/clients/${id}/progress`}>View in Progress →</Link></div>
+          <div className="section-title" style={{ margin: '0 0 10px' }}>Baseline → latest <Link className="assess-inline-link" to={`/clients/${id}/progress#outcomes`}>View in Progress →</Link></div>
+          {type === 'fitness' && <p className="muted" style={{ fontSize: 12 }}>Changes compare the same test, side, unit and protocol.</p>}
           <div className="cmp">
             <div className="cmp-head"><span>Metric</span><span>{fmtDate(b.date)}</span><span /><span>{fmtDate(l.date)}</span><span>Δ</span></div>
             {rows.map((r, i) => <DeltaRow r={r} key={i} />)}
@@ -223,14 +227,27 @@ export default function AssessmentDetailPage() {
       {movementChanges && <MovementChanges changes={movementChanges} previous={previousMovement} current={currentMovement} />}
       {corrective && <CorrectivePlan plan={corrective} assessment={l} onReview={reviewCorrective} />}
 
+      {movementPain.length > 0 && <section className="card" style={{ marginBottom: 16 }} aria-label="Pain reported in movement screens">
+        <h2 className="section-title" style={{ margin: '0 0 10px' }}>Pain reported in movement screens</h2>
+        <p className="muted" style={{ fontSize: 12 }}>Pain severity was not scored in these screens. Edit the source screen to update a flag.</p>
+        {movementPain.map(({ record: source, findings }) => <details className="assess-disclosure" key={source.id}>
+          <summary>{fmtDate(source.date)} · {findings.length} pain flag{findings.length === 1 ? '' : 's'} · {source.id === latestMovementId ? 'Latest movement screen' : 'Earlier movement screen'}</summary>
+          {findings.map(finding => <div className="asr-kv" key={finding.id}><span className="asr-k">{finding.label}{finding.side ? ` · ${finding.side}` : ''}</span><span className="asr-v">Pain reported{finding.note ? ` — ${finding.note}` : ''}</span></div>)}
+          <div className="flex gap" style={{ flexWrap: 'wrap', marginTop: 8 }}>
+            <Link className="assess-inline-link" to={`/clients/${id}/assessments/movement?record=${encodeURIComponent(source.id)}#assessment-record-${encodeURIComponent(source.id)}`}>View movement record →</Link>
+            <Button size="sm" variant="ghost" onClick={() => editRec(source)}>Edit movement screen</Button>
+          </div>
+        </details>)}
+      </section>}
+
       <div className="card">
-        <div className="section-title" style={{ margin: '0 0 6px' }}>Entries</div>
+        <div className="section-title" style={{ margin: '0 0 6px' }}>{type === 'pain' ? 'Pain assessments' : 'Entries'}</div>
         {recs.length ? (
           <>
             <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Newest assessment date first · select an entry to see its recorded data</div>
             {recs.map((a) => <EntryRow key={`${a.id}-${location.search}`} rec={a} initiallyOpen={new URLSearchParams(location.search).get('record') === a.id} onEdit={() => editRec(a)} onDelete={() => del(a)} />)}
           </>
-        ) : (
+        ) : movementPain.length > 0 ? <p className="muted">No standalone pain assessment recorded.</p> : (
           <div className="empty" style={{ padding: 24 }}>
             <div className="big"><Icon name={meta.icon} size={40} /></div>
             No {meta.label.toLowerCase()} recorded yet.

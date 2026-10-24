@@ -1,8 +1,10 @@
 import { recommendedMuscleTargets } from './exerciseMuscleMap.js'
+import { EXERCISE_LIBRARY_EXPANSION } from './exerciseLibraryExpansion.js'
 
 // Exercise library imported from the Strength Training Manual (Mladen Jovanović)
 // taxonomy — 209 exercises across Olympic, Hinge, Squat, Push and Pull patterns.
-// Pure data (no ids): the seed and the load-time migration assign a uid + media.
+// Expanded with the practical coaching gaps documented in exercise-library-expansion.md.
+// Pure data (no ids): the seed and migration assign stable catalog identities.
 //
 // Fields:
 //   name        canonical exercise name (matches the workout builder's library)
@@ -225,4 +227,4 @@ export const EXERCISE_LIBRARY = [
   { name: "Wall Squat", muscle: "Legs", equip: "Fitness Ball", difficulty: "Intermediate", category: "Grinding", pattern: "Squat" },
   { name: "Wall Squat 1-Leg", muscle: "Legs", equip: "Fitness Ball", difficulty: "Intermediate", category: "Grinding", pattern: "Squat" },
   { name: "Zercher Squat", muscle: "Legs", equip: "Barbell", difficulty: "Intermediate", category: "Grinding", pattern: "Squat", relPct: 60, relTo: "Squat" },
-].map((exercise) => ({ ...exercise, muscleTargets: recommendedMuscleTargets(exercise.name) }))
+].map((exercise) => ({ ...exercise, muscleTargets: recommendedMuscleTargets(exercise.name) })).concat(EXERCISE_LIBRARY_EXPANSION)

@@ -10,7 +10,7 @@ import { NewAssessmentMenu, assessmentForm } from '../components/organisms/forms
 import ScreeningReview from '../components/organisms/screening/ScreeningReview'
 import ScreeningProfile from '../components/organisms/screening/ScreeningProfile'
 import CoachScreeningModal from '../components/organisms/screening/CoachScreeningModal'
-import { TYPES, ONBOARDING_TYPES, DEFAULT_REASSESS_DAYS, forClient, formalAssessments, latest, summarize, dueStatus, hasBaselineRecord, baselineProgress } from '../lib/assessment'
+import { TYPES, ONBOARDING_TYPES, DEFAULT_REASSESS_DAYS, forClient, formalAssessments, latest, summarize, dueStatus, hasBaselineRecord, baselineProgress, movementPainFindings, movementPainReports } from '../lib/assessment'
 import { fmtDate, todayISO } from '../lib/dates'
 import { screeningsFor, OUTCOME_META, programStatus, isExpired, redFlags } from '../lib/screening'
 import './AssessmentsPage.css'
@@ -92,6 +92,9 @@ export default function AssessmentsPage() {
   const progress = baselineProgress(records)
   const pain = records.filter((r) => r.type === 'pain')
   const latestPain = latest(pain, 'pain')
+  const latestMovement = latest(records, 'movement')
+  const movementPain = movementPainFindings(latestMovement?.data)
+  const painHistoryCount = pain.length + movementPainReports(records).length
   const gated = row && programStatus(row) === 'gated'
   const expired = row && isExpired(row, todayISO(tz))
   const flags = row && redFlags(row)
@@ -129,8 +132,18 @@ export default function AssessmentsPage() {
         <div className="assessment-baseline-count"><span>{progress.done}/{progress.total} baselines</span><span className="assessment-mini-track" aria-hidden="true"><span style={{ width: `${progress.done / progress.total * 100}%` }} /></span></div>
       </div>
       <div className="assessment-category-grid">{TEST_TYPES.filter((type) => ONBOARDING_TYPES.includes(type.key)).map((type) => <AssessmentCard key={type.key} type={type} records={records.filter((rec) => rec.type === type.key)} intervalDays={intervalDays} today={todayISO(tz)} clientId={id} onAdd={addType} onEdit={(record) => openModal(assessmentForm(record.type, id, record))} />)}</div>
-      <article className="card assessment-pain"><div><h3>Pain assessment</h3><p>{latestPain ? `${summarize(latestPain)} · ${fmtDate(latestPain.date)} · ${sourceOf(latestPain)}` : 'No pain assessment recorded.'}</p></div>
-        <div className="assessment-pain-actions">{latestPain && <Link className="assessment-link" to={`/clients/${id}/assessments/pain`}>History · {pain.length} →</Link>}<Button variant="ghost" onClick={() => addType('pain', latestPain ? 'reassessment' : 'baseline')}>Record pain</Button></div>
+      <article className="card assessment-pain"><div className="assessment-pain-summary"><h3>Pain assessment</h3>
+        {latestPain && <p>{`${summarize(latestPain)} · ${fmtDate(latestPain.date)} · ${sourceOf(latestPain)}`}</p>}
+        {movementPain.length > 0 ? <details className="assessment-movement-pain">
+          <summary>{movementPain.length} pain flag{movementPain.length === 1 ? '' : 's'} · Movement screen · {fmtDate(latestMovement.date)}</summary>
+          <ul>{movementPain.map(finding => <li key={finding.id}>{finding.label}{finding.side ? ` · ${finding.side}` : ''}{finding.note ? ` — ${finding.note}` : ''}</li>)}</ul>
+          <Link className="assessment-link" to={recordPath(id, latestMovement)}>View movement record →</Link>
+        </details> : <>
+          {!latestPain && <p>No standalone pain assessment recorded.</p>}
+          {painHistoryCount > pain.length && <p>Latest movement screen: no pain flags · {fmtDate(latestMovement.date)}</p>}
+        </>}
+      </div>
+        <div className="assessment-pain-actions">{painHistoryCount > 0 && <Link className="assessment-link" to={`/clients/${id}/assessments/pain`}>History · {painHistoryCount} →</Link>}<Button variant="ghost" onClick={() => addType('pain', latestPain ? 'reassessment' : 'baseline')}>Record pain</Button></div>
       </article>
     </section>
     {screeningSettled && screeningCard}

@@ -2,6 +2,7 @@ import { screeningsFor } from './screening'
 import { epley1RM } from './program'
 import { postureFindings, SEVERITY_WEIGHT } from './posture'
 import { assessmentReview, DEFAULT_REASSESS_DAYS, isFormalReviewAssessment } from './assessmentReview'
+import { fitnessTestLabel, fitnessTestValue, compareFitnessTests } from './fitnessTests'
 export { DEFAULT_REASSESS_DAYS }
 
 // Pure helpers for the Assessment module — no React, no I/O.
@@ -117,6 +118,21 @@ export function movementScore(data) {
   return { protocol: 'legacy', score, max: MOVEMENT_MAX, pct: Math.round((score / MOVEMENT_MAX) * 100), pain }
 }
 
+// Pain flagged during a screen stays attached to that dated screen. A posture
+// compensation's mild/moderate/marked rating is not a numeric pain severity.
+export function movementPainFindings(data) {
+  if (data?.protocol === 'nasm') return postureFindings(data).filter(finding => finding.pain).map(finding => ({
+    id: finding.id, label: `${finding.item.group} · ${finding.item.label}`,
+    side: finding.sides.filter(side => side !== 'mid').map(side => side === 'L' ? 'Left' : 'Right').join(' & '), note: finding.note,
+  }))
+  return (data?.screens || []).filter(screen => screen.pain).map((screen, index) => ({
+    id: `${screen.pattern}-${index}`, label: screen.pattern ? screen.pattern[0].toUpperCase() + screen.pattern.slice(1) : 'Movement pattern', side: '', note: screen.note || '',
+  }))
+}
+
+export const movementPainReports = list => (list || []).filter(record => record.type === 'movement')
+  .sort(byDateDesc).map(record => ({ record, findings: movementPainFindings(record.data) })).filter(report => report.findings.length > 0)
+
 // Legacy screens with a score < 2 count as a "compensation" for rough parity
 // when comparing an old record against a new NASM one.
 const countLegacyFlags = (d) => (d?.screens || []).filter((s) => (num(s.score) ?? 3) < 2).length
@@ -147,7 +163,7 @@ export function summarize(rec) {
       return `Score ${m.score}/${m.max}${m.pain ? ` · ${m.pain} pain flag${m.pain === 1 ? '' : 's'}` : ''}`
     }
     case 'body_comp': return [d.method, d.massKg != null ? `${d.massKg} kg` : null, d.bodyFatPct != null ? `${d.bodyFatPct}% BF` : null].filter(Boolean).join(' · ') || '—'
-    case 'fitness': return [(d.strength?.length ? `${d.strength.length} lift${d.strength.length === 1 ? '' : 's'}` : null), d.endurance?.result].filter(Boolean).join(' · ') || '—'
+    case 'fitness': return [(d.strength?.length ? `${d.strength.length} lift${d.strength.length === 1 ? '' : 's'}` : null), d.endurance?.result, d.otherTests?.length ? `${d.otherTests.length} other test${d.otherTests.length === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ') || '—'
     case 'pain': return `${d.sites?.length || 0} site${(d.sites?.length || 0) === 1 ? '' : 's'}`
     case 'lifestyle': return [d.sleepHrs != null ? `Sleep ${d.sleepHrs} h` : null, d.stress != null ? `stress ${d.stress}/7` : null].filter(Boolean).join(' · ') || '—'
     case 'goals': return `${d.shortTerm?.length || 0} short · ${d.longTerm?.length || 0} long-term`
@@ -168,6 +184,7 @@ export function describe(rec) {
       }))
       if (d.endurance?.test) out.push({ label: 'Endurance', value: `${d.endurance.test}${d.endurance.result ? ' — ' + d.endurance.result : ''}` })
       ;(d.mobility || []).forEach((m) => out.push({ label: `Mobility · ${m.joint}`, value: [m.value, m.side].filter(Boolean).join(' · ') || '—' }))
+      ;(d.otherTests || []).forEach(test => out.push({ label: fitnessTestLabel(test), value: fitnessTestValue(test) }))
       if (d.posture) out.push({ label: 'Posture', value: d.posture })
       return out
     }
@@ -247,7 +264,7 @@ export function compare(type, b, l) {
   if (type === 'fitness') {
     const bl = bd.strength || [], ll = ld.strength || []
     const names = [...new Set([...bl, ...ll].map((x) => x.lift))]
-    return names.map((n) => row(n, bl.find((x) => x.lift === n)?.valueKg, ll.find((x) => x.lift === n)?.valueKg, 'up', 'kg'))
+    return [...names.map((n) => row(n, bl.find((x) => x.lift === n)?.valueKg, ll.find((x) => x.lift === n)?.valueKg, 'up', 'kg')), ...compareFitnessTests(bd.otherTests, ld.otherTests)]
   }
   return []
 }

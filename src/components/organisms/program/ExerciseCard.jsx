@@ -6,6 +6,7 @@ import SetRow from '../../molecules/SetRow'
 import Autocomplete from '../../molecules/Autocomplete'
 import { INTENSITY_TYPES, SUPERSET_GROUPS, newSet } from '../../../lib/program'
 import { changeIntensity, editPrescribedSet, followFirstSet } from '../../../lib/prescription'
+import { matchesExerciseSearch, exerciseSearchRank, exerciseSuggestionDescription } from '../../../lib/exerciseSearch'
 
 export default function ExerciseCard({
   ex, exercises, tmKg, tmInfo, maxHr,
@@ -14,6 +15,7 @@ export default function ExerciseCard({
   dragProps, dragHandleProps, isOver, isDragging,
 }) {
   const liftNames = [...exercises.map((e) => e.name)].sort((a, b) => a.localeCompare(b))
+  const exerciseByName = new Map(exercises.map(exercise => [exercise.name, exercise]))
   // Set 1 acts as the template row: edits to its prescription fields
   // auto-fill every later set that hasn't been edited individually
   // (copy-paste ergonomics). Touching a lower set opts it out.
@@ -37,6 +39,10 @@ export default function ExerciseCard({
           className="ac-grow" inputClassName="presc-ex"
           value={ex.exerciseName}
           options={liftNames}
+          filterOption={(name, query) => matchesExerciseSearch(exerciseByName.get(name) || name, query)}
+          sortOptions={(a, b, query) => exerciseSearchRank(exerciseByName.get(a) || a, query) - exerciseSearchRank(exerciseByName.get(b) || b, query) || a.localeCompare(b)}
+          getOptionDescription={exerciseSuggestionDescription}
+          showAllMatches
           placeholder="Exercise name"
           ariaLabel="Exercise name"
           onChange={(v) => onChange({ exerciseName: v, unmapped: false, exerciseDbRef: null })}

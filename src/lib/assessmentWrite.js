@@ -1,7 +1,9 @@
 import { uid } from './format'
 import { reassessmentDateError } from './assessmentReview'
+import { cleanFitnessTests } from './fitnessTests'
 
 export function saveAssessmentRecord(draft, { clientId, type, form, data, record }) {
+  if (type === 'fitness' && Object.hasOwn(data, 'otherTests')) data = { ...data, otherTests: cleanFitnessTests(data.otherTests) }
   const hasReviewDate = Object.hasOwn(form, 'nextReassessmentDate')
   if (hasReviewDate) {
     const error = reassessmentDateError(form.date, form.nextReassessmentDate)
