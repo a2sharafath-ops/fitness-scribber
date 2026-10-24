@@ -6,9 +6,9 @@
     "total": 251
   },
   "after": {
-    "strength": 463,
-    "corrective": 42,
-    "total": 505
+    "strength": 528,
+    "corrective": 72,
+    "total": 600
   },
   "added": [
     {
@@ -4775,6 +4775,1403 @@
         "source": "catalog"
       },
       "source": "expanded-library"
+    },
+    {
+      "name": "Single-Arm Kettlebell Snatch",
+      "equip": "Kettlebell",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Hamstrings",
+          "Glutes"
+        ],
+        "indirect": [
+          "Quadriceps",
+          "Abdominals",
+          "Forearms",
+          "Trapezius",
+          "Front delts",
+          "Rotator cuff",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Barbell Split Jerk",
+      "equip": "Barbell",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes"
+        ],
+        "indirect": [
+          "Calves",
+          "Abdominals",
+          "Spinal erectors",
+          "Front delts",
+          "Triceps",
+          "Trapezius",
+          "Serratus anterior",
+          "Rotator cuff"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Banded Leg Extension",
+      "equip": "Bands",
+      "difficulty": "Beginner",
+      "pattern": "Knee extension",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Banded Straight-Arm Pulldown",
+      "equip": "Bands",
+      "difficulty": "Beginner",
+      "pattern": "Pull",
+      "muscle": "Back",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Lats"
+        ],
+        "indirect": [
+          "Chest",
+          "Triceps",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Meadows Row",
+      "equip": "Landmine",
+      "difficulty": "Intermediate",
+      "pattern": "Pull",
+      "muscle": "Back",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Lats",
+          "Upper back"
+        ],
+        "indirect": [
+          "Biceps",
+          "Rear delts",
+          "Forearms",
+          "Abdominals",
+          "Spinal erectors"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Barbell JM Press",
+      "equip": "Barbell",
+      "difficulty": "Advanced",
+      "pattern": "Elbow extension",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Triceps"
+        ],
+        "indirect": [
+          "Front delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Barbell Upright Row",
+      "equip": "Barbell",
+      "difficulty": "Intermediate",
+      "pattern": "Pull",
+      "muscle": "Shoulders",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Side delts"
+        ],
+        "indirect": [
+          "Trapezius",
+          "Biceps",
+          "Forearms",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Barbell Z Press",
+      "equip": "Barbell",
+      "difficulty": "Advanced",
+      "pattern": "Overhead press",
+      "muscle": "Shoulders",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Front delts",
+          "Side delts",
+          "Triceps"
+        ],
+        "indirect": [
+          "Abdominals",
+          "Spinal erectors",
+          "Trapezius",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Squat Jump (Static Start)",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Power",
+      "muscle": "Legs",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Calves"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Depth Jump",
+      "equip": "Box",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Legs",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Calves"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Wall-Ball Shot",
+      "equip": "Medicine Ball",
+      "difficulty": "Intermediate",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Front delts",
+          "Triceps"
+        ],
+        "indirect": [
+          "Abdominals",
+          "Spinal erectors",
+          "Calves",
+          "Trapezius",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Single-Arm Kettlebell Suitcase Deadlift",
+      "equip": "Kettlebell",
+      "difficulty": "Intermediate",
+      "pattern": "Hinge",
+      "muscle": "Hamstrings",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Hamstrings",
+          "Glutes"
+        ],
+        "indirect": [
+          "Quadriceps",
+          "Abdominals",
+          "Spinal erectors",
+          "Forearms",
+          "Hip abductors",
+          "Upper back"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Sandbag Bear Hug Squat",
+      "equip": "Sandbag",
+      "difficulty": "Intermediate",
+      "pattern": "Squat",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes"
+        ],
+        "indirect": [
+          "Adductors",
+          "Abdominals",
+          "Spinal erectors",
+          "Upper back",
+          "Front delts",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Ring Support Hold (Top)",
+      "equip": "Gymnastic Rings",
+      "difficulty": "Intermediate",
+      "pattern": "Support",
+      "muscle": "Chest",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Chest",
+          "Triceps"
+        ],
+        "indirect": [
+          "Front delts",
+          "Lats",
+          "Rotator cuff",
+          "Serratus anterior",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Strict Ring Muscle-Up",
+      "equip": "Gymnastic Rings",
+      "difficulty": "Advanced",
+      "pattern": "Pull/Push",
+      "muscle": "Full Body",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Lats",
+          "Chest",
+          "Triceps"
+        ],
+        "indirect": [
+          "Biceps",
+          "Upper back",
+          "Front delts",
+          "Forearms",
+          "Abdominals",
+          "Rotator cuff",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Banded Hip Abduction",
+      "equip": "Bands",
+      "difficulty": "Beginner",
+      "pattern": "Hip abduction",
+      "muscle": "Glutes",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Hip abductors"
+        ],
+        "indirect": [
+          "Glutes"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Standing Banded Hip Adduction",
+      "equip": "Bands",
+      "difficulty": "Beginner",
+      "pattern": "Hip adduction",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Adductors"
+        ],
+        "indirect": [
+          "Hip abductors",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "V-Up",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals",
+          "Hip flexors"
+        ],
+        "indirect": [
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Supine Adductor Squeeze (Ball)",
+      "equip": "Soft Ball",
+      "difficulty": "Beginner",
+      "pattern": "Hip adduction",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Adductors"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Single-Arm Dumbbell Snatch (From Floor)",
+      "equip": "Dumbbell",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Trapezius"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Spinal erectors",
+          "Abdominals",
+          "Forearms",
+          "Front delts",
+          "Triceps",
+          "Rotator cuff",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Sandbag Ground-to-Shoulder",
+      "equip": "Sandbag",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Spinal erectors",
+          "Abdominals",
+          "Upper back",
+          "Trapezius",
+          "Biceps",
+          "Forearms",
+          "Front delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Plank Body Saw",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals"
+        ],
+        "indirect": [
+          "Serratus anterior",
+          "Front delts",
+          "Glutes",
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Suspension Knee Tuck",
+      "equip": "Suspension Trainer",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals",
+          "Hip flexors"
+        ],
+        "indirect": [
+          "Front delts",
+          "Serratus anterior",
+          "Triceps",
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Suspension Biceps Curl",
+      "equip": "Suspension Trainer",
+      "difficulty": "Advanced",
+      "pattern": "Elbow flexion",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Biceps"
+        ],
+        "indirect": [
+          "Forearms",
+          "Abdominals",
+          "Front delts",
+          "Upper back"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Suspension Overhead Triceps Extension",
+      "equip": "Suspension Trainer",
+      "difficulty": "Advanced",
+      "pattern": "Elbow extension",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Triceps"
+        ],
+        "indirect": [
+          "Abdominals",
+          "Front delts",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Hand-Supported Sissy Squat",
+      "equip": "Bodyweight",
+      "difficulty": "Advanced",
+      "pattern": "Knee extension",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps"
+        ],
+        "indirect": [
+          "Calves",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Kettlebell Halo",
+      "equip": "Kettlebell",
+      "difficulty": "Advanced",
+      "pattern": "Shoulder control",
+      "muscle": "Shoulders",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Front delts",
+          "Side delts"
+        ],
+        "indirect": [
+          "Rotator cuff",
+          "Trapezius",
+          "Serratus anterior",
+          "Abdominals",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Depth Drop (Stick Landing)",
+      "equip": "Box",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Legs",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Calves"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Hip abductors",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Barbell Push Jerk",
+      "equip": "Barbell",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Front delts",
+          "Triceps"
+        ],
+        "indirect": [
+          "Calves",
+          "Trapezius",
+          "Serratus anterior",
+          "Abdominals",
+          "Spinal erectors"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Hollow Body Rock",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals"
+        ],
+        "indirect": [
+          "Hip flexors",
+          "Quadriceps",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Superman Hold (Floor)",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "pattern": "Trunk extension",
+      "muscle": "Back",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Spinal erectors",
+          "Glutes"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Trapezius",
+          "Rear delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Suspension Chest Fly",
+      "equip": "Suspension Trainer",
+      "difficulty": "Advanced",
+      "pattern": "Chest isolation",
+      "muscle": "Chest",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Chest"
+        ],
+        "indirect": [
+          "Front delts",
+          "Biceps",
+          "Triceps",
+          "Abdominals",
+          "Serratus anterior"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Dumbbell Box Step-Over",
+      "equip": "Dumbbell",
+      "difficulty": "Intermediate",
+      "pattern": "Squat",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Hip abductors",
+          "Adductors",
+          "Abdominals",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Dragon Flag (Body Lever)",
+      "equip": "Fixed Anchor",
+      "difficulty": "Advanced",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals"
+        ],
+        "indirect": [
+          "Lats",
+          "Forearms",
+          "Glutes",
+          "Quadriceps",
+          "Triceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Bench Dip",
+      "equip": "Bench",
+      "difficulty": "Intermediate",
+      "pattern": "Elbow extension",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Triceps"
+        ],
+        "indirect": [
+          "Chest",
+          "Front delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Wall-Facing Handstand Hold",
+      "equip": "Wall",
+      "difficulty": "Advanced",
+      "pattern": "Overhead support",
+      "muscle": "Shoulders",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Front delts",
+          "Side delts",
+          "Triceps",
+          "Serratus anterior"
+        ],
+        "indirect": [
+          "Trapezius",
+          "Rotator cuff",
+          "Abdominals",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Suspension Reverse Fly (T)",
+      "equip": "Suspension Trainer",
+      "difficulty": "Intermediate",
+      "pattern": "Shoulder isolation",
+      "muscle": "Shoulders",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Rear delts",
+          "Upper back"
+        ],
+        "indirect": [
+          "Rotator cuff",
+          "Trapezius",
+          "Abdominals",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Rubber-Band Finger Opening",
+      "equip": "Rubber Band",
+      "difficulty": "Beginner",
+      "pattern": "Finger extension",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Forearms"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Wrist Roller (Handheld)",
+      "equip": "Wrist Roller",
+      "difficulty": "Intermediate",
+      "pattern": "Grip",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Forearms"
+        ],
+        "indirect": [
+          "Front delts",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Neck Isometric Flexion (Hand Resistance)",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "pattern": "Neck flexion",
+      "muscle": "Neck",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Neck flexors"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Rotary Torso Machine",
+      "equip": "Machine",
+      "difficulty": "Beginner",
+      "pattern": "Trunk rotation",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals"
+        ],
+        "indirect": [
+          "Spinal erectors"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Lumbar Extension Machine",
+      "equip": "Machine",
+      "difficulty": "Beginner",
+      "pattern": "Trunk extension",
+      "muscle": "Back",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Spinal erectors"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Dip Machine (Plate-Loaded)",
+      "equip": "Machine",
+      "difficulty": "Beginner",
+      "pattern": "Elbow extension",
+      "muscle": "Arms",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Triceps"
+        ],
+        "indirect": [
+          "Chest",
+          "Front delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "American Kettlebell Swing (Overhead)",
+      "equip": "Kettlebell",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Hamstrings",
+          "Glutes"
+        ],
+        "indirect": [
+          "Spinal erectors",
+          "Abdominals",
+          "Forearms",
+          "Front delts",
+          "Serratus anterior",
+          "Trapezius",
+          "Rotator cuff"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Medicine Ball Overhead Forward Throw",
+      "equip": "Medicine Ball",
+      "difficulty": "Intermediate",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Lats",
+          "Abdominals",
+          "Triceps"
+        ],
+        "indirect": [
+          "Chest",
+          "Front delts",
+          "Glutes",
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Medicine Ball Overhead Backward Throw",
+      "equip": "Medicine Ball",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Glutes",
+          "Quadriceps",
+          "Hamstrings"
+        ],
+        "indirect": [
+          "Calves",
+          "Spinal erectors",
+          "Abdominals",
+          "Front delts",
+          "Forearms",
+          "Trapezius"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Banded Ankle Plantarflexion",
+      "equip": "Resistance Band",
+      "difficulty": "Beginner",
+      "pattern": "Ankle plantarflexion",
+      "muscle": "Ankles",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Calves"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Banded Ankle Dorsiflexion",
+      "equip": "Resistance Band",
+      "difficulty": "Beginner",
+      "pattern": "Ankle dorsiflexion",
+      "muscle": "Ankles",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Tibialis anterior"
+        ],
+        "indirect": [],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Stability Ball Pike",
+      "equip": "Fitness Ball",
+      "difficulty": "Advanced",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals",
+          "Hip flexors"
+        ],
+        "indirect": [
+          "Front delts",
+          "Serratus anterior",
+          "Triceps",
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Side Plank Hip Dip",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals",
+          "Hip abductors"
+        ],
+        "indirect": [
+          "Glutes",
+          "Serratus anterior",
+          "Rotator cuff"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Lateral Box Jump",
+      "equip": "Box",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Legs",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Calves"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Hip abductors",
+          "Adductors",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Tuck Jump",
+      "equip": "Bodyweight",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Legs",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Calves"
+        ],
+        "indirect": [
+          "Hip flexors",
+          "Hamstrings",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Archer Push-Up (Floor)",
+      "equip": "Bodyweight",
+      "difficulty": "Advanced",
+      "pattern": "Horizontal push",
+      "muscle": "Chest",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Chest",
+          "Triceps"
+        ],
+        "indirect": [
+          "Front delts",
+          "Serratus anterior",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Seated Sled Rope Pull",
+      "equip": "Sled and Rope",
+      "difficulty": "Intermediate",
+      "pattern": "Horizontal pull",
+      "muscle": "Back",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Lats",
+          "Upper back",
+          "Biceps",
+          "Forearms"
+        ],
+        "indirect": [
+          "Rear delts",
+          "Abdominals",
+          "Spinal erectors"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Backward Sled Drag (Straps)",
+      "equip": "Sled and Straps",
+      "difficulty": "Intermediate",
+      "pattern": "Sled drag",
+      "muscle": "Legs",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps"
+        ],
+        "indirect": [
+          "Glutes",
+          "Calves",
+          "Hamstrings",
+          "Abdominals",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Battle Rope Alternating Waves",
+      "equip": "Battle Ropes",
+      "difficulty": "Intermediate",
+      "pattern": "Power",
+      "muscle": "Shoulders",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Front delts",
+          "Side delts"
+        ],
+        "indirect": [
+          "Trapezius",
+          "Forearms",
+          "Abdominals",
+          "Spinal erectors"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Mountain Climber",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Hip flexors",
+          "Abdominals"
+        ],
+        "indirect": [
+          "Front delts",
+          "Serratus anterior",
+          "Triceps",
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Burpee (Chest-to-Floor and Jump)",
+      "equip": "Bodyweight",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Calves",
+          "Chest",
+          "Triceps"
+        ],
+        "indirect": [
+          "Front delts",
+          "Abdominals",
+          "Spinal erectors",
+          "Hamstrings"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Jumping Jack",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Calves",
+          "Hip abductors",
+          "Adductors",
+          "Side delts"
+        ],
+        "indirect": [
+          "Quadriceps",
+          "Glutes",
+          "Abdominals",
+          "Trapezius"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Dumbbell Hang Power Clean (Two-Arm)",
+      "equip": "Dumbbell",
+      "difficulty": "Advanced",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Quadriceps",
+          "Glutes",
+          "Trapezius"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Calves",
+          "Spinal erectors",
+          "Upper back",
+          "Forearms",
+          "Abdominals"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Jump Rope (Single-Under)",
+      "equip": "Jump Rope",
+      "difficulty": "Beginner",
+      "pattern": "Power",
+      "muscle": "Legs",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Calves"
+        ],
+        "indirect": [
+          "Quadriceps",
+          "Glutes",
+          "Abdominals",
+          "Forearms",
+          "Front delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Crab Walk (Floor)",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Locomotion",
+      "muscle": "Full Body",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Triceps",
+          "Glutes"
+        ],
+        "indirect": [
+          "Hamstrings",
+          "Rear delts",
+          "Abdominals",
+          "Forearms"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "High-Knee Run (In Place)",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Power",
+      "muscle": "Full Body",
+      "category": "Ballistic",
+      "muscleTargets": {
+        "direct": [
+          "Hip flexors",
+          "Calves"
+        ],
+        "indirect": [
+          "Quadriceps",
+          "Hamstrings",
+          "Glutes",
+          "Abdominals",
+          "Front delts"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Flutter Kick (Supine)",
+      "equip": "Bodyweight",
+      "difficulty": "Intermediate",
+      "pattern": "Core",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Hip flexors",
+          "Abdominals"
+        ],
+        "indirect": [
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
+    },
+    {
+      "name": "Hanging Windshield Wiper",
+      "equip": "Pull-Up Bar",
+      "difficulty": "Advanced",
+      "pattern": "Trunk rotation",
+      "muscle": "Core",
+      "category": "Grinding",
+      "muscleTargets": {
+        "direct": [
+          "Abdominals",
+          "Hip flexors"
+        ],
+        "indirect": [
+          "Lats",
+          "Forearms",
+          "Rotator cuff",
+          "Upper back",
+          "Quadriceps"
+        ],
+        "source": "catalog"
+      },
+      "source": "expanded-library"
     }
   ],
   "existingNamesReusedByAlias": {
@@ -4786,6 +6183,14 @@
       "Barbell Bench Press",
       "Flat Barbell Press",
       "BB Bench"
+    ],
+    "Floor Press": [
+      "Barbell Floor Press",
+      "BB Floor Press"
+    ],
+    "DB Floor Press": [
+      "Dumbbell Floor Press",
+      "Two-Arm Dumbbell Floor Press"
     ],
     "Military Press": [
       "Barbell Overhead Press",
@@ -5572,6 +6977,409 @@
     "Barbell Thruster": [
       "Barbell Squat to Press",
       "BB Thruster"
+    ],
+    "Single-Arm Kettlebell Snatch": [
+      "One-Arm KB Snatch",
+      "Single Kettlebell Snatch"
+    ],
+    "Barbell Split Jerk": [
+      "Split Jerk",
+      "Split Jerk from Rack",
+      "BB Split Jerk"
+    ],
+    "Seated Banded Leg Extension": [
+      "Seated Resistance Band Knee Extension",
+      "Banded Leg Extension",
+      "Seated Band Knee Extension"
+    ],
+    "Banded Straight-Arm Pulldown": [
+      "Resistance Band Straight-Arm Lat Pulldown",
+      "Straight-Arm Band Pulldown"
+    ],
+    "Meadows Row": [
+      "Landmine Meadows Row",
+      "Meadow Row"
+    ],
+    "Barbell JM Press": [
+      "JM Press",
+      "J.M. Press"
+    ],
+    "Barbell Upright Row": [
+      "Upright Row",
+      "Upright Barbell Row",
+      "BB Upright Row"
+    ],
+    "Barbell Z Press": [
+      "Z-Press",
+      "Long-Sitting Barbell Overhead Press"
+    ],
+    "Squat Jump (Static Start)": [
+      "Static Squat Jump",
+      "Static Vertical Jump"
+    ],
+    "Depth Jump": [
+      "Box Drop to Vertical Jump",
+      "Depth Vertical Jump"
+    ],
+    "Wall-Ball Shot": [
+      "Wall Ball",
+      "Wall Ball Shot",
+      "Medicine Ball Squat Throw to Wall"
+    ],
+    "Single-Arm Kettlebell Suitcase Deadlift": [
+      "Kettlebell Suitcase Deadlift",
+      "One-Arm KB Suitcase Deadlift"
+    ],
+    "Sandbag Bear Hug Squat": [
+      "Bear-Hug Sandbag Squat",
+      "Sandbag Hug Squat"
+    ],
+    "Ring Support Hold (Top)": [
+      "Top Ring Support Hold",
+      "Straight-Arm Ring Support"
+    ],
+    "Strict Ring Muscle-Up": [
+      "Strict RMU",
+      "Strict Rings Muscle Up",
+      "Strict Ring Muscleup"
+    ],
+    "Seated Banded Hip Abduction": [
+      "Seated Resistance Band Hip Abduction",
+      "Seated Band Hip Abduction"
+    ],
+    "Standing Banded Hip Adduction": [
+      "Standing Resistance Band Hip Adduction",
+      "Standing Band Hip Adduction"
+    ],
+    "V-Up": [
+      "Floor Jackknife Sit-Up",
+      "V Sit-Up",
+      "Vup"
+    ],
+    "Supine Adductor Squeeze (Ball)": [
+      "Ball Squeeze Between Knees",
+      "Supine Ball Hip Adduction",
+      "Crook-Lying Adductor Squeeze"
+    ],
+    "Single-Arm Dumbbell Snatch (From Floor)": [
+      "Single-Arm Dumbbell Snatch",
+      "One-Arm DB Snatch from Floor",
+      "Dumbbell Snatch"
+    ],
+    "Sandbag Ground-to-Shoulder": [
+      "Sandbag Shouldering",
+      "Sandbag Clean to Shoulder"
+    ],
+    "Plank Body Saw": [
+      "Forearm Body Saw",
+      "Body Saw Plank",
+      "Body Saw"
+    ],
+    "Suspension Knee Tuck": [
+      "TRX Knee Tuck",
+      "Suspended Knee Tuck"
+    ],
+    "Suspension Biceps Curl": [
+      "TRX Biceps Curl",
+      "TRX Bicep Curl",
+      "Suspension Bicep Curl"
+    ],
+    "Suspension Overhead Triceps Extension": [
+      "TRX Overhead Triceps Extension",
+      "TRX Tricep Extension",
+      "Suspension Triceps Extension"
+    ],
+    "Hand-Supported Sissy Squat": [
+      "Hand-Assisted Sissy Squat",
+      "Supported Sissy Squat"
+    ],
+    "Kettlebell Halo": [
+      "KB Halo",
+      "Around-the-Head Kettlebell Halo"
+    ],
+    "Depth Drop (Stick Landing)": [
+      "Depth Drop",
+      "Box Drop Landing",
+      "Drop-and-Stick Landing"
+    ],
+    "Barbell Push Jerk": [
+      "Push Jerk",
+      "BB Push Jerk"
+    ],
+    "Hollow Body Rock": [
+      "Hollow Rock",
+      "Hollow Body Rocks"
+    ],
+    "Superman Hold (Floor)": [
+      "Prone Superman Hold",
+      "Arch Body Hold",
+      "Superman Hold"
+    ],
+    "Suspension Chest Fly": [
+      "TRX Chest Fly",
+      "Suspension Flye",
+      "TRX Chest Flye"
+    ],
+    "Dumbbell Box Step-Over": [
+      "DB Box Step Over",
+      "Dumbbell Box Step Overs"
+    ],
+    "Dragon Flag (Body Lever)": [
+      "Dragon Flag",
+      "Body Lever",
+      "Straight-Body Lever"
+    ],
+    "Static Cross-Body Shoulder Stretch": [
+      "Crossover Arm Stretch",
+      "Cross Body Shoulder Stretch"
+    ],
+    "Static Overhead Triceps Stretch": [
+      "Overhead Tricep Stretch",
+      "Overhead Triceps Stretch"
+    ],
+    "Static Wrist Flexor Stretch": [
+      "Wrist Flexor Stretch",
+      "Forearm Flexor Stretch"
+    ],
+    "Static Wrist Extensor Stretch": [
+      "Wrist Extensor Stretch",
+      "Forearm Extensor Stretch"
+    ],
+    "Bench Dip": [
+      "Bench Dips",
+      "Triceps Bench Dip"
+    ],
+    "Wall-Facing Handstand Hold": [
+      "Chest-to-Wall Handstand Hold",
+      "Wall Facing Handstand"
+    ],
+    "Suspension Reverse Fly (T)": [
+      "TRX Reverse Fly",
+      "TRX T Delt Fly",
+      "Suspension T Fly"
+    ],
+    "Cat-Cow": [
+      "Cat Cow Stretch",
+      "Cat Camel",
+      "Cat and Cow"
+    ],
+    "Side-Lying Thoracic Rotation (Open Book)": [
+      "Open Book Stretch",
+      "Side Lying Open Book",
+      "Thoracic Open Book"
+    ],
+    "Half-Kneeling Ankle Dorsiflexion Rock": [
+      "Half Kneeling Ankle Rock",
+      "Knee-to-Wall Ankle Rock"
+    ],
+    "90/90 Hip Switch": [
+      "90 90 Hip Switches",
+      "Shin Box Switch",
+      "Seated Hip Rotation Switch"
+    ],
+    "Supine Shoulder Flexion (Dowel-Assisted)": [
+      "Supine Dowel Shoulder Flexion",
+      "Lying Stick Assisted Shoulder Flexion"
+    ],
+    "Supine Lower Trunk Rotation": [
+      "Lying Lower Trunk Rotation",
+      "Supine Bent-Knee Rotation",
+      "Lower Trunk Rotations"
+    ],
+    "Static Biceps Stretch (Wall Support)": [
+      "Wall Supported Biceps Stretch",
+      "Standing Biceps Wall Stretch"
+    ],
+    "Rubber-Band Finger Opening": [
+      "Finger Spring",
+      "Banded Finger Extension",
+      "Rubber Band Finger Spread"
+    ],
+    "Wrist Roller (Handheld)": [
+      "Handheld Wrist Roller",
+      "Hand Held Forearm Roller"
+    ],
+    "Neck Isometric Flexion (Hand Resistance)": [
+      "Isometric Neck Flexion",
+      "Hand Resisted Neck Flexion Hold"
+    ],
+    "Quadruped Adductor Rockback": [
+      "Adductor Rock Back",
+      "Kneeling Adductor Rockback"
+    ],
+    "Thoracic Extension (Foam Roller)": [
+      "Foam Roller Thoracic Extension",
+      "Thoracic Extension Mobilization"
+    ],
+    "Supine Active Hamstring Stretch": [
+      "Active Knee Extension Hamstring Stretch",
+      "90/90 Active Hamstring Stretch"
+    ],
+    "Standing Leg Swing (Front-to-Back)": [
+      "Front Back Leg Swing",
+      "Sagittal Leg Swing"
+    ],
+    "Standing Leg Swing (Side-to-Side)": [
+      "Side to Side Leg Swing",
+      "Lateral Leg Swing"
+    ],
+    "Quadruped Wrist Extension Rock": [
+      "Quadruped Wrist Rock",
+      "Palm Supported Wrist Extension Rock"
+    ],
+    "Supine Shoulder External Rotation (Dowel-Assisted)": [
+      "Supine Dowel External Rotation",
+      "Lying Stick Assisted External Rotation"
+    ],
+    "Rotary Torso Machine": [
+      "Seated Torso Rotation Machine",
+      "Rotary Torso",
+      "Machine Trunk Rotation"
+    ],
+    "Seated Lumbar Extension Machine": [
+      "Seated Back Extension Machine",
+      "Lumbar Extension Machine"
+    ],
+    "Seated Dip Machine (Plate-Loaded)": [
+      "Plate Loaded Seated Dip",
+      "Seated Dip Press Machine"
+    ],
+    "American Kettlebell Swing (Overhead)": [
+      "American KB Swing",
+      "Overhead Kettlebell Swing",
+      "American Swing"
+    ],
+    "Medicine Ball Overhead Forward Throw": [
+      "Med Ball Soccer Throw",
+      "Two-Hand Overhead Forward Throw"
+    ],
+    "Medicine Ball Overhead Backward Throw": [
+      "Backward Overhead Med Ball Throw",
+      "Two-Hand Overhead Backward Throw"
+    ],
+    "Supine Single-Knee-to-Chest Stretch": [
+      "Single Knee to Chest Stretch",
+      "Lying Single Knee Hug"
+    ],
+    "Prone Press-Up (Lumbar Mobility)": [
+      "Prone Lumbar Extension Press Up",
+      "Lumbar Press Up"
+    ],
+    "Standing Shoulder CAR": [
+      "Standing Shoulder CARs",
+      "Shoulder Controlled Articular Rotation"
+    ],
+    "Side-Lying Hip CAR": [
+      "Side Lying Hip CARs",
+      "Lying Hip Controlled Articular Rotation"
+    ],
+    "Seated Banded Ankle Plantarflexion": [
+      "Band Resisted Ankle Plantar Flexion",
+      "Seated Band Foot Press"
+    ],
+    "Seated Banded Ankle Dorsiflexion": [
+      "Band Resisted Ankle Dorsiflexion",
+      "Seated Band Toe Pull"
+    ],
+    "Stability Ball Pike": [
+      "Swiss Ball Pike",
+      "Exercise Ball Pike Up"
+    ],
+    "Side Plank Hip Dip": [
+      "Side Plank Hip Raise",
+      "Side Bridge Hip Lift"
+    ],
+    "Lateral Box Jump": [
+      "Sideways Box Jump",
+      "Side Box Jump"
+    ],
+    "Tuck Jump": [
+      "Knee Tuck Jump",
+      "Knees to Chest Jump"
+    ],
+    "Static Seated Butterfly Stretch": [
+      "Seated Butterfly Stretch",
+      "Butterfly Groin Stretch"
+    ],
+    "Dynamic Frog Stretch": [
+      "Frog Adductor Rock",
+      "Kneeling Frog Rockback"
+    ],
+    "Seated Neck Rotation": [
+      "Seated Cervical Rotation",
+      "Active Neck Turning"
+    ],
+    "Seated Ankle Circles": [
+      "Unresisted Ankle Circles",
+      "Sitting Foot Circles"
+    ],
+    "Archer Push-Up (Floor)": [
+      "Floor Archer Press Up",
+      "Archer Pushup"
+    ],
+    "Seated Sled Rope Pull": [
+      "Seated Hand Over Hand Sled Pull",
+      "Seated Arm Over Arm Sled Pull"
+    ],
+    "Backward Sled Drag (Straps)": [
+      "Strap Backward Sled Pull",
+      "Reverse Sled Drag"
+    ],
+    "Battle Rope Alternating Waves": [
+      "Alternating Arm Rope Waves",
+      "Battle Ropes Alternating Waves"
+    ],
+    "Mountain Climber": [
+      "Mountain Climbers",
+      "Alternating Plank Knee Drive"
+    ],
+    "Burpee (Chest-to-Floor and Jump)": [
+      "Chest to Floor Burpee",
+      "Burpee with Jump"
+    ],
+    "Jumping Jack": [
+      "Jumping Jacks",
+      "Side Straddle Hop"
+    ],
+    "Dumbbell Hang Power Clean (Two-Arm)": [
+      "Two Dumbbell Hang Power Clean",
+      "Double DB Hang Power Clean"
+    ],
+    "Supine Heel Slide (Knee Mobility)": [
+      "Lying Knee Flexion Heel Slide",
+      "Unloaded Supine Heel Slide"
+    ],
+    "Quadruped Thread the Needle": [
+      "All Fours Thread the Needle",
+      "Quadruped Reach Under Rotation"
+    ],
+    "Jump Rope (Single-Under)": [
+      "Single Under Skipping Rope",
+      "Basic Two-Foot Rope Jump"
+    ],
+    "Crab Walk (Floor)": [
+      "Floor Crab Crawl",
+      "Reverse Tabletop Walk"
+    ],
+    "High-Knee Run (In Place)": [
+      "High Knees In Place",
+      "Stationary High Knee Run"
+    ],
+    "Flutter Kick (Supine)": [
+      "Supine Flutter Kicks",
+      "Lying Flutter Kick"
+    ],
+    "Hanging Windshield Wiper": [
+      "Hanging Leg Sweep",
+      "Bar Hanging Windshield Wipers"
+    ],
+    "Wall Angel (Back-to-Wall)": [
+      "Back to Wall Shoulder Angel",
+      "Standing Wall Angels"
+    ],
+    "Side-Lying Sleeper Stretch": [
+      "Sleeper Shoulder Stretch",
+      "Side Lying Internal Rotation Stretch"
     ]
   },
   "searchAliasesByExercise": {
@@ -5804,7 +7612,8 @@
       "Alternating Dumbbell Bench Press Two-Arm"
     ],
     "DB Floor Press": [
-      "Dumbbell Floor Press"
+      "Dumbbell Floor Press",
+      "Two-Arm Dumbbell Floor Press"
     ],
     "DB Incline Bench Press 1-Arm": [
       "Dumbbell Incline Bench Press Single-Arm"
@@ -5833,6 +7642,10 @@
     ],
     "DB Push Press 2-Arm": [
       "Dumbbell Push Press Two-Arm"
+    ],
+    "Floor Press": [
+      "Barbell Floor Press",
+      "BB Floor Press"
     ],
     "KB Press 1-Arm": [
       "Kettlebell Press Single-Arm"
@@ -6598,6 +8411,285 @@
       "Barbell Squat to Press",
       "BB Thruster"
     ],
+    "Single-Arm Kettlebell Snatch": [
+      "One-Arm KB Snatch",
+      "Single Kettlebell Snatch"
+    ],
+    "Barbell Split Jerk": [
+      "Split Jerk",
+      "Split Jerk from Rack",
+      "BB Split Jerk"
+    ],
+    "Seated Banded Leg Extension": [
+      "Seated Resistance Band Knee Extension",
+      "Banded Leg Extension",
+      "Seated Band Knee Extension"
+    ],
+    "Banded Straight-Arm Pulldown": [
+      "Resistance Band Straight-Arm Lat Pulldown",
+      "Straight-Arm Band Pulldown"
+    ],
+    "Meadows Row": [
+      "Landmine Meadows Row",
+      "Meadow Row"
+    ],
+    "Barbell JM Press": [
+      "JM Press",
+      "J.M. Press"
+    ],
+    "Barbell Upright Row": [
+      "Upright Row",
+      "Upright Barbell Row",
+      "BB Upright Row"
+    ],
+    "Barbell Z Press": [
+      "Z-Press",
+      "Long-Sitting Barbell Overhead Press"
+    ],
+    "Squat Jump (Static Start)": [
+      "Static Squat Jump",
+      "Static Vertical Jump"
+    ],
+    "Depth Jump": [
+      "Box Drop to Vertical Jump",
+      "Depth Vertical Jump"
+    ],
+    "Wall-Ball Shot": [
+      "Wall Ball",
+      "Wall Ball Shot",
+      "Medicine Ball Squat Throw to Wall"
+    ],
+    "Single-Arm Kettlebell Suitcase Deadlift": [
+      "Kettlebell Suitcase Deadlift",
+      "One-Arm KB Suitcase Deadlift"
+    ],
+    "Sandbag Bear Hug Squat": [
+      "Bear-Hug Sandbag Squat",
+      "Sandbag Hug Squat"
+    ],
+    "Ring Support Hold (Top)": [
+      "Top Ring Support Hold",
+      "Straight-Arm Ring Support"
+    ],
+    "Strict Ring Muscle-Up": [
+      "Strict RMU",
+      "Strict Rings Muscle Up",
+      "Strict Ring Muscleup"
+    ],
+    "Seated Banded Hip Abduction": [
+      "Seated Resistance Band Hip Abduction",
+      "Seated Band Hip Abduction"
+    ],
+    "Standing Banded Hip Adduction": [
+      "Standing Resistance Band Hip Adduction",
+      "Standing Band Hip Adduction"
+    ],
+    "V-Up": [
+      "Floor Jackknife Sit-Up",
+      "V Sit-Up",
+      "Vup"
+    ],
+    "Supine Adductor Squeeze (Ball)": [
+      "Ball Squeeze Between Knees",
+      "Supine Ball Hip Adduction",
+      "Crook-Lying Adductor Squeeze"
+    ],
+    "Single-Arm Dumbbell Snatch (From Floor)": [
+      "Single-Arm Dumbbell Snatch",
+      "One-Arm DB Snatch from Floor",
+      "Dumbbell Snatch"
+    ],
+    "Sandbag Ground-to-Shoulder": [
+      "Sandbag Shouldering",
+      "Sandbag Clean to Shoulder"
+    ],
+    "Plank Body Saw": [
+      "Forearm Body Saw",
+      "Body Saw Plank",
+      "Body Saw"
+    ],
+    "Suspension Knee Tuck": [
+      "TRX Knee Tuck",
+      "Suspended Knee Tuck"
+    ],
+    "Suspension Biceps Curl": [
+      "TRX Biceps Curl",
+      "TRX Bicep Curl",
+      "Suspension Bicep Curl"
+    ],
+    "Suspension Overhead Triceps Extension": [
+      "TRX Overhead Triceps Extension",
+      "TRX Tricep Extension",
+      "Suspension Triceps Extension"
+    ],
+    "Hand-Supported Sissy Squat": [
+      "Hand-Assisted Sissy Squat",
+      "Supported Sissy Squat"
+    ],
+    "Kettlebell Halo": [
+      "KB Halo",
+      "Around-the-Head Kettlebell Halo"
+    ],
+    "Depth Drop (Stick Landing)": [
+      "Depth Drop",
+      "Box Drop Landing",
+      "Drop-and-Stick Landing"
+    ],
+    "Barbell Push Jerk": [
+      "Push Jerk",
+      "BB Push Jerk"
+    ],
+    "Hollow Body Rock": [
+      "Hollow Rock",
+      "Hollow Body Rocks"
+    ],
+    "Superman Hold (Floor)": [
+      "Prone Superman Hold",
+      "Arch Body Hold",
+      "Superman Hold"
+    ],
+    "Suspension Chest Fly": [
+      "TRX Chest Fly",
+      "Suspension Flye",
+      "TRX Chest Flye"
+    ],
+    "Dumbbell Box Step-Over": [
+      "DB Box Step Over",
+      "Dumbbell Box Step Overs"
+    ],
+    "Dragon Flag (Body Lever)": [
+      "Dragon Flag",
+      "Body Lever",
+      "Straight-Body Lever"
+    ],
+    "Bench Dip": [
+      "Bench Dips",
+      "Triceps Bench Dip"
+    ],
+    "Wall-Facing Handstand Hold": [
+      "Chest-to-Wall Handstand Hold",
+      "Wall Facing Handstand"
+    ],
+    "Suspension Reverse Fly (T)": [
+      "TRX Reverse Fly",
+      "TRX T Delt Fly",
+      "Suspension T Fly"
+    ],
+    "Rubber-Band Finger Opening": [
+      "Finger Spring",
+      "Banded Finger Extension",
+      "Rubber Band Finger Spread"
+    ],
+    "Wrist Roller (Handheld)": [
+      "Handheld Wrist Roller",
+      "Hand Held Forearm Roller"
+    ],
+    "Neck Isometric Flexion (Hand Resistance)": [
+      "Isometric Neck Flexion",
+      "Hand Resisted Neck Flexion Hold"
+    ],
+    "Rotary Torso Machine": [
+      "Seated Torso Rotation Machine",
+      "Rotary Torso",
+      "Machine Trunk Rotation"
+    ],
+    "Seated Lumbar Extension Machine": [
+      "Seated Back Extension Machine",
+      "Lumbar Extension Machine"
+    ],
+    "Seated Dip Machine (Plate-Loaded)": [
+      "Plate Loaded Seated Dip",
+      "Seated Dip Press Machine"
+    ],
+    "American Kettlebell Swing (Overhead)": [
+      "American KB Swing",
+      "Overhead Kettlebell Swing",
+      "American Swing"
+    ],
+    "Medicine Ball Overhead Forward Throw": [
+      "Med Ball Soccer Throw",
+      "Two-Hand Overhead Forward Throw"
+    ],
+    "Medicine Ball Overhead Backward Throw": [
+      "Backward Overhead Med Ball Throw",
+      "Two-Hand Overhead Backward Throw"
+    ],
+    "Seated Banded Ankle Plantarflexion": [
+      "Band Resisted Ankle Plantar Flexion",
+      "Seated Band Foot Press"
+    ],
+    "Seated Banded Ankle Dorsiflexion": [
+      "Band Resisted Ankle Dorsiflexion",
+      "Seated Band Toe Pull"
+    ],
+    "Stability Ball Pike": [
+      "Swiss Ball Pike",
+      "Exercise Ball Pike Up"
+    ],
+    "Side Plank Hip Dip": [
+      "Side Plank Hip Raise",
+      "Side Bridge Hip Lift"
+    ],
+    "Lateral Box Jump": [
+      "Sideways Box Jump",
+      "Side Box Jump"
+    ],
+    "Tuck Jump": [
+      "Knee Tuck Jump",
+      "Knees to Chest Jump"
+    ],
+    "Archer Push-Up (Floor)": [
+      "Floor Archer Press Up",
+      "Archer Pushup"
+    ],
+    "Seated Sled Rope Pull": [
+      "Seated Hand Over Hand Sled Pull",
+      "Seated Arm Over Arm Sled Pull"
+    ],
+    "Backward Sled Drag (Straps)": [
+      "Strap Backward Sled Pull",
+      "Reverse Sled Drag"
+    ],
+    "Battle Rope Alternating Waves": [
+      "Alternating Arm Rope Waves",
+      "Battle Ropes Alternating Waves"
+    ],
+    "Mountain Climber": [
+      "Mountain Climbers",
+      "Alternating Plank Knee Drive"
+    ],
+    "Burpee (Chest-to-Floor and Jump)": [
+      "Chest to Floor Burpee",
+      "Burpee with Jump"
+    ],
+    "Jumping Jack": [
+      "Jumping Jacks",
+      "Side Straddle Hop"
+    ],
+    "Dumbbell Hang Power Clean (Two-Arm)": [
+      "Two Dumbbell Hang Power Clean",
+      "Double DB Hang Power Clean"
+    ],
+    "Jump Rope (Single-Under)": [
+      "Single Under Skipping Rope",
+      "Basic Two-Foot Rope Jump"
+    ],
+    "Crab Walk (Floor)": [
+      "Floor Crab Crawl",
+      "Reverse Tabletop Walk"
+    ],
+    "High-Knee Run (In Place)": [
+      "High Knees In Place",
+      "Stationary High Knee Run"
+    ],
+    "Flutter Kick (Supine)": [
+      "Supine Flutter Kicks",
+      "Lying Flutter Kick"
+    ],
+    "Hanging Windshield Wiper": [
+      "Hanging Leg Sweep",
+      "Bar Hanging Windshield Wipers"
+    ],
     "Floor Glute Bridge": [
       "Bodyweight Glute Bridge"
     ],
@@ -6607,6 +8699,130 @@
     "Ball Hamstring Curl": [
       "Stability Ball Leg Curl",
       "Swiss Ball Hamstring Curl"
+    ],
+    "Static Cross-Body Shoulder Stretch": [
+      "Crossover Arm Stretch",
+      "Cross Body Shoulder Stretch"
+    ],
+    "Static Overhead Triceps Stretch": [
+      "Overhead Tricep Stretch",
+      "Overhead Triceps Stretch"
+    ],
+    "Static Wrist Flexor Stretch": [
+      "Wrist Flexor Stretch",
+      "Forearm Flexor Stretch"
+    ],
+    "Static Wrist Extensor Stretch": [
+      "Wrist Extensor Stretch",
+      "Forearm Extensor Stretch"
+    ],
+    "Cat-Cow": [
+      "Cat Cow Stretch",
+      "Cat Camel",
+      "Cat and Cow"
+    ],
+    "Side-Lying Thoracic Rotation (Open Book)": [
+      "Open Book Stretch",
+      "Side Lying Open Book",
+      "Thoracic Open Book"
+    ],
+    "Half-Kneeling Ankle Dorsiflexion Rock": [
+      "Half Kneeling Ankle Rock",
+      "Knee-to-Wall Ankle Rock"
+    ],
+    "90/90 Hip Switch": [
+      "90 90 Hip Switches",
+      "Shin Box Switch",
+      "Seated Hip Rotation Switch"
+    ],
+    "Supine Shoulder Flexion (Dowel-Assisted)": [
+      "Supine Dowel Shoulder Flexion",
+      "Lying Stick Assisted Shoulder Flexion"
+    ],
+    "Supine Lower Trunk Rotation": [
+      "Lying Lower Trunk Rotation",
+      "Supine Bent-Knee Rotation",
+      "Lower Trunk Rotations"
+    ],
+    "Static Biceps Stretch (Wall Support)": [
+      "Wall Supported Biceps Stretch",
+      "Standing Biceps Wall Stretch"
+    ],
+    "Quadruped Adductor Rockback": [
+      "Adductor Rock Back",
+      "Kneeling Adductor Rockback"
+    ],
+    "Thoracic Extension (Foam Roller)": [
+      "Foam Roller Thoracic Extension",
+      "Thoracic Extension Mobilization"
+    ],
+    "Supine Active Hamstring Stretch": [
+      "Active Knee Extension Hamstring Stretch",
+      "90/90 Active Hamstring Stretch"
+    ],
+    "Standing Leg Swing (Front-to-Back)": [
+      "Front Back Leg Swing",
+      "Sagittal Leg Swing"
+    ],
+    "Standing Leg Swing (Side-to-Side)": [
+      "Side to Side Leg Swing",
+      "Lateral Leg Swing"
+    ],
+    "Quadruped Wrist Extension Rock": [
+      "Quadruped Wrist Rock",
+      "Palm Supported Wrist Extension Rock"
+    ],
+    "Supine Shoulder External Rotation (Dowel-Assisted)": [
+      "Supine Dowel External Rotation",
+      "Lying Stick Assisted External Rotation"
+    ],
+    "Supine Single-Knee-to-Chest Stretch": [
+      "Single Knee to Chest Stretch",
+      "Lying Single Knee Hug"
+    ],
+    "Prone Press-Up (Lumbar Mobility)": [
+      "Prone Lumbar Extension Press Up",
+      "Lumbar Press Up"
+    ],
+    "Standing Shoulder CAR": [
+      "Standing Shoulder CARs",
+      "Shoulder Controlled Articular Rotation"
+    ],
+    "Side-Lying Hip CAR": [
+      "Side Lying Hip CARs",
+      "Lying Hip Controlled Articular Rotation"
+    ],
+    "Static Seated Butterfly Stretch": [
+      "Seated Butterfly Stretch",
+      "Butterfly Groin Stretch"
+    ],
+    "Dynamic Frog Stretch": [
+      "Frog Adductor Rock",
+      "Kneeling Frog Rockback"
+    ],
+    "Seated Neck Rotation": [
+      "Seated Cervical Rotation",
+      "Active Neck Turning"
+    ],
+    "Seated Ankle Circles": [
+      "Unresisted Ankle Circles",
+      "Sitting Foot Circles"
+    ],
+    "Supine Heel Slide (Knee Mobility)": [
+      "Lying Knee Flexion Heel Slide",
+      "Unloaded Supine Heel Slide"
+    ],
+    "Quadruped Thread the Needle": [
+      "All Fours Thread the Needle",
+      "Quadruped Reach Under Rotation"
+    ],
+    "Wall Angel (Back-to-Wall)": [
+      "Back to Wall Shoulder Angel",
+      "Standing Wall Angels"
+    ],
+    "Side-Lying Sleeper Stretch": [
+      "Sleeper Shoulder Stretch",
+      "Side Lying Internal Rotation Stretch"
     ]
   },
   "sources": [
@@ -6849,6 +9065,386 @@
     {
       "title": "Sit and Be Fit: seated row with band",
       "url": "https://www.sitandbefit.org/seated-row-band-upper-body-strengthening/"
+    },
+    {
+      "title": "CrossFit: kettlebell snatch movement definition",
+      "url": "https://www.crossfit.com/essentials/the-kettlebell-snatch"
+    },
+    {
+      "title": "NCSF: Teaching Techniques for Overhead Ballistics",
+      "url": "https://www.ncsf.org/pdf/ceu/teaching_techniques_for_overhead_ballistics.pdf"
+    },
+    {
+      "title": "NSCA / Human Kinetics: Exercise Technique Manual, fourth edition (Split Jerk listed)",
+      "url": "https://us.humankinetics.com/products/exercise-technique-manual-for-resistance-training-4th-edition-with-hkpropel-online-video"
+    },
+    {
+      "title": "Bexley MSK NHS: resisted seated knee extension",
+      "url": "https://msk-bexley.nhs.uk/conditions/knee-pain/knee-osteoarthritis"
+    },
+    {
+      "title": "Gonex equipment exercise demonstration: straight-arm band pulldown",
+      "url": "https://www.gonexsport.com/pages/fitness-video-26"
+    },
+    {
+      "title": "John Meadows: Master the Meadows Row",
+      "url": "https://archive.t-nation.com/training/tip-master-the-meadows-row/"
+    },
+    {
+      "title": "EliteFTS: official JM Blakley instruction linked in JM Press section",
+      "url": "https://elitefts.com/blogs/training/build-bench-with-tricep-exercises"
+    },
+    {
+      "title": "JM Blakley / EliteFTS: The Official JM Press Tutorial",
+      "url": "https://www.youtube.com/watch?v=hOCW9cE-GJg"
+    },
+    {
+      "title": "NSCA / Human Kinetics upright-row technique excerpt, Coaches Association of Ontario",
+      "url": "https://www.coachesontario.ca/articles/breaking-down-the-upright-row/"
+    },
+    {
+      "title": "Catalyst Athletics: Z-Press exercise definition",
+      "url": "https://www.catalystathletics.com/exercise/914/Z-Press/"
+    },
+    {
+      "title": "NSCA / Human Kinetics: static vertical squat-jump definition",
+      "url": "https://us.humankinetics.com/blogs/excerpt/maximum-muscular-power-high-speed-strength-test-protocol-squat-jump-static-vertical-jump"
+    },
+    {
+      "title": "NSCA: Basics of Strength and Conditioning Manual, Depth Jump",
+      "url": "https://www.nsca.com/contentassets/116c55d64e1343d2b264e05aaf158a91/basics_of_strength_and_conditioning_manual.pdf"
+    },
+    {
+      "title": "CrossFit: The Wall-Ball Shot movement definition",
+      "url": "https://www.crossfit.com/essentials/the-wall-ball"
+    },
+    {
+      "title": "Cathal Fanning / Independent Personal Trainers: Suitcase Deadlift",
+      "url": "https://www.independentpersonaltrainers.org/wp-content/uploads/2023/12/38.-Suitcase-Deadlift-Booklet.pdf"
+    },
+    {
+      "title": "StrongFirst / Pavel Macek: suitcase deadlift among kettlebell hinge progressions",
+      "url": "https://www.strongfirst.com/3-month-plan-for-beginner-group-lessons/"
+    },
+    {
+      "title": "Sandbag Fitness: Sandbag Bear Hug Squat movement definition",
+      "url": "https://www.sandbagfitnessstore.com/pages/sandbag-bear-hug-squat"
+    },
+    {
+      "title": "Roger Harrell / CrossFit Journal: Got Rings? Now What? (The support)",
+      "url": "https://library.crossfit.com/free/pdf/44_06_GotRings_NowWhat.pdf"
+    },
+    {
+      "title": "Pamela Gagnon / CrossFit: ring muscle-up strength and skill breakdown",
+      "url": "https://www.crossfit.com/essentials/crossfit-ring-muscle-up-rx-plan"
+    },
+    {
+      "title": "Prehab exercise demonstration: seated hip abduction with band",
+      "url": "https://theprehabguys.com/vimeo-video/seated-hip-abduction-band/"
+    },
+    {
+      "title": "University of Melbourne: standing resistance-band adduction (HAD2)",
+      "url": "https://healthsciences.unimelb.edu.au/departments/physiotherapy/chesm/video-library/exercise/hip-oa/hip-adductor-exercises"
+    },
+    {
+      "title": "Rogue athlete demonstration: V-Ups",
+      "url": "https://www.roguefitness.com/gb/theindex/movement-library/movement-demo-v-ups"
+    },
+    {
+      "title": "CrossFit FAQ: dumbbell versus kettlebell snatch starting positions",
+      "url": "https://www.crossfit.com/cf/faq"
+    },
+    {
+      "title": "Sandbag Fitness: Sandbag Shouldering movement definition",
+      "url": "https://www.sandbagfitnessstore.com/pages/sandbag-shouldering"
+    },
+    {
+      "title": "[P]rehab: Plank Body Saw demonstration",
+      "url": "https://theprehabguys.com/vimeo-video/plank-body-saw-2/"
+    },
+    {
+      "title": "Dynamic Sports Physical Therapy: TRX Hip Program, Knee Tuck",
+      "url": "https://www.dynamicsportspt.com/files/2012/04/TRX_Hip_Program.pdf"
+    },
+    {
+      "title": "ACE: TRX Biceps Curl",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/78/trx-reg-biceps-curl/"
+    },
+    {
+      "title": "ACE: TRX Overhead Triceps Extension",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/80/trx-reg-overhead-triceps-extension/"
+    },
+    {
+      "title": "[P]rehab: Sissy Squat, including hand support",
+      "url": "https://theprehabguys.com/vimeo-video/sissy-squat-2/"
+    },
+    {
+      "title": "ACE: Kettlebell Halo",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/394/halo/"
+    },
+    {
+      "title": "[P]rehab: Depth Drop",
+      "url": "https://theprehabguys.com/vimeo-video/depth-drop-2/"
+    },
+    {
+      "title": "NSCA Coach 3.1: Drop Landing versus Depth Jump, exercise progression",
+      "url": "https://www.nsca.com/contentassets/9dab08fc28274f3ba1d76af31bbbe40b/coach3.1-screening_and_preventing_common_injuries_in_division_i_basketball_players.pdf"
+    },
+    {
+      "title": "CrossFit: The Push Jerk",
+      "url": "https://www.crossfit.com/essentials/the-push-jerk"
+    },
+    {
+      "title": "CrossFit: The Hollow Rock",
+      "url": "https://www.crossfit.com/essentials/the-hollow-rock"
+    },
+    {
+      "title": "ACE: Supermans",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/9/supermans/"
+    },
+    {
+      "title": "TRX: Chest Fly",
+      "url": "https://www.trxtraining.com/blogs/news/trx-chest-fly"
+    },
+    {
+      "title": "CrossFit 2018 Team Series Event 8: Dumbbell Box Step-Over definition",
+      "url": "https://games-assets.crossfit.com/2018teamseries_event8_feetshneh76323bhwd.pdf"
+    },
+    {
+      "title": "GymnasticBodies: Body Lever / Dragon Flag",
+      "url": "https://www.gymnasticbodies.com/exercises/body-lever"
+    },
+    {
+      "title": "AAOS: Crossover Arm Stretch in shoulder conditioning program",
+      "url": "https://orthoinfo.aaos.org/globalassets/pdfs/2022-rotator-cuff-and-shoulder-conditioning-program.pdf"
+    },
+    {
+      "title": "ACE: Overhead Triceps Stretch",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/174/overhead-triceps-stretch/"
+    },
+    {
+      "title": "Cleveland Clinic: Wrist Flexor and Extensor Stretches",
+      "url": "https://health.clevelandclinic.org/wrist-pain-exercises"
+    },
+    {
+      "title": "ACE: bench-dip discussion and selection limitations",
+      "url": "https://www.acefitness.org/certifiednewsarticle/1657/follow-up-q-and-a-dangerous-dips/"
+    },
+    {
+      "title": "CrossFit: lesson-plan compilation, wall-facing handstand hold",
+      "url": "https://assets.crossfit.com/pdfs/seminars/LessonPlan_Compilation.pdf"
+    },
+    {
+      "title": "TRX: T Delt Fly and reverse-fly distinction",
+      "url": "https://www.trxtraining.com/blogs/news/trx-shoulder-exercises"
+    },
+    {
+      "title": "[P]rehab: Cat Cow",
+      "url": "https://theprehabguys.com/vimeo-video/cat-cow/"
+    },
+    {
+      "title": "[P]rehab: Open Book",
+      "url": "https://theprehabguys.com/vimeo-video/open-book/"
+    },
+    {
+      "title": "B3 Physical Therapy: Half Kneeling Ankle Rocking",
+      "url": "https://b3pt.com/half-kneeling-ankle-rocking/"
+    },
+    {
+      "title": "Advanced Therapy and Performance: 90 90 Hip Switches demonstration",
+      "url": "https://www.youtube.com/watch?v=YxECcOkUCEY"
+    },
+    {
+      "title": "[P]rehab: Supine Shoulder Flexion, PROM with Dowel",
+      "url": "https://theprehabguys.com/vimeo-video/supine-shoulder-flexion-prom-dowel/"
+    },
+    {
+      "title": "[P]rehab: Lower Trunk Rotation",
+      "url": "https://theprehabguys.com/vimeo-video/lower-trunk-rotation-2/"
+    },
+    {
+      "title": "MyHealth Alberta: Biceps stretch with optional wall support",
+      "url": "https://myhealth.alberta.ca/Health/aftercareinformation/pages/conditions.aspx?hwid=zp4494"
+    },
+    {
+      "title": "Rogue: Handheld wrist roller task and setup",
+      "url": "https://www.roguefitness.com/rogue-wrist-roller"
+    },
+    {
+      "title": "Essex Partnership University NHS: Isometric neck flexion definition",
+      "url": "https://www.eput.nhs.uk/wp-content/uploads/2025/03/a4whiplash.pdf"
+    },
+    {
+      "title": "[P]rehab: Adductor Rock Back",
+      "url": "https://theprehabguys.com/vimeo-video/quadruped-dynamic-long-adductor-stretch/"
+    },
+    {
+      "title": "[P]rehab: Thoracic Extension With Foam Roller",
+      "url": "https://theprehabguys.com/vimeo-video/thoracic-extension-mobilization/"
+    },
+    {
+      "title": "Merck Manual / Tomah Memorial Hospital: Supine Active Hamstring Stretch",
+      "url": "https://www.merckmanuals.com/professional/multimedia/video/supine-active-hamstring-stretch"
+    },
+    {
+      "title": "ACE: Front-to-back and side-to-side leg swings as dynamic warm-up movements",
+      "url": "https://www.acefitness.org/resources/everyone/blog/6240/why-the-change-of-season-can-be-good-for-your-running-program/?topicScope=cardiovascular-training"
+    },
+    {
+      "title": "Erson Religioso, DPT: Quadruped rocking into wrist extension",
+      "url": "https://www.themanualtherapist.com/2018/05/mini-case-when-is-wrist-pain-not-wrist.html"
+    },
+    {
+      "title": "[P]rehab: Supine Shoulder External Rotation, PROM with Dowel",
+      "url": "https://theprehabguys.com/vimeo-video/supine-shoulder-external-rotation-prom/"
+    },
+    {
+      "title": "Life Fitness: Insignia Torso Rotation",
+      "url": "https://www.lifefitness.com/en-us/catalog/strength-training/selectorized/insignia-series-torso-rotation"
+    },
+    {
+      "title": "Life Fitness: Insignia Back Extension",
+      "url": "https://www.lifefitness.com/en-us/catalog/strength-training/selectorized/insignia-series-back-extension"
+    },
+    {
+      "title": "Hammer Strength: Plate-Loaded Seated Dip",
+      "url": "https://www.lifefitness.com/en-us/catalog/strength-training/plate-loaded/plate-loaded-seated-dip"
+    },
+    {
+      "title": "CrossFit: American Kettlebell Swing with Jeff Martone",
+      "url": "https://www.crossfit.com/essentials/american-kettlebell-swing-with-jeff-martone"
+    },
+    {
+      "title": "Discovery: Athletics Coaching Manual, overhead forward throw (both arms)",
+      "url": "https://www.discovery.co.za/microsites_za/vitality_schools/web/linked_content/pdfs/for_coaches/athletics_coaching_manual.pdf"
+    },
+    {
+      "title": "World Athletics: Backward Overhead Throw",
+      "url": "https://worldathletics.org/en/kids-athletics/teaching-athletics/backward-overhead-throw"
+    },
+    {
+      "title": "University Hospitals Dorset NHS: Back booklet, single knee-to-chest movement",
+      "url": "https://www.uhd.nhs.uk/uploads/about/docs/our_publications/patient_information_leaflets/orthopaedics/Back_pain_booklet_Ortho.pdf"
+    },
+    {
+      "title": "[P]rehab: Prone Press Up",
+      "url": "https://theprehabguys.com/vimeo-video/prone-press-up/"
+    },
+    {
+      "title": "[P]rehab: Shoulder CARs",
+      "url": "https://theprehabguys.com/vimeo-video/shoulder-cars/"
+    },
+    {
+      "title": "[P]rehab: Hip CARs, Side Lying",
+      "url": "https://theprehabguys.com/vimeo-video/hip-cars-side-lying/"
+    },
+    {
+      "title": "AAOS: Foot and Ankle Conditioning, elastic-band dorsiflexion and plantar flexion",
+      "url": "https://www.orthoinfo.org/recovery/foot-and-ankle-conditioning-program/"
+    },
+    {
+      "title": "Fanshawe Fitness and Health Promotion: Stability Ball Pike",
+      "url": "https://fitnessandhealthpromotion.ca/exercise-database/entry/2352/"
+    },
+    {
+      "title": "[P]rehab: Side Plank, Hip Dip",
+      "url": "https://library.theprehabguys.com/vimeo-video/sideplank-hip-dip/"
+    },
+    {
+      "title": "Physitrack: Lateral Box Jump",
+      "url": "https://ca.physitrack.com/home-exercise-video/lateral-box-jump"
+    },
+    {
+      "title": "NASM: Tuck Jump",
+      "url": "https://www.nasm.org/resource-center/exercise-library/tuck-jump"
+    },
+    {
+      "title": "ACE: Seated Butterfly Stretch",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/216/seated-butterfly-stretch/"
+    },
+    {
+      "title": "[P]rehab: Frog Stretch, Dynamic",
+      "url": "https://theprehabguys.com/vimeo-video/frog-stretch-dynamic/"
+    },
+    {
+      "title": "NHS: Flexibility Exercises, seated neck rotation",
+      "url": "https://www.nhs.uk/live-well/exercise/flexibility-exercises/"
+    },
+    {
+      "title": "Royal Berkshire NHS: Ankle Range of Movement, ankle circles",
+      "url": "https://www.royalberkshire.nhs.uk/media/iz3hdgmm/ankle-range-of-movement-exercises_dec25.pdf"
+    },
+    {
+      "title": "NASM: Archer Push-Up, floor movement description",
+      "url": "https://www.nasm.org/resource-center/exercise-library/archer-push-up"
+    },
+    {
+      "title": "Ken Mannie, Coach and Athletic Director: Seated rope sled pull",
+      "url": "https://coachad.com/articles/powerline-learning-the-ropes/"
+    },
+    {
+      "title": "EarthFIT Coach Sam: Backward sled drag and strap handles",
+      "url": "https://earthfittraining.com/2022/06/10/how-to-backward-sled-drag/"
+    },
+    {
+      "title": "ACE: Battle Rope Ready, alternating arm waves",
+      "url": "https://www.acefitness.org/continuing-education/certified/march-2023/8267/battle-rope-ready-a-research-based-workout/"
+    },
+    {
+      "title": "ACE: Mountain Climbers",
+      "url": "https://www.acefitness.org/resources/everyone/exercise-library/258/mountain-climbers/"
+    },
+    {
+      "title": "CrossFit: The Burpee, chest-to-floor and jump finish",
+      "url": "https://www.crossfit.com/essentials/the-burpee"
+    },
+    {
+      "title": "NASM: Jumping Jacks",
+      "url": "https://www.nasm.org/resource-center/exercise-library/jumping-jacks"
+    },
+    {
+      "title": "CrossFit: The Dumbbell Hang Power Clean",
+      "url": "https://www.crossfit.com/essentials/the-dumbbell-hang-power-clean"
+    },
+    {
+      "title": "Mike Rutherford, CrossFit Journal: Dumbbell Bear, bilateral hang power clean component",
+      "url": "https://library.crossfit.com/free/pdf/58_07_Dumbbell_Bear.pdf"
+    },
+    {
+      "title": "Gateshead Health NHS: Heel slide movement identity",
+      "url": "https://www.gatesheadhealth.nhs.uk/resources/soft-tissue-knee-injury/"
+    },
+    {
+      "title": "South Tees Hospitals NHS: Kneeling exercises, Thread the needle",
+      "url": "https://www.southtees.nhs.uk/services/back-pain/backtracks/kneeling-exercises/"
+    },
+    {
+      "title": "ACE: Jumping Rope, basic rope-jump task",
+      "url": "https://contentcdn.eacefitness.com/assets/education-resources/lifestyle/fitfacts/pdfs/fitfacts/itemid_2688.pdf"
+    },
+    {
+      "title": "ACE: Crab walks, face-up hand-and-foot support",
+      "url": "https://www.acefitness.org/resources/everyone/blog/5055/youth-fitness-resistance-training/"
+    },
+    {
+      "title": "Special Olympics: High Knees, in-place running",
+      "url": "https://resources.specialolympics.org/health/fitness/fitness-for-sports-coaches/high-knees"
+    },
+    {
+      "title": "U.S. Marshals Service: FIT Readiness Program, supine flutter kicks on PDF page 82",
+      "url": "https://www.usmarshals.gov/sites/default/files/media/document/FIT-readiness-program.pdf"
+    },
+    {
+      "title": "Catalyst Athletics: Hanging Windshield Wiper",
+      "url": "https://www.catalystathletics.com/exercise/44/Windshield-Wiper/"
+    },
+    {
+      "title": "[P]rehab: Wall Angel",
+      "url": "https://theprehabguys.com/vimeo-video/wall-angel/"
+    },
+    {
+      "title": "AAOS: Shoulder conditioning, Sleeper Stretch movement identity",
+      "url": "https://www.orthoinfo.org/recovery/rotator-cuff-and-shoulder-conditioning-program"
     }
   ],
   "limitations": [
@@ -7606,11 +10202,1326 @@
       "sourceChanges": [
         "The release also applies the reviewed no-spinal-erector override to Machine Abdominal Crunch and Bicycle Crunch, extending the same regression check to all five selected crunch standards."
       ]
+    },
+    {
+      "id": "project-quality-batch-17",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Single-Arm Kettlebell Snatch",
+        "Barbell Split Jerk"
+      ],
+      "reasons": {
+        "Single-Arm Kettlebell Snatch": "Adds a single-bell backswing-to-overhead task. The existing kettlebell clean finishes in the rack, while barbell snatches use a different implement and bilateral setup.",
+        "Barbell Split Jerk": "Adds the standalone front-rack-to-overhead jerk with a split catch. It can be prescribed without a preceding clean and differs from the existing push press and continuous squat-to-press thruster."
+      },
+      "deferred": [
+        {
+          "candidate": "Forward Sled Push",
+          "reason": "The legacy Sled Marching entry may already denote this task; resolve that identity before adding a duplicate. Dedicated distance prescription is also unavailable."
+        },
+        {
+          "candidate": "Additional jerk, snatch, stance and implement permutations",
+          "reason": "Not added merely to multiply an established task. Review a separate coaching need before adding more variants."
+        }
+      ],
+      "references": [
+        {
+          "title": "CrossFit: kettlebell snatch movement definition",
+          "url": "https://www.crossfit.com/essentials/the-kettlebell-snatch"
+        },
+        {
+          "title": "NCSF: Teaching Techniques for Overhead Ballistics",
+          "url": "https://www.ncsf.org/pdf/ceu/teaching_techniques_for_overhead_ballistics.pdf"
+        },
+        {
+          "title": "NSCA / Human Kinetics: Exercise Technique Manual, fourth edition (Split Jerk listed)",
+          "url": "https://us.humankinetics.com/products/exercise-technique-manual-for-resistance-training-4th-edition-with-hkpropel-online-video"
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 225,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 254
+      }
+    },
+    {
+      "id": "project-quality-batch-18",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Seated Banded Leg Extension",
+        "Banded Straight-Arm Pulldown"
+      ],
+      "reasons": {
+        "Seated Banded Leg Extension": "A seated, band-resisted knee-extension option without a leg-extension machine. Its ankle/foot resistance and larger knee excursion distinguish it from the existing standing terminal knee extension with a band behind the knee.",
+        "Banded Straight-Arm Pulldown": "An elastic-resistance substitute when a cable station is unavailable. The straight-arm shoulder movement differs from the existing elbow-bending band lat pulldown and triceps pushdown."
+      },
+      "references": [
+        {
+          "title": "Bexley MSK NHS: resisted seated knee extension",
+          "url": "https://msk-bexley.nhs.uk/conditions/knee-pain/knee-osteoarthritis"
+        },
+        {
+          "title": "Gonex equipment exercise demonstration: straight-arm band pulldown",
+          "url": "https://www.gonexsport.com/pages/fitness-video-26"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Seal Row / Barbell Box Squat",
+          "reason": "Already represented by Bench Pull (Seal Row alias) and Box Squat; no new canonical rows needed."
+        },
+        {
+          "candidate": "Band colors, grips and anchor-height permutations",
+          "reason": "Record setup in notes; these do not warrant separate exercises."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 226,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 256
+      }
+    },
+    {
+      "id": "project-quality-batch-19",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Meadows Row",
+        "Barbell JM Press"
+      ],
+      "reasons": {
+        "Meadows Row": "Adds a unilateral row performed side-on to the loaded end of an anchored barbell. This setup differs from the existing bilateral landmine T-bar row and free-moving dumbbell row.",
+        "Barbell JM Press": "Adds the named triceps accessory with its distinct elbow/bar path between pressing and lying extension. It is not another name for the existing close-grip bench press or skull crusher."
+      },
+      "references": [
+        {
+          "title": "John Meadows: Master the Meadows Row",
+          "url": "https://archive.t-nation.com/training/tip-master-the-meadows-row/"
+        },
+        {
+          "title": "EliteFTS: official JM Blakley instruction linked in JM Press section",
+          "url": "https://elitefts.com/blogs/training/build-bench-with-tricep-exercises"
+        },
+        {
+          "title": "JM Blakley / EliteFTS: The Official JM Press Tutorial",
+          "url": "https://www.youtube.com/watch?v=hOCW9cE-GJg"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Barbell Floor Press / Two-Arm Dumbbell Floor Press",
+          "reason": "Already present as Floor Press and DB Floor Press. Added implement-specific aliases without new rows or renamed history."
+        },
+        {
+          "candidate": "Smith-machine, dumbbell, chains and band versions of JM press; more landmine row handles",
+          "reason": "No separate selection need established for this batch. Keep one defined version of each new task."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 227,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 258
+      }
+    },
+    {
+      "id": "project-quality-batch-20",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Barbell Upright Row",
+        "Barbell Z Press"
+      ],
+      "reasons": {
+        "Barbell Upright Row": "Adds the controlled upward shoulder-pull task, distinct from shoulder shrugs, lateral raises and the existing explosive clean/snatch high pulls. One barbell version is defined rather than a series of grip and implement variants.",
+        "Barbell Z Press": "Adds an unsupported long-sitting overhead press from the floor. The support and lower-body setup differ from the existing standing and bench-seated presses; it is not a supine floor bench press."
+      },
+      "references": [
+        {
+          "title": "NSCA / Human Kinetics upright-row technique excerpt, Coaches Association of Ontario",
+          "url": "https://www.coachesontario.ca/articles/breaking-down-the-upright-row/"
+        },
+        {
+          "title": "Catalyst Athletics: Z-Press exercise definition",
+          "url": "https://www.catalystathletics.com/exercise/914/Z-Press/"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Additional upright-row grips, cable/dumbbell versions and Z-press implements",
+          "reason": "No further coaching selection need established; prescribe setup in notes rather than add permutations."
+        },
+        {
+          "candidate": "High Pull as an upright-row alias / Floor Press as a Z-press alias",
+          "reason": "These broad terms would conflate different tasks and split or misdirect exercise selection/history. Retain existing high pulls and floor presses separately."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 228,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 260
+      }
+    },
+    {
+      "id": "project-quality-batch-21",
+      "date": "2026-10-24",
+      "newCatalogEntries": 3,
+      "names": [
+        "Squat Jump (Static Start)",
+        "Depth Jump",
+        "Wall-Ball Shot"
+      ],
+      "reasons": {
+        "Squat Jump (Static Start)": "Adds the static-start vertical jump without a preparatory dip, distinct from the existing countermovement jump. This is a recognized jump task, not a separate arbitrary tempo label on every squat.",
+        "Depth Jump": "Adds the drop-to-ground then vertical-rebound task. It differs from jumping onto a box and from landing-and-holding drills. One rebound standard is added without height or contact-time permutations.",
+        "Wall-Ball Shot": "Adds the linked medicine-ball squat-to-wall-target throw and catch. It is distinct from chest passes, scoop tosses and barbell thrusters."
+      },
+      "references": [
+        {
+          "title": "NSCA / Human Kinetics: static vertical squat-jump definition",
+          "url": "https://us.humankinetics.com/blogs/excerpt/maximum-muscular-power-high-speed-strength-test-protocol-squat-jump-static-vertical-jump"
+        },
+        {
+          "title": "NSCA: Basics of Strength and Conditioning Manual, Depth Jump",
+          "url": "https://www.nsca.com/contentassets/116c55d64e1343d2b264e05aaf158a91/basics_of_strength_and_conditioning_manual.pdf"
+        },
+        {
+          "title": "CrossFit: The Wall-Ball Shot movement definition",
+          "url": "https://www.crossfit.com/essentials/the-wall-ball"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Separate rows for each drop height, ball mass or target height",
+          "reason": "These are prescription/setup details, not new exercises."
+        },
+        {
+          "candidate": "Drop Jump as a universal Depth Jump alias",
+          "reason": "Different coaching/testing protocols use the term for different contact-time goals. Keep this entry explicitly a drop-to-vertical-rebound depth jump."
+        },
+        {
+          "candidate": "Automatic jump testing, ground-contact counts and wall-ball circuit scoring",
+          "reason": "Current prescription/logging fields support repetitions and load, not force-platform data, contact time, target validation or interval scoring."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 229,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 262
+      }
+    },
+    {
+      "id": "project-quality-batch-22",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Single-Arm Kettlebell Suitcase Deadlift",
+        "Sandbag Bear Hug Squat"
+      ],
+      "reasons": {
+        "Single-Arm Kettlebell Suitcase Deadlift": "Adds a stationary two-foot hinge with one bell held beside the body. Its asymmetric loading differs from the existing centered kettlebell deadlift, single-leg hinges and suitcase carry/march tasks.",
+        "Sandbag Bear Hug Squat": "Adds a squat with a bag embraced against the torso, enabling a practical odd-object loading option. The existing sandbag carry is locomotion, while front/goblet squats use different load support and equipment."
+      },
+      "references": [
+        {
+          "title": "Cathal Fanning / Independent Personal Trainers: Suitcase Deadlift",
+          "url": "https://www.independentpersonaltrainers.org/wp-content/uploads/2023/12/38.-Suitcase-Deadlift-Booklet.pdf"
+        },
+        {
+          "title": "StrongFirst / Pavel Macek: suitcase deadlift among kettlebell hinge progressions",
+          "url": "https://www.strongfirst.com/3-month-plan-for-beginner-group-lessons/"
+        },
+        {
+          "title": "Sandbag Fitness: Sandbag Bear Hug Squat movement definition",
+          "url": "https://www.sandbagfitnessstore.com/pages/sandbag-bear-hug-squat"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Dumbbell/barbell suitcase deadlifts and sandbag shoulder/front-hold squat permutations",
+          "reason": "Start with one explicit version of each missing task rather than multiplying implements and holding positions."
+        },
+        {
+          "candidate": "Further suitcase carries and bear-hug carries",
+          "reason": "These tasks already exist; they must not be reintroduced as additions or aliases for the stationary lifts."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 230,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 265
+      }
+    },
+    {
+      "id": "project-quality-batch-23",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Ring Support Hold (Top)",
+        "Strict Ring Muscle-Up"
+      ],
+      "reasons": {
+        "Ring Support Hold (Top)": "Adds the timed straight-arm top support task on rings, rather than another dip repetition or a hanging drill. It provides a separately prescribable support-strength task using the existing Seconds metric.",
+        "Strict Ring Muscle-Up": "Adds the linked pull, transition and dip skill. The transition distinguishes it from separately prescribing the existing ring pull-up and ring dip. Strict execution is explicit rather than conflating kipping or assisted versions."
+      },
+      "references": [
+        {
+          "title": "Roger Harrell / CrossFit Journal: Got Rings? Now What? (The support)",
+          "url": "https://library.crossfit.com/free/pdf/44_06_GotRings_NowWhat.pdf"
+        },
+        {
+          "title": "Pamela Gagnon / CrossFit: ring muscle-up strength and skill breakdown",
+          "url": "https://www.crossfit.com/essentials/crossfit-ring-muscle-up-rx-plan"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Kipping/bar muscle-ups, assisted transitions and ring-turnout permutations",
+          "reason": "Not interchangeable with the two defined tasks. No further selection need established for this batch; do not multiply skill variations merely to reach the target."
+        },
+        {
+          "candidate": "Fixed-bar support holds or additional ring dips/pull-ups",
+          "reason": "The existing ring dips/pull-ups remain intact; apparatus changes or a different support task require separate review."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 231,
+        "testConcurrency": 2,
+        "testNote": "Initial default-concurrency run exhausted process memory in two unrelated PGlite security-test files; complete suite passed with concurrency limited to two, without code changes.",
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 267
+      }
+    },
+    {
+      "id": "project-quality-batch-24",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Seated Banded Hip Abduction",
+        "Standing Banded Hip Adduction"
+      ],
+      "reasons": {
+        "Seated Banded Hip Abduction": "Adds seated outward hip work using a loop band and chair instead of an abduction machine. It is a practical equipment substitution, distinct from the existing side-lying clamshell and band-walking tasks.",
+        "Standing Banded Hip Adduction": "Adds anchored inward hip work without a cable stack or adduction machine. Standing unilateral movement differs from the existing side-lying bodyweight option."
+      },
+      "references": [
+        {
+          "title": "Prehab exercise demonstration: seated hip abduction with band",
+          "url": "https://theprehabguys.com/vimeo-video/seated-hip-abduction-band/"
+        },
+        {
+          "title": "University of Melbourne: standing resistance-band adduction (HAD2)",
+          "url": "https://healthsciences.unimelb.edu.au/departments/physiotherapy/chesm/video-library/exercise/hip-oa/hip-adductor-exercises"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "More band colors, seated trunk angles, loop placements and anchored hip permutations",
+          "reason": "Record setup and resistance identity in notes. These do not justify separate catalog rows for this batch."
+        },
+        {
+          "candidate": "Additional clamshells and band walks",
+          "reason": "Already represented in the project catalog. Do not re-add them under alternative names."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 232,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 269
+      }
+    },
+    {
+      "id": "project-quality-batch-25",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "V-Up",
+        "Supine Adductor Squeeze (Ball)"
+      ],
+      "reasons": {
+        "V-Up": "Adds linked trunk and straight-leg flexion from the floor, distinct from the existing bent-knee floor sit-up, lying leg raise and static hollow/L-sit holds.",
+        "Supine Adductor Squeeze (Ball)": "Adds a low-equipment isometric inward hip squeeze with bent knees and a compressible ball. It differs from a moving band/cable adduction task and the supported Copenhagen plank."
+      },
+      "references": [
+        {
+          "title": "Rogue athlete demonstration: V-Ups",
+          "url": "https://www.roguefitness.com/gb/theindex/movement-library/movement-demo-v-ups"
+        },
+        {
+          "title": "University of Melbourne: crook-lying leg squeeze (HAD1)",
+          "url": "https://healthsciences.unimelb.edu.au/departments/physiotherapy/chesm/video-library/exercise/hip-oa/hip-adductor-exercises"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Weighted, single-leg and tuck V-up permutations",
+          "reason": "First define the common linked floor movement; no need to multiply load or limb variations."
+        },
+        {
+          "candidate": "More ball sizes, squeeze tools and postures",
+          "reason": "Document setup in notes. Tool dimensions and compressibility do not create new canonical exercises."
+        },
+        {
+          "candidate": "Automatic squeeze-force or bodyweight-volume estimates",
+          "reason": "Ball mass does not measure squeeze resistance, and the existing app does not measure compression force."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 233,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 271
+      }
+    },
+    {
+      "id": "project-quality-batch-26",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Single-Arm Dumbbell Snatch (From Floor)",
+        "Sandbag Ground-to-Shoulder"
+      ],
+      "reasons": {
+        "Single-Arm Dumbbell Snatch (From Floor)": "Adds a one-dumbbell floor-to-overhead lift, a practical selection when dumbbells rather than kettlebells or a barbell are available. The floor start and implement distinguish it from the existing kettlebell swing-based snatch and barbell snatches.",
+        "Sandbag Ground-to-Shoulder": "Adds an odd-object floor-to-shoulder lift with a shoulder-supported finish. It differs from the existing sandbag carry/squat and is not an over-the-shoulder toss or an overhead lift."
+      },
+      "references": [
+        {
+          "title": "CrossFit FAQ: dumbbell versus kettlebell snatch starting positions",
+          "url": "https://www.crossfit.com/cf/faq"
+        },
+        {
+          "title": "Sandbag Fitness: Sandbag Shouldering movement definition",
+          "url": "https://www.sandbagfitnessstore.com/pages/sandbag-shouldering"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Separate dumbbell hang, squat-catch and alternating-only snatch entries",
+          "reason": "No extra variants added to inflate the count. The selected entry explicitly starts on the floor; the coach records receiving position and side scheme."
+        },
+        {
+          "candidate": "Sandbag over-shoulder toss, front-rack clean, clean-and-press and grip permutations",
+          "reason": "Different finishes and combinations are not aliases for shouldering. Review a separate need before adding more linked variations."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 234,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 273
+      }
+    },
+    {
+      "id": "project-quality-batch-27",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Plank Body Saw",
+        "Suspension Knee Tuck"
+      ],
+      "reasons": {
+        "Plank Body Saw": "Adds forward/backward travel in a forearm plank, distinct from a static plank, shoulder tap and kneeling rollout. This entry uses the floor/toes setup rather than requiring sliders.",
+        "Suspension Knee Tuck": "Adds a prone, feet-in-straps knee tuck. It differs from supine suspension hamstring curls, hanging knee raises and floor V-ups; it does not require an added push-up."
+      },
+      "references": [
+        {
+          "title": "[P]rehab: Plank Body Saw demonstration",
+          "url": "https://theprehabguys.com/vimeo-video/plank-body-saw-2/"
+        },
+        {
+          "title": "Dynamic Sports Physical Therapy: TRX Hip Program, Knee Tuck",
+          "url": "https://www.dynamicsportspt.com/files/2012/04/TRX_Hip_Program.pdf"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Separate slider and suspension body-saw variants",
+          "reason": "Add the floor version first. Equipment permutations are not needed solely to increase catalog size."
+        },
+        {
+          "candidate": "Knee-tuck/push-up combinations and suspension pike variations",
+          "reason": "Combinations and straight-leg pikes are different tasks, not aliases. No demonstrated need for extra linked variants in this batch."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 235,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 275
+      }
+    },
+    {
+      "id": "project-quality-batch-28",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Suspension Biceps Curl",
+        "Suspension Overhead Triceps Extension"
+      ],
+      "reasons": {
+        "Suspension Biceps Curl": "Fills a strap-based elbow-flexion gap for sessions without free weights or a cable stack. Unlike a suspension row, the upper arms stay forward while elbow flexion brings the hands toward the forehead.",
+        "Suspension Overhead Triceps Extension": "Fills the strap-based overhead elbow-extension gap. The handles move with the athlete, unlike the existing fixed-bar bodyweight extension; it also differs from cable/band-resisted overhead extensions."
+      },
+      "references": [
+        {
+          "title": "ACE: TRX Biceps Curl",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/78/trx-reg-biceps-curl/"
+        },
+        {
+          "title": "ACE: TRX Overhead Triceps Extension",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/80/trx-reg-overhead-triceps-extension/"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Suspension hammer, reverse, single-arm and grip-only curls",
+          "reason": "The common bilateral supinated curl fills the current gap. No extra grip or unilateral variants are needed for this batch."
+        },
+        {
+          "candidate": "Separate ring equivalents and kneeling triceps variants",
+          "reason": "Do not multiply support and posture permutations without a demonstrated coaching need."
+        },
+        {
+          "candidate": "Automatic resistance or 1RM estimates from suspension angle",
+          "reason": "The app does not measure strap force, anchor geometry or body angle. Effort and consistent setup can be prescribed without inventing kilograms or cable-stack equivalents."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 236,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 277
+      }
+    },
+    {
+      "id": "project-quality-batch-29",
+      "date": "2026-10-24",
+      "newCatalogEntries": 2,
+      "names": [
+        "Hand-Supported Sissy Squat",
+        "Kettlebell Halo"
+      ],
+      "reasons": {
+        "Hand-Supported Sissy Squat": "Adds a standing, hand-supported knee-extension task with a backward-leaning body. The feet/toes stay on the floor, unlike the kneeling Reverse Nordic Curl; it is not the constrained machine version or an upright supported squat.",
+        "Kettlebell Halo": "Adds a controlled around-the-head kettlebell path for shoulder preparation. It is distinct from the overhead press, windmill, Turkish get-up and around-the-waist pass."
+      },
+      "references": [
+        {
+          "title": "[P]rehab: Sissy Squat, including hand support",
+          "url": "https://theprehabguys.com/vimeo-video/sissy-squat-2/"
+        },
+        {
+          "title": "ACE: Kettlebell Halo",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/394/halo/"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Freestanding, weighted and machine sissy-squat variants",
+          "reason": "Add one clearly defined hand-supported option first. Support, range and loading changes require consistent setup, not extra names just for the target count."
+        },
+        {
+          "candidate": "Plate/dumbbell halos, kneeling halos and waist-level circles",
+          "reason": "No implement or posture permutations added. A waist-level orbit is a different task and is not used as an alias for the around-head halo."
+        },
+        {
+          "candidate": "Automatic direction counting and assisted bodyweight load estimates",
+          "reason": "The builder does not measure assistance, angle, range or movement direction. Use existing notes and reps; no estimated effective kilograms or automatic left/right totals."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 237,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 279
+      }
+    },
+    {
+      "id": "project-quality-batch-30",
+      "date": "2026-10-24",
+      "newCatalogEntries": 1,
+      "names": [
+        "Depth Drop (Stick Landing)"
+      ],
+      "reasons": {
+        "Depth Drop (Stick Landing)": "Adds a bilateral step-off-box landing with a deliberate hold and no rebound. The existing Depth Jump rebounds vertically, Box Jump lands on a box after takeoff, and step-downs keep one foot supported rather than dropping to land."
+      },
+      "references": [
+        {
+          "title": "[P]rehab: Depth Drop",
+          "url": "https://theprehabguys.com/vimeo-video/depth-drop-2/"
+        },
+        {
+          "title": "NSCA Coach 3.1: Drop Landing versus Depth Jump, exercise progression",
+          "url": "https://www.nsca.com/contentassets/9dab08fc28274f3ba1d76af31bbbe40b/coach3.1-screening_and_preventing_common_injuries_in_division_i_basketball_players.pdf"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Single-leg, lateral, rotational and box-height-specific depth drops",
+          "reason": "One clear bilateral landing task fills the gap. More landing variants need a demonstrated coaching need rather than a catalog-count target."
+        },
+        {
+          "candidate": "Drop Jump as a Depth Drop alias",
+          "reason": "Drop jump commonly denotes a rebound task. It would blur the distinction from Depth Jump and is deliberately excluded."
+        },
+        {
+          "candidate": "Automated landing quality, impact force, contact-time and reactive-strength scoring",
+          "reason": "The current builder records prescribed/completed reps, not force-plate or video-analysis measurements. No values or clearance rules are inferred."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 238,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 281
+      }
+    },
+    {
+      "id": "project-quality-batch-31",
+      "date": "2026-10-24",
+      "newCatalogEntries": 10,
+      "strengthEntries": 6,
+      "flexibilityEntries": 4,
+      "names": [
+        "Barbell Push Jerk",
+        "Hollow Body Rock",
+        "Superman Hold (Floor)",
+        "Suspension Chest Fly",
+        "Dumbbell Box Step-Over",
+        "Dragon Flag (Body Lever)",
+        "Static Cross-Body Shoulder Stretch",
+        "Static Overhead Triceps Stretch",
+        "Static Wrist Flexor Stretch",
+        "Static Wrist Extensor Stretch"
+      ],
+      "reasons": {
+        "Barbell Push Jerk": "Adds a shoulder-to-overhead lift received with a knee re-bend and parallel stance, distinct from Push Press and the split-stance jerk. No separate power-jerk synonym entry is added.",
+        "Hollow Body Rock": "Adds controlled rocking while retaining a hollow body shape, distinct from a static hollow hold, sit-up or V-up.",
+        "Superman Hold (Floor)": "Adds a prone arms-overhead and legs-raised hold, distinct from the arms-back Prone Cobra, quadruped Bird Dog and supported back extensions.",
+        "Suspension Chest Fly": "Adds chest isolation through an arm arc while supported by straps and body angle, distinct from elbow-bending ring push-ups and external-load cable/dumbbell flies.",
+        "Dumbbell Box Step-Over": "Adds a loaded traversal onto and across a box, finishing on the opposite side; existing step-ups return to their starting side.",
+        "Dragon Flag (Body Lever)": "Adds an anchored straight-body lever raised/lowered from shoulder support, distinct from hip-flexion leg raises and floor hollow holds.",
+        "Static Cross-Body Shoulder Stretch": "Adds a posterior-shoulder flexibility option across the chest, distinct from the doorway pectoral and overhead lat stretches.",
+        "Static Overhead Triceps Stretch": "Adds a held elbow-flexed overhead arm stretch, distinct from resisted overhead elbow extensions.",
+        "Static Wrist Flexor Stretch": "Adds a palm-side forearm flexibility option, distinct from loaded wrist curls and the opposing extensor stretch.",
+        "Static Wrist Extensor Stretch": "Adds the opposing back-of-forearm flexibility option, distinct from the flexor stretch and loaded wrist-extension exercise."
+      },
+      "references": [
+        {
+          "title": "CrossFit: The Push Jerk",
+          "url": "https://www.crossfit.com/essentials/the-push-jerk"
+        },
+        {
+          "title": "CrossFit: The Hollow Rock",
+          "url": "https://www.crossfit.com/essentials/the-hollow-rock"
+        },
+        {
+          "title": "ACE: Supermans",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/9/supermans/"
+        },
+        {
+          "title": "TRX: Chest Fly",
+          "url": "https://www.trxtraining.com/blogs/news/trx-chest-fly"
+        },
+        {
+          "title": "CrossFit 2018 Team Series Event 8: Dumbbell Box Step-Over definition",
+          "url": "https://games-assets.crossfit.com/2018teamseries_event8_feetshneh76323bhwd.pdf"
+        },
+        {
+          "title": "GymnasticBodies: Body Lever / Dragon Flag",
+          "url": "https://www.gymnasticbodies.com/exercises/body-lever"
+        },
+        {
+          "title": "AAOS: Crossover Arm Stretch in shoulder conditioning program",
+          "url": "https://orthoinfo.aaos.org/globalassets/pdfs/2022-rotator-cuff-and-shoulder-conditioning-program.pdf"
+        },
+        {
+          "title": "ACE: Overhead Triceps Stretch",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/174/overhead-triceps-stretch/"
+        },
+        {
+          "title": "Cleveland Clinic: Wrist Flexor and Extensor Stretches",
+          "url": "https://health.clevelandclinic.org/wrist-pain-exercises"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Additional grip, implement, pause and tempo variants",
+          "reason": "Prescribe those details on the existing exercise; they do not justify new catalog rows in this batch."
+        },
+        {
+          "candidate": "Tuck/one-leg dragon flags, hollow/arch rock permutations and separate Power Jerk entry",
+          "reason": "No progression ladders or potentially overlapping jerk names added for count. Record lever shape and footwork standards in notes."
+        },
+        {
+          "candidate": "Cardio/distance targets, body-angle effective loads, automatic two-dumbbell multipliers and medical protocols",
+          "reason": "No unsupported measurements, hidden load conversion or generic treatment prescription is introduced."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 240,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 282,
+        "unchangedPreviousCorrectiveEntries": 42,
+        "unchangedPreviousAliases": true
+      }
+    },
+    {
+      "id": "project-quality-batch-32",
+      "date": "2026-10-24",
+      "newCatalogEntries": 10,
+      "strengthEntries": 3,
+      "flexibilityEntries": 7,
+      "names": [
+        "Bench Dip",
+        "Wall-Facing Handstand Hold",
+        "Suspension Reverse Fly (T)",
+        "Cat-Cow",
+        "Side-Lying Thoracic Rotation (Open Book)",
+        "Half-Kneeling Ankle Dorsiflexion Rock",
+        "90/90 Hip Switch",
+        "Supine Shoulder Flexion (Dowel-Assisted)",
+        "Supine Lower Trunk Rotation",
+        "Static Biceps Stretch (Wall Support)"
+      ],
+      "reasons": {
+        "Bench Dip": "Adds feet-supported elbow extension with hands on a bench behind the body, distinct from suspended parallel-bar/ring dips and a forward-leaning fixed-bar triceps extension. It is a selectable task, not an automatic beginner regression.",
+        "Wall-Facing Handstand Hold": "Adds an isometric inverted overhead support task with the chest facing a wall, distinct from repeated handstand push-ups, a pike push-up and ring support.",
+        "Suspension Reverse Fly (T)": "Adds a strap-based horizontal-abduction/retraction task facing the anchor. It differs from elbow-bending suspension rows and from the chest fly facing away from the anchor.",
+        "Cat-Cow": "Adds controlled quadruped spinal flexion/extension mobility, distinct from opposite-limb Bird Dog, the prone Superman hold and static Child's Pose.",
+        "Side-Lying Thoracic Rotation (Open Book)": "Adds side-lying upper-trunk rotation while the bent knees remain stacked. It is distinct from loaded trunk rotation and from supine lower-trunk rotation.",
+        "Half-Kneeling Ankle Dorsiflexion Rock": "Adds repeated forward ankle-range practice with the heel supported, distinct from held calf stretches and tibialis toe raises.",
+        "90/90 Hip Switch": "Adds seated transitions between internal/external hip-rotation positions, distinct from static piriformis stretches and hip-strength isolation work.",
+        "Supine Shoulder Flexion (Dowel-Assisted)": "Adds an unloaded assisted overhead range task while lying down, distinct from serratus wall slides, loaded overhead presses and static lat stretches.",
+        "Supine Lower Trunk Rotation": "Adds knees-together lower-trunk rotation from a supine bent-knee position. It differs from the upper-trunk open-book rotation and resisted rotational work.",
+        "Static Biceps Stretch (Wall Support)": "Adds a wall-supported anterior-arm flexibility option, distinct from overhead triceps and forearm-only stretches."
+      },
+      "references": [
+        {
+          "title": "ACE: bench-dip discussion and selection limitations",
+          "url": "https://www.acefitness.org/certifiednewsarticle/1657/follow-up-q-and-a-dangerous-dips/"
+        },
+        {
+          "title": "CrossFit: lesson-plan compilation, wall-facing handstand hold",
+          "url": "https://assets.crossfit.com/pdfs/seminars/LessonPlan_Compilation.pdf"
+        },
+        {
+          "title": "TRX: T Delt Fly and reverse-fly distinction",
+          "url": "https://www.trxtraining.com/blogs/news/trx-shoulder-exercises"
+        },
+        {
+          "title": "[P]rehab: Cat Cow",
+          "url": "https://theprehabguys.com/vimeo-video/cat-cow/"
+        },
+        {
+          "title": "[P]rehab: Open Book",
+          "url": "https://theprehabguys.com/vimeo-video/open-book/"
+        },
+        {
+          "title": "B3 Physical Therapy: Half Kneeling Ankle Rocking",
+          "url": "https://b3pt.com/half-kneeling-ankle-rocking/"
+        },
+        {
+          "title": "Advanced Therapy and Performance: 90 90 Hip Switches demonstration",
+          "url": "https://www.youtube.com/watch?v=YxECcOkUCEY"
+        },
+        {
+          "title": "[P]rehab: Supine Shoulder Flexion, PROM with Dowel",
+          "url": "https://theprehabguys.com/vimeo-video/supine-shoulder-flexion-prom-dowel/"
+        },
+        {
+          "title": "[P]rehab: Lower Trunk Rotation",
+          "url": "https://theprehabguys.com/vimeo-video/lower-trunk-rotation-2/"
+        },
+        {
+          "title": "MyHealth Alberta: Biceps stretch with optional wall support",
+          "url": "https://myhealth.alberta.ca/Health/aftercareinformation/pages/conditions.aspx?hwid=zp4494"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Scapular dips and extra handstand orientations",
+          "reason": "Do not equate straight-arm scapular movement with elbow-bending dips, or a wall-facing hold with freestanding/back-to-wall holds. No extra support permutations added in this batch."
+        },
+        {
+          "candidate": "New diagnostic rules or activation maps for mobility drills",
+          "reason": "These are manually selected general range-of-motion tasks. Existing Stretch mode keeps them outside working-muscle mappings; their target labels do not match existing posture findings."
+        },
+        {
+          "candidate": "Forced end-range goals, post-surgery protocols and automatic body-angle load estimates",
+          "reason": "No medical protocol, universal range/duration, height, readiness rule, bodyweight-equivalent kilograms or source programming is imported."
+        },
+        {
+          "candidate": "Unreviewed source muscle tables",
+          "reason": "The reviewed NASM bench-dip page contains an unrelated lower-body/barbell muscle table. That table was not imported; catalog roles are reviewed independently and the ACE discussion supplies context."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 242,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 288,
+        "unchangedPreviousCorrectiveEntries": 46,
+        "unchangedPreviousAliases": true,
+        "newAutomaticPostureMatches": 0
+      }
+    },
+    {
+      "id": "project-quality-batch-33",
+      "date": "2026-10-24",
+      "newCatalogEntries": 10,
+      "strengthEntries": 3,
+      "flexibilityEntries": 7,
+      "names": [
+        "Rubber-Band Finger Opening",
+        "Wrist Roller (Handheld)",
+        "Neck Isometric Flexion (Hand Resistance)",
+        "Quadruped Adductor Rockback",
+        "Thoracic Extension (Foam Roller)",
+        "Supine Active Hamstring Stretch",
+        "Standing Leg Swing (Front-to-Back)",
+        "Standing Leg Swing (Side-to-Side)",
+        "Quadruped Wrist Extension Rock",
+        "Supine Shoulder External Rotation (Dowel-Assisted)"
+      ],
+      "reasons": {
+        "Rubber-Band Finger Opening": "Adds resisted hand opening rather than closing a gripper, pinching plates or moving the wrist. It covers a distinct finger-extensor task with simple equipment.",
+        "Wrist Roller (Handheld)": "Adds repeated winding/unwinding of a suspended load with a handheld roller, distinct from isolated wrist curls and static grip holds.",
+        "Neck Isometric Flexion (Hand Resistance)": "Adds a stationary forehead-against-hand contraction, distinct from cervical retraction/chin tucks. It uses an explicit duration, without a guessed resistance value.",
+        "Quadruped Adductor Rockback": "Adds controlled backward hip travel with one leg extended sideways, distinct from a standing adductor stretch, Cossack squat and seated hip switch.",
+        "Thoracic Extension (Foam Roller)": "Adds extension over a positioned roller, distinct from thoracic soft-tissue rolling/massage and quadruped Cat-Cow.",
+        "Supine Active Hamstring Stretch": "Adds active knee straightening with the thigh supported in a supine position, distinct from the existing passive band-assisted hamstring stretch.",
+        "Standing Leg Swing (Front-to-Back)": "Adds supported sagittal-plane leg mobility, distinct from resisted hip flexion, squat work and rotational hip switches.",
+        "Standing Leg Swing (Side-to-Side)": "Adds frontal-plane leg mobility across/out from the body, distinct from front-to-back swings and resisted band walks.",
+        "Quadruped Wrist Extension Rock": "Adds progressive palm-supported wrist-range practice using body travel, distinct from a passive wrist-flexor stretch or loaded wrist curls.",
+        "Supine Shoulder External Rotation (Dowel-Assisted)": "Adds assisted outward shoulder rotation while supine, distinct from dowel-assisted flexion and resisted cable/band external rotation."
+      },
+      "references": [
+        {
+          "title": "Cleveland Clinic: Finger spring with a rubber band",
+          "url": "https://health.clevelandclinic.org/wrist-pain-exercises"
+        },
+        {
+          "title": "Rogue: Handheld wrist roller task and setup",
+          "url": "https://www.roguefitness.com/rogue-wrist-roller"
+        },
+        {
+          "title": "Essex Partnership University NHS: Isometric neck flexion definition",
+          "url": "https://www.eput.nhs.uk/wp-content/uploads/2025/03/a4whiplash.pdf"
+        },
+        {
+          "title": "[P]rehab: Adductor Rock Back",
+          "url": "https://theprehabguys.com/vimeo-video/quadruped-dynamic-long-adductor-stretch/"
+        },
+        {
+          "title": "[P]rehab: Thoracic Extension With Foam Roller",
+          "url": "https://theprehabguys.com/vimeo-video/thoracic-extension-mobilization/"
+        },
+        {
+          "title": "Merck Manual / Tomah Memorial Hospital: Supine Active Hamstring Stretch",
+          "url": "https://www.merckmanuals.com/professional/multimedia/video/supine-active-hamstring-stretch"
+        },
+        {
+          "title": "ACE: Front-to-back and side-to-side leg swings as dynamic warm-up movements",
+          "url": "https://www.acefitness.org/resources/everyone/blog/6240/why-the-change-of-season-can-be-good-for-your-running-program/?topicScope=cardiovascular-training"
+        },
+        {
+          "title": "Erson Religioso, DPT: Quadruped rocking into wrist extension",
+          "url": "https://www.themanualtherapist.com/2018/05/mini-case-when-is-wrist-pain-not-wrist.html"
+        },
+        {
+          "title": "[P]rehab: Supine Shoulder External Rotation, PROM with Dowel",
+          "url": "https://theprehabguys.com/vimeo-video/supine-shoulder-external-rotation-prom/"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Finger-by-finger, band-brand and roller grip/direction permutations",
+          "reason": "One hand-opening task and one handheld roller task fill distinct gaps. Use setup notes rather than extra rows for resistance tools and winding direction."
+        },
+        {
+          "candidate": "Neck extension/lateral-flexion mappings and automatic neck-loading progressions",
+          "reason": "Only the supported neck-flexor group is mapped. No unrepresented anatomy is relabelled and no treatment, force or progression rules are inferred."
+        },
+        {
+          "candidate": "Universal range, rep tempo, clinical protocols and source treatment doses",
+          "reason": "Definitions establish movement identity only. Coaches choose appropriate use and prescription; no medical routine, source schedule or guaranteed outcome is imported."
+        },
+        {
+          "candidate": "Massaging and extending on a roller as one interchangeable task",
+          "reason": "Preserve the existing SMR entry and add a separate mobility entry. Generic roller searches may show both, with the exact task ranked first."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 244,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 291,
+        "unchangedPreviousCorrectiveEntries": 53,
+        "unchangedPreviousAliases": true,
+        "newAutomaticPostureMatches": 0
+      }
+    },
+    {
+      "id": "project-quality-batch-34",
+      "date": "2026-10-24",
+      "newCatalogEntries": 10,
+      "strengthEntries": 6,
+      "flexibilityEntries": 4,
+      "names": [
+        "Rotary Torso Machine",
+        "Seated Lumbar Extension Machine",
+        "Seated Dip Machine (Plate-Loaded)",
+        "American Kettlebell Swing (Overhead)",
+        "Medicine Ball Overhead Forward Throw",
+        "Medicine Ball Overhead Backward Throw",
+        "Supine Single-Knee-to-Chest Stretch",
+        "Prone Press-Up (Lumbar Mobility)",
+        "Standing Shoulder CAR",
+        "Side-Lying Hip CAR"
+      ],
+      "reasons": {
+        "Rotary Torso Machine": "Adds a seated, externally resisted trunk-rotation machine task, distinct from cable chops and anti-rotation holds.",
+        "Seated Lumbar Extension Machine": "Adds supported seated lumbar extension, distinct from hip-hinge back extensions on a 45-degree or horizontal bench.",
+        "Seated Dip Machine (Plate-Loaded)": "Adds a seated loaded-handle press, distinct from assisted bodyweight dips and isolated machine triceps extensions.",
+        "American Kettlebell Swing (Overhead)": "Adds an explicitly overhead two-handed swing finish while preserving the existing Russian swing identity and aliases.",
+        "Medicine Ball Overhead Forward Throw": "Adds a two-handed overhead forward throw, distinct from downward slams, chest passes and backward throws.",
+        "Medicine Ball Overhead Backward Throw": "Adds a backward overhead trajectory driven by leg and hip extension, distinct from forward throws and generic scoop tosses.",
+        "Supine Single-Knee-to-Chest Stretch": "Adds single-leg supine hip-flexion mobility, distinct from a piriformis rotation stretch and active hamstring knee extension.",
+        "Prone Press-Up (Lumbar Mobility)": "Adds hand-assisted prone lumbar extension, distinct from the existing Press Up push-up, Prone Cobra and Superman Hold.",
+        "Standing Shoulder CAR": "Adds controlled standing shoulder circumduction, distinct from resisted shoulder rotation, raises and static stretches.",
+        "Side-Lying Hip CAR": "Adds controlled hip circumduction in a supported side-lying position, distinct from seated hip switches and loaded hip-airplane balance work."
+      },
+      "references": [
+        {
+          "title": "Life Fitness: Insignia Torso Rotation",
+          "url": "https://www.lifefitness.com/en-us/catalog/strength-training/selectorized/insignia-series-torso-rotation"
+        },
+        {
+          "title": "Life Fitness: Insignia Back Extension",
+          "url": "https://www.lifefitness.com/en-us/catalog/strength-training/selectorized/insignia-series-back-extension"
+        },
+        {
+          "title": "Hammer Strength: Plate-Loaded Seated Dip",
+          "url": "https://www.lifefitness.com/en-us/catalog/strength-training/plate-loaded/plate-loaded-seated-dip"
+        },
+        {
+          "title": "CrossFit: American Kettlebell Swing with Jeff Martone",
+          "url": "https://www.crossfit.com/essentials/american-kettlebell-swing-with-jeff-martone"
+        },
+        {
+          "title": "Discovery: Athletics Coaching Manual, overhead forward throw (both arms)",
+          "url": "https://www.discovery.co.za/microsites_za/vitality_schools/web/linked_content/pdfs/for_coaches/athletics_coaching_manual.pdf"
+        },
+        {
+          "title": "World Athletics: Backward Overhead Throw",
+          "url": "https://worldathletics.org/en/kids-athletics/teaching-athletics/backward-overhead-throw"
+        },
+        {
+          "title": "University Hospitals Dorset NHS: Back booklet, single knee-to-chest movement",
+          "url": "https://www.uhd.nhs.uk/uploads/about/docs/our_publications/patient_information_leaflets/orthopaedics/Back_pain_booklet_Ortho.pdf"
+        },
+        {
+          "title": "[P]rehab: Prone Press Up",
+          "url": "https://theprehabguys.com/vimeo-video/prone-press-up/"
+        },
+        {
+          "title": "[P]rehab: Shoulder CARs",
+          "url": "https://theprehabguys.com/vimeo-video/shoulder-cars/"
+        },
+        {
+          "title": "[P]rehab: Hip CARs, Side Lying",
+          "url": "https://theprehabguys.com/vimeo-video/hip-cars-side-lying/"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Machine-brand, handle-grip and facing-direction permutations",
+          "reason": "Record the machine and setup in notes instead of creating near-duplicate entries or assuming equal resistance between machines."
+        },
+        {
+          "candidate": "Extra CAR positions and unqualified Cobra or Press-Up aliases",
+          "reason": "One shoulder and one supported hip circumduction task fill the gap. Preserve existing push-up search priority and avoid ambiguous names."
+        },
+        {
+          "candidate": "Throw distance, velocity, power output and machine/free-weight max conversion",
+          "reason": "Current prescription supports repetitions and external load, not these measurements. No invented values or equivalence ratios are added."
+        },
+        {
+          "candidate": "Clinical mobility protocols, automatic posture matches and fixed end ranges",
+          "reason": "References identify the movement only. General mobility labels add no diagnostic or automatic corrective prescription rules."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 246,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 294,
+        "unchangedPreviousCorrectiveEntries": 60,
+        "unchangedPreviousAliases": true,
+        "newAutomaticPostureMatches": 0
+      }
+    },
+    {
+      "id": "project-quality-batch-35",
+      "date": "2026-10-24",
+      "newCatalogEntries": 10,
+      "strengthEntries": 6,
+      "flexibilityEntries": 4,
+      "names": [
+        "Seated Banded Ankle Plantarflexion",
+        "Seated Banded Ankle Dorsiflexion",
+        "Stability Ball Pike",
+        "Side Plank Hip Dip",
+        "Lateral Box Jump",
+        "Tuck Jump",
+        "Static Seated Butterfly Stretch",
+        "Dynamic Frog Stretch",
+        "Seated Neck Rotation",
+        "Seated Ankle Circles"
+      ],
+      "reasons": {
+        "Seated Banded Ankle Plantarflexion": "Adds seated foot-against-band resistance without lifting bodyweight, distinct from calf raises and calf stretching.",
+        "Seated Banded Ankle Dorsiflexion": "Adds seated toe-pulling against an anchored band, distinct from toe raises under bodyweight and knee-to-wall ankle mobility.",
+        "Stability Ball Pike": "Adds straight-legged hip elevation with feet supported on a rolling ball, distinct from bent-knee suspension tucks, rollouts and elbow-bending pike push-ups.",
+        "Side Plank Hip Dip": "Adds repeated lowering and lifting of the pelvis from a side support, distinct from holding a side plank or hiking a hip on a step.",
+        "Lateral Box Jump": "Adds sideways takeoff and landing onto an elevated box, distinct from forward box jumps, single-leg lateral bounds and step-overs.",
+        "Tuck Jump": "Adds knee-to-chest flight mechanics to a two-foot vertical jump, distinct from an untucked countermovement jump and a static-start squat jump.",
+        "Static Seated Butterfly Stretch": "Adds bilateral bent-knee seated groin mobility, distinct from standing adductor stretches and supine piriformis rotation.",
+        "Dynamic Frog Stretch": "Adds bilateral wide-knee rockbacks, distinct from the one-leg-straight quadruped adductor rockback and the seated butterfly hold.",
+        "Seated Neck Rotation": "Adds active cervical turning, distinct from chin retraction, neck flexion isometrics and side-bending stretches.",
+        "Seated Ankle Circles": "Adds unresisted ankle circumduction, distinct from single-plane band resistance and weight-bearing dorsiflexion rocks."
+      },
+      "references": [
+        {
+          "title": "AAOS: Foot and Ankle Conditioning, elastic-band dorsiflexion and plantar flexion",
+          "url": "https://www.orthoinfo.org/recovery/foot-and-ankle-conditioning-program/"
+        },
+        {
+          "title": "Fanshawe Fitness and Health Promotion: Stability Ball Pike",
+          "url": "https://fitnessandhealthpromotion.ca/exercise-database/entry/2352/"
+        },
+        {
+          "title": "[P]rehab: Side Plank, Hip Dip",
+          "url": "https://library.theprehabguys.com/vimeo-video/sideplank-hip-dip/"
+        },
+        {
+          "title": "Physitrack: Lateral Box Jump",
+          "url": "https://ca.physitrack.com/home-exercise-video/lateral-box-jump"
+        },
+        {
+          "title": "NASM: Tuck Jump",
+          "url": "https://www.nasm.org/resource-center/exercise-library/tuck-jump"
+        },
+        {
+          "title": "ACE: Seated Butterfly Stretch",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/216/seated-butterfly-stretch/"
+        },
+        {
+          "title": "[P]rehab: Frog Stretch, Dynamic",
+          "url": "https://theprehabguys.com/vimeo-video/frog-stretch-dynamic/"
+        },
+        {
+          "title": "NHS: Flexibility Exercises, seated neck rotation",
+          "url": "https://www.nhs.uk/live-well/exercise/flexibility-exercises/"
+        },
+        {
+          "title": "Royal Berkshire NHS: Ankle Range of Movement, ankle circles",
+          "url": "https://www.royalberkshire.nhs.uk/media/iz3hdgmm/ankle-range-of-movement-exercises_dec25.pdf"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Ankle eversion, toe curls and other intrinsic-foot strength mappings",
+          "reason": "The reporting taxonomy lacks specific fibularis/peroneal and intrinsic-foot groups. Do not assign them to unrelated supported muscles merely to add rows."
+        },
+        {
+          "candidate": "More band brands, box angles, kneeling side-plank and circle-position variants",
+          "reason": "Use one explicit task per gap and record equipment, side and setup in notes. No variation permutations are added for catalog size."
+        },
+        {
+          "candidate": "Band tension in kilograms, jump height, landing-force or equal-dose comparisons",
+          "reason": "These are not measured by the current exercise recorder. Keep unmeasured load blank and retain existing repetition or duration fields."
+        },
+        {
+          "candidate": "Mobility diagnoses, forced end ranges and source rehabilitation schedules",
+          "reason": "References establish task identity only. Do not import treatment protocols or add automatic posture prescriptions."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 248,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 300,
+        "unchangedPreviousCorrectiveEntries": 64,
+        "unchangedPreviousAliases": true,
+        "newAutomaticPostureMatches": 0
+      }
+    },
+    {
+      "id": "project-quality-batch-36",
+      "date": "2026-10-24",
+      "newCatalogEntries": 10,
+      "strengthEntries": 8,
+      "flexibilityEntries": 2,
+      "names": [
+        "Archer Push-Up (Floor)",
+        "Seated Sled Rope Pull",
+        "Backward Sled Drag (Straps)",
+        "Battle Rope Alternating Waves",
+        "Mountain Climber",
+        "Burpee (Chest-to-Floor and Jump)",
+        "Jumping Jack",
+        "Dumbbell Hang Power Clean (Two-Arm)",
+        "Supine Heel Slide (Knee Mobility)",
+        "Quadruped Thread the Needle"
+      ],
+      "reasons": {
+        "Archer Push-Up (Floor)": "Adds side-shifting asymmetrical pressing with the assisting arm relatively straight, distinct from a symmetric wide-hand push-up or a ring push-up.",
+        "Seated Sled Rope Pull": "Adds stationary seated hand-over-hand reeling of a sled, distinct from climbing a rope or rowing a fixed cable attachment.",
+        "Backward Sled Drag (Straps)": "Adds backward stepping while facing and pulling a sled through straps, distinct from pushing directly against sled handles and from a stationary rope pull.",
+        "Battle Rope Alternating Waves": "Adds alternating oscillation of anchored ropes, distinct from rope climbing, sled reeling and ball slams.",
+        "Mountain Climber": "Adds alternating knee drives from a stationary high plank, distinct from travelling bear crawls and simultaneous suspended knee tucks.",
+        "Burpee (Chest-to-Floor and Jump)": "Adds the established linked floor-to-standing jump task with an explicit chest-to-floor standard, distinct from a squat thrust, isolated push-up or standalone jump.",
+        "Jumping Jack": "Adds repeated out-and-back leg motion coordinated with overhead arm motion, distinct from tuck jumps and straight ankle hops.",
+        "Dumbbell Hang Power Clean (Two-Arm)": "Adds a bilateral independent-implement clean from the hang to the shoulder rack for dumbbell-based programming, distinct from the barbell hang clean, one-arm kettlebell clean and floor dumbbell snatch.",
+        "Supine Heel Slide (Knee Mobility)": "Adds unloaded supported knee bending and straightening with the heel sliding on the floor, distinct from a loaded slider hamstring curl or bridge-and-curl.",
+        "Quadruped Thread the Needle": "Adds a supported reach-under thoracic rotation, distinct from the side-lying open book and a resisted rotational row."
+      },
+      "references": [
+        {
+          "title": "NASM: Archer Push-Up, floor movement description",
+          "url": "https://www.nasm.org/resource-center/exercise-library/archer-push-up"
+        },
+        {
+          "title": "Ken Mannie, Coach and Athletic Director: Seated rope sled pull",
+          "url": "https://coachad.com/articles/powerline-learning-the-ropes/"
+        },
+        {
+          "title": "EarthFIT Coach Sam: Backward sled drag and strap handles",
+          "url": "https://earthfittraining.com/2022/06/10/how-to-backward-sled-drag/"
+        },
+        {
+          "title": "ACE: Battle Rope Ready, alternating arm waves",
+          "url": "https://www.acefitness.org/continuing-education/certified/march-2023/8267/battle-rope-ready-a-research-based-workout/"
+        },
+        {
+          "title": "ACE: Mountain Climbers",
+          "url": "https://www.acefitness.org/resources/everyone/exercise-library/258/mountain-climbers/"
+        },
+        {
+          "title": "CrossFit: The Burpee, chest-to-floor and jump finish",
+          "url": "https://www.crossfit.com/essentials/the-burpee"
+        },
+        {
+          "title": "NASM: Jumping Jacks",
+          "url": "https://www.nasm.org/resource-center/exercise-library/jumping-jacks"
+        },
+        {
+          "title": "CrossFit: The Dumbbell Hang Power Clean",
+          "url": "https://www.crossfit.com/essentials/the-dumbbell-hang-power-clean"
+        },
+        {
+          "title": "Mike Rutherford, CrossFit Journal: Dumbbell Bear, bilateral hang power clean component",
+          "url": "https://library.crossfit.com/free/pdf/58_07_Dumbbell_Bear.pdf"
+        },
+        {
+          "title": "Gateshead Health NHS: Heel slide movement identity",
+          "url": "https://www.gatesheadhealth.nhs.uk/resources/soft-tissue-knee-injury/"
+        },
+        {
+          "title": "South Tees Hospitals NHS: Kneeling exercises, Thread the needle",
+          "url": "https://www.southtees.nhs.uk/services/back-pain/backtracks/kneeling-exercises/"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Forward Sled Push",
+          "reason": "Previously held back because Sled Marching may already denote this task. The identity remains unresolved; no duplicate row or broad alias was introduced."
+        },
+        {
+          "candidate": "Star Jump, Squat Thrust and generic Sled Pull aliases",
+          "reason": "These can refer to different tasks. Keep the out-and-back jumping jack, chest-to-floor burpee, backward strap drag and seated rope pull explicit."
+        },
+        {
+          "candidate": "Extra rope waves, burpee combinations and dumbbell clean permutations",
+          "reason": "One explicit version fills each selection gap. Do not add every arm pattern, hurdle, single-arm variation or catch position merely for count."
+        },
+        {
+          "candidate": "Distance targets, calorie burn, sled friction, rope-force and 1RM conversions",
+          "reason": "Use existing durations or repetitions with consistent setup notes. Current logging does not measure these outcomes; no external mass or equal training dose is inferred."
+        },
+        {
+          "candidate": "Clinical mobility schedules and automatic posture recommendations",
+          "reason": "The two mobility drills are manually chosen general range work. No diagnosis, clearance, treatment schedule or forced end range is imported."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 250,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 306,
+        "unchangedPreviousCorrectiveEntries": 68,
+        "unchangedPreviousAliases": true,
+        "newAutomaticPostureMatches": 0
+      }
+    },
+    {
+      "id": "project-quality-batch-37",
+      "date": "2026-10-24",
+      "newCatalogEntries": 7,
+      "strengthEntries": 5,
+      "flexibilityEntries": 2,
+      "names": [
+        "Jump Rope (Single-Under)",
+        "Crab Walk (Floor)",
+        "High-Knee Run (In Place)",
+        "Flutter Kick (Supine)",
+        "Hanging Windshield Wiper",
+        "Wall Angel (Back-to-Wall)",
+        "Side-Lying Sleeper Stretch"
+      ],
+      "reasons": {
+        "Jump Rope (Single-Under)": "Adds rope-clearance coordination with a defined one-pass jump, distinct from unroped pogo jumps and battle-rope waves.",
+        "Crab Walk (Floor)": "Adds face-up locomotion supported on hands and feet, distinct from face-down bear crawling, stationary glute bridges and banded lateral walks called crab walks.",
+        "High-Knee Run (In Place)": "Adds stationary alternating running knee drives, distinct from slow loaded suitcase marches and floor mountain climbers.",
+        "Flutter Kick (Supine)": "Adds alternating small leg lifts while lying face-up, distinct from bilateral lying leg raises and whole-body hollow rocking.",
+        "Hanging Windshield Wiper": "Adds supported hanging trunk rotation with raised legs, distinct from a hanging leg raise and unloaded supine trunk mobility.",
+        "Wall Angel (Back-to-Wall)": "Adds back-to-wall shoulder elevation through an abduction/rotation path, distinct from serratus-focused wall slides and dowel-assisted supine flexion.",
+        "Side-Lying Sleeper Stretch": "Adds supported passive shoulder internal-rotation mobility, distinct from resisted internal rotation and the existing side-lying external-rotation strength exercise."
+      },
+      "references": [
+        {
+          "title": "ACE: Jumping Rope, basic rope-jump task",
+          "url": "https://contentcdn.eacefitness.com/assets/education-resources/lifestyle/fitfacts/pdfs/fitfacts/itemid_2688.pdf"
+        },
+        {
+          "title": "ACE: Crab walks, face-up hand-and-foot support",
+          "url": "https://www.acefitness.org/resources/everyone/blog/5055/youth-fitness-resistance-training/"
+        },
+        {
+          "title": "Special Olympics: High Knees, in-place running",
+          "url": "https://resources.specialolympics.org/health/fitness/fitness-for-sports-coaches/high-knees"
+        },
+        {
+          "title": "U.S. Marshals Service: FIT Readiness Program, supine flutter kicks on PDF page 82",
+          "url": "https://www.usmarshals.gov/sites/default/files/media/document/FIT-readiness-program.pdf"
+        },
+        {
+          "title": "Catalyst Athletics: Hanging Windshield Wiper",
+          "url": "https://www.catalystathletics.com/exercise/44/Windshield-Wiper/"
+        },
+        {
+          "title": "[P]rehab: Wall Angel",
+          "url": "https://theprehabguys.com/vimeo-video/wall-angel/"
+        },
+        {
+          "title": "AAOS: Shoulder conditioning, Sleeper Stretch movement identity",
+          "url": "https://www.orthoinfo.org/recovery/rotator-cuff-and-shoulder-conditioning-program"
+        }
+      ],
+      "deferred": [
+        {
+          "candidate": "Double-unders, weighted-rope, crab-direction and high-knee cadence permutations",
+          "reason": "One explicit basic task fills each selection gap. Record direction, cadence and setup without adding variants for the numeric target."
+        },
+        {
+          "candidate": "Generic Crab Walk, Windshield Wiper and Wall Slide aliases",
+          "reason": "Those terms can overlap existing band walks, floor mobility or activation exercises. Keep qualified aliases and preserve the old banded-crab-walk search."
+        },
+        {
+          "candidate": "Automatic skip totals, paired-side counts, pace, calorie burn and effective bodyweight",
+          "reason": "Use existing durations or explicit coach rep conventions. None of these measurements or conversions is inferred by the app."
+        },
+        {
+          "candidate": "Shoulder diagnoses, forced end ranges and clinical source schedules",
+          "reason": "The two mobility entries are manually chosen general range work. No diagnostic rule, treatment schedule or required end range is imported."
+        }
+      ],
+      "releaseStatus": "Included in the project-level 600-exercise source release; deployment status is not recorded here.",
+      "verification": {
+        "applicationTestsPassed": 252,
+        "testConcurrency": 2,
+        "lint": "passed",
+        "productionBuild": "passed",
+        "diffWhitespace": "passed",
+        "unchangedPreviousExpansionEntries": 314,
+        "unchangedPreviousCorrectiveEntries": 70,
+        "unchangedPreviousAliases": true,
+        "newAutomaticPostureMatches": 0,
+        "unchangedCommittedExpansionEntries": 254,
+        "unchangedCommittedCorrectiveEntries": 42
+      }
     }
   ],
   "qualityPolicy": {
     "targetUniqueCatalogNames": 600,
-    "currentUniqueCatalogNames": 505,
+    "currentUniqueCatalogNames": 600,
     "countAliasesAsExercises": false,
     "countDuplicateDemoRows": false,
     "required": [
@@ -7640,5 +11551,349 @@
         "reason": "Prefer the existing exercise and its prescription notes when no distinct selection or reporting need is established."
       }
     ]
+  },
+  "correctiveAdded": [
+    {
+      "name": "Static Cross-Body Shoulder Stretch",
+      "muscle": "Shoulders",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Posterior deltoid"
+      ]
+    },
+    {
+      "name": "Static Overhead Triceps Stretch",
+      "muscle": "Arms",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Triceps"
+      ]
+    },
+    {
+      "name": "Static Wrist Flexor Stretch",
+      "muscle": "Forearms",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Wrist flexors"
+      ]
+    },
+    {
+      "name": "Static Wrist Extensor Stretch",
+      "muscle": "Forearms",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Wrist extensors"
+      ]
+    },
+    {
+      "name": "Cat-Cow",
+      "muscle": "Back",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Spinal mobility"
+      ]
+    },
+    {
+      "name": "Side-Lying Thoracic Rotation (Open Book)",
+      "muscle": "Back",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Thoracic rotation mobility"
+      ]
+    },
+    {
+      "name": "Half-Kneeling Ankle Dorsiflexion Rock",
+      "muscle": "Ankles",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Ankle dorsiflexion mobility"
+      ]
+    },
+    {
+      "name": "90/90 Hip Switch",
+      "muscle": "Hips",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Hip internal/external rotation mobility"
+      ]
+    },
+    {
+      "name": "Supine Shoulder Flexion (Dowel-Assisted)",
+      "muscle": "Shoulders",
+      "equip": "Dowel",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Assisted shoulder flexion mobility"
+      ]
+    },
+    {
+      "name": "Supine Lower Trunk Rotation",
+      "muscle": "Back",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Trunk rotation mobility"
+      ]
+    },
+    {
+      "name": "Static Biceps Stretch (Wall Support)",
+      "muscle": "Arms",
+      "equip": "Wall",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Biceps"
+      ]
+    },
+    {
+      "name": "Quadruped Adductor Rockback",
+      "muscle": "Hips",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Adductor mobility"
+      ]
+    },
+    {
+      "name": "Thoracic Extension (Foam Roller)",
+      "muscle": "Back",
+      "equip": "Foam Roller",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Thoracic extension mobility"
+      ]
+    },
+    {
+      "name": "Supine Active Hamstring Stretch",
+      "muscle": "Hamstrings",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Active hamstring mobility"
+      ]
+    },
+    {
+      "name": "Standing Leg Swing (Front-to-Back)",
+      "muscle": "Hips",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Sagittal hip mobility"
+      ]
+    },
+    {
+      "name": "Standing Leg Swing (Side-to-Side)",
+      "muscle": "Hips",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Frontal hip mobility"
+      ]
+    },
+    {
+      "name": "Quadruped Wrist Extension Rock",
+      "muscle": "Forearms",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Weight-bearing wrist extension mobility"
+      ]
+    },
+    {
+      "name": "Supine Shoulder External Rotation (Dowel-Assisted)",
+      "muscle": "Shoulders",
+      "equip": "Dowel",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Assisted shoulder external rotation mobility"
+      ]
+    },
+    {
+      "name": "Supine Single-Knee-to-Chest Stretch",
+      "muscle": "Hips",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Single-knee hip flexion mobility"
+      ]
+    },
+    {
+      "name": "Prone Press-Up (Lumbar Mobility)",
+      "muscle": "Back",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Prone lumbar extension mobility"
+      ]
+    },
+    {
+      "name": "Standing Shoulder CAR",
+      "muscle": "Shoulders",
+      "equip": "Bodyweight",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Controlled shoulder circumduction mobility"
+      ]
+    },
+    {
+      "name": "Side-Lying Hip CAR",
+      "muscle": "Hips",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Controlled hip circumduction mobility"
+      ]
+    },
+    {
+      "name": "Static Seated Butterfly Stretch",
+      "muscle": "Hips",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Seated bilateral groin mobility"
+      ]
+    },
+    {
+      "name": "Dynamic Frog Stretch",
+      "muscle": "Hips",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Bilateral kneeling groin mobility"
+      ]
+    },
+    {
+      "name": "Seated Neck Rotation",
+      "muscle": "Neck",
+      "equip": "Chair",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Active cervical rotation mobility"
+      ]
+    },
+    {
+      "name": "Seated Ankle Circles",
+      "muscle": "Ankles",
+      "equip": "Chair",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Unresisted ankle circumduction mobility"
+      ]
+    },
+    {
+      "name": "Supine Heel Slide (Knee Mobility)",
+      "muscle": "Knees",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Unloaded knee flexion and extension mobility"
+      ]
+    },
+    {
+      "name": "Quadruped Thread the Needle",
+      "muscle": "Back",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Supported reach-under thoracic rotation mobility"
+      ]
+    },
+    {
+      "name": "Wall Angel (Back-to-Wall)",
+      "muscle": "Shoulders",
+      "equip": "Wall",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Back-to-wall overhead shoulder mobility"
+      ]
+    },
+    {
+      "name": "Side-Lying Sleeper Stretch",
+      "muscle": "Shoulders",
+      "equip": "Mat",
+      "difficulty": "Beginner",
+      "mode": "Stretch",
+      "target": [
+        "Side-lying shoulder internal rotation mobility"
+      ]
+    }
+  ],
+  "projectSourceRelease": {
+    "date": "2026-10-24",
+    "uniqueCatalogNames": 600,
+    "includedBatches": [
+      "project-quality-batch-17",
+      "project-quality-batch-18",
+      "project-quality-batch-19",
+      "project-quality-batch-20",
+      "project-quality-batch-21",
+      "project-quality-batch-22",
+      "project-quality-batch-23",
+      "project-quality-batch-24",
+      "project-quality-batch-25",
+      "project-quality-batch-26",
+      "project-quality-batch-27",
+      "project-quality-batch-28",
+      "project-quality-batch-29",
+      "project-quality-batch-30",
+      "project-quality-batch-31",
+      "project-quality-batch-32",
+      "project-quality-batch-33",
+      "project-quality-batch-34",
+      "project-quality-batch-35",
+      "project-quality-batch-36",
+      "project-quality-batch-37"
+    ],
+    "distribution": "Project defaults merged into coach libraries on app load after deployment; existing coach IDs, overrides and program references are preserved.",
+    "directLiveAccountWrites": false,
+    "verification": {
+      "applicationTestsPassed": 252,
+      "testConcurrency": 2,
+      "lint": "passed",
+      "productionBuild": "passed",
+      "diffWhitespace": "passed",
+      "unchangedPreviousExpansionEntries": 314,
+      "unchangedPreviousCorrectiveEntries": 70,
+      "unchangedPreviousAliases": true,
+      "newAutomaticPostureMatches": 0,
+      "unchangedCommittedExpansionEntries": 254,
+      "unchangedCommittedCorrectiveEntries": 42
+    }
   }
 }

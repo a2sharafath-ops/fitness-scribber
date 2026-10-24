@@ -346,4 +346,302 @@ export const EXERCISE_LIBRARY_ADDITIONS_BATCH_7 = [
   ]),
 ]
 
-export const EXERCISE_LIBRARY_EXPANSION = [...FIRST_EXPANSION, ...EXERCISE_LIBRARY_ADDITIONS_2026_10_24, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_3, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_4, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_5, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_6, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_7]
+// Project batch 17 adds new defaults; batches 8–16 activated existing entries.
+// Keep unilateral overhead snatching and a standalone jerk distinct from cleans
+// and presses. Neither borrows a load percentage from another lift.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_17 = [
+  ...family('Power', 'Full Body', ['Hamstrings', 'Glutes'], ['Quadriceps', 'Abdominals', 'Forearms', 'Trapezius', 'Front delts', 'Rotator cuff', 'Serratus anterior'], [
+    ['Single-Arm Kettlebell Snatch', 'Kettlebell', 'Advanced'],
+  ]),
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes'], ['Calves', 'Abdominals', 'Spinal erectors', 'Front delts', 'Triceps', 'Trapezius', 'Serratus anterior', 'Rotator cuff'], [
+    ['Barbell Split Jerk', 'Barbell', 'Advanced'],
+  ]),
+]
+
+// Practical band substitutions where the catalog only had a machine/cable task.
+// Full seated knee extension is distinct from standing terminal knee extension;
+// straight-arm shoulder extension is distinct from an elbow-bending pulldown.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_18 = [
+  ...family('Knee extension', 'Legs', ['Quadriceps'], [], [
+    ['Seated Banded Leg Extension', 'Bands', 'Beginner'],
+  ]),
+  ...family('Pull', 'Back', ['Lats'], ['Chest', 'Triceps', 'Abdominals'], [
+    ['Banded Straight-Arm Pulldown', 'Bands', 'Beginner'],
+  ]),
+]
+
+// Established accessory tasks with distinct bar paths; generic floor pressing
+// already exists and receives aliases rather than another catalog definition.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_19 = [
+  ...family('Pull', 'Back', ['Lats', 'Upper back'], ['Biceps', 'Rear delts', 'Forearms', 'Abdominals', 'Spinal erectors'], [
+    ['Meadows Row', 'Landmine'],
+  ]),
+  ...family('Elbow extension', 'Arms', ['Triceps'], ['Front delts'], [
+    ['Barbell JM Press', 'Barbell', 'Advanced'],
+  ]),
+]
+
+// Controlled shoulder pull and unsupported floor-seated overhead press.
+// Neither is an explosive high pull or a supine floor bench press.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_20 = [
+  ...family('Pull', 'Shoulders', ['Side delts'], ['Trapezius', 'Biceps', 'Forearms', 'Abdominals'], [
+    ['Barbell Upright Row', 'Barbell'],
+  ]),
+  ...family('Overhead press', 'Shoulders', ['Front delts', 'Side delts', 'Triceps'], ['Abdominals', 'Spinal erectors', 'Trapezius', 'Serratus anterior'], [
+    ['Barbell Z Press', 'Barbell', 'Advanced'],
+  ]),
+]
+
+// Different jump initiation/landing tasks and a linked squat-to-target throw.
+// Repetitions are supported; this does not add jump-height or circuit scoring.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_21 = [
+  ...family('Power', 'Legs', ['Quadriceps', 'Glutes', 'Calves'], ['Hamstrings', 'Abdominals'], [
+    ['Squat Jump (Static Start)', 'Bodyweight'],
+    ['Depth Jump', 'Box', 'Advanced'],
+  ]),
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes', 'Front delts', 'Triceps'], ['Abdominals', 'Spinal erectors', 'Calves', 'Trapezius', 'Serratus anterior'], [
+    ['Wall-Ball Shot', 'Medicine Ball'],
+  ]),
+]
+
+// Stationary asymmetric lifting and a bear-hug squat, not more carry variants.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_22 = [
+  ...family('Hinge', 'Hamstrings', ['Hamstrings', 'Glutes'], ['Quadriceps', 'Abdominals', 'Spinal erectors', 'Forearms', 'Hip abductors', 'Upper back'], [
+    ['Single-Arm Kettlebell Suitcase Deadlift', 'Kettlebell'],
+  ]),
+  ...family('Squat', 'Legs', ['Quadriceps', 'Glutes'], ['Adductors', 'Abdominals', 'Spinal erectors', 'Upper back', 'Front delts', 'Forearms'], [
+    ['Sandbag Bear Hug Squat', 'Sandbag'],
+  ]),
+]
+
+// A timed support and a strict linked pull/transition/dip task. Neither aliases
+// kipping skills, assisted transitions or the existing standalone ring dips.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_23 = [
+  ...family('Support', 'Chest', ['Chest', 'Triceps'], ['Front delts', 'Lats', 'Rotator cuff', 'Serratus anterior', 'Abdominals'], [
+    ['Ring Support Hold (Top)', 'Gymnastic Rings'],
+  ]),
+  ...family('Pull/Push', 'Full Body', ['Lats', 'Chest', 'Triceps'], ['Biceps', 'Upper back', 'Front delts', 'Forearms', 'Abdominals', 'Rotator cuff', 'Serratus anterior'], [
+    ['Strict Ring Muscle-Up', 'Gymnastic Rings', 'Advanced'],
+  ]),
+]
+
+// Band alternatives for seated outward hip work and anchored inward hip work.
+// Neither represents lateral walking or a side-lying clamshell task.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_24 = [
+  ...family('Hip abduction', 'Glutes', ['Hip abductors'], ['Glutes'], [
+    ['Seated Banded Hip Abduction', 'Bands', 'Beginner'],
+  ]),
+  ...family('Hip adduction', 'Legs', ['Adductors'], ['Hip abductors', 'Abdominals'], [
+    ['Standing Banded Hip Adduction', 'Bands', 'Beginner'],
+  ]),
+]
+
+// Linked floor trunk/leg flexion and an isometric inward hip squeeze.
+// The squeeze uses duration/effort, not the ball's mass as a resistance value.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_25 = [
+  ...family('Core', 'Core', ['Abdominals', 'Hip flexors'], ['Quadriceps'], [
+    ['V-Up', 'Bodyweight'],
+  ]),
+  ...family('Hip adduction', 'Legs', ['Adductors'], [], [
+    ['Supine Adductor Squeeze (Ball)', 'Soft Ball', 'Beginner'],
+  ]),
+]
+
+// Floor-start lifts with different implements and finishes. The bag is brought
+// onto a shoulder, not thrown over it; the dumbbell entry is not a hang snatch.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_26 = [
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes', 'Trapezius'], ['Hamstrings', 'Spinal erectors', 'Abdominals', 'Forearms', 'Front delts', 'Triceps', 'Rotator cuff', 'Serratus anterior'], [
+    ['Single-Arm Dumbbell Snatch (From Floor)', 'Dumbbell', 'Advanced'],
+  ]),
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes'], ['Hamstrings', 'Spinal erectors', 'Abdominals', 'Upper back', 'Trapezius', 'Biceps', 'Forearms', 'Front delts'], [
+    ['Sandbag Ground-to-Shoulder', 'Sandbag', 'Advanced'],
+  ]),
+]
+
+// Dynamic plank travel and suspended hip/knee flexion are distinct core tasks.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_27 = [
+  ...family('Core', 'Core', ['Abdominals'], ['Serratus anterior', 'Front delts', 'Glutes', 'Quadriceps'], [
+    ['Plank Body Saw', 'Bodyweight'],
+  ]),
+  ...family('Core', 'Core', ['Abdominals', 'Hip flexors'], ['Front delts', 'Serratus anterior', 'Triceps', 'Quadriceps'], [
+    ['Suspension Knee Tuck', 'Suspension Trainer'],
+  ]),
+]
+
+// Arm isolation using body angle and straps, distinct from suspension rows,
+// cable stacks and the fixed-bar bodyweight extension.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_28 = [
+  ...family('Elbow flexion', 'Arms', ['Biceps'], ['Forearms', 'Abdominals', 'Front delts', 'Upper back'], [
+    ['Suspension Biceps Curl', 'Suspension Trainer', 'Advanced'],
+  ]),
+  ...family('Elbow extension', 'Arms', ['Triceps'], ['Abdominals', 'Front delts', 'Serratus anterior'], [
+    ['Suspension Overhead Triceps Extension', 'Suspension Trainer', 'Advanced'],
+  ]),
+]
+
+// Standing supported knee extension and a controlled around-head shoulder
+// task, not a reverse Nordic, machine squat or around-the-waist kettlebell pass.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_29 = [
+  ...family('Knee extension', 'Legs', ['Quadriceps'], ['Calves', 'Abdominals'], [
+    ['Hand-Supported Sissy Squat', 'Bodyweight', 'Advanced'],
+  ]),
+  ...family('Shoulder control', 'Shoulders', ['Front delts', 'Side delts'], ['Rotator cuff', 'Trapezius', 'Serratus anterior', 'Abdominals', 'Forearms'], [
+    ['Kettlebell Halo', 'Kettlebell', 'Advanced'],
+  ]),
+]
+
+// A drop-and-hold landing task, with no rebound jump. Power/Ballistic is the
+// catalog's dynamic-drill grouping, not a measurement of force or power output.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_30 = [
+  ...family('Power', 'Legs', ['Quadriceps', 'Glutes', 'Calves'], ['Hamstrings', 'Hip abductors', 'Abdominals'], [
+    ['Depth Drop (Stick Landing)', 'Box', 'Advanced'],
+  ]),
+]
+
+// Distinct tasks: re-dip overhead receiving, dynamic hollow rocking, prone
+// extension hold, strap-based chest isolation, crossing a box and a body lever.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_31 = [
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes', 'Front delts', 'Triceps'], ['Calves', 'Trapezius', 'Serratus anterior', 'Abdominals', 'Spinal erectors'], [
+    ['Barbell Push Jerk', 'Barbell', 'Advanced'],
+  ]),
+  ...family('Core', 'Core', ['Abdominals'], ['Hip flexors', 'Quadriceps', 'Serratus anterior'], [
+    ['Hollow Body Rock', 'Bodyweight'],
+  ]),
+  ...family('Trunk extension', 'Back', ['Spinal erectors', 'Glutes'], ['Hamstrings', 'Trapezius', 'Rear delts'], [
+    ['Superman Hold (Floor)', 'Bodyweight', 'Beginner'],
+  ]),
+  ...family('Chest isolation', 'Chest', ['Chest'], ['Front delts', 'Biceps', 'Triceps', 'Abdominals', 'Serratus anterior'], [
+    ['Suspension Chest Fly', 'Suspension Trainer', 'Advanced'],
+  ]),
+  ...family('Squat', 'Legs', ['Quadriceps', 'Glutes'], ['Hamstrings', 'Hip abductors', 'Adductors', 'Abdominals', 'Forearms'], [
+    ['Dumbbell Box Step-Over', 'Dumbbell'],
+  ]),
+  ...family('Core', 'Core', ['Abdominals'], ['Lats', 'Forearms', 'Glutes', 'Quadriceps', 'Triceps'], [
+    ['Dragon Flag (Body Lever)', 'Fixed Anchor', 'Advanced'],
+  ]),
+]
+
+// Distinct support/loading tasks; mobility-only drills live in the corrective
+// catalog so they do not acquire working-muscle volume mappings.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_32 = [
+  ...family('Elbow extension', 'Arms', ['Triceps'], ['Chest', 'Front delts'], [
+    ['Bench Dip', 'Bench'],
+  ]),
+  ...family('Overhead support', 'Shoulders', ['Front delts', 'Side delts', 'Triceps', 'Serratus anterior'], ['Trapezius', 'Rotator cuff', 'Abdominals', 'Forearms'], [
+    ['Wall-Facing Handstand Hold', 'Wall', 'Advanced'],
+  ]),
+  ...family('Shoulder isolation', 'Shoulders', ['Rear delts', 'Upper back'], ['Rotator cuff', 'Trapezius', 'Abdominals', 'Forearms'], [
+    ['Suspension Reverse Fly (T)', 'Suspension Trainer'],
+  ]),
+]
+
+// Hand opening, rolling a suspended load, and a stationary neck-flexion
+// contraction fill different gaps from grippers, wrist curls and chin tucks.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_33 = [
+  ...family('Finger extension', 'Arms', ['Forearms'], [], [
+    ['Rubber-Band Finger Opening', 'Rubber Band', 'Beginner'],
+  ]),
+  ...family('Grip', 'Arms', ['Forearms'], ['Front delts', 'Abdominals'], [
+    ['Wrist Roller (Handheld)', 'Wrist Roller'],
+  ]),
+  ...family('Neck flexion', 'Neck', ['Neck flexors'], [], [
+    ['Neck Isometric Flexion (Hand Resistance)', 'Bodyweight', 'Beginner'],
+  ]),
+]
+
+// Supported machine tasks, an explicitly overhead swing, and two different
+// throw trajectories. None carries a free-weight max or power-output estimate.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_34 = [
+  ...family('Trunk rotation', 'Core', ['Abdominals'], ['Spinal erectors'], [
+    ['Rotary Torso Machine', 'Machine', 'Beginner'],
+  ]),
+  ...family('Trunk extension', 'Back', ['Spinal erectors'], [], [
+    ['Seated Lumbar Extension Machine', 'Machine', 'Beginner'],
+  ]),
+  ...family('Elbow extension', 'Arms', ['Triceps'], ['Chest', 'Front delts'], [
+    ['Seated Dip Machine (Plate-Loaded)', 'Machine', 'Beginner'],
+  ]),
+  ...family('Power', 'Full Body', ['Hamstrings', 'Glutes'], ['Spinal erectors', 'Abdominals', 'Forearms', 'Front delts', 'Serratus anterior', 'Trapezius', 'Rotator cuff'], [
+    ['American Kettlebell Swing (Overhead)', 'Kettlebell', 'Advanced'],
+  ]),
+  ...family('Power', 'Full Body', ['Lats', 'Abdominals', 'Triceps'], ['Chest', 'Front delts', 'Glutes', 'Quadriceps'], [
+    ['Medicine Ball Overhead Forward Throw', 'Medicine Ball'],
+  ]),
+  ...family('Power', 'Full Body', ['Glutes', 'Quadriceps', 'Hamstrings'], ['Calves', 'Spinal erectors', 'Abdominals', 'Front delts', 'Forearms', 'Trapezius'], [
+    ['Medicine Ball Overhead Backward Throw', 'Medicine Ball', 'Advanced'],
+  ]),
+]
+
+// Ankle resistance without weight-bearing, moving core tasks, and two distinct
+// jump paths. No band-force, jump-height or free-weight max estimates are added.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_35 = [
+  ...family('Ankle plantarflexion', 'Ankles', ['Calves'], [], [
+    ['Seated Banded Ankle Plantarflexion', 'Resistance Band', 'Beginner'],
+  ]),
+  ...family('Ankle dorsiflexion', 'Ankles', ['Tibialis anterior'], [], [
+    ['Seated Banded Ankle Dorsiflexion', 'Resistance Band', 'Beginner'],
+  ]),
+  ...family('Core', 'Core', ['Abdominals', 'Hip flexors'], ['Front delts', 'Serratus anterior', 'Triceps', 'Quadriceps'], [
+    ['Stability Ball Pike', 'Fitness Ball', 'Advanced'],
+  ]),
+  ...family('Core', 'Core', ['Abdominals', 'Hip abductors'], ['Glutes', 'Serratus anterior', 'Rotator cuff'], [
+    ['Side Plank Hip Dip', 'Bodyweight'],
+  ]),
+  ...family('Power', 'Legs', ['Quadriceps', 'Glutes', 'Calves'], ['Hamstrings', 'Hip abductors', 'Adductors', 'Abdominals'], [
+    ['Lateral Box Jump', 'Box', 'Advanced'],
+  ]),
+  ...family('Power', 'Legs', ['Quadriceps', 'Glutes', 'Calves'], ['Hip flexors', 'Hamstrings', 'Abdominals'], [
+    ['Tuck Jump', 'Bodyweight', 'Advanced'],
+  ]),
+]
+
+// Distinct support, pulling and conditioning tasks. Timed work uses existing
+// duration fields; distance, calorie, effective-force and 1RM estimates are absent.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_36 = [
+  ...family('Horizontal push', 'Chest', ['Chest', 'Triceps'], ['Front delts', 'Serratus anterior', 'Abdominals'], [
+    ['Archer Push-Up (Floor)', 'Bodyweight', 'Advanced'],
+  ]),
+  ...family('Horizontal pull', 'Back', ['Lats', 'Upper back', 'Biceps', 'Forearms'], ['Rear delts', 'Abdominals', 'Spinal erectors'], [
+    ['Seated Sled Rope Pull', 'Sled and Rope'],
+  ]),
+  ...family('Sled drag', 'Legs', ['Quadriceps'], ['Glutes', 'Calves', 'Hamstrings', 'Abdominals', 'Forearms'], [
+    ['Backward Sled Drag (Straps)', 'Sled and Straps'],
+  ]),
+  ...family('Power', 'Shoulders', ['Front delts', 'Side delts'], ['Trapezius', 'Forearms', 'Abdominals', 'Spinal erectors'], [
+    ['Battle Rope Alternating Waves', 'Battle Ropes'],
+  ]),
+  ...family('Core', 'Core', ['Hip flexors', 'Abdominals'], ['Front delts', 'Serratus anterior', 'Triceps', 'Quadriceps'], [
+    ['Mountain Climber', 'Bodyweight'],
+  ]),
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes', 'Calves', 'Chest', 'Triceps'], ['Front delts', 'Abdominals', 'Spinal erectors', 'Hamstrings'], [
+    ['Burpee (Chest-to-Floor and Jump)', 'Bodyweight', 'Advanced'],
+  ]),
+  ...family('Power', 'Full Body', ['Calves', 'Hip abductors', 'Adductors', 'Side delts'], ['Quadriceps', 'Glutes', 'Abdominals', 'Trapezius'], [
+    ['Jumping Jack', 'Bodyweight', 'Beginner'],
+  ]),
+  ...family('Power', 'Full Body', ['Quadriceps', 'Glutes', 'Trapezius'], ['Hamstrings', 'Calves', 'Spinal erectors', 'Upper back', 'Forearms', 'Abdominals'], [
+    ['Dumbbell Hang Power Clean (Two-Arm)', 'Dumbbell', 'Advanced'],
+  ]),
+]
+
+// Useful remaining coordination and core tasks, kept distinct from band walks,
+// static holds and leg raises. No pace, rope-force or performance estimates.
+export const EXERCISE_LIBRARY_ADDITIONS_BATCH_37 = [
+  ...family('Power', 'Legs', ['Calves'], ['Quadriceps', 'Glutes', 'Abdominals', 'Forearms', 'Front delts'], [
+    ['Jump Rope (Single-Under)', 'Jump Rope', 'Beginner'],
+  ]),
+  ...family('Locomotion', 'Full Body', ['Triceps', 'Glutes'], ['Hamstrings', 'Rear delts', 'Abdominals', 'Forearms'], [
+    ['Crab Walk (Floor)', 'Bodyweight'],
+  ]),
+  ...family('Power', 'Full Body', ['Hip flexors', 'Calves'], ['Quadriceps', 'Hamstrings', 'Glutes', 'Abdominals', 'Front delts'], [
+    ['High-Knee Run (In Place)', 'Bodyweight'],
+  ]),
+  ...family('Core', 'Core', ['Hip flexors', 'Abdominals'], ['Quadriceps'], [
+    ['Flutter Kick (Supine)', 'Bodyweight'],
+  ]),
+  ...family('Trunk rotation', 'Core', ['Abdominals', 'Hip flexors'], ['Lats', 'Forearms', 'Rotator cuff', 'Upper back', 'Quadriceps'], [
+    ['Hanging Windshield Wiper', 'Pull-Up Bar', 'Advanced'],
+  ]),
+]
+
+export const EXERCISE_LIBRARY_EXPANSION = [...FIRST_EXPANSION, ...EXERCISE_LIBRARY_ADDITIONS_2026_10_24, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_3, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_4, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_5, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_6, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_7, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_17, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_18, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_19, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_20, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_21, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_22, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_23, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_24, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_25, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_26, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_27, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_28, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_29, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_30, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_31, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_32, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_33, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_34, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_35, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_36, ...EXERCISE_LIBRARY_ADDITIONS_BATCH_37]
