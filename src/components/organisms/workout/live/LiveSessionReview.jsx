@@ -15,7 +15,7 @@ export default function LiveSessionReview({ session, units }) {
   const line = (row) => {
     if (view === 'actual') return [row.mode === 'duration' ? secToClock(row.durationSeconds || 0) : row.reps == null ? 'Reps not recorded' : `${row.reps} reps`,
       row.load != null ? `${toDisp(row.load, units)} ${units}` : null].filter(Boolean).join(' · ')
-    return [row.pDurationSeconds != null ? secToClock(row.pDurationSeconds) : row.pReps != null ? `${row.pReps} reps` : 'No rep target',
+    return [row.pDurationSeconds != null ? secToClock(row.pDurationSeconds) : row.pReps != null ? `${row.pReps}${row.pRepsMax != null && row.pRepsMax !== row.pReps ? '–' + row.pRepsMax : ''} reps` : 'No rep target',
       row.pLoadKg != null ? `${toDisp(row.pLoadKg, units)} ${units}` : null,
       view === 'adjusted' && row.skipped ? 'Skipped' : null].filter(Boolean).join(' · ')
   }
@@ -26,8 +26,10 @@ export default function LiveSessionReview({ session, units }) {
     {session.liveState.recoveredInProgress && <p className="ls-hint">Original snapshot captured when this saved session first opened in the updated logger.</p>}
     {blocks.map((block) => <section key={block.id}><h3>{block.title}{view === 'adjusted' && block.skipped ? ' · Skipped' : ''}</h3>{block.items.map((item) => {
       const sets = ensureSetRows(item).map((row) => view === 'original' && item.duration ? { ...row, pDurationSeconds: restToSec(item.duration) } : row).filter((row) => view !== 'actual' || row.done)
+      const values = sets.map(line)
+      const summary = !values.length ? 'No logged sets' : values.every((value) => value === values[0]) ? `${values.length} × ${values[0]}` : values.join(' / ')
       return <div className="ls-review-exercise" key={item.id}><strong>{item.name}{view === 'adjusted' && item.skipped ? ' · Upcoming skipped' : ''}</strong>
-        <span>{sets.length ? sets.map(line).join(' / ') : 'No logged sets'}</span></div>
+        <span>{summary}</span></div>
     })}</section>)}
   </aside>
 }

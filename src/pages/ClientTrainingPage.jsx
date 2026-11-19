@@ -74,7 +74,6 @@ export default function ClientTrainingPage() {
     {showRunner && <section id="workout-log" className="training-session" aria-label={`Workout logging for ${fmtDate(selectedDate)}`}>
       <div className="training-runner-head"><span>Logging · {fmtDate(selectedDate)}</span>{!logging && <Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>}</div>
       <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} startOnOpen onRunStateChange={setLogging} onSessionComplete={closeRunner} />
-      {logging && <p className="training-save-note">Save &amp; exit before opening the calendar.</p>}
     </section>}
     {!showRunner && <>
       <div id="selected-workout" className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>

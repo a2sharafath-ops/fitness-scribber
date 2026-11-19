@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import useLiveSessionLayout from '../../../hooks/useLiveSessionLayout'
 import { useAuth } from '../../../store/AuthContext'
 import useLiveSession from '../../../hooks/useLiveSession'
 import LiveSessionMenu from '../../molecules/LiveSessionMenu'
@@ -18,6 +20,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   const [busy, setBusy] = useState(false)
   const [reviewUnits, setReviewUnits] = useState(null)
   const readOnly = liveClosed(session)
+  const { sessionRef, headerRef, dockRef, markerRef, compact, dockBounds } = useLiveSessionLayout(readOnly)
   const units = reviewUnits || session.liveState.settings.units || preferredUnits || 'kg'
   const blocks = liveBlocks(session)
   const pending = session.liveState.setTimer ? locateLive(session, session.liveState.setTimer.rowId) : nextLiveSet(session)
@@ -66,9 +69,10 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
     if (rowMode(pending.row) === 'duration') act({ type: 'set-timer', id: pending.row.id })
     else openEditor({ kind: 'result', rowId: pending.row.id, exerciseId: pending.item.id, blockId: pending.block.id })
   }
-  return <div className="ls-session">
-    <header className="ls-header"><div><div className="ls-clock-line"><strong className="ls-clock" role="timer" aria-label="Workout elapsed time">{clock}</strong><span className="ls-status">{session.status === 'discarded' ? 'Discarded' : session.liveState.clock.paused ? 'Paused' : 'In progress'}</span></div>
-      <h1>{session.title}</h1><p>{clientName || 'Training session'} · {session.date}</p></div>
+  return <div className="ls-session" ref={sessionRef}>
+    <span className="ls-sticky-marker" ref={markerRef} aria-hidden="true" />
+    <header className={'ls-header' + (compact ? ' is-compact' : '')} ref={headerRef}><div className="ls-header-main"><div className="ls-clock-line"><strong className="ls-clock" role="timer" aria-label="Workout elapsed time">{clock}</strong><span className="ls-status">{session.status === 'discarded' ? 'Discarded' : session.liveState.clock.paused ? 'Paused' : 'In progress'}</span></div>
+      <h1 title={session.title}>{session.title}</h1><p className="ls-client-label">{clientName || 'Training session'} · {session.date}</p></div>
       <div className="ls-header-tools"><div className="ls-tools"><div className="ls-tabs ls-unit-switch" aria-label="Weight units">{['kg', 'lb'].map((unit) => <button key={unit} type="button" aria-pressed={units === unit} onClick={() => readOnly ? setReviewUnits(unit) : act({ type: 'settings', settings: { units: unit } })}>{unit}</button>)}</div>
         {!readOnly && <button type="button" className="ls-button ls-finish" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
         <LiveSessionMenu label="Workout options">{!readOnly && <><button type="button" role="menuitem" onClick={() => act({ type: 'pause' })}>{session.liveState.clock.paused ? 'Resume workout' : 'Pause workout'}</button>
@@ -97,13 +101,13 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
       </section>)}
       {!readOnly && !locked && <button type="button" className="ls-button" onClick={() => openEditor({ kind: 'add-block' })}>+ Add block</button>}
     </div><LiveSessionReview session={session} units={units} /></div>
-    {!readOnly && <div className="ls-current" aria-label="Current exercise"><div><small>{session.liveState.setTimer ? 'Timing set' : 'Next set'}{pending?.block ? ` · ${pending.block.title}` : ''}</small>
+    {!readOnly && typeof document !== 'undefined' && createPortal(<div className="ls-current" aria-label="Current exercise" ref={dockRef} style={dockBounds || undefined}><div><small>{session.liveState.setTimer ? 'Timing set' : 'Next set'}{pending?.block ? ` · ${pending.block.title}` : ''}</small>
       {pending?.row ? <><button type="button" className="ls-current-name" title="Jump to set" onClick={() => jump(pending.row)}>{pending.item.name}</button>
-        <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.row.pDurationSeconds != null ? secToClock(pending.row.pDurationSeconds) : `${pending.row.pReps ?? '—'} reps`}</p></> : <strong>No sets left to log</strong>}</div>
+        <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.row.pDurationSeconds != null ? secToClock(pending.row.pDurationSeconds) : `${pending.row.pReps ?? '—'}${pending.row.pRepsMax != null && pending.row.pRepsMax !== pending.row.pReps ? '–' + pending.row.pRepsMax : ''} reps`}</p></> : <strong>No sets left to log</strong>}</div>
       <div className="ls-live-hr"><strong>♥ — <small>bpm</small></strong><small>No live HR feed</small></div>
       {pending?.row ? <button type="button" className="ls-button primary" disabled={session.liveState.clock.paused && !session.liveState.setTimer && rowMode(pending.row) === 'duration'} onClick={nextAction}>
         {session.liveState.setTimer ? 'Stop timer' : rowMode(pending.row) === 'duration' ? 'Start timed set' : 'Log next set'}</button> : <button type="button" className="ls-button primary" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
-    </div>}
+    </div>, document.body)}
     {editor && <LiveSessionEditor key={JSON.stringify(editor)} editor={editor} session={session} units={units} exercises={exercises} history={history} onAction={act}
       onClose={() => setEditor(null)} onReload={reloadSaved} onFinish={finish} onDiscard={discard} busy={busy} error={actionError || error} />}
   </div>
