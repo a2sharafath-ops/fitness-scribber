@@ -4,8 +4,9 @@ import { isClosedTrainingDay, isSession } from './planner'
 export function trainingDay(db, clientId, date, today) {
   const prescription = (db.prescriptions || []).find((row) => row.clientId === clientId && row.date === date && isSession(row)) || null
   const workouts = (db.workouts || []).filter((row) => row.clientId === clientId && row.date === date)
+  const discarded = workouts.filter((row) => row.status === 'discarded')
   const completed = workouts.filter((row) => row.status === 'completed')
-  const pending = workouts.find((row) => row.status === 'in_progress') || workouts.find((row) => row.status !== 'completed') || null
+  const pending = workouts.find((row) => row.status === 'in_progress') || workouts.find((row) => !['completed', 'discarded'].includes(row.status)) || null
   const appointment = (db.sessions || []).find((row) => row.clientId === clientId && row.date === date && String(row.status).toLowerCase() === 'completed') || null
   const closed = isClosedTrainingDay(db, clientId, date, today)
   const status = completed.length ? 'completed' : pending ? pending.status === 'in_progress' ? 'progress' : 'ready'
@@ -14,7 +15,7 @@ export function trainingDay(db, clientId, date, today) {
   const title = completed[0]?.title || pending?.title || (appointment ? 'Appointment completed' : prescription?.name)
     || (prescription ? 'Prescribed workout' : date < today ? 'No workout recorded' : 'No workout planned')
   const canRun = !completed.length && date <= today && (pending?.status === 'in_progress' || date === today && !closed && Boolean(pending || prescription))
-  return { prescription, completed, pending, appointment, closed, status, label, title, canRun,
+  return { prescription, completed, discarded, pending, appointment, closed, status, label, title, canRun,
     canEditPlan: Boolean(prescription && !completed.length && !appointment && !pending),
     canPlan: !closed && !prescription && !pending,
     canDeletePlan: Boolean(prescription && !closed && !pending) }

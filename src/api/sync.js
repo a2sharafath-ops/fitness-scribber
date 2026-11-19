@@ -1,6 +1,7 @@
 // Supabase data layer. Loads the signed-in coach's whole dataset into the
 // existing store shape, and persists store changes by diffing collections by id —
 // so every existing `commit(db => ...)` call site keeps working unchanged.
+import { saveLiveWorkout } from './workouts'
 import { supabase, TABLES } from '../lib/supabase'
 import { ensureLibrary } from '../lib/programLibrary'
 import { seed } from '../lib/seed'
@@ -57,6 +58,14 @@ export async function persistDiff(prev, next, client = supabase) {
     try { await saveAssignmentRemote({ assignment, prescriptions: rows, expected }, client) }
     catch (error) { issues.push({ table: 'programAssignments', kind: 'write', message: error.message }) }
   }
+  // Save the conditional workout first, so a stale completion cannot write
+  // effort/strength records for a workout that the server rejected.
+  const previousWorkouts = byId(prev.workouts)
+  const liveWrites = (next.workouts || []).filter(row => (row.liveState || previousWorkouts[row.id]?.liveState) && !eq(previousWorkouts[row.id], row))
+  for (const row of liveWrites) {
+    try { await saveLiveWorkout(row, previousWorkouts[row.id], client) }
+    catch (error) { return [{ table: 'workouts', message: error.message, kind: 'write' }] }
+  }
   for (const t of TABLES) {
     const a = byId(prev[t]), b = byId(next[t])
     const ups = (next[t] || []).filter((r) => (!a[r.id] || !eq(a[r.id], r))
@@ -64,7 +73,8 @@ export async function persistDiff(prev, next, client = supabase) {
       && !(t === 'prescriptions' && groupedIds.has(r.id))
       && !(t === 'programAssignments' && newAssignments.some(p => p.id === r.id)))
     const dels = (prev[t] || []).filter((r) => !b[r.id]).map((r) => r.id)
-    if (ups.length) { const { error } = await client.from(t).upsert(ups); if (error) { console.error(t, 'upsert', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
+    const ordinaryUps = ups.filter(row => t !== 'workouts' || !liveWrites.some(workout => workout.id === row.id))
+    if (ordinaryUps.length) { const { error } = await client.from(t).upsert(ordinaryUps); if (error) { console.error(t, 'upsert', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
     if (dels.length) { const { error } = await client.from(t).delete().in('id', dels); if (error) { console.error(t, 'delete', error); issues.push({ table: t, message: error.message, kind: 'write' }) } }
   }
   if (!eq(prev.settings, next.settings)) {

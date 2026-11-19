@@ -10,6 +10,7 @@ const RIR_SCALE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 export default function SetLogRow({ row, units, onChange, warmupBlock = false }) {
   const effortType = row.effortType === 'RPE' ? 'RPE' : 'RIR'
+  const timed = row.mode === 'duration'
   const scale = effortType === 'RPE' ? RPE_SCALE : RIR_SCALE
 
   // Prescribed-target hint, e.g. "5 reps @ 2 RIR · 100 kg".
@@ -41,10 +42,10 @@ export default function SetLogRow({ row, units, onChange, warmupBlock = false })
         <input type="number" step="0.5" inputMode="decimal" value={row.load == null ? '' : toDisp(row.load, units)}
           placeholder={row.pLoadKg != null ? String(toDisp(row.pLoadKg, units)) : '—'} aria-label={`Set ${row.n} load`}
           onChange={(e) => onChange({ load: e.target.value === '' ? null : dispToKg(e.target.value, units) })} /></label>
-      <label className="slog-f"><span>Reps</span>
-        <input type="number" min="0" inputMode="numeric" value={row.reps ?? ''} aria-label={`Set ${row.n} reps`}
+      <label className="slog-f"><span>{timed ? 'Duration (sec)' : 'Reps'}</span>
+        <input type="number" min="0" inputMode="numeric" value={(timed ? row.durationSeconds : row.reps) ?? ''} aria-label={`Set ${row.n} ${timed ? 'duration' : 'reps'}`}
           placeholder={row.pReps != null ? String(row.pReps) : '—'}
-          onChange={(e) => onChange({ reps: numOrNull(e.target.value) })} /></label>
+          onChange={(e) => onChange({ [timed ? 'durationSeconds' : 'reps']: numOrNull(e.target.value) })} /></label>
       <label className="slog-f"><span>{effortType}</span>
         <select value={row.effort ?? ''} aria-label={`Set ${row.n} ${effortType}`}
           onChange={(e) => onChange({ effort: numOrNull(e.target.value) })}>

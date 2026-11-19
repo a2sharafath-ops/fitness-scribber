@@ -54,7 +54,7 @@ export function muscleVolume(db, clientId, start, end, { workingOnly = false } =
         return false
       }
       if (Array.isArray(item.setRows) && item.setRows.length) {
-        item.setRows.forEach((s, j) => { if (s.done && allow(s, j, 1)) add(row, item.name, 1, s.reps, s.load, `workout:${w.id}:${i}:${j}`, item.exId) })
+        item.setRows.forEach((s, j) => { if (s.done && allow(s, j, 1)) add(row, item.name, 1, s.mode === 'duration' ? null : s.reps, s.load, `workout:${w.id}:${i}:${j}`, item.exId) })
       } else if (item.done) {
         if (!allow(item, null, count(item.doneSets))) continue
         // Legacy actuals only. Prescribed sets/reps/weight are not performance.

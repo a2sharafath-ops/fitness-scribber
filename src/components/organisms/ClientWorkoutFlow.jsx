@@ -12,6 +12,7 @@ import { removeWorkoutStrength, resolveTrainingMax } from '../../lib/program'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { clearWorkoutDraft } from '../../lib/workoutDraft'
 import { buildFromPrescription } from '../../lib/workout'
+import { prepareLiveSession } from '../../lib/liveSession'
 import { trainingDay } from '../../lib/trainingDay'
 
 // Training owns the Classic session writes. The date is
@@ -21,12 +22,14 @@ export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSe
   const { openModal } = useModal()
   const [checkinW, setCheckinW] = useState(null)
   const [rpeW, setRpeW] = useState(null)
+  const [completionBusy, setCompletionBusy] = useState(false)
+  const completionAttempt = useRef(null)
   const [runOpen, setRunOpen] = useState(false)
   const startAttempted = useRef(false)
   useEffect(() => { onRunStateChange?.(runOpen) }, [runOpen, onRunStateChange])
   const sessionDate = date || todayISO(tz)
   const day = trainingDay(db, client.id, sessionDate, todayISO(tz))
-  const workout = day.completed[0] || day.pending || null
+  const workout = day.completed[0] || day.pending || (runOpen ? day.discarded?.at(-1) : null) || null
   const prescription = day.prescription
   const dayClosed = day.closed
   const completedAppointment = Boolean(day.appointment)
@@ -62,7 +65,7 @@ export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSe
     if (workout?.status === 'in_progress') { setRunOpen(true); return }
     const candidate = workout || buildFromPrescription(prescription, { clientId: client.id, date: sessionDate,
       resolveTm: (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg })
-    startWorkout({ ...candidate, status: 'in_progress', startedAt: new Date().toISOString() })
+    startWorkout({ ...prepareLiveSession(candidate, (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg), status: 'in_progress', startedAt: new Date().toISOString() })
   }, [startOnOpen, day.canRun, db, client.id, sessionDate, workout, prescription, startWorkout])
   const submitCheckin = (values) => {
     const item = checkinW
@@ -71,9 +74,16 @@ export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSe
     setRunOpen(true)
   }
   const skipCheckin = () => { const item = checkinW; setCheckinW(null); if (item) { saveWorkout(item); setRunOpen(true) } }
-  const finishWorkout = (item, rpe, minutes) => {
-    let peaks = []
-    commit((data) => { peaks = completeClassicWorkout(data, client.id, item, rpe, minutes) })
+  const requestComplete = (item) => { completionAttempt.current = null; setRpeW(item) }
+  const finishWorkout = async (item, rpe, minutes) => {
+    setCompletionBusy(true)
+    let result
+    if (completionAttempt.current) result = await commit(() => {})
+    else result = await commit((data) => { completionAttempt.current = { peaks: completeClassicWorkout(data, client.id, item, rpe, minutes) } })
+    setCompletionBusy(false)
+    if (!result?.saved) { toast('The session could not finish saving. Retry to save the same recorded effort and sets.', 'error'); return }
+    const peaks = completionAttempt.current?.peaks || []
+    completionAttempt.current = null
     clearWorkoutDraft(item, 'run')
     setRpeW(null)
     setRunOpen(false)
@@ -84,11 +94,11 @@ export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSe
   }
 
   const workoutProps = {
-    client, today: sessionDate, workout, prescription, plans: db.plans, exercises: db.exercises, preserveDraft: true, dayClosed, completedAppointment,
+    client, today: sessionDate, workout, prescription, plans: db.plans, exercises: db.exercises, preserveDraft: true, history: db.workouts || [], dayClosed, completedAppointment,
     units, context: { readiness, acwr }, restingHr: wearable?.rhr ?? null,
     age, bodyMassKg: client.anthro?.massKg ?? null,
     resolveTm: (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg,
-    onStart: startWorkout, onSave: saveWorkout, onComplete: setRpeW, onClear: clearWorkout,
+    onStart: startWorkout, onSave: saveWorkout, onComplete: requestComplete, onClear: clearWorkout,
     runOpen, onResume: () => setRunOpen(true), onExit: () => { setRunOpen(false); onSessionComplete?.() },
     onTemplate: saveTemplate,
     onAddSession: dayClosed ? null : () => openModal(<WorkoutBuilderModal clientId={client.id} date={sessionDate} />, 'xl'),
@@ -100,7 +110,7 @@ export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSe
           headerLabel={sessionDate === todayISO(tz) ? "Today's Workout" : `Workout · ${fmtDate(sessionDate)}`} />}
       {checkinW && <CheckInModal today={sessionDate} onSubmit={submitCheckin} onSkip={skipCheckin}
         onClose={() => { setCheckinW(null); setRunOpen(false); onSessionComplete?.() }} />}
-      {rpeW && <RPEModal workout={rpeW}
+      {rpeW && <RPEModal workout={rpeW} busy={completionBusy} locked={!!completionAttempt.current}
         onSubmit={(rpe, minutes) => finishWorkout(rpeW, rpe, minutes)}
         onSkip={(minutes) => finishWorkout(rpeW, null, minutes)} onClose={() => setRpeW(null)} />}
     </>

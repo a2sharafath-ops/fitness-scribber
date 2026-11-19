@@ -81,7 +81,7 @@ function matchingItem(db, item, metric) {
   return exerciseKey(item.name) === exerciseKey(metric.name) && (!item.exId || matches.length === 1 && matches[0].id === item.exId)
 }
 function eligibleSet(item, set) {
-  return set.done && workingGroup(item) && set.purpose === 'working' && !item.isWarmup && item.purpose !== 'warmup' && !set.isWarmup && !['Seconds','Minutes','Target HR'].includes(set.pIntensityType)
+  return set.done && set.mode !== 'duration' && workingGroup(item) && set.purpose === 'working' && !item.isWarmup && item.purpose !== 'warmup' && !set.isWarmup && !['Seconds','Minutes','Target HR'].includes(set.pIntensityType)
 }
 function estimateAllowed(db, item) {
   const e = (db.exercises || []).find(e => e.id === item.exId) || (db.exercises || []).find(e => exerciseKey(e.name) === exerciseKey(item.name))

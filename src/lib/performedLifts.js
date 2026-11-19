@@ -27,7 +27,7 @@ export function performedLiftHistory(db, clientId) {
     for (const item of workout.main || []) {
       if (!validName(item.name)) continue
       const sets = Array.isArray(item.setRows) && item.setRows.length
-        ? item.setRows.filter((set) => set.done).map((set) => ({ load: numeric(set.load ?? set.pLoadKg), reps: numeric(set.reps ?? set.pReps) }))
+        ? item.setRows.filter((set) => set.done && set.mode !== 'duration').map((set) => ({ load: numeric(set.load ?? set.pLoadKg), reps: numeric(set.reps ?? set.pReps) }))
         : item.done ? [{ load: numeric(item.doneWeight ?? item.weight), reps: numeric(item.doneReps ?? item.reps) }] : []
       if (!sets.length) continue
       const loaded = sets.filter((set) => set.load != null)

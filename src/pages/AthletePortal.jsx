@@ -12,6 +12,7 @@ import CheckInModal from '../components/organisms/workout/CheckInModal'
 import RPEModal from '../components/organisms/workout/RPEModal'
 import { useAuth } from '../store/AuthContext'
 import { supabase } from '../lib/supabase'
+import { saveLiveWorkout } from '../api/workouts'
 import { callFunction } from '../api/functions'
 import { beginWearableConnection } from '../api/wearable'
 import { uid } from '../lib/format'
@@ -125,10 +126,19 @@ export default function AthletePortal() {
   const rScore = readinessScore({ wellness: state.wellness, wearable: state.wearable }, client.id, today)
   const acwr = acwrSeries(dailySum(state.srpe, client.id, 'tl'), lastNDates(28)).filter((v) => v != null).slice(-1)[0]
   const restingHr = latestOf(state.wearable, client.id)?.rhr ?? null
-  const saveWorkout = async (w) => {
-    const { error } = await supabase.from('workouts').upsert({ ...w, clientId: client.id, coachId: client.coachId })
-    if (error) { alert(error.message); return }
-    await load()
+  const saveWorkout = async (w, expected) => {
+    try {
+      const record = { ...w, clientId: client.id, coachId: client.coachId }
+      if (w.liveState) await saveLiveWorkout(record, expected || todayW)
+      else {
+        const { error } = await supabase.from('workouts').upsert(record)
+        if (error) throw error
+      }
+      setState((current) => ({ ...current, workouts: [...current.workouts.filter((row) => row.id !== w.id), record] }))
+      return { saved: true }
+    } catch (error) {
+      return { saved: false, issues: [{ message: error.message }] }
+    }
   }
   const clearWorkout = async () => {
     if (!todayW) return
@@ -163,8 +173,10 @@ export default function AthletePortal() {
     setBusy(true)
     const durationSec = minutes != null ? Math.max(60, Math.round(minutes * 60)) : w.durationSec
     const wc = { ...w, durationSec, status: 'completed', clientId: client.id, coachId: client.coachId }
-    const { error } = await supabase.from('workouts').upsert(wc)
-    if (error) { setBusy(false); alert(error.message); return }
+    try {
+      if (wc.liveState) await saveLiveWorkout(wc, todayW)
+      else { const { error } = await supabase.from('workouts').upsert(wc); if (error) throw error }
+    } catch (error) { setBusy(false); alert(error.message); return }
     if (rpe != null) {
       const mins = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
       const { error: e2 } = await supabase.from('srpe').insert({
@@ -214,7 +226,7 @@ export default function AthletePortal() {
         <div style={{ marginTop: 16 }}>
           <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
             units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
-            athlete resolveTm={(name) => resolveTrainingMax(state, client.id, name, today).kg}
+            athlete history={state.workouts} resolveTm={(name) => resolveTrainingMax(state, client.id, name, today).kg}
             onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
         </div>
 

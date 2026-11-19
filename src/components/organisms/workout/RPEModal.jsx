@@ -10,7 +10,7 @@ import { calcSRPETL } from '../../../lib/calc'
 // workout + sRPE row. Serves both the athlete portal and the coach's client page.
 //   onSubmit(rpe, minutes) — save workout + sRPE
 //   onSkip(minutes) — save workout without an RPE entry · onClose() — keep running
-export default function RPEModal({ busy, workout, onSubmit, onSkip, onClose }) {
+export default function RPEModal({ busy, locked = false, workout, onSubmit, onSkip, onClose }) {
   const [rpe, setRpe] = useState('')
   const [minutes, setMinutes] = useState(workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30)
   const mins = Math.max(1, Math.round(+minutes || 0) || 1)
@@ -19,9 +19,10 @@ export default function RPEModal({ busy, workout, onSubmit, onSkip, onClose }) {
       <div className="modal" role="dialog" aria-modal="true">
         <ModalShell title="How hard was that session?" onClose={onClose}
           footer={<>
-            <Button variant="ghost" disabled={busy} onClick={() => onSkip(mins)}>Skip</Button>
-            <Button disabled={busy || !rpe} onClick={() => onSubmit(Number(rpe), mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>
+            <Button variant={locked ? 'primary' : 'ghost'} disabled={busy} onClick={() => onSkip(mins)}>{locked ? 'Retry save' : 'Skip'}</Button>
+            {!locked && <Button disabled={busy || !rpe} onClick={() => onSubmit(Number(rpe), mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>}
           </>}>
+          <fieldset disabled={locked || busy} style={{ border: 0, minWidth: 0 }}>
           <Field label="Session RPE (Borg CR10)">
             <select value={rpe} onChange={(e) => setRpe(e.target.value)}>
               <option value="">Choose your rating</option>
@@ -31,6 +32,8 @@ export default function RPEModal({ busy, workout, onSubmit, onSkip, onClose }) {
           <Field label="Workout duration (minutes)">
             <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
           </Field>
+          </fieldset>
+          {locked && <p role="status">Retrying the recorded effort and duration from the first save attempt.</p>}
           <div className="muted" style={{ fontSize: 12 }}>
             Training load: <strong>{rpe ? `${calcSRPETL(Number(rpe), mins)} AU` : 'Select an RPE to calculate'}</strong>
           </div>

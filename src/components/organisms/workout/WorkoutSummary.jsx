@@ -79,7 +79,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
                   <div key={i} className={'sumex-set' + (r.done ? '' : ' skip')}>
                     <span className="sumex-n">{r.n}</span>
                     {r.done
-                      ? <span>{r.reps ?? r.pReps ?? '—'} reps{(r.load ?? r.pLoadKg) != null ? ` · ${toDisp(r.load ?? r.pLoadKg, units)} ${unitName(units)}` : ''}{r.effort != null ? ` · ${r.effort} ${r.effortType}` : ''}</span>
+                      ? <span>{r.mode === 'duration' ? secToClock(r.durationSeconds || 0) : `${r.reps ?? r.pReps ?? '—'} reps`}{(r.load ?? r.pLoadKg) != null ? ` · ${toDisp(r.load ?? r.pLoadKg, units)} ${unitName(units)}` : ''}{r.effort != null ? ` · ${r.effort} ${r.effortType}` : ''}</span>
                       : <span className="muted">skipped · target {r.pReps ?? '—'}{r.pLoadKg != null ? ` @ ${toDisp(r.pLoadKg, units)} ${unitName(units)}` : ''}</span>}
                   </div>
                 ))}

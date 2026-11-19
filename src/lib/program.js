@@ -631,7 +631,7 @@ export function workoutPeaks(maxes, workout) {
     let est = 0
     if (Array.isArray(m.setRows) && m.setRows.length) {
       for (const r of m.setRows) {
-        if (!r.done) continue
+        if (!r.done || r.mode === 'duration') continue
         const e = epley1RM(+(r.load ?? r.pLoadKg) || 0, parseInt(r.reps ?? r.pReps, 10) || 0)
         if (e > est) est = e
       }

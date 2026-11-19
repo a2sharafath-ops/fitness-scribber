@@ -1,5 +1,5 @@
 import { itemsToBlocks } from '../../../lib/program'
-import { runBlocks } from '../../../lib/workout'
+import { secToClock, runBlocks } from '../../../lib/workout'
 import { toDisp, unitName } from '../../../lib/units'
 
 const plannedBlocks = (prescription) => prescription?.blocks?.length
@@ -17,7 +17,7 @@ function PlannedSet({ row, index, units, intensityType }) {
 
 function LoggedSet({ row, index, units, completed }) {
   const value = row.done ? [
-    (row.reps ?? row.pReps) != null ? `${row.reps ?? row.pReps} reps` : null,
+    row.mode === 'duration' ? secToClock(row.durationSeconds || 0) : (row.reps ?? row.pReps) != null ? `${row.reps ?? row.pReps} reps` : null,
     (row.load ?? row.pLoadKg) != null ? `${toDisp(row.load ?? row.pLoadKg, units)} ${unitName(units)}` : null,
   ].filter(Boolean).join(' · ') : completed ? 'Skipped' : 'Not logged yet'
   return <li>Set {row.n ?? index + 1}: {value || 'Completed; values not recorded'}</li>
@@ -34,7 +34,7 @@ export default function DayBlockReview({ prescription, workout, units, compact =
       if (workout) {
         if (item.setRows?.length) {
           const rows = item.setRows.filter((row) => row.done)
-          return rows.length ? collapse(rows.map((row) => `${row.reps != null ? `${row.reps} reps` : 'Reps not recorded'} · ${loadText(row.load)}`)) : workout.status === 'completed' ? 'No completed sets' : 'Not logged yet'
+          return rows.length ? collapse(rows.map((row) => `${row.mode === 'duration' ? secToClock(row.durationSeconds || 0) : row.reps != null ? `${row.reps} reps` : 'Reps not recorded'} · ${loadText(row.load)}`)) : workout.status === 'completed' ? 'No completed sets' : 'Not logged yet'
         }
         return `${item.doneSets ?? '—'} recorded sets · ${item.doneReps ?? '—'} reps · ${loadText(item.doneWeight)}`
       }

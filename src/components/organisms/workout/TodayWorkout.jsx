@@ -5,9 +5,11 @@ import Icon from '../../atoms/Icon'
 import Kpi from '../../atoms/Kpi'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import WorkoutPlayer from './WorkoutPlayer'
+import LiveTrainingSession from './LiveTrainingSession'
 import WorkoutSummary from './WorkoutSummary'
 import CompletedWorkoutEditor from './CompletedWorkoutEditor'
 import { buildFromPlan, buildFromPrescription, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
+import { prepareLiveSession } from '../../../lib/liveSession'
 import { programStats } from '../../../lib/program'
 import { fmtVL } from '../../../lib/units'
 
@@ -24,7 +26,7 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // intercepts the Start press so the parent can run a pre-flight (check-in popup).
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
-export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, preserveDraft = false, dayClosed = false, completedAppointment = false }) {
+export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, preserveDraft = false, history = [], dayClosed = false, completedAppointment = false }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -99,8 +101,8 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
   }
 
   // ---- Live session -------------------------------------------------
-  if (workout.status === 'in_progress') {
-    if (!runOpen) return (
+  if (workout.status === 'in_progress' || workout.status === 'discarded') {
+    if (!runOpen && workout.status !== 'discarded') return (
       <Shell extra={headerExtra} label={headerLabel}>
         <div className="tw-rest">
           <div style={{ flex: 1 }}>
@@ -113,8 +115,9 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
     )
     return (
       <Shell extra={headerExtra} label={headerLabel}>
-        <WorkoutPlayer workout={workout} units={units} running locked={locked} restingHr={restingHr} age={age} resolveTm={resolveTm} preserveDraft={preserveDraft}
-          onSave={(item) => { onSave(item); onExit?.() }} onComplete={onComplete} />
+        <LiveTrainingSession key={workout.id} workout={workout} units={units} clientName={client.name}
+          exercises={exercises} history={history} locked={locked} resolveTm={resolveTm} onPersist={onSave}
+          onExit={onExit} onComplete={onComplete} />
       </Shell>
     )
   }
@@ -132,7 +135,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
 
   // ---- Overview (suggested, not started) ----------------------------
   const vol = workoutVolume(workout)
-  const start = () => (onStart || onSave)({ ...workout, status: 'in_progress', startedAt: new Date().toISOString() })
+  const start = () => (onStart || onSave)({ ...prepareLiveSession(workout, resolveTm), status: 'in_progress', startedAt: new Date().toISOString() })
   return (
     <Shell extra={headerExtra} label={headerLabel}>
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>

@@ -118,6 +118,11 @@ export function normalizeRunItem(it, resolveTm) {
 // grouped by its builder block type (Main Lifts / Assisted / Core…) preserving
 // order, then cool-down. Empty sections are dropped.
 export function runBlocks(w) {
+  if (w?.liveState?.blocks) {
+    const items = new Map(['warmup', 'main', 'cooldown'].flatMap(section => w[section] || []).map(item => [item.id, item]))
+    return w.liveState.blocks.map(block => ({ key: block.id, title: block.title, section: block.section,
+      blockType: block.title, items: block.exerciseIds.map(id => items.get(id)).filter(Boolean) }))
+  }
   const out = []
   if (w?.warmup?.length) out.push({ key: 'warmup', title: 'Warm-up', section: 'warmup', items: w.warmup })
   const groups = []
@@ -136,7 +141,7 @@ export function runBlocks(w) {
 // prescription so a pre-start estimate still has a number.
 export const rowWork = (r) => (+(r.load ?? r.pLoadKg) || 0) * (parseInt(r.reps ?? r.pReps, 10) || 0)
 // Same, but only counts a row the athlete actually completed.
-export const doneRowWork = (r) => (r.done ? (+(r.load ?? r.pLoadKg) || 0) * (parseInt(r.reps ?? r.pReps, 10) || 0) : 0)
+export const doneRowWork = (r) => (r.done && r.mode !== 'duration' ? (+(r.load ?? r.pLoadKg) || 0) * (parseInt(r.reps ?? r.pReps, 10) || 0) : 0)
 
 // Generic warm-up / cool-down scaffolding (program logic, not UI data).
 const warmupItems = () => [
@@ -268,7 +273,7 @@ export function summarize(w, { exercises = [], restingHr = null, age = null, bod
   const hasRows = (m) => Array.isArray(m.setRows) && m.setRows.length
   const doneRows = (m) => m.setRows.filter((r) => r.done)
   const repsOf = (m) => hasRows(m)
-    ? doneRows(m).reduce((t, r) => t + (parseInt(r.reps ?? r.pReps, 10) || 0), 0)
+    ? doneRows(m).reduce((t, r) => t + (r.mode === 'duration' ? 0 : parseInt(r.reps ?? r.pReps, 10) || 0), 0)
     : actualSets(m) * actualReps(m)
   const volume = main.reduce((t, m) => t + (hasRows(m) ? doneRows(m).reduce((s, r) => s + doneRowWork(r), 0) : repsOf(m) * actualWeight(m)), 0)
   const reps = main.reduce((t, m) => t + repsOf(m), 0)

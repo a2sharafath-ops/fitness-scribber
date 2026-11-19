@@ -40,9 +40,9 @@ export default function ClientTrainingPage() {
   const assignedPrograms = (db.programAssignments || []).filter(a => a.clientId === id).sort((a,b) => b.data.start.localeCompare(a.data.start))
   const selectedProgram = assignedPrograms.find(a => a.id === selectedProgramId) || assignedPrograms[0]
   const plan = db.plans.find((item) => item.id === client.planId)
-  const workouts = (db.workouts || []).filter((item) => item.clientId === id && item.status === 'completed').sort((a, b) => b.date.localeCompare(a.date))
+  const workouts = (db.workouts || []).filter((item) => item.clientId === id && ['completed', 'discarded'].includes(item.status)).sort((a, b) => b.date.localeCompare(a.date))
   const appointments = db.sessions.filter((item) => item.clientId === id && String(item.status).toLowerCase() === 'completed').sort((a, b) => b.date.localeCompare(a.date))
-  const showRunner = searchParams.get('run') === '1' && trainingDay(db, id, selectedDate, today).canRun
+  const showRunner = searchParams.get('run') === '1' && (logging || trainingDay(db, id, selectedDate, today).canRun)
   const selectDate = (date) => { setLogging(false); setHistoryRequest(0); setSearchParams({ date }) }
   const closeRunner = () => { setLogging(false); setSearchParams({ date: selectedDate }) }
   const reviewHistory = (workout) => {
@@ -84,7 +84,7 @@ export default function ClientTrainingPage() {
         <SegToggle options={[[ 'workouts', `Workout logs (${workouts.length})` ], [ 'appointments', `Appointments (${appointments.length})` ]]} value={historyType} onChange={setHistoryType} ariaLabel="History type" />
         <div className="training-history-list" role="region" aria-label="Session history entries" tabIndex={0}>
           {historyType === 'workouts' ? workouts.length ? workouts.map((item) => <button key={item.id} className="training-history-row" onClick={() => reviewHistory(item)}>
-            <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · Workout log</small></span><span>Review day →</span>
+            <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review day →</span>
           </button>) : <p className="muted">No completed workout logs yet.</p>
             : appointments.length ? appointments.map((item) => <div key={item.id} className="training-history-row static">
               <span><strong>{item.type || 'Appointment'}</strong><small>{fmtDate(item.date)} · {item.time || 'Time not set'} · {item.dur || '—'} min</small></span><span>Completed</span>
