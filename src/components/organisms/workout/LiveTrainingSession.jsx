@@ -56,8 +56,9 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   }
   const discard = async () => {
     setBusy(true)
-    if (act({ type: 'discard' }) && await flush()) setEditor(null)
+    const saved = act({ type: 'discard' }) && await flush()
     setBusy(false)
+    if (saved) { setEditor(null); onExit?.() }
   }
   const jump = (row) => {
     const element = document.getElementById('live-set-' + row.id)
