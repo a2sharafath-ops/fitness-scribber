@@ -17,6 +17,10 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
   const submitAction = (action) => { if (onAction(action)) onClose() }
   const field = (name, label, value, { min = 0, max = 999, step = 1, required = false } = {}) => <label>{label}<input type="number" name={name} defaultValue={value ?? ''} min={min} max={max} step={step} required={required} /></label>
   if (kind === 'order') return <LiveWorkoutOrder session={session} onAction={onAction} onClose={onClose} />
+  if (kind === 'set-options') return <LiveSessionDialog title="Set options" onClose={onClose}>
+    <button type="button" className="ls-button ls-danger-text" onClick={() => submitAction({ type: 'skip-row', id: row.id })}>Skip set</button>
+    {error && <p className="ls-form-error" role="alert">{error}</p>}
+  </LiveSessionDialog>
   if (kind === 'history') {
     const previous = previousLivePerformance(history, session, item)
     return <LiveSessionDialog title={`Last performance · ${item.name}`} onClose={onClose}>
@@ -74,11 +78,10 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
         pDurationSeconds: form.get('pDurationSeconds') === '' ? null : Number(form.get('pDurationSeconds')) } })
       break
     case 'effort':
-      title = 'Set options'
+      title = 'Enter set effort'
       content = <><label>Effort metric<select name="effortType" defaultValue={row.effortType || 'RIR'}><option>RIR</option><option>RPE</option></select></label>
         {field('effort', 'Actual effort', row.effort, { max: 10, step: 0.5 })}
-        {row.effort != null && <p>Recorded effort · {row.effort} {row.effortType}</p>}
-        <button type="button" className="ls-button ls-danger-text" onClick={() => submitAction({ type: 'skip-row', id: row.id })}>Skip set</button></>
+        {row.effort != null && <p>Recorded effort · {row.effort} {row.effortType || 'RIR'}</p>}</>
       submit = (form) => submitAction({ type: 'row', id: row.id, patch: { effortType: form.get('effortType'), effort: form.get('effort') === '' ? null : Number(form.get('effort')) } })
       break
     case 'rest':

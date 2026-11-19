@@ -237,7 +237,7 @@
 }
 .ls-set-row {
   display:grid;
-  grid-template-columns:49px minmax(0,1fr) minmax(0,1.2fr) 96px;
+  grid-template-columns:49px minmax(0,1fr) minmax(0,1.2fr) minmax(64px,.55fr) 96px;
   align-items:start;
   gap:8px;
   padding:8px 0;
@@ -282,6 +282,9 @@
   font-variant-numeric:tabular-nums;
   padding:5px;
   gap:3px
+}
+.ls-session .ls-value {
+  min-width:0
 }
 .ls-value:not(:disabled):hover {
   border-color:#9caed3;
@@ -377,7 +380,7 @@
 .ls-text:hover {
   text-decoration:underline
 }
-.ls-effort {
+.ls-row-options {
   font-size:17px;
   padding:5px 0
 }
@@ -797,7 +800,7 @@
     padding:10px
   }
   .ls-set-row {
-    grid-template-columns:44px minmax(0,1fr) minmax(0,1.2fr) 44px;
+    grid-template-columns:44px minmax(0,1fr) minmax(0,1.2fr) 48px 44px;
     gap:5px
   }
   .ls-set-actions {
@@ -945,7 +948,7 @@
 .ls-exercise-head>div:first-child {
   min-width:0
 }
-.ls-session .ls-done,.ls-session .ls-effort {
+.ls-session .ls-done,.ls-session .ls-row-options {
   min-width:44px;
   min-height:44px
 }

@@ -9,7 +9,7 @@ export default function LiveExerciseCard({ session, exercise, block, units, now,
     <header className="ls-exercise-head"><div><h3>{exercise.name}</h3><p>{exercise.setRows.length} {exercise.setRows.length === 1 ? 'set' : 'sets'}
       {exercise.replaces && ' · Replacement'}{exercise.replacedBy && ' · Replaced'}{exercise.skipped && ' · Upcoming sets skipped'}</p></div>
       <div className="ls-tools">{!readOnly && !exercise.skipped && !block.skipped && <button type="button" className="ls-button ls-rest-toggle" aria-pressed={!!exercise.restEnabled}
-        onClick={() => onAction({ type: 'rest-toggle', id: exercise.id })}>◷ {exercise.restEnabled ? 'Rest on' : 'Rest'}</button>}
+        onClick={() => onAction({ type: 'rest-toggle', id: exercise.id })}>{exercise.restEnabled ? 'Rest on' : 'Rest'}</button>}
         <LiveSessionMenu label={`${exercise.name} options`}>
           {!readOnly && !locked && !exercise.skipped && pending && <button type="button" role="menuitem" onClick={() => edit('replace')}>Replace exercise…</button>}
           {!readOnly && !locked && (exercise.supersetId ? <button type="button" role="menuitem" onClick={() => onAction({ type: 'unlink', id: exercise.id })}>Unlink superset</button> :
@@ -21,7 +21,7 @@ export default function LiveExerciseCard({ session, exercise, block, units, now,
         </LiveSessionMenu>
       </div>
     </header>
-    <div className="ls-set-row ls-set-head" aria-hidden="true"><span>Set</span><span>Weight ({units})</span><span>Reps / duration</span><span /></div>
+    <div className="ls-set-row ls-set-head" aria-hidden="true"><span>Set</span><span>Weight ({units})</span><span>Reps / duration</span><span>Effort</span><span /></div>
     {exercise.setRows.map((row, index) => <LiveSetRow key={row.id} row={row} index={index} exercise={exercise} block={block} session={session} units={units} now={now}
       readOnly={readOnly} onAction={onAction} onEdit={edit} />)}
     <footer className="ls-exercise-foot"><button type="button" className="ls-text" onClick={() => edit('history')}>View last performance</button>
