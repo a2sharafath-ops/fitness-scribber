@@ -32,7 +32,7 @@ function Tabs({ label, options, value, onChange }) {
 function DashboardList({ label, rows, moreLabel }) {
   const visibleCount = 4
   const hidden = rows.length - visibleCount
-  return <div className="db-list" aria-label={label}>
+  return <div className="db-list" role="group" aria-label={label}>
     {rows.slice(0, visibleCount)}
     {hidden > 0 && <details className="db-more-rows">
       <summary><span>Show {hidden} more {moreLabel}{hidden === 1 ? '' : 's'}</span><span>Show fewer {moreLabel}s</span></summary>
@@ -151,19 +151,28 @@ export default function DashboardPage() {
       <div className="orbit-dashboard-column">
       <DashboardBookings key={today} db={db} bookings={bookings} roster={roster} next={next} today={today} onBook={book} onPlan={showPlan}
         onDetails={(booking) => openModal(<SessionForm session={booking} />)} />
-      <section className="db-card orbit-review" id="dashboard-review">
-        <Heading icon="alert" tone="review">Needs review</Heading>
-        <Tabs label="Review category" options={[[ 'review', `Review first · ${reviewFirst.length}` ], ['followup', `Follow-up · ${followup.length}`]]}
+      <section className="db-card orbit-review" id="dashboard-review" aria-labelledby="orbit-review-title">
+        <header className="db-head">
+          <h2 id="orbit-review-title">Needs review</h2>
+          <Link className="db-link" to="/concerns">View concerns</Link>
+        </header>
+        <Tabs label="Review category" options={[[ 'review', `Review first · ${reviewFirst.length}` ], ['followup', `Follow-ups · ${followup.length}`]]}
           value={reviewCategory} onChange={setReviewFilter} />
-        <DashboardList key={reviewCategory} label="Client review queue" moreLabel="review item" rows={reviewRows.map(r =>
-          <div key={r.key} className={`db-row db-review-item db-tone-${r.tone}`}>
-            <div className="db-info"><strong>{r.client.name}</strong><small>{r.reason}</small><span className="db-review-detail">{r.detail}</span></div>
-            <Link className="db-link db-row-action" aria-label={`Review ${r.reason} for ${r.client.name}`} to={r.path}>Review →</Link>
-          </div>)} />
-        {!reviewRows.length && <div className="db-inline-empty">
-          <p>{reviewCategory === 'review' ? 'No priority items to review.' : 'No follow-ups due.'}</p>
-          {reviewCategory === 'review' && followup.length > 0 && <button type="button" className="db-link" onClick={() => setReviewFilter('followup')}>View follow-ups →</button>}
-        </div>}
+        {reviewRows.length > 0 ?
+          <DashboardList key={reviewCategory} label="Client review queue" moreLabel="review item" rows={reviewRows.map(r =>
+            <Link key={r.key} className="orbit-review-row" data-tone={r.tone} to={r.path}>
+              <span className="orbit-review-marker" aria-hidden="true" />
+              <span className="orbit-review-copy">
+                <strong>{r.client.name}</strong>
+                <span>{r.reason}</span>
+                {r.detail && <small>{r.detail}</small>}
+              </span>
+              <Icon name="chevron-right" size={16} />
+            </Link>)} /> :
+          <div className="orbit-review-empty">
+            <Icon name="check" size={18} />
+            <p>{reviewCategory === 'review' ? 'No priority items to review.' : 'No follow-ups due.'}</p>
+          </div>}
       </section>
       </div>
       <div className="orbit-dashboard-column">
