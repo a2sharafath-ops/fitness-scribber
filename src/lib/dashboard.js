@@ -68,26 +68,43 @@ export function dashboardData(db, { today, time }) {
   return { clients, roster, bookings, next, upcoming, recorded, missing, reviews, plans, noProgram, completion, strength }
 }
 
-export function dashboardActivity(db, { today, days, metric }) {
+export function dashboardActivity(db, { today, days, metric, bucketDays = 7 }) {
   const start = addDays(today, -days), end = addDays(today, -1)
   const roster = new Set(db.clients.map(c => c.id)), daily = new Map(), unique = new Set()
-  const rows = metric === 'load' ? db.srpe : metric === 'checkins' ? db.wellness : db.sessions
+  const activeRoster = new Set(db.clients.filter(c => c.status === 'Active').map(c => c.id))
+  const rows = {
+    load: db.srpe, checkins: db.wellness, readiness: [...db.wellness, ...(db.wearable || [])],
+  }[metric] || db.sessions
+  const isAverage = metric === 'readiness' || metric === 'completion'
   for (const row of rows) {
     if (!roster.has(row.clientId) || row.date < start || row.date > end) continue
     if (metric === 'sessions' && row.status !== 'Completed') continue
-    if (metric === 'checkins') {
+    if (metric === 'completion' && !['Completed', 'Missed'].includes(row.status)) continue
+    if (metric === 'readiness' && !activeRoster.has(row.clientId)) continue
+    if (metric === 'checkins' || metric === 'readiness') {
       const key = `${row.clientId}:${row.date}`
       if (unique.has(key)) continue
       unique.add(key)
     }
     if (metric === 'load' && (row.tl == null || row.tl === '' || !Number.isFinite(+row.tl) || +row.tl < 0)) continue
-    daily.set(row.date, (daily.get(row.date) || 0) + (metric === 'load' ? +row.tl : 1))
+    let value = 1
+    if (metric === 'load') value = +row.tl
+    if (metric === 'completion') value = row.status === 'Completed' ? 100 : 0
+    if (metric === 'readiness') {
+      value = computeReadiness(db, row.clientId, row.date).score
+      if (!Number.isFinite(value)) continue
+    }
+    const day = daily.get(row.date) || { sum: 0, samples: 0 }
+    daily.set(row.date, { sum: day.sum + value, samples: day.samples + 1 })
   }
   const buckets = []
-  for (let offset = 0; offset < days; offset += 7) {
-    const count = Math.min(7, days - offset), from = addDays(start, offset), through = addDays(from, count - 1)
+  for (let offset = 0; offset < days; offset += bucketDays) {
+    const count = Math.min(bucketDays, days - offset), from = addDays(start, offset), through = addDays(from, count - 1)
     const values = Array.from({ length: count }, (_, i) => daily.get(addDays(from, i))).filter(v => v !== undefined)
-    buckets.push({ from, through, count, value: values.length ? values.reduce((a, b) => a + b, 0) : null, label: `${fmtDay(from)}–${fmtDay(through)}` })
+    const sum = values.reduce((total, day) => total + day.sum, 0)
+    const samples = values.reduce((total, day) => total + day.samples, 0)
+    const value = samples ? isAverage ? Math.round(sum / samples) : sum : null
+    buckets.push({ from, through, count, value, label: count === 1 ? fmtDay(from) : `${fmtDay(from)}–${fmtDay(through)}` })
   }
   return { start, end, buckets, hasData: daily.size > 0 }
 }

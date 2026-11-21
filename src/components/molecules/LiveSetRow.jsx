@@ -1,4 +1,4 @@
-import { LIVE_SET_TYPES, rowMode, adjustedSetDuration, rowType, timerElapsed, restRemainingMs } from '../../lib/liveSession'
+import { LIVE_SET_TYPES, rowMode, adjustedSetDuration, rowType, liveSetLoad, timerElapsed, restRemainingMs } from '../../lib/liveSession'
 import { toDisp, unitName } from '../../lib/units'
 import { secToClock } from '../../lib/workout'
 
@@ -8,7 +8,8 @@ export default function LiveSetRow({ row, index, exercise, block, session, units
   const running = session.liveState.setTimer?.rowId === row.id
   const label = `set ${index + 1} of ${exercise.name}`
   const type = rowType(row)
-  const weight = row.load == null ? '—' : `${toDisp(row.load, units)} ${unitName(units)}`
+  const load = liveSetLoad(row)
+  const weight = load == null ? '—' : `${toDisp(load, units)} ${unitName(units)}`
   const metric = rowMode(row) === 'duration' ? row.durationSeconds == null ? '— sec' : secToClock(row.durationSeconds) : row.reps == null ? '— reps' : `${row.reps} reps`
   const effort = `${row.effort ?? '—'} ${row.effortType || 'RIR'}`
   const targetDuration = adjustedSetDuration(row)

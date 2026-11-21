@@ -1,6 +1,7 @@
 /* Workspace photograph by Charlotte May, Pexels (5825380), Pexels License. */
 :root {
-  --orbit-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --orbit-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --orbit-display-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --orbit-red: #d71932;
   --orbit-red-hover: #b71229;
   --orbit-frost: .64;
@@ -18,6 +19,7 @@
   --radius-sm: 12px;
   --orbit-frame: 255 253 255;
   --orbit-panel: linear-gradient(130deg, #fff9, #fff5), var(--surface);
+  --orbit-glass: linear-gradient(130deg, #fffc, #fff8);
   --orbit-feature: linear-gradient(135deg, #fce5e9, #faeff2 70%, #f8e9ef);
   --orbit-shadow: 0 15px 54px #30203118;
   --orbit-bg-tint: #faeef4bd;
@@ -47,6 +49,7 @@
   --tint-yellow: #403526;
   --orbit-frame: 26 22 30;
   --orbit-panel: linear-gradient(135deg, #e65b7510, transparent 75%), var(--surface);
+  --orbit-glass: linear-gradient(135deg, #34252fe6, #211c25b8 75%);
   --orbit-feature: linear-gradient(135deg, #573540, #372833 65%, #2a222d);
   --orbit-shadow: 0 18px 52px #08060c66;
   --orbit-bg-tint: #241b27c9;
@@ -122,17 +125,18 @@ body:has(.orbit-shell) {
   border-radius: 27px 0 0 27px;
 }
 .orbit-sidebar { display: flex; flex-direction: column; color: var(--text); background: var(--orbit-panel); }
+.orbit-shell .orbit-sidebar { background: var(--orbit-glass); }
 .orbit-sidebar-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 5px; padding: 3px 4px; margin-bottom: 23px; }
 .orbit-sidebar-home { min-width: 0; }
 .orbit-shell #sidebar, .orbit-drawer .orbit-sidebar { overflow: auto; }
 .orbit-sidebar .nav-item { border: 1px solid transparent; margin-bottom: 5px; }
 .orbit-sidebar .nav-item .orbit-nav-label { display: inline; }
-.orbit-sidebar .nav-item.active { color: white; background: var(--orbit-red); }
-.orbit-sidebar .nav-item.active:hover { background: var(--orbit-red-hover); }
+.orbit-sidebar .nav-item.active { color: var(--text); background: var(--orbit-selected); box-shadow: inset 3px 0 var(--accent); }
+.orbit-sidebar .nav-item.active:hover { border-color: var(--accent); }
 .orbit-sidebar .nav-item:not(.active):hover { border-color: var(--border); }
 .orbit-sidebar .sb-foot { display: block; padding-inline: 6px; }
 .orbit-sidebar .nav-badge.show { display: grid; place-items: center; }
-.orbit-sidebar .nav-item.active .nav-badge { background: #fff; color: var(--orbit-red-hover); }
+.orbit-sidebar .nav-item.active .nav-badge { background: var(--surface); color: var(--accent); }
 .orbit-shell[data-sidebar-collapsed="true"] .orbit-sidebar-head { flex-direction: column; align-items: center; gap: 13px; }
 .orbit-shell[data-sidebar-collapsed="true"] #sidebar .nav-item { justify-content: center; position: relative; padding-inline: 0; }
 .orbit-shell[data-sidebar-collapsed="true"] #sidebar .orbit-nav-label,

@@ -26,6 +26,39 @@ test('session adoption preserves original structures and logged values with stab
   assert.deepEqual(live.prepareLiveSession(next, () => 500, now + 1000), next)
   assert.equal(old.liveState, undefined)
 })
+test('live actual weight stays blank until confirmed, including old prefills and added sets', () => {
+  const old = fixture()
+  old.main[0].setRows[1].load = 40
+  old.main[1].setRows = [{ pReps: 12, pLoadKg: 30, done: false, load: null, autofill: { load: 'manual' } }]
+  let w = live.prepareLiveSession(old, () => 100, now)
+  const id = 'bench:set:2'
+  const row = () => live.locateLive(w, id).row
+  assert.equal(row().load, null)
+  assert.equal(row().pLoadKg, 40)
+  assert.equal(w.main[1].setRows[0].load, null)
+  assert.equal(w.liveState.original.main[0].setRows[1].load, 40)
+
+  // Resume a stored version from before the actual-weight field was separated.
+  row().load = 40
+  const saved = structuredClone(w)
+  w = live.prepareLiveSession(w, null, now)
+  assert.deepEqual(w, saved)
+  assert.equal(live.liveSetLoad(row()), null)
+  w = change(w, 'row', id, { patch: { pLoadKg: 42 } })
+  assert.equal(live.liveSetLoad(row()), null)
+  assert.throws(() => change(w, 'done', id, { actual: { metric: 9, load: null } }), /Confirm the weight/)
+
+  w = change(w, 'add-set', 'bench')
+  w = change(w, 'row', id, { patch: { load: 42 } })
+  assert.equal(live.liveSetLoad(row()), 42)
+  assert.equal(w.main[0].setRows[2].load, null)
+  assert.equal(w.main[0].setRows[2].pLoadKg, 42)
+  w = change(w, 'done', id, { actual: { metric: 9, load: 0 } })
+  w = change(w, 'done', id)
+  assert.equal(live.liveSetLoad(row()), 0)
+  assert.equal(row().completionHistory[0].recorded.load, 0)
+  assert.equal(w.main[0].setRows[0].load, 45)
+})
 test('completed rows reject edits, undo retains an audit copy, and new logging leaves original targets untouched', () => {
   let w = prepare()
   assert.throws(() => change(w, 'row', 'bench:set:1', { patch: { reps: 1 } }), /Undo/)
@@ -41,7 +74,7 @@ test('completed rows reject edits, undo retains an audit copy, and new logging l
 test('rest only starts on Done, is attached to a set, and pauses without counting inactive time', () => {
   let w = change(prepare(), 'rest-toggle', 'row')
   assert.equal(w.liveState.rest, null)
-  w = change(w, 'row', 'row:set:1', { patch: { reps: 12 } })
+  w = change(w, 'row', 'row:set:1', { patch: { reps: 12, load: 30 } })
   w = change(w, 'done', 'row:set:1')
   assert.equal(w.liveState.rest.rowId, 'row:set:1')
   assert.equal(live.restRemainingMs(w.liveState.rest, now + 10000), 50000)
@@ -55,7 +88,7 @@ test('rest only starts on Done, is attached to a set, and pauses without countin
 test('actual set effort survives Done, reload and Undo without changing targets or other sets', () => {
   let w = prepare()
   const original = structuredClone(w.liveState.original)
-  w = change(w, 'row', 'bench:set:2', { patch: { reps: 10, effortType: 'RIR', effort: 1.5 } })
+  w = change(w, 'row', 'bench:set:2', { patch: { reps: 10, load: 40, effortType: 'RIR', effort: 1.5 } })
   w = change(w, 'done', 'bench:set:2')
   w = live.prepareLiveSession(JSON.parse(JSON.stringify(w)), null, now)
   assert.equal(live.locateLive(w, 'bench:set:2').row.effort, 1.5)
@@ -114,7 +147,7 @@ test('legacy per-exercise actuals survive adoption and supersets advance by roun
   assert.equal(summarize(normalized).volume, 720)
   let w = change(prepare(), 'superset', 'bench', { partnerId: 'row' })
   assert.equal(live.nextLiveSet(w).row.id, 'row:set:1')
-  w = change(w, 'row', 'row:set:1', { patch: { reps: 12 } })
+  w = change(w, 'row', 'row:set:1', { patch: { reps: 12, load: 30 } })
   w = change(w, 'done', 'row:set:1')
   assert.equal(live.nextLiveSet(w).row.id, 'bench:set:2')
 })

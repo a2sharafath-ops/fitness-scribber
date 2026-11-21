@@ -10,6 +10,14 @@ export const liveClosed = (workout) => ['completed', 'discarded'].includes(worko
 export const rowMode = (row) => row.mode === 'duration' ||
   (row.mode == null && !row.done && row.reps == null && adjustedSetDuration(row) != null) ? 'duration' : 'reps'
 export const rowType = (row) => row.type || ({ warmup: 'warmup', cooldown: 'cooldown' }[row.purpose]) || 'normal'
+
+export function liveSetLoad(row) {
+  if (row.done || row.completedAt != null || row.completionHistory?.length || row.autofill?.load === 'manual') return row.load ?? null
+  // Older drafts stored both prefilled targets and copied weights in the actual field.
+  if (row.load === row.pLoadKg || row.autofill?.load === 'suggested' || Number.isInteger(row.autofill?.load)) return null
+  return row.load ?? null
+}
+
 const copy = (value) => structuredClone(value)
 const planParts = (workout) => Object.fromEntries(SESSION_SECTIONS.map((section) => [section, copy(workout[section] || [])]))
 function structuredDuration(row) {
@@ -36,7 +44,7 @@ export function prepareLiveSession(workout, resolveTm, now = Date.now()) {
   const original = planParts(workout)
   for (const section of SESSION_SECTIONS) {
     next[section] = (next[section] || []).map((item, index) => {
-      const normalized = normalizeRunItem(item, resolveTm)
+      const normalized = normalizeRunItem(item, resolveTm, { prefillLoad: false })
       const existingRows = item.setRows || []
       const id = item.id || `${workout.id}:${section}:${index}`
       return { ...normalized, id, setRows: normalized.setRows.map((normalizedRow, i) => {
@@ -45,6 +53,7 @@ export function prepareLiveSession(workout, resolveTm, now = Date.now()) {
           reps: item.doneReps ?? item.reps ?? null, load: item.doneWeight ?? item.weight ?? null }
         const duration = prescribedSetDuration(item, row)
         return { ...row, id: row.id || `${id}:set:${i + 1}`,
+          ...(!row.done ? { load: liveSetLoad(row) } : {}),
           ...(duration != null && duration > 0 && !row.done && row.mode == null && row.reps == null
             ? { mode: 'duration', pDurationSeconds: duration } : {}) }
       }) }
@@ -169,15 +178,19 @@ export function applyLiveAction(workout, action, now = Date.now()) {
   const { block, item, row } = locateLive(next, action.id)
   const metaBlock = state.blocks.find((entry) => entry.id === block?.id)
   switch (action.type) {
-    case 'row':
+    case 'row': {
       requirePending(block, item, row)
       if (state.setTimer?.rowId === row.id) throw new Error('Stop the set timer before editing this set.')
       if (action.patch.load != null && !validNumber(action.patch.load, 2000)) throw new Error('Enter a weight between 0 and 2000 kg.')
       if (action.patch.reps != null && !validNumber(action.patch.reps, 999, true)) throw new Error('Enter whole reps between 0 and 999.')
       if (action.patch.durationSeconds != null && !validNumber(action.patch.durationSeconds, 35999, true, 1)) throw new Error('Enter duration between 1 and 35999 seconds.')
-      if ((action.patch.mode || rowMode(row)) === 'reps') item.setRows = editRunSet(item.setRows, item.setRows.indexOf(row), action.patch)
-      else Object.assign(row, action.patch)
+      if (Object.hasOwn(action.patch, 'pLoadKg') && row.load != null && liveSetLoad(row) == null) {
+        row.autofill = { ...row.autofill, load: 'suggested' }
+      }
+      const propagate = (action.patch.mode || rowMode(row)) === 'reps' ? ['reps'] : []
+      item.setRows = editRunSet(item.setRows, item.setRows.indexOf(row), action.patch, propagate)
       break
+    }
     case 'done':
       if (row.done) {
         row.completionHistory = [...(row.completionHistory || []), { undoneAt: now,
@@ -195,6 +208,9 @@ export function applyLiveAction(workout, action, now = Date.now()) {
           if (mode === 'duration') row.durationSeconds = metric
           else row.reps = metric
         }
+        const actualLoad = action.actual ? row.load : liveSetLoad(row)
+        if (row.pLoadKg != null && actualLoad == null) throw new Error('Confirm the weight used for this set.')
+        row.load = actualLoad
         const timed = mode === 'duration'
         const metric = timed ? row.durationSeconds : row.reps
         if (!validNumber(metric, timed ? 35999 : 999, true, timed ? 1 : 0)) throw new Error('Enter the performed reps or duration first.')
@@ -255,7 +271,7 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       break
     case 'add-set': {
       const last = item.setRows.at(-1) || {}
-      item.setRows.push({ ...last, id: uid(), n: item.setRows.length + 1, load: last.pLoadKg ?? null, reps: null,
+      item.setRows.push({ ...last, id: uid(), n: item.setRows.length + 1, load: null, reps: null,
         durationSeconds: null, effort: null, done: false, skipped: false, completedAt: null, completionHistory: [], autofill: {} })
       item.sets = item.setRows.length
       break

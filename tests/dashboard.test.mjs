@@ -129,6 +129,16 @@ test('activity keeps missing load as null, accepts explicitly recorded zero, ded
   assert.equal(dashboardActivity(db,{today,days:28,metric:'checkins'}).buckets.at(-1).value,1)
 })
 
+test('daily dashboard trends use recorded outcomes and leave dates with missing records blank', () => {
+  const db = fixture(), clientId = db.clients[0].id
+  db.sessions = [booking(db, 'completed', '2026-10-10', '09:00', 'Completed'), booking(db, 'missed', '2026-10-10', '11:00', 'Missed'),
+    booking(db, 'pending', '2026-10-10', '13:00'), booking(db, 'unresolved', '2026-10-09', '11:00')]
+  db.wellness = [{ clientId, date: '2026-10-10', score: 16 }, { clientId, date: '2026-10-10', score: 28 }, { clientId, date: '2026-10-09' }]
+  const daily = metric => dashboardActivity(db, { today, days: 7, bucketDays: 1, metric }).buckets.map(b => b.value)
+  assert.deepEqual(daily('completion'), [null, null, null, null, null, null, 50])
+  assert.deepEqual(daily('readiness'), [null, null, null, null, null, null, 50])
+})
+
 test('Dashboard renders real destinations and empty states without duplicate shortcut strips or AI claims', () => {
   const db=fixture(), render=db=>renderToStaticMarkup(React.createElement(DataProvider,{initialDb:db,backend:false},React.createElement(ModalProvider,null,React.createElement(MemoryRouter,null,React.createElement(DashboardPage)))))
   const html=render(db)

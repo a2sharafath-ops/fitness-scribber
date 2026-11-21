@@ -35,7 +35,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
     if (action.type === 'done' && !action.actual) {
       const { row } = locateLive(session, action.id)
       const metric = rowMode(row) === 'duration' ? row.durationSeconds : row.reps
-      if (!row.done && (metric == null || row.load != null || row.pLoadKg != null)) {
+      if (!row.done && (metric == null || row.pLoadKg != null)) {
         openEditor({ kind: 'complete-set', rowId: row.id })
         return false
       }
