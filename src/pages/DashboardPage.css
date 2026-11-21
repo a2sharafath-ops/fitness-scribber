@@ -328,7 +328,7 @@
 .coach-dashboard .orbit-trend-change { border-radius: 6px; background: var(--surface); padding: 3px 6px; }
 .coach-dashboard .orbit-trend-change[data-tone="up"] { background: var(--tint-green); color: var(--green); }
 .coach-dashboard .orbit-trend-change[data-tone="down"] { background: var(--tint-amber); color: var(--accent2); }
-.coach-dashboard .db-chart { height: 178px; }
+.coach-dashboard .db-chart { height: 178px; overflow: clip; }
 .coach-dashboard .db-chart-heading { margin-top: 12px; }
 
 .coach-dashboard .orbit-segments {
@@ -502,12 +502,11 @@
 }
 .db-chart-guide {
   position: absolute;
-  left: 0;
+  left: clamp(0px, var(--guide-x, 0px), calc(100% - 1px));
   width: 0;
   border-left: 1px dashed var(--accent);
   opacity: .62;
-  transform: translateX(var(--guide-x, 0px));
-  transition: transform .14s ease-out;
+  transition: left .14s ease-out;
   pointer-events: none;
 }
 .orbit-insight-progress[data-playing="false"] { animation-play-state: paused; }
