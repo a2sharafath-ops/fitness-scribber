@@ -144,11 +144,11 @@
   color: var(--text);
 }
 .coach-dashboard .db-menu-list button:hover, .coach-dashboard .db-count, .coach-dashboard .db-avatar { background: var(--surface2); color: var(--muted); }
-.coach-dashboard .db-tabs button[aria-pressed="true"] { background: var(--orbit-red); border-color: var(--orbit-red); color: #fff; }
+.coach-dashboard .db-tabs button[aria-pressed="true"] { background: var(--orbit-selected); border-color: var(--accent); color: var(--accent); }
 .coach-dashboard .db-chart { height: 150px; }
 .coach-dashboard .db-chart-heading { margin: 12px 0 6px; }
 .coach-dashboard .db-chart-controls { gap: 8px; }
-.coach-dashboard .db-chart-controls select { font: inherit; }
+.coach-dashboard .db-chart-controls select { min-height: 40px; font: inherit; color: var(--text); }
 .coach-dashboard .db-note { color: var(--muted); }
 .orbit-readiness-overview { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 0 0 17px; }
 .orbit-readiness-overview .db-note { margin-top: 3px; }
@@ -159,7 +159,14 @@
 .orbit-readiness-legend li::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; background: var(--green); }
 .orbit-readiness-legend li:nth-child(2)::before { background: #da9d38; }
 .orbit-readiness-legend li:nth-child(3)::before { background: var(--accent); }
-.orbit-dashboard-grid .db-scroll { max-height: 253px; }
+.coach-dashboard .db-inline-empty { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; color: var(--muted); font-size: 13px; }
+.coach-dashboard .db-list { min-width: 0; }
+.coach-dashboard .db-list .db-row { flex-wrap: wrap; }
+.coach-dashboard .db-list .db-info { flex-basis: 50%; }
+.coach-dashboard .db-list .db-row-action, .coach-dashboard .db-list .db-link { margin-left: auto; }
+.coach-dashboard .orbit-readiness .db-tabs { margin-bottom: 4px; }
+.db-more-rows > summary { width: fit-content; padding: 9px 0; color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 650; }
+.db-more-rows:not([open]) > summary span:last-child, .db-more-rows[open] > summary span:first-child { display: none; }
 .orbit-snapshot .db-trend-bottom { margin-top: 0; padding-top: 0; border: 0; }
 @media (max-width: 1050px) { .orbit-dashboard-grid { gap: 14px; } }
 @media (max-width: 880px) {

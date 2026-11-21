@@ -4,6 +4,7 @@ import { fmtDate, fmtDay, weekDates } from '../../lib/dates'
 import { programStats } from '../../lib/program'
 import { isSession, isClosedTrainingDay } from '../../lib/planner'
 import { activeBooking, trainingBookings } from '../../lib/schedule'
+import { trainingDay } from '../../lib/trainingDay'
 
 export default function OverviewTraining({ clientId, today }) {
   const { db, tz } = useData()
@@ -29,15 +30,13 @@ export default function OverviewTraining({ clientId, today }) {
     <div className="overview-section-head"><h2 id="today-training-title">Today’s training</h2></div>
     <div className="overview-training-status"><div><h3 title={title}>{title}</h3><p className="muted">{meta}</p></div><Link className={'btn' + (completed || closed && !hasWorkout ? ' ghost' : '')} to={url}>{action} →</Link></div>
     <div className="overview-week" aria-label="This week at a glance">{weekDates(0, tz).map((date) => {
-      const logs = (db.workouts || []).filter((row) => row.clientId === clientId && row.date === date)
-      const done = logs.some((row) => row.status === 'completed')
-      const running = !done && logs.some((row) => row.status === 'in_progress')
-      const planned = db.prescriptions.some((row) => row.clientId === clientId && row.date === date && isSession(row))
-      const label = done ? 'Done' : running ? 'In progress' : planned ? 'Plan' : 'No plan'
-      return <Link key={date} to={`/clients/${clientId}/training?date=${date}`} className={'overview-day' + (date === today ? ' today' : done ? ' done' : '')} aria-label={`${fmtDate(date)} · ${done ? 'Completed workout' : running ? 'Workout in progress' : planned ? 'Planned workout' : 'No workout planned'}`}>
-        <span>{date === today ? 'Today' : fmtDay(date).split(',')[0]}</span><strong>{Number(date.slice(8))}</strong><span>{label}</span>
+      const day = trainingDay(db, clientId, date, today)
+      return <Link key={date} to={`/clients/${clientId}/training?date=${date}`} className={`overview-day ${day.status}${date === today ? ' today' : ''}`}
+        aria-current={date === today ? 'date' : undefined} aria-label={`${fmtDate(date)} · ${day.label}`}>
+        <span>{date === today ? 'Today' : fmtDay(date).split(',')[0]}</span><strong>{Number(date.slice(8))}</strong>
+        {day.status !== 'empty' && <span>{day.label}</span>}
       </Link>
     })}</div>
-    <div className="overview-training-footer">{hasWorkout && <details className="overview-training-details"><summary>{bookings.length ? 'Day’s plan' : 'Workout details'}</summary><div className="overview-exercises">{exercises.map((exercise, index) => <div key={index}><span>{exercise.name}</span><small>{exercise.detail}</small></div>)}</div></details>}</div>
+    {hasWorkout && <details className="overview-training-details"><summary>{bookings.length ? 'Day’s plan' : 'Workout details'}</summary><div className="overview-exercises">{exercises.map((exercise, index) => <div key={index}><span>{exercise.name}</span><small>{exercise.detail}</small></div>)}</div></details>}
   </section>
 }

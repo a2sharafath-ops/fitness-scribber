@@ -1,5 +1,5 @@
 import { isClosedTrainingDay, isSession } from './planner'
-import { activeBooking, trainingBookings } from './schedule'
+import { activeBooking, bookingWorkout, scheduledBooking, trainingBookings } from './schedule'
 
 // Calendar cells and the selected-day panel share client/date eligibility rules.
 export function trainingDay(db, clientId, date, today, { unlinkedOnly = false } = {}) {
@@ -10,14 +10,22 @@ export function trainingDay(db, clientId, date, today, { unlinkedOnly = false } 
   const pending = workouts.find((row) => row.status === 'in_progress') || workouts.find((row) => !['completed', 'discarded'].includes(row.status)) || null
   const appointment = (db.sessions || []).find((row) => row.clientId === clientId && row.date === date && String(row.status).toLowerCase() === 'completed') || null
   const closed = isClosedTrainingDay(db, clientId, date, today)
-  const status = completed.length ? 'completed' : pending ? pending.status === 'in_progress' ? 'progress' : 'ready'
+  const bookings = trainingBookings(db, clientId, date).filter(activeBooking)
+  const openBookings = bookings.map(booking => ({ booking, workout: bookingWorkout(db, booking) })).filter(({ booking, workout }) =>
+    workout?.status === 'in_progress' || scheduledBooking(booking) && !['completed', 'discarded'].includes(workout?.status))
+  const scheduled = openBookings.length
+  const running = openBookings.some(({ workout }) => workout?.status === 'in_progress')
+  const bookedLogs = completed.filter((workout) => bookings.some(booking => booking.id === workout.bookingId)).length
+  const status = running ? 'progress' : scheduled ? 'booked'
+    : completed.length ? 'completed' : pending ? pending.status === 'in_progress' ? 'progress' : 'ready'
     : appointment ? 'appointment' : prescription ? 'planned' : 'empty'
-  const label = { completed: completed.length > 1 ? `${completed.length} logs` : 'Completed', progress: 'In progress', ready: 'Ready', appointment: 'Appt done', planned: 'Planned', empty: 'No plan' }[status]
-  const title = completed[0]?.title || pending?.title || (appointment ? 'Appointment completed' : prescription?.name)
+  const label = scheduled && bookedLogs ? `${bookedLogs} logged · ${scheduled} left`
+    : { booked: `${scheduled} booked`,
+    completed: completed.length > 1 ? `${completed.length} logs` : 'Logged', progress: 'In progress', ready: 'Ready', appointment: 'Booking completed', planned: 'Planned', empty: 'No plan' }[status]
+  const title = (scheduled ? pending?.title || prescription?.name : completed[0]?.title || pending?.title) || (appointment ? 'Appointment completed' : prescription?.name)
     || (prescription ? 'Prescribed workout' : date < today ? 'No workout recorded' : 'No workout planned')
-  const hasBooking = trainingBookings(db, clientId, date).some(activeBooking)
-  const canRun = !completed.length && date <= today && (pending?.status === 'in_progress' || !hasBooking && date === today && !closed && Boolean(pending || prescription))
-  return { prescription, completed, discarded, pending, appointment, closed, status, label, title, canRun,
+  const canRun = !completed.length && date <= today && (pending?.status === 'in_progress' || !bookings.length && date === today && !closed && Boolean(pending || prescription))
+  return { prescription, completed, discarded, pending, appointment, closed, status, label, title, canRun, scheduled, bookedLogs,
     canEditPlan: Boolean(prescription && !completed.length && !appointment && !pending),
     canPlan: !closed && !prescription && !pending,
     canDeletePlan: Boolean(prescription && !closed && !pending) }

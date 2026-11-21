@@ -2,6 +2,18 @@
 // Match the server's settings.tz fallback; never infer a coach zone from a device.
 export const coachTimeZone = (tz) => tz || 'UTC'
 
+export function coachClock(now = new Date(), tz) {
+  const options = { timeZone: coachTimeZone(tz) }
+  const parts = new Intl.DateTimeFormat('en-CA', { ...options, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
+  const value = key => parts.find(p => p.type === key)?.value
+  return { today: `${value('year')}-${value('month')}-${value('day')}`, time: `${value('hour')}:${value('minute')}` }
+}
+
+export function fmtDateRange(from, through) {
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+    .formatRange(new Date(from), new Date(through))
+}
+
 export const todayISO = (tz) => {
   try {
     return new Date().toLocaleDateString('en-CA', { timeZone: coachTimeZone(tz) })

@@ -91,6 +91,25 @@ test('prescription names and completion are separate; client-owned upcoming prog
   assert.equal(dashboardClientPath('a/b','/training?date='+today),'/clients/a%2Fb/training?date='+today)
 })
 
+test('completing one booked workout keeps the other same-day booking visible', () => {
+  const db = fixture(), clientId = db.clients[0].id
+  const first = { ...booking(db, 'morning', today, '13:00'), type: 'Personal training' }
+  const second = { ...first, id: 'afternoon', time: '17:00' }
+  db.sessions = [first, second]
+  db.prescriptions = [{ id: 'day-plan', clientId, date: today, items: [{ sets: 3 }] }]
+  db.workouts = [{ id: 'morning-log', bookingId: first.id, status: 'completed', clientId, date: today }]
+  const partial = dashboardData(db, clock)
+  assert.equal(partial.next.id, second.id)
+  assert.equal(partial.plans[0].done, false)
+  assert.equal(partial.plans[0].workoutStatus, '1 logged · 1 left')
+  db.workouts.push({ id: 'afternoon-log', bookingId: second.id, status: 'completed', clientId, date: today })
+  const finished = dashboardData(db, clock)
+  assert.equal(finished.next, undefined)
+  assert.equal(finished.plans[0].done, true)
+  assert.equal(finished.plans[0].workoutStatus, '2 logs')
+  assert.ok(db.sessions.every(s => s.status === first.status))
+})
+
 test('retrospective completion excludes today/future/cancelled/orphans; pending remains a status update', () => {
   const db=fixture()
   db.sessions=[booking(db,'done','2026-10-10','09:00','Completed'),booking(db,'missed','2026-10-09','09:00','Missed'),booking(db,'pending','2026-10-08','09:00'),booking(db,'cancel','2026-10-07','09:00','Cancelled'),booking(db,'future','2026-10-12','09:00'),booking(db,'today',today,'09:00','Completed'),booking(db,'old','2026-09-10','09:00','Completed'),booking(db,'orphan','2026-10-01','09:00','Completed','deleted')]
@@ -113,7 +132,8 @@ test('activity keeps missing load as null, accepts explicitly recorded zero, ded
 test('Dashboard renders real destinations and empty states without duplicate shortcut strips or AI claims', () => {
   const db=fixture(), render=db=>renderToStaticMarkup(React.createElement(DataProvider,{initialDb:db,backend:false},React.createElement(ModalProvider,null,React.createElement(MemoryRouter,null,React.createElement(DashboardPage)))))
   const html=render(db)
-  for(const text of ['Up next','Today’s sessions','Needs review','Group readiness today','Planned workouts','Training snapshot','/clients/local-builder-100/check-ins?view=wellness']) assert.ok(html.includes(text))
+  assert.doesNotMatch(html, /orbit-up-next-title/)
+  for(const text of ['Today’s sessions','Needs review','Group readiness today','Planned workouts','Training snapshot','/clients/local-builder-100/check-ins?view=wellness']) assert.ok(html.includes(text))
   for(const text of ['AI Coach','At risk','rest day','Quick actions']) assert.ok(!html.includes(text))
   db.clients=[]
   assert.ok(render(db).includes('Start with your first client'))

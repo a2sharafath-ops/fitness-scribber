@@ -1,7 +1,6 @@
-import { addDays, fmtDay } from './dates'
-import { dashboardClock } from './dashboard'
+import { addDays, coachClock, fmtDay } from './dates'
 
-export const scheduleClock = dashboardClock
+export const scheduleClock = coachClock
 export const minute = time => Number(time?.slice(0, 2)) * 60 + Number(time?.slice(3, 5))
 export const clockTime = n => Number.isFinite(n) ? `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}` : '—'
 export const hasDuration = s => Number.isFinite(Number(s.dur)) && Number(s.dur) > 0
@@ -32,18 +31,35 @@ export function bookingWorkout(db, booking) {
   return (db.workouts || []).find(row => row.bookingId === booking.id && row.clientId === booking.clientId && row.date === booking.date) || null
 }
 
+export function workoutReviewPath(workout) {
+  const params = new URLSearchParams({ date: workout.date, workout: workout.id })
+  if (workout.bookingId) params.set('booking', workout.bookingId)
+  return `/clients/${encodeURIComponent(workout.clientId)}/training?${params}#selected-workout`
+}
+
+export const scheduledBooking = booking => ['Pending', 'Confirmed'].includes(booking.status)
+
+export function bookingWorkoutStatus(booking, workout) {
+  if (workout?.status === 'completed') return 'Workout logged'
+  if (workout?.status === 'in_progress') return 'Workout in progress'
+  if (workout?.status === 'discarded') return 'Workout discarded'
+  if (booking.status === 'Completed') return trainingBooking(booking) ? 'Booking completed · No workout log' : 'Booking completed'
+  return booking.status === 'Pending' ? 'Scheduled' : booking.status || 'Booking'
+}
+
 export function canRunBookingWorkout(booking, workout, today) {
   if (['completed', 'discarded'].includes(workout?.status)) return false
-  return workout?.status === 'in_progress' || (booking.date === today && ['Pending', 'Confirmed'].includes(booking.status))
+  return workout?.status === 'in_progress' || (booking.date === today && scheduledBooking(booking))
 }
 
 export function bookingWorkoutAction(db, booking, today) {
+  if (!trainingBooking(booking)) return null
   const workout = bookingWorkout(db, booking)
-  const path = sessionPath(booking).split('#')[0]
   if (['completed', 'discarded'].includes(workout?.status)) {
-    return { path: `${path}&workout=${encodeURIComponent(workout.id)}#selected-workout`, label: 'Review workout' }
+    return { path: workoutReviewPath(workout), label: 'Review workout' }
   }
   if (canRunBookingWorkout(booking, workout, today)) {
+    const path = sessionPath(booking).split('#')[0]
     return { path: path + '&run=1#workout-log', label: workout ? 'Resume workout' : 'Start workout' }
   }
   return null

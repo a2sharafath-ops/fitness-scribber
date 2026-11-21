@@ -9,7 +9,7 @@ import { useModal } from '../../store/ModalContext'
 import { useClipboard } from '../../store/ClipboardContext'
 import { trainingDay } from '../../lib/trainingDay'
 import { buildClip, clipTargets, clipClashes, pasteClip, writePrescription, isSession, deleteSpan, isPlanTargetBlocked } from '../../lib/planner'
-import { weekDates, fmtDate, fmtDay, todayISO, monthGridDates, monthLabel, addMonths, addDays, datesBetween } from '../../lib/dates'
+import { weekDates, fmtDate, fmtDateRange, fmtDay, todayISO, monthGridDates, monthLabel, addMonths, addDays, datesBetween } from '../../lib/dates'
 import { confirmedPlanWrite } from '../../lib/confirmedPersistence'
 import { toast, confirmDialog } from '../../lib/toast'
 import { cloneBlocksFresh, itemsToBlocks } from '../../lib/program'
@@ -96,8 +96,8 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
         <Button variant="ghost" size="sm" aria-label={`Next ${view}`} onClick={() => selectDate(view === 'month' ? addMonths(anchor, 1) : addDays(anchor, 7))}>→</Button>
       </div>
     </div></div>
-    <div className="training-calendar-period"><strong>{view === 'month' ? monthLabel(anchor) : `${fmtDate(dates[0])}–${fmtDate(dates[6])}`}</strong>
-      <span>{period.filter((day) => day.status === 'planned').length} planned · {logCount} workout log{logCount === 1 ? '' : 's'}</span></div>
+    <div className="training-calendar-period"><strong>{view === 'month' ? monthLabel(anchor) : fmtDateRange(dates[0], dates[6])}</strong>
+      <span>{period.filter((day) => day.prescription).length} days with a plan · {logCount} workout log{logCount === 1 ? '' : 's'}</span></div>
     {selection.length > 1 && !clip && <div className="training-calendar-selection" role="status"><span>{selection.length} dates · {sessions.length} plans</span><div className="flex gap">
       <Button size="sm" disabled={!sessions.length} onClick={copy}>Copy</Button>
       <Button variant="danger" size="sm" disabled={!sessions.length || selectionClosed} onClick={remove}>Delete plans</Button>
@@ -110,7 +110,8 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
     {view === 'month' && <div className="training-calendar-dow" aria-hidden="true">{DOW.map((day) => <span key={day}>{day}</span>)}</div>}
     <div className={`training-calendar-dates ${view}`} role="group" aria-label={`${view === 'month' ? 'Month' : 'Week'} dates`}>{days.map((day) => <button type="button" key={day.date}
       className={'training-calendar-day' + (day.date === today ? ' today' : '') + (view === 'month' && day.date.slice(0, 7) !== anchor.slice(0, 7) ? ' outside' : '') + (selection.includes(day.date) ? ' selected-range' : '') + (targets.includes(day.date) || dropDate === day.date ? ' paste-target' : '')}
-      aria-pressed={day.date === focusDate} aria-label={`${fmtDay(day.date)}${day.date === today ? ', today' : ''}: ${day.label}${day.status !== 'empty' ? `, ${day.title}` : ''}`} title={`${fmtDate(day.date)} · ${day.label} · ${day.title}. Shift-click another date to select a range.`}
+      aria-pressed={day.date === focusDate} aria-current={day.date === today ? 'date' : undefined}
+      aria-label={`${fmtDay(day.date)}${day.date === today ? ', today' : ''}: ${day.label}${day.status !== 'empty' ? `, ${day.title}` : ''}`} title={`${fmtDate(day.date)} · ${day.label} · ${day.title}. Shift-click another date to select a range.`}
       onClick={(event) => { if (!suppress.current) { if (clip) paste(day.date); else if (event.shiftKey) setSel({ from: sel?.from || focusDate || day.date, to: day.date }); else selectDate(day.date) } }}
       onMouseDown={(event) => { if (event.button === 0 && !clip && !event.shiftKey) { drag.current = { from: day.date, moved: false }; setSel({ from: day.date, to: day.date }) } }}
       onMouseEnter={() => { if (clip) setHoverDate(day.date); else if (drag.current) { drag.current.moved = true; setSel({ from: drag.current.from, to: day.date }) } }}
@@ -119,10 +120,13 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
       onDragEnd={() => { chip.current = null; setDropDate(null) }}
       onDragOver={(event) => { if (chip.current) { event.preventDefault(); setDropDate(day.date) } }}
       onDrop={(event) => { event.preventDefault(); drop(day.date) }}>
-      <span className="training-calendar-date">{view === 'week' && <span>{fmtDay(day.date).split(',')[0]}</span>}<strong>{Number(day.date.slice(8))}</strong>{day.date === today && <small>Today</small>}</span>
-      <span className={`training-calendar-status ${day.status}`}>{day.label}</span><span className="training-calendar-name">{day.status === 'empty' ? '—' : day.status === 'appointment' ? 'No workout log' : day.title}</span>
+      <span className="training-calendar-date">{view === 'week' && <span>{day.date === today ? 'Today' : fmtDay(day.date).split(',')[0]}</span>}<strong>{Number(day.date.slice(8))}</strong></span>
+      {day.status !== 'empty' && <span className={`training-calendar-status ${day.status}`}>{day.label}</span>}
+      {day.scheduled > 0 && day.bookedLogs > 0 && <span className="training-calendar-log-count" aria-hidden="true">{day.bookedLogs}/{day.bookedLogs + day.scheduled}</span>}
+      {day.status === 'appointment' ? <span className="training-calendar-name">No workout log</span>
+        : (day.prescription || day.pending || day.completed.length > 0) && <span className="training-calendar-name">{day.title}</span>}
     </button>)}</div>
-    <div className="training-calendar-legend" aria-hidden="true"><span className="planned">Planned</span><span className="completed">Completed log</span><span className="progress">In progress</span><span className="appointment">Appt done</span></div>
+    <div className="training-calendar-legend" aria-hidden="true"><span className="planned">Planned or booked</span><span className="completed">Workout logged</span><span className="progress">In progress</span><span className="appointment">Booking completed</span></div>
     {children}
   </section>
 }

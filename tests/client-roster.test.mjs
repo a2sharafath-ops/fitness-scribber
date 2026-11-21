@@ -54,7 +54,7 @@ test('latest activity includes completed workout evidence and excludes future pl
   const row=clientRoster(db,today)[0]
   assert.equal(row.latest.source,'Workout log')
   assert.equal(row.latest.date,'2026-10-10')
-  assert.equal(row.latest.path,`/clients/${id}/training?date=2026-10-10&workout=completed`)
+  assert.equal(row.latest.path,`/clients/${id}/training?date=2026-10-10&workout=completed#selected-workout`)
 })
 
 test('latest assessment paths preserve profile ownership and exact record; legacy evidence does not misdirect another client', () => {

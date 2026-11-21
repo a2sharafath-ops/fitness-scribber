@@ -37,7 +37,8 @@ function ClientRow({ row, index, today }) {
       {programs.length > 1 && <Link className="cr-more-programs" to={dashboardClientPath(client.id, '/training')}>＋ {programs.length - 1} more program{programs.length > 2 ? 's' : ''}</Link>}
     </td>
     <td className="cr-booked-cell"><span className="cr-mobile-label">Booked sessions · 30 days</span>
-      {completion.total ? <><Link className="cr-completion" to={dashboardClientPath(client.id, '/progress#attendance')} aria-label={`Booked completion for ${client.name}: ${bookingDescription}`} title={bookingDescription}>{completion.completed} <span>/ {completion.total}</span></Link><div className="cr-bar" aria-hidden="true"><i style={{ width: `${completion.completed / completion.total * 100}%` }} /></div><span className="cr-cell-note">completed</span></> : <span className="cr-muted">No past bookings</span>}
+      {completion.total ? <><Link className="cr-completion" to={dashboardClientPath(client.id, '/progress#attendance')} aria-label={`Booked completion for ${client.name}: ${bookingDescription}`} title={bookingDescription}>{completion.completed} <span>/ {completion.total} completed</span></Link><div className="cr-bar" aria-hidden="true"><i style={{ width: `${completion.completed / completion.total * 100}%` }} /></div>
+        {completion.pending > 0 && <span className="cr-cell-note">{completion.pending} awaiting status</span>}</> : <span className="cr-muted">No bookings in 30 days</span>}
     </td>
     <td className="cr-activity-cell"><span className="cr-mobile-label">Latest record</span>
       {latest ? <>{latest.path ? <Link className="cr-latest" to={latest.path} aria-label={`${latest.source} for ${client.name}, ${fmtDate(latest.date)}`}>{dateLabel(latest.date, today)}</Link> : <span className="cr-latest">{dateLabel(latest.date, today)}</span>}<span className="cr-cell-note">{latest.source}</span></> : <span className="cr-muted">Not recorded</span>}
@@ -85,7 +86,10 @@ export default function ClientsPage() {
         </div>
         <div className="cr-tools">
           <div className="cr-search"><Icon name="search" size={17} /><input ref={searchRef} type="search" value={query} onChange={e => update(setQuery)(e.target.value)} aria-label="Search roster" placeholder="Search name, email, goal or program…" />{query && <button className="cr-clear" type="button" onClick={clearSearch} aria-label="Clear search">×</button>}</div>
-          <label className="cr-sort">Sort <select value={sort} onChange={e => update(setSort)(e.target.value)}><option value="name">Name A–Z</option><option value="recent">Latest activity</option><option value="review">Review first</option></select></label>
+          <label className="cr-sort">Sort <span className="orbit-select-wrap">
+            <select value={sort} onChange={e => update(setSort)(e.target.value)}><option value="name">Name A–Z</option><option value="recent">Latest activity</option><option value="review">Review first</option></select>
+            <Icon name="chevron-down" size={14} aria-hidden="true" />
+          </span></label>
           <label className="cr-no-program"><input type="checkbox" checked={unassigned} onChange={e => update(setUnassigned)(e.target.checked)} />No program</label>
         </div>
         {(query || unassigned) && <div className="cr-active-query"><span>{[query.trim() ? `Search: “${query.trim()}”` : '', unassigned ? 'Without a program' : ''].filter(Boolean).join(' · ')}</span><button className="cr-text-link" type="button" onClick={reset}>Reset filters</button></div>}
@@ -96,8 +100,7 @@ export default function ClientsPage() {
           <tbody>{visible.map((row, index) => <ClientRow key={row.client.id} row={row} index={index} today={today} />)}</tbody>
         </table> : <div className="cr-empty"><span className="cr-empty-icon"><Icon name={counts.all ? 'search' : 'users'} size={26} /></span><h3>{counts.all ? 'No clients match' : 'Meet your first client'}</h3><p>{counts.all ? 'Try another name or reset the filters.' : 'Add a client to start planning and tracking their training.'}</p><Button variant={counts.all ? 'ghost' : 'primary'} onClick={counts.all ? reset : add}>{counts.all ? 'Reset filters' : '＋ Add client'}</Button></div>}
       </div>
-      {!!visible.length && <footer className="cr-roster-foot"><span role="status">{start + 1}–{Math.min(start + ROSTER_PAGE_SIZE, filtered.length)} of {filtered.length} {filter === 'active' ? 'active ' : ''}clients</span><div className="cr-pagination"><button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => changePage(page - 1)}>←</button><span>Page {page} of {pages}</span><button type="button" aria-label="Next page" disabled={page === pages} onClick={() => changePage(page + 1)}>→</button></div></footer>}
+      {!!visible.length && <footer className="cr-roster-foot"><span role="status">{start + 1}–{Math.min(start + ROSTER_PAGE_SIZE, filtered.length)} of {filtered.length} {filter === 'active' ? 'active ' : ''}clients</span>{pages > 1 && <div className="cr-pagination"><button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => changePage(page - 1)}>←</button><span>Page {page} of {pages}</span><button type="button" aria-label="Next page" disabled={page === pages} onClick={() => changePage(page + 1)}>→</button></div>}</footer>}
     </section>
-    <p className="cr-bottom-note">Select a client to open their Overview.</p>
   </div>
 }

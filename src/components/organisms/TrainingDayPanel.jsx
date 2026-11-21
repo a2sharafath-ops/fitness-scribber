@@ -12,7 +12,7 @@ import ModalShell from '../molecules/ModalShell'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { trainingDay } from '../../lib/trainingDay'
-import { bookingWorkout, bookingWorkoutAction } from '../../lib/schedule'
+import { bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus } from '../../lib/schedule'
 import { programStats } from '../../lib/program'
 import { deleteSpan } from '../../lib/planner'
 import { runBlocks } from '../../lib/workout'
@@ -36,6 +36,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const records = [...day.completed, ...day.discarded].filter(row => !selectedBooking || row.bookingId === selectedBooking.id)
   const log = records.find((row) => row.id === logId) || records[0]
   const pending = selectedBooking ? (log ? null : bookingWorkout(db, selectedBooking)) : day.pending
+  const appointment = selectedBooking ? selectedBooking.status === 'Completed' : !day.scheduled && day.appointment
   const legacyAction = legacyDay.canRun
   const title = log?.title || pending?.title || (selectedBooking ? `Booking at ${selectedBooking.time}` : day.title)
   const actual = Boolean(log) && (recordView === 'actual' || !day.prescription)
@@ -47,7 +48,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const stats = programStats(day.prescription)
   const doneSets = log ? runBlocks(log).flatMap((block) => block.items).reduce((count, item) => count + (item.setRows ? item.setRows.filter((row) => row.done).length : Number(item.doneSets) || 0), 0) : 0
   const label = log ? log.status === 'discarded' ? 'Discarded workout · recorded sets retained' : 'Completed workout log'
-    : pending ? (pending.status === 'in_progress' ? 'In progress' : 'Ready') : day.appointment ? 'Completed appointment' : day.prescription ? 'Planned workout' : 'No workout data'
+    : pending ? (pending.status === 'in_progress' ? 'In progress' : 'Ready') : appointment ? 'Completed booking' : day.prescription ? 'Planned workout' : 'No workout data'
   const notice = log ? actual ? `${doneSets} recorded set${doneSets === 1 ? '' : 's'}${log.durationSec > 0 ? ` · ${Math.round(log.durationSec / 60)} min` : ''}` : 'Prescription only · The logged workout is a separate record.'
     : pending ? 'Saved workout details' : `${stats.exercises} exercise${stats.exercises === 1 ? '' : 's'} · ${stats.sets} prescribed set${stats.sets === 1 ? '' : 's'}`
   return <section className="training-selected-day" aria-labelledby="selected-day-title">
@@ -58,8 +59,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         const action = bookingWorkoutAction(db, booking, today)
         return <li key={booking.id} data-selected={booking.id === selectedBooking?.id || undefined}>
           <div><strong>{booking.time} · {workout?.title || booking.type}</strong>
-            <small>{booking.status} · {workout?.status === 'in_progress' ? 'Workout in progress'
-              : workout?.status === 'completed' ? 'Workout completed' : workout?.status === 'discarded' ? 'Workout discarded · sets retained' : 'No workout started'}</small>
+            <small>{bookingWorkoutStatus(booking, workout)}{workout && ` · Booking ${booking.status.toLowerCase()}`}</small>
           </div>
           {action && <Link className="btn ghost sm" to={action.path} aria-label={`${action.label} for ${booking.time} booking`}>{action.label}</Link>}
         </li>
@@ -76,13 +76,12 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
     <div className="training-selected-body">
       {log && records.length > 1 && <label className="training-log-picker">Workout log<select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</select></label>}
       {log && day.prescription && <SegToggle options={[[ 'actual', 'Logged workout' ], [ 'plan', bookings.length ? 'Day’s plan' : 'Original plan' ]]} value={recordView} onChange={setRecordView} ariaLabel="Completed day view" />}
-      {log || pending || day.prescription && !day.appointment ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
+      {log || pending || day.prescription && !appointment ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
         <DayBlockReview compact workout={actual ? log : log ? null : pending} prescription={day.prescription} units={units} />
         {actual && log?.liveState && <div className="ls-session"><LiveSessionReview key={log.id} session={log} units={units} /></div>}
         {(actual ? log.note : pending?.note || day.prescription?.notes) && <p className="training-selected-notes">{actual ? log.note : pending?.note || day.prescription?.notes}</p>}
-      </div></> : <div className="training-selected-empty"><strong>{day.appointment ? 'Appointment complete · No workout log' : date < today ? 'No workout was prescribed or logged.' : 'Choose this date when you’re ready to plan.'}</strong>
-        <p>{day.appointment ? 'The booking status does not count as a completed workout.' : date < today ? 'Past dates are closed to new planning.' : 'An unplanned day is not marked as missed or as a completed rest day.'}</p>
-        {day.appointment && <Link className="btn ghost sm" to="/schedule">View appointment →</Link>}
+      </div></> : <div className="training-selected-empty"><strong>{appointment ? 'Booking completed · No workout log' : date < today ? 'No workout was prescribed or logged.' : 'No workout planned for this date'}</strong>
+        {appointment && <Link className="btn ghost sm" to="/schedule">View schedule →</Link>}
       </div>}
     </div>
     <div className="training-selected-foot"><span>{label}</span>{(day.prescription || log) && <details className="training-more" key={`${date}:${log?.id || ''}`}><summary>More actions</summary><div className="training-more-menu">
