@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
+import Brand from '../components/atoms/Brand'
 import { useAuth } from '../store/AuthContext'
 import { toast } from '../lib/toast'
 
 // Copy per mode — mirrors the Cureocity "01 · Login / Sign up" Figma frame,
 // adapted for the three auth flows the backend supports.
 const COPY = {
-  signin: { h: 'Welcome back', sub: 'Sign in to your trainer studio', cta: 'Sign in' },
+  signin: { h: 'Sign in to Orbit Trainer', sub: 'Your coaching workspace', cta: 'Sign in' },
   signup: { h: 'Create your account', sub: 'Athletes join with an invite code · coach accounts are set up by your admin', cta: 'Create account' },
   reset: { h: 'Reset your password', sub: "We'll email you a reset link", cta: 'Send reset link' },
 }
@@ -51,24 +52,19 @@ export default function AuthPage() {
   return (
     <div className="auth-wrap">
       <aside className="auth-brand">
-        <div className="auth-brandmark">
-          <span className="auth-logo"><img src="/cureocity-logo.png" alt="Cureocity" /></span>
-          <span className="auth-brand-name">Cureocity</span>
-        </div>
+        <Brand onDark />
         <div className="auth-spacer" />
         <div className="auth-hero">
           <h2>Coach smarter.<br />Every client, one studio.</h2>
           <p>Programs, schedules, health insights and Curio Ai — everything your coaching practice needs in one place.</p>
         </div>
         <div className="auth-spacer" />
-        <figure className="auth-quote">
-          <blockquote>“I cut my admin time in half. My clients feel the difference every week.”</blockquote>
-          <figcaption>Maya Chen · Strength coach, Berlin</figcaption>
-        </figure>
+
       </aside>
 
       <main className="auth-panel">
-        <div className="auth-card">
+        <div className="auth-card orbit-auth-card">
+          <Brand />
           <div className="auth-head">
             <h1 className="auth-h">{copy.h}</h1>
             <p className="auth-sub">{copy.sub}</p>

@@ -89,3 +89,22 @@ export function dashboardActivity(db, { today, days, metric }) {
   }
   return { start, end, buckets, hasData: daily.size > 0 }
 }
+
+export function dashboardReadiness(db, clients, today) {
+  const scores = []
+  let older = 0
+  let missing = 0
+  let unscored = 0
+  for (const client of clients) {
+    const entries = db.wellness.filter((entry) => entry.clientId === client.id && entry.date && entry.date <= today)
+    if (!entries.length) { missing += 1; continue }
+    if (!entries.some((entry) => entry.date === today)) { older += 1; continue }
+    const result = computeReadiness(db, client.id, today)
+    if (result.score == null) unscored += 1
+    else scores.push(result)
+  }
+  const shared = (color) => scores.filter((score) => score.color === color).length
+  return { count: scores.length, older, missing, unscored,
+    average: scores.length ? Math.round(scores.reduce((sum, entry) => sum + entry.score, 0) / scores.length) : null,
+    high: shared('green'), medium: shared('yellow'), low: shared('red') }
+}

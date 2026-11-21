@@ -1,4 +1,4 @@
-import { LIVE_SET_TYPES, rowMode, rowType, timerElapsed, restRemainingMs } from '../../lib/liveSession'
+import { LIVE_SET_TYPES, rowMode, adjustedSetDuration, rowType, timerElapsed, restRemainingMs } from '../../lib/liveSession'
 import { toDisp, unitName } from '../../lib/units'
 import { secToClock } from '../../lib/workout'
 
@@ -11,7 +11,8 @@ export default function LiveSetRow({ row, index, exercise, block, session, units
   const weight = row.load == null ? '—' : `${toDisp(row.load, units)} ${unitName(units)}`
   const metric = rowMode(row) === 'duration' ? row.durationSeconds == null ? '— sec' : secToClock(row.durationSeconds) : row.reps == null ? '— reps' : `${row.reps} reps`
   const effort = `${row.effort ?? '—'} ${row.effortType || 'RIR'}`
-  const targetMetric = row.pDurationSeconds != null ? secToClock(row.pDurationSeconds) : row.pReps != null ? `${row.pReps}${row.pRepsMax && row.pRepsMax !== row.pReps ? '–' + row.pRepsMax : ''} reps` : '—'
+  const targetDuration = adjustedSetDuration(row)
+  const targetMetric = targetDuration != null ? secToClock(targetDuration) : row.pReps != null ? `${row.pReps}${row.pRepsMax && row.pRepsMax !== row.pReps ? '–' + row.pRepsMax : ''} reps` : '—'
   const rest = session.liveState.rest
   const activeRest = rest?.rowId === row.id
   const showRest = exercise.restEnabled && !readOnly && !block.skipped && !exercise.skipped && !row.skipped && exercise.setRows.slice(index + 1).some((set) => !set.skipped)
@@ -32,8 +33,8 @@ export default function LiveSetRow({ row, index, exercise, block, session, units
         {!locked && <button type="button" className="ls-text ls-row-options" aria-label={`Options for ${label}`} onClick={() => onEdit('set-options', row)}>⋯</button>}</>}
       </div>
     </div>
-    {rowMode(row) === 'duration' && !locked && <div className="ls-set-stopwatch"><span role="timer">{running ? secToClock(Math.floor(timerElapsed(session.liveState.setTimer, now) / 1000)) : 'Timed set'}</span>
-      <button type="button" className="ls-button" disabled={!running && (session.liveState.clock.paused || !!session.liveState.setTimer)} onClick={() => onAction({ type: 'set-timer', id: row.id })}>{running ? 'Stop timer' : 'Start timer'}</button></div>}
+    {rowMode(row) === 'duration' && !locked && <div className="ls-set-stopwatch"><span role={running ? 'timer' : undefined}>{running ? secToClock(Math.floor(timerElapsed(session.liveState.setTimer, now) / 1000)) : row.durationSeconds == null ? 'Timed set' : 'Ready to log'}</span>
+      <button type="button" className="ls-button" disabled={!running && (session.liveState.clock.paused || !!session.liveState.setTimer)} onClick={() => onAction({ type: 'set-timer', id: row.id })}>{running ? 'Stop timer' : row.durationSeconds == null ? 'Start timer' : 'Restart timer'}</button></div>}
     {showRest && <div className="ls-rest-between"><span>{activeRest ? restRemainingMs(rest, now) === 0 ? 'Rest complete' : session.liveState.clock.paused ? 'Rest paused' : 'Rest remaining' : 'Rest'}</span>
       <span role={activeRest ? 'timer' : undefined}>{secToClock(activeRest ? Math.ceil(restRemainingMs(rest, now) / 1000) : exercise.restSeconds ?? exercise.rest ?? session.liveState.settings.defaultRestSeconds)}</span></div>}
   </>

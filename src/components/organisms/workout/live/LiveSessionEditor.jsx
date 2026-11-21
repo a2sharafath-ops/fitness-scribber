@@ -2,7 +2,7 @@ import { useState } from 'react'
 import LiveSessionDialog from '../../../molecules/LiveSessionDialog'
 import LivePlateCalculator from './LivePlateCalculator'
 import LiveWorkoutOrder from './LiveWorkoutOrder'
-import { LIVE_SET_TYPES, locateLive, rowMode, rowType, liveBlocks, previousLivePerformance, exerciseRestSeconds } from '../../../../lib/liveSession'
+import { LIVE_SET_TYPES, locateLive, rowMode, adjustedSetDuration, rowType, liveBlocks, previousLivePerformance, exerciseRestSeconds } from '../../../../lib/liveSession'
 import { secToClock } from '../../../../lib/workout'
 import { toDisp, dispToKg } from '../../../../lib/units'
 
@@ -17,10 +17,17 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
   const submitAction = (action) => { if (onAction(action)) onClose() }
   const field = (name, label, value, { min = 0, max = 999, step = 1, required = false } = {}) => <label>{label}<input type="number" name={name} defaultValue={value ?? ''} min={min} max={max} step={step} required={required} /></label>
   if (kind === 'order') return <LiveWorkoutOrder session={session} onAction={onAction} onClose={onClose} />
-  if (kind === 'set-options') return <LiveSessionDialog title="Set options" onClose={onClose}>
-    <button type="button" className="ls-button ls-danger-text" onClick={() => submitAction({ type: 'skip-row', id: row.id })}>Skip set</button>
-    {error && <p className="ls-form-error" role="alert">{error}</p>}
-  </LiveSessionDialog>
+  if (kind === 'set-options') {
+    const index = item.setRows.findIndex((set) => set.id === row.id)
+    return <LiveSessionDialog title="Set options" onClose={onClose}>
+      <div className="ls-tools">
+        <button type="button" className="ls-button" disabled={index === 0} onClick={() => submitAction({ type: 'move-set', id: row.id, beforeId: item.setRows[index - 1]?.id })}>Move set up</button>
+        <button type="button" className="ls-button" disabled={index === item.setRows.length - 1} onClick={() => submitAction({ type: 'move-set', id: row.id, beforeId: item.setRows[index + 2]?.id })}>Move set down</button>
+        <button type="button" className="ls-button ls-danger-text" onClick={() => submitAction({ type: 'skip-row', id: row.id })}>Skip set</button>
+      </div>
+      {error && <p className="ls-form-error" role="alert">{error}</p>}
+    </LiveSessionDialog>
+  }
   if (kind === 'history') {
     const previous = previousLivePerformance(history, session, item)
     return <LiveSessionDialog title={`Last performance · ${item.name}`} onClose={onClose}>
@@ -41,8 +48,26 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
     <p>{kind === 'finish' ? 'Review your effort and duration next to finish the session.' : 'This ends the session and marks it discarded. The original plan, adjustments and recorded sets stay available for review.'}</p>
     {error && <p role="alert">{error}</p>}
   </LiveSessionDialog>
-  let title, content, submit
+  let title, content, submit, confirm
   switch (kind) {
+    case 'complete-set': {
+      const isTimed = rowMode(row) === 'duration'
+      title = `Log set · ${item.name}`
+      confirm = 'Mark set done'
+      const initialLoad = row.load ?? row.pLoadKg
+      const displayLoad = initialLoad == null ? '' : toDisp(initialLoad, units)
+      content = <>
+        {field('load', `Actual weight (${units})`, displayLoad, { max: units === 'lb' ? 4409.25 : 2000, step: 0.01, required: initialLoad != null })}
+        {field('metric', isTimed ? 'Actual duration (seconds)' : 'Actual reps', isTimed ? row.durationSeconds : row.reps,
+          { min: isTimed ? 1 : 0, max: isTimed ? 35999 : 999, required: true })}
+      </>
+      submit = (form) => {
+        const weight = form.get('load')
+        const load = weight === '' ? null : String(weight) === String(toDisp(row.load, units)) && row.load != null ? row.load : dispToKg(weight, units)
+        submitAction({ type: 'done', id: row.id, actual: { load, metric: Number(form.get('metric')) } })
+      }
+      break
+    }
     case 'weight': {
       title = 'Enter weight'
       const hasPlates = /barbell|plates|plate.loaded/i.test(libraryItem?.equip || item.name)
@@ -70,7 +95,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
     case 'target':
       title = 'Edit set targets'
       content = <>{field('pLoadKg', `Target weight (${units})`, toDisp(row.pLoadKg, units), { max: units === 'lb' ? 4409 : 2000, step: 0.01 })}
-        {field('pReps', 'Target reps', row.pReps)}{field('pDurationSeconds', 'Target duration (seconds)', row.pDurationSeconds, { min: 1, max: 35999 })}
+        {field('pReps', 'Target reps', row.pReps)}{field('pDurationSeconds', 'Target duration (seconds)', adjustedSetDuration(row), { min: 1, max: 35999 })}
         <p className="ls-hint">This adjusts this session. The original target remains in Original plan.</p></>
       submit = (form) => submitAction({ type: 'row', id: row.id, patch: {
         pLoadKg: form.get('pLoadKg') === '' ? null : String(form.get('pLoadKg')) === String(toDisp(row.pLoadKg, units)) ? row.pLoadKg : dispToKg(form.get('pLoadKg'), units),
@@ -116,7 +141,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       break
     default: return null
   }
-  return <><LiveSessionDialog title={title} onClose={onClose} onSubmit={submit}>
+  return <><LiveSessionDialog title={title} confirm={confirm} onClose={onClose} onSubmit={submit}>
     {content}{error && <p className="ls-form-error" role="alert">{error}</p>}
   </LiveSessionDialog>{plates && <LivePlateCalculator units={units} onClose={() => setPlates(false)} onUse={setValue} />}</>
 }

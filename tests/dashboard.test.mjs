@@ -113,7 +113,7 @@ test('activity keeps missing load as null, accepts explicitly recorded zero, ded
 test('Dashboard renders real destinations and empty states without duplicate shortcut strips or AI claims', () => {
   const db=fixture(), render=db=>renderToStaticMarkup(React.createElement(DataProvider,{initialDb:db,backend:false},React.createElement(ModalProvider,null,React.createElement(MemoryRouter,null,React.createElement(DashboardPage)))))
   const html=render(db)
-  for(const text of ['Today’s schedule','Needs review','Today’s check-ins','Planned workouts','Roster trends','/clients/local-builder-100/check-ins?view=wellness']) assert.ok(html.includes(text))
+  for(const text of ['Up next','Today’s sessions','Needs review','Group readiness today','Planned workouts','Training snapshot','/clients/local-builder-100/check-ins?view=wellness']) assert.ok(html.includes(text))
   for(const text of ['AI Coach','At risk','rest day','Quick actions']) assert.ok(!html.includes(text))
   db.clients=[]
   assert.ok(render(db).includes('Start with your first client'))

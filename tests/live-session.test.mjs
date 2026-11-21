@@ -132,3 +132,70 @@ test('a conflicting workout save stops before effort or strength observations ar
   assert.equal(result[0].table, 'workouts')
   assert.deepEqual(written, [])
 })
+
+test('a stopped timer keeps the same set ready to mark done after reload', () => {
+  let w = prepare()
+  const original = structuredClone(w.liveState.original)
+  const id = 'row:set:2'
+  w = change(w, 'row', id, { patch: { mode: 'duration' } })
+  w = change(w, 'set-timer', id)
+  assert.equal(live.liveDockSet(w).action, 'stop')
+  w = change(w, 'set-timer', id, {}, now + 6500)
+  w = live.prepareLiveSession(JSON.parse(JSON.stringify(w)))
+  assert.notEqual(live.nextLiveSet(w).row.id, id)
+  assert.equal(live.liveDockSet(w).action, 'done')
+  assert.equal(live.liveDockSet(w).row.id, id)
+  assert.equal(live.liveDockSet(w).row.durationSeconds, 6)
+  assert.throws(() => change(w, 'done', id, { actual: { load: -1, metric: 6 } }), /weight/)
+  assert.equal(live.liveDockSet(w).row.done, false)
+  w = change(w, 'done', id, { actual: { load: 20, metric: 6 } })
+  assert.equal(live.locateLive(w, id).row.load, 20)
+  assert.equal(live.locateLive(w, id).row.done, true)
+  assert.equal(live.locateLive(w, 'bench:set:1').row.load, 45)
+  assert.deepEqual(w.liveState.original, original)
+  assert.equal(w.liveState.stoppedSetId, undefined)
+})
+
+test('restoring an exercise retains its individually skipped sets', () => {
+  let w = prepare()
+  w = change(w, 'skip-row', 'row:set:1')
+  w = change(w, 'skip-exercise', 'row')
+  w = change(w, 'skip-exercise', 'row')
+  assert.deepEqual(live.locateLive(w, 'row').item.setRows.map(set => Boolean(set.skipped)), [true, false])
+})
+
+test('prescriptions measured in seconds or minutes open timed without rewriting history or explicit modes', async () => {
+  const { buildFromPrescription } = await vite.ssrLoadModule('/src/lib/workout.js')
+  const set = value => ({ prescribedReps: 10, prescribedIntensityValue: value })
+  const plan = { name: 'Timed plan', blocks: [{ blockType: 'Main Lifts', exercises: [
+    { exerciseName: 'Plank', intensityType: 'Seconds', sets: [set(30), set(45), set(20), set(15)] },
+    { exerciseName: 'Bike', intensityType: 'Minutes', sets: [set(1.5)] },
+    { exerciseName: 'Press', intensityType: 'RPE', sets: [set(8)] },
+  ] }] }
+  const planBefore = structuredClone(plan)
+  const workout = buildFromPrescription(plan, { clientId: 'test-client', date: '2026-11-19' })
+  Object.assign(workout.main[0].setRows[2], { mode: 'reps', reps: 7 })
+  Object.assign(workout.main[0].setRows[3], { done: true, reps: 4, load: 6 })
+  let session = live.prepareLiveSession(workout, null, now)
+  assert.deepEqual(plan, planBefore)
+  assert.deepEqual(session.liveState.original.main, workout.main)
+  assert.deepEqual(session.main.map(item => item.setRows.map(live.rowMode)), [['duration', 'duration', 'reps', 'reps'], ['duration'], ['reps']])
+  assert.deepEqual(session.main[0].setRows.slice(0, 2).map(live.adjustedSetDuration), [30, 45])
+  assert.equal(live.adjustedSetDuration(session.main[1].setRows[0]), 90)
+  assert.equal(live.prescribedSetDuration(session.liveState.original.main[0], session.liveState.original.main[0].setRows[0]), 30)
+  assert.equal(live.liveDockSet(session).action, 'start')
+
+  const legacy = session.main[0].setRows[0]
+  delete legacy.mode
+  delete legacy.pDurationSeconds
+  assert.equal(live.liveDockSet(session).action, 'start')
+  assert.equal(legacy.mode, undefined)
+  session = change(session, 'set-timer', legacy.id)
+  session = change(session, 'set-timer', legacy.id, {}, now + 4200)
+  assert.equal(live.liveDockSet(session).action, 'done')
+  session = change(session, 'done', legacy.id)
+  assert.equal(live.locateLive(session, legacy.id).row.durationSeconds, 4)
+  assert.deepEqual(session.liveState.original.main, workout.main)
+  assert.equal(session.main[0].setRows[3].load, 6)
+  assert.equal(session.main[0].setRows[3].reps, 4)
+})

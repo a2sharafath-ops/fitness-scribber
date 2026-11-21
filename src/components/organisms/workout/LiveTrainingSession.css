@@ -1031,3 +1031,59 @@
 .ls-dialog {
   margin: auto;
 }
+
+/* Use the workspace palette for the logger and its body-level overlays. */
+[data-orbit-theme] :is(.ls-session, .ls-dialog, .ls-menu, .ls-current) {
+  --ls-ink: var(--text);
+  --ls-mute: var(--muted);
+  --ls-accent: var(--accent);
+  --ls-line: var(--border);
+  --ls-soft: var(--surface2);
+  color: var(--ls-ink);
+}
+
+[data-orbit-theme] :is(.ls-header, .ls-review, .ls-exercise, .ls-dialog, .ls-menu, .ls-current) {
+  background: var(--orbit-panel);
+  border-color: var(--ls-line);
+  box-shadow: var(--orbit-shadow);
+}
+[data-orbit-theme] :is(.ls-block, .ls-superset, .ls-stats, .ls-tabs, .ls-mode, .ls-set-stopwatch) {
+  background: var(--ls-soft);
+  border-color: var(--ls-line);
+}
+[data-orbit-theme] .ls-layout, [data-orbit-theme] .ls-blocks { min-width: 0; }
+[data-orbit-theme] :is(.ls-button, .ls-more, .ls-value, .ls-done > span, .ls-note textarea, .ls-fields input, .ls-fields select) {
+  color: var(--ls-accent);
+  background: var(--surface);
+  border-color: var(--ls-line);
+}
+[data-orbit-theme] :is(.ls-button, .ls-more, .ls-value):hover:not(:disabled),
+[data-orbit-theme] .ls-menu button:is(:hover, :focus-visible) { background: var(--tint-red); }
+[data-orbit-theme] .ls-button.primary { background: var(--orbit-red); color: #fff; border-color: transparent; }
+[data-orbit-theme] .ls-button.primary:hover:not(:disabled) { background: var(--orbit-red-hover); }
+[data-orbit-theme] .ls-button.ls-finish, [data-orbit-theme] .ls-rest-toggle[aria-pressed="true"] {
+  color: var(--ls-accent); background: var(--tint-red); border-color: var(--ls-line);
+}
+[data-orbit-theme] :is(.ls-status, .is-done .ls-value, .ls-done[aria-pressed="true"] > span) {
+  color: var(--green);
+  background: var(--tint-green);
+  border-color: var(--ls-line);
+}
+[data-orbit-theme] :is(.ls-save-error, .ls-set-type) { background: var(--tint-amber); border-color: var(--ls-line); color: var(--accent2) !important; }
+[data-orbit-theme] :is(.ls-save, .ls-danger-text, .ls-form-error) { color: var(--ls-accent) !important; }
+[data-orbit-theme] .ls-save.saved { color: var(--green) !important; }
+[data-orbit-theme] :is(.ls-tabs button, .ls-rest-between, .ls-current small, .ls-current p, .ls-live-hr small, .ls-order-exercise small, .ls-review-exercise span) { color: var(--ls-mute); }
+[data-orbit-theme] :is(.ls-current-name, .ls-value:disabled, .ls-tabs button[aria-pressed="true"], .ls-dialog h2) { color: var(--ls-ink); }
+[data-orbit-theme] :is(.ls-tabs button[aria-pressed="true"], .ls-mode label:has(:checked)) { background: var(--surface); }
+[data-orbit-theme] :is(.ls-set-row, .ls-stats > div, .ls-order-block, .ls-order-exercise, .ls-review section) { border-color: var(--ls-line); }
+[data-orbit-theme] :is(.is-skipped .ls-value, .ls-live-hr) { color: var(--ls-mute); background: var(--ls-soft); border-color: var(--ls-line); }
+[data-orbit-theme] :is(.ls-rest-between [role="timer"], .ls-superset-label) { color: var(--ls-accent); }
+[data-orbit-theme] .ls-rest-between [role="timer"] { background: var(--tint-red); }
+[data-orbit-theme] .ls-rest-between::before,
+[data-orbit-theme] .ls-rest-between::after { background: var(--ls-line); }
+
+.ls-review-sets { list-style: none; margin: 4px 0 0; padding: 0; }
+.ls-review-sets li { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--ls-line); }
+.ls-review-sets li:last-child { border-bottom: 0; }
+.ls-review-sets li span:first-child { flex: none; }
+.ls-review-sets li span:last-child { text-align: right; overflow-wrap: anywhere; }

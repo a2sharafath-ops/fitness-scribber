@@ -7,11 +7,26 @@ export const SESSION_SECTIONS = ['warmup', 'main', 'cooldown']
 export const sessionItems = (workout) => SESSION_SECTIONS.flatMap((section) => workout[section] || [])
 export const sessionRows = (workout) => sessionItems(workout).flatMap((item) => item.setRows || [])
 export const liveClosed = (workout) => ['completed', 'discarded'].includes(workout.status)
-export const rowMode = (row) => row.mode === 'duration' ? 'duration' : 'reps'
+export const rowMode = (row) => row.mode === 'duration' ||
+  (row.mode == null && !row.done && row.reps == null && adjustedSetDuration(row) != null) ? 'duration' : 'reps'
 export const rowType = (row) => row.type || ({ warmup: 'warmup', cooldown: 'cooldown' }[row.purpose]) || 'normal'
 const copy = (value) => structuredClone(value)
 const planParts = (workout) => Object.fromEntries(SESSION_SECTIONS.map((section) => [section, copy(workout[section] || [])]))
-const timedPrescription = (item, row) => item.duration || (/\b(sec|min)\b|\d\s*[sm]\b/i.test(String(row.pReps)) ? row.pReps : null)
+function structuredDuration(row) {
+  const minutes = row.pIntensityType === 'Minutes'
+  if (!minutes && row.pIntensityType !== 'Seconds') return null
+  const value = Number(row.pIntensityValue) * (minutes ? 60 : 1)
+  return Number.isFinite(value) && value > 0 ? Math.max(1, Math.round(value)) : null
+}
+
+export const adjustedSetDuration = (row) => row.pDurationSeconds === undefined ? structuredDuration(row) : row.pDurationSeconds
+
+export function prescribedSetDuration(item, row) {
+  const target = adjustedSetDuration(row)
+  if (target != null) return target
+  const legacy = item.duration ?? (/\d\s*(?:secs?|seconds?|mins?|minutes?|[sm])\b/i.test(String(row.pReps)) ? row.pReps : null)
+  return legacy == null ? null : restToSec(legacy)
+}
 
 // The snapshot is captured once. Legacy sessions retain every existing field and
 // actual value, including fields unknown to this version of the runner.
@@ -28,9 +43,10 @@ export function prepareLiveSession(workout, resolveTm, now = Date.now()) {
         let row = existingRows[i]?.done ? copy(existingRows[i]) : normalizedRow
         if (!existingRows.length && item.done && i < (item.doneSets ?? item.sets ?? 1)) row = { ...row, done: true,
           reps: item.doneReps ?? item.reps ?? null, load: item.doneWeight ?? item.weight ?? null }
-        const timed = timedPrescription(item, row)
+        const duration = prescribedSetDuration(item, row)
         return { ...row, id: row.id || `${id}:set:${i + 1}`,
-          ...(timed && !row.done ? { mode: 'duration', pDurationSeconds: restToSec(timed) } : {}) }
+          ...(duration != null && duration > 0 && !row.done && row.mode == null && row.reps == null
+            ? { mode: 'duration', pDurationSeconds: duration } : {}) }
       }) }
     })
   }
@@ -75,6 +91,20 @@ export function nextLiveSet(workout) {
   }
   return null
 }
+export function liveDockSet(workout) {
+  const state = workout.liveState
+  if (state.setTimer) return { ...locateLive(workout, state.setTimer.rowId), action: 'stop' }
+  if (state.stoppedSetId) {
+    const stopped = locateLive(workout, state.stoppedSetId)
+    if (stopped.row && rowPending(stopped.block, stopped.item, stopped.row) && rowMode(stopped.row) === 'duration' && stopped.row.durationSeconds != null) {
+      return { ...stopped, action: 'done' }
+    }
+  }
+  const next = nextLiveSet(workout)
+  if (!next) return null
+  const action = rowMode(next.row) !== 'duration' ? 'log' : next.row.durationSeconds == null ? 'start' : 'done'
+  return { ...next, action }
+}
 export const liveElapsed = (workout, now = Date.now()) => {
   const clock = workout.liveState.clock
   return clock.elapsedMs + (clock.runningSince == null ? 0 : Math.max(0, now - clock.runningSince))
@@ -86,7 +116,10 @@ export function stopLiveSetTimer(workout, now) {
   const timer = workout.liveState.setTimer
   if (!timer) return
   const { row } = locateLive(workout, timer.rowId)
-  if (row && !row.done) row.durationSeconds = Math.max(1, Math.floor(timerElapsed(timer, now) / 1000))
+  if (row && !row.done) {
+    row.durationSeconds = Math.max(1, Math.floor(timerElapsed(timer, now) / 1000))
+    workout.liveState.stoppedSetId = row.id
+  }
   workout.liveState.setTimer = null
 }
 function startRest(workout, item, row, now) {
@@ -154,10 +187,21 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       } else {
         requirePending(block, item, row)
         if (state.setTimer?.rowId === row.id) throw new Error('Stop the timer before marking the set done.')
-        const metric = rowMode(row) === 'duration' ? row.durationSeconds : row.reps
-        if (!validNumber(metric, rowMode(row) === 'duration' ? 35999 : 999, true, rowMode(row) === 'duration' ? 1 : 0)) throw new Error('Enter the performed reps or duration first.')
+        const mode = rowMode(row)
+        if (action.actual) {
+          const { load, metric } = action.actual
+          if (load != null && !validNumber(load, 2000)) throw new Error('Enter a weight between 0 and 2000 kg.')
+          row.load = load
+          if (mode === 'duration') row.durationSeconds = metric
+          else row.reps = metric
+        }
+        const timed = mode === 'duration'
+        const metric = timed ? row.durationSeconds : row.reps
+        if (!validNumber(metric, timed ? 35999 : 999, true, timed ? 1 : 0)) throw new Error('Enter the performed reps or duration first.')
+        if (timed) row.mode = 'duration'
         row.done = true
         row.completedAt = now
+        if (state.stoppedSetId === row.id) delete state.stoppedSetId
         startRest(next, item, row, now)
       }
       item.done = item.setRows.some((set) => set.done)
@@ -166,9 +210,16 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       if (row.done) throw new Error('Undo the completed set before skipping it.')
       row.skipped = !row.skipped
       break
-    case 'skip-exercise':
-      skipUpcoming(item, !item.skipped)
+    case 'skip-exercise': {
+      const skipped = item.skipped
+      if (!skipped) item.individuallySkippedSetIds = item.setRows.filter((set) => set.skipped).map((set) => set.id)
+      skipUpcoming(item, !skipped)
+      if (skipped && item.individuallySkippedSetIds) {
+        for (const set of item.setRows) if (item.individuallySkippedSetIds.includes(set.id)) set.skipped = true
+        delete item.individuallySkippedSetIds
+      }
       break
+    }
     case 'skip-block':
       metaBlock.skipped = !metaBlock.skipped
       break
@@ -197,7 +248,9 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       else {
         if (state.clock.paused) throw new Error('Resume the workout before starting a set timer.')
         if (state.setTimer) throw new Error('Stop the running set timer first.')
+        row.mode = 'duration'
         state.setTimer = { rowId: row.id, elapsedMs: 0, runningSince: now }
+        delete state.stoppedSetId
       }
       break
     case 'add-set': {

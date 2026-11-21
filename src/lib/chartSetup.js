@@ -32,14 +32,14 @@ export const shortLabel = (iso) => {
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function baseOptions() {
+export function baseOptions(grid = GRID, text = TEXT) {
   return {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: TEXT, boxWidth: 12, font: { size: 11 } } } },
+    plugins: { legend: { labels: { color: text, boxWidth: 12, font: { size: 11 } } } },
     scales: {
-      x: { grid: { color: GRID }, ticks: { color: TEXT, maxTicksLimit: 8, font: { size: 9 } } },
-      y: { grid: { color: GRID }, ticks: { color: TEXT } },
+      x: { grid: { color: grid }, ticks: { color: text, maxTicksLimit: 8, font: { size: 9 } } },
+      y: { grid: { color: grid }, ticks: { color: text } },
     },
   }
 }
