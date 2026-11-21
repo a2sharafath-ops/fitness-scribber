@@ -69,7 +69,7 @@ export default function DashboardPage() {
   }, [])
   const clock = dashboardClock(now, tz)
   const { today } = clock
-  const { clients, roster, bookings, next, upcoming: remainingToday, recorded, missing, reviews, plans, noProgram, completion, strength } = dashboardData(db, clock)
+  const { clients, roster, bookings, next, recorded, missing, reviews, plans, noProgram, completion, strength } = dashboardData(db, clock)
   const reviewFirst = reviews.filter(r => r.kind === 'review'), followup = reviews.filter(r => r.kind === 'followup')
   const reviewCategory = reviewFilter || (reviewFirst.length || !followup.length ? 'review' : 'followup')
   const reviewRows = reviewCategory === 'review' ? reviewFirst : followup
@@ -149,7 +149,7 @@ export default function DashboardPage() {
     {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan their training.</p><div className="db-actions"><Button onClick={() => openModal(<ClientForm />)}>＋ Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
     <div className="orbit-dashboard-grid">
       <div className="orbit-dashboard-column">
-      <DashboardBookings db={db} bookings={bookings} roster={roster} upcoming={remainingToday} next={next} today={today} onBook={book} onPlan={showPlan}
+      <DashboardBookings key={today} db={db} bookings={bookings} roster={roster} next={next} today={today} onBook={book} onPlan={showPlan}
         onDetails={(booking) => openModal(<SessionForm session={booking} />)} />
       <section className="db-card orbit-review" id="dashboard-review">
         <Heading icon="alert" tone="review">Needs review</Heading>
