@@ -424,9 +424,10 @@ body:has(.orbit-shell) {
 .orbit-command-header { justify-content: space-between; margin-bottom: 9px; }
 .orbit-command-header h2 { margin: 0; font-size: 16px; }
 .orbit-command-input { border: 1px solid var(--border); border-radius: 9px; padding-inline: 10px; }
-.orbit-command-input:focus-within { border-color: var(--accent); }
+.orbit-command-input:focus-within { border-color: var(--accent); outline: 1px solid var(--orbit-focus); }
 .orbit-command-input svg { flex: none; }
 .orbit-command-input input { flex: 1; min-width: 0; min-height: 42px; padding-inline: 0; border: 0; background: transparent; outline: 0; }
+.orbit-command-input input:focus-visible { outline: 0; }
 .orbit-command-results { display: grid; gap: 2px; max-height: min(390px, 58dvh); overflow: auto; margin-top: 8px; }
 .orbit-command-results button {
   display: grid;
@@ -463,6 +464,7 @@ body:has(.orbit-shell) {
   .orbit-search-trigger kbd { display: none; }
 }
 @media (max-width: 700px) {
+  .orbit-command-input input { font-size: 16px; }
   .orbit-toolbar .orbit-icon-button, .orbit-search-trigger { min-height: 44px; }
   .orbit-toolbar > .orbit-icon-button, .orbit-toolbar .gb-bell { width: 44px; }
   .orbit-search-trigger { width: 44px; flex: none; justify-content: center; padding: 0; }
