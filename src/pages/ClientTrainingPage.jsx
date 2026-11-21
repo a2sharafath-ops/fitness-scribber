@@ -51,12 +51,19 @@ export default function ClientTrainingPage() {
     setHistoryRequest((count) => count + 1)
   }
 
+  if (showRunner) return <section id="workout-log" className="training-session" aria-label={`Workout logging for ${fmtDate(selectedDate)}`}>
+    {!logging && <div className="training-runner-head">
+      <span>{client.name} · Training</span><Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>
+    </div>}
+    <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} startOnOpen onRunStateChange={setLogging} onSessionComplete={closeRunner} />
+  </section>
+
   return <>
-    <div className="topbar training-topbar"><h1>Training</h1>{!logging && <Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>}</div>
+    <div className="topbar training-topbar"><h1>Training</h1><Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button></div>
     <section className="card training-program" aria-labelledby="training-program-title">
       <div className="training-program-head"><div className="training-program-copy">
         <span className="overview-eyebrow">Programs</span><h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
-      </div>{!logging && <Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link>}</div>
+      </div><Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link></div>
       {assignedPrograms.length > 0 && <>
         <div className="training-program-list"><div className="training-program-assignment">
           <div className="training-program-copy">
@@ -66,16 +73,11 @@ export default function ClientTrainingPage() {
             </select>
             <small>Starts {fmtDate(selectedProgram.data.start)} · {selectedProgram.data.weeks} week{selectedProgram.data.weeks === 1 ? '' : 's'}</small>
           </div>
-          {!logging && <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>}
+          <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>
         </div></div>
         <p className="training-program-note">Edits apply to this client only. The library template stays unchanged.</p>
       </>}
     </section>
-    {showRunner && <section id="workout-log" className="training-session" aria-label={`Workout logging for ${fmtDate(selectedDate)}`}>
-      <div className="training-runner-head"><span>Logging · {fmtDate(selectedDate)}</span>{!logging && <Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>}</div>
-      <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} startOnOpen onRunStateChange={setLogging} onSessionComplete={closeRunner} />
-    </section>}
-    {!showRunner && <>
       <div id="selected-workout" className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>
         <TrainingDayPanel key={`${id}:${selectedDate}:${searchParams.get('workout') || ''}`} client={client} date={selectedDate} today={today} selectedWorkoutId={searchParams.get('workout')} onSelectDate={selectDate} />
       </WorkoutPlanner></div>
@@ -90,6 +92,5 @@ export default function ClientTrainingPage() {
             </div>) : <p className="muted">No completed appointments yet.</p>}
         </div>
       </details>
-    </>}
   </>
 }

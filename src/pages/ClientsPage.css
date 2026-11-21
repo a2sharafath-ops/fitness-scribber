@@ -170,3 +170,25 @@
 }
 @media(max-width:560px){.client-roster .cr-search{min-width:0}}
 @media(max-width:420px){.client-roster .cr-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.client-roster .cr-filters button{justify-content:center}}
+
+[data-orbit-theme] .client-roster {
+  --ink: var(--text);
+  --muted: var(--orbit-roster-muted);
+  --line: var(--border);
+  --soft: var(--surface2);
+  --orbit-roster-muted: #605762;
+  --green: #21654a;
+}
+[data-orbit-theme="dark"] .client-roster { --orbit-roster-muted: #c4b8c5; --green: #91dca8; }
+[data-orbit-theme] .client-roster :is(.cr-card, .cr-sort select, .cr-pagination button) { background: var(--surface); border-color: var(--line); }
+[data-orbit-theme] .client-roster :is(th, .cr-filters, .cr-search, .cr-program-cell, .cr-bar) { background: var(--soft); border-color: var(--line); }
+[data-orbit-theme] .client-roster tbody tr:hover { background: var(--soft); }
+[data-orbit-theme] .client-roster td { border-color: var(--line); }
+[data-orbit-theme] .client-roster :is(.cr-filters button, th, th small, .cr-email, .cr-client-link .cr-arrow, .cr-cell-note, .cr-search svg, .cr-no-program, .cr-upcoming, .cr-active-query, .cr-completion span, .cr-pagination) { color: var(--muted); }
+[data-orbit-theme] .client-roster .cr-filters button[aria-pressed="true"] { color: #fff; background: var(--orbit-red); }
+[data-orbit-theme] .client-roster :is(.cr-assign, .cr-empty-icon) { color: var(--green); background: var(--tint-green); border-color: var(--line); }
+[data-orbit-theme] .client-roster .cr-program-name { color: var(--green); }
+[data-orbit-theme] .client-roster .cr-review { color: var(--accent2); background: var(--tint-amber); border-color: var(--line); }
+[data-orbit-theme] .client-roster .cr-review.cr-red { color: var(--accent); background: var(--tint-red); border-color: var(--line); }
+[data-orbit-theme] .client-roster .cr-review.cr-neutral { color: var(--muted); background: var(--soft); border-color: var(--line); }
+[data-orbit-theme] .client-roster .cr-section-icon { color: var(--accent); background: var(--tint-red); }

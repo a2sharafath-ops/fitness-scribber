@@ -106,7 +106,7 @@ export default function ClientWorkoutFlow({ client, date, onRunStateChange, onSe
 
   return (
     <>
-      {!checkinW && <TodayWorkout {...workoutProps} isToday={sessionDate === todayISO(tz)}
+      {!checkinW && <TodayWorkout {...workoutProps} focusedRunner={startOnOpen} isToday={sessionDate === todayISO(tz)}
           headerLabel={sessionDate === todayISO(tz) ? "Today's Workout" : `Workout · ${fmtDate(sessionDate)}`} />}
       {checkinW && <CheckInModal today={sessionDate} onSubmit={submitCheckin} onSkip={skipCheckin}
         onClose={() => { setCheckinW(null); setRunOpen(false); onSessionComplete?.() }} />}

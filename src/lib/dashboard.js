@@ -108,3 +108,15 @@ export function dashboardReadiness(db, clients, today) {
     average: scores.length ? Math.round(scores.reduce((sum, entry) => sum + entry.score, 0) / scores.length) : null,
     high: shared('green'), medium: shared('yellow'), low: shared('red') }
 }
+
+// Calendar weeks use the coach's local date and shared schedule boundaries.
+export function dashboardWeeks(sessions, monday, count) {
+  return Array.from({ length: count }, (_, index) => {
+    const from = addDays(monday, (index - count + 1) * 7)
+    const through = addDays(from, 6)
+    const bookings = sessions.filter((session) => session.date >= from && session.date <= through && session.status !== 'Cancelled')
+    return { from, through, booked: bookings.length,
+      completed: bookings.filter((session) => session.status === 'Completed').length,
+      missed: bookings.filter((session) => session.status === 'Missed').length }
+  })
+}

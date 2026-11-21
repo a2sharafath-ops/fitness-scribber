@@ -1087,3 +1087,22 @@
 .ls-review-sets li:last-child { border-bottom: 0; }
 .ls-review-sets li span:first-child { flex: none; }
 .ls-review-sets li span:last-child { text-align: right; overflow-wrap: anywhere; }
+
+.ls-workout-actions { display: flex; align-items: center; gap: 7px; }
+@container (max-width: 360px) {
+  .ls-header-tools > .ls-tools { display: grid; grid-template-columns: max-content max-content; }
+  .ls-header-tools > .ls-tools > .ls-more { grid-row: 1; grid-column: 2; }
+  .ls-workout-actions { grid-column: 1 / -1; }
+}
+@media (max-width: 540px) {
+  .ls-current {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 3px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .ls-current > div:first-child { grid-area: 1 / 1; min-width: 0; }
+  .ls-current > .ls-button { grid-area: 1 / 2 / span 2; margin-left: 0; }
+  .ls-current .ls-live-hr { grid-area: 2 / 1; justify-items: start; padding: 0; margin-left: 0; border: 0; background: none; }
+  .ls-current .ls-live-hr strong { display: none; }
+}

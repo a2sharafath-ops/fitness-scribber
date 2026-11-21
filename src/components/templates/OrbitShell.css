@@ -218,3 +218,35 @@ body:has(.orbit-shell) {
   #app.orbit-shell { display: block; margin: 0; border: 0; box-shadow: none; background: white; color: black; }
   .orbit-shell::before, .orbit-drawer { display: none; }
 }
+
+[data-orbit-theme] .client-tabs {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+[data-orbit-theme] .client-tabs .tab.active { background: var(--surface); color: var(--accent); }
+.client-workspace:has(> #workout-log) > :is(.client-workspace-header, .client-save-status, .client-subnav) { display: none; }
+.orbit-shell:has(#workout-log) .orbit-toolbar { margin-bottom: 14px; }
+
+.orbit-mobile-search { display: none; }
+.orbit-notification-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px; padding: 4px; }
+.orbit-notification-controls > div { display: flex; gap: 4px; }
+.gb-drop .orbit-notification-controls button { width: auto; padding: 5px 8px; min-height: 28px; font-size: 12px; }
+.orbit-notification-controls [aria-pressed="true"] { background: var(--tint-red); color: var(--accent); }
+.orbit-notification-controls button:disabled { opacity: .55; cursor: default; }
+.orbit-notification-count { padding: 2px 10px 6px; color: var(--muted); font-size: 12px; }
+.orbit-toolbar .gb-drop { max-height: min(440px, 75dvh); overflow: auto; }
+.orbit-notification-row { display: flex; border-top: 1px solid var(--border); }
+.orbit-notification-row button:first-child { min-width: 0; overflow-wrap: anywhere; }
+.orbit-notification-row small { display: block; font-size: 11px; color: var(--muted); }
+.gb-drop .orbit-notification-mark { flex: none; width: 38px; align-self: center; }
+@media (max-width: 700px) {
+  .orbit-toolbar { position: relative; }
+  .orbit-mobile-search { display: inline-grid; }
+  .orbit-toolbar .gb-search { display: none; }
+  .orbit-toolbar[data-mobile-search="true"] .gb-search { display: flex; }
+  .orbit-toolbar-menu { position: static; }
+  .orbit-toolbar-panel { top: 46px; }
+}
+@media (max-width: 375px) {
+  .orbit-mobile-brand > span { display: none; }
+}

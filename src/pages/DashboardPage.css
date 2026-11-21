@@ -95,8 +95,7 @@
 /* Wrapped headers and filters must still leave usable list space on narrow phones. */
 @media(max-width:360px){.db-checkin-card,.db-plans-card{height:452px}.db-coverage{padding:13px 10px;gap:10px}.db-coverage-ring{width:58px;height:58px}.db-stat>strong{font-size:25px}.db-stat>strong small{font-size:13px}}
 
-/* Orbit dashboard. Keep the activity card and Up next in the first row,
-   with today's bookings across the full width directly underneath. */
+/* Independent stacks let today's sessions follow the booking carousel. */
 .coach-dashboard {
   --db-ink: var(--text);
   --db-muted: var(--muted);
@@ -107,9 +106,9 @@
 .db-title h1 { font-size: clamp(26px, 3vw, 37px); letter-spacing: -.044em; }
 .orbit-dashboard-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr); gap: 20px; align-items: start; }
 .orbit-dashboard-grid > * { min-width: 0; }
-.orbit-up-next { grid-row: 1; grid-column: 1; }
-.orbit-coaching { grid-row: 1; grid-column: 2; }
-.orbit-today { grid-column: 1 / -1; grid-row: 2; }
+.orbit-dashboard-column { display: grid; align-content: start; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.db-chart-controls > *, .db-tabs { min-width: 0; max-width: 100%; }
+.db-tabs button { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .coach-dashboard .db-card { border-color: var(--border); background: var(--orbit-panel); }
 .coach-dashboard .db-head { margin-bottom: 14px; }
 .coach-dashboard .db-head h2 { font-size: 18px; }
@@ -165,9 +164,9 @@
 @media (max-width: 1050px) { .orbit-dashboard-grid { gap: 14px; } }
 @media (max-width: 880px) {
   .orbit-dashboard-grid { grid-template-columns: minmax(0, 1fr); }
-  .orbit-up-next, .orbit-today, .orbit-coaching { grid-row: auto; grid-column: auto; }
+  .orbit-dashboard-column { display: contents; }
   .orbit-booking-feature { min-height: 155px; }
-  .orbit-dashboard-grid > .db-card { padding: 17px; }
+  .orbit-dashboard-grid .db-card { padding: 17px; }
 }
 @media (max-width: 420px) {
   .coach-dashboard .db-stat { padding: 9px 6px; }
@@ -175,3 +174,42 @@
   .orbit-today-booking .avatar { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .orbit-booking-feature { animation: none; } }
+
+.orbit-booking-deck { position: relative; isolation: isolate; touch-action: pan-y; }
+.orbit-booking-deck.has-stack { padding-top: 12px; }
+.orbit-booking-deck.has-stack::before, .orbit-booking-deck.has-stack::after {
+  content: ""; position: absolute; inset: 1px 14px 20px; z-index: -1;
+  border: 1px solid var(--border); border-radius: 19px; background: var(--orbit-feature); transform: rotate(-2deg);
+}
+.orbit-booking-deck.has-stack::after { inset: 6px 7px 18px; transform: rotate(1.4deg); }
+.orbit-booking-plan { display: flex; justify-content: flex-end; margin-top: 10px; }
+.orbit-booking-controls { text-align: center; }
+.orbit-booking-controls .orbit-icon-button, .orbit-insight-tools .orbit-icon-button { font-size: 23px; line-height: 1; }
+.orbit-carousel-dots { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
+.orbit-carousel-dots button { display: grid; place-items: center; width: 24px; height: 30px; border: 0; background: none; cursor: pointer; }
+.orbit-carousel-dots button::before { content: ""; width: 6px; height: 6px; border-radius: 9px; background: var(--muted); }
+.orbit-carousel-dots button[aria-current="true"]::before { width: 14px; background: var(--orbit-red); }
+.orbit-weekly .db-head .db-tabs { margin: 0; }
+.orbit-weekly-legend { display: flex; gap: 12px; color: var(--muted); font-size: 12px; margin-bottom: 7px; }
+.orbit-weekly-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-inline-end: 4px; border-radius: 50%; background: var(--muted); }
+.orbit-weekly-legend span:last-child::before { background: var(--orbit-red); }
+.orbit-weekly-bars { display: grid; grid-template-columns: repeat(var(--weeks), minmax(0, 1fr)); gap: 3px; }
+.orbit-weekly-bars button { display: grid; gap: 4px; align-content: end; height: 106px; padding: 2px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--muted); font: inherit; font-size: 10px; cursor: pointer; overflow: hidden; }
+.orbit-weekly-bars button:is(:hover, [aria-pressed="true"]) { background: var(--surface2); border-color: var(--border); }
+.orbit-weekly-bars button > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.orbit-weekly-pair { display: flex; align-items: end; justify-content: center; gap: 2px; height: 70px; }
+.orbit-weekly-pair i { width: min(30%, 18px); background: var(--muted); border-radius: 3px 3px 0 0; }
+.orbit-weekly-pair i:last-child { background: var(--orbit-red); }
+.orbit-report-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.orbit-report-stats div { padding: 10px; background: var(--surface2); border-radius: 12px; }
+.orbit-report-stats dd { margin: 5px 0 0; font-size: 18px; font-weight: 700; }
+.orbit-insight-content { min-height: 105px; }
+.orbit-insight-content p { color: var(--muted); margin-top: 6px; }
+.orbit-insight-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+.orbit-upcoming-row time { color: var(--muted); font-size: 12px; }
+.orbit-upcoming-row:hover .db-info strong { color: var(--accent); }
+
+@media (max-width: 400px) {
+  .db-chart-controls .db-tabs { width: 100%; }
+  .orbit-weekly-bars { gap: 1px; }
+}

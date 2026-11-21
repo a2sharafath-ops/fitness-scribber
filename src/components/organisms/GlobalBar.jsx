@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Icon from '../atoms/Icon'
 import Brand from '../atoms/Brand'
+import { useAuth } from '../../store/AuthContext'
+import OrbitNotifications from './OrbitNotifications'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { useConversations } from '../../hooks/useConversations'
@@ -17,19 +19,30 @@ const PAGES = [
 
 export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance }) {
   const { db } = useData()
+  const { user } = useAuth()
   const { openModal } = useModal()
-  const { totalUnread } = useConversations()
+  const { byClient } = useConversations()
   const nav = useNavigate()
   const { pathname } = useLocation()
   const input = useRef(null)
   const actionMenu = useRef(null)
   const appearanceMenu = useRef(null)
   const [query, setQuery] = useState('')
+  const [mobileSearch, setMobileSearch] = useState(false)
+  const mobileSearchButton = useRef(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [active, setActive] = useState(-1)
   const [bellOpen, setBellOpen] = useState(false)
-  const concerns = openConcerns(db)
-  const nCount = concerns.length + (totalUnread > 0 ? 1 : 0)
+  const notices = [
+    ...Object.values(byClient).filter(({ unread }) => unread > 0).map(({ clientId, last, unread }) => ({
+      id: `message:${clientId}:${last.id}:${unread}`, icon: 'message', path: '/messages?clientId=' + encodeURIComponent(clientId),
+      label: `${db.clients.find(({ id }) => id === clientId)?.name || 'Client'} · ${unread} unread message${unread === 1 ? '' : 's'}`,
+    })),
+    ...openConcerns(db).map((concern) => ({
+      id: 'concern:' + concern.id, icon: 'alert', path: '/concerns',
+      label: `${db.clients.find(({ id }) => id === concern.clientId)?.name || 'Client'}: ${concern.category} · ${concern.severity}`,
+    })),
+  ]
   const term = query.trim().toLowerCase()
   const results = term ? [
     ...db.clients.map((client) => ({ path: '/clients/' + encodeURIComponent(client.id), name: client.name, kind: 'Client' })),
@@ -38,9 +51,14 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
   ].filter((entry) => entry.name?.toLowerCase().includes(term)).slice(0, 8) : []
   const page = pathname.startsWith('/clients/') ? 'Client workspace' : PAGES.find(([path]) => path === pathname)?.[1] || 'Trainer workspace'
 
+  const showSearch = () => {
+    setMobileSearch(true)
+    requestAnimationFrame(() => input.current?.focus())
+  }
+
   useEffect(() => {
     const shortcut = (event) => {
-      if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) { event.preventDefault(); input.current?.focus() }
+      if (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) { event.preventDefault(); showSearch() }
       if (event.key === 'Escape') {
         if (appearanceMenu.current?.open) appearanceMenu.current.open = false
         if (actionMenu.current?.open) actionMenu.current.open = false
@@ -50,9 +68,13 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
     window.addEventListener('keydown', shortcut)
     return () => window.removeEventListener('keydown', shortcut)
   }, [])
-  const go = (path) => { setQuery(''); setSearchOpen(false); setActive(-1); nav(path) }
+  const go = (path) => { setQuery(''); setSearchOpen(false); setMobileSearch(false); setActive(-1); nav(path) }
   const searchKey = (event) => {
-    if (event.key === 'Escape') { setSearchOpen(false); setActive(-1); return }
+    if (event.key === 'Escape') {
+      setSearchOpen(false); setMobileSearch(false); setActive(-1)
+      if (mobileSearchButton.current?.offsetWidth) mobileSearchButton.current.focus()
+      return
+    }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       if (!results.length) return
       event.preventDefault()
@@ -65,11 +87,13 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
   const showsResults = searchOpen && Boolean(term)
 
   return (
-    <header className="global-bar orbit-toolbar">
+    <header className="global-bar orbit-toolbar" data-mobile-search={mobileSearch}>
       <button type="button" className="orbit-icon-button orbit-mobile-menu" ref={menuTrigger} onClick={onOpenNavigation} aria-label="Open navigation" aria-haspopup="dialog" aria-controls="orbit-mobile-navigation"><Icon name="menu" size={19} /></button>
       <button type="button" className="orbit-mobile-brand" aria-label="Orbit Trainer home" onClick={() => go('/')}><Brand ringOnly /><span>Orbit Trainer</span></button>
       <span className="orbit-crumb">{page}</span>
-      <div className="gb-search" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setSearchOpen(false) }}>
+      <button type="button" className="orbit-icon-button orbit-mobile-search" ref={mobileSearchButton} onClick={() => mobileSearch ? setMobileSearch(false) : showSearch()}
+        aria-label={mobileSearch ? 'Close search' : 'Open search'} aria-expanded={mobileSearch} aria-controls="orbit-search"><Icon name={mobileSearch ? 'close' : 'search'} size={18} /></button>
+      <div className="gb-search" id="orbit-search" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setSearchOpen(false) }}>
         <Icon name="search" size={17} />
         <input ref={input} value={query} onChange={(event) => { setQuery(event.target.value); setActive(-1); setSearchOpen(true) }}
           onFocus={() => setSearchOpen(true)} onKeyDown={searchKey} placeholder="Search clients, programs, pages" aria-label="Search clients, programs and pages"
@@ -107,26 +131,9 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
           <input type="range" id="orbit-frost" min="0" max="100" value={appearance.frost} onChange={(event) => appearance.updateAppearance({ frost: Number(event.target.value) })} />
         </div>
       </details>
-      <div className="gb-bellwrap">
-        <button type="button" className="orbit-icon-button gb-bell" onClick={() => setBellOpen((open) => !open)} aria-label="Notifications" aria-expanded={bellOpen}>
-          <Icon name="bell" size={18} />
-          {nCount > 0 && <span className="gb-badge">{nCount}</span>}
-        </button>
-        {bellOpen && <>
-          <div className="gb-overlay" aria-hidden="true" onClick={() => setBellOpen(false)} />
-          <div className="gb-drop" aria-label="Notifications">
-            {totalUnread > 0 && <button type="button" onClick={() => { setBellOpen(false); nav('/messages') }}>
-              <Icon name="message" size={15} /> {totalUnread} unread message{totalUnread > 1 ? 's' : ''}
-            </button>}
-            {concerns.slice(0, 5).map((concern) => (
-              <button type="button" key={concern.id} onClick={() => { setBellOpen(false); nav('/concerns') }}>
-                <Icon name="alert" size={15} /> {db.clients.find((client) => client.id === concern.clientId)?.name || 'Client'}: {concern.category} · {concern.severity}
-              </button>
-            ))}
-            {!nCount && <div className="gb-empty">You’re all caught up.</div>}
-          </div>
-        </>}
-      </div>
+      <OrbitNotifications key={user?.id ?? 'local'} scope={user?.id ?? 'local'} notices={notices}
+        open={bellOpen} onToggle={() => setBellOpen(!bellOpen)} onClose={() => setBellOpen(false)}
+        onOpen={(path) => { setBellOpen(false); go(path) }} />
       <button type="button" className="gb-avatar" onClick={() => nav('/settings')} aria-label="Your settings">
         {initials(db.settings?.trainerName || 'Coach')}
       </button>
