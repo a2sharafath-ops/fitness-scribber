@@ -12,7 +12,7 @@ export default function ClientLayout() {
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      const target = hash && document.getElementById(hash.slice(1))
+      const target = hash && hash !== '#workout-log' && document.getElementById(hash.slice(1))
       if (target) target.scrollIntoView()
       else window.scrollTo(0, 0)
     })

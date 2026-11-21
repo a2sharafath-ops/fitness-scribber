@@ -8,7 +8,7 @@ import { MemoryRouter } from 'react-router-dom'
 const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' })
 after(() => vite.close())
 const load = path => vite.ssrLoadModule(`/src/${path}`)
-const { dashboardClock, dashboardData, dashboardActivity, dashboardClientPath } = await load('lib/dashboard.js')
+const { dashboardClock, dashboardData, dashboardActivity, dashboardClientPath, dashboardWeeks } = await load('lib/dashboard.js')
 const { seedBuilderQA } = await load('lib/builderQA.js')
 const { default: DashboardPage } = await load('pages/DashboardPage.jsx')
 const { DataProvider } = await load('store/DataContext.jsx')
@@ -117,4 +117,20 @@ test('Dashboard renders real destinations and empty states without duplicate sho
   for(const text of ['AI Coach','At risk','rest day','Quick actions']) assert.ok(!html.includes(text))
   db.clients=[]
   assert.ok(render(db).includes('Start with your first client'))
+})
+
+test('weekly dashboard counts calendar bookings once and excludes cancelled sessions', () => {
+  const db = fixture()
+  db.sessions = [
+    booking(db, 'past', '2026-10-04', '09:00', 'Completed'),
+    booking(db, 'complete', '2026-10-05', '09:00', 'Completed'),
+    booking(db, 'missed', '2026-10-06', '09:00', 'Missed'),
+    booking(db, 'pending', '2026-10-11', '09:00'),
+    booking(db, 'cancelled', '2026-10-11', '10:00', 'Cancelled'),
+    booking(db, 'next', '2026-10-12', '09:00'),
+  ]
+  assert.deepEqual(dashboardWeeks(db.sessions, '2026-10-05', 2), [
+    { from: '2026-09-28', through: '2026-10-04', booked: 1, completed: 1, missed: 0 },
+    { from: '2026-10-05', through: '2026-10-11', booked: 3, completed: 1, missed: 1 },
+  ])
 })

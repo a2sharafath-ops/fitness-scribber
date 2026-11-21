@@ -82,8 +82,12 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
     <header className={'ls-header' + (compact ? ' is-compact' : '')} ref={headerRef}><div className="ls-header-main"><div className="ls-clock-line"><strong className="ls-clock" role="timer" aria-label="Workout elapsed time">{clock}</strong><span className="ls-status">{session.status === 'discarded' ? 'Discarded' : session.liveState.clock.paused ? 'Paused' : 'In progress'}</span></div>
       <h1 title={session.title}>{session.title}</h1><p className="ls-client-label">{clientName || 'Training session'} · {session.date}</p></div>
       <div className="ls-header-tools"><div className="ls-tools"><div className="ls-tabs ls-unit-switch" aria-label="Weight units">{['kg', 'lb'].map((unit) => <button key={unit} type="button" aria-pressed={units === unit} onClick={() => readOnly ? setReviewUnits(unit) : act({ type: 'settings', settings: { units: unit } })}>{unit}</button>)}</div>
-        {!readOnly && <button type="button" className="ls-button ls-finish" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
-        <LiveSessionMenu label="Workout options">{!readOnly && <><button type="button" role="menuitem" onClick={() => act({ type: 'pause' })}>{session.liveState.clock.paused ? 'Resume workout' : 'Pause workout'}</button>
+        {!readOnly && <div className="ls-workout-actions">
+          <button type="button" className="ls-button ls-pause" onClick={() => act({ type: 'pause' })}
+            aria-label={session.liveState.clock.paused ? 'Resume workout' : 'Pause workout'}>{session.liveState.clock.paused ? 'Resume' : 'Pause'}</button>
+          <button type="button" className="ls-button ls-finish" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>
+        </div>}
+        <LiveSessionMenu label="Workout options">{!readOnly && <>
           {!locked && <button type="button" role="menuitem" onClick={() => openEditor({ kind: 'order' })}>Reorder workout…</button>}
           <button type="button" role="menuitem" onClick={() => openEditor({ kind: 'settings' })}>Workout settings…</button>
           <hr /><button type="button" role="menuitem" className="ls-danger-text" onClick={() => openEditor({ kind: 'discard' })}>Discard workout…</button></>}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../atoms/Icon'
 import Avatar from '../atoms/Avatar'
@@ -15,25 +15,52 @@ function bookingDestination(db, booking, today) {
   return { path, label: day.completed.length ? 'Review workout' : 'Open training' }
 }
 
-export default function DashboardBookings({ db, bookings, roster, next, today, onDetails }) {
+export default function DashboardBookings({ db, bookings, roster, next, today, onDetails, onPlan }) {
   const [selectedId, setSelectedId] = useState(null)
+  const gesture = useRef(null)
   const upcoming = bookings.filter((booking) => ['Confirmed', 'Pending'].includes(booking.status))
   const booking = upcoming.find((entry) => entry.id === selectedId) || next || upcoming[0]
   const index = upcoming.findIndex((entry) => entry.id === booking?.id)
   const shift = (direction) => setSelectedId(upcoming[(index + direction + upcoming.length) % upcoming.length]?.id)
   const destination = booking && bookingDestination(db, booking, today)
+  const plan = booking && bookingPlan(db, booking)
+  const startSwipe = (event) => {
+    if (event.pointerType === 'mouse' || event.target.closest('button, a')) return
+    gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
+  }
+  const endSwipe = (event) => {
+    const start = gesture.current
+    gesture.current = null
+    if (start?.id !== event.pointerId || upcoming.length < 2) return
+    const dx = event.clientX - start.x, dy = event.clientY - start.y
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) shift(dx < 0 ? 1 : -1)
+  }
+  const browseWithArrows = (event) => {
+    if (event.target !== event.currentTarget || upcoming.length < 2 || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+    event.preventDefault()
+    shift(event.key === 'ArrowRight' ? 1 : -1)
+  }
 
-  return <>
+  return <div className="orbit-dashboard-column">
     <section className="db-card orbit-up-next" aria-labelledby="orbit-up-next-title">
       <header className="db-head"><h2 id="orbit-up-next-title">Up next</h2><Link className="db-link" to="/schedule">View schedule</Link></header>
       {booking ? <>
-        <article className="orbit-booking-feature" key={booking.id} aria-live="polite">
-          <p className="orbit-booking-time">{booking.time || 'Time not set'}{booking.dur ? ' · ' + durationLabel(booking) : ''}</p>
-          <div><h3>{bookingPlan(db, booking)?.name || booking.type || 'Training session'}</h3><p>{roster.get(booking.clientId)?.name}</p></div>
-          <div className="orbit-booking-actions"><Avatar name={roster.get(booking.clientId)?.name || 'Client'} /><Link className="btn" to={destination.path}>{destination.label}</Link></div>
-        </article>
+        <div className={'orbit-booking-deck' + (upcoming.length > 1 ? ' has-stack' : '')} tabIndex={upcoming.length > 1 ? 0 : undefined}
+          role="group" aria-label="Today’s booking carousel" onKeyDown={browseWithArrows} onPointerDown={startSwipe}
+          onPointerUp={endSwipe} onPointerCancel={() => { gesture.current = null }}>
+          <article className="orbit-booking-feature" key={booking.id} aria-live="polite">
+            <p className="orbit-booking-time">{booking.time || 'Time not set'}{booking.dur ? ' · ' + durationLabel(booking) : ''}</p>
+            <div><h3>{plan?.name || booking.type || 'Training session'}</h3><p>{roster.get(booking.clientId)?.name}</p></div>
+            <div className="orbit-booking-actions"><Avatar name={roster.get(booking.clientId)?.name || 'Client'} /><Link className="btn" to={destination.path}>{destination.label}</Link></div>
+          </article>
+        </div>
+        {plan && <div className="orbit-booking-plan"><button type="button" className="btn ghost sm" onClick={() => onPlan(plan)}>View plan</button></div>}
         {upcoming.length > 1 && <div className="orbit-booking-controls" aria-label="Browse bookings">
-          <button className="btn ghost sm" onClick={() => shift(-1)}>Previous</button><span>{index + 1} of {upcoming.length}</span><button className="btn ghost sm" onClick={() => shift(1)}>Next</button>
+          <button type="button" className="orbit-icon-button" aria-label="Previous booking" onClick={() => shift(-1)}><span aria-hidden="true">‹</span></button>
+          <div><p>{index + 1} of {upcoming.length}</p><div className="orbit-carousel-dots">
+            {upcoming.map((entry, i) => <button key={entry.id} type="button" aria-label={`View booking ${i + 1}`} aria-current={entry.id === booking.id ? 'true' : undefined} onClick={() => setSelectedId(entry.id)} />)}
+          </div></div>
+          <button type="button" className="orbit-icon-button" aria-label="Next booking" onClick={() => shift(1)}><span aria-hidden="true">›</span></button>
         </div>}
       </> : <p className="db-empty">No upcoming sessions today.</p>}
     </section>
@@ -50,5 +77,5 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
         </article>
       })}</div> : <p className="db-empty">No bookings today.</p>}
     </section>
-  </>
+  </div>
 }
