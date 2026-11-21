@@ -13,9 +13,9 @@ function readAppearance() {
   return { theme: 'system', frost: 64 }
 }
 
-export default function useOrbitAppearance() {
+export default function useOrbitAppearance({ applyToDocument = true } = {}) {
   const [appearance, setAppearance] = useState(readAppearance)
-  const [systemDark, setSystemDark] = useState(() => window.matchMedia?.(SYSTEM).matches ?? false)
+  const [systemDark, setSystemDark] = useState(() => globalThis.window?.matchMedia?.(SYSTEM).matches ?? false)
   const theme = appearance.theme === 'system' ? systemDark ? 'dark' : 'light' : appearance.theme
 
   useEffect(() => {
@@ -26,6 +26,7 @@ export default function useOrbitAppearance() {
     return () => system.removeEventListener('change', update)
   }, [])
   useEffect(() => {
+    if (!applyToDocument) return undefined
     const root = document.documentElement
     root.dataset.orbitTheme = theme
     root.style.setProperty('--orbit-frost', appearance.frost / 100)
@@ -33,7 +34,7 @@ export default function useOrbitAppearance() {
       delete root.dataset.orbitTheme
       root.style.removeProperty('--orbit-frost')
     }
-  }, [theme, appearance.frost])
+  }, [applyToDocument, theme, appearance.frost])
 
   const updateAppearance = (patch) => {
     const next = { ...appearance, ...patch }

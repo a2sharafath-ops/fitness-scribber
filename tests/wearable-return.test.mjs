@@ -18,7 +18,7 @@ test('callback stays mounted through auth updates after clearing the fragment', 
     name: 'callback-test-boundaries', enforce: 'pre',
     transform(source, id) {
       if (id.replaceAll('\\', '/').endsWith('/src/App.jsx')) return source.replace(/^import .* from ['"]([^'"]+)['"]\r?\n/gm, (line, path) => {
-        if (path === 'react' || path === './api/wearable' || path.endsWith('/WearableReturn')) return line
+        if (path === 'react' || path === './api/wearable' || path.endsWith('/WearableReturn') || path.endsWith('/StartupScreen')) return line
         if (path === './lib/supabase') return 'const hasBackend = true\n'
         if (path === './store/AuthContext') return 'const useAuth = () => globalThis.__callbackAuth; const AuthProvider = ({children}) => children\n'
         if (path.endsWith('/Toaster')) return 'const Toaster = () => null\n'

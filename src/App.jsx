@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { hasBackend } from './lib/supabase'
 import { AuthProvider, useAuth } from './store/AuthContext'
@@ -14,10 +14,12 @@ import Toaster from './components/organisms/Toaster'
 import { clientSectionPath } from './lib/clientRoutes'
 import { wearableReturn } from './api/wearable'
 import WearableReturn from './components/organisms/WearableReturn'
+import StartupScreen from './components/templates/StartupScreen'
 
 const AthletePortal = lazy(() => import('./pages/AthletePortal'))
 const AdminPortal = lazy(() => import('./pages/AdminPortal'))
-const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const loadDashboard = () => import('./pages/DashboardPage')
+const DashboardPage = lazy(loadDashboard)
 const ClientsPage = lazy(() => import('./pages/ClientsPage'))
 const ClientDetailPage = lazy(() => import('./pages/ClientDetailPage'))
 const ClientProfilePage = lazy(() => import('./pages/ClientProfilePage'))
@@ -35,7 +37,7 @@ const MessagesPage = lazy(() => import('./pages/MessagesPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const ReportPage = lazy(() => import('./pages/ReportPage'))
 
-const routeLoading = <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading…</div>
+const routeLoading = <StartupScreen />
 
 function LegacyClientRoute({ section }) {
   const { id } = useParams()
@@ -44,6 +46,10 @@ function LegacyClientRoute({ section }) {
 }
 
 function Shell() {
+  useEffect(() => {
+    if (window.location.pathname === '/') void loadDashboard().catch(() => {})
+  }, [])
+
   return (
     <DataProvider>
       <BrowserRouter>
@@ -89,7 +95,7 @@ function Gate() {
   // across the auth/profile updates that follow startup until Continue navigates.
   const [isWearableReturn] = useState(() => hasBackend && wearableReturn())
   if (!hasBackend) return <Shell />
-  const loading = <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Starting…</div>
+  const loading = <StartupScreen label="Starting Orbit Trainer…" />
   if (!ready) return loading
   if (recovery) return <ResetPasswordPage />
   if (!session) return <AuthPage />
