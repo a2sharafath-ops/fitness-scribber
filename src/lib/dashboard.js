@@ -1,17 +1,14 @@
-import { addDays, daysBetween, fmtDay, coachTimeZone } from './dates'
+import { addDays, daysBetween, fmtDay, coachClock } from './dates'
 import { computeReadiness, openConcerns } from './calc'
 import { programStats } from './program'
 import { clientPrograms } from './clientPrograms'
 import { formalAssessments, latest, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, typeMeta } from './assessment'
 import { screeningsFor, programStatus, rescreenDue } from './screening'
 import { assessmentReview } from './assessmentReview'
+import { bookingWorkout, scheduledBooking } from './schedule'
+import { trainingDay } from './trainingDay'
 
-export function dashboardClock(now = new Date(), tz) {
-  const options = { timeZone: coachTimeZone(tz) }
-  const parts = new Intl.DateTimeFormat('en-CA', { ...options, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
-  const value = key => parts.find(p => p.type === key).value
-  return { today: `${value('year')}-${value('month')}-${value('day')}`, time: `${value('hour')}:${value('minute')}` }
-}
+export const dashboardClock = coachClock
 
 export const dashboardClientPath = (id, suffix = '') => `/clients/${encodeURIComponent(id)}${suffix}`
 const recent = rows => [...rows].sort((a, b) => (b.date || '').localeCompare(a.date || ''))
@@ -53,17 +50,22 @@ export function dashboardData(db, { today, time }) {
   const clients = [...db.clients].filter(c => c.status === 'Active').sort((a, b) => a.name.localeCompare(b.name))
   const roster = new Map(db.clients.map(c => [c.id, c]))
   const bookings = db.sessions.filter(s => roster.has(s.clientId) && s.date === today && s.status !== 'Cancelled').sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-  const next = bookings.find(s => ['Confirmed', 'Pending'].includes(s.status) && s.time >= time)
+  const upcoming = bookings.filter(s => scheduledBooking(s) && s.time >= time && !['completed', 'discarded'].includes(bookingWorkout(db, s)?.status))
+  const next = upcoming[0]
   const checked = new Set(db.wellness.filter(w => w.date === today).map(w => w.clientId))
   const recorded = clients.filter(c => checked.has(c.id)), missing = clients.filter(c => !checked.has(c.id))
   const reviews = clientReviewItems(db, today, clients)
   const activeIds = new Set(clients.map(c => c.id))
-  const plans = db.prescriptions.filter(p => activeIds.has(p.clientId) && p.date === today && programStats(p).exercises > 0).map(p => ({ ...p, client: roster.get(p.clientId), done: db.workouts.some(w => w.clientId === p.clientId && w.date === today && w.status === 'completed') })).sort((a, b) => a.client.name.localeCompare(b.client.name))
+  const plans = db.prescriptions.filter(p => activeIds.has(p.clientId) && p.date === today && programStats(p).exercises > 0).map(p => {
+    const day = trainingDay(db, p.clientId, today, today)
+    return { ...p, client: roster.get(p.clientId), done: !day.scheduled && day.completed.length > 0 && day.status === 'completed',
+      workoutStatus: day.scheduled || day.completed.length || day.pending ? day.label : null }
+  }).sort((a, b) => a.client.name.localeCompare(b.client.name))
   const noProgram = clients.filter(c => !clientPrograms(db, c, today).length)
   // Only fully elapsed calendar days enter the retrospective summary.
   const completion = bookedCompletion(db.sessions, today, new Set(roster.keys()))
   const strength = recent(db.maxes.filter(m => roster.has(m.clientId) && m.kind === 'e1rm' && m.date <= today && Number.isFinite(+m.valueKg) && +m.valueKg > 0))[0]
-  return { clients, roster, bookings, next, recorded, missing, reviews, plans, noProgram, completion, strength }
+  return { clients, roster, bookings, next, upcoming, recorded, missing, reviews, plans, noProgram, completion, strength }
 }
 
 export function dashboardActivity(db, { today, days, metric }) {

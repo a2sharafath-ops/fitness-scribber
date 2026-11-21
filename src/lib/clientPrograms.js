@@ -2,14 +2,20 @@ import { addDays, daysBetween, fmtDate } from './dates'
 
 const programPath = (clientId, assignmentId) => `/workouts?assignment=${encodeURIComponent(assignmentId)}&clientId=${encodeURIComponent(clientId)}`
 
+export function programPeriod(assignment) {
+  const dates = (assignment.data?.schedule || []).map(s => s.date).filter(Boolean).sort()
+  if (!dates.length) return null
+  const start = [assignment.data.start || dates[0], dates[0]].sort()[0]
+  const weeks = Number(assignment.data.weeks)
+  const nominalEnd = Number.isInteger(weeks) && weeks > 0 ? addDays(assignment.data.start || start, weeks * 7 - 1) : dates.at(-1)
+  return { start, end: [nominalEnd, dates.at(-1)].sort().at(-1), weeks }
+}
+
 export function clientPrograms(db, client, today) {
   const assignments = (db.programAssignments || []).filter(a => a.clientId === client.id).flatMap(a => {
-    const dates = (a.data?.schedule || []).map(s => s.date).filter(Boolean).sort()
-    if (!dates.length) return []
-    const start = [a.data.start || dates[0], dates[0]].sort()[0]
-    const weeks = Number(a.data.weeks)
-    const nominalEnd = Number.isInteger(weeks) && weeks > 0 ? addDays(a.data.start || start, weeks * 7 - 1) : dates.at(-1)
-    const end = [nominalEnd, dates.at(-1)].sort().at(-1)
+    const period = programPeriod(a)
+    if (!period) return []
+    const { start, end, weeks } = period
     if (end < today) return []
     const upcoming = start > today
     const week = upcoming ? null : Math.floor(daysBetween(start, today) / 7) + 1

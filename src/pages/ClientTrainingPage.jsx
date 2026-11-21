@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
+import Icon from '../components/atoms/Icon'
 import SegToggle from '../components/molecules/SegToggle'
 import ClientWorkoutFlow from '../components/organisms/ClientWorkoutFlow'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
@@ -8,11 +9,12 @@ import TrainingDayPanel from '../components/organisms/TrainingDayPanel'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
-import { todayISO, fmtDate } from '../lib/dates'
+import { todayISO, fmtDate, fmtDateRange } from '../lib/dates'
 import { trainingDay } from '../lib/trainingDay'
 import { bookingWorkout, canRunBookingWorkout, trainingBookings } from '../lib/schedule'
 import { blankWorkout, buildFromPlan, buildFromPrescription } from '../lib/workout'
 import { resolveTrainingMax } from '../lib/program'
+import { programPeriod } from '../lib/clientPrograms'
 
 const validDate = (value) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false
@@ -86,7 +88,15 @@ export default function ClientTrainingPage() {
   const legacyDay = trainingDay(db, id, selectedDate, today, { unlinkedOnly: true })
   const canRunBooking = booking && canRunBookingWorkout(booking, linkedWorkout, today)
   const starter = bookingDraft?.bookingId === booking?.id ? bookingDraft : null
-  const assignedPrograms = (db.programAssignments || []).filter(a => a.clientId === id).sort((a,b) => b.data.start.localeCompare(a.data.start))
+  const assignedPrograms = (db.programAssignments || []).filter(a => a.clientId === id).map(assignment => {
+    const period = programPeriod(assignment)
+    const status = !period ? 'Dates unavailable' : today < period.start ? 'Upcoming' : today > period.end ? 'Past' : 'Current'
+    return { ...assignment, period, status }
+  }).sort((a, b) => {
+    const rank = { Current: 0, Upcoming: 1, Past: 2, 'Dates unavailable': 3 }
+    return rank[a.status] - rank[b.status] || (a.status === 'Upcoming' ? a.period.start.localeCompare(b.period.start)
+      : (b.period?.start || b.data?.start || '').localeCompare(a.period?.start || a.data?.start || ''))
+  })
   const selectedProgram = assignedPrograms.find(a => a.id === selectedProgramId) || assignedPrograms[0]
   const plan = db.plans.find((item) => item.id === client.planId)
   const workouts = (db.workouts || []).filter((item) => item.clientId === id && ['completed', 'discarded'].includes(item.status)).sort((a, b) => b.date.localeCompare(a.date))
@@ -119,20 +129,27 @@ export default function ClientTrainingPage() {
     <div className="topbar training-topbar"><h1>Training</h1><Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button></div>
     <section className="card training-program" aria-labelledby="training-program-title">
       <div className="training-program-head"><div className="training-program-copy">
-        <span className="overview-eyebrow">Programs</span><h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
+        <h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
       </div><Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link></div>
       {assignedPrograms.length > 0 && <>
         <div className="training-program-list"><div className="training-program-assignment">
           <div className="training-program-copy">
-            <label className="training-program-copy-label" htmlFor="training-client-program">Client copy · {assignedPrograms.length} program{assignedPrograms.length === 1 ? '' : 's'}</label>
-            <select id="training-client-program" aria-label="Client program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
-              {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {fmtDate(a.data.start)}</option>)}
-            </select>
-            <small>Starts {fmtDate(selectedProgram.data.start)} · {selectedProgram.data.weeks} week{selectedProgram.data.weeks === 1 ? '' : 's'}</small>
+            {assignedPrograms.length > 1 ? <>
+              <label className="training-program-copy-label" htmlFor="training-client-program">Client program</label>
+              <span className="orbit-select-wrap">
+                <select id="training-client-program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
+                  {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {a.status}{a.period ? ` · ${fmtDate(a.period.start)}` : ''}</option>)}
+                </select>
+                <Icon name="chevron-down" size={14} aria-hidden="true" />
+              </span>
+            </> : <strong>{selectedProgram.name}</strong>}
+            <div className="training-program-meta"><span className="training-program-status" data-status={selectedProgram.status}>{selectedProgram.status}</span>
+              {selectedProgram.period && <small>{fmtDateRange(selectedProgram.period.start, selectedProgram.period.end)}</small>}
+            </div>
           </div>
           <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>
         </div></div>
-        <p className="training-program-note">Edits apply to this client only. The library template stays unchanged.</p>
+        <p className="training-program-note">Program edits apply to this client’s copy.</p>
       </>}
     </section>
       <div id="selected-workout" className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>

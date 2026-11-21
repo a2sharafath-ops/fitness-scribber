@@ -22,6 +22,7 @@
   --orbit-shadow: 0 15px 54px #30203118;
   --orbit-bg-tint: #faeef4bd;
   --orbit-focus: #b7162b;
+  --orbit-selected: #f8e3e9;
   color-scheme: light;
 }
 
@@ -50,6 +51,7 @@
   --orbit-shadow: 0 18px 52px #08060c66;
   --orbit-bg-tint: #241b27c9;
   --orbit-focus: #ffabb8;
+  --orbit-selected: #48232e;
   color-scheme: dark;
 }
 
@@ -219,11 +221,10 @@ body:has(.orbit-shell) {
   .orbit-shell::before, .orbit-drawer { display: none; }
 }
 
-[data-orbit-theme] .client-tabs {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-}
-[data-orbit-theme] .client-tabs .tab.active { background: var(--surface); color: var(--accent); }
+[data-orbit-theme] .client-tabs .tab.active { background: var(--orbit-selected); color: var(--accent); }
+.orbit-select-wrap { position: relative; display: inline-flex; min-width: 0; }
+.orbit-select-wrap select { appearance: none; padding-inline-end: 32px; }
+.orbit-select-wrap > svg { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
 .client-workspace:has(> #workout-log) > :is(.client-workspace-header, .client-save-status, .client-subnav) { display: none; }
 .orbit-shell:has(#workout-log) .orbit-toolbar { margin-bottom: 14px; }
 

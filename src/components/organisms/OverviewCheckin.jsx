@@ -4,10 +4,14 @@ import ModalShell from '../molecules/ModalShell'
 import { WellnessForm } from './forms/LogForms'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
-import { fmtDate } from '../../lib/dates'
+import { daysBetween, fmtDate } from '../../lib/dates'
 import { wellnessBaseline, MIN_WELLNESS_BASELINE_DAYS, WELLNESS_BASELINE_DAYS } from '../../lib/wellnessBaseline'
 
 const scoreLabel = (z) => z === null ? '—' : Math.abs(z) < 0.05 ? '0.0' : `${z > 0 ? '+' : ''}${z.toFixed(1)}`
+const recordedWhen = (date, today) => {
+  const age = daysBetween(date, today)
+  return age === 0 ? 'Today' : `${fmtDate(date)} · ${age === 1 ? '1 day' : `${age} days`} ago`
+}
 
 function BaselineExplanation({ baseline }) {
   const { closeModal } = useModal()
@@ -28,11 +32,12 @@ export default function OverviewCheckin({ clientId, today }) {
   const { latest, metrics } = baseline
   const todaysEntry = latest?.date === today ? latest : null
   const counts = metrics.map((metric) => metric.count)
+  const hasComparison = metrics.some((metric) => metric.z !== null)
   const lowCount = Math.min(...counts), highCount = Math.max(...counts)
   const missing = metrics.some((metric) => metric.reason === 'missing-rating')
   const noVariation = metrics.some((metric) => metric.reason === 'no-variation')
   const caption = !latest ? 'No check-ins yet. Record your first check-in.'
-    : lowCount < MIN_WELLNESS_BASELINE_DAYS ? `${lowCount} earlier daily ratings · ${MIN_WELLNESS_BASELINE_DAYS - lowCount} more complete check-ins needed.`
+    : lowCount < MIN_WELLNESS_BASELINE_DAYS ? `${MIN_WELLNESS_BASELINE_DAYS - lowCount} more complete check-in${MIN_WELLNESS_BASELINE_DAYS - lowCount === 1 ? '' : 's'} needed for a full baseline comparison.`
       : missing ? 'Some latest ratings are missing. Available ratings are compared below.'
         : noVariation ? 'Some baseline ratings have no variation; those scores are unavailable.'
           : `${lowCount === highCount ? lowCount : `${lowCount}–${highCount}`} earlier daily ratings · Latest date excluded`
@@ -42,10 +47,18 @@ export default function OverviewCheckin({ clientId, today }) {
       <Button size="sm" variant={todaysEntry ? 'ghost' : 'primary'} onClick={() => openModal(<WellnessForm clientId={clientId} entry={todaysEntry || undefined} />)}>{todaysEntry ? 'Edit today’s check-in' : 'Record check-in'}</Button>
       <Link className="btn ghost sm" to={`/clients/${clientId}/check-ins`}>View check-ins →</Link>
     </div></div>
-    <p className="overview-source">{latest ? `${latest.date === today ? 'Today' : fmtDate(latest.date)} · ${latest.source || 'Source not recorded'}` : 'No data recorded'}</p>
-    <div className="overview-baseline-layout"><div className="overview-baseline-chart">
-      <div className="overview-chart-head"><h3>Baseline change · Z-score</h3><button type="button" className="overview-info" aria-label="How baseline Z-scores work" onClick={() => openModal(<BaselineExplanation baseline={baseline} />)}>i</button></div>
-      <p className="overview-chart-caption">{caption}</p>
+    {latest && <p className="overview-source">Last check-in · {recordedWhen(latest.date, today)} · {latest.source || 'Source not recorded'}</p>}
+    <div className={`overview-baseline-layout${hasComparison ? '' : ' no-chart'}`}>
+      {latest && <div className="overview-latest-ratings"><div className="overview-eyebrow">Latest ratings</div>{metrics.map((metric) =>
+        <div className="overview-rating" key={metric.key}><span>{metric.label}</span><strong>{metric.value ?? '—'}{metric.value !== null && <small> /7</small>}</strong></div>)}
+      </div>}
+      <div className="overview-baseline-chart">
+      <div className="overview-chart-head"><h3>{hasComparison ? 'Baseline change · Z-score' : latest ? 'Baseline comparison unavailable' : 'No check-ins yet'}</h3>
+        {latest && <button type="button" className="overview-info" aria-label="How baseline Z-scores work" onClick={() => openModal(<BaselineExplanation baseline={baseline} />)}>i</button>}
+      </div>
+      <p className="overview-chart-caption">{latest && !hasComparison && lowCount >= MIN_WELLNESS_BASELINE_DAYS
+        ? 'A comparison needs a latest rating and enough variation in earlier ratings.' : latest ? caption : 'Record a check-in to see the latest ratings here.'}</p>
+      {hasComparison && <>
       <div className="overview-chart-direction"><span>← Less favourable</span><span>More favourable →</span></div>
       <div role="group" aria-label="Wellness change in standard deviations from personal baseline">{metrics.map((metric) => {
         const { z, band } = metric
@@ -57,7 +70,8 @@ export default function OverviewCheckin({ clientId, today }) {
       })}</div>
       <div className="overview-z-axis" aria-hidden="true">{['−3', '−2', '−1', '0', '+1', '+2', '+3'].map((number) => <span key={number}>{number}</span>)}</div>
       <p className="overview-z-legend"><span className="unfavourable">Below −1</span><span className="near-baseline">Within ±1 SD</span><span className="favourable">Above +1</span></p>
-    </div><div className="overview-latest-ratings"><div className="overview-eyebrow">Latest ratings</div>{metrics.map((metric) => <div className="overview-rating" key={metric.key}><span>{metric.label}</span><strong>{metric.value ?? '—'}{metric.value !== null && <small> /7</small>}</strong></div>)}</div></div>
-    {wearable && <div className="overview-device"><strong>Wearable</strong><span>{fmtDate(wearable.date)} · {wearable.source || 'Source not recorded'} · HRV {wearable.hrv ?? '—'} ms · Resting HR {wearable.rhr ?? '—'} bpm</span></div>}
+      </>}
+    </div></div>
+    {wearable && <div className="overview-device"><strong>Last wearable reading</strong><span>{recordedWhen(wearable.date, today)} · {wearable.source || 'Source not recorded'} · HRV {wearable.hrv ?? '—'} ms · Resting HR {wearable.rhr ?? '—'} bpm</span></div>}
   </section>
 }

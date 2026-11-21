@@ -3,17 +3,18 @@ import { clientPrograms } from './clientPrograms'
 import { isTrainingDerivedAssessment } from './assessment'
 export { clientPrograms as rosterPrograms } from './clientPrograms'
 import { bookedCompletion, clientReviewItems, dashboardClientPath } from './dashboard'
+import { workoutReviewPath } from './schedule'
 
 export const ROSTER_PAGE_SIZE = 8
 const byName = (a, b) => a.client.name.localeCompare(b.client.name)
 function latestRecord(db, clientId, today) {
   const records = []
   const add = (row, source, path, date = row.date) => {
-    if (date && date <= today) records.push({ date, source, path, createdAt: row.createdAt || '' })
+    if (date && date <= today) records.push({ date, source, path, createdAt: row.createdAt || row.endedAt || '' })
   }
   const mine = key => (db[key] || []).filter(r => r.clientId === clientId)
   // Same-day ties prefer completed workout evidence before its derived entries.
-  mine('workouts').filter(w => w.status === 'completed').forEach(w => add(w, 'Workout log', dashboardClientPath(clientId, `/training?date=${w.date}&workout=${encodeURIComponent(w.id)}`)))
+  mine('workouts').filter(w => w.status === 'completed').forEach(w => add(w, 'Workout log', workoutReviewPath(w)))
   mine('wellness').forEach(w => add(w, 'Wellness check-in', dashboardClientPath(clientId, '/check-ins?view=wellness')))
   mine('assessments').forEach(a => {
     if (isTrainingDerivedAssessment(a)) {
