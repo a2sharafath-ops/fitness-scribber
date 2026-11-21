@@ -41,9 +41,9 @@ export default function DashboardWeekly({ bookings, monday }) {
       <div className="orbit-weekly-tooltip" data-hovered={Boolean(hovered)} style={{ '--weekly-tooltip-x': `${activePosition}%` }} aria-hidden="true">
         <strong>{fmtDate(active.from)}</strong><span>{active.booked} booked · {active.completed} completed</span>
       </div>
+      </div>
       <div className="orbit-weekly-axis" data-count={count} aria-hidden="true">
         {weeks.map(week => <span className="orbit-weekly-date" key={week.from}>{fmtDate(week.from).split(',')[0]}</span>)}
-      </div>
       </div>
     </div>
     <p className="db-note" aria-live="polite"><strong>{fmtDateRange(active.from, active.through)}</strong> · {active.booked} booked · {active.completed} completed</p>
