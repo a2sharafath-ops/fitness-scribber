@@ -15,10 +15,10 @@ export default function StartupScreen({ label = 'Loading your workspace…', err
           <p>{error.message || 'Check your connection and try again.'}</p>
         </div>
         <Button onClick={onRetry}>Retry</Button>
-      </> : <p className="orbit-startup-status" role="status">
-        <span className="orbit-startup-spinner" aria-hidden="true" />
-        {label}
-      </p>}
+      </> : <div className="orbit-startup-status" role="status">
+        <p>{label}</p>
+        <span className="orbit-startup-track" aria-hidden="true" />
+      </div>}
     </div>
   </main>
 }
