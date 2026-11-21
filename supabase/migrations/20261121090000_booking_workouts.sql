@@ -1,6 +1,8 @@
 -- Existing workouts remain unlinked. No workout, plan or booking rows are updated.
 begin;
 set local lock_timeout = '5s';
+-- Follow the lock order used by save_schedule_booking during a live rollout.
+lock table public.sessions in share row exclusive mode;
 
 alter table public.workouts add column if not exists "bookingId" text
   references public.sessions(id) on delete no action;
