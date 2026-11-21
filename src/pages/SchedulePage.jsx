@@ -8,7 +8,7 @@ import ScheduleMoveReview from '../components/organisms/ScheduleMoveReview'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { addDays, addMonths, fmtDay, monthGridDates, monthLabel } from '../lib/dates'
-import { bookingPlan, bookingConflicts, calendarLanes, calendarTimeRange, clockTime, durationLabel, hasDuration, minute, scheduleClock, scheduleLock, scheduleRequest, scheduleSort, sessionEnd, sessionPath, trainingBooking, weekOf } from '../lib/schedule'
+import { bookingPlan, bookingConflicts, bookingWorkout, calendarLanes, calendarTimeRange, clockTime, durationLabel, hasDuration, minute, scheduleClock, scheduleLock, scheduleRequest, scheduleSort, sessionEnd, sessionPath, trainingBooking, weekOf } from '../lib/schedule'
 import { programStats } from '../lib/program'
 import './SchedulePage.css'
 
@@ -17,12 +17,14 @@ const Badge = ({ status }) => <span className={'schedule-badge ' + status}>{stat
 
 function BookingDetails({ session: s, onEdit, onOpen }) {
   const { db } = useData(), { closeModal } = useModal(), plan = bookingPlan(db, s)
+  const workout = trainingBooking(s) && bookingWorkout(db, s)
   const stats = plan ? programStats(plan) : null
   return <div className="schedule-dialog"><ModalShell title={db.clients.find(c => c.id === s.clientId)?.name || 'Client unavailable'} onClose={closeModal}
     footer={<><Button variant="ghost" onClick={onEdit}>Booking details</Button><Button onClick={onOpen}>{trainingBooking(s) ? 'Open training session' : s.type === 'Assessment' ? 'Open assessments' : s.type === 'Check-in' ? 'Open check-ins' : 'Open client'}</Button></>}>
     <div className="schedule-detail-time"><span className="schedule-eyebrow">{fmtDay(s.date)}</span><strong>{s.time}–{sessionEnd(s)}</strong><span>{durationLabel(s)} · {s.type}</span><Badge status={s.status} /></div>
-    {plan && <div className="schedule-preserved"><strong>{plan.name || 'Prescribed workout'}</strong><p>{stats.exercises} exercises · {stats.sets} prescribed sets</p></div>}
-    {trainingBooking(s) && !plan && <p className="muted">Open Training to review or prescribe this day’s workout.</p>}
+    {workout && <div className="schedule-preserved"><strong>{workout.title || 'Workout'}</strong><p>Workout for the {s.time} booking</p></div>}
+    {!workout && plan && <div className="schedule-preserved"><strong>{plan.name || 'Prescribed workout'}</strong><p>{stats.exercises} exercises · {stats.sets} prescribed sets</p></div>}
+    {trainingBooking(s) && !plan && !workout && <p className="muted">Open Training to view the workout options for this booking.</p>}
   </ModalShell></div>
 }
 

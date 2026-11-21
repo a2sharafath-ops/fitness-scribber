@@ -20,9 +20,34 @@ export const scheduleSort = (a, b) => (a.date + a.time).localeCompare(b.date + b
 export const weekOf = date => addDays(date, -((new Date(date + 'T12:00:00Z').getUTCDay() + 6) % 7))
 export const activeBooking = s => s.status !== 'Cancelled'
 export const beforeNow = (s, clock) => s.date < clock.today || s.date === clock.today && s.time <= clock.time
-export const sessionPath = s => `/clients/${encodeURIComponent(s.clientId)}/${trainingBooking(s) ? 'training?date=' + s.date : s.type === 'Assessment' ? 'assessments' : s.type === 'Check-in' ? 'check-ins?view=wellness' : ''}`
+export const sessionPath = s => `/clients/${encodeURIComponent(s.clientId)}/${trainingBooking(s) ? `training?date=${s.date}&booking=${encodeURIComponent(s.id)}#training-bookings` : s.type === 'Assessment' ? 'assessments' : s.type === 'Check-in' ? 'check-ins?view=wellness' : ''}`
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 const at = (rows, s) => (rows || []).filter(p => p.clientId === s.clientId && p.date === s.date)
+
+export function trainingBookings(db, clientId, date) {
+  return at(db.sessions, { clientId, date }).filter(trainingBooking).sort(scheduleSort)
+}
+
+export function bookingWorkout(db, booking) {
+  return (db.workouts || []).find(row => row.bookingId === booking.id && row.clientId === booking.clientId && row.date === booking.date) || null
+}
+
+export function canRunBookingWorkout(booking, workout, today) {
+  if (['completed', 'discarded'].includes(workout?.status)) return false
+  return workout?.status === 'in_progress' || (booking.date === today && ['Pending', 'Confirmed'].includes(booking.status))
+}
+
+export function bookingWorkoutAction(db, booking, today) {
+  const workout = bookingWorkout(db, booking)
+  const path = sessionPath(booking).split('#')[0]
+  if (['completed', 'discarded'].includes(workout?.status)) {
+    return { path: `${path}&workout=${encodeURIComponent(workout.id)}#selected-workout`, label: 'Review workout' }
+  }
+  if (canRunBookingWorkout(booking, workout, today)) {
+    return { path: path + '&run=1#workout-log', label: workout ? 'Resume workout' : 'Start workout' }
+  }
+  return null
+}
 
 // Legacy bookings have no prescription foreign key. Link only a unique training
 // appointment to the unique client/day prescription; never guess among duplicates.
@@ -36,7 +61,7 @@ export function bookingPlan(db, s) {
 export function scheduleLock(db, s, clock = scheduleClock(new Date(), db.settings?.tz)) {
   if (!['Pending', 'Confirmed'].includes(s.status)) return 'Only pending or confirmed bookings can be moved.'
   if (beforeNow(s, clock)) return 'This session has already started or is in the past. Update its booking status instead.'
-  if (trainingBooking(s) && at(db.workouts, s).length) return 'A workout record exists for this day. Keep its booking in place and open Training to review it.'
+  if (trainingBooking(s) && at(db.workouts, s).some(row => !row.bookingId || row.bookingId === s.id)) return 'A workout record is linked to this booking or its original day. Open Training to review it.'
   return ''
 }
 
@@ -71,14 +96,13 @@ export function bookingConflicts(db, original, next, clock = scheduleClock(new D
     for (const s of db.sessions.filter(s => s.id !== original?.id && activeBooking(s) && s.date === next.date)) {
       if (minute(next.time) < minute(s.time) + Number(s.dur) && minute(s.time) < minute(next.time) + next.dur)
         add('Coach time already occupied', `${db.clients.find(c => c.id === s.clientId)?.name || 'Client'} · ${s.time}–${sessionEnd(s)}. Choose another time or shorten the session.`, s)
-      else if (trainingBooking(next) && trainingBooking(s) && s.clientId === next.clientId)
-        add('Client already has a training booking', `${fmtDay(s.date)} at ${s.time}. Open that session, or choose another day.`, s)
     }
-    if (trainingBooking(next) && at(db.workouts, next).length && (!original || original.date !== next.date)) add('Workout already recorded', 'Choose another day; this day has a workout record.', next)
-    if (trainingBooking(next) && (!original || original.date !== next.date) && at(db.sessions, next).some(s => s.id !== original?.id && s.status === 'Completed')) add('Day already completed', 'This client has a completed appointment on that day. Choose another day or review its recorded status.', next)
     if (original && original.date !== next.date && trainingBooking(original)) {
-      if (at(db.prescriptions, original).length && !bookingPlan(db, original)) add('Workout link is ambiguous', 'More than one training booking or prescription exists on the original day. Review them before moving this session.', original)
-      if (at(db.prescriptions, next).length || (db.programAssignments || []).some(a => a.clientId === next.clientId && a.data?.schedule?.some(p => p.date === next.date)))
+      const movingPlan = bookingPlan(db, original)
+      if (at(db.prescriptions, original).length && !movingPlan) add('Workout link is ambiguous', 'More than one training booking or prescription exists on the original day. Review them before moving this session.', original)
+      if (movingPlan && at(db.workouts, next).length) add('Workout already recorded', 'The existing prescription cannot move onto a day with workout records.', next)
+      if (movingPlan && at(db.sessions, next).some(s => s.status === 'Completed')) add('Day already completed', 'The existing prescription cannot move onto a day with a completed appointment.', next)
+      if (movingPlan && (at(db.prescriptions, next).length || (db.programAssignments || []).some(a => a.clientId === next.clientId && a.data?.schedule?.some(p => p.date === next.date))))
         add('Day already prescribed', `${fmtDay(next.date)} has a workout for this client. Open it, or choose an unprescribed day.`, next)
     }
   }

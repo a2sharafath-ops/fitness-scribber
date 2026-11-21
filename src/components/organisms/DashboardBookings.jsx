@@ -2,17 +2,12 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../atoms/Icon'
 import Avatar from '../atoms/Avatar'
-import { bookingPlan, durationLabel, sessionPath, trainingBooking } from '../../lib/schedule'
-import { trainingDay } from '../../lib/trainingDay'
+import { bookingPlan, bookingWorkout, bookingWorkoutAction, durationLabel, sessionPath, trainingBooking } from '../../lib/schedule'
 
 function bookingDestination(db, booking, today) {
   const path = sessionPath(booking)
   if (!trainingBooking(booking)) return { path, label: 'Open booking' }
-  const day = trainingDay(db, booking.clientId, booking.date, today)
-  if (day.canRun && bookingPlan(db, booking)) {
-    return { path: path + '&run=1#workout-log', label: day.pending?.status === 'in_progress' ? 'Resume workout' : 'Start workout' }
-  }
-  return { path, label: day.completed.length ? 'Review workout' : 'Open training' }
+  return bookingWorkoutAction(db, booking, today) || { path, label: 'Open training' }
 }
 
 export default function DashboardBookings({ db, bookings, roster, next, today, onDetails, onPlan }) {
@@ -24,6 +19,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
   const shift = (direction) => setSelectedId(upcoming[(index + direction + upcoming.length) % upcoming.length]?.id)
   const destination = booking && bookingDestination(db, booking, today)
   const plan = booking && bookingPlan(db, booking)
+  const workout = booking && bookingWorkout(db, booking)
   const startSwipe = (event) => {
     if (event.pointerType === 'mouse' || event.target.closest('button, a')) return
     gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
@@ -50,7 +46,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
           onPointerUp={endSwipe} onPointerCancel={() => { gesture.current = null }}>
           <article className="orbit-booking-feature" key={booking.id} aria-live="polite">
             <p className="orbit-booking-time">{booking.time || 'Time not set'}{booking.dur ? ' · ' + durationLabel(booking) : ''}</p>
-            <div><h3>{plan?.name || booking.type || 'Training session'}</h3><p>{roster.get(booking.clientId)?.name}</p></div>
+            <div><h3>{workout?.title || plan?.name || booking.type || 'Training session'}</h3><p>{roster.get(booking.clientId)?.name}</p></div>
             <div className="orbit-booking-actions"><Avatar name={roster.get(booking.clientId)?.name || 'Client'} /><Link className="btn" to={destination.path}>{destination.label}</Link></div>
           </article>
         </div>

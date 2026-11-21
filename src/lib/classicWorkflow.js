@@ -20,7 +20,7 @@ export function completeClassicWorkout(draft, clientId, workout, rpe, minutes) {
   if (rpe != null) {
     const duration = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
     draft.srpe = [...draft.srpe, {
-      id: uid(), clientId, date: workout.date, sessionId: null,
+      id: uid(), clientId, date: workout.date, sessionId: workout.bookingId ?? null,
       rpe, duration, tl: calcSRPETL(rpe, duration), source: 'Workout completion',
     }]
   }

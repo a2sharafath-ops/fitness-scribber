@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 const vite = await createServer({server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'})
 after(()=>vite.close())
 const load = p=>vite.ssrLoadModule('/src/'+p)
-const { bookingConflicts, bookingPlan, scheduleRequest, applyScheduleRequest, freeScheduleSlots, calendarLanes, calendarTimeRange, sessionPath, scheduleClock }=await load('lib/schedule.js')
+const { bookingConflicts, bookingPlan, bookingWorkout, bookingWorkoutAction, scheduleRequest, applyScheduleRequest, freeScheduleSlots, calendarLanes, calendarTimeRange, sessionPath, scheduleClock }=await load('lib/schedule.js')
 const { saveScheduleRemote }=await load('api/sync.js')
 const { seedBuilderQA }=await load('lib/builderQA.js')
 const clock={today:'2026-10-11',time:'12:00'}
@@ -86,6 +86,23 @@ test('coach overlaps include other clients; touching times and cancelled booking
   assert.equal(bookingConflicts(db,db.sessions[0],{...candidate(db),time:'10:00'},clock).length,0)
   db.sessions[1].status='Cancelled';assert.equal(bookingConflicts(db,db.sessions[0],candidate(db),clock).length,0)
 })
+test('same-day training bookings retain independent workout identities', () => {
+  const db = fixture(), first = db.sessions[0]
+  const second = { ...first, id: 'second', time: '10:00' }
+  const before = structuredClone(db.prescriptions)
+  db.workouts = [{ id: 'first-workout', bookingId: first.id, clientId: first.clientId, date: first.date, status: 'completed' }]
+  db.sessions[0].status = 'Completed'
+  applyScheduleRequest(db, scheduleRequest(db, null, second), clock)
+  assert.deepEqual(db.prescriptions, before)
+  assert.deepEqual(bookingWorkout(db, first), db.workouts[0])
+  assert.equal(bookingWorkout(db, second), null)
+  assert.equal(bookingWorkoutAction(db, first, first.date).label, 'Review workout')
+  assert.equal(bookingWorkoutAction(db, second, second.date).label, 'Start workout')
+  assert.equal(bookingWorkoutAction(db, { ...second, status: 'Cancelled' }, second.date), null)
+  assert.match(bookingWorkoutAction(db, second, second.date).path, /booking=second&run=1/)
+  assert.ok(bookingConflicts(db, null, { ...second, id: 'third', time: '10:30' }, clock)
+    .some(issue => issue.title === 'Coach time already occupied'))
+})
 test('completed, past and started workout sources cannot be moved or deleted; status update remains available',()=>{
   for(const mode of ['complete','past','workout']){
     const db=fixture(),s=db.sessions[0]
@@ -139,7 +156,7 @@ test('lane layout separates chained overlaps and reuses lane after a group ends'
   assert.deepEqual(layout.map(r=>[r.session.id,r.lane,r.lanes]),[['a',0,2],['b',1,2],['c',0,2],['d',0,1]])
 })
 test('routes select the actual client/date and appointment purpose',()=>{
-  const s=fixture().sessions[0];assert.equal(sessionPath(s),'/clients/local-builder-100/training?date=2026-10-12')
+  const s=fixture().sessions[0];assert.equal(sessionPath(s),'/clients/local-builder-100/training?date=2026-10-12&booking=s#training-bookings')
   assert.ok(sessionPath({...s,type:'Assessment'}).endsWith('/assessments'))
   assert.ok(sessionPath({...s,type:'Check-in'}).endsWith('/check-ins?view=wellness'))
   assert.equal(scheduleClock(new Date('2026-10-11T22:00Z'),'Asia/Dubai').today,'2026-10-12')
