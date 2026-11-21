@@ -431,25 +431,26 @@
 .orbit-weekly-legend span:first-child::before { background: var(--orbit-red); }
 .orbit-weekly-legend span:last-child::before { background: var(--muted); }
 .orbit-weekly-plot { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 7px; }
-.orbit-weekly-scale { display: flex; flex-direction: column; justify-content: space-between; padding: 11px 0 21px; color: var(--muted); font-size: 10px; }
+.orbit-weekly-scale { display: flex; flex-direction: column; justify-content: space-between; padding: 8px 0 4px; color: var(--muted); font-size: 10px; }
 .orbit-weekly-bars {
   background: linear-gradient(var(--border), var(--border)) 0 13px / 100% 1px no-repeat,
-    linear-gradient(var(--border), var(--border)) 0 calc(100% - 20px) / 100% 1px no-repeat;
+    linear-gradient(var(--border), var(--border)) 0 calc(100% - 4px) / 100% 1px no-repeat;
 }
-.orbit-weekly-bars button { grid-template-rows: 70px 15px; transition: background-color .16s, border-color .16s; }
-.orbit-weekly-bars button > .orbit-weekly-date { text-overflow: clip; }
+.orbit-weekly-bars button { height: 88px; grid-template-rows: 70px; transition: background-color .16s, border-color .16s; }
+.orbit-weekly-axis {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+  color: var(--muted);
+  text-align: center;
+  font-size: 10px;
+}
 .orbit-weekly-pair i { transform-origin: bottom; animation: orbit-bar-in .43s ease-out both; animation-delay: var(--week-delay); }
 .orbit-weekly-pair i:first-child { background: linear-gradient(var(--orbit-red), var(--tint-red)); }
 .orbit-weekly-pair i:last-child { background: linear-gradient(var(--muted), var(--border)); }
 @container (max-width: 395px) {
-  .orbit-weekly-bars[data-count="8"] button > .orbit-weekly-date { visibility: hidden; }
-  .orbit-weekly-bars[data-count="8"] button:nth-child(odd) > .orbit-weekly-date {
-    visibility: visible;
-    width: calc(200% + 4px);
-    text-align: center;
-    overflow: visible;
-  }
-  .orbit-weekly-bars[data-count="8"] button:nth-child(odd) { overflow: visible; }
+  .orbit-weekly-axis[data-count="8"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .orbit-weekly-axis[data-count="8"] .orbit-weekly-date:nth-child(even) { display: none; }
 }
 
 .orbit-insight-content { animation: orbit-booking-in .28s ease-out; }
