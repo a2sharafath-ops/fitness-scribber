@@ -26,7 +26,7 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // intercepts the Start press so the parent can run a pre-flight (check-in popup).
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
-export default function TodayWorkout({ client, today, workout, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, preserveDraft = false, history = [], dayClosed = false, completedAppointment = false, focusedRunner = false }) {
+export default function TodayWorkout({ client, today, workout, bookingTime, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, preserveDraft = false, history = [], dayClosed = false, completedAppointment = false, focusedRunner = false }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -113,7 +113,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
         </div>
       </Shell>
     )
-    const runner = <LiveTrainingSession key={workout.id} workout={workout} units={units} clientName={client.name}
+    const runner = <LiveTrainingSession key={workout.id} workout={workout} units={units} clientName={client.name} bookingTime={bookingTime}
       exercises={exercises} history={history} locked={locked} resolveTm={resolveTm} onPersist={onSave}
       onExit={onExit} onComplete={onComplete} />
     return focusedRunner ? runner : <Shell extra={headerExtra} label={headerLabel}>{runner}</Shell>
@@ -143,7 +143,7 @@ export default function TodayWorkout({ client, today, workout, prescription, pla
         </div>
         <div className="flex gap">
           {!locked && !dayClosed && <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>Edit</Button>}
-          {!locked && !dayClosed && <Button variant="ghost" size="sm" onClick={onClear}>Change</Button>}
+          {!locked && !dayClosed && onClear && <Button variant="ghost" size="sm" onClick={onClear}>Change</Button>}
           {!dayClosed && <Button size="sm" onClick={start}>▶ Start</Button>}
         </div>
       </div>

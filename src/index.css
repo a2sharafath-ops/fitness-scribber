@@ -1247,6 +1247,16 @@ html:has(.progress-index){overflow-x:clip}
 .training-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .training-session,.training-planner,.training-history{margin-bottom:20px}
 .training-runner-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--muted)}
+.training-bookings{margin-bottom:20px;scroll-margin-top:16px}
+.training-bookings ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.training-bookings li{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2)}
+.training-bookings li[data-selected]{border-color:var(--accent)}
+.training-bookings small{display:block;color:var(--muted);margin-top:3px}
+.training-booking-setup{padding:clamp(16px,4vw,32px)}
+.training-booking-setup form{display:grid;gap:12px;max-width:400px;margin-top:16px}
+.training-booking-setup form label{display:grid;gap:4px;min-width:0}
+.training-booking-setup select{width:100%}
+.training-booking-setup form .btn{justify-self:start}
 .training-save-note{font-size:12px;font-weight:700;color:var(--accent);margin-top:10px}
 .training-history summary{cursor:pointer;font-weight:700}
 .training-history[open] summary{margin-bottom:16px}

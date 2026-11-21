@@ -121,7 +121,7 @@ export default function AthletePortal() {
 
   // Today's Workout — the session in progress (workouts) plus whatever the
   // coach prescribed for today in the planner (prescriptions), if anything.
-  const todayW = (state.workouts || []).find((w) => w.date === today) || null
+  const todayW = (state.workouts || []).find((w) => w.date === today && !w.bookingId) || null
   const todayP = (state.prescriptions || []).find((p) => p.date === today) || null
   const rScore = readinessScore({ wellness: state.wellness, wearable: state.wearable }, client.id, today)
   const acwr = acwrSeries(dailySum(state.srpe, client.id, 'tl'), lastNDates(28)).filter((v) => v != null).slice(-1)[0]

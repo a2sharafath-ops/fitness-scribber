@@ -56,7 +56,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
           {onDuration && <Button variant="ghost" size="sm" onClick={editDuration}>⏱ Edit duration</Button>}
           <Button variant="ghost" size="sm" onClick={share}>↗ Share</Button>
           {!locked && onTemplate && <Button variant="ghost" size="sm" onClick={template}>＋ Save as template</Button>}
-          {!locked && <Button variant="danger" size="sm" onClick={del}>🗑 Delete</Button>}
+          {!locked && onDelete && <Button variant="danger" size="sm" onClick={del}>🗑 Delete</Button>}
         </div>
       </div>
 

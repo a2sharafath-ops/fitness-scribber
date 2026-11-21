@@ -346,8 +346,11 @@ export function finishLiveSession(workout, now = Date.now()) {
   return next
 }
 export function previousLivePerformance(workouts, current, item) {
+  const recordedAt = (workout) => workout.endedAt || workout.startedAt || ''
   return (workouts || []).filter((workout) => workout.clientId === current.clientId && workout.id !== current.id &&
-    workout.status === 'completed' && workout.date <= current.date).sort((a, b) => b.date.localeCompare(a.date))
+    workout.status === 'completed' && (workout.date < current.date || workout.date === current.date &&
+      (!current.startedAt || recordedAt(workout) <= current.startedAt)))
+    .sort((a, b) => b.date.localeCompare(a.date) || recordedAt(b).localeCompare(recordedAt(a)))
     .map((workout) => ({ workout, items: sessionItems(workout).filter((entry) => entry.name.trim().toLowerCase() === item.name.trim().toLowerCase()) }))
     .map(({ workout, items }) => ({ date: workout.date, rows: items.flatMap((entry) => entry.setRows?.length ? entry.setRows.filter((row) => row.done) :
       entry.done ? ensureSetRows(entry).slice(0, entry.doneSets || entry.sets).map((row) => ({ ...row, done: true, reps: entry.doneReps, load: entry.doneWeight })) : []) }))

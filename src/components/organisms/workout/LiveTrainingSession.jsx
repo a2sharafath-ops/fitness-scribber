@@ -11,7 +11,7 @@ import { liveBlocks, liveExerciseUnits, liveClosed, liveElapsed, liveDockSet, lo
 import { secToClock } from '../../../lib/workout'
 import './LiveTrainingSession.css'
 
-export default function LiveTrainingSession({ workout, units: preferredUnits, clientName, exercises = [], history = [], locked, resolveTm, onPersist, onExit, onComplete }) {
+export default function LiveTrainingSession({ workout, units: preferredUnits, clientName, bookingTime, exercises = [], history = [], locked, resolveTm, onPersist, onExit, onComplete }) {
   const { user } = useAuth()
   const { session, change, flush, status, error, storageFailed, reloadSaved } = useLiveSession(workout, user?.id || 'local', resolveTm, onPersist)
   const [now, setNow] = useState(Date.now())
@@ -80,7 +80,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   return <div className="ls-session" ref={sessionRef}>
     <span className="ls-sticky-marker" ref={markerRef} aria-hidden="true" />
     <header className={'ls-header' + (compact ? ' is-compact' : '')} ref={headerRef}><div className="ls-header-main"><div className="ls-clock-line"><strong className="ls-clock" role="timer" aria-label="Workout elapsed time">{clock}</strong><span className="ls-status">{session.status === 'discarded' ? 'Discarded' : session.liveState.clock.paused ? 'Paused' : 'In progress'}</span></div>
-      <h1 title={session.title}>{session.title}</h1><p className="ls-client-label">{clientName || 'Training session'} · {session.date}</p></div>
+      <h1 title={session.title}>{session.title}</h1><p className="ls-client-label">{clientName || 'Training session'} · {session.date}{bookingTime && ` · ${bookingTime} booking`}</p></div>
       <div className="ls-header-tools"><div className="ls-tools"><div className="ls-tabs ls-unit-switch" aria-label="Weight units">{['kg', 'lb'].map((unit) => <button key={unit} type="button" aria-pressed={units === unit} onClick={() => readOnly ? setReviewUnits(unit) : act({ type: 'settings', settings: { units: unit } })}>{unit}</button>)}</div>
         {!readOnly && <div className="ls-workout-actions">
           <button type="button" className="ls-button ls-pause" onClick={() => act({ type: 'pause' })}

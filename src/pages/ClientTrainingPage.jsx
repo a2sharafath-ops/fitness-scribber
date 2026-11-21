@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
 import SegToggle from '../components/molecules/SegToggle'
@@ -10,6 +10,9 @@ import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { todayISO, fmtDate } from '../lib/dates'
 import { trainingDay } from '../lib/trainingDay'
+import { bookingWorkout, canRunBookingWorkout, trainingBookings } from '../lib/schedule'
+import { blankWorkout, buildFromPlan, buildFromPrescription } from '../lib/workout'
+import { resolveTrainingMax } from '../lib/program'
 
 const validDate = (value) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false
@@ -17,12 +20,47 @@ const validDate = (value) => {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
 }
 
+function BookingWorkoutSetup({ booking, client, db, prescription, onStart, onClose }) {
+  const [source, setSource] = useState(prescription ? 'prescription' : 'blank')
+  const [planId, setPlanId] = useState(db.plans[0]?.id || '')
+  const start = (event) => {
+    event.preventDefault()
+    const context = { clientId: client.id, date: booking.date,
+      resolveTm: name => resolveTrainingMax(db, client.id, name, booking.date).kg }
+    const template = db.plans.find(plan => plan.id === planId)
+    if (source === 'library' && !template) return
+    const workout = source === 'prescription' ? buildFromPrescription(prescription, context)
+      : source === 'library' ? buildFromPlan(template, db.exercises, context)
+      : { ...blankWorkout(context), warmup: [], main: [], cooldown: [] }
+    onStart({ ...workout, id: `booking:${booking.id}`, bookingId: booking.id })
+  }
+  return <section id="workout-log" className="card training-booking-setup" aria-labelledby="booking-workout-title">
+    <div className="training-runner-head"><span>{client.name} · {fmtDate(booking.date)} · {booking.time}</span>
+      <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+    </div>
+    <h2 id="booking-workout-title">Start workout</h2>
+    <p className="muted">Choose a starting plan for this booking. Any plan you copy stays intact.</p>
+    <form onSubmit={start}>
+      <label>Workout source<select value={source} onChange={event => setSource(event.target.value)}>
+        {prescription && <option value="prescription">Copy day’s plan · {prescription.name || 'Prescribed workout'}</option>}
+        {!!db.plans.length && <option value="library">Copy a library workout</option>}
+        <option value="blank">Start with an empty workout</option>
+      </select></label>
+      {source === 'library' && <label>Library workout<select value={planId} onChange={event => setPlanId(event.target.value)}>
+        {db.plans.map(plan => <option key={plan.id} value={plan.id}>{plan.name}</option>)}
+      </select></label>}
+      <Button type="submit">Start workout</Button>
+    </form>
+  </section>
+}
+
 export default function ClientTrainingPage() {
   const { id } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const { db, tz } = useData()
   const { openModal } = useModal()
-  const [logging, setLogging] = useState(false)
+  const [loggingKey, setLoggingKey] = useState(null)
+  const [bookingDraft, setBookingDraft] = useState(null)
   const [historyType, setHistoryType] = useState('workouts')
   const [historyRequest, setHistoryRequest] = useState(0)
   const [selectedProgramId, setSelectedProgramId] = useState('')
@@ -32,30 +70,49 @@ export default function ClientTrainingPage() {
     heading?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     heading?.focus({ preventScroll: true })
   }, [historyRequest, searchParams])
-  const client = db.clients.find((item) => item.id === id)
-  if (!client) return null
   const today = todayISO(tz)
   const requestedDate = searchParams.get('date')
   const selectedDate = validDate(requestedDate) ? requestedDate : today
+  const requestedBooking = searchParams.get('booking')
+  const runnerKey = JSON.stringify([id, selectedDate, requestedBooking])
+  const logging = loggingKey === runnerKey
+  const changeLogging = useCallback((open) => setLoggingKey(open ? runnerKey : null), [runnerKey])
+  const client = db.clients.find((item) => item.id === id)
+  if (!client) return null
+  const bookings = trainingBookings(db, id, selectedDate)
+  const booking = bookings.find(row => row.id === requestedBooking)
+  const linkedWorkout = booking && bookingWorkout(db, booking)
+  const wantsRunner = searchParams.get('run') === '1'
+  const legacyDay = trainingDay(db, id, selectedDate, today, { unlinkedOnly: true })
+  const canRunBooking = booking && canRunBookingWorkout(booking, linkedWorkout, today)
+  const starter = bookingDraft?.bookingId === booking?.id ? bookingDraft : null
   const assignedPrograms = (db.programAssignments || []).filter(a => a.clientId === id).sort((a,b) => b.data.start.localeCompare(a.data.start))
   const selectedProgram = assignedPrograms.find(a => a.id === selectedProgramId) || assignedPrograms[0]
   const plan = db.plans.find((item) => item.id === client.planId)
   const workouts = (db.workouts || []).filter((item) => item.clientId === id && ['completed', 'discarded'].includes(item.status)).sort((a, b) => b.date.localeCompare(a.date))
   const appointments = db.sessions.filter((item) => item.clientId === id && String(item.status).toLowerCase() === 'completed').sort((a, b) => b.date.localeCompare(a.date))
-  const showRunner = searchParams.get('run') === '1' && (logging || trainingDay(db, id, selectedDate, today).canRun)
-  const selectDate = (date) => { setLogging(false); setHistoryRequest(0); setSearchParams({ date }) }
-  const closeRunner = () => { setLogging(false); setSearchParams({ date: selectedDate }) }
+  const showRunner = wantsRunner && (logging || (requestedBooking ? canRunBooking && (linkedWorkout || starter) : legacyDay.canRun))
+  const selectDate = (date) => { setLoggingKey(null); setBookingDraft(null); setHistoryRequest(0); setSearchParams({ date }) }
+  const closeRunner = () => {
+    setLoggingKey(null)
+    setBookingDraft(null)
+    setSearchParams({ date: selectedDate, ...(booking ? { booking: booking.id } : {}) })
+  }
   const reviewHistory = (workout) => {
-    setLogging(false)
-    setSearchParams({ date: workout.date, workout: workout.id })
+    setLoggingKey(null)
+    setBookingDraft(null)
+    setSearchParams({ date: workout.date, workout: workout.id, ...(workout.bookingId ? { booking: workout.bookingId } : {}) })
     setHistoryRequest((count) => count + 1)
   }
 
+  if (wantsRunner && canRunBooking && !linkedWorkout && !starter) return <BookingWorkoutSetup key={booking.id}
+    booking={booking} client={client} db={db} prescription={legacyDay.prescription} onStart={setBookingDraft} onClose={closeRunner} />
+
   if (showRunner) return <section id="workout-log" className="training-session" aria-label={`Workout logging for ${fmtDate(selectedDate)}`}>
     {!logging && <div className="training-runner-head">
-      <span>{client.name} · Training</span><Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>
+      <span>{client.name} · {booking ? `Booking at ${booking.time}` : 'Training'}</span><Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>
     </div>}
-    <ClientWorkoutFlow key={`${id}:${selectedDate}`} client={client} date={selectedDate} startOnOpen onRunStateChange={setLogging} onSessionComplete={closeRunner} />
+    <ClientWorkoutFlow key={runnerKey} client={client} date={selectedDate} booking={booking} starter={starter} startOnOpen onRunStateChange={changeLogging} onSessionComplete={closeRunner} />
   </section>
 
   return <>
@@ -79,13 +136,16 @@ export default function ClientTrainingPage() {
       </>}
     </section>
       <div id="selected-workout" className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>
-        <TrainingDayPanel key={`${id}:${selectedDate}:${searchParams.get('workout') || ''}`} client={client} date={selectedDate} today={today} selectedWorkoutId={searchParams.get('workout')} onSelectDate={selectDate} />
+        <TrainingDayPanel key={JSON.stringify([runnerKey, searchParams.get('workout')])} client={client} date={selectedDate} today={today}
+          bookings={bookings} selectedBooking={booking} selectedWorkoutId={searchParams.get('workout')} onSelectDate={selectDate} />
       </WorkoutPlanner></div>
       <details className="card training-history" open={searchParams.get('history') === 'workouts' || undefined}><summary id="training-history-title">Session history</summary>
         <SegToggle options={[[ 'workouts', `Workout logs (${workouts.length})` ], [ 'appointments', `Appointments (${appointments.length})` ]]} value={historyType} onChange={setHistoryType} ariaLabel="History type" />
         <div className="training-history-list" role="region" aria-label="Session history entries" tabIndex={0}>
           {historyType === 'workouts' ? workouts.length ? workouts.map((item) => <button key={item.id} className="training-history-row" onClick={() => reviewHistory(item)}>
-            <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review day →</span>
+            <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.bookingId
+              ? db.sessions.find(row => row.id === item.bookingId)?.time || 'Booked workout'
+              : 'Unlinked'} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review workout →</span>
           </button>) : <p className="muted">No completed workout logs yet.</p>
             : appointments.length ? appointments.map((item) => <div key={item.id} className="training-history-row static">
               <span><strong>{item.type || 'Appointment'}</strong><small>{fmtDate(item.date)} · {item.time || 'Time not set'} · {item.dur || '—'} min</small></span><span>Completed</span>

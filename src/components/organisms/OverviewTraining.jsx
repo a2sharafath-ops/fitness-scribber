@@ -3,10 +3,12 @@ import { useData } from '../../store/DataContext'
 import { fmtDate, fmtDay, weekDates } from '../../lib/dates'
 import { programStats } from '../../lib/program'
 import { isSession, isClosedTrainingDay } from '../../lib/planner'
+import { activeBooking, trainingBookings } from '../../lib/schedule'
 
 export default function OverviewTraining({ clientId, today }) {
   const { db, tz } = useData()
-  const workout = (db.workouts || []).find((row) => row.clientId === clientId && row.date === today)
+  const bookings = trainingBookings(db, clientId, today).filter(activeBooking)
+  const workout = !bookings.length && (db.workouts || []).find((row) => row.clientId === clientId && row.date === today)
   const prescription = db.prescriptions.find((row) => row.clientId === clientId && row.date === today && isSession(row))
   const completed = workout?.status === 'completed'
   const inProgress = workout?.status === 'in_progress'
@@ -16,11 +18,13 @@ export default function OverviewTraining({ clientId, today }) {
     : prescription?.blocks?.length ? prescription.blocks.flatMap((block) => block.exercises.map((exercise) => ({ name: exercise.exerciseName, detail: `${exercise.sets?.length || 0} sets` })))
       : (prescription?.items || []).map((exercise) => ({ name: exercise.exercise, detail: `${exercise.sets || 0} × ${exercise.reps ?? '—'}` }))
   const count = workout ? workout.main?.length || 0 : programStats(prescription).exercises
-  const title = hasWorkout ? workout?.title || prescription?.name || 'Prescribed workout' : closed ? 'No workout logged' : 'No workout planned'
-  const action = completed ? 'Review workout' : inProgress ? 'Resume workout' : closed ? 'Review day' : hasWorkout ? 'Start workout' : 'Plan workout'
-  const url = `/clients/${clientId}/training?date=${today}${hasWorkout && !completed && (!closed || inProgress) ? '&run=1' : ''}`
+  const title = bookings.length ? `${bookings.length} training booking${bookings.length === 1 ? '' : 's'}`
+    : hasWorkout ? workout?.title || prescription?.name || 'Prescribed workout' : closed ? 'No workout logged' : 'No workout planned'
+  const action = bookings.length ? 'View training bookings' : completed ? 'Review workout' : inProgress ? 'Resume workout' : closed ? 'Review day' : hasWorkout ? 'Start workout' : 'Plan workout'
+  const url = `/clients/${clientId}/training?date=${today}${bookings.length ? '#training-bookings' : hasWorkout && !completed && (!closed || inProgress) ? '&run=1' : ''}`
   const minutes = workout?.durationSec > 0 ? Math.round(workout.durationSec / 60) : null
-  const meta = hasWorkout ? `${completed ? 'Completed' : inProgress ? 'In progress' : 'Planned'} · ${count} exercise${count === 1 ? '' : 's'}${minutes ? ` · ${minutes} min` : ''}` : `Today · ${fmtDate(today)}`
+  const meta = bookings.length ? bookings.map(booking => booking.time).filter(Boolean).join(' · ')
+    : hasWorkout ? `${completed ? 'Completed' : inProgress ? 'In progress' : 'Planned'} · ${count} exercise${count === 1 ? '' : 's'}${minutes ? ` · ${minutes} min` : ''}` : `Today · ${fmtDate(today)}`
   return <section id="today-training" className="card overview-workout" aria-labelledby="today-training-title">
     <div className="overview-section-head"><h2 id="today-training-title">Today’s training</h2></div>
     <div className="overview-training-status"><div><h3 title={title}>{title}</h3><p className="muted">{meta}</p></div><Link className={'btn' + (completed || closed && !hasWorkout ? ' ghost' : '')} to={url}>{action} →</Link></div>
@@ -34,6 +38,6 @@ export default function OverviewTraining({ clientId, today }) {
         <span>{date === today ? 'Today' : fmtDay(date).split(',')[0]}</span><strong>{Number(date.slice(8))}</strong><span>{label}</span>
       </Link>
     })}</div>
-    <div className="overview-training-footer">{hasWorkout && <details className="overview-training-details"><summary>Workout details</summary><div className="overview-exercises">{exercises.map((exercise, index) => <div key={index}><span>{exercise.name}</span><small>{exercise.detail}</small></div>)}</div></details>}</div>
+    <div className="overview-training-footer">{hasWorkout && <details className="overview-training-details"><summary>{bookings.length ? 'Day’s plan' : 'Workout details'}</summary><div className="overview-exercises">{exercises.map((exercise, index) => <div key={index}><span>{exercise.name}</span><small>{exercise.detail}</small></div>)}</div></details>}</div>
   </section>
 }
