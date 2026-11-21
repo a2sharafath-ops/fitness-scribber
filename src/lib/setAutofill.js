@@ -5,7 +5,7 @@ const valid = (field, value) => typeof value === 'number' && Number.isFinite(val
 
 // Provenance travels with the draft so resuming preserves manual overrides.
 // Completion patches never propagate: filling a value is not performing a set.
-export function editRunSet(rows, index, patch) {
+export function editRunSet(rows, index, patch, propagate = fields) {
   if (!rows[index]) return rows
   const source = rows[index]
   const edited = fields.filter((field) => Object.hasOwn(patch, field) && !Object.hasOwn(patch, 'done'))
@@ -14,6 +14,7 @@ export function editRunSet(rows, index, patch) {
     ...(edited.length ? { autofill: { ...row.autofill, ...Object.fromEntries(edited.map((field) => [field, 'manual'])) } } : {}),
   } : row)
   for (const field of edited) {
+    if (!propagate.includes(field)) continue
     const value = patch[field]
     for (let i = index + 1; i < next.length; i++) {
       const row = next[i]

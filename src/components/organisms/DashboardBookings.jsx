@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Icon from '../atoms/Icon'
 import Avatar from '../atoms/Avatar'
 import { bookingPlan, bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, durationLabel, sessionPath, trainingBooking } from '../../lib/schedule'
 
 function bookingDestination(db, booking, today) {
   const path = sessionPath(booking)
-  if (!trainingBooking(booking)) return { path, label: 'Open booking' }
+  if (!trainingBooking(booking)) {
+    const label = { Assessment: 'Open assessments', 'Check-in': 'Open check-ins' }[booking.type] || 'Open client'
+    return { path, label }
+  }
   return bookingWorkoutAction(db, booking, today) || { path, label: 'Open training' }
 }
 
@@ -35,13 +37,25 @@ export default function DashboardBookings({ db, bookings, roster, upcoming, next
     event.preventDefault()
     shift(event.key === 'ArrowRight' ? 1 : -1)
   }
+  const updateTilt = (event) => {
+    if (event.pointerType !== 'mouse' || !matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return
+    const deck = event.currentTarget
+    const { left, top, width, height } = deck.getBoundingClientRect()
+    deck.style.setProperty('--booking-tilt-x', `${(0.5 - (event.clientY - top) / height) * 4}deg`)
+    deck.style.setProperty('--booking-tilt-y', `${((event.clientX - left) / width - 0.5) * 4}deg`)
+  }
+  const resetTilt = (event) => {
+    event.currentTarget.style.removeProperty('--booking-tilt-x')
+    event.currentTarget.style.removeProperty('--booking-tilt-y')
+  }
 
   return <>
     {booking && <section className="db-card orbit-up-next" aria-labelledby="orbit-up-next-title">
       <header className="db-head"><h2 id="orbit-up-next-title">Up next</h2><Link className="db-link" to="/schedule">View schedule</Link></header>
         <div className={'orbit-booking-deck' + (upcoming.length > 1 ? ' has-stack' : '')} tabIndex={upcoming.length > 1 ? 0 : undefined}
           role="group" aria-label="Today’s booking carousel" onKeyDown={browseWithArrows} onPointerDown={startSwipe}
-          onPointerUp={endSwipe} onPointerCancel={() => { gesture.current = null }}>
+          onPointerUp={endSwipe} onPointerCancel={() => { gesture.current = null }}
+          onPointerMove={updateTilt} onPointerLeave={resetTilt}>
           <article className="orbit-booking-feature" key={booking.id} aria-live="polite">
             <p className="orbit-booking-time">{booking.time || 'Time not set'}{booking.dur ? ' · ' + durationLabel(booking) : ''}</p>
             <div><h3>{workout?.title || plan?.name || booking.type || 'Training session'}</h3><p>{roster.get(booking.clientId)?.name}</p></div>
@@ -68,8 +82,10 @@ export default function DashboardBookings({ db, bookings, roster, upcoming, next
         return <article className="orbit-today-booking" key={entry.id}>
           <Avatar name={client.name} />
           <div className="db-info"><strong>{client.name}</strong><small>{entry.time || 'Time not set'} · {entry.type}</small><small>{status}</small></div>
-          <Link className="orbit-icon-button" to={action.path} aria-label={`${action.label} for ${client.name} at ${entry.time}`} title={action.label}><Icon name="chevron-right" size={17} /></Link>
-          <button className="db-link" type="button" aria-label={`Booking details for ${client.name} at ${entry.time}`} onClick={() => onDetails(entry)}>Details</button>
+          <div className="orbit-today-actions">
+            <Link className="btn ghost" to={action.path} aria-label={`${action.label} for ${client.name} at ${entry.time || 'unscheduled time'}`}>{action.label}</Link>
+            <button className="db-link" type="button" aria-label={`Booking details for ${client.name} at ${entry.time || 'unscheduled time'}`} onClick={() => onDetails(entry)}>Details</button>
+          </div>
         </article>
       })}</div> : <div className="db-inline-empty"><p>No bookings today.</p><button type="button" className="db-link" onClick={onBook}>Book session →</button></div>}
     </section>

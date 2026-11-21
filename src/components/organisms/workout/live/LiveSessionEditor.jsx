@@ -2,7 +2,7 @@ import { useState } from 'react'
 import LiveSessionDialog from '../../../molecules/LiveSessionDialog'
 import LivePlateCalculator from './LivePlateCalculator'
 import LiveWorkoutOrder from './LiveWorkoutOrder'
-import { LIVE_SET_TYPES, locateLive, rowMode, adjustedSetDuration, rowType, liveBlocks, previousLivePerformance, exerciseRestSeconds } from '../../../../lib/liveSession'
+import { LIVE_SET_TYPES, locateLive, rowMode, adjustedSetDuration, rowType, liveSetLoad, liveBlocks, previousLivePerformance, exerciseRestSeconds } from '../../../../lib/liveSession'
 import { secToClock } from '../../../../lib/workout'
 import { toDisp, dispToKg } from '../../../../lib/units'
 
@@ -10,8 +10,9 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
   const { kind, rowId, exerciseId, blockId } = editor
   const { item, row } = locateLive(session, rowId || exerciseId)
   const block = liveBlocks(session).find((entry) => entry.id === blockId)
+  const confirmedLoad = row ? liveSetLoad(row) : null
   const [mode, setMode] = useState(row ? rowMode(row) : 'reps')
-  const [value, setValue] = useState(row?.load == null ? '' : toDisp(row.load, units))
+  const [value, setValue] = useState(toDisp(confirmedLoad, units) ?? '')
   const [plates, setPlates] = useState(false)
   const libraryItem = exercises.find((entry) => entry.id === item?.exId || entry.id === item?.exerciseId || entry.name?.toLowerCase() === item?.name?.toLowerCase())
   const submitAction = (action) => { if (onAction(action)) onClose() }
@@ -50,31 +51,33 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
   </LiveSessionDialog>
   let title, content, submit, confirm
   switch (kind) {
+    case 'weight':
     case 'complete-set': {
+      const completing = kind === 'complete-set'
       const isTimed = rowMode(row) === 'duration'
-      title = `Log set · ${item.name}`
-      confirm = 'Mark set done'
-      const initialLoad = row.load ?? row.pLoadKg
-      const displayLoad = initialLoad == null ? '' : toDisp(initialLoad, units)
+      const target = toDisp(row.pLoadKg, units)
+      const hasPlates = /barbell|plates|plate.loaded/i.test(libraryItem?.equip || item.name)
+      title = completing ? `Log set · ${item.name}` : 'Enter weight'
+      confirm = completing ? 'Mark set done' : 'Confirm weight'
       content = <>
-        {field('load', `Actual weight (${units})`, displayLoad, { max: units === 'lb' ? 4409.25 : 2000, step: 0.01, required: initialLoad != null })}
-        {field('metric', isTimed ? 'Actual duration (seconds)' : 'Actual reps', isTimed ? row.durationSeconds : row.reps,
+        <label>Actual weight ({units})<input type="number" name="load" min="0" max={units === 'lb' ? 4409.25 : 2000}
+          step="0.01" value={value} required={completing && target != null} onChange={(event) => setValue(event.target.value)} /></label>
+        {(target != null || hasPlates) && <div className="ls-tools">
+          {target != null && <button type="button" className="ls-button" onClick={() => setValue(target)}>Use target ({target} {units})</button>}
+          {hasPlates && <button type="button" className="ls-button" onClick={() => setPlates(true)}>Plate calculator…</button>}
+        </div>}
+        {completing && field('metric', isTimed ? 'Actual duration (seconds)' : 'Actual reps', isTimed ? row.durationSeconds : row.reps,
           { min: isTimed ? 1 : 0, max: isTimed ? 35999 : 999, required: true })}
       </>
       submit = (form) => {
         const weight = form.get('load')
-        const load = weight === '' ? null : String(weight) === String(toDisp(row.load, units)) && row.load != null ? row.load : dispToKg(weight, units)
-        submitAction({ type: 'done', id: row.id, actual: { load, metric: Number(form.get('metric')) } })
+        const load = weight === '' ? null
+          : Number(weight) === toDisp(confirmedLoad, units) ? confirmedLoad
+          : Number(weight) === target ? row.pLoadKg : dispToKg(weight, units)
+        submitAction(completing
+          ? { type: 'done', id: row.id, actual: { load, metric: Number(form.get('metric')) } }
+          : { type: 'row', id: row.id, patch: { load } })
       }
-      break
-    }
-    case 'weight': {
-      title = 'Enter weight'
-      const hasPlates = /barbell|plates|plate.loaded/i.test(libraryItem?.equip || item.name)
-      content = <><label>Actual weight ({units})<input type="number" name="load" min="0" max={units === 'lb' ? 4409 : 2000} step="0.01" value={value} onChange={(event) => setValue(event.target.value)} /></label>
-        {hasPlates && <button type="button" className="ls-button" onClick={() => setPlates(true)}>Plate calculator…</button>}</>
-      submit = (form) => submitAction({ type: 'row', id: row.id, patch: { load: form.get('load') === '' ? null :
-        String(form.get('load')) === String(toDisp(row.load, units)) ? row.load : dispToKg(form.get('load'), units) } })
       break
     }
     case 'result':

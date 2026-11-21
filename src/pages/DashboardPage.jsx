@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
-import { Bar } from 'react-chartjs-2'
+import { Bar, Line } from 'react-chartjs-2'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
 import DashboardBookings from '../components/organisms/DashboardBookings'
@@ -87,9 +87,16 @@ export default function DashboardPage() {
   const highShare = toPercent(group.high)
   const midBoundary = highShare + toPercent(group.medium)
   const readinessRing = group.count ? `conic-gradient(var(--green) 0 ${highShare}%, #da9d38 ${highShare}% ${midBoundary}%, var(--accent) ${midBoundary}% 100%)` : 'var(--border)'
-  const activity = dashboardActivity(db, { today, days: +period, metric })
-  const metricEmpty = { sessions: 'No bookings marked complete in this period.', checkins: 'No check-ins recorded in this period.', load: 'No session load recorded in this period.' }[metric]
-  const metricLabel = { sessions: 'Completed bookings', checkins: 'Recorded check-ins', load: 'Recorded session load (sRPE · AU)' }[metric]
+  const daily = period === '7'
+  const activity = dashboardActivity(db, { today, days: +period, metric, bucketDays: daily ? 1 : 7 })
+  const metricEmpty = { sessions: 'No bookings marked complete in this period.', checkins: 'No check-ins recorded in this period.',
+    load: 'No session load recorded in this period.', completion: 'No bookings marked complete or missed in this period.',
+    readiness: 'No readiness scores recorded in this period.' }[metric]
+  const metricLabel = { sessions: 'Completed bookings', checkins: 'Recorded check-ins', load: 'Recorded session load (sRPE · AU)',
+    completion: 'Booking completion rate', readiness: 'Average group readiness' }[metric]
+  const isTrend = metric === 'readiness' || metric === 'completion'
+  const ActivityChart = isTrend ? Line : Bar
+  const activityValue = value => value == null ? 'No records' : metric === 'completion' ? `${value}%` : metric === 'readiness' ? `${value}/100` : value
   const pick = (purpose, subset = clients) => {
     const title = { overview: 'Find a client', assessment: 'Record an assessment', program: 'Assign a program', load: 'Review training load' }[purpose]
     openModal(<DashboardClientPicker clients={subset} title={title} onChoose={async id => {
@@ -124,11 +131,18 @@ export default function DashboardPage() {
   const base = theme === 'dark' ? baseOptions('#4d414f', '#c4b8c5') : baseOptions('#e6dfe5', '#605762')
   const chartOptions = {
     ...base,
+    interaction: { mode: 'index', intersect: false },
     onHover: (_event, points) => { if (points.length) setChartSelection(points[0].index) },
-    plugins: { ...base.plugins, legend: { display: false }, tooltip: { callbacks: { title: items => { const b = activity.buckets[items[0].dataIndex]; return `${fmtDate(b.from)}–${fmtDate(b.through)} (${b.count} days)` } } } },
-    scales: { x: { ...base.scales.x, grid: { display: false }, ticks: { ...base.scales.x.ticks, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } }, y: { ...base.scales.y, beginAtZero: true, suggestedMax: activity.hasData ? undefined : metric === 'load' ? 1000 : 10, ticks: { ...base.scales.y.ticks, precision: 0 } } },
+    plugins: { ...base.plugins, legend: { display: false }, tooltip: { callbacks: {
+      title: ([item]) => activity.buckets[item.dataIndex].label,
+      label: ({ raw }) => activityValue(raw),
+    } } },
+    scales: { x: { ...base.scales.x, grid: { display: false }, ticks: { ...base.scales.x.ticks, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } },
+      y: { ...base.scales.y, beginAtZero: true, max: isTrend ? 100 : undefined, ticks: { ...base.scales.y.ticks, precision: 0 } } },
   }
-  const chartData = { labels: activity.buckets.map(b => fmtDay(b.from)), datasets: [{ label: metricLabel, data: activity.buckets.map(b => b.value), backgroundColor: '#dc465e', borderRadius: 5, maxBarThickness: 40 }] }
+  const chartData = { labels: activity.buckets.map(b => fmtDay(b.from)), datasets: [{ label: metricLabel, data: activity.buckets.map(b => b.value),
+    ...(isTrend ? { borderColor: '#dc465e', backgroundColor: '#dc465e22', pointBackgroundColor: '#dc465e', fill: true, tension: .25 }
+      : { backgroundColor: '#dc465e', borderRadius: 5, maxBarThickness: 40 }) }] }
 
   return <div className="coach-dashboard">
     <header className="db-title"><div><p className="db-date">{fmtDay(today)} · {clock.time} {coachTimeZone(tz).replaceAll('_', ' ')}</p><h1>{db.settings?.trainerName ? `Welcome, ${db.settings.trainerName.trim().split(/\s+/)[0]}.` : 'Dashboard'}</h1></div><div className="db-actions"><Button variant="ghost" onClick={showWeeklyReport}><Icon name="calendar" size={16} /> Weekly report</Button><Button onClick={book}><Icon name="calendar" size={16} /> Book session</Button><details className="db-menu"><summary>More actions <Icon name="chevron-down" size={14} /></summary><div className="db-menu-list">{[['Add client', () => openModal(<ClientForm />)], ['Record assessment', () => pick('assessment')], ['Assign a program', () => pick('program')]].map(([text, action]) => <button key={text} type="button" onClick={e => { e.currentTarget.closest('details').open = false; action() }}>{text}</button>)}</div></details></div></header>
@@ -161,24 +175,25 @@ export default function DashboardPage() {
           <button className="db-stat" type="button" onClick={() => jump('dashboard-checkins')}><span>Checked in today</span><strong>{recorded.length}<small> / {clients.length}</small></strong></button>
         </div>
         <div className="db-chart-controls">
-          <Tabs label="Activity metric" options={[[ 'sessions', 'Bookings completed' ], ['checkins', 'Check-ins'], ['load', 'Session load']]} value={metric} onChange={(value) => { setChartSelection(null); setMetric(value) }} />
-          <label>Period <span className="orbit-select-wrap">
-            <select aria-label="Activity period" value={period} onChange={event => { setChartSelection(null); setPeriod(event.target.value) }}><option value="30">30 days</option><option value="90">90 days</option></select>
-            <Icon name="chevron-down" size={14} aria-hidden="true" />
-          </span></label>
+          <Tabs label="Activity metric" options={[[ 'sessions', 'Bookings completed' ], ['checkins', 'Check-ins'], ['load', 'Session load'],
+            ['completion', 'Completion rate'], ['readiness', 'Group readiness']]} value={metric} onChange={(value) => { setChartSelection(null); setMetric(value) }} />
+          <Tabs label="Activity period" options={[[ '7', '7d' ], ['30', '30d'], ['90', '90d']]} value={period}
+            onChange={(value) => { setChartSelection(null); setPeriod(value) }} />
         </div>
         <p className="db-chart-heading">{metricLabel} · {fmtDateRange(activity.start, activity.end)}</p>
-        {activity.hasData ? <><div className="db-chart" tabIndex={0} aria-label={`${metricLabel}. Use the arrow keys to view each week`}
+        {activity.hasData ? <><div className="db-chart" tabIndex={0} aria-label={`${metricLabel}. Use the arrow keys to view each ${daily ? 'day' : 'week'}`}
           onKeyDown={(event) => {
             if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
             event.preventDefault()
             setChartSelection((index) => Math.max(0, Math.min(activity.buckets.length - 1, (index ?? -1) + (event.key === 'ArrowRight' ? 1 : -1))))
           }}>
-          <Bar data={chartData} options={chartOptions} aria-hidden="true" />
-        </div><p className="db-note" aria-live="polite">{chartSelection == null ? 'Hover or use the arrow keys to view a week.' : `${activity.buckets[chartSelection].label} · ${activity.buckets[chartSelection].value ?? 'No records'}`}</p></> :
+          <ActivityChart data={chartData} options={chartOptions} aria-hidden="true" />
+        </div><p className="db-note" aria-live="polite">{chartSelection == null ? `Hover or use the arrow keys to view a ${daily ? 'day' : 'week'}.` : `${activity.buckets[chartSelection].label} · ${activityValue(activity.buckets[chartSelection].value)}`}</p></> :
           <p className="db-chart-empty">{metricEmpty}</p>}
+        {metric === 'completion' && <p className="db-note">Share of bookings marked complete among bookings marked complete or missed.</p>}
         {metric === 'load' && <button className="db-link" type="button" onClick={() => pick('load')}>View a client’s load records →</button>}
       </section>
+      <DashboardWeekly bookings={ownedBookings} monday={monday} />
       <section className="db-card orbit-readiness" id="dashboard-checkins" aria-labelledby="orbit-readiness-title">
         <header className="db-head"><h2 id="orbit-readiness-title">Group readiness today</h2><button className="db-link" type="button" disabled={!clients.length} onClick={() => openModal(<BulkWellnessForm />, true)}>Record check-ins</button></header>
         <div className="orbit-readiness-overview">
@@ -203,7 +218,6 @@ export default function DashboardPage() {
         {!checkinRows.length && <p className="db-note">{!clients.length ? 'No active clients.' : checkinFilter === 'missing' ? 'Everyone has checked in.' : 'No check-ins recorded today.'}</p>}
       </section>
       </div>
-      <DashboardWeekly bookings={ownedBookings} monday={monday} />
       <DashboardInsights insights={insights} />
       <section className="db-card orbit-upcoming">
         <header className="db-head"><h2>Upcoming sessions</h2><Link className="db-link" to="/schedule">View schedule</Link></header>

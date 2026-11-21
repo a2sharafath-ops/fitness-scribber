@@ -103,13 +103,13 @@ export function ensureSetRows(it) {
 // player opens, so sessions built before target loads existed still get them,
 // and an updated Training Max is reflected — without touching loads already
 // logged. `resolveTm(name) => kg | null`.
-export function normalizeRunItem(it, resolveTm) {
+export function normalizeRunItem(it, resolveTm, { prefillLoad = true } = {}) {
   const rows = ensureSetRows(it)
   const tmKg = resolveTm ? resolveTm(it.name) : null
   const setRows = rows.map((r) => {
     const target = targetLoadKg(r.pIntensityType, { prescribedIntensityValue: r.pIntensityValue, prescribedReps: r.pReps, prescribedRepsMax: r.pRepsMax, prescribedLoadKg: r.pLoadKg }, tmKg)
     if (target == null) return r
-    return { ...r, pLoadKg: r.pLoadKg ?? target, load: r.load ?? target }
+    return { ...r, pLoadKg: r.pLoadKg ?? target, ...(prefillLoad ? { load: r.load ?? target } : {}) }
   })
   return { ...it, note: it.note || '', setRows }
 }

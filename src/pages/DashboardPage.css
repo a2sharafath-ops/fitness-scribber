@@ -103,13 +103,13 @@
   --db-green: var(--accent);
   max-width: 1600px;
 }
-.db-title h1 { font-size: clamp(26px, 3vw, 37px); letter-spacing: -.044em; }
+.db-title h1 { font: 650 24px/1.25 var(--orbit-display-font); letter-spacing: -.022em; }
 .orbit-dashboard-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr); gap: 20px; align-items: start; }
 .orbit-dashboard-grid > * { min-width: 0; }
 .orbit-dashboard-column { display: grid; align-content: start; gap: 20px; grid-template-columns: minmax(0, 1fr); }
 .db-chart-controls > *, .db-tabs { min-width: 0; max-width: 100%; }
 .db-tabs button { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
-.coach-dashboard .db-card { border-color: var(--border); background: var(--orbit-panel); }
+.coach-dashboard .db-card { border-color: var(--border); background: var(--orbit-glass); }
 .coach-dashboard .db-head { margin-bottom: 14px; }
 .coach-dashboard .db-head h2 { font-size: 18px; }
 .orbit-booking-feature {
@@ -124,14 +124,17 @@
   animation: orbit-card-in .2s ease-out;
 }
 @keyframes orbit-card-in { from { opacity: .65; transform: translateY(3px); } }
-.orbit-booking-feature h3 { font-size: clamp(19px, 2vw, 27px); line-height: 1.2; letter-spacing: -.028em; overflow-wrap: anywhere; }
+.orbit-booking-feature h3 { font: 650 clamp(19px, 2vw, 24px)/1.25 var(--orbit-display-font); letter-spacing: -.022em; overflow-wrap: anywhere; }
 .orbit-booking-feature p { color: var(--muted); }
 .orbit-booking-time { font-size: 13px; }
 .orbit-booking-actions, .orbit-booking-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .orbit-booking-controls { margin-top: 13px; color: var(--muted); font-size: 12px; }
-.orbit-today-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: 12px; }
-.orbit-today-booking { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 14px; min-width: 0; }
-.orbit-today-booking .orbit-icon-button { width: 30px; height: 30px; }
+.orbit-today-list { display: grid; gap: 10px; }
+.orbit-today-booking { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; padding: 10px 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 14px; min-width: 0; }
+.orbit-today-booking .db-info { flex: 1 1 110px; overflow-wrap: anywhere; }
+.orbit-today-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+.orbit-today-actions :is(.btn, .db-link) { min-height: 44px; white-space: normal; }
+.orbit-today-actions .btn { padding: 6px 12px; }
 .coach-dashboard .db-stats { gap: 8px; margin: 0 0 16px; }
 .coach-dashboard .db-stat { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-height: 0; padding: 11px 12px; border-color: var(--border); background: var(--surface2); border-radius: 14px; }
 .coach-dashboard .db-stat:hover { border-color: var(--accent); }
@@ -179,6 +182,20 @@
   .coach-dashboard .db-stat { padding: 9px 6px; }
   .coach-dashboard .db-stat strong { font-size: 22px; }
   .orbit-today-booking .avatar { display: none; }
+}
+@keyframes dashboard-card-arrival { from { opacity: .62; translate: 0 5px; } }
+@media (prefers-reduced-motion: no-preference) {
+  .orbit-dashboard-column > .db-card, .orbit-dashboard-grid > .db-card {
+    animation: dashboard-card-arrival .29s ease-out backwards;
+  }
+  .orbit-dashboard-column > .db-card:nth-child(2) { animation-delay: 45ms; }
+  .orbit-dashboard-column > .db-card:nth-child(n+3), .orbit-dashboard-grid > .db-card { animation-delay: 85ms; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .orbit-booking-feature {
+    transform: perspective(760px) rotateX(var(--booking-tilt-x, 0deg)) rotateY(var(--booking-tilt-y, 0deg));
+    transition: transform .18s ease-out;
+  }
 }
 @media (prefers-reduced-motion: reduce) { .orbit-booking-feature { animation: none; } }
 
