@@ -216,7 +216,11 @@ function fakeBackend(rows = {}, errors = {}) {
       return {
         select() {
           const response = { data: rows[table] || [], error: errors[`read:${table}`] || null }
-          return { then: (ok, fail) => Promise.resolve(response).then(ok, fail), maybeSingle: async () => ({ data: rows.settings || null }) }
+          return {
+            abortSignal() { return this },
+            then: (ok, fail) => Promise.resolve(response).then(ok, fail),
+            maybeSingle: async () => ({ data: rows.settings || null, error: response.error }),
+          }
         },
         async upsert(data) { calls.push({ table, kind: 'upsert', data }); return { error: errors[`upsert:${table}`] || null } },
         delete() { return { in: async (_column, ids) => { calls.push({ table, kind: 'delete', ids }); return { error: errors[`delete:${table}`] || null } } } },
@@ -551,7 +555,8 @@ test('legacy readiness detail keeps neutral wording and one shared client identi
 test('backend loading and error states are explicit', () => {
   const loading = renderToStaticMarkup(React.createElement(DataProvider, { backend: true, initialDb: null }, 'Loaded'))
   const error = renderToStaticMarkup(React.createElement(DataProvider, { backend: true, initialDb: null, initialError: new Error('offline') }, 'Loaded'))
-  assert.match(loading, /Loading your athletes/)
+  assert.match(loading, /Loading your workspace/)
+  assert.match(loading, /role="status"/)
   assert.match(error, /Couldn’t load your data/)
   assert.match(error, /offline/)
   assert.match(error, />Retry</)
@@ -574,7 +579,7 @@ test('table failures remain visible and Overview labels observation provenance',
 })
 
 test('backend load surfaces missing tables; diff writes only changed rows and reports failure', async () => {
-  const { client } = fakeBackend({ clients: [{ id: 'a', name: 'Avery', coachId: 'private' }] }, { 'read:wearable': { message: 'missing table' } })
+  const { client } = fakeBackend({ clients: [{ id: 'a', name: 'Avery', coachId: 'private' }] }, { 'read:wearable': { code: 'PGRST205', message: 'missing table' } })
   const loaded = await fetchAll(client)
   assert.equal(loaded.clients[0].coachId, undefined)
   assert.deepEqual(loaded._loadIssues, [{ table: 'wearable', message: 'missing table' }])
@@ -586,6 +591,42 @@ test('backend load surfaces missing tables; diff writes only changed rows and re
   const issues = await persistDiff(prev, next, backend.client)
   assert.deepEqual(backend.calls, [{ table: 'wellness', kind: 'upsert', data: next.wellness }])
   assert.deepEqual(issues, [{ table: 'wellness', message: 'write denied', kind: 'write' }])
+})
+
+test('workspace loads tables concurrently and refuses a partial snapshot after a connection error', async () => {
+  const { client } = fakeBackend({ clients: [{ id: 'a', name: 'Avery' }] }, { 'read:workouts': { code: '', message: 'Failed to fetch' } })
+  const from = client.from
+  let inFlight = 0, peak = 0
+  client.from = table => ({
+    select() {
+      const query = from(table).select()
+      return {
+        abortSignal() { return this },
+        maybeSingle: query.maybeSingle,
+        then(resolve, reject) {
+          inFlight += 1
+          peak = Math.max(inFlight, peak)
+          return Promise.resolve(query).then(resolve, reject).finally(() => { inFlight -= 1 })
+        },
+      }
+    },
+  })
+  await assert.rejects(fetchAll(client), /Couldn’t finish loading/)
+  assert.ok(peak > 1 && peak <= 6)
+})
+
+test('a stalled workspace read times out, cancels its requests and does not load an empty roster', async () => {
+  const { client } = fakeBackend()
+  let requestSignal
+  client.from = () => ({
+    select: () => ({
+      abortSignal(signal) { requestSignal = signal; return this },
+      then() {},
+      maybeSingle: () => new Promise(() => {}),
+    }),
+  })
+  await assert.rejects(fetchAll(client, { timeoutMs: 25 }), /connection took too long/)
+  assert.ok(requestSignal.aborted)
 })
 
 test('empty Check-ins and Progress views disclose missing observations for the selected client', () => {

@@ -7,6 +7,7 @@ import { hasBackend } from '../lib/supabase'
 import { fetchAll, persistDiff, deleteClientRemote, saveScheduleRemote, saveAssignmentRemote, saveTrainingPlansRemote } from '../api/sync'
 import { createSnapshotQueue } from '../lib/confirmedPersistence'
 import { applyScheduleRequest } from '../lib/schedule'
+import StartupScreen from '../components/templates/StartupScreen'
 
 const DataContext = createContext(null)
 
@@ -23,6 +24,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   // Local mode: hydrate from localStorage immediately. Backend mode: load async.
   const [db, setDb] = useState(() => (initialDb !== undefined ? initialDb : backend ? null : loadDB()))
   const [loadError, setLoadError] = useState(initialError)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   // Tables whose last write failed (missing column/table) — surfaced in the UI.
   const [writeIssues, setWriteIssues] = useState([])
   const [saveStatus, setSaveStatus] = useState('idle')
@@ -72,11 +74,17 @@ export function DataProvider({ children, initialDb, initialError = null, backend
 
   useEffect(() => {
     if (!backend) return undefined
-    let active = true
-    fetchAll().then((d) => { if (active) { dbRef.current = d; persistenceRef.current?.reset(d); setLoadError(null); setDb(d) } })
-      .catch((e) => { if (active) { console.error('load failed', e); setLoadError(e) } })
-    return () => { active = false }
-  }, [backend])
+    const controller = new AbortController()
+    const { signal } = controller
+    fetchAll(undefined, { signal }).then((d) => {
+      if (signal.aborted) return
+      dbRef.current = d
+      persistenceRef.current?.reset(d)
+      setLoadError(null)
+      setDb(d)
+    }).catch((error) => { if (!signal.aborted) setLoadError(error) })
+    return () => controller.abort()
+  }, [backend, loadAttempt])
 
   // Local mode persists the whole store; backend mode persists diffs per commit.
   useEffect(() => {
@@ -227,19 +235,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
   }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, deleteClient, refresh, saveStatus, writeIssues])
 
-  if (backend && !db) {
-    if (loadError) {
-      return (
-        <div className="empty" style={{ paddingTop: 120 }}>
-          <div className="big">⚠️</div>
-          Couldn’t load your data.
-          <div className="muted" style={{ fontSize: 13, margin: '6px 0 14px' }}>{loadError.message || 'Check your connection and try again.'}</div>
-          <button className="btn" onClick={() => window.location.reload()}>Retry</button>
-        </div>
-      )
-    }
-    return <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading your athletes…</div>
-  }
+  if (backend && !db) return <StartupScreen error={loadError} onRetry={() => { setLoadError(null); setLoadAttempt(n => n + 1) }} />
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }
 

@@ -11,23 +11,63 @@ const stripOwner = (rows) => rows.map(({ coachId: _own, requestHash: _receipt, .
 const byId = (arr) => Object.fromEntries((arr || []).map((r) => [r.id, r]))
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b)
 
-export async function fetchAll(client = supabase) {
+const READ_BATCH_SIZE = 6
+const READ_TIMEOUT_MS = 15_000
+const MISSING_TABLE_CODES = new Set(['42P01', 'PGRST205'])
+
+export async function fetchAll(client = supabase, { signal, timeoutMs = READ_TIMEOUT_MS } = {}) {
+  const controller = new AbortController()
+  const cancel = () => controller.abort(signal.reason)
+  if (signal?.aborted) cancel()
+  else signal?.addEventListener('abort', cancel, { once: true })
+  const { signal: requestSignal } = controller
+  const interrupted = new Promise((_, reject) => {
+    if (requestSignal.aborted) reject(requestSignal.reason)
+    else requestSignal.addEventListener('abort', () => reject(requestSignal.reason), { once: true })
+  })
+  const timer = setTimeout(() => controller.abort(new Error('The connection took too long. Check your connection and try again.')), timeoutMs)
+  try {
+    return await Promise.race([interrupted, Promise.resolve().then(() => readWorkspace(client, requestSignal))])
+  } finally {
+    clearTimeout(timer)
+    signal?.removeEventListener('abort', cancel)
+    // Cancel any remaining reads if another table caused the load to fail.
+    controller.abort()
+  }
+}
+
+async function readWorkspace(client, signal) {
+  signal.throwIfAborted()
   const db = {}
   const loadIssues = []
-  const { data: { user } } = await client.auth.getUser()
-  if (!user?.id) throw new Error('Your sign-in expired. Please sign in again before loading data.')
-  for (const t of TABLES) {
-    const { data, error } = await client.from(t).select('*')
-    // Be resilient to a table that hasn't been migrated yet (e.g. workouts before
-    // schema_workouts.sql is applied) — fall back to empty instead of breaking load,
-    // but record the failure so the UI can surface it (a missing table means those
-    // records can never save, which must not be silent).
-    if (error) { console.warn('fetch', t, 'failed:', error.message); db[t] = []; loadIssues.push({ table: t, message: error.message }); continue }
-    db[t] = stripOwner(data || [])
+  const { data: { user }, error: authError } = await client.auth.getUser()
+  signal.throwIfAborted()
+  if (authError && !(authError.status === 401 || authError.status === 403)) {
+    throw new Error('Couldn’t verify your session. Check your connection and try again.')
   }
-  const { data: s } = await client.from('settings').select('*').maybeSingle()
-  const { coachId: _own, ...settings } = s || {}
-  db.settings = { trainerName: '', businessName: '', units: 'kg', tz: '', ...settings }
+  if (!user?.id) throw new Error('Your sign-in expired. Please sign in again before loading data.')
+  const sources = ['clients', 'settings', ...TABLES.filter(table => table !== 'clients')]
+  for (let start = 0; start < sources.length; start += READ_BATCH_SIZE) {
+    signal.throwIfAborted()
+    const batch = sources.slice(start, start + READ_BATCH_SIZE)
+    const results = await Promise.all(batch.map(async (table) => {
+      const query = client.from(table).select('*').abortSignal(signal)
+      const { data, error } = await (table === 'settings' ? query.maybeSingle() : query)
+      if (error && (table === 'clients' || table === 'settings' || !MISSING_TABLE_CODES.has(error.code))) {
+        throw new Error('Couldn’t finish loading your workspace. Check your connection and try again.')
+      }
+      return { table, data, error }
+    }))
+    for (const { table, data, error } of results) {
+      if (table === 'settings') {
+        const { coachId: _own, ...settings } = data || {}
+        db.settings = { trainerName: '', businessName: '', units: 'kg', tz: '', ...settings }
+      } else {
+        db[table] = stripOwner(data || [])
+        if (error) loadIssues.push({ table, message: error.message })
+      }
+    }
+  }
   // defensive defaults so pure calc never sees undefined nested fields
   db.clients.forEach((c) => {
     if (!c.anthro) c.anthro = { age: null, heightCm: null, massKg: null, bodyFatPct: null, leanMassKg: null }
