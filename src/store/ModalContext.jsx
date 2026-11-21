@@ -10,10 +10,16 @@ export function ModalProvider({ children }) {
   const dialogRef = useRef(null)
   const returnFocusRef = useRef(null) // element focused before the modal opened
   const closeGuardRef = useRef(null)
+  const revision = useRef(0)
+  const closing = useRef(null)
 
   // isWide: false | true | 'xl' (extra-wide, e.g. the workout builder)
-  const openModal = useCallback((content, isWide = false) => {
-    returnFocusRef.current = document.activeElement
+  const openModal = useCallback((content, isWide = false, trigger) => {
+    revision.current += 1
+    closing.current = null
+    dialogRef.current?.parentElement?.removeAttribute('data-closing')
+    if (dialogRef.current) dialogRef.current.inert = false
+    returnFocusRef.current = trigger || document.activeElement
     closeGuardRef.current = null
     setNode(() => content)
     setWide(isWide)
@@ -23,10 +29,26 @@ export function ModalProvider({ children }) {
     return () => { if (closeGuardRef.current === guard) closeGuardRef.current = null }
   }, [])
   const closeModal = useCallback(async (options) => {
-    if (options?.force !== true && closeGuardRef.current && !await closeGuardRef.current()) return false
-    closeGuardRef.current = null
-    setNode(null)
-    return true
+    if (closing.current && options?.force !== true) return closing.current
+    if (options?.force === true) revision.current += 1
+    const current = revision.current
+    const finish = async () => {
+      if (options?.force !== true && closeGuardRef.current && !await closeGuardRef.current()) return false
+      if (revision.current !== current) return false
+      closeGuardRef.current = null
+      const box = dialogRef.current
+      if (box && document.documentElement.dataset.orbitTheme && window.matchMedia?.('(prefers-reduced-motion: no-preference)')?.matches && !options?.force) {
+        box.parentElement.dataset.closing = 'true'
+        box.inert = true
+        await new Promise(resolve => setTimeout(resolve, 120))
+      }
+      if (revision.current !== current) return false
+      setNode(null)
+      return true
+    }
+    const pending = finish()
+    closing.current = pending
+    try { return await pending } finally { if (closing.current === pending) closing.current = null }
   }, [])
 
   // Move focus into the dialog on open; restore it to the trigger on close.
@@ -63,7 +85,7 @@ export function ModalProvider({ children }) {
   }, [node, closeModal])
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal, setCloseGuard }}>
+    <ModalContext.Provider value={{ openModal, closeModal, setCloseGuard, modalOpen: Boolean(node) }}>
       {children}
       {node && (
         <div

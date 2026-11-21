@@ -8,10 +8,17 @@ import useOrbitAppearance from '../../hooks/useOrbitAppearance'
 import './OrbitShell.css'
 
 export default function AppLayout() {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('orbit:trainer:sidebar-collapsed') === 'true' } catch { return false }
+  })
   const mobileNav = useRef(null)
   const menuTrigger = useRef(null)
   const appearance = useOrbitAppearance()
+  const toggleSidebar = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    try { localStorage.setItem('orbit:trainer:sidebar-collapsed', String(next)) } catch { /* The current tab keeps the choice. */ }
+  }
   useEffect(() => {
     const desktop = window.matchMedia?.('(min-width: 701px)')
     if (!desktop) return undefined
@@ -23,7 +30,7 @@ export default function AppLayout() {
   return (
     <div id="app" className="orbit-shell" data-sidebar-collapsed={collapsed}>
       <a href="#main" className="skip-link">Skip to content</a>
-      <Sidebar collapsed={collapsed} onCollapse={() => setCollapsed(!collapsed)} />
+      <Sidebar collapsed={collapsed} onCollapse={toggleSidebar} />
       <dialog ref={mobileNav} id="orbit-mobile-navigation" className="orbit-drawer" aria-label="Main navigation"
         onClick={(event) => { if (event.target === event.currentTarget) event.currentTarget.close() }}
         onClose={() => menuTrigger.current?.focus()}>
