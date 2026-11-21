@@ -7,7 +7,7 @@ import LiveSessionMenu from '../../molecules/LiveSessionMenu'
 import LiveExerciseCard from './live/LiveExerciseCard'
 import LiveSessionReview from './live/LiveSessionReview'
 import LiveSessionEditor from './live/LiveSessionEditor'
-import { liveBlocks, liveExerciseUnits, liveClosed, liveElapsed, nextLiveSet, locateLive, rowMode, finishLiveSession } from '../../../lib/liveSession'
+import { liveBlocks, liveExerciseUnits, liveClosed, liveElapsed, liveDockSet, locateLive, rowMode, adjustedSetDuration, finishLiveSession } from '../../../lib/liveSession'
 import { secToClock } from '../../../lib/workout'
 import './LiveTrainingSession.css'
 
@@ -23,19 +23,25 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   const { sessionRef, headerRef, dockRef, markerRef, compact, dockBounds } = useLiveSessionLayout(readOnly)
   const units = reviewUnits || session.liveState.settings.units || preferredUnits || 'kg'
   const blocks = liveBlocks(session)
-  const pending = session.liveState.setTimer ? locateLive(session, session.liveState.setTimer.rowId) : nextLiveSet(session)
+  const pending = liveDockSet(session)
+  const nextDuration = pending ? adjustedSetDuration(pending.row) : null
+  const nextLabel = { stop: 'Stop timer', start: 'Start timed set', done: 'Mark set done', log: 'Log next set' }[pending?.action]
   const seconds = Math.floor(liveElapsed(session, now) / 1000)
   const clock = new Date(seconds * 1000).toISOString().slice(seconds >= 3600 ? 11 : 14, 19)
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(timer) }, [])
   const openEditor = (next) => { setActionError(''); setEditor(next) }
   const act = (action) => {
     setActionError('')
+    if (action.type === 'done' && !action.actual) {
+      const { row } = locateLive(session, action.id)
+      const metric = rowMode(row) === 'duration' ? row.durationSeconds : row.reps
+      if (!row.done && (metric == null || row.load != null || row.pLoadKg != null)) {
+        openEditor({ kind: 'complete-set', rowId: row.id })
+        return false
+      }
+    }
     try { change(action); return true }
     catch (failure) {
-      if (action.type === 'done' && /performed reps/.test(failure.message)) {
-        const context = locateLive(session, action.id)
-        openEditor({ kind: 'result', rowId: action.id, exerciseId: context.item.id, blockId: context.block.id })
-      }
       setActionError(failure.message)
       return false
     }
@@ -67,8 +73,9 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   }
   const nextAction = () => {
     jump(pending.row)
-    if (rowMode(pending.row) === 'duration') act({ type: 'set-timer', id: pending.row.id })
-    else openEditor({ kind: 'result', rowId: pending.row.id, exerciseId: pending.item.id, blockId: pending.block.id })
+    if (pending.action === 'start' || pending.action === 'stop') act({ type: 'set-timer', id: pending.row.id })
+    else if (pending.action === 'done') act({ type: 'done', id: pending.row.id })
+    else openEditor({ kind: 'complete-set', rowId: pending.row.id })
   }
   return <div className="ls-session" ref={sessionRef}>
     <span className="ls-sticky-marker" ref={markerRef} aria-hidden="true" />
@@ -102,12 +109,12 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
       </section>)}
       {!readOnly && !locked && <button type="button" className="ls-button" onClick={() => openEditor({ kind: 'add-block' })}>+ Add block</button>}
     </div><LiveSessionReview session={session} units={units} /></div>
-    {!readOnly && typeof document !== 'undefined' && createPortal(<div className="ls-current" aria-label="Current exercise" ref={dockRef} style={dockBounds || undefined}><div><small>{session.liveState.setTimer ? 'Timing set' : 'Next set'}{pending?.block ? ` · ${pending.block.title}` : ''}</small>
+    {!readOnly && typeof document !== 'undefined' && createPortal(<div className="ls-current" aria-label="Current exercise" ref={dockRef} style={dockBounds || undefined}><div><small>{pending?.action === 'stop' ? 'Timing set' : pending?.action === 'done' ? 'Ready to log' : 'Next set'}{pending?.block ? ` · ${pending.block.title}` : ''}</small>
       {pending?.row ? <><button type="button" className="ls-current-name" title="Jump to set" onClick={() => jump(pending.row)}>{pending.item.name}</button>
-        <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.row.pDurationSeconds != null ? secToClock(pending.row.pDurationSeconds) : `${pending.row.pReps ?? '—'}${pending.row.pRepsMax != null && pending.row.pRepsMax !== pending.row.pReps ? '–' + pending.row.pRepsMax : ''} reps`}</p></> : <strong>No sets left to log</strong>}</div>
+        <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.action === 'done' ? secToClock(pending.row.durationSeconds) : nextDuration != null ? secToClock(nextDuration) : `${pending.row.pReps ?? '—'}${pending.row.pRepsMax != null && pending.row.pRepsMax !== pending.row.pReps ? '–' + pending.row.pRepsMax : ''} reps`}</p></> : <strong>No sets left to log</strong>}</div>
       <div className="ls-live-hr"><strong>♥ — <small>bpm</small></strong><small>No live HR feed</small></div>
-      {pending?.row ? <button type="button" className="ls-button primary" disabled={session.liveState.clock.paused && !session.liveState.setTimer && rowMode(pending.row) === 'duration'} onClick={nextAction}>
-        {session.liveState.setTimer ? 'Stop timer' : rowMode(pending.row) === 'duration' ? 'Start timed set' : 'Log next set'}</button> : <button type="button" className="ls-button primary" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
+      {pending?.row ? <button type="button" className="ls-button primary" disabled={session.liveState.clock.paused && pending.action === 'start'} onClick={nextAction}>
+        {nextLabel}</button> : <button type="button" className="ls-button primary" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
     </div>, document.body)}
     {editor && <LiveSessionEditor key={JSON.stringify(editor)} editor={editor} session={session} units={units} exercises={exercises} history={history} onAction={act}
       onClose={() => setEditor(null)} onReload={reloadSaved} onFinish={finish} onDiscard={discard} busy={busy} error={actionError || error} />}

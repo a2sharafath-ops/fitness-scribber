@@ -15,3 +15,21 @@
 .schedule-event>button>*{flex-shrink:0}.schedule-event>button>strong{min-height:13px}
 
 .schedule-incomplete{padding:9px 20px;border-top:1px solid #eee9e4;background:#fff8e9}.schedule-incomplete button{background:none;border:0;text-align:left;font:inherit;font-size:11px;color:#865d23;cursor:pointer;padding:5px}
+
+[data-orbit-theme] .schedule-page {
+  --sc-line: var(--border);
+  --sc-ink: var(--text);
+  --sc-muted: var(--muted);
+  --sc-green: var(--green);
+}
+[data-orbit-theme] :is(.schedule-calendar, .schedule-day-panel, .schedule-stats > div, .schedule-stats > button, .schedule-time-head, .schedule-zone, .schedule-hours) {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-orbit-theme] :is(.schedule-views, .schedule-time-head .selected, .schedule-time-column.selected, .schedule-month-cell.selected, .schedule-month-cell.other, .schedule-day-card.next) {
+  background: var(--surface2);
+}
+[data-orbit-theme] .schedule-views button[aria-pressed="true"] { background: var(--surface); color: var(--text); }
+[data-orbit-theme] :is(.schedule-legend, .schedule-hours, .schedule-zone) { color: var(--muted); }
+[data-orbit-theme] :is(.schedule-next-label, .schedule-plan-name, .schedule-day-actions button) { color: var(--green); }
+[data-orbit-theme] .schedule-time-head .today strong { background: var(--orbit-red); }

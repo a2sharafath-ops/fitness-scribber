@@ -93,7 +93,7 @@ function ReportContents({ client, db, tz, dbIssues, saveStatus, commit }) {
   const movement = data.assessments.movement
   const fitness = data.assessments.fitness
   const bodyFields = [['Body mass', 'massKg', true], ['Body fat', 'bodyFatPct', false], ['Lean mass', 'leanMassKg', true]]
-  const company = db.settings?.businessName || 'Fitness Partner'
+  const company = db.settings?.businessName || 'Orbit Trainer'
   const trainer = db.settings?.trainerName || 'Your trainer'
   const workoutCount = data.workouts.length
   const weekCount = Math.ceil(days / 7)
