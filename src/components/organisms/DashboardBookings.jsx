@@ -101,6 +101,10 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
           </div></div>
           <Button variant="ghost" aria-label="Next booking" onClick={() => shift(1)}><span>Next</span><Icon name="chevron-right" size={14} /></Button>
         </div>}
-    </> : <div className="db-inline-empty"><p>No bookings today.</p><button type="button" className="db-link" onClick={onBook}>Book session →</button></div>}
+    </> : <div className="orbit-booking-feature orbit-booking-empty">
+      <span className="orbit-booking-empty-icon" aria-hidden="true"><Icon name="calendar" size={20} /></span>
+      <h3>No bookings today.</h3>
+      <Button aria-haspopup="dialog" onClick={onBook}>Book session</Button>
+    </div>}
   </section>
 }
