@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import ProgramsLibrary from '../components/organisms/program/ProgramsLibrary'
 import Button from '../components/atoms/Button'
 import ExerciseThumb from '../components/molecules/ExerciseThumb'
@@ -12,9 +13,12 @@ import { matchesExerciseSearch, exerciseSearchRank, exerciseSuggestionDescriptio
 export default function WorkoutsPage() {
   const { db } = useData()
   const { openModal } = useModal()
+  const [params, setParams] = useSearchParams()
   const [programDirty, setProgramDirty] = useState(false)
-  const [tab, setTab] = useState('programs')
-  const [search, setSearch] = useState('')
+  const tab = params.get('view') === 'exercises' ? 'lib' : 'programs'
+  const search = params.get('q') || ''
+  const setTab = (view) => setParams(view === 'lib' ? { view: 'exercises' } : {})
+  const setSearch = (query) => setParams(query ? { view: 'exercises', q: query } : { view: 'exercises' }, { replace: true })
   const [mappingFilter, setMappingFilter] = useState('all')
   const [equipmentFilter, setEquipmentFilter] = useState('all')
   const equipmentOptions = [...new Set(db.exercises.map(exercise => exercise.equip).filter(Boolean))].sort((a, b) => a.localeCompare(b))

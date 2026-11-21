@@ -311,3 +311,240 @@
   .db-chart-controls .db-tabs { width: 100%; }
   .orbit-weekly-bars { gap: 1px; }
 }
+
+.coach-dashboard .db-card { padding: 21px; }
+.coach-dashboard .db-head h2 { font-size: 16px; }
+.coach-dashboard .db-actions :is(.btn, summary) { border-radius: 10px; min-height: 40px; }
+.coach-dashboard :is(a, button, summary, [tabindex]):focus-visible { outline-color: var(--orbit-focus); }
+.coach-dashboard .db-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.coach-dashboard .db-stat { padding: 12px; font-variant-numeric: tabular-nums; }
+.coach-dashboard .db-stat > small { font-size: 12px; }
+.coach-dashboard div.db-stat { cursor: default; }
+.coach-dashboard div.db-stat:hover { border-color: var(--border); box-shadow: none; }
+.orbit-today-metrics { display: flex; flex-wrap: wrap; column-gap: 14px; margin: -8px 0 9px; }
+.orbit-trend-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-bottom: 10px; }
+.orbit-trend-head h3 { font-size: 14px; }
+.orbit-trend-head .db-tabs { margin: 0; }
+.coach-dashboard .orbit-trend-change { border-radius: 6px; background: var(--surface); padding: 3px 6px; }
+.coach-dashboard .orbit-trend-change[data-tone="up"] { background: var(--tint-green); color: var(--green); }
+.coach-dashboard .orbit-trend-change[data-tone="down"] { background: var(--tint-amber); color: var(--accent2); }
+.coach-dashboard .db-chart { height: 178px; }
+.coach-dashboard .db-chart-heading { margin-top: 12px; }
+
+.coach-dashboard .orbit-segments {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+.orbit-selection-thumb {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: var(--selection-width, 0px);
+  height: var(--selection-height, 0px);
+  transform: translate(var(--selection-x, 0px), var(--selection-y, 0px));
+  background: var(--orbit-selected);
+  border-radius: 7px;
+  pointer-events: none;
+  transition: transform .26s ease, width .26s ease, height .26s ease;
+}
+.coach-dashboard .orbit-segments button {
+  position: relative;
+  min-height: 33px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  transition: color .16s, background-color .16s;
+}
+.coach-dashboard .orbit-segments button[aria-pressed="true"] { color: var(--accent); background: transparent; }
+.coach-dashboard .orbit-segments button[aria-pressed="false"]:hover { background: var(--surface); color: var(--text); }
+.coach-dashboard .orbit-review .orbit-segments button { border-radius: 7px; }
+.orbit-review-row { transition: background-color .16s; }
+.orbit-review-row > svg { transition: color .16s; }
+
+.orbit-booking-deck { perspective: 900px; }
+.orbit-booking-deck:not([data-count="1"]) { cursor: grab; }
+.orbit-booking-deck[data-dragging] { cursor: grabbing; user-select: none; }
+.orbit-booking-feature {
+  position: relative;
+  isolation: isolate;
+  animation: orbit-booking-in .3s cubic-bezier(.16,.8,.25,1);
+}
+.orbit-booking-feature::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(ellipse at var(--booking-shine-x, 50%) var(--booking-shine-y, 40%), #fff2, transparent 62%);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.orbit-booking-deck[data-hovering]:not([data-dragging]) .orbit-booking-feature::after { opacity: 1; }
+.orbit-booking-deck[data-dragging] .orbit-booking-feature {
+  transform: translateX(var(--booking-drag, 0px)) rotate(var(--booking-rotate, 0deg));
+  transition: none;
+}
+.orbit-booking-deck::before, .orbit-booking-deck::after { transition: scale .24s ease-out; }
+.orbit-booking-deck[data-dragging]::after { scale: 1.025; }
+.orbit-booking-controls { grid-template-columns: auto minmax(55px, 1fr) auto; }
+.orbit-booking-list { margin-top: 9px; border-top: 1px solid var(--border); }
+.orbit-booking-list summary { color: var(--accent); font-size: 12px; font-weight: 600; padding: 10px 4px; cursor: pointer; }
+.orbit-booking-list button {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 15px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 5px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.orbit-booking-list button:is(:hover, [aria-current="true"]) { background: var(--surface2); }
+.orbit-booking-list button :is(time, small) { color: var(--muted); font-size: 12px; }
+.orbit-booking-list button small { display: block; }
+.orbit-booking-list button span { overflow-wrap: anywhere; }
+
+.orbit-weekly { container-type: inline-size; }
+.orbit-weekly-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.orbit-weekly-summary strong { color: var(--text); font-size: 22px; }
+.orbit-weekly-legend span:first-child::before { background: var(--orbit-red); }
+.orbit-weekly-legend span:last-child::before { background: var(--muted); }
+.orbit-weekly-plot { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 7px; }
+.orbit-weekly-scale { display: flex; flex-direction: column; justify-content: space-between; padding: 11px 0 21px; color: var(--muted); font-size: 10px; }
+.orbit-weekly-bars {
+  background: linear-gradient(var(--border), var(--border)) 0 13px / 100% 1px no-repeat,
+    linear-gradient(var(--border), var(--border)) 0 calc(100% - 20px) / 100% 1px no-repeat;
+}
+.orbit-weekly-bars button { grid-template-rows: 70px 15px; transition: background-color .16s, border-color .16s; }
+.orbit-weekly-bars button > .orbit-weekly-date { text-overflow: clip; }
+.orbit-weekly-pair i { transform-origin: bottom; animation: orbit-bar-in .43s ease-out both; animation-delay: var(--week-delay); }
+.orbit-weekly-pair i:first-child { background: linear-gradient(var(--orbit-red), var(--tint-red)); }
+.orbit-weekly-pair i:last-child { background: linear-gradient(var(--muted), var(--border)); }
+@container (max-width: 395px) {
+  .orbit-weekly-bars[data-count="8"] button > .orbit-weekly-date { visibility: hidden; }
+  .orbit-weekly-bars[data-count="8"] button:nth-child(odd) > .orbit-weekly-date {
+    visibility: visible;
+    width: calc(200% + 4px);
+    text-align: center;
+    overflow: visible;
+  }
+  .orbit-weekly-bars[data-count="8"] button:nth-child(odd) { overflow: visible; }
+}
+
+.orbit-insight-content { animation: orbit-booking-in .28s ease-out; }
+.orbit-insights { position: relative; }
+.orbit-insights .orbit-booking-controls .btn { justify-content: center; min-width: 0; padding: 5px 8px; }
+.orbit-insight-tools { justify-content: flex-end; margin-top: 7px; }
+.orbit-insight-progress {
+  position: absolute;
+  inset: auto 1px 1px;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: orbit-insight-progress 8s linear both;
+}
+.orbit-readiness-overview { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.orbit-readiness-overview > div:only-child { grid-column: 1 / -1; }
+.orbit-readiness-ring { animation: orbit-booking-in .45s ease-out; }
+.orbit-readiness-ring strong { display: block; text-align: center; line-height: 83px; }
+.orbit-readiness-legend { display: grid; gap: 6px; padding: 0; }
+.orbit-readiness-legend li { display: grid; grid-template-columns: 7px minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+.orbit-readiness-legend li::before { margin: 0; }
+.orbit-readiness-legend strong { font-variant-numeric: tabular-nums; }
+.orbit-readiness .db-list .db-row { padding-block: 10px; }
+.orbit-date-tile { display: grid; place-items: center; flex: none; min-width: 48px; min-height: 42px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface2); }
+
+@keyframes orbit-booking-in {
+  from { opacity: .42; translate: var(--booking-entry, 0px) 5px; rotate: var(--booking-entry-angle, 0deg); scale: .98; }
+}
+@keyframes orbit-bar-in { from { transform: scaleY(0); opacity: .35; } }
+@keyframes orbit-insight-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes orbit-greeting-in { from { opacity: 0; transform: translateY(6px); filter: blur(2px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .orbit-greeting-word { display: inline-block; white-space: pre; animation: orbit-greeting-in .4s ease-out backwards; animation-delay: var(--word-delay); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-booking-feature, .orbit-weekly-pair i, .orbit-insight-content, .orbit-readiness-ring { animation: none; }
+  .orbit-booking-deck[data-dragging] .orbit-booking-feature { transform: none; }
+}
+@media (max-width: 1000px) {
+  .orbit-dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .orbit-dashboard-column { display: contents; }
+}
+@media (max-width: 700px) {
+  .coach-dashboard .db-card { padding: 17px; }
+  .coach-dashboard .db-actions :is(.btn, summary), .coach-dashboard .orbit-segments button, .orbit-insights .orbit-booking-controls .btn { min-height: 44px; }
+  .orbit-readiness-overview { gap: 11px; }
+  .orbit-readiness-ring { width: 76px; height: 76px; }
+  .orbit-readiness-ring strong { width: 63px; height: 63px; line-height: 63px; font-size: 23px; }
+}
+.db-chart-guide {
+  position: absolute;
+  left: 0;
+  width: 0;
+  border-left: 1px dashed var(--accent);
+  opacity: .62;
+  transform: translateX(var(--guide-x, 0px));
+  transition: transform .14s ease-out;
+  pointer-events: none;
+}
+.orbit-insight-progress[data-playing="false"] { animation-play-state: paused; }
+@property --readiness-angle {
+  syntax: "<percentage>";
+  initial-value: 100%;
+  inherits: false;
+}
+.orbit-readiness-ring {
+  --readiness-first-stop: calc(var(--readiness-angle) * var(--readiness-high));
+  --readiness-second-stop: calc(var(--readiness-angle) * var(--readiness-mid));
+  background: conic-gradient(var(--green) 0 var(--readiness-first-stop),
+    #da9d38 var(--readiness-first-stop) var(--readiness-second-stop),
+    var(--accent) var(--readiness-second-stop) var(--readiness-angle),
+    var(--border) var(--readiness-angle) 100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .orbit-readiness-ring { animation: orbit-readiness-sweep .55s ease-out; }
+}
+@keyframes orbit-readiness-sweep { from { --readiness-angle: 0%; } }
+.orbit-weekly-bars { position: relative; }
+.orbit-weekly-tooltip {
+  position: absolute;
+  top: -15px;
+  left: clamp(69px, var(--weekly-tooltip-x), calc(100% - 69px));
+  z-index: 1;
+  display: grid;
+  gap: 1px;
+  padding: 5px 8px;
+  min-width: 135px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  font-size: 11px;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: left .14s ease-out, opacity .14s ease-out;
+  pointer-events: none;
+}
+.orbit-weekly-bars:has(button:focus-visible) .orbit-weekly-tooltip, .orbit-weekly-tooltip[data-hovered="true"] { opacity: 1; }

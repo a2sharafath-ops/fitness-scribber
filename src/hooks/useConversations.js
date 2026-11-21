@@ -25,5 +25,5 @@ export function useConversations() {
     return { byClient: map, totalUnread: total }
   }, [messages])
 
-  return { byClient, totalUnread, reload }
+  return { byClient, totalUnread, messages, reload }
 }
