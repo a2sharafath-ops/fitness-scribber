@@ -24,6 +24,7 @@ const { performedLiftHistory, performedLiftOptions, recentLiftTrend } = await lo
 const { loadResponseRows, pairedResponsePoints, responseSeries } = await load('lib/loadResponse.js')
 const { addDays, todayISO } = await load('lib/dates.js')
 const { DataProvider } = await load('store/DataContext.jsx')
+const { AuthProvider } = await load('store/AuthContext.jsx')
 const { default: ClientLayout } = await load('components/templates/ClientLayout.jsx')
 const { default: SchemaWarning } = await load('components/organisms/SchemaWarning.jsx')
 const { ModalProvider } = await load('store/ModalContext.jsx')
@@ -257,7 +258,7 @@ function renderClientPage(path, db, Page) {
 }
 
 function renderRoutedSection(path, db) {
-  return renderToStaticMarkup(React.createElement(DataProvider, { initialDb: db },
+  return renderToStaticMarkup(React.createElement(AuthProvider, null, React.createElement(DataProvider, { initialDb: db },
     React.createElement(ModalProvider, null,
       React.createElement(ClipboardProvider, null,
         React.createElement(MemoryRouter, { initialEntries: [path] },
@@ -277,7 +278,7 @@ function renderRoutedSection(path, db) {
         ),
       ),
     ),
-  ))
+  )))
 }
 
 test('legacy and assessment routes preserve client, query, and anchor', () => {

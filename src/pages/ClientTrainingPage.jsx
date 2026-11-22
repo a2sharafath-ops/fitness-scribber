@@ -8,6 +8,7 @@ import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
 import TrainingDayPanel from '../components/organisms/TrainingDayPanel'
 import { QuickLogMenu } from '../components/organisms/forms/LogForms'
 import { useData } from '../store/DataContext'
+import { useAuth } from '../store/AuthContext'
 import { useModal } from '../store/ModalContext'
 import { todayISO, fmtDate, fmtDateRange } from '../lib/dates'
 import { trainingDay } from '../lib/trainingDay'
@@ -15,6 +16,7 @@ import { bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, canRunBooki
 import { blankWorkout, buildFromPlan, buildFromPrescription } from '../lib/workout'
 import { resolveTrainingMax } from '../lib/program'
 import { programPeriod } from '../lib/clientPrograms'
+import { readWorkoutCompletion } from '../lib/workoutCompletion'
 
 const validDate = (value) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false
@@ -61,6 +63,7 @@ export default function ClientTrainingPage() {
   const { id } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const { db, tz } = useData()
+  const { user } = useAuth()
   const { openModal } = useModal()
   const [loggingKey, setLoggingKey] = useState(null)
   const [bookingDraft, setBookingDraft] = useState(null)
@@ -87,6 +90,8 @@ export default function ClientTrainingPage() {
   const linkedWorkout = booking && bookingWorkout(db, booking)
   const wantsRunner = searchParams.get('run') === '1'
   const legacyDay = trainingDay(db, id, selectedDate, today, { unlinkedOnly: true })
+  const selectedWorkout = requestedBooking ? linkedWorkout : legacyDay.completed[0] || legacyDay.pending
+  const pendingFinish = wantsRunner && readWorkoutCompletion(user?.id || 'local', selectedWorkout)
   const canRunBooking = booking && canRunBookingWorkout(booking, linkedWorkout, today)
   const starter = bookingDraft?.bookingId === booking?.id ? bookingDraft : null
   const assignedPrograms = (db.programAssignments || []).filter(a => a.clientId === id).map(assignment => {
@@ -102,7 +107,7 @@ export default function ClientTrainingPage() {
   const plan = db.plans.find((item) => item.id === client.planId)
   const workouts = (db.workouts || []).filter((item) => item.clientId === id && ['completed', 'discarded'].includes(item.status)).sort((a, b) => b.date.localeCompare(a.date))
   const appointments = db.sessions.filter((item) => item.clientId === id && String(item.status).toLowerCase() === 'completed').sort((a, b) => b.date.localeCompare(a.date))
-  const showRunner = wantsRunner && (logging || (requestedBooking ? canRunBooking && (linkedWorkout || starter) : legacyDay.canRun))
+  const showRunner = wantsRunner && (pendingFinish || logging || (requestedBooking ? canRunBooking && (linkedWorkout || starter) : legacyDay.canRun))
   const selectDate = (date) => { setLoggingKey(null); setBookingDraft(null); setHistoryRequest(0); setSearchParams({ date }) }
   const closeRunner = () => {
     setLoggingKey(null)
@@ -123,7 +128,8 @@ export default function ClientTrainingPage() {
     {!logging && <div className="training-runner-head">
       <span>{client.name} · {booking ? `Booking at ${booking.time}` : 'Training'}</span><Button variant="ghost" size="sm" onClick={closeRunner}>Close</Button>
     </div>}
-    <ClientWorkoutFlow key={runnerKey} client={client} date={selectedDate} booking={booking} starter={starter} startOnOpen onRunStateChange={changeLogging} onSessionComplete={closeRunner} />
+    <ClientWorkoutFlow key={runnerKey} client={client} date={selectedDate} booking={booking} starter={starter} startOnOpen
+      pendingFinish={pendingFinish} onRunStateChange={changeLogging} onSessionComplete={closeRunner} />
   </section>
 
   return <>

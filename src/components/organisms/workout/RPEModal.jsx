@@ -10,19 +10,22 @@ import { calcSRPETL } from '../../../lib/calc'
 // workout + sRPE row. Serves both the athlete portal and the coach's client page.
 //   onSubmit(rpe, minutes) — save workout + sRPE
 //   onSkip(minutes) — save workout without an RPE entry · onClose() — keep running
-export default function RPEModal({ busy, locked = false, workout, onSubmit, onSkip, onClose }) {
-  const [rpe, setRpe] = useState('')
-  const [minutes, setMinutes] = useState(workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30)
+export default function RPEModal({ busy, workout, attempt, finishError, onSubmit, onSkip, onRetry, onUseSaved, onClose }) {
+  const [rpe, setRpe] = useState(attempt?.rpe ?? '')
+  const [minutes, setMinutes] = useState(attempt?.minutes ?? (workout.durationSec ? Math.max(1, Math.round(workout.durationSec / 60)) : 30))
   const mins = Math.max(1, Math.round(+minutes || 0) || 1)
   return (
-    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="modal" role="dialog" aria-modal="true">
+    <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) onClose?.() }}>
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <ModalShell title="How hard was that session?" onClose={onClose}
           footer={<>
-            <Button variant={locked ? 'primary' : 'ghost'} disabled={busy} onClick={() => onSkip(mins)}>{locked ? 'Retry save' : 'Skip'}</Button>
-            {!locked && <Button disabled={busy || !rpe} onClick={() => onSubmit(Number(rpe), mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button>}
+            {attempt ? finishError?.conflict
+              ? <Button onClick={onUseSaved}>Use saved workout</Button>
+              : <Button disabled={busy} onClick={onRetry}>{busy ? 'Saving…' : 'Retry save'}</Button>
+              : <><Button variant="ghost" disabled={busy} onClick={() => onSkip(mins)}>Skip</Button>
+                <Button disabled={busy || !rpe} onClick={() => onSubmit(Number(rpe), mins)}>{busy ? 'Saving…' : 'Save & finish'}</Button></>}
           </>}>
-          <fieldset disabled={locked || busy} style={{ border: 0, minWidth: 0 }}>
+          <fieldset disabled={!!attempt || busy} style={{ border: 0, minWidth: 0 }}>
           <Field label="Session RPE (Borg CR10)">
             <select value={rpe} onChange={(e) => setRpe(e.target.value)}>
               <option value="">Choose your rating</option>
@@ -33,7 +36,8 @@ export default function RPEModal({ busy, locked = false, workout, onSubmit, onSk
             <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
           </Field>
           </fieldset>
-          {locked && <p role="status">Retrying the recorded effort and duration from the first save attempt.</p>}
+          {attempt && busy && <p role="status">Saving the workout and updating Progress…</p>}
+          {finishError && <p role="alert">{finishError.message}</p>}
           <div className="muted" style={{ fontSize: 12 }}>
             Training load: <strong>{rpe ? `${calcSRPETL(Number(rpe), mins)} AU` : 'Select an RPE to calculate'}</strong>
           </div>

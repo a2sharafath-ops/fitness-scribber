@@ -7,6 +7,8 @@ import { hasBackend } from '../lib/supabase'
 import { fetchAll, persistDiff, deleteClientRemote, saveScheduleRemote, saveAssignmentRemote, saveTrainingPlansRemote } from '../api/sync'
 import { createSnapshotQueue } from '../lib/confirmedPersistence'
 import { applyScheduleRequest } from '../lib/schedule'
+import { applyWorkoutCompletion } from '../lib/workoutCompletion'
+import { saveLiveWorkoutCompletion } from '../api/workouts'
 import StartupScreen from '../components/templates/StartupScreen'
 
 const DataContext = createContext(null)
@@ -199,6 +201,44 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     } finally { scheduleSavingRef.current = false }
   }, [backend])
 
+  const finishWorkout = useCallback(async (attempt) => {
+    if (scheduleSavingRef.current) throw new Error('Another change is saving. Please wait and retry.')
+    scheduleSavingRef.current = true
+    try {
+      await writeQueueRef.current
+      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before finishing the workout.')
+      const db = backend ? dbRef.current : readStoredDB()
+      const current = db?.workouts.find(row => row.id === attempt.workout.id)
+      if (!current || current.clientId !== attempt.workout.clientId) {
+        const error = new Error('The saved workout is no longer available.')
+        error.conflict = true
+        throw error
+      }
+      setSaveStatus('saving')
+      let next = db
+      if (backend) {
+        const saved = await saveLiveWorkoutCompletion(attempt)
+        next = applyWorkoutCompletion(db, attempt, saved)
+      } else if (current.liveState?.completionId !== attempt.workout.liveState.completionId) {
+        if (JSON.stringify(current) !== JSON.stringify(attempt.expected)) {
+          const error = new Error('This workout changed in another window or device.')
+          error.conflict = true
+          throw error
+        }
+        next = applyWorkoutCompletion(db, attempt, attempt)
+        if (!saveDB(next)) throw new Error('Browser storage is unavailable. Retry to finish the workout.')
+      }
+      commitVersionRef.current += 1
+      persistenceRef.current?.reset(next)
+      dbRef.current = next
+      setDb(next)
+      setSaveStatus('saved')
+    } catch (error) {
+      setSaveStatus(writeFailedRef.current ? 'failed' : 'idle')
+      throw error
+    } finally { scheduleSavingRef.current = false }
+  }, [backend])
+
   const deleteClient = useCallback(async (clientId) => {
     if (scheduleSavingRef.current) throw new Error('Wait for the booking to finish saving.')
     if (!backend) {
@@ -232,8 +272,8 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     for (const i of [...(db?._loadIssues || []), ...writeIssues]) {
       byTable.set(i.table, { table: i.table, message: i.message, kind: i.kind || 'load' })
     }
-    return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
-  }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, deleteClient, refresh, saveStatus, writeIssues])
+    return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
+  }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, deleteClient, refresh, saveStatus, writeIssues])
 
   if (backend && !db) return <StartupScreen error={loadError} onRetry={() => { setLoadError(null); setLoadAttempt(n => n + 1) }} />
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
