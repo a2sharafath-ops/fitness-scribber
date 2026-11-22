@@ -74,10 +74,11 @@ function BookingList({ slides, index, onChoose }) {
       </button> : <span className="orbit-booking-list-count">{count} bookings</span>}
     </header>
     <ul id="orbit-booking-rows">
-      {slides.slice(first, end).map(({ booking, client, title, status, state }, offset) => {
+      {slides.slice(first, end).map(({ booking, client, title, status, state, subject, destination }, offset) => {
         const active = index === first + offset
         const [primaryStatus, statusDetail] = status.split(' · ')
-        return <li key={booking.id}>
+        const actionLabel = destination.label.startsWith('Open ') ? 'Open' : destination.label.replace(/ workout$/, '')
+        return <li key={booking.id} className="orbit-booking-entry">
           <button className="orbit-booking-row" type="button" aria-current={active ? 'true' : undefined}
             onClick={() => onChoose(first + offset)}>
             <span className="orbit-booking-row-time">{booking.time ? <time dateTime={booking.time}>{booking.time}</time> : 'No time'}</span>
@@ -91,6 +92,8 @@ function BookingList({ slides, index, onChoose }) {
             </span>
             <Icon name={active ? 'check' : 'chevron-right'} size={15} />
           </button>
+          <Link className="btn ghost orbit-booking-row-action" to={destination.path}
+            aria-label={`${destination.label} for ${subject}`}>{actionLabel}</Link>
         </li>
       })}
     </ul>

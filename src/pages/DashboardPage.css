@@ -404,7 +404,7 @@
 .orbit-booking-deck[data-dragging]::after { scale: 1.025; }
 .orbit-booking-deck[data-count="3"][data-dragging]::before { opacity: .55; }
 .orbit-booking-controls { grid-template-columns: auto minmax(55px, 1fr) auto; }
-.orbit-booking-list { margin-top: 12px; border-top: 1px solid var(--border); }
+.orbit-booking-list { margin-top: 12px; border-top: 1px solid var(--border); container-type: inline-size; }
 .orbit-booking-list > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; }
 .orbit-booking-list h3 { font-size: 14px; overflow-wrap: anywhere; }
 .orbit-booking-list-count { color: var(--muted); font-size: 12px; white-space: nowrap; }
@@ -428,6 +428,25 @@
 .orbit-booking-list-toggle[aria-expanded="true"] svg { rotate: 180deg; }
 .orbit-booking-list ul { list-style: none; }
 .orbit-booking-list li + li { border-top: 1px solid var(--border); }
+.orbit-booking-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  padding-inline-end: 8px;
+}
+.orbit-booking-entry:has(> .orbit-booking-row[aria-current="true"]) {
+  background: var(--orbit-selected);
+  box-shadow: inset 2px 0 var(--accent);
+}
+.orbit-today .orbit-booking-row-action {
+  justify-content: center;
+  min-width: 68px;
+  min-height: 44px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
 .orbit-booking-row {
   display: grid;
   grid-template-columns: 45px minmax(0, 1fr) 15px;
@@ -446,7 +465,6 @@
   cursor: pointer;
 }
 .orbit-booking-row:hover { background: var(--surface2); }
-.orbit-booking-row[aria-current="true"] { background: var(--orbit-selected); box-shadow: inset 2px 0 var(--accent); }
 .orbit-booking-row:focus-visible { outline-offset: -2px; }
 .orbit-booking-row-time { color: var(--muted); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .orbit-booking-row-copy { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
@@ -459,6 +477,10 @@
 .orbit-booking-row-status > span:is([data-state="missed"], [data-state="discarded"]) { background: var(--tint-amber); color: var(--accent2); }
 .orbit-booking-row > svg { margin-top: 1px; color: var(--muted); }
 .orbit-booking-row[aria-current="true"] :is(.orbit-booking-row-time, svg) { color: var(--accent); }
+@container (max-width: 310px) {
+  .orbit-booking-row { grid-template-columns: minmax(0, 1fr) 15px; row-gap: 3px; }
+  .orbit-booking-row-copy { grid-column: 1 / -1; grid-row: 2; }
+}
 
 .orbit-weekly { container-type: inline-size; }
 .orbit-weekly-summary {
