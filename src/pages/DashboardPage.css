@@ -213,6 +213,8 @@
 .coach-dashboard .db-chart-controls select { min-height: 40px; font: inherit; color: var(--text); }
 .coach-dashboard .db-note { color: var(--muted); }
 .orbit-readiness-overview { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 0 0 17px; }
+.orbit-readiness-actions { display: flex; gap: 4px 16px; flex-wrap: wrap; }
+.orbit-readiness-actions .db-link { min-height: 44px; }
 .orbit-readiness-overview .db-note { margin-top: 3px; }
 .orbit-readiness-ring { border-radius: 50%; width: 98px; height: 98px; display: grid; place-items: center; flex: none; }
 .orbit-readiness-ring strong { border-radius: 50%; width: 83px; height: 83px; display: grid; grid-auto-flow: column; align-content: center; justify-content: center; align-items: baseline; background: var(--surface); font-size: 27px; letter-spacing: -.04em; }

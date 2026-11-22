@@ -8,7 +8,7 @@ import { MemoryRouter } from 'react-router-dom'
 const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'error' })
 after(() => vite.close())
 const load = path => vite.ssrLoadModule(`/src/${path}`)
-const { dashboardClock, dashboardData, dashboardActivity, dashboardClientPath, dashboardWeeks } = await load('lib/dashboard.js')
+const { dashboardClock, dashboardData, dashboardActivity, dashboardClientPath, dashboardReadiness, dashboardWeeks, readinessRoster } = await load('lib/dashboard.js')
 const { seedBuilderQA } = await load('lib/builderQA.js')
 const { default: DashboardPage } = await load('pages/DashboardPage.jsx')
 const { DataProvider } = await load('store/DataContext.jsx')
@@ -41,6 +41,32 @@ test('coverage deduplicates clients and excludes inactive, future and orphan che
   const d = dashboardData(db, clock)
   assert.equal(d.recorded.length, 1); assert.equal(d.missing.length, 1)
   assert.ok(!d.reviews.some(r => /risk|Lower app score/.test(r.reason)))
+})
+
+test('readiness roster puts missing and oldest check-ins ahead of unscored and lower current scores', () => {
+  const db = fixture()
+  db.clients = [
+    ['high', 'High Score', 'Active'], ['missing', 'A Missing', 'Active'],
+    ['older', 'Older Client', 'Active'], ['low-b', 'Z Same Score', 'Active'],
+    ['oldest', 'Oldest Client', 'Active'], ['unscored', 'Unscored Client', 'Active'],
+    ['low-a', 'B Same Score', 'Active'], ['future', 'Z Future Only', 'Active'],
+    ['inactive', 'Inactive Client', 'On Hold'],
+  ].map(([id, name, status]) => ({ id, name, status }))
+  db.wellness = [
+    ['high', today, 26], ['missing', '', 16], ['oldest', '2026-09-30', 24],
+    ['older', '2026-10-10', 20], ['older', '2026-10-01', 12], ['older', '2026-10-12', 8],
+    ['low-b', today, 4], ['unscored', today, null], ['unscored', '2026-10-10', 24],
+    ['low-a', today, 4], ['future', '2026-10-12', 10], ['inactive', today, 4], ['orphan', today, 4],
+  ].map(([clientId, date, score]) => ({ clientId, date, score }))
+
+  const rows = readinessRoster(db, today)
+  assert.deepEqual(rows.map(({ client, date, readiness }) => [client.id, date, readiness?.score ?? null]), [
+    ['missing', null, null], ['future', null, null], ['oldest', '2026-09-30', 83], ['older', '2026-10-10', 67],
+    ['unscored', today, null], ['low-a', today, 0], ['low-b', today, 0], ['high', today, 92],
+  ])
+  assert.deepEqual(dashboardReadiness(db, rows.map(row => row.client), today), {
+    count: 3, older: 2, missing: 2, unscored: 1, average: 31, high: 1, medium: 0, low: 2,
+  })
 })
 
 test('review queue preserves all clients, routes concerns first and only flags today’s lower recorded score', () => {
@@ -161,7 +187,7 @@ test('Dashboard renders real destinations and empty states without duplicate sho
   const db=fixture(), render=db=>renderToStaticMarkup(React.createElement(DataProvider,{initialDb:db,backend:false},React.createElement(ModalProvider,null,React.createElement(MemoryRouter,null,React.createElement(DashboardPage)))))
   const html=render(db)
   assert.doesNotMatch(html, /orbit-up-next-title/)
-  for(const text of ['Today’s sessions','Needs review','Group readiness today','Planned workouts','Training snapshot','/clients/local-builder-100/check-ins?view=wellness']) assert.ok(html.includes(text))
+  for(const text of ['Today’s sessions','Needs review','Group readiness today','/clients?view=readiness','Planned workouts','Training snapshot','/clients/local-builder-100/check-ins?view=wellness']) assert.ok(html.includes(text))
   for(const text of ['AI Coach','At risk','rest day','Quick actions']) assert.ok(!html.includes(text))
   db.clients=[]
   assert.ok(render(db).includes('Start with your first client'))

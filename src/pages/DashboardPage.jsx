@@ -20,6 +20,7 @@ import useReducedMotion from '../hooks/useReducedMotion'
 import { initials } from '../lib/format'
 import { addDays, coachTimeZone, fmtDate, fmtDateRange, fmtDay } from '../lib/dates'
 import { baseOptions, shortLabel } from '../lib/chartSetup'
+import { CLIENT_READINESS_PATH } from '../lib/clientRoutes'
 import { dashboardActivity, dashboardClientPath, dashboardClock, dashboardData, dashboardReadiness, dashboardWeeks } from '../lib/dashboard'
 import { scheduleSort, sessionPath, weekOf } from '../lib/schedule'
 import './DashboardPage.css'
@@ -142,7 +143,7 @@ export default function DashboardPage() {
   const [week] = dashboardWeeks(ownedBookings, monday, 1)
   const upcoming = ownedBookings.filter((booking) => booking.date > today && ['Pending', 'Confirmed'].includes(booking.status)).sort(scheduleSort).slice(0, 4)
   const insights = [
-    { title: 'Check-in coverage', detail: `${recorded.length} of ${clients.length} active clients checked in today.`, path: '/#dashboard-checkins', action: 'View readiness' },
+    { title: 'Check-in coverage', detail: `${recorded.length} of ${clients.length} active clients checked in today.`, path: CLIENT_READINESS_PATH, action: 'View readiness' },
     { title: 'Items to review', detail: `${reviewFirst.length} to review and ${followup.length} follow-up items on the dashboard.`, path: '/#dashboard-review', action: 'View review queue' },
     { title: 'Booking completion', detail: completion.total ? `${completion.completed} of ${completion.total} bookings were completed in the past 30 days.` : 'There are no past bookings in the last 30 days.', path: '/schedule', action: 'View schedule' },
     { title: 'Upcoming sessions', detail: upcoming.length ? `Next booking on ${fmtDay(upcoming[0].date)} at ${upcoming[0].time}.` : 'There are no future bookings scheduled.', path: '/schedule', action: 'View upcoming sessions' },
@@ -338,7 +339,13 @@ export default function DashboardPage() {
   )
   const readinessCard = (
       <section className="db-card orbit-readiness" id="dashboard-checkins" aria-labelledby="orbit-readiness-title">
-        <header className="db-head"><h2 id="orbit-readiness-title">Group readiness today</h2><button className="db-link" type="button" disabled={!clients.length} onClick={event => openModal(<BulkWellnessForm />, true, event.currentTarget)}>Record check-ins</button></header>
+        <header className="db-head">
+          <h2 id="orbit-readiness-title">Group readiness today</h2>
+          <div className="orbit-readiness-actions">
+            <Link className="db-link" to={CLIENT_READINESS_PATH}>View readiness <Icon name="chevron-right" size={14} /></Link>
+            <button className="db-link" type="button" disabled={!clients.length} onClick={event => openModal(<BulkWellnessForm />, true, event.currentTarget)}>Record check-ins</button>
+          </div>
+        </header>
         <div className="orbit-readiness-overview">
           {group.average != null && <div className="orbit-readiness-ring" style={{ '--readiness-high': highShare / 100, '--readiness-mid': midBoundary / 100 }} aria-label="Average readiness">
             <strong><AnimatedNumber value={group.average} reduced={reduced} /><small>/100</small></strong>
