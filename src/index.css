@@ -1248,8 +1248,9 @@ html:has(.progress-index){overflow-x:clip}
 .training-workspace-side .training-history-row{flex-wrap:wrap}
 .training-workspace-side .training-history-row>span:first-child{min-width:0;overflow-wrap:anywhere;white-space:normal}
 .training-workspace-side .training-history-row>span:last-child:not(:only-child){white-space:normal}
-.training-workspace-side .training-program-assignment{flex-wrap:wrap;gap:10px}
-.training-workspace-side .training-program-assignment .training-program-copy{flex-basis:100%}
+.training-workspace-side .training-program-assignment{display:grid;gap:10px}
+.training-workspace-side .training-program-assignment .btn{justify-self:start}
+@media(min-width:601px) and (max-width:1179px){.training-workspace-side .training-program-assignment{grid-template-columns:minmax(0,1fr) auto}}
 @media(min-width:1180px){.training-workspace-grid{grid-template-columns:minmax(0,1fr) minmax(260px,31%)}}
 .training-program{margin-bottom:14px;padding:16px}
 .training-program-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
