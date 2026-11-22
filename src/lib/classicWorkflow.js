@@ -2,6 +2,8 @@ import { calcSRPETL } from './calc'
 import { uid } from './format'
 import { applyWorkoutStrength, removeWorkoutStrength } from './program'
 
+export const workoutEffortId = (workout) => `workout-rpe:${workout.id}`
+
 // These mutations run inside DataContext.commit so the workout, observations,
 // and derived strength records are saved from the same draft snapshot.
 export function logWorkoutCheckin(draft, clientId, values, workout) {
@@ -20,7 +22,8 @@ export function completeClassicWorkout(draft, clientId, workout, rpe, minutes) {
   if (rpe != null) {
     const duration = Math.max(1, Math.round(durationSec ? durationSec / 60 : 30))
     draft.srpe = [...draft.srpe, {
-      id: uid(), clientId, date: workout.date, sessionId: workout.bookingId ?? null,
+      id: workout.bookingId ? uid() : workoutEffortId(workout),
+      clientId, date: workout.date, sessionId: workout.bookingId ?? null,
       rpe, duration, tl: calcSRPETL(rpe, duration), source: 'Workout completion',
     }]
   }

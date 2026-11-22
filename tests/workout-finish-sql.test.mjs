@@ -84,3 +84,49 @@ test('finish is atomic, preserves recorded sets, and replays safely after a lost
   await pg.exec('set role anon')
   await assert.rejects(finish(), /permission denied/)
 })
+
+test('correcting completed work updates only the linked booking and rolls back a failed save', async () => {
+  await pg.exec('reset role')
+  const correctionMigration = await readFile('supabase/migrations/20261122170000_correct_workout_load.sql', 'utf8')
+  const saved = await readWorkout()
+  await pg.exec(correctionMigration)
+  assert.deepEqual(await readWorkout(), saved)
+
+  await pg.exec(`set role authenticated; set request.jwt.claim.sub = '${owner}';
+    insert into workouts (id,"clientId",date,status,"bookingId","durationSec")
+      values ('afternoon','qa','2026-11-22','completed','other-booking',1320);
+    insert into srpe (id,"clientId",date,"sessionId",rpe,duration,tl,source) values
+      ('finish-effort','qa','2026-11-22','qa-booking',7,28,196,'Workout completion'),
+      ('afternoon-effort','qa','2026-11-22','other-booking',5,22,110,'Workout completion'),
+      ('manual-effort','qa','2026-11-22','qa-booking',6,15,90,'Coach manual');`)
+  const efforts = async () => (await pg.query(`select to_jsonb(s)-'coachId' as row from srpe s order by id`)).rows.map(x => x.row)
+  const afternoon = async () => (await pg.query(`select to_jsonb(w) as row from workouts w where id='afternoon'`)).rows[0].row
+  const before = await efforts()
+  const afternoonBefore = await afternoon()
+  const revised = { ...saved, durationSec: 1920 }
+  const newEffort = { ...effort, rpe: 8, duration: 32, tl: 256 }
+  const record = { expected: effort, row: newEffort }
+  const correct = (workout = revised, expected = saved, change = record, strength = null) =>
+    pg.query('select public.correct_completed_workout($1::jsonb,$2::jsonb,$3::jsonb,$4::jsonb)',
+      [workout, expected, change, strength].map(value => value == null ? null : JSON.stringify(value)))
+
+  await assert.rejects(correct({ ...revised, bookingId: 'other-booking' }), /identity/)
+  await assert.rejects(correct({ ...revised, liveState: { ...revised.liveState, original: {} } }), /original snapshot/)
+  await assert.rejects(correct(revised, saved, { ...record, row: { ...newEffort, tl: 196 } }), /Invalid session RPE/)
+  const sameSetEdits = structuredClone(revised)
+  sameSetEdits.main[0].setRows[0].reps = 8
+  const newMax = { ...max, id: 'corrected-estimate', valueKg: 55.7 }
+  await pg.query(`insert into assessments (id,"clientId",date,type) values ('reserved','qa',$1,'fitness')`, [saved.date])
+  await assert.rejects(correct(sameSetEdits, saved, record, {
+    maxes: [newMax], assessments: [{ ...assessment, id: 'reserved', data: { ...assessment.data, sourceMaxId: newMax.id } }],
+  }), /duplicate key/)
+  assert.deepEqual(await efforts(), before)
+  assert.deepEqual(await readWorkout(), saved)
+
+  await correct()
+  await assert.rejects(correct(), /workout changed/i)
+  await correct(revised, revised, { expected: newEffort, row: newEffort })
+  assert.deepEqual(await efforts(), before.map(row => row.id === effort.id ? newEffort : row))
+  assert.deepEqual(await readWorkout(), revised)
+  assert.deepEqual(await afternoon(), afternoonBefore)
+})
