@@ -7,7 +7,7 @@ import LiveSessionMenu from '../../molecules/LiveSessionMenu'
 import LiveExerciseCard from './live/LiveExerciseCard'
 import LiveSessionReview from './live/LiveSessionReview'
 import LiveSessionEditor from './live/LiveSessionEditor'
-import { liveBlocks, liveExerciseUnits, liveClosed, liveElapsed, liveDockSet, locateLive, rowMode, adjustedSetDuration, finishLiveSession } from '../../../lib/liveSession'
+import { liveBlocks, liveExerciseUnits, liveClosed, liveElapsed, liveDockSet, locateLive, rowMode, adjustedSetDuration, finishLiveSession, sessionRows } from '../../../lib/liveSession'
 import { prefersReducedMotion } from '../../../hooks/useReducedMotion'
 import { secToClock } from '../../../lib/workout'
 import './LiveTrainingSession.css'
@@ -25,6 +25,8 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   const units = reviewUnits || session.liveState.settings.units || preferredUnits || 'kg'
   const blocks = liveBlocks(session)
   const pending = liveDockSet(session)
+  const rows = sessionRows(session)
+  const allSetsLogged = rows.length > 0 && rows.every(row => row.done)
   const nextDuration = pending ? adjustedSetDuration(pending.row) : null
   const nextLabel = { stop: 'Stop timer', start: 'Start timed set', done: 'Mark set done', log: 'Log next set' }[pending?.action]
   const seconds = Math.floor(liveElapsed(session, now) / 1000)
@@ -114,9 +116,12 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
       </section>)}
       {!readOnly && !locked && <button type="button" className="ls-button" onClick={() => openEditor({ kind: 'add-block' })}>+ Add block</button>}
     </div><LiveSessionReview session={session} units={units} /></div>
-    {!readOnly && typeof document !== 'undefined' && createPortal(<div className="ls-current" aria-label="Current exercise" ref={dockRef} style={dockBounds || undefined}><div><small>{pending?.action === 'stop' ? 'Timing set' : pending?.action === 'done' ? 'Ready to log' : 'Next set'}{pending?.block ? ` · ${pending.block.title}` : ''}</small>
-      {pending?.row ? <><button type="button" className="ls-current-name" title="Jump to set" onClick={() => jump(pending.row)}>{pending.item.name}</button>
-        <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.action === 'done' ? secToClock(pending.row.durationSeconds) : nextDuration != null ? secToClock(nextDuration) : `${pending.row.pReps ?? '—'}${pending.row.pRepsMax != null && pending.row.pRepsMax !== pending.row.pReps ? '–' + pending.row.pRepsMax : ''} reps`}</p></> : <strong>No sets left to log</strong>}</div>
+    {!readOnly && typeof document !== 'undefined' && createPortal(<div className="ls-current" aria-label="Current exercise" ref={dockRef} style={dockBounds || undefined}><div>
+      {pending?.row ? <>
+        <small>{pending.action === 'stop' ? 'Timing set' : pending.action === 'done' ? 'Ready to log' : 'Next set'} · {pending.block.title}</small>
+        <button type="button" className="ls-current-name" title="Jump to set" onClick={() => jump(pending.row)}>{pending.item.name}</button>
+        <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.action === 'done' ? secToClock(pending.row.durationSeconds) : nextDuration != null ? secToClock(nextDuration) : `${pending.row.pReps ?? '—'}${pending.row.pRepsMax != null && pending.row.pRepsMax !== pending.row.pReps ? '–' + pending.row.pRepsMax : ''} reps`}</p>
+      </> : <strong>{allSetsLogged ? 'All sets logged' : 'No sets left to log'}</strong>}</div>
       <div className="ls-live-hr"><strong>♥ — <small>bpm</small></strong><small>No live HR feed</small></div>
       {pending?.row ? <button type="button" className="ls-button primary" disabled={session.liveState.clock.paused && pending.action === 'start'} onClick={nextAction}>
         {nextLabel}</button> : <button type="button" className="ls-button primary" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
