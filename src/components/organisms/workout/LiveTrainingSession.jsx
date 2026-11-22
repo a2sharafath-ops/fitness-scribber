@@ -8,6 +8,7 @@ import LiveExerciseCard from './live/LiveExerciseCard'
 import LiveSessionReview from './live/LiveSessionReview'
 import LiveSessionEditor from './live/LiveSessionEditor'
 import { liveBlocks, liveExerciseUnits, liveClosed, liveElapsed, liveDockSet, locateLive, rowMode, adjustedSetDuration, finishLiveSession } from '../../../lib/liveSession'
+import { prefersReducedMotion } from '../../../hooks/useReducedMotion'
 import { secToClock } from '../../../lib/workout'
 import './LiveTrainingSession.css'
 
@@ -68,7 +69,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   }
   const jump = (row) => {
     const element = document.getElementById('live-set-' + row.id)
-    element?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+    element?.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'instant' : 'smooth' })
     element?.querySelector('button:not(:disabled)')?.focus({ preventScroll: true })
   }
   const nextAction = () => {

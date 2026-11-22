@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
+import { Link, Outlet, useLocation, useOutletContext, useParams } from 'react-router-dom'
 import Avatar from '../atoms/Avatar'
 import ClientSubnav from './ClientSubnav'
 import { useData } from '../../store/DataContext'
 
 export default function ClientLayout() {
+  const theme = useOutletContext()
   const { id } = useParams()
   const { pathname, hash } = useLocation()
   const { db, saveStatus } = useData()
@@ -46,7 +47,7 @@ export default function ClientLayout() {
         {saveStatus === 'saving' ? 'Saving changes…' : saveStatus === 'saved' ? 'Changes saved' : 'Changes may not have saved. Review the data warning before continuing.'}
       </div>}
       <ClientSubnav client={client} />
-      <Outlet />
+      <Outlet context={theme} />
     </div>
   )
 }

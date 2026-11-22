@@ -20,15 +20,19 @@ function groupFor(name, blockType, exercises) {
 
 // Only observations of completed work qualify. A prescription, a manually
 // tracked name, or a standalone 1RM checkpoint does not prove performance.
-export function performedLiftHistory(db, clientId) {
+export function performedLiftHistory(db, clientId, { actualOnly = false } = {}) {
   const rows = []
   for (const workout of db.workouts || []) {
     if (workout.clientId !== clientId || workout.status !== 'completed') continue
     for (const item of workout.main || []) {
       if (!validName(item.name)) continue
       const sets = Array.isArray(item.setRows) && item.setRows.length
-        ? item.setRows.filter((set) => set.done && set.mode !== 'duration').map((set) => ({ load: numeric(set.load ?? set.pLoadKg), reps: numeric(set.reps ?? set.pReps) }))
-        : item.done ? [{ load: numeric(item.doneWeight ?? item.weight), reps: numeric(item.doneReps ?? item.reps) }] : []
+        ? item.setRows.filter((set) => set.done && set.mode !== 'duration').map((set) => ({
+          load: numeric(actualOnly ? set.load : set.load ?? set.pLoadKg),
+          reps: numeric(actualOnly ? set.reps : set.reps ?? set.pReps),
+        }))
+        : item.done ? [{ load: numeric(actualOnly ? item.doneWeight : item.doneWeight ?? item.weight),
+          reps: numeric(actualOnly ? item.doneReps : item.doneReps ?? item.reps) }] : []
       if (!sets.length) continue
       const loaded = sets.filter((set) => set.load != null)
       const best = loaded.sort((a, b) => b.load - a.load)[0]
@@ -39,7 +43,22 @@ export function performedLiftHistory(db, clientId) {
     if (row.clientId !== clientId || !validName(row.exercise)) continue
     rows.push({ name: row.exercise.trim(), date: row.date, source: row.source || 'Resistance log', blockType: '', sets: numeric(row.sets), reps: numeric(row.reps), loadKg: numeric(row.weight) })
   }
-  return rows.sort((a, b) => b.date.localeCompare(a.date))
+  return rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+}
+
+export function recentLiftTrend(db, clientId, today) {
+  const lifts = new Map()
+  for (const row of performedLiftHistory(db, clientId, { actualOnly: true })) {
+    if (!row.date || row.date > today || row.loadKg == null || row.loadKg < 0) continue
+    const key = keyOf(row.name)
+    if (!lifts.has(key)) lifts.set(key, new Map())
+    const dates = lifts.get(key)
+    const previous = dates.get(row.date)
+    if (!previous || row.loadKg > previous.loadKg) dates.set(row.date, row)
+  }
+  const series = [...lifts.values()]
+  const chosen = series.find(dates => dates.size >= 2) || series[0]
+  return chosen ? [...chosen.values()].slice(0, 8).reverse() : []
 }
 
 export function performedLiftOptions(db, clientId) {

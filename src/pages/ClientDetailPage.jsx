@@ -5,6 +5,7 @@ import Icon from '../components/atoms/Icon'
 import ConcernCard from '../components/molecules/ConcernCard'
 import OverviewTraining from '../components/organisms/OverviewTraining'
 import OverviewCheckin from '../components/organisms/OverviewCheckin'
+import OverviewLiftTrend from '../components/organisms/OverviewLiftTrend'
 import { InviteAthleteForm } from '../components/organisms/forms/ClientForms'
 import ConcernForm from '../components/organisms/forms/ConcernForm'
 import SessionForm from '../components/organisms/forms/SessionForm'
@@ -20,6 +21,8 @@ import { readinessScore } from '../lib/calc'
 import { bookedCompletion } from '../lib/dashboard'
 import { clientPrograms } from '../lib/clientPrograms'
 import { fmtWt } from '../lib/units'
+import { recentLiftTrend } from '../lib/performedLifts'
+import { prefersReducedMotion } from '../hooks/useReducedMotion'
 
 export default function ClientDetailPage() {
   const { id } = useParams()
@@ -38,6 +41,7 @@ export default function ClientDetailPage() {
   const strength = (db.maxes || []).filter((row) => row.clientId === id && row.kind === 'e1rm' && row.date <= today && Number(row.valueKg) > 0)
     .sort((a, b) => b.date.localeCompare(a.date))[0]
   const program = clientPrograms(db, client, today)[0]
+  const liftTrend = recentLiftTrend(db, id, today)
   const metrics = [
     { name: 'Booking completion', value: completion.total ? `${Math.round(completion.completed / completion.total * 100)}%` : '—',
       note: completion.total ? `${completion.completed} of ${completion.total} · past 30 days` : 'No past bookings in 30 days', path: `/clients/${id}/progress#attendance` },
@@ -70,9 +74,10 @@ export default function ClientDetailPage() {
     const details = concernDetails.current
     if (!details) return
     details.open = true
-    details.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const behavior = prefersReducedMotion() ? 'instant' : 'smooth'
+    details.scrollIntoView({ behavior, block: 'center' })
     details.querySelector('summary')?.focus({ preventScroll: true })
-    document.getElementById(`overview-concern-${concernId}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    document.getElementById(`overview-concern-${concernId}`)?.scrollIntoView({ behavior, block: 'nearest' })
   }
   const resolve = async (concernId) => {
     const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional):', multiline: true, confirmLabel: 'Resolve' })
@@ -122,13 +127,20 @@ export default function ClientDetailPage() {
         <span>{name}</span><strong>{value}</strong><small>{note}</small><Icon name="chevron-right" size={16} aria-hidden="true" />
       </Link>)}
     </div>
-    <section className="card overview-program" aria-labelledby="overview-program-title">
-      <div><h2 id="overview-program-title">{program?.upcoming ? 'Upcoming program' : 'Current program'}</h2>
-        <strong>{program?.name || 'No current or upcoming program'}</strong>
-        {program?.note && <p>{program.note}</p>}
-      </div>
-      <Link className="btn ghost" to={`/clients/${id}/training${program ? '#training-program-title' : ''}`}>{program ? 'View program' : 'Open Training'}</Link>
-    </section>
+    <div className="overview-progress">
+      <section className="card overview-program" aria-labelledby="overview-program-title">
+        <h2 id="overview-program-title">{program?.upcoming ? 'Upcoming program' : 'Current program'}</h2>
+        <div className="overview-program-content">
+          {program?.week && <div className="overview-week-ring" aria-hidden="true"
+            style={{ '--program-week': `${program.week / program.totalWeeks * 100}%` }}><span><b>{program.week}</b> / {program.totalWeeks}</span></div>}
+          <div><strong>{program?.name || 'No current or upcoming program'}</strong>
+            {program?.note && <p>{program.note}</p>}
+          </div>
+        </div>
+        <Link className="btn ghost" to={`/clients/${id}/training${program ? '#training-program-title' : ''}`}>{program ? 'View training plan' : 'Open Training'}</Link>
+      </section>
+      <OverviewLiftTrend key={id} clientId={id} trend={liftTrend} units={units} />
+    </div>
     <div className="overview-priority">
       <section className="card overview-next" aria-labelledby="next-session-title">
         <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSession ? nextSession.type : 'No upcoming session booked'}</h2>

@@ -7,6 +7,7 @@ import OrbitNotifications from './OrbitNotifications'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { useConversations } from '../../hooks/useConversations'
+import { prefersReducedMotion } from '../../hooks/useReducedMotion'
 import { openConcerns } from '../../lib/calc'
 import { WORKSPACE_PAGES, workspaceSearch } from '../../lib/workspaceSearch'
 import SessionForm from './forms/SessionForm'
@@ -50,7 +51,7 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
   const closePanel = useCallback((restore = false, animate = true) => {
     const box = toolbar.current?.querySelector('[data-panel="' + panel + '"]')
     if (restore) box?.querySelector('summary, .gb-bell')?.focus()
-    setExiting(animate && window.matchMedia?.('(prefers-reduced-motion: no-preference)')?.matches ? panel : null)
+    setExiting(animate && !prefersReducedMotion() ? panel : null)
     setPanel(null)
   }, [panel])
   useEffect(() => {
@@ -143,6 +144,16 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
           </div>
           <label htmlFor="orbit-frost">Frost <span>{appearance.frost}%</span></label>
           <input type="range" id="orbit-frost" min="0" max="100" value={appearance.frost} onChange={(event) => appearance.updateAppearance({ frost: Number(event.target.value) })} />
+          <label htmlFor="orbit-motion">Motion</label>
+          <select id="orbit-motion" value={appearance.motion} onChange={event => appearance.updateAppearance({ motion: event.target.value })}>
+            <option value="system">Device preference</option>
+            <option value="reduce">Reduce motion</option>
+          </select>
+          <label htmlFor="orbit-density">Content spacing</label>
+          <select id="orbit-density" value={appearance.density} onChange={event => appearance.updateAppearance({ density: event.target.value })}>
+            <option value="comfortable">Comfortable</option>
+            <option value="compact">Compact</option>
+          </select>
         </div>
       </details>
       <OrbitNotifications key={user?.id ?? 'local'} scope={user?.id ?? 'local'} notices={notices}
