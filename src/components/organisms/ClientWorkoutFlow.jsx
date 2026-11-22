@@ -7,7 +7,7 @@ import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
 import { toast } from '../../lib/toast'
 import { readinessScore, dailySum, acwrSeries } from '../../lib/calc'
-import { completeClassicWorkout, correctClassicWorkout, logWorkoutCheckin } from '../../lib/classicWorkflow'
+import { correctClassicWorkout, logWorkoutCheckin } from '../../lib/classicWorkflow'
 import { removeWorkoutStrength, resolveTrainingMax } from '../../lib/program'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { clearWorkoutDraft } from '../../lib/workoutDraft'
@@ -15,19 +15,31 @@ import { buildFromPrescription } from '../../lib/workout'
 import { prepareLiveSession } from '../../lib/liveSession'
 import { trainingDay } from '../../lib/trainingDay'
 import { bookingWorkout } from '../../lib/schedule'
+import { useAuth } from '../../store/AuthContext'
+import { forgetWorkoutCompletion, prepareWorkoutCompletion, readWorkoutCompletion, rememberWorkoutCompletion } from '../../lib/workoutCompletion'
 
 // Training owns the Classic session writes. The date is
 // explicit so a completed workout can be reopened from Training history.
-export default function ClientWorkoutFlow({ client, date, booking, starter, onRunStateChange, onSessionComplete, startOnOpen = false }) {
-  const { db, commit, tz, units } = useData()
+export default function ClientWorkoutFlow({ client, date, booking, starter, pendingFinish, onRunStateChange, onSessionComplete, startOnOpen = false }) {
+  const { db, commit, finishWorkout, tz, units } = useData()
+  const { user } = useAuth()
+  const scope = user?.id || 'local'
   const { openModal } = useModal()
   const [checkinW, setCheckinW] = useState(null)
-  const [rpeW, setRpeW] = useState(null)
+  const [rpeW, setRpeW] = useState(pendingFinish?.workout ?? null)
   const [completionBusy, setCompletionBusy] = useState(false)
-  const completionAttempt = useRef(null)
+  const [completion, setCompletion] = useState(pendingFinish || null)
+  const [finishError, setFinishError] = useState(null)
+  const savingFinish = useRef(false)
+  const restoredFinish = useRef(false)
+  const mounted = useRef(false)
   const [runOpen, setRunOpen] = useState(false)
   const startAttempted = useRef(false)
   useEffect(() => { onRunStateChange?.(runOpen) }, [runOpen, onRunStateChange])
+  useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false }
+  }, [])
   const sessionDate = date || todayISO(tz)
   const day = trainingDay(db, client.id, sessionDate, todayISO(tz), { unlinkedOnly: true })
   const workout = booking ? bookingWorkout(db, booking) : day.completed[0] || day.pending || (runOpen ? day.discarded?.at(-1) : null) || null
@@ -63,13 +75,13 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, onRu
   }, [needsCheckin, saveWorkout])
   const canStart = booking ? Boolean(starter || workout && !['completed', 'discarded'].includes(workout.status)) : day.canRun
   useEffect(() => {
-    if (!startOnOpen || startAttempted.current || !canStart) return
+    if (!startOnOpen || pendingFinish || startAttempted.current || !canStart) return
     startAttempted.current = true
     if (workout?.status === 'in_progress') { setRunOpen(true); return }
     const candidate = workout || starter || buildFromPrescription(prescription, { clientId: client.id, date: sessionDate,
       resolveTm: (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg })
     startWorkout({ ...prepareLiveSession(candidate, (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg), status: 'in_progress', startedAt: new Date().toISOString() })
-  }, [startOnOpen, canStart, db, client.id, sessionDate, workout, starter, prescription, startWorkout])
+  }, [startOnOpen, pendingFinish, canStart, db, client.id, sessionDate, workout, starter, prescription, startWorkout])
   const submitCheckin = (values) => {
     const item = checkinW
     setCheckinW(null)
@@ -77,23 +89,52 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, onRu
     setRunOpen(true)
   }
   const skipCheckin = () => { const item = checkinW; setCheckinW(null); if (item) { saveWorkout(item); setRunOpen(true) } }
-  const requestComplete = (item) => { completionAttempt.current = null; setRpeW(item) }
-  const finishWorkout = async (item, rpe, minutes) => {
+  const requestComplete = (item) => { setFinishError(null); setRpeW(item) }
+  const saveCompletion = useCallback(async (attempt) => {
+    if (savingFinish.current) return
+    savingFinish.current = true
+    setCompletion(attempt)
     setCompletionBusy(true)
-    let result
-    if (completionAttempt.current) result = await commit(() => {})
-    else result = await commit((data) => { completionAttempt.current = { peaks: completeClassicWorkout(data, client.id, item, rpe, minutes) } })
-    setCompletionBusy(false)
-    if (!result?.saved) { toast('The session could not finish saving. Retry to save the same recorded effort and sets.', 'error'); return }
-    const peaks = completionAttempt.current?.peaks || []
-    completionAttempt.current = null
-    clearWorkoutDraft(item, 'run')
+    setFinishError(null)
+    try {
+      await finishWorkout(attempt)
+      forgetWorkoutCompletion(scope, attempt)
+      clearWorkoutDraft(attempt.workout, 'run')
+    } catch (error) {
+      if (mounted.current) setFinishError({ conflict: error.conflict, message: error.conflict
+        ? `${error.message} Open the saved workout to continue.`
+        : `The workout could not finish saving. Your duration and effort are kept on this browser. ${error.message}` })
+      return
+    } finally {
+      savingFinish.current = false
+      if (mounted.current) setCompletionBusy(false)
+    }
+    if (!mounted.current) return
+    setCompletion(null)
     setRpeW(null)
     setRunOpen(false)
     onSessionComplete?.()
-    peaks.forEach((entry, index) => setTimeout(() => toast(
+    attempt.peaks.forEach((entry, index) => setTimeout(() => toast(
       `New estimated 1RM — ${entry.exercise}: ${entry.valueKg} kg${entry.tracked ? ' (assessment updated)' : ''}`,
       'info', 6000), index * 350))
+  }, [finishWorkout, onSessionComplete, scope])
+  useEffect(() => {
+    if (!pendingFinish || restoredFinish.current) return
+    restoredFinish.current = true
+    void saveCompletion(pendingFinish)
+  }, [pendingFinish, saveCompletion])
+  const submitFinish = (rpe, minutes) => {
+    if (savingFinish.current) return
+    const pending = readWorkoutCompletion(scope, workout)
+    if (pending) { void saveCompletion(pending); return }
+    try {
+      const attempt = prepareWorkoutCompletion(db, workout, rpeW, rpe, minutes)
+      rememberWorkoutCompletion(scope, attempt)
+      void saveCompletion(attempt)
+    } catch (error) {
+      setFinishError({ message: error.name === 'QuotaExceededError' || error.name === 'SecurityError'
+        ? 'This browser could not keep your finish details. Allow browser storage and retry.' : error.message })
+    }
   }
 
   const workoutProps = {
@@ -109,13 +150,15 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, onRu
 
   return (
     <>
-      {!checkinW && <TodayWorkout {...workoutProps} focusedRunner={startOnOpen} isToday={sessionDate === todayISO(tz)}
+      {!checkinW && !completion && <TodayWorkout {...workoutProps} focusedRunner={startOnOpen} isToday={sessionDate === todayISO(tz)}
           headerLabel={sessionDate === todayISO(tz) ? "Today's Workout" : `Workout · ${fmtDate(sessionDate)}`} />}
       {checkinW && <CheckInModal today={sessionDate} onSubmit={submitCheckin} onSkip={skipCheckin}
         onClose={() => { setCheckinW(null); setRunOpen(false); onSessionComplete?.() }} />}
-      {rpeW && <RPEModal workout={rpeW} busy={completionBusy} locked={!!completionAttempt.current}
-        onSubmit={(rpe, minutes) => finishWorkout(rpeW, rpe, minutes)}
-        onSkip={(minutes) => finishWorkout(rpeW, null, minutes)} onClose={() => setRpeW(null)} />}
+      {rpeW && <RPEModal workout={rpeW} busy={completionBusy} attempt={completion} finishError={finishError}
+        onSubmit={submitFinish} onSkip={(minutes) => submitFinish(null, minutes)}
+        onRetry={() => saveCompletion(completion)}
+        onUseSaved={() => { forgetWorkoutCompletion(scope, completion); window.location.reload() }}
+        onClose={completionBusy ? undefined : completion ? onSessionComplete : () => setRpeW(null)} />}
     </>
   )
 }
