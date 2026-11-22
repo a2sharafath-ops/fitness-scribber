@@ -325,9 +325,7 @@
 .orbit-activity-reading strong { color: var(--accent); font-size: 24px; line-height: 1; }
 .orbit-activity-reading span { color: var(--muted); font-size: 12px; }
 .orbit-activity-reading small { display: block; }
-@media (max-width: 400px) {
-  .coach-dashboard .orbit-trend-tiles { grid-template-columns: repeat(2,minmax(0,1fr)); }
-}
+.orbit-metric-select { display: none; }
 .coach-dashboard .orbit-trend-change { border-radius: 6px; background: var(--surface); padding: 3px 6px; }
 .coach-dashboard .orbit-trend-change[data-tone="up"] { background: var(--tint-green); color: var(--green); }
 .coach-dashboard .orbit-trend-change[data-tone="down"] { background: var(--tint-amber); color: var(--accent2); }
@@ -510,6 +508,60 @@
   .coach-dashboard .db-card { padding: 17px; }
   .orbit-today { overflow: clip; }
   .coach-dashboard .db-actions :is(.btn, summary), .coach-dashboard .orbit-segments button, .orbit-insights .orbit-booking-controls .btn { min-height: 44px; }
+  .orbit-coaching .db-head { margin-bottom: 10px; }
+  .coach-dashboard .orbit-coaching .db-stats { margin-bottom: 8px; }
+  .coach-dashboard .orbit-coaching button.db-stat { padding: 8px 10px; gap: 2px; }
+  .orbit-coaching button.db-stat > :is(span, strong) { order: 0; }
+  .orbit-coaching button.db-stat > span { font-size: 11px; }
+  .coach-dashboard .orbit-coaching button.db-stat strong { font-size: 22px; }
+  .orbit-today-metrics { margin: 0 0 8px; }
+  .orbit-trend-head { margin-bottom: 8px; }
+  .coach-dashboard .orbit-trend-tiles {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface2);
+  }
+  .coach-dashboard .orbit-trend-tiles .db-stat {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0 6px;
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .coach-dashboard .orbit-trend-tiles .db-stat + .db-stat { border-top: 1px solid var(--border); }
+  .orbit-trend-tiles .db-stat > span { font-size: 12px; }
+  .coach-dashboard .orbit-trend-tiles .db-stat > strong { grid-area: 1 / 3; font-size: 18px; letter-spacing: 0; white-space: nowrap; }
+  .orbit-trend-tiles .db-stat > strong small { font-size: 12px; }
+  .orbit-trend-tiles .orbit-trend-change { grid-area: 1 / 2; white-space: nowrap; }
+  .orbit-metric-buttons { display: none; }
+  .orbit-metric-select {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .coach-dashboard .orbit-metric-select select {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline-start: 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 16px;
+  }
+  .orbit-metric-select select:focus-visible { outline-color: var(--orbit-focus); }
+  .coach-dashboard .orbit-coaching :is(.db-note, .db-chart-heading, .db-chart-empty) { margin-top: 8px; }
+  .orbit-coaching .orbit-activity-reading { min-height: 0; }
   .orbit-readiness-overview { gap: 11px; }
   .orbit-readiness-ring { width: 76px; height: 76px; }
   .orbit-readiness-ring strong { width: 63px; height: 63px; line-height: 63px; font-size: 23px; }
