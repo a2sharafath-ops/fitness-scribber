@@ -38,7 +38,7 @@ function BookingSlide({ slide, active, direction, cardRef }) {
   const { booking, client, title, program, subject, featuredStatus, destination, readiness } = slide
   return <article className={`orbit-booking-card ${active ? 'orbit-booking-feature' : 'orbit-booking-measure'}`}
     ref={active ? cardRef : undefined} inert={!active} aria-hidden={active ? undefined : true}
-    style={active ? { '--booking-entry': `${direction * 42}px`, '--booking-entry-angle': `${direction * 3}deg` } : undefined}>
+    style={active ? { '--booking-entry': `${direction * 55}px`, '--booking-entry-angle': `${direction * 3}deg` } : undefined}>
     <div className="orbit-booking-meta">
       <p className="orbit-booking-time">{booking.time || 'Time not set'}{hasDuration(booking) && ' · ' + durationLabel(booking)}</p>
       <span className="orbit-booking-status">{featuredStatus}</span>
@@ -55,19 +55,37 @@ function BookingSlide({ slide, active, direction, cardRef }) {
   </article>
 }
 
+function resetTilt(deck) {
+  if (!deck) return
+  delete deck.dataset.hovering
+  for (const property of ['tilt-x', 'tilt-y', 'shine-x', 'shine-y']) {
+    deck.style.removeProperty(`--booking-${property}`)
+  }
+}
+
 export default function DashboardBookings({ db, bookings, roster, next, today, reducedMotion, onDetails, onPlan, onBook }) {
   const [selectedId, setSelectedId] = useState(null)
   const [direction, setDirection] = useState(0)
   const cardRef = useRef(null)
+  const deckRef = useRef(null)
   const departure = useRef(null)
   const gesture = useRef(null)
+  const snapTimeout = useRef(null)
+  useEffect(() => {
+    const onBlur = () => resetTilt(deckRef.current)
+    window.addEventListener('blur', onBlur)
+    return () => window.removeEventListener('blur', onBlur)
+  }, [])
   useEffect(() => () => {
+    clearTimeout(snapTimeout.current)
     const animation = departure.current
     departure.current = null
     animation?.cancel()
   }, [])
   useEffect(() => {
-    if (reducedMotion) departure.current?.finish()
+    if (!reducedMotion) return
+    resetTilt(deckRef.current)
+    departure.current?.finish()
   }, [reducedMotion])
   const count = bookings.length
   const booking = bookings.find((entry) => entry.id === selectedId) || next || bookings.find((entry) => {
@@ -108,50 +126,68 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
   }
   const shift = (offset) => select((index + offset + count) % count, offset)
   const startSwipe = (event) => {
+    const deck = event.currentTarget
+    resetTilt(deck)
     if (count < 2 || gesture.current || departure.current || event.button !== 0 || event.target.closest('button, a')) return
-    gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
-    if (event.isTrusted) event.currentTarget.setPointerCapture(event.pointerId)
+    clearTimeout(snapTimeout.current)
+    delete deck.dataset.snapping
+    gesture.current = {
+      id: event.pointerId, x: event.clientX, y: event.clientY,
+      lastX: event.clientX, lastTime: event.timeStamp, velocity: 0,
+    }
+    if (event.isTrusted) deck.setPointerCapture(event.pointerId)
   }
   const endSwipe = (event) => {
     const start = gesture.current
     if (start?.id !== event.pointerId) return
     gesture.current = null
-    const dx = event.clientX - start.x, dy = event.clientY - start.y
-    if (count > 1 && event.type === 'pointerup' && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) shift(dx < 0 ? 1 : -1)
-    event.currentTarget.removeAttribute('data-dragging')
-    event.currentTarget.style.removeProperty('--booking-drag')
-    event.currentTarget.style.removeProperty('--booking-rotate')
+    const deck = event.currentTarget
+    const dx = event.clientX - start.x
+    const distance = Math.abs(dx)
+    const horizontal = distance > Math.abs(event.clientY - start.y)
+    const flick = distance > 25 && Math.abs(start.velocity) > .45
+    const commit = count > 1 && event.type === 'pointerup' && horizontal && (distance > 60 || flick)
+    if (commit) shift(dx < 0 ? 1 : -1)
+    if (!commit && !reducedMotion && deck.hasAttribute('data-dragging')) {
+      deck.dataset.snapping = 'true'
+      snapTimeout.current = setTimeout(() => { delete deck.dataset.snapping }, 450)
+    }
+    delete deck.dataset.dragging
+    deck.style.removeProperty('--booking-drag')
+    deck.style.removeProperty('--booking-rotate')
   }
   const browseWithArrows = (event) => {
     if (event.target !== event.currentTarget || count < 2 || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return
     event.preventDefault()
     shift(event.key === 'ArrowRight' ? 1 : -1)
   }
-  const updateTilt = (event) => {
-    if (departure.current || reducedMotion) return
+  const movePointer = (event) => {
+    if (departure.current) return
     const deck = event.currentTarget
     const start = gesture.current
     if (start?.id === event.pointerId) {
       const dx = event.clientX - start.x
-      if (Math.abs(dx) > 4 && Math.abs(dx) > Math.abs(event.clientY - start.y)) {
-        deck.dataset.dragging = 'true'
-        deck.style.setProperty('--booking-drag', `${Math.max(-110, Math.min(110, dx))}px`)
-        deck.style.setProperty('--booking-rotate', `${Math.max(-6, Math.min(6, dx * .04))}deg`)
-      }
+      start.velocity = (event.clientX - start.lastX) / Math.max(1, event.timeStamp - start.lastTime)
+      start.lastX = event.clientX
+      start.lastTime = event.timeStamp
+      if (reducedMotion) return
+      const dragging = Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(event.clientY - start.y)
+      deck.toggleAttribute('data-dragging', dragging)
+      const offset = dragging ? dx : 0
+      deck.style.setProperty('--booking-drag', `${Math.max(-135, Math.min(135, offset))}px`)
+      deck.style.setProperty('--booking-rotate', `${Math.max(-8, Math.min(8, offset * .045))}deg`)
       return
     }
-    if (event.pointerType !== 'mouse' || !matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) return
+    if (start || reducedMotion || event.pointerType !== 'mouse' || !matchMedia('(hover: hover) and (pointer: fine)').matches) return
     const { left, top, width, height } = deck.getBoundingClientRect()
-    deck.style.setProperty('--booking-tilt-x', `${(0.5 - (event.clientY - top) / height) * 4}deg`)
-    deck.style.setProperty('--booking-tilt-y', `${((event.clientX - left) / width - 0.5) * 4}deg`)
-    deck.style.setProperty('--booking-shine-x', `${(event.clientX - left) / width * 100}%`)
-    deck.style.setProperty('--booking-shine-y', `${(event.clientY - top) / height * 100}%`)
+    const padding = parseFloat(getComputedStyle(deck).paddingTop)
+    const x = Math.max(0, Math.min(1, (event.clientX - left) / width))
+    const y = Math.max(0, Math.min(1, (event.clientY - top - padding) / (height - padding)))
+    deck.style.setProperty('--booking-tilt-x', `${((.5 - y) * 6).toFixed(2)}deg`)
+    deck.style.setProperty('--booking-tilt-y', `${((x - .5) * 8).toFixed(2)}deg`)
+    deck.style.setProperty('--booking-shine-x', `${(x * 100).toFixed(1)}%`)
+    deck.style.setProperty('--booking-shine-y', `${(y * 100).toFixed(1)}%`)
     deck.dataset.hovering = 'true'
-  }
-  const resetTilt = (event) => {
-    event.currentTarget.style.removeProperty('--booking-tilt-x')
-    event.currentTarget.style.removeProperty('--booking-tilt-y')
-    event.currentTarget.removeAttribute('data-hovering')
   }
 
   return <section className="db-card orbit-today" id="dashboard-schedule" aria-labelledby="orbit-today-title">
@@ -160,11 +196,11 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
       <Link className="db-link" to="/schedule">View schedule</Link>
     </header>
     {booking ? <>
-        <div className="orbit-booking-deck" data-count={Math.min(count, 3)} tabIndex={count > 1 ? 0 : undefined}
+        <div ref={deckRef} className="orbit-booking-deck" data-count={Math.min(count, 3)} tabIndex={count > 1 ? 0 : undefined}
           role="group" aria-roledescription="carousel" aria-label="Today’s bookings" aria-live="polite"
           onKeyDown={browseWithArrows} onPointerDown={startSwipe}
           onPointerUp={endSwipe} onPointerCancel={endSwipe} onLostPointerCapture={endSwipe}
-          onPointerMove={updateTilt} onPointerLeave={resetTilt}>
+          onPointerMove={movePointer} onPointerLeave={event => resetTilt(event.currentTarget)}>
           {slides.map(slide => <BookingSlide key={slide.booking.id} slide={slide} active={slide === selected} direction={direction} cardRef={cardRef} />)}
         </div>
         <div className="orbit-booking-tools">
