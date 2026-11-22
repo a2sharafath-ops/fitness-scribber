@@ -106,7 +106,7 @@
 .coach-dashboard .db-card { border-color: var(--border); background: var(--orbit-glass); }
 .coach-dashboard .db-head { margin-bottom: 14px; }
 .coach-dashboard .db-head h2 { font-size: 18px; }
-.orbit-booking-feature {
+.orbit-booking-card {
   display: grid;
   gap: 12px;
   min-width: 0;
@@ -116,11 +116,9 @@
   border: 1px solid #f199a354;
   border-radius: 20px;
   box-shadow: 0 15px 30px #10081038;
-  animation: orbit-card-in .2s ease-out;
 }
-@keyframes orbit-card-in { from { opacity: .65; transform: translateY(3px); } }
-.orbit-booking-feature h3 { margin-bottom: 3px; font: 650 22px/1.25 var(--orbit-display-font); letter-spacing: -.022em; overflow-wrap: anywhere; }
-.orbit-booking-feature p { color: #f5eaf0; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.orbit-booking-card h3 { margin-bottom: 3px; font: 650 22px/1.25 var(--orbit-display-font); letter-spacing: -.022em; overflow-wrap: anywhere; }
+.orbit-booking-card p { color: #f5eaf0; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
 .orbit-booking-empty { justify-items: center; align-content: center; min-height: 160px; text-align: center; }
 .orbit-booking-empty h3 { margin: 0; }
 .orbit-booking-empty-icon {
@@ -139,7 +137,7 @@
 .orbit-booking-client { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .orbit-booking-client .avatar { flex: none; }
 .orbit-today .btn { min-height: 36px; border-radius: 10px; font-size: 13px; white-space: normal; }
-.orbit-today .orbit-booking-feature .btn { background: #e51836; color: #fff; border: 1px solid #ffffff1c; }
+.orbit-today .orbit-booking-card .btn { background: #e51836; color: #fff; border: 1px solid #ffffff1c; }
 .orbit-today .orbit-booking-feature .btn:hover { background: var(--orbit-red-hover); }
 .orbit-today .orbit-booking-feature .btn:focus-visible { outline-color: #ffabb8; }
 .coach-dashboard .db-stats { gap: 8px; margin: 0 0 16px; }
@@ -256,9 +254,10 @@
     transition: transform .18s ease-out;
   }
 }
-@media (prefers-reduced-motion: reduce) { .orbit-booking-feature { animation: none; } }
-
-.orbit-booking-deck { position: relative; isolation: isolate; touch-action: pan-y; margin-top: 4px; }
+.orbit-booking-deck { display: grid; grid-template-columns: minmax(0, 1fr); position: relative; isolation: isolate; touch-action: pan-y; margin-top: 4px; }
+/* The tallest booking sets the height, even while another booking is visible. */
+.orbit-booking-deck > .orbit-booking-card { grid-area: 1 / 1; grid-template-rows: auto 1fr auto; }
+.orbit-booking-measure { visibility: hidden; }
 .orbit-booking-deck[data-count="2"], .orbit-booking-deck[data-count="3"] { padding-top: 17px; }
 .orbit-booking-deck[data-count="3"]::before, .orbit-booking-deck[data-count="2"]::after, .orbit-booking-deck[data-count="3"]::after {
   content: ""; position: absolute; inset: 1px 8% auto; height: 65%; z-index: -1;
@@ -278,7 +277,7 @@
 .orbit-carousel-dots button::before { content: ""; width: 6px; height: 6px; border-radius: 9px; background: var(--border); }
 .orbit-carousel-dots button[aria-current="true"]::before { width: 15px; background: var(--accent); }
 @media (max-width: 700px) {
-  .orbit-booking-feature { padding: 14px; }
+  .orbit-booking-card { padding: 14px; }
   .orbit-today .btn { min-height: 44px; }
   .orbit-carousel-dots button { width: 26px; height: 40px; }
 }
@@ -393,6 +392,7 @@
   transform: translateX(var(--booking-drag, 0px)) rotate(var(--booking-rotate, 0deg));
   transition: none;
 }
+.orbit-booking-feature[data-leaving] { pointer-events: none; transition: none; }
 .orbit-booking-deck::before, .orbit-booking-deck::after { transition: scale .24s ease-out; }
 .orbit-booking-deck[data-dragging]::after { scale: 1.025; }
 .orbit-booking-controls { grid-template-columns: auto minmax(55px, 1fr) auto; }

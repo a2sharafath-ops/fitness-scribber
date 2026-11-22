@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Avatar from '../atoms/Avatar'
 import Button from '../atoms/Button'
@@ -15,45 +15,109 @@ function bookingDestination(db, booking, today) {
   return bookingWorkoutAction(db, booking, today) || { path, label: 'Open training' }
 }
 
-export default function DashboardBookings({ db, bookings, roster, next, today, onDetails, onPlan, onBook }) {
+function bookingSlide(db, booking, client, today, next) {
+  const plan = bookingPlan(db, booking)
+  const workout = bookingWorkout(db, booking)
+  const title = workout?.title || plan?.name || booking.type || 'Training session'
+  const program = plan && db.programAssignments?.find((assignment) =>
+    assignment.clientId === booking.clientId && assignment.data?.schedule?.some((entry) => entry.prescriptionId === plan.id))?.name
+  const status = bookingWorkoutStatus(booking, workout)
+  return {
+    booking, client, plan, title, program, status,
+    subject: `${client.name} at ${booking.time || 'unscheduled time'}`,
+    featuredStatus: !workout && booking.id === next?.id ? 'Next scheduled' : status,
+    destination: bookingDestination(db, booking, today),
+    readiness: readinessScore(db, client.id, today),
+  }
+}
+
+function BookingSlide({ slide, active, direction, cardRef }) {
+  const { booking, client, title, program, subject, featuredStatus, destination, readiness } = slide
+  return <article className={`orbit-booking-card ${active ? 'orbit-booking-feature' : 'orbit-booking-measure'}`}
+    ref={active ? cardRef : undefined} inert={!active} aria-hidden={active ? undefined : true}
+    style={active ? { '--booking-entry': `${direction * 42}px`, '--booking-entry-angle': `${direction * 3}deg` } : undefined}>
+    <div className="orbit-booking-meta">
+      <p className="orbit-booking-time">{booking.time || 'Time not set'}{hasDuration(booking) && ' · ' + durationLabel(booking)}</p>
+      <span className="orbit-booking-status">{featuredStatus}</span>
+    </div>
+    <div><h3>{title}</h3><p>{client.name}{program && program !== title && ' · ' + program}</p></div>
+    <div className="orbit-booking-actions">
+      <div className="orbit-booking-client">
+        <Avatar name={client.name} size={35} />
+        <p>{readiness == null ? 'No readiness score today' : `Client readiness · ${readiness}/100`}</p>
+      </div>
+      {active ? <Link className="btn" to={destination.path} aria-label={`${destination.label} for ${subject}`}>{destination.label}</Link>
+        : <span className="btn">{destination.label}</span>}
+    </div>
+  </article>
+}
+
+export default function DashboardBookings({ db, bookings, roster, next, today, reducedMotion, onDetails, onPlan, onBook }) {
   const [selectedId, setSelectedId] = useState(null)
   const [direction, setDirection] = useState(0)
+  const cardRef = useRef(null)
+  const departure = useRef(null)
   const gesture = useRef(null)
+  useEffect(() => () => {
+    const animation = departure.current
+    departure.current = null
+    animation?.cancel()
+  }, [])
+  useEffect(() => {
+    if (reducedMotion) departure.current?.finish()
+  }, [reducedMotion])
   const count = bookings.length
   const booking = bookings.find((entry) => entry.id === selectedId) || next || bookings.find((entry) => {
     const workout = bookingWorkout(db, entry)
     return workout ? workout.status === 'in_progress' : scheduledBooking(entry)
   }) || bookings[0]
   const index = bookings.findIndex((entry) => entry.id === booking?.id)
+  const slides = bookings.map(entry => bookingSlide(db, entry, roster.get(entry.clientId), today, next))
+  const selected = slides[index]
   const select = (position, motion = Math.sign(position - index)) => {
-    if (position === index) return
-    setDirection(motion)
-    setSelectedId(bookings[position].id)
+    if (position === index || !bookings[position] || departure.current) return
+    const id = bookings[position].id
+    const card = cardRef.current
+    const show = () => {
+      if (card?.contains(document.activeElement)) card.parentElement?.focus({ preventScroll: true })
+      setDirection(motion)
+      setSelectedId(id)
+    }
+    if (reducedMotion || !card?.animate) {
+      show()
+      return
+    }
+    const { transform, opacity } = getComputedStyle(card)
+    const animation = card.animate([
+      { transform, opacity },
+      { transform: `translateX(${-motion * 110}px) rotate(${-motion * 7}deg) scale(.97)`, opacity: 0 },
+    ], { duration: 165, easing: 'cubic-bezier(.4,0,.8,.3)', fill: 'forwards' })
+    departure.current = animation
+    card.dataset.leaving = 'true'
+    const finish = () => {
+      if (departure.current !== animation) return
+      departure.current = null
+      delete card.dataset.leaving
+      animation.cancel()
+      show()
+    }
+    animation.finished.then(finish, finish)
   }
   const shift = (offset) => select((index + offset + count) % count, offset)
-  const destination = booking && bookingDestination(db, booking, today)
-  const plan = booking && bookingPlan(db, booking)
-  const workout = booking && bookingWorkout(db, booking)
-  const client = booking && roster.get(booking.clientId)
-  const title = workout?.title || plan?.name || booking?.type || 'Training session'
-  const program = plan && db.programAssignments?.find((assignment) =>
-    assignment.clientId === booking.clientId && assignment.data?.schedule?.some((entry) => entry.prescriptionId === plan.id))?.name
-  const readiness = client && readinessScore(db, client.id, today)
-  const subject = booking && `${client.name} at ${booking.time || 'unscheduled time'}`
   const startSwipe = (event) => {
-    if (count < 2 || event.button !== 0 || event.target.closest('button, a')) return
+    if (count < 2 || gesture.current || departure.current || event.button !== 0 || event.target.closest('button, a')) return
     gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY }
     if (event.isTrusted) event.currentTarget.setPointerCapture(event.pointerId)
   }
   const endSwipe = (event) => {
     const start = gesture.current
+    if (start?.id !== event.pointerId) return
     gesture.current = null
+    const dx = event.clientX - start.x, dy = event.clientY - start.y
+    if (count > 1 && event.type === 'pointerup' && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) shift(dx < 0 ? 1 : -1)
     event.currentTarget.removeAttribute('data-dragging')
     event.currentTarget.style.removeProperty('--booking-drag')
     event.currentTarget.style.removeProperty('--booking-rotate')
-    if (start?.id !== event.pointerId || count < 2) return
-    const dx = event.clientX - start.x, dy = event.clientY - start.y
-    if (event.type === 'pointerup' && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) shift(dx < 0 ? 1 : -1)
   }
   const browseWithArrows = (event) => {
     if (event.target !== event.currentTarget || count < 2 || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return
@@ -61,6 +125,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
     shift(event.key === 'ArrowRight' ? 1 : -1)
   }
   const updateTilt = (event) => {
+    if (departure.current || reducedMotion) return
     const deck = event.currentTarget
     const start = gesture.current
     if (start?.id === event.pointerId) {
@@ -97,24 +162,11 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
           onKeyDown={browseWithArrows} onPointerDown={startSwipe}
           onPointerUp={endSwipe} onPointerCancel={endSwipe} onLostPointerCapture={endSwipe}
           onPointerMove={updateTilt} onPointerLeave={resetTilt}>
-          <article className="orbit-booking-feature" key={booking.id} style={{ '--booking-entry': `${direction * 42}px`, '--booking-entry-angle': `${direction * 3}deg` }}>
-            <div className="orbit-booking-meta">
-              <p className="orbit-booking-time">{booking.time || 'Time not set'}{hasDuration(booking) && ' · ' + durationLabel(booking)}</p>
-              <span className="orbit-booking-status">{!workout && booking.id === next?.id ? 'Next scheduled' : bookingWorkoutStatus(booking, workout)}</span>
-            </div>
-            <div><h3>{title}</h3><p>{client.name}{program && program !== title && ' · ' + program}</p></div>
-            <div className="orbit-booking-actions">
-              <div className="orbit-booking-client">
-                <Avatar name={client.name} size={35} />
-                <p>{readiness == null ? 'No readiness score today' : `Client readiness · ${readiness}/100`}</p>
-              </div>
-              <Link className="btn" to={destination.path} aria-label={`${destination.label} for ${subject}`}>{destination.label}</Link>
-            </div>
-          </article>
+          {slides.map(slide => <BookingSlide key={slide.booking.id} slide={slide} active={slide === selected} direction={direction} cardRef={cardRef} />)}
         </div>
         <div className="orbit-booking-tools">
-          <Button variant="ghost" aria-haspopup="dialog" aria-label={`Booking details for ${subject}`} onClick={event => onDetails(booking, event.currentTarget)}>Details</Button>
-          {plan && <Button variant="ghost" aria-haspopup="dialog" onClick={event => onPlan(plan, event.currentTarget)}>View plan</Button>}
+          <Button variant="ghost" aria-haspopup="dialog" aria-label={`Booking details for ${selected.subject}`} onClick={event => onDetails(booking, event.currentTarget)}>Details</Button>
+          {selected.plan && <Button variant="ghost" aria-haspopup="dialog" onClick={event => onPlan(selected.plan, event.currentTarget)}>View plan</Button>}
         </div>
         {count > 1 && <div className="orbit-booking-controls" role="group" aria-label="Browse bookings">
           <Button variant="ghost" className="orbit-booking-previous" aria-label="Previous booking" onClick={() => shift(-1)}><Icon name="chevron-right" size={14} /><span>Previous</span></Button>
@@ -127,17 +179,14 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
         </div>}
         {count > 1 && <details className="orbit-booking-list">
           <summary>All bookings today ({count})</summary>
-          {bookings.map((entry, position) => {
-            const person = roster.get(entry.clientId)
-            const result = bookingWorkout(db, entry)
-            return <button key={entry.id} type="button" aria-current={entry.id === booking.id ? 'true' : undefined} onClick={() => select(position)}>
-              <time>{entry.time || 'Time not set'}</time><span><strong>{person.name}</strong><small>{result?.title || bookingPlan(db, entry)?.name || entry.type}</small>
-                <small>{bookingWorkoutStatus(entry, result)}</small></span>
+          {slides.map(({ booking: entry, client, title, status }, position) => (
+            <button key={entry.id} type="button" aria-current={entry.id === booking.id ? 'true' : undefined} onClick={() => select(position)}>
+              <time>{entry.time || 'Time not set'}</time><span><strong>{client.name}</strong><small>{title}</small><small>{status}</small></span>
               <Icon name="chevron-right" size={15} />
             </button>
-          })}
+          ))}
         </details>}
-    </> : <div className="orbit-booking-feature orbit-booking-empty">
+    </> : <div className="orbit-booking-card orbit-booking-feature orbit-booking-empty">
       <span className="orbit-booking-empty-icon" aria-hidden="true"><Icon name="calendar" size={20} /></span>
       <h3>No bookings today.</h3>
       <Button aria-haspopup="dialog" onClick={onBook}>Book session</Button>

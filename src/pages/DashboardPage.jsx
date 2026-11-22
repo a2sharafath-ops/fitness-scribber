@@ -95,15 +95,6 @@ export default function DashboardPage() {
   const [metric, setMetric] = useState('sessions')
   const [period, setPeriod] = useState('30')
   const [chartSelection, setChartSelection] = useState(null)
-  const [stacked, setStacked] = useState(() => globalThis.window?.matchMedia?.('(max-width: 1000px)')?.matches ?? false)
-  useEffect(() => {
-    const viewport = window.matchMedia?.('(max-width: 1000px)')
-    if (!viewport) return
-    const resize = () => setStacked(viewport.matches)
-    resize()
-    viewport.addEventListener('change', resize)
-    return () => viewport.removeEventListener('change', resize)
-  }, [])
   useEffect(() => {
     const refresh = () => setNow(new Date())
     const interval = setInterval(refresh, 60000)
@@ -225,7 +216,7 @@ export default function DashboardPage() {
 
 
   const bookingCard = (
-      <DashboardBookings key={today} db={db} bookings={bookings} roster={roster} next={next} today={today} onBook={book} onPlan={showPlan}
+      <DashboardBookings key={today} db={db} bookings={bookings} roster={roster} next={next} today={today} reducedMotion={reduced} onBook={book} onPlan={showPlan}
         onDetails={(booking, trigger) => openModal(<SessionForm session={booking} />, false, trigger)} />
   )
   const reviewCard = (
@@ -329,10 +320,8 @@ export default function DashboardPage() {
     <header className="db-title"><div><p className="db-date">{fmtDay(today)} · {clock.time} {coachTimeZone(tz).replaceAll('_', ' ')}</p><h1 aria-label={title}>{title.split(' ').map((word, index) => <span className="orbit-greeting-word" aria-hidden="true" key={index} style={{ '--word-delay': `${index * 65}ms` }}>{word}{' '}</span>)}</h1></div><div className="db-actions"><Button variant="ghost" onClick={showWeeklyReport}><Icon name="file-text" size={16} /> Weekly report</Button><Button onClick={book}><Icon name="calendar" size={16} /> Book session</Button><details className="db-menu"><summary>More actions <Icon name="chevron-down" size={14} /></summary><div className="db-menu-list">{[['Add client', () => openModal(<ClientForm />)], ['Record assessment', () => pick('assessment')], ['Assign a program', () => pick('program')]].map(([text, action]) => <button key={text} type="button" onClick={e => { e.currentTarget.closest('details').open = false; action() }}>{text}</button>)}</div></details></div></header>
     {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan their training.</p><div className="db-actions"><Button onClick={() => openModal(<ClientForm />)}>＋ Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
     <div className="orbit-dashboard-grid">
-      {stacked ? <>{bookingCard}{coachingCard}{weeklyCard}{reviewCard}{readinessCard}</> : <>
-        <div className="orbit-dashboard-column">{bookingCard}{reviewCard}</div>
-        <div className="orbit-dashboard-column">{coachingCard}{weeklyCard}{readinessCard}</div>
-      </>}
+      <div className="orbit-dashboard-column">{bookingCard}{reviewCard}</div>
+      <div className="orbit-dashboard-column">{coachingCard}{weeklyCard}{readinessCard}</div>
       <DashboardInsights insights={insights} />
       <section className="db-card orbit-upcoming">
         <header className="db-head"><h2>Upcoming sessions</h2><Link className="db-link" to="/schedule">View schedule</Link></header>
