@@ -76,7 +76,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         {log && log.status === 'completed' && <Button variant="ghost" onClick={() => openModal(<WorkoutBuilderModal clientId={client.id} date={date} review selectedWorkoutId={log.id} initialMode="edit-log" />, 'xl')}>Edit logged details</Button>}
       </div>
     </div>
-    <div className="training-selected-body" data-empty={!hasDetails || undefined}>
+    <div className="training-selected-body" data-empty={!hasDetails || undefined} data-logged-workout={actual || undefined}>
       {log && records.length > 1 && <label className="training-log-picker">Workout log<select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</select></label>}
       {log && day.prescription && <SegToggle options={[[ 'actual', 'Logged workout' ], [ 'plan', bookings.length ? 'Day’s plan' : 'Original plan' ]]} value={recordView} onChange={setRecordView} ariaLabel="Completed day view" />}
       {hasDetails ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
