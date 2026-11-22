@@ -1,5 +1,6 @@
 import test, { after } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -577,8 +578,10 @@ test('legacy readiness detail keeps neutral wording and one shared client identi
 test('backend loading and error states are explicit', () => {
   const loading = renderToStaticMarkup(React.createElement(DataProvider, { backend: true, initialDb: null }, 'Loaded'))
   const error = renderToStaticMarkup(React.createElement(DataProvider, { backend: true, initialDb: null, initialError: new Error('offline') }, 'Loaded'))
-  assert.match(loading, /Loading your workspace/)
-  assert.match(loading, /role="status"/)
+  assert.match(loading, /data-orbit-loading/)
+  const document = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+  assert.match(document, /id="orbit-preload"/)
+  assert.match(document, /role="status"[^>]*>\s*<p>Loading your workspace/)
   assert.match(error, /Couldn’t load your data/)
   assert.match(error, /offline/)
   assert.match(error, />Retry</)

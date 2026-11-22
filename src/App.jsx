@@ -15,6 +15,7 @@ import { clientSectionPath } from './lib/clientRoutes'
 import { wearableReturn } from './api/wearable'
 import WearableReturn from './components/organisms/WearableReturn'
 import StartupScreen from './components/templates/StartupScreen'
+import useOrbitAppearance from './hooks/useOrbitAppearance'
 
 const AthletePortal = lazy(() => import('./pages/AthletePortal'))
 const AdminPortal = lazy(() => import('./pages/AdminPortal'))
@@ -45,7 +46,7 @@ function LegacyClientRoute({ section }) {
   return <Navigate to={clientSectionPath(id, section, search, hash)} replace />
 }
 
-function Shell() {
+function Shell({ appearance }) {
   useEffect(() => {
     if (window.location.pathname === '/') void loadDashboard().catch(() => {})
   }, [])
@@ -56,7 +57,7 @@ function Shell() {
       <ModalProvider>
         <ClipboardProvider>
           <Suspense fallback={routeLoading}><Routes>
-            <Route element={<AppLayout />}>
+            <Route element={<AppLayout appearance={appearance} />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/clients" element={<ClientsPage />} />
               <Route path="/clients/:id" element={<ClientLayout />}>
@@ -89,28 +90,29 @@ function Shell() {
 }
 
 // In backend mode: require login, then branch by role. In local mode: straight through (coach app).
-function Gate() {
-  const { ready, session, profileReady, role, recovery } = useAuth()
+function Gate({ appearance }) {
+  const { ready, session, profileReady, profileError, refreshProfile, role, recovery } = useAuth()
   // Completion removes the sensitive URL fragment. Keep this screen mounted
   // across the auth/profile updates that follow startup until Continue navigates.
   const [isWearableReturn] = useState(() => hasBackend && wearableReturn())
-  if (!hasBackend) return <Shell />
-  const loading = <StartupScreen label="Starting Orbit Trainer…" />
-  if (!ready) return loading
+  if (!hasBackend) return <Shell appearance={appearance} />
+  if (!ready) return routeLoading
   if (recovery) return <ResetPasswordPage />
   if (!session) return <AuthPage />
   if (isWearableReturn) return <WearableReturn />
-  if (!profileReady) return loading
+  if (profileError) return <StartupScreen title="Couldn’t check your profile" error={profileError} onRetry={refreshProfile} />
+  if (!profileReady) return routeLoading
   if (!role || role === 'pending') return <RoleOnboarding />
   if (role === 'admin') return <Suspense fallback={routeLoading}><AdminPortal /></Suspense>
   if (role === 'athlete') return <Suspense fallback={routeLoading}><AthletePortal /></Suspense>
-  return <Shell />
+  return <Shell appearance={appearance} />
 }
 
 export default function App() {
+  const appearance = useOrbitAppearance()
   return (
     <AuthProvider>
-      <Gate />
+      <Gate appearance={appearance} />
       <Toaster />
     </AuthProvider>
   )
