@@ -40,16 +40,17 @@ export function workoutReviewPath(workout) {
 export const scheduledBooking = booking => ['Pending', 'Confirmed'].includes(booking.status)
 
 export function bookingWorkoutStatus(booking, workout) {
-  if (workout?.status === 'completed') return 'Workout logged'
-  if (workout?.status === 'in_progress') return 'Workout in progress'
-  if (workout?.status === 'discarded') return 'Workout discarded'
+  const workoutState = { completed: 'Workout logged', in_progress: 'Workout in progress', discarded: 'Workout discarded' }[workout?.status]
+  if (workoutState) return `${workoutState} · ${booking.status ? 'Booking ' + booking.status.toLowerCase() : 'Booking status unavailable'}`
   if (booking.status === 'Completed') return trainingBooking(booking) ? 'Booking completed · No workout log' : 'Booking completed'
   return booking.status === 'Pending' ? 'Scheduled' : booking.status || 'Booking'
 }
 
 export function canRunBookingWorkout(booking, workout, today) {
-  if (['completed', 'discarded'].includes(workout?.status)) return false
-  return workout?.status === 'in_progress' || (booking.date === today && scheduledBooking(booking))
+  if (!trainingBooking(booking) || ['completed', 'discarded'].includes(workout?.status)) return false
+  return workout?.status === 'in_progress'
+    || (booking.date === today && scheduledBooking(booking))
+    || (booking.status === 'Completed' && booking.date <= today)
 }
 
 export function bookingWorkoutAction(db, booking, today) {
@@ -60,7 +61,8 @@ export function bookingWorkoutAction(db, booking, today) {
   }
   if (canRunBookingWorkout(booking, workout, today)) {
     const path = sessionPath(booking).split('#')[0]
-    return { path: path + '&run=1#workout-log', label: workout ? 'Resume workout' : 'Start workout' }
+    const label = workout?.status === 'in_progress' ? 'Resume workout' : booking.status === 'Completed' ? 'Log workout' : 'Start workout'
+    return { path: path + '&run=1#workout-log', label }
   }
   return null
 }

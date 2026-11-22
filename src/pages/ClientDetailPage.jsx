@@ -16,10 +16,14 @@ import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { coachClock, fmtDate } from '../lib/dates'
 import { forClient, formalAssessments, baselineProgress, dueStatus, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, TYPES } from '../lib/assessment'
 import { bookingWorkout, bookingWorkoutAction, scheduledBooking, sessionPath, trainingBooking, workoutReviewPath } from '../lib/schedule'
+import { readinessScore } from '../lib/calc'
+import { bookedCompletion } from '../lib/dashboard'
+import { clientPrograms } from '../lib/clientPrograms'
+import { fmtWt } from '../lib/units'
 
 export default function ClientDetailPage() {
   const { id } = useParams()
-  const { db, commit, tz } = useData()
+  const { db, commit, tz, units } = useData()
   const { openModal } = useModal()
   const concernDetails = useRef(null)
   const client = db.clients.find((item) => item.id === id)
@@ -29,6 +33,19 @@ export default function ClientDetailPage() {
   const concernsUrl = `${checkInsUrl}?view=concerns`
   const assessmentsUrl = `/clients/${id}/assessments`
   const sessions = db.sessions.filter((session) => session.clientId === id)
+  const completion = bookedCompletion(sessions, today, new Set([id]))
+  const readiness = readinessScore(db, id, today)
+  const strength = (db.maxes || []).filter((row) => row.clientId === id && row.kind === 'e1rm' && row.date <= today && Number(row.valueKg) > 0)
+    .sort((a, b) => b.date.localeCompare(a.date))[0]
+  const program = clientPrograms(db, client, today)[0]
+  const metrics = [
+    { name: 'Booking completion', value: completion.total ? `${Math.round(completion.completed / completion.total * 100)}%` : '—',
+      note: completion.total ? `${completion.completed} of ${completion.total} · past 30 days` : 'No past bookings in 30 days', path: `/clients/${id}/progress#attendance` },
+    { name: 'Readiness today', value: readiness == null ? '—' : `${readiness}/100`,
+      note: readiness == null ? 'No readiness score today' : 'Today’s recorded readiness', path: checkInsUrl },
+    { name: 'Latest strength estimate', value: strength ? fmtWt(Number(strength.valueKg), units) : '—',
+      note: strength ? `${strength.exercise} · ${fmtDate(strength.date)}` : 'No estimated 1RM recorded', path: `/clients/${id}/progress#strength` },
+  ]
   const nextSession = sessions.filter((session) => (session.date > today || session.date === today && (!session.time || session.time >= currentTime))
     && scheduledBooking(session) && !['completed', 'discarded'].includes(bookingWorkout(db, session)?.status))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))[0]
@@ -100,6 +117,18 @@ export default function ClientDetailPage() {
       {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={client} />)}><Icon name="link" size={14} /> Invite</Button>}
       <Button onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>
     </div></div>
+    <div className="overview-metrics" role="group" aria-label="Client progress at a glance">
+      {metrics.map(({ name, value, note, path }) => <Link className="card overview-metric" key={name} to={path}>
+        <span>{name}</span><strong>{value}</strong><small>{note}</small><Icon name="chevron-right" size={16} aria-hidden="true" />
+      </Link>)}
+    </div>
+    <section className="card overview-program" aria-labelledby="overview-program-title">
+      <div><h2 id="overview-program-title">{program?.upcoming ? 'Upcoming program' : 'Current program'}</h2>
+        <strong>{program?.name || 'No current or upcoming program'}</strong>
+        {program?.note && <p>{program.note}</p>}
+      </div>
+      <Link className="btn ghost" to={`/clients/${id}/training${program ? '#training-program-title' : ''}`}>{program ? 'View program' : 'Open Training'}</Link>
+    </section>
     <div className="overview-priority">
       <section className="card overview-next" aria-labelledby="next-session-title">
         <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSession ? nextSession.type : 'No upcoming session booked'}</h2>

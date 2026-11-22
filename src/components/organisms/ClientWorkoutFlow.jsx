@@ -56,10 +56,11 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, onRu
     clearWorkoutDraft(workout)
   }
   const checkedIn = db.wellness.some((entry) => entry.clientId === client.id && entry.date === sessionDate)
+  const needsCheckin = !checkedIn && booking?.status !== 'Completed'
   const startWorkout = useCallback((item) => {
-    if (checkedIn) { saveWorkout(item); setRunOpen(true) }
+    if (!needsCheckin) { saveWorkout(item); setRunOpen(true) }
     else setCheckinW(item)
-  }, [checkedIn, saveWorkout])
+  }, [needsCheckin, saveWorkout])
   const canStart = booking ? Boolean(starter || workout && !['completed', 'discarded'].includes(workout.status)) : day.canRun
   useEffect(() => {
     if (!startOnOpen || startAttempted.current || !canStart) return

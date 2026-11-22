@@ -79,4 +79,32 @@ test('per-booking workouts preserve earlier rows and enforce one independently s
   assert.deepEqual(await read('workouts', 'legacy'), { ...oldWorkout, bookingId: null })
   assert.deepEqual(await read('workouts', morning.id), morningDone)
   assert.deepEqual(await read('workouts', afternoon.id), afternoonDone)
+
+  const past = { ...first, id: 'past-completed', date: '2000-01-01', status: 'Completed' }
+  const lateLog = { ...running(past.id, 'Late workout log', 10), date: past.date }
+  await pg.exec(`insert into public.sessions(id,"clientId",date,time,type,dur,status) values
+    ('past-completed','booking-test','${past.date}','09:00','1-on-1 Training',60,'Completed'),
+    ('past-missed','booking-test','${past.date}','15:00','Personal training',60,'Missed'),
+    ('past-assessment','booking-test','${past.date}','16:00','Assessment',60,'Completed'),
+    ('future-completed','booking-test','${date}','16:00','Personal training',60,'Completed');`)
+  await assert.rejects(save(lateLog), /booking is unavailable/)
+
+  const previous = await read('sessions', past.id)
+  await pg.exec('reset role')
+  const lateLogging = 'supabase/migrations/20261122090000_log_completed_booking_workouts.sql'
+  await file(lateLogging)
+  await file(lateLogging)
+  await pg.exec(`set role authenticated; set request.jwt.claim.sub='${owner}'`)
+  await assert.rejects(save({ ...lateLog, bookingId: 'past-missed' }), /booking is unavailable/)
+  await assert.rejects(save({ ...lateLog, bookingId: 'past-assessment' }), /booking is unavailable/)
+  await assert.rejects(save(running('future-completed', 'Future workout', 10)), /booking is unavailable/)
+  await assert.rejects(save({ ...lateLog, clientId: 'other-client' }), /booking is unavailable/)
+  await save(lateLog)
+  await assert.rejects(save({ ...lateLog, id: 'duplicate-late-log' }), /workouts_booking_uidx/)
+  assert.deepEqual(await read('sessions', past.id), previous)
+  assert.equal((await read('workouts', lateLog.id)).bookingId, past.id)
+  assert.deepEqual(await read('prescriptions', 'day-plan'), oldPlan)
+  assert.deepEqual(await read('workouts', 'legacy'), { ...oldWorkout, bookingId: null })
+  assert.deepEqual(await read('workouts', morning.id), morningDone)
+  assert.deepEqual(await read('workouts', afternoon.id), afternoonDone)
 })

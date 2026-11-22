@@ -1158,6 +1158,19 @@ html:has(.progress-index){overflow-x:clip}
 
 /* Client Overview */
 .overview-title{margin-bottom:16px}
+.overview-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.overview-metric{display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:start;gap:5px 8px;min-width:0;color:var(--text);text-decoration:none;padding:14px 16px;transition:border-color .16s,background-color .16s}
+.overview-metric>span,.overview-metric>small{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.overview-metric>strong{grid-column:1;font-size:24px;font-variant-numeric:tabular-nums}
+.overview-metric>small{grid-column:1 / -1}
+.overview-metric>svg{grid-area:1 / 2;color:var(--muted);align-self:center}
+.overview-metric:hover{border-color:var(--accent)}
+.overview-program{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:16px}
+.overview-program>div{min-width:0;overflow-wrap:anywhere}
+.overview-program h2{font-size:12px;color:var(--muted);margin:0 0 5px}
+.overview-program strong{font-size:16px}
+.overview-program p{margin:3px 0 0;color:var(--muted);font-size:12px}
+@media(max-width:600px){.overview-metrics{grid-template-columns:1fr;gap:8px}.overview-metric{grid-template-columns:minmax(0,1fr) auto auto;align-items:center;padding:10px 12px}.overview-metric>strong{grid-column:2;font-size:19px}.overview-metric>small{grid-column:1 / 3}.overview-metric>svg{grid-area:1 / 3 / 3 / 4}}
 .overview-priority,.overview-bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:20px}
 .overview-priority,.overview-bottom{align-items:start}.overview-priority>.card,.overview-bottom>.card{min-width:0}
 .overview-priority h2,.overview-checkin h2,.overview-workout h2,.overview-concerns h2,.overview-activity h2{font-size:18px;line-height:1.3;margin:0}
@@ -1228,6 +1241,15 @@ html:has(.progress-index){overflow-x:clip}
 
 /* Training shows a compact programme summary; the calendar owns day details. */
 .training-topbar{margin-bottom:16px}
+.training-workspace-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.training-workspace-grid>.training-planner,.training-workspace-side{min-width:0;margin:0}
+.training-workspace-grid .training-calendar{margin-bottom:0}
+.training-workspace-side .training-history-row{flex-wrap:wrap}
+.training-workspace-side .training-history-row>span:first-child{min-width:0;overflow-wrap:anywhere;white-space:normal}
+.training-workspace-side .training-history-row>span:last-child:not(:only-child){white-space:normal}
+.training-workspace-side .training-program-assignment{flex-wrap:wrap;gap:10px}
+.training-workspace-side .training-program-assignment .training-program-copy{flex-basis:100%}
+@media(min-width:1180px){.training-workspace-grid{grid-template-columns:minmax(0,1fr) minmax(260px,31%)}}
 .training-program{margin-bottom:14px;padding:16px}
 .training-program-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .training-program-list{display:grid;gap:10px;margin-top:14px}
@@ -1287,6 +1309,8 @@ html:has(.progress-index){overflow-x:clip}
 .training-selected-day{border-top:1px solid var(--border);margin-top:20px;padding-top:20px}.training-selected-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start;min-height:78px}.training-selected-head h3{font-size:20px;margin:7px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .training-selected-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:280px}.training-selected-actions .btn:not(.ghost){min-width:144px;text-align:center;justify-content:center}
 .training-selected-body{height:308px;display:flex;flex-direction:column;min-height:0;gap:0}.training-selected-body>.seg{flex:none;align-self:flex-start;margin-bottom:12px}.training-selected-notice{font-size:11px;color:var(--muted);min-height:30px;margin:0;padding-bottom:10px;flex:none}
+.training-selected-body[data-empty]{height:auto}
+.training-selected-body[data-empty] .training-selected-empty{min-height:64px;padding:14px}
 .training-selected-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border:1px solid var(--border);border-radius:12px}.training-exercise-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-height:56px;padding:12px 15px;border-bottom:1px solid var(--border);font-size:12px}.training-exercise-row:last-child{border:0}.training-exercise-row>div{min-width:0}.training-exercise-row strong{display:block;font-size:13px;overflow-wrap:anywhere}.training-exercise-row small{display:block;font-size:10px;color:var(--muted);margin-top:3px}.training-exercise-row>span{font-size:12px;color:var(--muted);text-align:right;max-width:320px;overflow-wrap:anywhere}
 .training-selected-empty{flex:1;min-height:0;border:1px dashed var(--border);border-radius:12px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:8px}.training-selected-empty strong{font-size:14px}.training-selected-empty p{font-size:12px;color:var(--muted);max-width:330px;margin:0}.training-selected-notes{font-size:12px;color:var(--muted);padding:12px 15px;border-top:1px solid var(--border);margin:0}
 .training-selected-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:49px;border-top:1px solid var(--border);padding-top:12px;margin-top:14px;font-size:11px;color:var(--muted)}.training-more{position:relative;margin-left:auto}.training-more summary{cursor:pointer;list-style:none;padding:7px 11px;border:1px solid var(--border);border-radius:20px;min-height:34px;color:var(--text);font-size:11px;font-weight:700}.training-more summary::-webkit-details-marker{display:none}.training-more summary:after{content:' ▾'}.training-more-menu{position:absolute;right:0;bottom:40px;min-width:175px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:7px;box-shadow:0 8px 24px #0002;z-index:4;display:grid;gap:4px}.training-more-menu .btn{border:0;justify-content:flex-start;border-radius:7px;font-size:11px;min-height:36px}

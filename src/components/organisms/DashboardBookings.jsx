@@ -131,7 +131,8 @@ export default function DashboardBookings({ db, bookings, roster, next, today, o
             const person = roster.get(entry.clientId)
             const result = bookingWorkout(db, entry)
             return <button key={entry.id} type="button" aria-current={entry.id === booking.id ? 'true' : undefined} onClick={() => select(position)}>
-              <time>{entry.time || 'Time not set'}</time><span><strong>{person.name}</strong><small>{result?.title || bookingPlan(db, entry)?.name || entry.type}</small></span>
+              <time>{entry.time || 'Time not set'}</time><span><strong>{person.name}</strong><small>{result?.title || bookingPlan(db, entry)?.name || entry.type}</small>
+                <small>{bookingWorkoutStatus(entry, result)}</small></span>
               <Icon name="chevron-right" size={15} />
             </button>
           })}
