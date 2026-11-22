@@ -4,16 +4,14 @@ import Sidebar from '../organisms/Sidebar'
 import GlobalBar from '../organisms/GlobalBar'
 import SchemaWarning from '../organisms/SchemaWarning'
 import { isLocalBuilderQA } from '../../lib/supabase'
-import useOrbitAppearance from '../../hooks/useOrbitAppearance'
 import './OrbitShell.css'
 
-export default function AppLayout() {
+export default function AppLayout({ appearance }) {
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem('orbit:trainer:sidebar-collapsed') === 'true' } catch { return false }
   })
   const mobileNav = useRef(null)
   const menuTrigger = useRef(null)
-  const appearance = useOrbitAppearance()
   const toggleSidebar = () => {
     const next = !collapsed
     setCollapsed(next)

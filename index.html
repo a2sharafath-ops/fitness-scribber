@@ -5,6 +5,26 @@
     <link rel="icon" type="image/png" href="/orbit-icon.png?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f5f6" />
+    <script>
+      (() => {
+        const root = document.documentElement;
+        let theme;
+        try {
+          const appearance = JSON.parse(localStorage.getItem('orbit:trainer:appearance'));
+          theme = appearance?.theme;
+          if (appearance?.motion === 'reduce') root.dataset.orbitMotion = 'reduce';
+        } catch { /* Fall back to the system theme when storage is unavailable. */ }
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
+        }
+        root.dataset.orbitTheme = theme;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#18151b' : '#f7f5f6';
+      })();
+    </script>
+    <style>
+      html { background: #f7f5f6; color-scheme: light; }
+      html[data-orbit-theme="dark"] { background: #18151b; color-scheme: dark; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -12,6 +32,21 @@
   </head>
   <body>
     <div id="root"></div>
+    <main id="orbit-preload" class="orbit-startup" aria-label="Orbit Trainer">
+      <div class="orbit-startup-card">
+        <div class="orbit-brand">
+          <div class="orbit-brand-lockup">
+            <img class="orbit-brand-dark-ink" src="/orbit-wordmark-dark.png" alt="Orbit by Cureocity" width="132" height="17" />
+            <img class="orbit-brand-light-ink" src="/orbit-wordmark-light.png" alt="Orbit by Cureocity" width="132" height="17" />
+            <span class="orbit-brand-by" aria-hidden="true">by Cureocity</span>
+          </div>
+        </div>
+        <div class="orbit-startup-status" role="status">
+          <p>Loading your workspace…</p>
+          <span class="orbit-startup-track" aria-hidden="true"></span>
+        </div>
+      </div>
+    </main>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
