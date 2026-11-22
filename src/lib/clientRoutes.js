@@ -1,3 +1,5 @@
+export const CLIENT_READINESS_PATH = '/clients?view=readiness'
+
 export const clientSectionPath = (id, section, search = '', hash = '') =>
   `/clients/${id}/${section}${search}${hash}`
 

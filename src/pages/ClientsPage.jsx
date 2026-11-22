@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
 import { ClientForm } from '../components/organisms/forms/ClientForms'
@@ -9,6 +9,7 @@ import { initials } from '../lib/format'
 import { addDays, fmtDate, todayISO } from '../lib/dates'
 import { dashboardClientPath } from '../lib/dashboard'
 import { clientRoster, rosterResults, ROSTER_PAGE_SIZE } from '../lib/clientRoster'
+import ReadinessRoster from './ReadinessRoster'
 import './ClientsPage.css'
 
 const dateLabel = (date, today) => date === today ? 'Today' : date === addDays(today, -1) ? 'Yesterday' : fmtDate(date)
@@ -52,15 +53,9 @@ function ClientRow({ row, index, today }) {
 }
 
 export default function ClientsPage() {
-  const { db, tz } = useData()
-  const { openModal } = useModal()
-  const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState(() => db.clients.some(c => c.status === 'Active') ? 'active' : 'all')
-  const [sort, setSort] = useState('name')
-  const [unassigned, setUnassigned] = useState(false)
-  const [requestedPage, setPage] = useState(1)
+  const { tz } = useData()
+  const [params] = useSearchParams()
   const [today, setToday] = useState(() => todayISO(tz))
-  const searchRef = useRef(null), listRef = useRef(null)
   useEffect(() => {
     const refresh = () => setToday(todayISO(tz))
     refresh()
@@ -68,6 +63,18 @@ export default function ClientsPage() {
     document.addEventListener('visibilitychange', refresh)
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
   }, [tz])
+  return params.get('view') === 'readiness' ? <ReadinessRoster today={today} /> : <ClientRoster today={today} />
+}
+
+function ClientRoster({ today }) {
+  const { db } = useData()
+  const { openModal } = useModal()
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState(() => db.clients.some(c => c.status === 'Active') ? 'active' : 'all')
+  const [sort, setSort] = useState('name')
+  const [unassigned, setUnassigned] = useState(false)
+  const [requestedPage, setPage] = useState(1)
+  const searchRef = useRef(null), listRef = useRef(null)
   const rows = clientRoster(db, today)
   const result = rosterResults(rows, { filter, query, unassigned, sort, page: requestedPage })
   const { counts, filtered, visible, page, pages, start } = result

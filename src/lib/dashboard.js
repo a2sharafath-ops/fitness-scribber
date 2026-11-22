@@ -116,17 +116,41 @@ export function dashboardActivity(db, { today, days, metric, bucketDays = 7 }) {
   return { start, end, buckets, hasData: daily.size > 0 }
 }
 
+function latestCheckInDates(wellness, today) {
+  const dates = new Map()
+  for (const { clientId, date } of wellness) {
+    if (typeof date === 'string' && date <= today && date > (dates.get(clientId) || '')) dates.set(clientId, date)
+  }
+  return dates
+}
+
+export function readinessRoster(db, today) {
+  const dates = latestCheckInDates(db.wellness, today)
+  return db.clients.filter(client => client.status === 'Active').map(client => {
+    const date = dates.get(client.id) ?? null
+    const result = date ? computeReadiness(db, client.id, date) : null
+    const readiness = Number.isFinite(result?.score) ? result : null
+    return { client, date, readiness }
+  }).sort((a, b) => {
+    const dateOrder = (a.date ?? '').localeCompare(b.date ?? '')
+    const scoreOrder = (a.readiness?.score ?? -1) - (b.readiness?.score ?? -1)
+    return dateOrder || (a.date === today ? scoreOrder : 0)
+      || a.client.name.localeCompare(b.client.name) || String(a.client.id).localeCompare(String(b.client.id))
+  })
+}
+
 export function dashboardReadiness(db, clients, today) {
+  const dates = latestCheckInDates(db.wellness, today)
   const scores = []
   let older = 0
   let missing = 0
   let unscored = 0
   for (const client of clients) {
-    const entries = db.wellness.filter((entry) => entry.clientId === client.id && entry.date && entry.date <= today)
-    if (!entries.length) { missing += 1; continue }
-    if (!entries.some((entry) => entry.date === today)) { older += 1; continue }
+    const date = dates.get(client.id)
+    if (!date) { missing += 1; continue }
+    if (date !== today) { older += 1; continue }
     const result = computeReadiness(db, client.id, today)
-    if (result.score == null) unscored += 1
+    if (!Number.isFinite(result.score)) unscored += 1
     else scores.push(result)
   }
   const shared = (color) => scores.filter((score) => score.color === color).length
