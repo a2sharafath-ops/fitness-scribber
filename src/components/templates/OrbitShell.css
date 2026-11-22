@@ -274,9 +274,10 @@ body:has(.orbit-shell) {
 .orbit-toolbar-panel { position: absolute; right: 0; top: 48px; z-index: 11; width: max-content; max-width: calc(100vw - 42px); border-radius: 14px; border: 1px solid var(--border); padding: 7px; background: var(--surface); box-shadow: var(--orbit-shadow); }
 .orbit-toolbar-panel button { padding: 9px 12px; display: block; width: 100%; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .orbit-toolbar-panel button:hover { background: var(--surface2); }
-.orbit-appearance-panel { width: min(262px, calc(100vw - 50px)); padding: 13px; }
+.orbit-appearance-panel { width: min(262px, calc(100vw - 50px)); max-height: calc(100dvh - 76px); overflow: auto; padding: 13px; }
 .orbit-appearance-panel label { display: flex; justify-content: space-between; margin: 14px 0 4px; }
 .orbit-appearance-panel input { padding: 0; accent-color: var(--orbit-red); }
+.orbit-appearance-panel select { width: 100%; min-height: 44px; }
 .orbit-scheme { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
 .orbit-scheme button { width: auto; padding: 8px; font-size: 12px; }
 .orbit-scheme button[aria-pressed="true"] { background: var(--orbit-red); color: white; }
@@ -310,10 +311,19 @@ body:has(.orbit-shell) {
   .orbit-mobile-brand .orbit-brand-lockup { width: 23px; }
   .orbit-mobile-brand > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .orbit-crumb { display: none; }
+  .orbit-appearance-panel select { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .orbit-shell *, .orbit-drawer * { scroll-behavior: auto; transition-duration: 0s; animation-duration: 0s; }
 }
+[data-orbit-motion="reduce"] :is(.orbit-shell, .orbit-drawer, .overlay) * {
+  scroll-behavior: auto !important;
+  transition-duration: 0s !important;
+  animation-name: none !important;
+}
+[data-orbit-density="compact"] :is(.orbit-dashboard-grid, .orbit-dashboard-column, .overview-progress, .overview-metrics, .overview-priority, .overview-bottom) { gap: 10px; }
+[data-orbit-density="compact"] .orbit-shell :is(.db-card, .overview-progress > .card, .overview-priority > .card, .overview-bottom > .card) { padding: 13px; }
+[data-orbit-density="compact"] .orbit-shell :is(.db-title, .overview-progress, .overview-metrics) { margin-bottom: 12px; }
 @media print {
   #app.orbit-shell { display: block; margin: 0; border: 0; box-shadow: none; background: white; color: black; }
   .orbit-shell::before, .orbit-drawer { display: none; }

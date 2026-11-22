@@ -324,6 +324,15 @@
 .orbit-trend-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-bottom: 10px; }
 .orbit-trend-head h3 { font-size: 14px; }
 .orbit-trend-head .db-tabs { margin: 0; }
+.coach-dashboard .orbit-trend-tiles { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.coach-dashboard .orbit-trend-tiles .db-stat > span { overflow-wrap: anywhere; }
+.orbit-activity-reading { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-height: 43px; margin: 8px 0; }
+.orbit-activity-reading strong { color: var(--accent); font-size: 24px; line-height: 1; }
+.orbit-activity-reading span { color: var(--muted); font-size: 12px; }
+.orbit-activity-reading small { display: block; }
+@media (max-width: 400px) {
+  .coach-dashboard .orbit-trend-tiles { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
 .coach-dashboard .orbit-trend-change { border-radius: 6px; background: var(--surface); padding: 3px 6px; }
 .coach-dashboard .orbit-trend-change[data-tone="up"] { background: var(--tint-green); color: var(--green); }
 .coach-dashboard .orbit-trend-change[data-tone="down"] { background: var(--tint-amber); color: var(--accent2); }
@@ -510,6 +519,7 @@
   transition: left .14s ease-out;
   pointer-events: none;
 }
+[data-orbit-motion="reduce"] .orbit-booking-feature { transform: none; }
 .orbit-insight-progress[data-playing="false"] { animation-play-state: paused; }
 @property --readiness-angle {
   syntax: "<percentage>";

@@ -18,8 +18,11 @@ export function clientPrograms(db, client, today) {
     const { start, end, weeks } = period
     if (end < today) return []
     const upcoming = start > today
-    const week = upcoming ? null : Math.floor(daysBetween(start, today) / 7) + 1
-    return [{ id: a.id, name: a.name, start, end, upcoming, path: programPath(client.id, a.id), note: upcoming ? `Starts ${fmtDate(start)}${weeks > 0 ? ` · ${weeks} weeks` : ''}` : weeks > 0 ? `Week ${Math.min(week, weeks)} of ${weeks}` : `Through ${fmtDate(end)}` }]
+    const totalWeeks = Number.isInteger(weeks) && weeks > 0 ? weeks : null
+    const week = !upcoming && totalWeeks ? Math.min(Math.floor(daysBetween(start, today) / 7) + 1, totalWeeks) : null
+    const note = upcoming ? `Starts ${fmtDate(start)}${totalWeeks ? ` · ${totalWeeks} weeks` : ''}`
+      : week ? `Week ${week} of ${totalWeeks}` : `Through ${fmtDate(end)}`
+    return [{ id: a.id, name: a.name, start, end, upcoming, week, totalWeeks, path: programPath(client.id, a.id), note }]
   }).sort((a, b) => Number(a.upcoming) - Number(b.upcoming) || (a.upcoming ? a.start.localeCompare(b.start) : b.start.localeCompare(a.start)) || a.name.localeCompare(b.name))
   if (assignments.length) return assignments
   const legacy = (db.plans || []).find(p => p.id === client.planId)

@@ -72,17 +72,22 @@ export function dashboardActivity(db, { today, days, metric, bucketDays = 7 }) {
   const start = addDays(today, -days), end = addDays(today, -1)
   const roster = new Set(db.clients.map(c => c.id)), daily = new Map(), unique = new Set()
   const activeRoster = new Set(db.clients.filter(c => c.status === 'Active').map(c => c.id))
+  const consistency = metric === 'consistency'
+  const clientDay = row => JSON.stringify([row.clientId, row.date])
+  const loggedDays = consistency ? new Set((db.workouts || []).filter(w => w.status === 'completed').map(clientDay)) : null
   const rows = {
-    load: db.srpe, checkins: db.wellness, readiness: [...db.wellness, ...(db.wearable || [])],
+    load: db.srpe, checkins: db.wellness, readiness: [...db.wellness, ...(db.wearable || [])], consistency: db.prescriptions || [],
   }[metric] || db.sessions
-  const isAverage = metric === 'readiness' || metric === 'completion'
+  const isRate = consistency || metric === 'completion'
+  const isAverage = metric === 'readiness' || isRate
   for (const row of rows) {
-    if (!roster.has(row.clientId) || row.date < start || row.date > end) continue
+    if (!row.date || !roster.has(row.clientId) || row.date < start || row.date > end) continue
     if (metric === 'sessions' && row.status !== 'Completed') continue
     if (metric === 'completion' && !['Completed', 'Missed'].includes(row.status)) continue
     if (metric === 'readiness' && !activeRoster.has(row.clientId)) continue
-    if (metric === 'checkins' || metric === 'readiness') {
-      const key = `${row.clientId}:${row.date}`
+    if (consistency && !programStats(row).exercises) continue
+    if (consistency || metric === 'checkins' || metric === 'readiness') {
+      const key = clientDay(row)
       if (unique.has(key)) continue
       unique.add(key)
     }
@@ -90,6 +95,7 @@ export function dashboardActivity(db, { today, days, metric, bucketDays = 7 }) {
     let value = 1
     if (metric === 'load') value = +row.tl
     if (metric === 'completion') value = row.status === 'Completed' ? 100 : 0
+    if (consistency) value = loggedDays.has(clientDay(row)) ? 100 : 0
     if (metric === 'readiness') {
       value = computeReadiness(db, row.clientId, row.date).score
       if (!Number.isFinite(value)) continue
@@ -104,7 +110,8 @@ export function dashboardActivity(db, { today, days, metric, bucketDays = 7 }) {
     const sum = values.reduce((total, day) => total + day.sum, 0)
     const samples = values.reduce((total, day) => total + day.samples, 0)
     const value = samples ? isAverage ? Math.round(sum / samples) : sum : null
-    buckets.push({ from, through, count, value, label: count === 1 ? fmtDay(from) : `${fmtDay(from)}–${fmtDay(through)}` })
+    buckets.push({ from, through, count, value, samples, matched: isRate ? sum / 100 : null,
+      label: count === 1 ? fmtDay(from) : `${fmtDay(from)}–${fmtDay(through)}` })
   }
   return { start, end, buckets, hasData: daily.size > 0 }
 }

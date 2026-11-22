@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { MOTION_CHANGE } from './useReducedMotion'
 
 const KEY = 'orbit:trainer:appearance'
 const SYSTEM = '(prefers-color-scheme: dark)'
@@ -7,10 +8,11 @@ function readAppearance() {
   try {
     const value = JSON.parse(localStorage.getItem(KEY))
     if (value && ['light', 'dark', 'system'].includes(value.theme) && Number.isFinite(value.frost)) {
-      return { theme: value.theme, frost: Math.min(100, Math.max(0, value.frost)) }
+      return { theme: value.theme, frost: Math.min(100, Math.max(0, value.frost)),
+        motion: value.motion === 'reduce' ? 'reduce' : 'system', density: value.density === 'compact' ? 'compact' : 'comfortable' }
     }
   } catch { /* The workspace is usable when browser preferences cannot be saved. */ }
-  return { theme: 'system', frost: 64 }
+  return { theme: 'system', frost: 64, motion: 'system', density: 'comfortable' }
 }
 
 export default function useOrbitAppearance({ applyToDocument = true } = {}) {
@@ -35,6 +37,22 @@ export default function useOrbitAppearance({ applyToDocument = true } = {}) {
       root.style.removeProperty('--orbit-frost')
     }
   }, [applyToDocument, theme, appearance.frost])
+  useEffect(() => {
+    if (!applyToDocument) return undefined
+    const root = document.documentElement
+    root.dataset.orbitDensity = appearance.density
+    return () => { delete root.dataset.orbitDensity }
+  }, [applyToDocument, appearance.density])
+  useEffect(() => {
+    if (!applyToDocument) return undefined
+    const root = document.documentElement
+    root.dataset.orbitMotion = appearance.motion
+    document.dispatchEvent(new window.Event(MOTION_CHANGE))
+    return () => {
+      delete root.dataset.orbitMotion
+      document.dispatchEvent(new window.Event(MOTION_CHANGE))
+    }
+  }, [applyToDocument, appearance.motion])
 
   const updateAppearance = (patch) => {
     const next = { ...appearance, ...patch }

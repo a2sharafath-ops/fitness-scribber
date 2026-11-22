@@ -18,7 +18,7 @@ import { useFormat } from '../hooks/useFormat'
 import useReducedMotion from '../hooks/useReducedMotion'
 import { initials } from '../lib/format'
 import { addDays, coachTimeZone, fmtDate, fmtDateRange, fmtDay } from '../lib/dates'
-import { baseOptions } from '../lib/chartSetup'
+import { baseOptions, shortLabel } from '../lib/chartSetup'
 import { dashboardActivity, dashboardClientPath, dashboardClock, dashboardData, dashboardReadiness, dashboardWeeks } from '../lib/dashboard'
 import { scheduleSort, sessionPath, weekOf } from '../lib/schedule'
 import './DashboardPage.css'
@@ -92,7 +92,7 @@ export default function DashboardPage() {
   const [now, setNow] = useState(() => new Date())
   const [reviewFilter, setReviewFilter] = useState(null)
   const [checkinFilter, setCheckinFilter] = useState('missing')
-  const [metric, setMetric] = useState('sessions')
+  const [metric, setMetric] = useState('consistency')
   const [period, setPeriod] = useState('30')
   const [chartSelection, setChartSelection] = useState(null)
   useEffect(() => {
@@ -139,7 +139,7 @@ export default function DashboardPage() {
   const daily = period === '7'
   const days = Number(period)
   const activity = useMemo(() => dashboardActivity(db, { today, days, metric, bucketDays: daily ? 1 : 7 }), [db, today, days, metric, daily])
-  const trendSummaries = useMemo(() => ['completion', 'readiness'].map((key) => {
+  const trendSummaries = useMemo(() => ['consistency', 'completion', 'readiness'].map((key) => {
     const options = { days, bucketDays: days, metric: key }
     const current = dashboardActivity(db, { ...options, today }).buckets[0].value
     const previous = dashboardActivity(db, { ...options, today: addDays(today, -days) }).buckets[0].value
@@ -147,12 +147,19 @@ export default function DashboardPage() {
   }), [db, days, today])
   const metricEmpty = { sessions: 'No bookings marked complete in this period.', checkins: 'No check-ins recorded in this period.',
     load: 'No session load recorded in this period.', completion: 'No bookings marked complete or missed in this period.',
-    readiness: 'No readiness scores recorded in this period.' }[metric]
+    readiness: 'No readiness scores recorded in this period.', consistency: 'No prescribed training days in this period.' }[metric]
   const metricLabel = { sessions: 'Completed bookings', checkins: 'Recorded check-ins', load: 'Recorded session load (sRPE · AU)',
-    completion: 'Booking completion rate', readiness: 'Average group readiness' }[metric]
-  const isTrend = metric === 'readiness' || metric === 'completion'
+    completion: 'Booking completion rate', readiness: 'Average group readiness', consistency: 'Training consistency' }[metric]
+  const isRate = metric === 'consistency' || metric === 'completion'
+  const isTrend = metric === 'readiness' || isRate
   const ActivityChart = isTrend ? Line : Bar
-  const activityValue = useCallback(value => value == null ? 'No records' : metric === 'completion' ? `${value}%` : metric === 'readiness' ? `${value}/100` : value, [metric])
+  const activityValue = useCallback(value => value == null ? 'No records' : isRate ? `${value}%` : metric === 'readiness' ? `${value}/100` : value, [isRate, metric])
+  const activeBucket = activity.buckets[chartSelection ?? activity.buckets.findLastIndex(bucket => bucket.value != null)]
+  const describeBucket = useCallback(bucket => {
+    if (!bucket?.samples || !isRate) return ''
+    return metric === 'consistency' ? `${bucket.matched} of ${bucket.samples} prescribed client-days logged`
+      : `${bucket.matched} of ${bucket.samples} completed or missed bookings`
+  }, [isRate, metric])
   const pick = (purpose, subset = clients) => {
     const title = { overview: 'Find a client', assessment: 'Record an assessment', program: 'Assign a program', load: 'Review training load' }[purpose]
     openModal(<DashboardClientPicker clients={subset} title={title} onChoose={async id => {
@@ -161,7 +168,7 @@ export default function DashboardPage() {
     }} />)
   }
   const book = (event) => openModal(db.clients.length ? <SessionForm date={today} /> : <ClientForm />, false, event.currentTarget)
-  const jump = id => document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
+  const jump = id => document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' })
   const showWeeklyReport = (event) => {
     const [week] = dashboardWeeks(ownedBookings, monday, 1)
     openModal(<ModalShell title="Weekly report" onClose={() => closeModal()} footer={<Button variant="ghost" onClick={() => closeModal()}>Close</Button>}>
@@ -186,22 +193,27 @@ export default function DashboardPage() {
   }, [locationHash])
   const chartOptions = useMemo(() => {
     const base = theme === 'dark' ? baseOptions('#4d414f', '#c4b8c5') : baseOptions('#e6dfe5', '#605762')
+    const inspect = (_event, points) => { if (points.length) setChartSelection(points[0].index) }
     return {
-    ...base,
-    animation: reduced ? false : { duration: 360, easing: 'easeOutCubic' },
-    interaction: { mode: 'index', intersect: false },
-    onHover: (_event, points) => { if (points.length) setChartSelection(points[0].index) },
-    plugins: { ...base.plugins, legend: { display: false }, tooltip: { callbacks: {
-      title: ([item]) => activity.buckets[item.dataIndex].label,
-      label: ({ raw }) => activityValue(raw),
-    } } },
-    scales: { x: { ...base.scales.x, grid: { display: false }, ticks: { ...base.scales.x.ticks, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } },
-      y: { ...base.scales.y, beginAtZero: true, max: isTrend ? 100 : undefined, ticks: { ...base.scales.y.ticks, precision: 0 } } },
+      ...base,
+      animation: reduced ? false : { duration: 360, easing: 'easeOutCubic' },
+      interaction: { mode: 'index', intersect: false },
+      onHover: inspect,
+      onClick: inspect,
+      plugins: { ...base.plugins, legend: { display: false }, tooltip: { callbacks: {
+        title: ([item]) => activity.buckets[item.dataIndex].label,
+        label: ({ raw }) => `${metricLabel}: ${activityValue(raw)}`,
+        afterLabel: ({ dataIndex }) => describeBucket(activity.buckets[dataIndex]),
+      } } },
+      scales: { x: { ...base.scales.x, grid: { display: false }, ticks: { ...base.scales.x.ticks, maxRotation: 0, maxTicksLimit: 5 } },
+        y: { ...base.scales.y, beginAtZero: true, max: isTrend ? 100 : undefined, ticks: { ...base.scales.y.ticks,
+          maxTicksLimit: 5, precision: 0, ...(isRate && { callback: value => `${value}%` }) } } },
     }
-  }, [theme, reduced, activity, activityValue, isTrend])
-  const chartData = useMemo(() => ({ labels: activity.buckets.map(b => fmtDay(b.from)), datasets: [{ label: 'Activity', data: activity.buckets.map(b => b.value),
-    ...(isTrend ? { borderColor: '#dc465e', backgroundColor: '#dc465e22', pointBackgroundColor: '#dc465e', fill: true, tension: .25 }
-      : { backgroundColor: '#dc465e', borderRadius: 5, maxBarThickness: 40 }) }] }), [activity, isTrend])
+  }, [theme, reduced, activity, activityValue, isTrend, isRate, metricLabel, describeBucket])
+  const chartData = useMemo(() => ({ labels: activity.buckets.map(b => shortLabel(b.from)), datasets: [{ label: metricLabel, data: activity.buckets.map(b => b.value),
+    ...(isTrend ? { borderColor: '#dc465e', backgroundColor: '#dc465e22', pointBackgroundColor: '#dc465e',
+      pointRadius: 3, pointHoverRadius: 6, fill: true, tension: .25, spanGaps: false }
+      : { backgroundColor: '#dc465e', borderRadius: 5, maxBarThickness: 40 }) }] }), [activity, isTrend, metricLabel])
   const selectBucket = (index) => {
     setChartSelection(index)
     const chart = chartRef.current
@@ -261,24 +273,32 @@ export default function DashboardPage() {
         </div>
         <div className="db-stats orbit-trend-tiles">
           {trendSummaries.map(({ key, current, delta }) => <div className="db-stat" key={key}>
-            <span>{key === 'completion' ? 'Booking completion rate' : 'Avg. group readiness'}</span>
-            <strong>{current == null ? '—' : <><AnimatedNumber value={current} reduced={reduced} /><small>{key === 'completion' ? '%' : '/100'}</small></>}</strong>
+            <span>{{ consistency: 'Training consistency', completion: 'Booking completion rate', readiness: 'Avg. group readiness' }[key]}</span>
+            <strong>{current == null ? '—' : <><AnimatedNumber value={current} reduced={reduced} /><small>{key === 'readiness' ? '/100' : '%'}</small></>}</strong>
             {delta != null && <small className="orbit-trend-change" data-tone={delta > 0 ? 'up' : delta < 0 ? 'down' : undefined} title="Compared with the previous period">{delta > 0 ? '+' : delta < 0 ? '−' : ''}{Math.abs(delta)} pt{Math.abs(delta) === 1 ? '' : 's'}</small>}
           </div>)}
         </div>
-        <DashboardSegments label="Activity metric" options={[[ 'sessions', 'Bookings completed' ], ['checkins', 'Check-ins'], ['load', 'Session load'],
-          ['completion', 'Completion rate'], ['readiness', 'Group readiness']]} value={metric} onChange={(value) => { setChartSelection(null); setMetric(value) }} />
+        <DashboardSegments label="Activity metric" options={[[ 'consistency', 'Training consistency' ], ['completion', 'Booking completion'],
+          ['sessions', 'Bookings completed' ], ['checkins', 'Check-ins'], ['load', 'Session load'], ['readiness', 'Group readiness']]}
+          value={metric} onChange={(value) => { setChartSelection(null); setMetric(value) }} />
         <p className="db-chart-heading">{metricLabel} · {fmtDateRange(activity.start, activity.end)}</p>
-        {activity.hasData ? <><div className="db-chart" tabIndex={0} aria-label={`${metricLabel}. Use the arrow keys to view each ${daily ? 'day' : 'week'}`}
-          onKeyDown={(event) => {
-            if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
-            event.preventDefault()
-            selectBucket(Math.max(0, Math.min(activity.buckets.length - 1, (chartSelection ?? (event.key === 'ArrowRight' ? -1 : activity.buckets.length)) + (event.key === 'ArrowRight' ? 1 : -1))))
-          }}>
-          <ActivityChart ref={chartRef} data={chartData} options={chartOptions} plugins={[CHART_GUIDE]} aria-hidden="true" />
-          <span className="db-chart-guide" aria-hidden="true" hidden />
-        </div><p className="db-note" aria-live="polite">{chartSelection == null ? `Hover or use the arrow keys to view a ${daily ? 'day' : 'week'}.` : `${activity.buckets[chartSelection].label} · ${activityValue(activity.buckets[chartSelection].value)}`}</p></> :
+        {activity.hasData ? <>
+          <div className="orbit-activity-reading" aria-live="polite">
+            <strong>{activityValue(activeBucket.value)}</strong>
+            <span>{activeBucket.label}{describeBucket(activeBucket) && <small>{describeBucket(activeBucket)}</small>}</span>
+          </div>
+          <div className="db-chart" tabIndex={0} aria-label={`${metricLabel}. Use the arrow keys to view each ${daily ? 'day' : 'week'}`}
+            onKeyDown={(event) => {
+              if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+              event.preventDefault()
+              const next = activity.buckets.indexOf(activeBucket) + (event.key === 'ArrowRight' ? 1 : -1)
+              selectBucket(Math.max(0, Math.min(activity.buckets.length - 1, next)))
+            }}>
+            <ActivityChart ref={chartRef} data={chartData} options={chartOptions} plugins={[CHART_GUIDE]} aria-hidden="true" />
+            <span className="db-chart-guide" aria-hidden="true" hidden />
+          </div><p className="db-note orbit-chart-instructions">Hover, tap, or use arrow keys to inspect a {daily ? 'day' : 'week'}.</p></> :
           <p className="db-chart-empty">{metricEmpty}</p>}
+        {metric === 'consistency' && <p className="db-note">Share of prescribed client-days with a completed workout log.</p>}
         {metric === 'completion' && <p className="db-note">Share of bookings marked complete among bookings marked complete or missed.</p>}
         {metric === 'load' && <button className="db-link" type="button" onClick={() => pick('load')}>View a client’s load records →</button>}
       </section>

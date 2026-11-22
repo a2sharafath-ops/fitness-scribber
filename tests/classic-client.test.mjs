@@ -20,7 +20,7 @@ const { dailySum, dayMetrics, readinessFor, calcWellness } = await load('lib/cal
 const { trainingDay } = await load('lib/trainingDay.js')
 const { forClient, formalAssessments } = await load('lib/assessment.js')
 const { compareToObservedBand, observedReferenceBand, trailingObservedBands } = await load('lib/progress.js')
-const { performedLiftHistory, performedLiftOptions } = await load('lib/performedLifts.js')
+const { performedLiftHistory, performedLiftOptions, recentLiftTrend } = await load('lib/performedLifts.js')
 const { loadResponseRows, pairedResponsePoints, responseSeries } = await load('lib/loadResponse.js')
 const { addDays, todayISO } = await load('lib/dates.js')
 const { DataProvider } = await load('store/DataContext.jsx')
@@ -807,6 +807,27 @@ test('Strength selects only this client’s completed lifts and groups recorded 
   assert.doesNotMatch(selector, /Unperformed Lift|Blair Lift/)
   assert.match(html, /Unperformed Lift.*1RM record only/)
   assert.doesNotMatch(html, /Blair Lift|Track lift|Lift to track/)
+})
+
+test('Overview strength compares confirmed loads for one exercise across dates', () => {
+  const db = fixture()
+  const log = (date, name, set, overrides = {}) => ({
+    date, clientId: 'a', status: 'completed', main: [{ name, setRows: [{ done: true, reps: 8, ...set }] }], ...overrides,
+  })
+  db.resistance = []
+  db.workouts = [
+    log('2026-09-21', 'Bench Press', { load: 0 }),
+    log('2026-09-24', ' bench press ', { load: 40 }),
+    log('2026-09-24', 'Bench Press', { load: 45 }),
+    log('2026-09-25', 'Bench Press', { pLoadKg: 99 }),
+    log('2026-09-26', 'Squat', { load: 50 }),
+    log('2026-09-27', 'Bench Press', { load: 75 }, { status: 'suggested' }),
+    log('2026-09-27', 'Bench Press', { load: 80 }, { clientId: 'b' }),
+    log('2026-09-29', 'Bench Press', { load: 95 }),
+  ]
+  assert.deepEqual(recentLiftTrend(db, 'a', '2026-09-28').map(({ date, loadKg }) => [date, loadKg]),
+    [['2026-09-21', 0], ['2026-09-24', 45]])
+  assert.deepEqual(recentLiftTrend(db, 'b', '2026-09-26'), [])
 })
 
 test('load graph band uses earlier observed values and withholds sparse baselines', () => {

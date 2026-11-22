@@ -139,6 +139,24 @@ test('daily dashboard trends use recorded outcomes and leave dates with missing 
   assert.deepEqual(daily('readiness'), [null, null, null, null, null, null, 50])
 })
 
+test('training consistency counts prescribed client-days independently of booking outcomes', () => {
+  const db = fixture()
+  const trained = { clientId: db.clients[0].id, date: '2026-10-08' }
+  const attended = { clientId: db.clients[1].id, date: '2026-10-08' }
+  const unplanned = { clientId: trained.clientId, date: '2026-10-09' }
+  const plan = day => ({ ...day, items: [{ exercise: 'Squat', sets: 2 }] })
+  db.prescriptions = [plan(trained), plan(trained), plan(attended), { ...unplanned, items: [] }, plan({ ...trained, date: today })]
+  db.workouts = [
+    { ...trained, status: 'completed' }, { ...trained, status: 'completed' },
+    { ...attended, status: 'in_progress' }, { ...unplanned, status: 'completed' },
+  ]
+  db.sessions = [booking(db, 'pending', trained.date, '09:00'), booking(db, 'attended', attended.date, '09:00', 'Completed', attended.clientId)]
+  const summarize = metric => dashboardActivity(db, { today, days: 3, bucketDays: 1, metric }).buckets
+    .map(({ value, samples, matched }) => [value, samples, matched])
+  assert.deepEqual(summarize('consistency'), [[50, 2, 1], [null, 0, 0], [null, 0, 0]])
+  assert.deepEqual(summarize('completion'), [[100, 1, 1], [null, 0, 0], [null, 0, 0]])
+})
+
 test('Dashboard renders real destinations and empty states without duplicate shortcut strips or AI claims', () => {
   const db=fixture(), render=db=>renderToStaticMarkup(React.createElement(DataProvider,{initialDb:db,backend:false},React.createElement(ModalProvider,null,React.createElement(MemoryRouter,null,React.createElement(DashboardPage)))))
   const html=render(db)

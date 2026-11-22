@@ -1165,11 +1165,22 @@ html:has(.progress-index){overflow-x:clip}
 .overview-metric>small{grid-column:1 / -1}
 .overview-metric>svg{grid-area:1 / 2;color:var(--muted);align-self:center}
 .overview-metric:hover{border-color:var(--accent)}
-.overview-program{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:16px}
-.overview-program>div{min-width:0;overflow-wrap:anywhere}
-.overview-program h2{font-size:12px;color:var(--muted);margin:0 0 5px}
+.overview-progress{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.overview-progress>.card{min-width:0;padding:16px}
+.overview-progress h2{margin:0;font-size:16px}
+.overview-program{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.overview-program-content{display:flex;align-items:center;gap:12px;max-width:100%;overflow-wrap:anywhere}
+.overview-week-ring{display:grid;place-items:center;flex:none;width:64px;aspect-ratio:1;border-radius:50%;background:conic-gradient(var(--accent) var(--program-week),var(--border) 0)}
+.overview-week-ring>span{display:grid;place-content:center;grid-auto-flow:column;align-items:baseline;gap:3px;width:54px;aspect-ratio:1;border-radius:50%;background:var(--surface);font-size:12px}
+.overview-week-ring b{font-size:18px}
 .overview-program strong{font-size:16px}
-.overview-program p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.overview-progress p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.overview-program .btn{margin-top:auto}
+.overview-strength>header,.overview-lift-reading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 10px}
+.overview-lift-reading{justify-content:flex-start;margin:8px 0;font-size:12px;color:var(--muted)}
+.overview-lift-reading strong{font-size:21px;line-height:1.1;color:var(--accent)}
+.overview-lift-chart{height:120px;position:relative;min-width:0}
+@media(max-width:700px){.overview-progress{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.overview-metrics{grid-template-columns:1fr;gap:8px}.overview-metric{grid-template-columns:minmax(0,1fr) auto auto;align-items:center;padding:10px 12px}.overview-metric>strong{grid-column:2;font-size:19px}.overview-metric>small{grid-column:1 / 3}.overview-metric>svg{grid-area:1 / 3 / 3 / 4}}
 .overview-priority,.overview-bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:20px}
 .overview-priority,.overview-bottom{align-items:start}.overview-priority>.card,.overview-bottom>.card{min-width:0}

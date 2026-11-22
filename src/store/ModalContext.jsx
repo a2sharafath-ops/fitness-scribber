@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '../hooks/useReducedMotion'
 
 const ModalContext = createContext(null)
 
@@ -37,7 +38,8 @@ export function ModalProvider({ children }) {
       if (revision.current !== current) return false
       closeGuardRef.current = null
       const box = dialogRef.current
-      if (box && document.documentElement.dataset.orbitTheme && window.matchMedia?.('(prefers-reduced-motion: no-preference)')?.matches && !options?.force) {
+      if (box && document.documentElement.dataset.orbitTheme && window.matchMedia?.('(prefers-reduced-motion: no-preference)')?.matches &&
+        !prefersReducedMotion() && !options?.force) {
         box.parentElement.dataset.closing = 'true'
         box.inert = true
         await new Promise(resolve => setTimeout(resolve, 120))
