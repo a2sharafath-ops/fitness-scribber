@@ -5,7 +5,7 @@ import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createServer } from 'vite'
 
-test('autosave continues after a no-change flush and recovers failed writes after remount', async () => {
+test('autosave recovers failed writes, recognizes saved drafts, and blocks conflicting retries', async () => {
   const dom = new JSDOM('<div id="root"></div>', { url: 'https://app.invalid/' })
   const globals = new Map()
   for (const [key, value] of Object.entries({ window: dom.window, document: dom.window.document, localStorage: dom.window.localStorage, IS_REACT_ACT_ENVIRONMENT: true })) {
@@ -18,11 +18,12 @@ test('autosave continues after a no-change flush and recovers failed writes afte
     const { default: useLiveSession } = await vite.ssrLoadModule('/src/hooks/useLiveSession.js')
     let remote = { id: 'test-recovery', clientId: 'test-client', status: 'in_progress', date: '2026-11-19', warmup: [], cooldown: [],
       main: [{ id: 'exercise', name: 'Test exercise', sets: 1, reps: '10' }] }
-    let api, failure = false, calls = 0
+    let api, failure = false, responseLost = false, calls = 0
     const persist = async (next) => {
       calls++
       if (failure) return { saved: false, issues: [{ message: 'Offline' }] }
       remote = structuredClone(next)
+      if (responseLost) return { saved: false, issues: [{ message: 'Connection reset' }] }
       return { saved: true }
     }
     function Harness() {
@@ -52,6 +53,45 @@ test('autosave continues after a no-change flush and recovers failed writes afte
     assert.equal(api.session.main[0].setRows[0].reps, 7)
     await act(async () => assert.equal(await api.flush(), true))
     assert.equal(remote.main[0].setRows[0].reps, 7)
+
+    responseLost = true
+    await act(async () => api.change({ type: 'row', id: 'exercise:set:1', patch: { reps: 6 } }))
+    await act(async () => assert.equal(await api.flush(), false))
+    assert.equal(remote.main[0].setRows[0].reps, 6)
+    await act(async () => root.unmount())
+    root = null
+    responseLost = false
+    remote.endedAt = null
+    await mount()
+    const writes = calls
+    assert.equal(api.conflict, false)
+    await act(async () => assert.equal(await api.flush(), true))
+    assert.equal(calls, writes)
+
+    await act(async () => root.unmount())
+    root = null
+    remote.main[0].setRows[0].reps = 8
+    await mount()
+    assert.equal(api.conflict, false)
+    assert.equal(api.session.main[0].setRows[0].reps, 8)
+    await act(async () => assert.equal(await api.flush(), true))
+    assert.equal(calls, writes)
+
+    failure = true
+    await act(async () => api.change({ type: 'row', id: 'exercise:set:1', patch: { reps: 5 } }))
+    await act(async () => assert.equal(await api.flush(), false))
+    await act(async () => root.unmount())
+    root = null
+    remote.main[0].setRows[0].reps = 4
+    failure = false
+    await mount()
+    assert.equal(api.conflict, true)
+    assert.equal(api.session.main[0].setRows[0].reps, 5)
+    const callsBeforeRetry = calls
+    await act(async () => assert.equal(await api.flush(), false))
+    assert.equal(calls, callsBeforeRetry)
+    assert.throws(() => api.change({ type: 'row', id: 'exercise:set:1', patch: { reps: 3 } }), /changed elsewhere/)
+    assert.equal(remote.main[0].setRows[0].reps, 4)
   } finally {
     if (root) await act(async () => root.unmount())
     await vite.close()

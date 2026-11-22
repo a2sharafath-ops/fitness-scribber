@@ -4,13 +4,20 @@ import { getWorkoutDraft } from '../lib/workoutDraft'
 
 const fingerprint = (value) => JSON.stringify(value, (_key, entry) => entry && typeof entry === 'object' && !Array.isArray(entry)
   ? Object.fromEntries(Object.entries(entry).sort(([a], [b]) => a.localeCompare(b))) : entry)
+const savedFingerprint = (workout) => fingerprint(Object.fromEntries(Object.entries(workout).filter(([, value]) => value != null)))
+const CONFLICT_MESSAGE = 'This saved session changed elsewhere. Your draft is kept. Load the saved session to continue.'
 const recoveryKey = (scope, workout) => `fitscribe:live:${scope}:${workout.clientId}:${workout.id}`
 function recover(key, workout, resolveTm) {
   try {
     const stored = JSON.parse(localStorage.getItem(key) || 'null')
-    if (stored && stored.base && !liveClosed(workout)) return {
-      session: stored.draft, baseline: stored.base,
-      conflict: fingerprint(stored.base) !== fingerprint(workout),
+    if (stored?.base && stored.draft && !liveClosed(workout)) {
+      const saved = savedFingerprint(workout)
+      const draft = savedFingerprint(stored.draft)
+      const base = savedFingerprint(stored.base)
+      // An accepted write can lose its response. An unchanged local copy also has nothing to recover.
+      if (draft === saved || draft === base) return { session: prepareLiveSession(workout, resolveTm), baseline: workout, conflict: false }
+      if (base === saved) return { session: { ...workout, ...stored.draft }, baseline: workout, conflict: false }
+      return { session: stored.draft, baseline: stored.base, conflict: true }
     }
   } catch { /* The save indicator reports storage failures on the first write. */ }
   return { session: prepareLiveSession(getWorkoutDraft(workout, 'run') || workout, resolveTm), baseline: workout, conflict: false }
@@ -29,7 +36,7 @@ export default function useLiveSession(workout, scope, resolveTm, onPersist) {
   const persist = useRef(onPersist)
   persist.current = onPersist
   const [status, setStatus] = useState(recovered.conflict ? 'failed' : 'saving')
-  const [error, setError] = useState(recovered.conflict ? 'This saved session changed elsewhere. Your recovered draft has been kept. Download it before reloading the saved session.' : '')
+  const [error, setError] = useState(recovered.conflict ? CONFLICT_MESSAGE : '')
   const [storageFailed, setStorageFailed] = useState(false)
   const mounted = useRef(true)
   const store = useCallback((draft, base = saved.current) => {
@@ -39,6 +46,7 @@ export default function useLiveSession(workout, scope, resolveTm, onPersist) {
     } catch { if (mounted.current) setStorageFailed(true) }
   }, [key])
   const change = useCallback((action) => {
+    if (recovered.conflict) throw new Error(CONFLICT_MESSAGE)
     const next = applyLiveAction(latest.current, action)
     latest.current = next
     store(next)
@@ -46,8 +54,9 @@ export default function useLiveSession(workout, scope, resolveTm, onPersist) {
     setStatus('saving')
     setError('')
     return next
-  }, [store])
+  }, [recovered.conflict, store])
   const flush = useCallback(() => {
+    if (recovered.conflict) return Promise.resolve(false)
     if (saving.current) return saving.current
     const operation = async () => {
       setStatus('saving')
@@ -68,7 +77,7 @@ export default function useLiveSession(workout, scope, resolveTm, onPersist) {
     }
     saving.current = Promise.resolve().then(operation)
     return saving.current
-  }, [store])
+  }, [recovered.conflict, store])
   useEffect(() => {
     store(session)
     if (recovered.conflict) return undefined
@@ -93,5 +102,5 @@ export default function useLiveSession(workout, scope, resolveTm, onPersist) {
       setError('The browser could not keep a recovery copy. Download the draft before closing this session.')
     }
   }
-  return { session, change, flush, status, error, storageFailed, reloadSaved }
+  return { session, change, flush, status, error, conflict: recovered.conflict, storageFailed, reloadSaved }
 }

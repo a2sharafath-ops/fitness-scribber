@@ -14,7 +14,7 @@ import './LiveTrainingSession.css'
 
 export default function LiveTrainingSession({ workout, units: preferredUnits, clientName, bookingTime, exercises = [], history = [], locked, resolveTm, onPersist, onExit, onComplete }) {
   const { user } = useAuth()
-  const { session, change, flush, status, error, storageFailed, reloadSaved } = useLiveSession(workout, user?.id || 'local', resolveTm, onPersist)
+  const { session, change, flush, status, error, conflict, storageFailed, reloadSaved } = useLiveSession(workout, user?.id || 'local', resolveTm, onPersist)
   const [now, setNow] = useState(Date.now())
   const [editor, setEditor] = useState(null)
   const [actionError, setActionError] = useState('')
@@ -88,18 +88,18 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
         {!readOnly && <div className="ls-workout-actions">
           <button type="button" className="ls-button ls-pause" onClick={() => act({ type: 'pause' })}
             aria-label={session.liveState.clock.paused ? 'Resume workout' : 'Pause workout'}>{session.liveState.clock.paused ? 'Resume' : 'Pause'}</button>
-          <button type="button" className="ls-button ls-finish" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>
+          <button type="button" className="ls-button ls-finish" disabled={conflict} onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>
         </div>}
         <LiveSessionMenu label="Workout options">{!readOnly && <>
           {!locked && <button type="button" role="menuitem" onClick={() => openEditor({ kind: 'order' })}>Reorder workout…</button>}
           <button type="button" role="menuitem" onClick={() => openEditor({ kind: 'settings' })}>Workout settings…</button>
           <hr /><button type="button" role="menuitem" className="ls-danger-text" onClick={() => openEditor({ kind: 'discard' })}>Discard workout…</button></>}
-          <button type="button" role="menuitem" disabled={busy} onClick={leave}>{readOnly ? 'Close session' : 'Save & exit'}</button>
+          <button type="button" role="menuitem" disabled={busy || conflict} onClick={leave}>{readOnly ? 'Close session' : 'Save & exit'}</button>
         </LiveSessionMenu></div>
         <p className={'ls-save ' + status} role="status">{status === 'failed' ? 'Save failed' : status === 'saving' ? 'Saving…' : 'Saved'}{storageFailed ? ' · Browser recovery unavailable' : ''}</p>
       </div></header>
     {(error || storageFailed) && <div className="ls-save-error" role="alert">{error || 'Browser storage is unavailable. Keep this session open until it is saved.'}
-      <div className="ls-tools"><button type="button" className="ls-button" onClick={downloadRecovery}>Download draft</button><button type="button" className="ls-button" onClick={flush}>Retry save</button><button type="button" className="ls-button" onClick={() => openEditor({ kind: 'reload' })}>Load saved session</button></div></div>}
+      <div className="ls-tools"><button type="button" className="ls-button" onClick={downloadRecovery}>Download draft</button>{!conflict && <button type="button" className="ls-button" onClick={flush}>Retry save</button>}<button type="button" className="ls-button" onClick={() => openEditor({ kind: 'reload' })}>Load saved session</button></div></div>}
     {actionError && !editor && <p role="alert" className="ls-form-error">{actionError}</p>}
     <div className="ls-layout"><div className="ls-blocks"><h2>Live session</h2>
       {blocks.map((block) => <section className="ls-block" key={block.id} aria-label={block.title}>
@@ -123,8 +123,8 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
         <p>Set {pending.item.setRows.indexOf(pending.row) + 1} of {pending.item.setRows.length} · {pending.action === 'done' ? secToClock(pending.row.durationSeconds) : nextDuration != null ? secToClock(nextDuration) : `${pending.row.pReps ?? '—'}${pending.row.pRepsMax != null && pending.row.pRepsMax !== pending.row.pReps ? '–' + pending.row.pRepsMax : ''} reps`}</p>
       </> : <strong>{allSetsLogged ? 'All sets logged' : 'No sets left to log'}</strong>}</div>
       <div className="ls-live-hr"><strong>♥ — <small>bpm</small></strong><small>No live HR feed</small></div>
-      {pending?.row ? <button type="button" className="ls-button primary" disabled={session.liveState.clock.paused && pending.action === 'start'} onClick={nextAction}>
-        {nextLabel}</button> : <button type="button" className="ls-button primary" onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
+      {pending?.row ? <button type="button" className="ls-button primary" disabled={conflict || session.liveState.clock.paused && pending.action === 'start'} onClick={nextAction}>
+        {nextLabel}</button> : <button type="button" className="ls-button primary" disabled={conflict} onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
     </div>, document.body)}
     {editor && <LiveSessionEditor key={JSON.stringify(editor)} editor={editor} session={session} units={units} exercises={exercises} history={history} onAction={act}
       onClose={() => setEditor(null)} onReload={reloadSaved} onFinish={finish} onDiscard={discard} busy={busy} error={actionError || error} />}
