@@ -8,7 +8,8 @@ import { fetchAll, persistDiff, deleteClientRemote, saveScheduleRemote, saveAssi
 import { createSnapshotQueue } from '../lib/confirmedPersistence'
 import { applyScheduleRequest } from '../lib/schedule'
 import { applyWorkoutCompletion } from '../lib/workoutCompletion'
-import { saveLiveWorkoutCompletion } from '../api/workouts'
+import { prepareWorkoutCorrection } from '../lib/workoutCorrection'
+import { saveCompletedWorkoutCorrection, saveLiveWorkoutCompletion } from '../api/workouts'
 import StartupScreen from '../components/templates/StartupScreen'
 
 const DataContext = createContext(null)
@@ -239,6 +240,28 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     } finally { scheduleSavingRef.current = false }
   }, [backend])
 
+  const saveWorkoutCorrection = useCallback(async (expected, workout, effort) => {
+    if (scheduleSavingRef.current) throw new Error('Another change is saving. Please wait and retry.')
+    scheduleSavingRef.current = true
+    try {
+      await writeQueueRef.current
+      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before correcting the workout.')
+      const db = backend ? dbRef.current : readStoredDB()
+      const correction = prepareWorkoutCorrection(db, expected, workout, effort)
+      setSaveStatus('saving')
+      if (backend) await saveCompletedWorkoutCorrection(workout, expected, correction)
+      else if (!saveDB(correction.next)) throw new Error('Browser storage is unavailable. Your edits are still open.')
+      commitVersionRef.current += 1
+      persistenceRef.current?.reset(correction.next)
+      dbRef.current = correction.next
+      setDb(correction.next)
+      setSaveStatus('saved')
+    } catch (error) {
+      setSaveStatus(writeFailedRef.current ? 'failed' : 'idle')
+      throw error
+    } finally { scheduleSavingRef.current = false }
+  }, [backend])
+
   const deleteClient = useCallback(async (clientId) => {
     if (scheduleSavingRef.current) throw new Error('Wait for the booking to finish saving.')
     if (!backend) {
@@ -272,8 +295,8 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     for (const i of [...(db?._loadIssues || []), ...writeIssues]) {
       byTable.set(i.table, { table: i.table, message: i.message, kind: i.kind || 'load' })
     }
-    return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
-  }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, deleteClient, refresh, saveStatus, writeIssues])
+    return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, saveWorkoutCorrection, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
+  }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, saveWorkoutCorrection, deleteClient, refresh, saveStatus, writeIssues])
 
   if (backend && !db) return <StartupScreen error={loadError} onRetry={() => { setLoadError(null); setLoadAttempt(n => n + 1) }} />
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

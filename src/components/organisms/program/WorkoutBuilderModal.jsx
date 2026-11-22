@@ -20,7 +20,7 @@ import useDragReorder from '../../../hooks/useDragReorder'
 import { moveOrdered } from '../../../lib/arrange'
 import { fmtDay, addDays, todayISO } from '../../../lib/dates'
 import { isClosedTrainingDay, isPlanTargetBlocked, writePrescription, approvePlanReplacement } from '../../../lib/planner'
-import { correctClassicWorkout } from '../../../lib/classicWorkflow'
+import { workoutEffort } from '../../../lib/workoutCorrection'
 import {
   newBlock, defaultBlocks, itemsToBlocks, cloneBlocksFresh,
   applyProgression, resolveTrainingMax, resetTrainingMaxes, programStats,
@@ -54,7 +54,7 @@ const fromExisting = (p, seedBlocks = []) => {
 }
 
 export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false, onLog, initialMode, selectedWorkoutId }) {
-  const { db, commit, saveTrainingPlans, tz, units } = useData()
+  const { db, saveTrainingPlans, saveWorkoutCorrection, tz, units } = useData()
   const { closeModal, setCloseGuard } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
@@ -63,7 +63,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
   const completedAppointment = (db.sessions || []).some((item) => item.clientId === clientId && item.date === date && String(item.status).toLowerCase() === 'completed')
   const closedDay = isClosedTrainingDay(db, clientId, date, todayISO(tz))
   const [selectedLogId, setSelectedLogId] = useState(() => selectedWorkoutId || completed[0]?.id || null)
-  const selectedLog = completed.find((item) => item.id === selectedLogId) || completed[0] || null
+  const selectedLog = completed.find((item) => item.id === selectedLogId) || null
   const [mode, setMode] = useState(() => initialMode === 'edit-log' && completed.length ? 'edit-log' : completed.length || unfinishedWorkout || completedAppointment || (review && (existing || closedDay)) ? 'view' : 'edit')
   const [blocks, setBlocks] = useState(() => fromExisting(existing, seedBlocks))
   const [name, setName] = useState(existing?.name || '')
@@ -283,12 +283,17 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
       </div>}
 
       {mode === 'edit-log' && selectedLog && <CompletedWorkoutEditor key={selectedLog.id} workout={selectedLog} units={units}
+        sessionEffort={workoutEffort(db, selectedLog)}
         onCancel={() => setMode('view')}
-        onSave={(updated) => {
-          commit((data) => correctClassicWorkout(data, clientId, updated))
-          setMode('view')
-          toast('Logged workout corrected.')
+        onSave={async (updated, expected, effort) => {
+          setSaving(true)
+          try {
+            await saveWorkoutCorrection(expected, updated, effort)
+            setMode('view')
+            toast('Logged workout corrected.')
+          } finally { setSaving(false) }
         }} />}
+      {mode === 'edit-log' && !selectedLog && <p role="alert">The selected workout is no longer available.</p>}
 
       {mode === 'edit' && step === 'dates' && (
         <>
