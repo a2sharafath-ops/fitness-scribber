@@ -4,7 +4,8 @@ import Avatar from '../atoms/Avatar'
 import Button from '../atoms/Button'
 import Icon from '../atoms/Icon'
 import { readinessScore } from '../../lib/calc'
-import { bookingPlan, bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, durationLabel, hasDuration, scheduledBooking, sessionPath, trainingBooking } from '../../lib/schedule'
+import { isSession } from '../../lib/planner'
+import { bookingDayPlan, bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, durationLabel, hasDuration, scheduledBooking, sessionPath, trainingBooking } from '../../lib/schedule'
 
 function bookingDestination(db, booking, today) {
   const path = sessionPath(booking)
@@ -16,14 +17,16 @@ function bookingDestination(db, booking, today) {
 }
 
 function bookingSlide(db, booking, client, today, next) {
-  const plan = bookingPlan(db, booking)
-  const workout = bookingWorkout(db, booking)
-  const title = workout?.title || plan?.name || booking.type || 'Training session'
-  const program = plan && db.programAssignments?.find((assignment) =>
+  const dayPlan = bookingDayPlan(db, booking)
+  const plan = isSession(dayPlan) ? dayPlan : null
+  const workout = trainingBooking(booking) ? bookingWorkout(db, booking) : null
+  const originalWorkout = workout?.liveState?.original ? workout : null
+  const title = workout?.title?.trim() || (plan && (plan.name?.trim() || 'Prescribed workout')) || booking.type || 'Training session'
+  const program = plan && (!workout || workout.source === 'prescribed' && title === plan.name?.trim()) && db.programAssignments?.find((assignment) =>
     assignment.clientId === booking.clientId && assignment.data?.schedule?.some((entry) => entry.prescriptionId === plan.id))?.name
   const status = bookingWorkoutStatus(booking, workout)
   return {
-    booking, client, plan, title, program, status,
+    booking, client, plan, originalWorkout, title, program, status,
     subject: `${client.name} at ${booking.time || 'unscheduled time'}`,
     featuredStatus: !workout && booking.id === next?.id ? 'Next scheduled' : status,
     destination: bookingDestination(db, booking, today),
@@ -166,7 +169,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
         </div>
         <div className="orbit-booking-tools">
           <Button variant="ghost" aria-haspopup="dialog" aria-label={`Booking details for ${selected.subject}`} onClick={event => onDetails(booking, event.currentTarget)}>Details</Button>
-          {selected.plan && <Button variant="ghost" aria-haspopup="dialog" onClick={event => onPlan(selected.plan, event.currentTarget)}>View plan</Button>}
+          {(selected.originalWorkout || selected.plan) && <Button variant="ghost" aria-haspopup="dialog" onClick={event => onPlan(selected, event.currentTarget)}>View plan</Button>}
         </div>
         {count > 1 && <div className="orbit-booking-controls" role="group" aria-label="Browse bookings">
           <Button variant="ghost" className="orbit-booking-previous" aria-label="Previous booking" onClick={() => shift(-1)}><Icon name="chevron-right" size={14} /><span>Previous</span></Button>

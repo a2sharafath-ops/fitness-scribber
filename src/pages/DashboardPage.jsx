@@ -7,6 +7,7 @@ import DashboardBookings from '../components/organisms/DashboardBookings'
 import DashboardWeekly from '../components/organisms/DashboardWeekly'
 import DashboardInsights from '../components/organisms/DashboardInsights'
 import DayBlockReview from '../components/organisms/program/DayBlockReview'
+import { OriginalWorkoutPlan } from '../components/organisms/workout/live/LiveSessionReview'
 import ModalShell from '../components/molecules/ModalShell'
 import DashboardSegments from '../components/molecules/DashboardSegments'
 import BulkWellnessForm from '../components/organisms/forms/BulkWellnessForm'
@@ -181,11 +182,18 @@ export default function DashboardPage() {
       </dl>
     </ModalShell>, false, event.currentTarget)
   }
-  const showPlan = (prescription, trigger) => openModal(<ModalShell title={prescription.name || 'Workout plan'} onClose={() => closeModal()}
-    footer={<Button variant="ghost" onClick={() => closeModal()}>Close</Button>}>
-    <p className="muted">{fmtDate(prescription.date)} · Planned targets</p>
-    <DayBlockReview prescription={prescription} units={units} />
-  </ModalShell>, true, trigger)
+  const showPlan = ({ booking, client, plan, originalWorkout, title }, trigger) =>
+    openModal(<ModalShell title={originalWorkout ? title : plan.name?.trim() || 'Workout plan'} onClose={() => closeModal()}
+      footer={<Button variant="ghost" onClick={() => closeModal()}>Close</Button>}>
+      <p className="muted">{[client.name, fmtDate(booking.date), booking.time].filter(Boolean).join(' · ')}</p>
+      {originalWorkout ? <>
+        <p className="muted">Original plan saved with this workout.</p>
+        <OriginalWorkoutPlan session={originalWorkout} units={units} />
+      </> : <>
+        <p className="muted">Day’s plan · Available to copy into this booking.</p>
+        <DayBlockReview prescription={plan} units={units} />
+      </>}
+    </ModalShell>, true, trigger)
   useEffect(() => {
     if (locationHash === '#dashboard-review' || locationHash === '#dashboard-checkins') {
       document.getElementById(locationHash.slice(1))?.scrollIntoView()
