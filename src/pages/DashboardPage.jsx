@@ -24,6 +24,15 @@ import { dashboardActivity, dashboardClientPath, dashboardClock, dashboardData, 
 import { scheduleSort, sessionPath, weekOf } from '../lib/schedule'
 import './DashboardPage.css'
 
+const ACTIVITY_METRICS = [
+  ['consistency', 'Training consistency'],
+  ['completion', 'Booking completion'],
+  ['sessions', 'Bookings completed'],
+  ['checkins', 'Check-ins'],
+  ['load', 'Session load'],
+  ['readiness', 'Group readiness'],
+]
+
 function Heading({ icon, tone, children, action }) {
   return <div className="db-head"><h2><span className={`db-section-icon db-${tone}`}><Icon name={icon} size={17} /></span>{children}</h2>{action}</div>
 }
@@ -96,6 +105,10 @@ export default function DashboardPage() {
   const [metric, setMetric] = useState('consistency')
   const [period, setPeriod] = useState('30')
   const [chartSelection, setChartSelection] = useState(null)
+  const chooseMetric = (value) => {
+    setChartSelection(null)
+    setMetric(value)
+  }
   useEffect(() => {
     const refresh = () => setNow(new Date())
     const interval = setInterval(refresh, 60000)
@@ -286,9 +299,18 @@ export default function DashboardPage() {
             {delta != null && <small className="orbit-trend-change" data-tone={delta > 0 ? 'up' : delta < 0 ? 'down' : undefined} title="Compared with the previous period">{delta > 0 ? '+' : delta < 0 ? '−' : ''}{Math.abs(delta)} pt{Math.abs(delta) === 1 ? '' : 's'}</small>}
           </div>)}
         </div>
-        <DashboardSegments label="Activity metric" options={[[ 'consistency', 'Training consistency' ], ['completion', 'Booking completion'],
-          ['sessions', 'Bookings completed' ], ['checkins', 'Check-ins'], ['load', 'Session load'], ['readiness', 'Group readiness']]}
-          value={metric} onChange={(value) => { setChartSelection(null); setMetric(value) }} />
+        <div className="orbit-metric-buttons">
+          <DashboardSegments label="Activity metric" options={ACTIVITY_METRICS} value={metric} onChange={chooseMetric} />
+        </div>
+        <label className="orbit-metric-select">
+          Metric
+          <span className="orbit-select-wrap">
+            <select value={metric} onChange={event => chooseMetric(event.target.value)}>
+              {ACTIVITY_METRICS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+            <Icon name="chevron-down" size={14} aria-hidden="true" />
+          </span>
+        </label>
         <p className="db-chart-heading">{metricLabel} · {fmtDateRange(activity.start, activity.end)}</p>
         {activity.hasData ? <>
           <div className="orbit-activity-reading" aria-live="polite">
