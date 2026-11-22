@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
@@ -34,6 +34,7 @@ export default function SchedulePage() {
   const [selected, setSelected] = useState(clock.today), [view, setView] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 640 ? 'day' : 'week')
   const [client, setClient] = useState('all'), [status, setStatus] = useState('booked'), [preview, setPreview] = useState(null)
   const drag = useRef(null), suppressClick = useRef(false), scroller = useRef(null), page = useRef(null), latest = useRef(null)
+  const selectedDayHeading = useRef(null), timeGutter = useRef(null)
   const clients = new Map(db.clients.map(c => [c.id, c]))
   const rows = db.sessions.filter(s => clients.has(s.clientId)).sort(scheduleSort)
   const visible = rows.filter(s => (client === 'all' || s.clientId === client) && (status === 'all' || status === 'booked' && s.status !== 'Cancelled' || s.status === status))
@@ -61,11 +62,32 @@ export default function SchedulePage() {
   }
   latest.current = { db, clock, propose, start, end }
   useEffect(() => { setClock(scheduleClock(new Date(), tz)); const id = setInterval(() => setClock(scheduleClock(new Date(), tz)), 30000); return () => clearInterval(id) }, [tz])
-  useEffect(() => {
-    if (scroller.current && timed) scroller.current.scrollTop = 0
-  // Show the beginning of the time range when switching calendar view.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (scroller.current) scroller.current.scrollTop = 0
   }, [view])
+
+  const revealSelectedDay = useCallback(() => {
+    const scroll = scroller.current, day = selectedDayHeading.current, gutter = timeGutter.current
+    if (!scroll || !day || !gutter) return
+
+    const dayBounds = day.getBoundingClientRect()
+    const visibleLeft = gutter.getBoundingClientRect().right
+    const visibleRight = scroll.getBoundingClientRect().left + scroll.clientWidth
+    // Scroll only the calendar, allowing for the sticky time column on the left.
+    if (dayBounds.left < visibleLeft) scroll.scrollLeft -= Math.ceil(visibleLeft - dayBounds.left)
+    else if (dayBounds.right > visibleRight) scroll.scrollLeft += Math.ceil(dayBounds.right - visibleRight)
+  }, [])
+
+  useLayoutEffect(() => {
+    if (view === 'week') revealSelectedDay()
+  }, [selected, view, revealSelectedDay])
+
+  useEffect(() => {
+    if (view !== 'week' || !scroller.current) return
+    const observer = new ResizeObserver(revealSelectedDay)
+    observer.observe(scroller.current)
+    return () => observer.disconnect()
+  }, [view, revealSelectedDay])
 
   useEffect(() => {
     let frame
@@ -133,22 +155,86 @@ export default function SchedulePage() {
   </div>
   const landing = (date, month = false) => preview?.candidate?.date === date && <div aria-hidden="true" className={'schedule-landing' + (preview.blocked ? ' blocked' : '') + (month ? ' month' : '')} style={month ? undefined : { top: minute(preview.candidate.time) - start, height: preview.candidate.dur }}><strong>{clients.get(preview.session.clientId)?.name}</strong><span>{preview.candidate.time}–{sessionEnd(preview.candidate)}</span><small>{preview.candidate.dur} min{preview.blocked ? ' · Conflict' : ''}</small></div>
   const shift = dir => setSelected(view === 'month' || view === 'agenda' ? addMonths(selected, dir) : addDays(selected, dir * (view === 'week' ? 7 : 1)))
+  const showToday = () => {
+    if (selected === clock.today && view === 'week') revealSelectedDay()
+    setSelected(clock.today)
+  }
   const dateRows = timed ? gridRows : visible.filter(s => s.date.slice(0, 7) === selected.slice(0, 7))
   const heading = view === 'week' ? `${fmtDay(week)} – ${fmtDay(addDays(week, 6))}` : view === 'day' ? fmtDay(selected) : monthLabel(selected)
   return <div className="schedule-page" ref={page}>
     <header className="schedule-heading"><div><span className="schedule-eyebrow">YOUR COACHING WEEK</span><h1>Schedule</h1><p>{fmtDay(clock.today)} · {tz}</p></div><Button disabled={!db.clients.length} onClick={() => book()}>＋ Book session</Button></header>
     <div className="schedule-stats"><div><span className="schedule-stat-icon"><Icon name="calendar" size={21} /></span><div><small>Today</small><strong>{todayRows.length} <span>{todayRows.length === 1 ? 'session' : 'sessions'}</span></strong></div></div><div><span className="schedule-stat-icon">◷</span><div><small>This week</small><strong>{Math.round(thisWeek.reduce((sum, s) => sum + Number(s.dur || 0), 0) / 6) / 10} <span>hours · {thisWeek.length} sessions</span></strong></div></div><button onClick={() => openModal(<div className="schedule-dialog"><ModalShell title="Booking status updates" onClose={closeModal}><p className="muted">Past bookings awaiting a status update.</p>{overdue.length ? overdue.map(s => <button className="schedule-agenda-row" key={s.id} onClick={() => edit(s)}><span>{fmtDay(s.date)} · {s.time}</span><strong>{clients.get(s.clientId)?.name}</strong><Badge status={s.status} /></button>) : <p>All up to date.</p>}</ModalShell></div>)}><span className="schedule-stat-icon amber">↻</span><div><small>Status updates</small><strong>{overdue.length} <span>{overdue.length ? 'to review →' : 'All up to date'}</span></strong></div></button></div>
-    <div className={'schedule-workspace' + (timed ? ' timed' : '')}>
-      <section className="schedule-calendar" aria-label="Session calendar"><div className="schedule-toolbar"><div className="schedule-range"><Button variant="ghost" size="sm" aria-label={'Previous ' + view} onClick={() => shift(-1)}>←</Button><h2>{heading}</h2><Button variant="ghost" size="sm" aria-label={'Next ' + view} onClick={() => shift(1)}>→</Button><Button variant="ghost" size="sm" onClick={() => setSelected(clock.today)}>Today</Button></div><div className="schedule-views">{['month', 'week', 'day', 'agenda'].map(v => <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>{v[0].toUpperCase() + v.slice(1)}</button>)}</div></div>
-        <div className="schedule-filters"><label>Client<select value={client} onChange={e => setClient(e.target.value)}><option value="all">All clients</option>{db.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Status<select value={status} onChange={e => setStatus(e.target.value)}><option value="booked">All except cancelled</option>{['Pending', 'Confirmed', 'Completed', 'Cancelled', 'Missed'].map(s => <option key={s}>{s}</option>)}<option value="all">All statuses</option></select></label>{(client !== 'all' || status !== 'booked') && <button className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}</div>
+    <div className="schedule-workspace">
+      <div className="schedule-controls">
+        <div className="schedule-toolbar">
+          <div className="schedule-range">
+            <Button variant="ghost" size="sm" aria-label={'Previous ' + view} onClick={() => shift(-1)}>←</Button>
+            <h2>{heading}</h2>
+            <Button variant="ghost" size="sm" aria-label={'Next ' + view} onClick={() => shift(1)}>→</Button>
+            <Button variant="ghost" size="sm" onClick={showToday}>Today</Button>
+          </div>
+          <div className="schedule-views" role="group" aria-label="Calendar view">
+            {['month', 'week', 'day', 'agenda'].map(v => <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>{v[0].toUpperCase() + v.slice(1)}</button>)}
+          </div>
+        </div>
+        <div className="schedule-filters">
+          <div className="schedule-filter">
+            <label htmlFor="schedule-client-filter">Client</label>
+            <span className="orbit-select-wrap">
+              <select id="schedule-client-filter" value={client} onChange={e => setClient(e.target.value)}>
+                <option value="all">All clients</option>
+                {db.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <Icon name="chevron-down" size={14} />
+            </span>
+          </div>
+          <div className="schedule-filter">
+            <label htmlFor="schedule-status-filter">Status</label>
+            <span className="orbit-select-wrap">
+              <select id="schedule-status-filter" value={status} onChange={e => setStatus(e.target.value)}>
+                <option value="booked">All except cancelled</option>
+                {['Pending', 'Confirmed', 'Completed', 'Cancelled', 'Missed'].map(s => <option key={s}>{s}</option>)}
+                <option value="all">All statuses</option>
+              </select>
+              <Icon name="chevron-down" size={14} />
+            </span>
+          </div>
+          {(client !== 'all' || status !== 'booked') && <button className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}
+        </div>
+      </div>
+      <section className="schedule-day-panel" aria-labelledby="schedule-selected-date">
+        <header>
+          <span className="schedule-eyebrow">{selected === clock.today ? 'TODAY' : 'SELECTED DAY'}</span>
+          <h2 id="schedule-selected-date">{fmtDay(selected)}</h2>
+          <p>{dayRows.length} {dayRows.length === 1 ? 'booking' : 'bookings'} · {dayRows.reduce((sum, s) => sum + Number(s.dur || 0), 0)} min</p>
+        </header>
+        <div className="schedule-day-scroll">
+          {dayRows.length ? dayRows.map(s => <article key={s.id} className={'schedule-day-card' + (s.id === next?.id ? ' next' : '')}>
+            <div className="schedule-day-time"><strong>{s.time} <small>– {sessionEnd(s)}</small></strong><Badge status={s.status} /></div>
+            {s.id === next?.id && <span className="schedule-next-label">UP NEXT</span>}
+            <h3>{clients.get(s.clientId)?.name}</h3>
+            <p>{s.type} · {durationLabel(s)}</p>
+            {bookingPlan(db, s)?.name && <p className="schedule-plan-name">{bookingPlan(db, s).name}</p>}
+            <div className="schedule-day-actions">
+              <button onClick={() => navigate(sessionPath(s))}>{trainingBooking(s) ? 'Open session →' : 'Open client →'}</button>
+              <button aria-label={'Booking details for ' + clients.get(s.clientId)?.name} onClick={() => edit(s)}>•••</button>
+            </div>
+          </article>) : <div className="schedule-empty">
+            <Icon name="calendar" size={32} />
+            <h3>{client !== 'all' || status !== 'booked' ? 'No matching bookings' : 'A clear day'}</h3>
+            <p>{client !== 'all' || status !== 'booked' ? 'Try another filter or date.' : 'Book a session when you’re ready.'}</p>
+          </div>}
+        </div>
+        <footer><Button variant="ghost" disabled={!db.clients.length} onClick={() => book()}>＋ Book on this day</Button></footer>
+      </section>
+      <section className="schedule-calendar" aria-label="Session calendar">
         <div className="schedule-caption"><span>{dateRows.length} {dateRows.length === 1 ? 'booking' : 'bookings'} shown</span><span>{timed ? 'Drag to move · Pull the bottom edge to resize' : view === 'month' ? 'Drag to another date · Time stays the same' : ''}</span></div>
-        {timed && gridRows.some(s => !validTimeRows.includes(s)) && <div className="schedule-incomplete">{gridRows.filter(s => !validTimeRows.includes(s)).map(s => <button key={s.id} onClick={() => detail(s)}>{fmtDay(s.date)} · {s.time} · {clients.get(s.clientId)?.name} — {durationLabel(s)}</button>)}</div>}{timed ? <div className="schedule-time-scroll" ref={scroller}><div className={'schedule-time-grid ' + (view === 'week' ? 'week' : 'day')} style={{ '--days': dates.length }}><div className="schedule-time-head"><span className="schedule-zone">Time</span>{dates.map(d => <button key={d} className={(d === selected ? 'selected ' : '') + (d === clock.today ? 'today' : '')} onClick={() => setSelected(d)}><span>{DAYS[(new Date(d + 'T12:00Z').getUTCDay() + 6) % 7]}</span><strong>{Number(d.slice(8))}</strong></button>)}</div><div className="schedule-time-body" style={{ height: end - start }}><div className="schedule-hours">{Array.from({ length: (end - start) / 60 + 1 }, (_, i) => <span key={i} style={{ top: i * 60, ...(start + i * 60 === end ? { transform: 'translateY(-100%)' } : {}) }}>{clockTime(start + i * 60)}</span>)}</div>{dates.map(d => <div key={d} data-schedule-date={d} className={'schedule-time-column' + (d === selected ? ' selected' : '')} onDoubleClick={e => { if (e.target !== e.currentTarget) return; book(d, clockTime(Math.min(end - 60, Math.max(start, Math.round((e.clientY - e.currentTarget.getBoundingClientRect().top + start) / 15) * 15)))) }}>
+        {timed && gridRows.some(s => !validTimeRows.includes(s)) && <div className="schedule-incomplete">{gridRows.filter(s => !validTimeRows.includes(s)).map(s => <button key={s.id} onClick={() => detail(s)}>{fmtDay(s.date)} · {s.time} · {clients.get(s.clientId)?.name} — {durationLabel(s)}</button>)}</div>}{timed ? <div className="schedule-time-scroll" ref={scroller}><div className={'schedule-time-grid ' + (view === 'week' ? 'week' : 'day')} style={{ '--days': dates.length }}><div className="schedule-time-head"><span className="schedule-zone" ref={timeGutter}>Time</span>{dates.map(d => <button key={d} ref={d === selected ? selectedDayHeading : null} aria-pressed={d === selected} aria-label={fmtDay(d)} className={(d === selected ? 'selected ' : '') + (d === clock.today ? 'today' : '')} onClick={() => setSelected(d)}><span>{DAYS[(new Date(d + 'T12:00Z').getUTCDay() + 6) % 7]}</span><strong>{Number(d.slice(8))}</strong></button>)}</div><div className="schedule-time-body" style={{ height: end - start }}><div className="schedule-hours">{Array.from({ length: (end - start) / 60 + 1 }, (_, i) => <span key={i} style={{ top: i * 60, ...(start + i * 60 === end ? { transform: 'translateY(-100%)' } : {}) }}>{clockTime(start + i * 60)}</span>)}</div>{dates.map(d => <div key={d} data-schedule-date={d} className={'schedule-time-column' + (d === selected ? ' selected' : '')} onDoubleClick={e => { if (e.target !== e.currentTarget) return; book(d, clockTime(Math.min(end - 60, Math.max(start, Math.round((e.clientY - e.currentTarget.getBoundingClientRect().top + start) / 15) * 15)))) }}>
           {calendarLanes(validTimeRows.filter(s => s.date === d)).map(({ session: s, lane, lanes }) => event(s, { top: minute(s.time) - start, height: Math.max(15, s.dur), left: `calc(${lane * 100 / lanes}% + 3px)`, width: `calc(${100 / lanes}% - 6px)` }))}
           {d === clock.today && minute(clock.time) >= start && minute(clock.time) <= end && <div className="schedule-now" style={{ top: minute(clock.time) - start }} aria-label={'Current time ' + clock.time} />}{landing(d)}
         </div>)}</div></div></div> : view === 'month' ? <div className="schedule-month">{DAYS.map(d => <div className="schedule-weekday" key={d}>{d}</div>)}{monthGridDates(selected).map(d => { const entries = visible.filter(s => s.date === d); return <div key={d} data-schedule-date={d} className={'schedule-month-cell' + (d === selected ? ' selected' : '') + (d.slice(0, 7) !== selected.slice(0, 7) ? ' other' : '')}><button className={'schedule-date' + (d === clock.today ? ' today' : '')} aria-label={`${fmtDay(d)}, ${entries.length} bookings`} aria-pressed={d === selected} onClick={() => setSelected(d)}>{Number(d.slice(8))}<small>{entries.length || ''}</small></button>{entries.slice(0, 2).map(s => event(s, undefined, true))}{entries.length > 2 && <button className="schedule-more" onClick={() => setSelected(d)}>+{entries.length - 2} more</button>}{landing(d, true)}</div> })}</div> : <div className="schedule-agenda">{dateRows.length ? [...new Set(dateRows.map(s => s.date))].map(d => <section key={d}><h3>{fmtDay(d)}</h3>{dateRows.filter(s => s.date === d).map(s => <button className="schedule-agenda-row" key={s.id} onClick={() => detail(s)}><span>{s.time}<small>{durationLabel(s)}</small></span><span><strong>{clients.get(s.clientId)?.name}</strong><small>{s.type}</small></span><Badge status={s.status} /></button>)}</section>) : <div className="schedule-empty"><Icon name="calendar" size={36} /><h3>No bookings this month</h3><p>Choose another month or adjust the filters.</p></div>}</div>}
         <div className="schedule-legend">{['Confirmed', 'Pending', 'Completed', 'Cancelled'].map(s => <span key={s}><i className={s} />{s}</span>)}</div>
       </section>
-      <section className="schedule-day-panel"><header><span className="schedule-eyebrow">{selected === clock.today ? 'TODAY' : 'SELECTED DAY'}</span><h2>{fmtDay(selected)}</h2><p>{dayRows.length} sessions · {dayRows.reduce((sum, s) => sum + Number(s.dur || 0), 0)} min</p></header><div className="schedule-day-scroll">{dayRows.length ? dayRows.map(s => <article key={s.id} className={'schedule-day-card' + (s.id === next?.id ? ' next' : '')}><div className="schedule-day-time"><strong>{s.time} <small>– {sessionEnd(s)}</small></strong><Badge status={s.status} /></div>{s.id === next?.id && <span className="schedule-next-label">UP NEXT</span>}<h3>{clients.get(s.clientId)?.name}</h3><p>{s.type} · {durationLabel(s)}</p>{bookingPlan(db, s)?.name && <p className="schedule-plan-name">{bookingPlan(db, s).name}</p>}<div className="schedule-day-actions"><button onClick={() => { navigate(sessionPath(s)) }}>{trainingBooking(s) ? 'Open session →' : 'Open client →'}</button><button aria-label={'Booking details for ' + clients.get(s.clientId)?.name} onClick={() => edit(s)}>•••</button></div></article>) : <div className="schedule-empty"><Icon name="calendar" size={32} /><h3>{client !== 'all' || status !== 'booked' ? 'No matching bookings' : 'A clear day'}</h3><p>{client !== 'all' || status !== 'booked' ? 'Try another filter or date.' : 'Book a session when you’re ready.'}</p></div>}</div><footer><Button variant="ghost" disabled={!db.clients.length} onClick={() => book()}>＋ Book on this day</Button></footer></section>
     </div>
     <p className="schedule-bottom-note">Set the usual training time in Profile to schedule planned workouts.</p>
     {preview && <><div role="status" className={'schedule-drag-status' + (preview.blocked ? ' blocked' : '')}>{preview.candidate ? `${fmtDay(preview.candidate.date)} · ${preview.candidate.time}–${sessionEnd(preview.candidate)} · ${preview.candidate.dur} min — ${preview.blocked ? preview.reason + '. Release to review options.' : 'Release to review'}` : 'Move over a calendar day to place the session'}<small>Esc to cancel</small></div>{!preview.candidate && <div className="schedule-floating" style={{ left: preview.x + 12, top: preview.y + 12, width: Math.max(130, preview.width) }}><strong>{clients.get(preview.session.clientId)?.name}</strong><span>{preview.session.time} · {preview.session.dur} min</span></div>}</>}
