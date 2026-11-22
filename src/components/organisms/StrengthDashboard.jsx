@@ -7,6 +7,7 @@ import { useFormat } from '../../hooks/useFormat'
 import { baseOptions, COLORS, shortLabel } from '../../lib/chartSetup'
 import { addDays, fmtDate, todayISO } from '../../lib/dates'
 import { LIFT_GROUPS, performedLiftHistory, performedLiftOptions } from '../../lib/performedLifts'
+import { workoutReviewPath } from '../../lib/schedule'
 
 const newest = (rows) => [...rows].sort((a, b) => b.date.localeCompare(a.date))[0] || null
 const sameLift = (a, b) => String(a || '').trim().replace(/\s+/g, ' ').toLowerCase() === String(b || '').trim().replace(/\s+/g, ' ').toLowerCase()
@@ -21,6 +22,7 @@ export default function StrengthDashboard({ client }) {
   const choice = options.find((option) => option.name === selected) || options[0]
   const lift = choice?.name
   const work = performedLiftHistory(db, client.id).filter((row) => sameLift(row.name, lift))
+  const bookings = new Map((db.sessions || []).filter((booking) => booking.clientId === client.id).map((booking) => [booking.id, booking]))
   // Zero external load is a recorded value; missing load stays unknown.
   const loaded = [...work].filter((row) => row.loadKg != null).reverse()
   const latestWork = work[0]
@@ -71,7 +73,22 @@ export default function StrengthDashboard({ client }) {
       <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
     </section>
     <details className="card progress-disclosure progress-strength-logs"><summary>Recorded sets <span>{work.length} entries</span></summary>
-      {work.length ? <div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table; scroll horizontally for more columns`} tabIndex={0}><table className="checkins-table"><caption className="sr-only">Recorded {lift} work</caption><thead><tr><th scope="col">Date</th><th scope="col">Source</th><th scope="col">Sets</th><th scope="col">Reps</th><th scope="col">Recorded load</th><th scope="col">Record</th></tr></thead><tbody>{work.map((row, index) => <tr key={`${row.date}-${row.source}-${index}`}><th scope="row">{fmtDate(row.date)}</th><td>{row.source}</td><td>{row.sets ?? '—'}</td><td>{row.reps ?? '—'}</td><td>{loadText(row.loadKg, fmtWt)}</td><td>{row.source === 'Completed workout' ? <Link to={`/clients/${client.id}/training?date=${row.date}`}>View day →</Link> : '—'}</td></tr>)}</tbody></table></div> : <p className="progress-empty">No recorded sets.</p>}
+      {work.length ? <div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table; scroll horizontally for more columns`} tabIndex={0}>
+        <table className="checkins-table">
+          <caption className="sr-only">Recorded {lift} work</caption>
+          <thead><tr><th scope="col">Date</th><th scope="col">Source</th><th scope="col">Sets</th><th scope="col">Reps</th><th scope="col">Recorded load</th><th scope="col">Record</th></tr></thead>
+          <tbody>{work.map((row, index) => {
+            const booking = bookings.get(row.bookingId)
+            const date = fmtDate(row.date)
+            const when = booking?.time && booking.date === row.date ? `${date} · ${booking.time}` : date
+            return <tr key={`${row.workoutId ?? row.date}-${row.source}-${index}`}>
+              <th scope="row">{when}</th><td>{row.source}</td><td>{row.sets ?? '—'}</td><td>{row.reps ?? '—'}</td><td>{loadText(row.loadKg, fmtWt)}</td>
+              <td>{row.workoutId ? <Link to={workoutReviewPath({ id: row.workoutId, date: row.date, clientId: client.id, bookingId: row.bookingId })}
+                aria-label={`View workout · ${when}`}>View workout →</Link> : '—'}</td>
+            </tr>
+          })}</tbody>
+        </table>
+      </div> : <p className="progress-empty">No recorded sets.</p>}
     </details>
   </div>
 }

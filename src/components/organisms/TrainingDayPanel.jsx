@@ -34,14 +34,15 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const [logId, setLogId] = useState(selectedWorkoutId)
   const [recordView, setRecordView] = useState('actual')
   const records = [...day.completed, ...day.discarded].filter(row => !selectedBooking || row.bookingId === selectedBooking.id)
-  const log = records.find((row) => row.id === logId) || records[0]
+  const log = logId ? records.find((row) => row.id === logId) : records[0]
+  const missingLog = Boolean(logId && !log)
   const pending = selectedBooking ? (log ? null : bookingWorkout(db, selectedBooking)) : day.pending
   const selectedAction = selectedBooking && bookingWorkoutAction(db, selectedBooking, today)
   const appointment = selectedBooking ? selectedBooking.status === 'Completed' : !day.scheduled && day.appointment
   const legacyAction = !selectedBooking && legacyDay.canRun
-  const title = log?.title || pending?.title || (selectedBooking ? `Booking at ${selectedBooking.time}` : day.title)
+  const title = missingLog ? 'Workout log unavailable' : log?.title || pending?.title || (selectedBooking ? `Booking at ${selectedBooking.time}` : day.title)
   const actual = Boolean(log) && (recordView === 'actual' || !day.prescription)
-  const hasDetails = Boolean(log || pending || day.prescription && !appointment)
+  const hasDetails = !missingLog && Boolean(log || pending || day.prescription && !appointment)
   const openBuilder = () => openModal(<WorkoutBuilderModal clientId={client.id} date={date} />, 'xl')
   const remove = async () => {
     if (!day.canDeletePlan || !await confirmDialog({ title: 'Delete planned workout?', message: `Remove ${day.prescription.name || 'this plan'} from ${fmtDate(date)}? Workout logs are kept.`, confirmLabel: 'Delete plan', danger: true })) return
@@ -67,7 +68,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         </li>
       })}</ul>
     </section>}
-    <div className="training-selected-head"><div><div className="overview-eyebrow">{date === today ? 'Today' : fmtDay(date).split(',')[0]} · {fmtDate(date)}{selectedBooking && ` · ${selectedBooking.time}`}</div><h3 id="selected-day-title" tabIndex={-1} title={title}>{title}</h3></div>
+    <div id="selected-workout" className="training-selected-head"><div><div className="overview-eyebrow">{date === today ? 'Today' : fmtDay(date).split(',')[0]} · {fmtDate(date)}{selectedBooking && ` · ${selectedBooking.time}`}</div><h3 id="selected-day-title" tabIndex={-1} title={title}>{title}</h3></div>
       <div className="training-selected-actions">
         {selectedAction?.label === 'Log workout' && <Link className="btn" to={selectedAction.path} aria-label={`Log workout for ${selectedBooking.time} booking`}>Log workout</Link>}
         {legacyAction && <Link className="btn" to={`/clients/${client.id}/training?date=${date}&run=1#workout-log`}>{legacyDay.pending?.status === 'in_progress' ? bookings.length ? 'Resume unlinked workout' : 'Resume workout' : 'Start workout'}</Link>}
@@ -83,14 +84,14 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         <DayBlockReview compact workout={actual ? log : log ? null : pending} prescription={day.prescription} units={units} />
         {actual && log?.liveState && <div className="ls-session"><LiveSessionReview key={log.id} session={log} units={units} /></div>}
         {(actual ? log.note : pending?.note || day.prescription?.notes) && <p className="training-selected-notes">{actual ? log.note : pending?.note || day.prescription?.notes}</p>}
-      </div></> : <div className="training-selected-empty"><strong>{appointment ? 'Booking completed · No workout log' : date < today ? 'No workout was prescribed or logged.' : 'No workout planned for this date'}</strong>
-        {appointment && !selectedAction && <Link className="btn ghost sm" to="/schedule">View schedule →</Link>}
+      </div></> : <div className="training-selected-empty"><strong>{missingLog ? 'This workout log is no longer available for the selected day.' : appointment ? 'Booking completed · No workout log' : date < today ? 'No workout was prescribed or logged.' : 'No workout planned for this date'}</strong>
+        {!missingLog && appointment && !selectedAction && <Link className="btn ghost sm" to="/schedule">View schedule →</Link>}
       </div>}
     </div>
-    <div className="training-selected-foot"><span>{label}</span>{(day.prescription || log) && <details className="training-more" key={`${date}:${log?.id || ''}`}><summary>More actions</summary><div className="training-more-menu">
+    {!missingLog && <div className="training-selected-foot"><span>{label}</span>{(day.prescription || log) && <details className="training-more" key={`${date}:${log?.id || ''}`}><summary>More actions</summary><div className="training-more-menu">
       {day.prescription && <Button variant="ghost" size="sm" onClick={(event) => { event.currentTarget.closest('details').open = false; openModal(<CopyWorkoutModal client={client} date={date} onCopied={onSelectDate} />) }}>Copy workout…</Button>}
       {day.canDeletePlan && <Button variant="danger" size="sm" onClick={(event) => { event.currentTarget.closest('details').open = false; remove() }}>Delete plan</Button>}
       {log && log.status === 'completed' && <Button variant="ghost" size="sm" onClick={(event) => { event.currentTarget.closest('details').open = false; openModal(<SessionInsightsModal workout={log} client={client} units={units} exercises={db.exercises} />, true) }}>Session insights</Button>}
-    </div></details>}</div>
+    </div></details>}</div>}
   </section>
 }

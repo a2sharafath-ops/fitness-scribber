@@ -468,6 +468,27 @@ test('Training history targets the chosen log when a date has multiple client-ow
   assert.match(page, /id="selected-day-title"[^>]*>Second log/)
   assert.match(page, /1 × 7 reps · 50 kg/)
   assert.doesNotMatch(page, /99 reps|Private other log/)
+  const missing = renderRoutedSection(`/clients/a/training?date=${date}&workout=other#selected-workout`, db)
+  assert.match(missing, /This workout log is no longer available for the selected day/)
+  assert.doesNotMatch(missing, /1 × (?:5|7|99) reps · 50 kg|id="selected-day-title"[^>]*>Private other log/)
+})
+
+test('Strength entries link to their own workout and booking on the same day', () => {
+  const db = fixture(), date = '2026-09-24'
+  db.sessions.push(
+    { id: 'morn', clientId: 'a', date, time: '09:00', type: 'Personal training' },
+    { id: 'aft', clientId: 'a', date, time: '15:00', type: 'Personal training' },
+  )
+  const result = (id, load, bookingId) => ({ id, clientId: 'a', date, bookingId, status: 'completed',
+    main: [{ name: 'Bench Press', setRows: [{ done: true, reps: 7, load }] }] })
+  db.workouts.push(result('booking:morn', 44, 'morn'), result('booking:aft', 35, 'aft'), result('old-log', 31))
+  db.resistance.push({ id: 'manual', clientId: 'a', date, exercise: 'Bench Press', weight: 25, reps: 8, sets: 1 })
+  const html = renderRoutedSection('/clients/a/progress#strength', db)
+  const results = [...html.matchAll(/<tr>.*?<\/tr>/g)].map(match => match[0])
+  assert.match(results.find(row => row.includes('44 kg')), /09:00.*workout=booking%3Amorn&amp;booking=morn#selected-workout/)
+  assert.match(results.find(row => row.includes('35 kg')), /15:00.*workout=booking%3Aaft&amp;booking=aft#selected-workout/)
+  assert.match(results.find(row => row.includes('31 kg')), /workout=old-log#selected-workout/)
+  assert.doesNotMatch(results.find(row => row.includes('25 kg')), /href=/)
 })
 
 test('session names persist separately from notes and completed days cannot receive new plans', async () => {

@@ -36,7 +36,9 @@ export function performedLiftHistory(db, clientId, { actualOnly = false } = {}) 
       if (!sets.length) continue
       const loaded = sets.filter((set) => set.load != null)
       const best = loaded.sort((a, b) => b.load - a.load)[0]
-      rows.push({ name: item.name.trim(), date: workout.date, source: 'Completed workout', blockType: item.blockType || '', sets: item.doneSets || sets.length, reps: best?.reps ?? sets[0].reps, loadKg: best?.load ?? null })
+      rows.push({ name: item.name.trim(), date: workout.date, workoutId: workout.id, bookingId: workout.bookingId,
+        source: 'Completed workout', blockType: item.blockType || '', sets: item.doneSets || sets.length,
+        reps: best?.reps ?? sets[0].reps, loadKg: best?.load ?? null })
     }
   }
   for (const row of db.resistance || []) {
