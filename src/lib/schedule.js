@@ -67,13 +67,20 @@ export function bookingWorkoutAction(db, booking, today) {
   return null
 }
 
-// Legacy bookings have no prescription foreign key. Link only a unique training
-// appointment to the unique client/day prescription; never guess among duplicates.
-export function bookingPlan(db, s) {
+// A date-level prescription can be previewed for any training booking on that day.
+export function bookingDayPlan(db, s) {
   if (!trainingBooking(s)) return null
   const plans = at(db.prescriptions, s)
+  return plans.length === 1 ? plans[0] : null
+}
+
+// Moving a booking can also move a uniquely linked plan. When several bookings
+// share the date, none of them owns the day-level prescription.
+export function bookingPlan(db, s) {
+  const plan = bookingDayPlan(db, s)
+  if (!plan) return null
   const bookings = at(db.sessions, s).filter(p => activeBooking(p) && trainingBooking(p))
-  return plans.length === 1 && bookings.length <= 1 ? plans[0] : null
+  return bookings.length <= 1 ? plan : null
 }
 
 export function scheduleLock(db, s, clock = scheduleClock(new Date(), db.settings?.tz)) {

@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 const vite = await createServer({server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'})
 after(()=>vite.close())
 const load = p=>vite.ssrLoadModule('/src/'+p)
-const { bookingConflicts, bookingPlan, bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, scheduleRequest, applyScheduleRequest, freeScheduleSlots, calendarLanes, calendarTimeRange, sessionPath, scheduleClock }=await load('lib/schedule.js')
+const { bookingConflicts, bookingDayPlan, bookingPlan, bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, scheduleRequest, applyScheduleRequest, freeScheduleSlots, calendarLanes, calendarTimeRange, sessionPath, scheduleClock }=await load('lib/schedule.js')
 const { saveScheduleRemote }=await load('api/sync.js')
 const { seedBuilderQA }=await load('lib/builderQA.js')
 const clock={today:'2026-10-11',time:'12:00'}
@@ -136,6 +136,21 @@ test('ambiguous legacy links and client reassignment are blocked',()=>{
   assert.equal(bookingPlan(db,db.sessions[0]),null)
   assert.ok(bookingConflicts(db,db.sessions[0],candidate(db),clock).some(i=>i.title==='Workout link is ambiguous'))
   assert.ok(bookingConflicts(db,db.sessions[0],{...candidate(db),clientId:'local-builder-200'},clock).some(i=>i.title==='Client cannot change'))
+})
+test('same-day bookings can preview the day plan without claiming it for a calendar move', () => {
+  const db = fixture()
+  const morning = db.sessions[0]
+  const afternoon = { ...morning, id: 'afternoon', time: '15:00' }
+  db.sessions.push(afternoon)
+  const plan = db.prescriptions[0]
+  for (const booking of [morning, afternoon]) {
+    assert.equal(bookingDayPlan(db, booking), plan)
+    assert.equal(bookingPlan(db, booking), null)
+  }
+  assert.equal(bookingDayPlan(db, { ...morning, type: 'Assessment' }), null)
+  assert.equal(bookingDayPlan(db, { ...morning, clientId: 'local-builder-200' }), null)
+  db.prescriptions.push({ ...plan, id: 'duplicate-plan' })
+  assert.equal(bookingDayPlan(db, morning), null)
 })
 test('stale booking, prescription and assignment fail before any mutation',()=>{
   for(const key of ['sessions','prescriptions','programAssignments']){

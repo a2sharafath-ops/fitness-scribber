@@ -1,17 +1,43 @@
 import { useState } from 'react'
 import { sessionRows, liveBlocks, SESSION_SECTIONS, adjustedSetDuration, prescribedSetDuration } from '../../../../lib/liveSession'
-import { ensureSetRows, secToClock } from '../../../../lib/workout'
-import { toDisp } from '../../../../lib/units'
+import { ensureSetRows, runBlocks, secToClock } from '../../../../lib/workout'
+import { toDisp, unitName } from '../../../../lib/units'
+
+function originalBlocks(session) {
+  const { original, originalBlocks: blocks } = session.liveState
+  if (!Array.isArray(blocks)) return runBlocks(original).map(block => ({ ...block, id: block.key }))
+  const items = new Map(SESSION_SECTIONS.flatMap(section => (original[section] || []).map((item, index) => {
+    const id = item.id || `${session.id}:${section}:${index}`
+    return [id, { ...item, id }]
+  })))
+  return blocks.map(block => ({ ...block, items: block.exerciseIds.map(id => items.get(id)).filter(Boolean) }))
+}
+
+function setTarget(row, duration, units) {
+  return [duration != null ? secToClock(duration) : row.pReps != null ? `${row.pReps}${row.pRepsMax != null && row.pRepsMax !== row.pReps ? '–' + row.pRepsMax : ''} reps` : 'No rep target',
+    row.pLoadKg != null ? `${toDisp(row.pLoadKg, units)} ${unitName(units)}` : null].filter(Boolean).join(' · ')
+}
+
+export function OriginalWorkoutPlan({ session, units }) {
+  const blocks = originalBlocks(session).filter(block => block.items.length)
+  if (!blocks.length) return <p className="muted">No exercises in the original plan.</p>
+  return <div className="training-day-blocks">{blocks.map(block =>
+    <section key={block.id} className="training-day-block" aria-label={block.title}>
+      <h3>{block.title}</h3>
+      {block.items.map((item, index) => <div key={item.id || index} className="training-day-exercise">
+        <strong>{item.name}</strong>
+        <ol>{ensureSetRows(item).map((row, i) => <li key={row.id || i}>Set {i + 1}: {setTarget(row, prescribedSetDuration(item, row), units)}</li>)}</ol>
+      </div>)}
+    </section>)}</div>
+}
 
 export default function LiveSessionReview({ session, units }) {
   const [view, setView] = useState('original')
   const original = session.liveState.original
   const originalCount = SESSION_SECTIONS.flatMap((section) => original[section] || []).reduce((sum, item) => sum + ensureSetRows(item).length, 0)
   const rows = sessionRows(session)
-  const originalItems = SESSION_SECTIONS.flatMap((section) => (original[section] || []).map((item, index) => ({ ...item, id: item.id || `${session.id}:${section}:${index}` })))
   const adjustedCount = liveBlocks(session).reduce((sum, block) => sum + block.items.reduce((count, item) => count + item.setRows.filter((row) => row.done || !block.skipped && !item.skipped && !row.skipped).length, 0), 0)
-  const blocks = view === 'original' ? session.liveState.originalBlocks.map((block) => ({ ...block,
-    items: originalItems.filter((item) => block.exerciseIds.includes(item.id)) })) : liveBlocks(session)
+  const blocks = view === 'original' ? originalBlocks(session) : liveBlocks(session)
   const line = (item, row, skipped) => {
     if (view === 'actual') {
       if (!row.done) return skipped ? 'Skipped' : 'Not logged'
@@ -24,9 +50,8 @@ export default function LiveSessionReview({ session, units }) {
       ].filter(Boolean).join(' · ')
     }
     const duration = view === 'original' ? prescribedSetDuration(item, row) : adjustedSetDuration(row)
-    return [duration != null ? secToClock(duration) : row.pReps != null ? `${row.pReps}${row.pRepsMax != null && row.pRepsMax !== row.pReps ? '–' + row.pRepsMax : ''} reps` : 'No rep target',
-      row.pLoadKg != null ? `${toDisp(row.pLoadKg, units)} ${units}` : null,
-      view === 'adjusted' && skipped ? 'Skipped' : null].filter(Boolean).join(' · ')
+    const target = setTarget(row, duration, units)
+    return view === 'adjusted' && skipped ? `${target} · Skipped` : target
   }
   return <aside className="ls-review"><h2>Session summary</h2><div className="ls-stats">
     {[[originalCount, 'Originally planned sets'], [adjustedCount, 'Adjusted sets'], [rows.filter((row) => row.done).length, 'Sets logged']].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
