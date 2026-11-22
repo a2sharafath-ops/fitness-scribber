@@ -8,6 +8,7 @@ import WorkoutPlayer from './WorkoutPlayer'
 import LiveTrainingSession from './LiveTrainingSession'
 import WorkoutSummary from './WorkoutSummary'
 import CompletedWorkoutEditor from './CompletedWorkoutEditor'
+import CoachWorkoutCorrection from './CoachWorkoutCorrection'
 import { buildFromPlan, buildFromPrescription, blankWorkout, workoutVolume, SOURCE_LABEL } from '../../../lib/workout'
 import { prepareLiveSession } from '../../../lib/liveSession'
 import { programStats } from '../../../lib/program'
@@ -26,7 +27,7 @@ const SRC_COLOR = { plan: 'blue', ai: 'purple', manual: 'gray', prescribed: 'gre
 // intercepts the Start press so the parent can run a pre-flight (check-in popup).
 // onAddSession (optional, coach only) opens the workout builder to prescribe a
 // session for this date — the only action offered on an unprescribed day.
-export default function TodayWorkout({ client, today, workout, bookingTime, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onCorrect, sessionEffort, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, preserveDraft = false, history = [], dayClosed = false, completedAppointment = false, focusedRunner = false }) {
+export default function TodayWorkout({ client, today, workout, bookingTime, prescription, plans, exercises, units, context = {}, restingHr, age, bodyMassKg, athlete, resolveTm, onStart, onSave, onComplete, onClear, onTemplate, onAddSession, headerExtra, headerLabel, isToday = true, runOpen = true, onResume, onExit, preserveDraft = false, history = [], dayClosed = false, completedAppointment = false, focusedRunner = false }) {
   const [editing, setEditing] = useState(false)
   const [altId, setAltId] = useState(client.planId || (plans[0]?.id ?? ''))
 
@@ -87,17 +88,16 @@ export default function TodayWorkout({ client, today, workout, bookingTime, pres
     )
   }
 
+  const closeEditor = () => setEditing(false)
+  const saveEditor = (updated) => { onSave(updated); closeEditor() }
+  const CorrectionEditor = athlete ? CompletedWorkoutEditor : CoachWorkoutCorrection
   // ---- Editing a suggested session (never reachable when locked) ----
   if (editing && !locked && workout.status !== 'in_progress') {
     return (
       <Shell extra={headerExtra} label={headerLabel}>
         {workout.status === 'completed'
-          ? <CompletedWorkoutEditor key={workout.id} workout={workout} units={units} sessionEffort={sessionEffort}
-              onSave={async (updated, expected, effort) => {
-                if (onCorrect) await onCorrect(expected, updated, effort)
-                else onSave(updated)
-                setEditing(false)
-              }} onCancel={() => setEditing(false)} />
+          ? <CorrectionEditor key={workout.id} workout={workout} units={units}
+              onSave={saveEditor} onDone={closeEditor} onCancel={closeEditor} />
           : <WorkoutPlayer workout={workout} units={units} running={false} preserveDraft={preserveDraft}
               onSave={(w) => { onSave(w); setEditing(false) }} onCancel={() => setEditing(false)} />}
       </Shell>
@@ -129,7 +129,7 @@ export default function TodayWorkout({ client, today, workout, bookingTime, pres
       <Shell extra={headerExtra} label={headerLabel}>
         <WorkoutSummary workout={workout} units={units} exercises={exercises} restingHr={restingHr} age={age} bodyMassKg={bodyMassKg}
           locked={locked} onEdit={() => setEditing(true)} onDelete={onClear} onTemplate={onTemplate}
-          onDuration={onCorrect ? undefined : (sec) => onSave({ ...workout, durationSec: sec })} />
+          onDuration={athlete ? (sec) => onSave({ ...workout, durationSec: sec }) : undefined} />
       </Shell>
     )
   }

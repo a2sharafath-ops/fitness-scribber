@@ -26,3 +26,12 @@ export async function confirmedPlanWrite(commit, mutate) {
   if (!result?.saved) throw new Error('Changes could not be saved. Review the data warning, then retry.')
   return result
 }
+
+// JSONB and browser storage can return the same record with different key order.
+export function sameSavedRecord(a, b) {
+  if (a === b) return true
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false
+  if (Array.isArray(a) && a.length !== b.length) return false
+  const keys = Object.keys(a)
+  return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && sameSavedRecord(a[key], b[key]))
+}

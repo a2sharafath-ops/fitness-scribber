@@ -22,7 +22,7 @@ export async function saveLiveWorkoutCompletion(attempt, client = supabase) {
 export async function saveCompletedWorkoutCorrection(workout, expected, correction) {
   const { error } = await supabase.rpc('correct_completed_workout', {
     p_workout: workout, p_expected: expected, p_effort: correction.effort, p_strength: correction.strength,
-  })
+  }).abortSignal(AbortSignal.timeout(20_000))
   if (error) throw new Error(error.code === 'PGRST202'
     ? 'Workout corrections are temporarily unavailable. Your edits are still open.'
     : error.message)

@@ -9,7 +9,7 @@ import BlockCard from './BlockCard'
 import DayBlockReview from './DayBlockReview'
 import ProgressionPanel from './ProgressionPanel'
 import DictationPanel from './DictationPanel'
-import CompletedWorkoutEditor from '../workout/CompletedWorkoutEditor'
+import CoachWorkoutCorrection from '../workout/CoachWorkoutCorrection'
 import WorkoutInsights from '../workout/WorkoutInsights'
 import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
@@ -20,7 +20,6 @@ import useDragReorder from '../../../hooks/useDragReorder'
 import { moveOrdered } from '../../../lib/arrange'
 import { fmtDay, addDays, todayISO } from '../../../lib/dates'
 import { isClosedTrainingDay, isPlanTargetBlocked, writePrescription, approvePlanReplacement } from '../../../lib/planner'
-import { workoutEffort } from '../../../lib/workoutCorrection'
 import {
   newBlock, defaultBlocks, itemsToBlocks, cloneBlocksFresh,
   applyProgression, resolveTrainingMax, resetTrainingMaxes, programStats,
@@ -54,7 +53,7 @@ const fromExisting = (p, seedBlocks = []) => {
 }
 
 export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], seedNotes = '', review = false, onLog, initialMode, selectedWorkoutId }) {
-  const { db, saveTrainingPlans, saveWorkoutCorrection, tz, units } = useData()
+  const { db, saveTrainingPlans, tz, units } = useData()
   const { closeModal, setCloseGuard } = useModal()
   const { toDisp, dispToKg, fmtVL, unitName } = useFormat()
   const existing = db.prescriptions.find((p) => p.clientId === clientId && p.date === date)
@@ -282,16 +281,12 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         </>}
       </div>}
 
-      {mode === 'edit-log' && selectedLog && <CompletedWorkoutEditor key={selectedLog.id} workout={selectedLog} units={units}
-        sessionEffort={workoutEffort(db, selectedLog)}
+      {mode === 'edit-log' && selectedLog && <CoachWorkoutCorrection key={selectedLog.id} workout={selectedLog} units={units}
         onCancel={() => setMode('view')}
-        onSave={async (updated, expected, effort) => {
-          setSaving(true)
-          try {
-            await saveWorkoutCorrection(expected, updated, effort)
-            setMode('view')
-            toast('Logged workout corrected.')
-          } finally { setSaving(false) }
+        onBusy={setSaving}
+        onDone={() => {
+          setMode('view')
+          toast('Logged workout corrected.')
         }} />}
       {mode === 'edit-log' && !selectedLog && <p role="alert">The selected workout is no longer available.</p>}
 

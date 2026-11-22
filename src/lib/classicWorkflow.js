@@ -1,6 +1,7 @@
 import { calcSRPETL } from './calc'
 import { uid } from './format'
 import { applyWorkoutStrength, removeWorkoutStrength } from './program'
+import { sameSavedRecord } from './confirmedPersistence'
 
 export const workoutEffortId = (workout) => `workout-rpe:${workout.id}`
 
@@ -37,10 +38,11 @@ export function correctClassicWorkout(draft, clientId, updated) {
   if (updated.clientId !== clientId || updated.status !== 'completed') throw new Error('Completed workout belongs to another client')
   const previous = (draft.workouts || []).find((item) => item.id === updated.id)
   if (!previous || previous.clientId !== clientId || previous.status !== 'completed') throw new Error('Completed workout was not found for this client')
-  const changedMain = JSON.stringify(previous.main || []) !== JSON.stringify(updated.main || [])
+  const changedMain = !sameSavedRecord(previous.main || [], updated.main || [])
   draft.workouts = draft.workouts.map((item) => item.id === updated.id && item.clientId === clientId ? updated : item)
   if (changedMain) {
     removeWorkoutStrength(draft, updated.id)
     applyWorkoutStrength(draft, updated)
   }
+  return changedMain
 }

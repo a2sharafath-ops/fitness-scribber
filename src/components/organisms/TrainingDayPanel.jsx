@@ -11,6 +11,7 @@ import WorkoutInsights from './workout/WorkoutInsights'
 import ModalShell from '../molecules/ModalShell'
 import { useData } from '../../store/DataContext'
 import { useModal } from '../../store/ModalContext'
+import useWorkoutCorrectionRecovery from '../../hooks/useWorkoutCorrectionRecovery'
 import { trainingDay } from '../../lib/trainingDay'
 import { bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus } from '../../lib/schedule'
 import { programStats } from '../../lib/program'
@@ -27,7 +28,7 @@ function SessionInsightsModal({ workout, client, units, exercises }) {
 }
 
 export default function TrainingDayPanel({ client, date, today, onSelectDate, bookings = [], selectedBooking, selectedWorkoutId }) {
-  const { db, commit, units } = useData()
+  const { db, commit, units, saveStatus } = useData()
   const { openModal } = useModal()
   const day = trainingDay(db, client.id, date, today)
   const legacyDay = trainingDay(db, client.id, date, today, { unlinkedOnly: true })
@@ -35,6 +36,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const [recordView, setRecordView] = useState('actual')
   const records = [...day.completed, ...day.discarded].filter(row => !selectedBooking || row.bookingId === selectedBooking.id)
   const log = logId ? records.find((row) => row.id === logId) : records[0]
+  const { recovery, dismiss } = useWorkoutCorrectionRecovery(log)
   const missingLog = Boolean(logId && !log)
   const pending = selectedBooking ? (log ? null : bookingWorkout(db, selectedBooking)) : day.pending
   const selectedAction = selectedBooking && bookingWorkoutAction(db, selectedBooking, today)
@@ -78,6 +80,10 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
       </div>
     </div>
     <div className="training-selected-body" data-empty={!hasDetails || undefined} data-logged-workout={actual || undefined}>
+      {recovery && saveStatus !== 'saving' && <div className="workout-correction-notice">
+        <p role="status">{recovery.kind === 'saved' ? 'Workout corrections were saved.' : 'A correction draft is available in Edit logged details.'}</p>
+        {recovery.kind === 'saved' && <Button size="sm" variant="ghost" onClick={dismiss}>Dismiss</Button>}
+      </div>}
       {log && records.length > 1 && <label className="training-log-picker">Workout log<select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</select></label>}
       {log && day.prescription && <SegToggle options={[[ 'actual', 'Logged workout' ], [ 'plan', bookings.length ? 'Day’s plan' : 'Original plan' ]]} value={recordView} onChange={setRecordView} ariaLabel="Completed day view" />}
       {hasDetails ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
