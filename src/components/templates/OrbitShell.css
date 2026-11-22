@@ -21,7 +21,6 @@
   --orbit-glass: linear-gradient(130deg, #fffc, #fff8);
   --orbit-feature: linear-gradient(135deg, #fce5e9, #faeff2 70%, #f8e9ef);
   --orbit-shadow: 0 15px 54px #30203118;
-  --orbit-page-glow: #efdde8;
   --orbit-focus: #b7162b;
   --orbit-selected: #f8e3e9;
   color-scheme: light;
@@ -51,7 +50,6 @@
   --orbit-glass: linear-gradient(135deg, #34252fe6, #211c25b8 75%);
   --orbit-feature: linear-gradient(135deg, #573540, #372833 65%, #2a222d);
   --orbit-shadow: 0 18px 52px #08060c66;
-  --orbit-page-glow: #32242f;
   --orbit-focus: #ffabb8;
   --orbit-selected: #48232e;
   color-scheme: dark;
@@ -187,7 +185,7 @@ body:has(#orbit-preload) > #root:is(:empty, :has(> [data-orbit-loading])) { min-
 [data-orbit-theme="dark"] .auth-wrap .auth-divider span { background: var(--border); }
 
 body:has(.orbit-shell) {
-  background: radial-gradient(ellipse at top left, var(--orbit-page-glow), transparent 70%) fixed, var(--bg);
+  background: var(--bg);
 }
 #app.orbit-shell {
   --orbit-sidebar-width: 218px;
