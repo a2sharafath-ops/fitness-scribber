@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 const vite = await createServer({server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'})
 after(()=>vite.close())
 const load = p=>vite.ssrLoadModule('/src/'+p)
-const { bookingConflicts, bookingPlan, bookingWorkout, bookingWorkoutAction, scheduleRequest, applyScheduleRequest, freeScheduleSlots, calendarLanes, calendarTimeRange, sessionPath, scheduleClock }=await load('lib/schedule.js')
+const { bookingConflicts, bookingPlan, bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, scheduleRequest, applyScheduleRequest, freeScheduleSlots, calendarLanes, calendarTimeRange, sessionPath, scheduleClock }=await load('lib/schedule.js')
 const { saveScheduleRemote }=await load('api/sync.js')
 const { seedBuilderQA }=await load('lib/builderQA.js')
 const clock={today:'2026-10-11',time:'12:00'}
@@ -97,11 +97,28 @@ test('same-day training bookings retain independent workout identities', () => {
   assert.deepEqual(bookingWorkout(db, first), db.workouts[0])
   assert.equal(bookingWorkout(db, second), null)
   assert.equal(bookingWorkoutAction(db, first, first.date).label, 'Review workout')
+  assert.equal(bookingWorkoutStatus(first, db.workouts[0]), 'Workout logged · Booking completed')
+  assert.equal(bookingWorkoutStatus({ ...first, status: 'Pending' }, db.workouts[0]), 'Workout logged · Booking pending')
   assert.equal(bookingWorkoutAction(db, second, second.date).label, 'Start workout')
   assert.equal(bookingWorkoutAction(db, { ...second, status: 'Cancelled' }, second.date), null)
   assert.match(bookingWorkoutAction(db, second, second.date).path, /booking=second&run=1/)
   assert.ok(bookingConflicts(db, null, { ...second, id: 'third', time: '10:30' }, clock)
     .some(issue => issue.title === 'Coach time already occupied'))
+})
+
+test('a completed training booking can start a linked log on its date or later', () => {
+  const db = fixture()
+  const booking = { ...db.sessions[0], status: 'Completed' }
+  const action = bookingWorkoutAction(db, booking, '2026-10-31')
+  assert.equal(action.label, 'Log workout')
+  assert.match(action.path, new RegExp(`date=${booking.date}&booking=${booking.id}&run=1#workout-log$`))
+  assert.equal(bookingWorkoutAction(db, booking, booking.date).label, 'Log workout')
+  assert.equal(bookingWorkoutStatus(booking, null), 'Booking completed · No workout log')
+  assert.equal(bookingWorkoutAction(db, booking, '2026-10-01'), null)
+  assert.equal(bookingWorkoutAction(db, { ...booking, type: 'Assessment' }, booking.date), null)
+  assert.equal(bookingWorkoutAction(db, { ...booking, status: 'Missed' }, booking.date), null)
+  db.workouts = [{ id: 'late-log', bookingId: booking.id, clientId: booking.clientId, date: booking.date, status: 'in_progress' }]
+  assert.equal(bookingWorkoutAction(db, booking, '2026-10-31').label, 'Resume workout')
 })
 test('completed, past and started workout sources cannot be moved or deleted; status update remains available',()=>{
   for(const mode of ['complete','past','workout']){

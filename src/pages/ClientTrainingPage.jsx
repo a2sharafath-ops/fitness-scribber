@@ -11,7 +11,7 @@ import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { todayISO, fmtDate, fmtDateRange } from '../lib/dates'
 import { trainingDay } from '../lib/trainingDay'
-import { bookingWorkout, canRunBookingWorkout, trainingBookings } from '../lib/schedule'
+import { bookingWorkout, bookingWorkoutAction, bookingWorkoutStatus, canRunBookingWorkout, trainingBookings } from '../lib/schedule'
 import { blankWorkout, buildFromPlan, buildFromPrescription } from '../lib/workout'
 import { resolveTrainingMax } from '../lib/program'
 import { programPeriod } from '../lib/clientPrograms'
@@ -25,6 +25,7 @@ const validDate = (value) => {
 function BookingWorkoutSetup({ booking, client, db, prescription, onStart, onClose }) {
   const [source, setSource] = useState(prescription ? 'prescription' : 'blank')
   const [planId, setPlanId] = useState(db.plans[0]?.id || '')
+  const label = booking.status === 'Completed' ? 'Log workout' : 'Start workout'
   const start = (event) => {
     event.preventDefault()
     const context = { clientId: client.id, date: booking.date,
@@ -40,7 +41,7 @@ function BookingWorkoutSetup({ booking, client, db, prescription, onStart, onClo
     <div className="training-runner-head"><span>{client.name} · {fmtDate(booking.date)} · {booking.time}</span>
       <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
     </div>
-    <h2 id="booking-workout-title">Start workout</h2>
+    <h2 id="booking-workout-title">{label}</h2>
     <p className="muted">Choose a starting plan for this booking. Any plan you copy stays intact.</p>
     <form onSubmit={start}>
       <label>Workout source<select value={source} onChange={event => setSource(event.target.value)}>
@@ -51,7 +52,7 @@ function BookingWorkoutSetup({ booking, client, db, prescription, onStart, onClo
       {source === 'library' && <label>Library workout<select value={planId} onChange={event => setPlanId(event.target.value)}>
         {db.plans.map(plan => <option key={plan.id} value={plan.id}>{plan.name}</option>)}
       </select></label>}
-      <Button type="submit">Start workout</Button>
+      <Button type="submit">{label}</Button>
     </form>
   </section>
 }
@@ -127,47 +128,56 @@ export default function ClientTrainingPage() {
 
   return <>
     <div className="topbar training-topbar"><h1>Training</h1><Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button></div>
-    <section className="card training-program" aria-labelledby="training-program-title">
-      <div className="training-program-head"><div className="training-program-copy">
-        <h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
-      </div><Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link></div>
-      {assignedPrograms.length > 0 && <>
-        <div className="training-program-list"><div className="training-program-assignment">
-          <div className="training-program-copy">
-            {assignedPrograms.length > 1 ? <>
-              <label className="training-program-copy-label" htmlFor="training-client-program">Client program</label>
-              <span className="orbit-select-wrap">
-                <select id="training-client-program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
-                  {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {a.status}{a.period ? ` · ${fmtDate(a.period.start)}` : ''}</option>)}
-                </select>
-                <Icon name="chevron-down" size={14} aria-hidden="true" />
-              </span>
-            </> : <strong>{selectedProgram.name}</strong>}
-            <div className="training-program-meta"><span className="training-program-status" data-status={selectedProgram.status}>{selectedProgram.status}</span>
-              {selectedProgram.period && <small>{fmtDateRange(selectedProgram.period.start, selectedProgram.period.end)}</small>}
-            </div>
-          </div>
-          <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>
-        </div></div>
-        <p className="training-program-note">Program edits apply to this client’s copy.</p>
-      </>}
-    </section>
+    <div className="training-workspace-grid">
       <div id="selected-workout" className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>
         <TrainingDayPanel key={JSON.stringify([runnerKey, searchParams.get('workout')])} client={client} date={selectedDate} today={today}
           bookings={bookings} selectedBooking={booking} selectedWorkoutId={searchParams.get('workout')} onSelectDate={selectDate} />
       </WorkoutPlanner></div>
-      <details className="card training-history" open={searchParams.get('history') === 'workouts' || undefined}><summary id="training-history-title">Session history</summary>
-        <SegToggle options={[[ 'workouts', `Workout logs (${workouts.length})` ], [ 'appointments', `Appointments (${appointments.length})` ]]} value={historyType} onChange={setHistoryType} ariaLabel="History type" />
-        <div className="training-history-list" role="region" aria-label="Session history entries" tabIndex={0}>
-          {historyType === 'workouts' ? workouts.length ? workouts.map((item) => <button key={item.id} className="training-history-row" onClick={() => reviewHistory(item)}>
-            <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.bookingId
-              ? db.sessions.find(row => row.id === item.bookingId)?.time || 'Booked workout'
-              : 'Unlinked'} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review workout →</span>
-          </button>) : <p className="muted">No completed workout logs yet.</p>
-            : appointments.length ? appointments.map((item) => <div key={item.id} className="training-history-row static">
-              <span><strong>{item.type || 'Appointment'}</strong><small>{fmtDate(item.date)} · {item.time || 'Time not set'} · {item.dur || '—'} min</small></span><span>Completed</span>
-            </div>) : <p className="muted">No completed appointments yet.</p>}
-        </div>
-      </details>
+      <div className="training-workspace-side">
+        <section className="card training-program" aria-labelledby="training-program-title">
+          <div className="training-program-head"><div className="training-program-copy">
+            <h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
+          </div><Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link></div>
+          {assignedPrograms.length > 0 && <>
+            <div className="training-program-list"><div className="training-program-assignment">
+              <div className="training-program-copy">
+                {assignedPrograms.length > 1 ? <>
+                  <label className="training-program-copy-label" htmlFor="training-client-program">Client program</label>
+                  <span className="orbit-select-wrap">
+                    <select id="training-client-program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
+                      {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {a.status}{a.period ? ` · ${fmtDate(a.period.start)}` : ''}</option>)}
+                    </select>
+                    <Icon name="chevron-down" size={14} aria-hidden="true" />
+                  </span>
+                </> : <strong>{selectedProgram.name}</strong>}
+                <div className="training-program-meta"><span className="training-program-status" data-status={selectedProgram.status}>{selectedProgram.status}</span>
+                  {selectedProgram.period && <small>{fmtDateRange(selectedProgram.period.start, selectedProgram.period.end)}</small>}
+                </div>
+              </div>
+              <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>
+            </div></div>
+            <p className="training-program-note">Program edits apply to this client’s copy.</p>
+          </>}
+        </section>
+        <details className="card training-history" open><summary id="training-history-title">Session history</summary>
+          <SegToggle options={[[ 'workouts', `Workout logs (${workouts.length})` ], [ 'appointments', `Appointments (${appointments.length})` ]]} value={historyType} onChange={setHistoryType} ariaLabel="History type" />
+          <div className="training-history-list" role="region" aria-label="Session history entries" tabIndex={0}>
+            {historyType === 'workouts' ? workouts.length ? workouts.map((item) => <button key={item.id} className="training-history-row" onClick={() => reviewHistory(item)}>
+              <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.bookingId
+                ? db.sessions.find(row => row.id === item.bookingId)?.time || 'Booked workout'
+                : 'Unlinked'} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review workout →</span>
+            </button>) : <p className="muted">No completed workout logs yet.</p>
+              : appointments.length ? appointments.map((item) => {
+                const action = bookingWorkoutAction(db, item, today)
+                return <div key={item.id} className="training-history-row static">
+                  <span><strong>{item.type || 'Appointment'}</strong><small>{fmtDate(item.date)} · {item.time || 'Time not set'} · {item.dur || '—'} min</small>
+                    <small>{bookingWorkoutStatus(item, bookingWorkout(db, item))}</small></span>
+                  {action && <Link className="overview-text-link" to={action.path} aria-label={`${action.label} for ${fmtDate(item.date)} at ${item.time}`}>{action.label}</Link>}
+                </div>
+              }) : <p className="muted">No completed appointments yet.</p>}
+          </div>
+        </details>
+      </div>
+    </div>
   </>
 }

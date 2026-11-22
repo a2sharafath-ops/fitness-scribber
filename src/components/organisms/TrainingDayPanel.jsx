@@ -36,10 +36,12 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const records = [...day.completed, ...day.discarded].filter(row => !selectedBooking || row.bookingId === selectedBooking.id)
   const log = records.find((row) => row.id === logId) || records[0]
   const pending = selectedBooking ? (log ? null : bookingWorkout(db, selectedBooking)) : day.pending
+  const selectedAction = selectedBooking && bookingWorkoutAction(db, selectedBooking, today)
   const appointment = selectedBooking ? selectedBooking.status === 'Completed' : !day.scheduled && day.appointment
-  const legacyAction = legacyDay.canRun
+  const legacyAction = !selectedBooking && legacyDay.canRun
   const title = log?.title || pending?.title || (selectedBooking ? `Booking at ${selectedBooking.time}` : day.title)
   const actual = Boolean(log) && (recordView === 'actual' || !day.prescription)
+  const hasDetails = Boolean(log || pending || day.prescription && !appointment)
   const openBuilder = () => openModal(<WorkoutBuilderModal clientId={client.id} date={date} />, 'xl')
   const remove = async () => {
     if (!day.canDeletePlan || !await confirmDialog({ title: 'Delete planned workout?', message: `Remove ${day.prescription.name || 'this plan'} from ${fmtDate(date)}? Workout logs are kept.`, confirmLabel: 'Delete plan', danger: true })) return
@@ -59,29 +61,30 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         const action = bookingWorkoutAction(db, booking, today)
         return <li key={booking.id} data-selected={booking.id === selectedBooking?.id || undefined}>
           <div><strong>{booking.time} · {workout?.title || booking.type}</strong>
-            <small>{bookingWorkoutStatus(booking, workout)}{workout && ` · Booking ${booking.status.toLowerCase()}`}</small>
+            <small>{bookingWorkoutStatus(booking, workout)}</small>
           </div>
-          {action && <Link className="btn ghost sm" to={action.path} aria-label={`${action.label} for ${booking.time} booking`}>{action.label}</Link>}
+          {action && (action.label !== 'Log workout' || booking.id !== selectedBooking?.id) && <Link className="btn ghost sm" to={action.path} aria-label={`${action.label} for ${booking.time} booking`}>{action.label}</Link>}
         </li>
       })}</ul>
     </section>}
     <div className="training-selected-head"><div><div className="overview-eyebrow">{date === today ? 'Today' : fmtDay(date).split(',')[0]} · {fmtDate(date)}{selectedBooking && ` · ${selectedBooking.time}`}</div><h3 id="selected-day-title" tabIndex={-1} title={title}>{title}</h3></div>
       <div className="training-selected-actions">
+        {selectedAction?.label === 'Log workout' && <Link className="btn" to={selectedAction.path} aria-label={`Log workout for ${selectedBooking.time} booking`}>Log workout</Link>}
         {legacyAction && <Link className="btn" to={`/clients/${client.id}/training?date=${date}&run=1#workout-log`}>{legacyDay.pending?.status === 'in_progress' ? bookings.length ? 'Resume unlinked workout' : 'Resume workout' : 'Start workout'}</Link>}
         {day.canEditPlan && <Button variant={legacyAction ? 'ghost' : 'primary'} onClick={openBuilder}>{bookings.length ? 'Edit day’s plan' : 'Edit session'}</Button>}
         {day.canPlan && <Button onClick={openBuilder}>Plan workout</Button>}
         {log && log.status === 'completed' && <Button variant="ghost" onClick={() => openModal(<WorkoutBuilderModal clientId={client.id} date={date} review selectedWorkoutId={log.id} initialMode="edit-log" />, 'xl')}>Edit logged details</Button>}
       </div>
     </div>
-    <div className="training-selected-body">
+    <div className="training-selected-body" data-empty={!hasDetails || undefined}>
       {log && records.length > 1 && <label className="training-log-picker">Workout log<select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</select></label>}
       {log && day.prescription && <SegToggle options={[[ 'actual', 'Logged workout' ], [ 'plan', bookings.length ? 'Day’s plan' : 'Original plan' ]]} value={recordView} onChange={setRecordView} ariaLabel="Completed day view" />}
-      {log || pending || day.prescription && !appointment ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
+      {hasDetails ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
         <DayBlockReview compact workout={actual ? log : log ? null : pending} prescription={day.prescription} units={units} />
         {actual && log?.liveState && <div className="ls-session"><LiveSessionReview key={log.id} session={log} units={units} /></div>}
         {(actual ? log.note : pending?.note || day.prescription?.notes) && <p className="training-selected-notes">{actual ? log.note : pending?.note || day.prescription?.notes}</p>}
       </div></> : <div className="training-selected-empty"><strong>{appointment ? 'Booking completed · No workout log' : date < today ? 'No workout was prescribed or logged.' : 'No workout planned for this date'}</strong>
-        {appointment && <Link className="btn ghost sm" to="/schedule">View schedule →</Link>}
+        {appointment && !selectedAction && <Link className="btn ghost sm" to="/schedule">View schedule →</Link>}
       </div>}
     </div>
     <div className="training-selected-foot"><span>{label}</span>{(day.prescription || log) && <details className="training-more" key={`${date}:${log?.id || ''}`}><summary>More actions</summary><div className="training-more-menu">

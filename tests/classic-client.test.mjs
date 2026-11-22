@@ -349,7 +349,7 @@ test('training page keeps day details in the calendar until logging is requested
   const page = renderRoutedSection(`/clients/a/training?date=${today}`, db)
   assert.match(page, /No program assigned/)
   assert.match(page, /Workout calendar/)
-  assert.match(page, /<details class="card training-history">/)
+  assert.match(page, /<details class="card training-history" open=""/)
   assert.doesNotMatch(page, /Plan sessions, record actual work|Week of|select a day to review or plan|Blue: prescribed|Today’s session|Today&#x27;s Workout|id="workout-log"/)
   const logging = renderRoutedSection(`/clients/a/training?date=${today}&run=1`, db)
   assert.doesNotMatch(logging, /id="workout-log"/)
