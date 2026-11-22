@@ -1,7 +1,7 @@
 import LiveSessionMenu from '../../../molecules/LiveSessionMenu'
 import LiveSetRow from '../../../molecules/LiveSetRow'
 
-export default function LiveExerciseCard({ session, exercise, block, units, now, readOnly, locked, onAction, onEdit }) {
+export default function LiveExerciseCard({ session, exercise, block, units, now, nextRowId, readOnly, locked, onAction, onEdit }) {
   const pending = exercise.setRows.some((row) => !row.done && !row.skipped)
   const partners = block.items.filter((item) => item.id !== exercise.id && !item.supersetId && !item.skipped)
   const edit = (kind, row) => onEdit({ kind, exerciseId: exercise.id, blockId: block.id, rowId: row?.id })
@@ -23,7 +23,7 @@ export default function LiveExerciseCard({ session, exercise, block, units, now,
     </header>
     <div className="ls-set-row ls-set-head" aria-hidden="true"><span>Set</span><span>Weight ({units})</span><span>Reps / duration</span><span>Effort</span><span /></div>
     {exercise.setRows.map((row, index) => <LiveSetRow key={row.id} row={row} index={index} exercise={exercise} block={block} session={session} units={units} now={now}
-      readOnly={readOnly} onAction={onAction} onEdit={edit} />)}
+      isNext={row.id === nextRowId} readOnly={readOnly} onAction={onAction} onEdit={edit} />)}
     <footer className="ls-exercise-foot"><button type="button" className="ls-text" onClick={() => edit('history')}>View last performance</button>
       {!readOnly && !locked && !exercise.skipped && !block.skipped && <button type="button" className="ls-text" onClick={() => onAction({ type: 'add-set', id: exercise.id })}>+ Add set</button>}</footer>
     <label className="ls-note">Note / reflection<textarea rows={1} value={exercise.note || ''} disabled={readOnly}

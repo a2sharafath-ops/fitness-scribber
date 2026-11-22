@@ -2,7 +2,7 @@ import { LIVE_SET_TYPES, rowMode, adjustedSetDuration, rowType, liveSetLoad, tim
 import { toDisp, unitName } from '../../lib/units'
 import { secToClock } from '../../lib/workout'
 
-export default function LiveSetRow({ row, index, exercise, block, session, units, now, readOnly, onAction, onEdit }) {
+export default function LiveSetRow({ row, index, exercise, block, session, units, now, isNext, readOnly, onAction, onEdit }) {
   const skipped = !row.done && (block.skipped || exercise.skipped || row.skipped)
   const locked = row.done || skipped || readOnly
   const running = session.liveState.setTimer?.rowId === row.id
@@ -18,9 +18,13 @@ export default function LiveSetRow({ row, index, exercise, block, session, units
   const activeRest = rest?.rowId === row.id
   const showRest = exercise.restEnabled && !readOnly && !block.skipped && !exercise.skipped && !row.skipped && exercise.setRows.slice(index + 1).some((set) => !set.skipped)
   return <>
-    <div className={'ls-set-row' + (row.done ? ' is-done' : '') + (skipped ? ' is-skipped' : '')} id={'live-set-' + row.id}>
-      <div className="ls-set-number"><button type="button" className="ls-value ls-number" disabled={locked} onClick={() => onEdit('type', row)} aria-label={`Change type for ${label}`}>
-        {index + 1}</button>{type !== 'normal' && <small className="ls-set-type">{LIVE_SET_TYPES[type] || type}</small>}</div>
+    <div className={'ls-set-row' + (row.done ? ' is-done' : '') + (skipped ? ' is-skipped' : '') + (isNext ? ' is-next' : '')}
+      id={'live-set-' + row.id} role="group" aria-label={`Set ${index + 1} of ${exercise.name}`} aria-current={isNext ? 'step' : undefined}>
+      <div className="ls-set-number">
+        <button type="button" className="ls-value ls-number" disabled={locked} onClick={() => onEdit('type', row)} aria-label={`Change type for ${label}`}>{index + 1}</button>
+        {isNext && <span className="ls-set-next">Next</span>}
+        {type !== 'normal' && <small className="ls-set-type">{LIVE_SET_TYPES[type] || type}</small>}
+      </div>
       <div className="ls-measure"><button type="button" className="ls-value" disabled={locked} onClick={() => onEdit('weight', row)} aria-label={`Weight for ${label}`}>{weight}</button>
         <small>{row.pLoadKg == null ? 'No weight target' : `Target ${toDisp(row.pLoadKg, units)} ${unitName(units)}`}</small></div>
       <div className="ls-measure"><button type="button" className="ls-value" disabled={locked || running} onClick={() => onEdit('result', row)} aria-label={`Reps or duration for ${label}`}>{metric}</button>
