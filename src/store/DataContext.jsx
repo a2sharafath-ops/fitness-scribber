@@ -9,6 +9,7 @@ import { createSnapshotQueue } from '../lib/confirmedPersistence'
 import { applyScheduleRequest } from '../lib/schedule'
 import { applyWorkoutCompletion } from '../lib/workoutCompletion'
 import { prepareWorkoutCorrection } from '../lib/workoutCorrection'
+import { forgetCorrectionDraft, inspectCorrectionDraft, rememberCorrectionDraft } from '../lib/workoutCorrectionRecovery'
 import { saveCompletedWorkoutCorrection, saveLiveWorkoutCompletion } from '../api/workouts'
 import StartupScreen from '../components/templates/StartupScreen'
 
@@ -240,14 +241,33 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     } finally { scheduleSavingRef.current = false }
   }, [backend])
 
-  const saveWorkoutCorrection = useCallback(async (expected, workout, effort) => {
+  const saveWorkoutCorrection = useCallback(async (scope, { expected, workout, effort }, retryId) => {
     if (scheduleSavingRef.current) throw new Error('Another change is saving. Please wait and retry.')
     scheduleSavingRef.current = true
     try {
       await writeQueueRef.current
       if (writeFailedRef.current) throw new Error('Resolve the existing save issue before correcting the workout.')
       const db = backend ? dbRef.current : readStoredDB()
+      const current = db.workouts.find(row => row.id === workout.id)
+      const recovery = inspectCorrectionDraft(scope, db, current)
+      if (retryId) {
+        if (retryId !== recovery?.attempt.id) throw new Error('This recovery draft was closed in another tab.')
+        if (recovery.kind === 'saved') {
+          forgetCorrectionDraft(scope, recovery.attempt)
+          return
+        }
+        if (recovery.kind !== 'retry') throw new Error('The saved workout has changed. Your recovery draft is still here.')
+        // Retry the original submission only. A fresh edit needs a new baseline.
+        expected = recovery.attempt.expected
+        workout = recovery.attempt.workout
+        const savedEffort = recovery.attempt.effort
+        effort = savedEffort ? { expected: savedEffort.expected, rpe: savedEffort.row?.rpe ?? null } : null
+      } else if (recovery && recovery.kind !== 'saved') {
+        throw new Error('Review the existing recovery draft before saving a new correction.')
+      }
       const correction = prepareWorkoutCorrection(db, expected, workout, effort)
+      const attempt = { id: retryId || crypto.randomUUID(), expected, workout, effort: correction.effort }
+      rememberCorrectionDraft(scope, attempt)
       setSaveStatus('saving')
       if (backend) await saveCompletedWorkoutCorrection(workout, expected, correction)
       else if (!saveDB(correction.next)) throw new Error('Browser storage is unavailable. Your edits are still open.')
@@ -256,6 +276,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
       dbRef.current = correction.next
       setDb(correction.next)
       setSaveStatus('saved')
+      forgetCorrectionDraft(scope, attempt)
     } catch (error) {
       setSaveStatus(writeFailedRef.current ? 'failed' : 'idle')
       throw error

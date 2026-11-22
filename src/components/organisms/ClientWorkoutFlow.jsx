@@ -17,12 +17,11 @@ import { trainingDay } from '../../lib/trainingDay'
 import { bookingWorkout } from '../../lib/schedule'
 import { useAuth } from '../../store/AuthContext'
 import { forgetWorkoutCompletion, prepareWorkoutCompletion, readWorkoutCompletion, rememberWorkoutCompletion } from '../../lib/workoutCompletion'
-import { workoutEffort } from '../../lib/workoutCorrection'
 
 // Training owns the Classic session writes. The date is
 // explicit so a completed workout can be reopened from Training history.
 export default function ClientWorkoutFlow({ client, date, booking, starter, pendingFinish, onRunStateChange, onSessionComplete, startOnOpen = false }) {
-  const { db, commit, finishWorkout, saveWorkoutCorrection, tz, units } = useData()
+  const { db, commit, finishWorkout, tz, units } = useData()
   const { user } = useAuth()
   const scope = user?.id || 'local'
   const { openModal } = useModal()
@@ -144,7 +143,6 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, pend
     age, bodyMassKg: client.anthro?.massKg ?? null,
     resolveTm: (name) => resolveTrainingMax(db, client.id, name, sessionDate).kg,
     onStart: startWorkout, onSave: saveWorkout, onComplete: requestComplete, onClear: booking ? undefined : clearWorkout,
-    onCorrect: saveWorkoutCorrection, sessionEffort: workout?.status === 'completed' ? workoutEffort(db, workout) : undefined,
     runOpen, onResume: () => setRunOpen(true), onExit: () => { setRunOpen(false); onSessionComplete?.() },
     onTemplate: saveTemplate,
     onAddSession: dayClosed || booking ? null : () => openModal(<WorkoutBuilderModal clientId={client.id} date={sessionDate} />, 'xl'),

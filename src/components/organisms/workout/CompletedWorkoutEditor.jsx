@@ -8,7 +8,7 @@ import { maxWorkoutMinutes, workoutMinutes } from '../../../lib/workoutCorrectio
 
 // Correct recorded details without changing the exercise list or reopening a
 // completed session. The existing set rows remain the source of actual work.
-export default function CompletedWorkoutEditor({ workout, units, sessionEffort, onSave, onCancel }) {
+export default function CompletedWorkoutEditor({ workout, units, sessionEffort, onSave, onCancel, readOnly, reviewActions, errorMessage }) {
   const [original] = useState(workout)
   const [originalEffort] = useState(sessionEffort)
   const [draft, setDraft] = useState(() => structuredClone(original))
@@ -50,7 +50,8 @@ export default function CompletedWorkoutEditor({ workout, units, sessionEffort, 
 
   return (
     <div className="completed-editor">
-      <fieldset className="completed-editor-fields" disabled={saving}>
+      {(error || errorMessage) && <p role="alert" className="form-error">{error || errorMessage}</p>}
+      <fieldset className="completed-editor-fields" disabled={saving || readOnly}>
       <div className="training-day-fields">
         <label>Session name<input value={draft.title} maxLength={100} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
         {originalEffort && (
@@ -61,14 +62,13 @@ export default function CompletedWorkoutEditor({ workout, units, sessionEffort, 
               <label>Session RPE (1–10)<input type="number" min="1" max="10" step="1" value={rpe}
                 disabled={!originalEffort.editable} placeholder="Not recorded" onChange={(event) => setRpe(event.target.value)} /></label>
             </div>
-            {!originalEffort.editable && <p className="muted">The existing effort record can’t be linked to this workout. It can be edited in Training load.</p>}
+            {!readOnly && !originalEffort.editable && <p className="muted">The existing effort record can’t be linked to this workout. It can be edited in Training load.</p>}
             {+rpe >= 1 && +rpe <= 10 && +minutes > 0 && <p className="muted">Training load · {calcSRPETL(+rpe, +minutes)} AU</p>}
           </>
         )}
         <label>Session notes<textarea rows={2} value={draft.note || ''} onChange={(event) => setDraft({ ...draft, note: event.target.value })} /></label>
       </div>
-      {error && <p role="alert" className="form-error">{error}</p>}
-      <p className="muted">Correct existing sets below. The completed exercise list stays fixed.</p>
+      {!readOnly && <p className="muted">Correct existing sets below. The completed exercise list stays fixed.</p>}
       {runBlocks(draft).map((block) => (
         <section key={block.key} className="training-day-block" aria-label={block.title}>
           <h3>{block.title}</h3>
@@ -93,11 +93,12 @@ export default function CompletedWorkoutEditor({ workout, units, sessionEffort, 
           ))}
         </section>
       ))}
-      <div className="flex gap training-day-actions">
+      {!readOnly && <div className="flex gap training-day-actions">
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
         <Button onClick={save}>{saving ? 'Saving…' : 'Save corrections'}</Button>
-      </div>
+      </div>}
       </fieldset>
+      {reviewActions && <div className="flex gap training-day-actions workout-correction-actions">{reviewActions}</div>}
     </div>
   )
 }

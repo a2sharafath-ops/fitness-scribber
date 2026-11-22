@@ -1,5 +1,6 @@
 import { calcSRPETL } from './calc'
 import { correctClassicWorkout, workoutEffortId } from './classicWorkflow'
+import { sameSavedRecord } from './confirmedPersistence'
 
 export const workoutMinutes = (seconds) => seconds > 0 ? Math.max(1, Math.round(seconds / 60)) : null
 export const maxWorkoutMinutes = Math.floor(2147483647 / 60)
@@ -18,10 +19,10 @@ export function workoutEffort(db, workout) {
 
 export function prepareWorkoutCorrection(db, expected, workout, effort) {
   const previous = db.workouts.find(row => row.id === expected.id)
-  if (!previous || JSON.stringify(previous) !== JSON.stringify(expected))
+  if (!previous || !sameSavedRecord(previous, expected))
     throw new Error('This workout changed. Reopen the saved workout before editing it.')
   const currentEffort = workoutEffort(db, previous)
-  if (effort && (!currentEffort.editable || JSON.stringify(currentEffort.row) !== JSON.stringify(effort.expected)))
+  if (effort && (!currentEffort.editable || !sameSavedRecord(currentEffort.row, effort.expected)))
     throw new Error('The session RPE changed. Reopen the saved workout before editing it.')
 
   const oldRow = currentEffort.row
@@ -39,8 +40,7 @@ export function prepareWorkoutCorrection(db, expected, workout, effort) {
   const effortChange = currentEffort.editable ? { expected: oldRow, row: newRow } : null
 
   const next = structuredClone(db)
-  const mainChanged = JSON.stringify(previous.main || []) !== JSON.stringify(workout.main || [])
-  correctClassicWorkout(next, previous.clientId, workout)
+  const mainChanged = correctClassicWorkout(next, previous.clientId, workout)
   if (newRow) {
     next.srpe = next.srpe.filter(row => row.id !== oldRow?.id)
     next.srpe.push(newRow)

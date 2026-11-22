@@ -269,6 +269,9 @@ canvas{max-width:100%}
 .completed-editor-fields{min-inline-size:0;margin:0;padding:0;border:0}
 .completed-editor-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px}
 .completed-editor .training-day-fields p{margin:0}
+.workout-correction-notice{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)}
+.workout-correction-notice p{margin:0}
+.workout-correction-actions{flex-wrap:wrap}
 .training-day-fields label,.training-day-legacy-fields label{display:grid;gap:5px;font-size:12px;font-weight:700}
 .training-day-fields input,.training-day-fields textarea,.training-day-legacy-fields input{width:100%;min-height:44px;border:1px solid var(--border);border-radius:7px;padding:8px;background:var(--surface);color:var(--text);font:inherit}
 .training-day-legacy-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
