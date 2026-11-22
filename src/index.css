@@ -1256,6 +1256,7 @@ html:has(.progress-index){overflow-x:clip}
 .training-workspace-grid>.training-planner,.training-workspace-side{min-width:0;margin:0}
 .training-workspace-grid .training-calendar{margin-bottom:0}
 .training-workspace-grid .training-selected-head{min-height:0;margin-bottom:12px}
+#selected-workout{scroll-margin-top:16px}
 .training-workspace-side .training-history-row{flex-wrap:wrap}
 .training-workspace-side .training-history-row>span:first-child{min-width:0;overflow-wrap:anywhere;white-space:normal}
 .training-workspace-side .training-history-row>span:last-child:not(:only-child){white-space:normal}

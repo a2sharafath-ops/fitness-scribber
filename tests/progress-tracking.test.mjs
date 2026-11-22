@@ -52,6 +52,18 @@ test('completed sessions produce load and reps from the selected set, never pres
   assert.equal(series(db,{...exercise,measure:'sets'}).rows[0].value,2)
   assert.equal(load.excluded,2)
 })
+test('supporting exercise results open their own same-day bookings', () => {
+  const db = fixture()
+  const date = '2026-09-05'
+  db.workouts = [
+    workout('booking:morn', date, [set(44, 7)], { bookingId: 'morn' }),
+    workout('booking:aft', date, [set(35, 9)], { bookingId: 'aft' }),
+  ]
+  assert.deepEqual(series(db).rows.map(row => [row.value, row.path]), [
+    [35, '/clients/a/training?date=2026-09-05&workout=booking%3Aaft&booking=aft#selected-workout'],
+    [44, '/clients/a/training?date=2026-09-05&workout=booking%3Amorn&booking=morn#selected-workout'],
+  ])
+})
 test('session estimates show declines and singles consistently without depending on peak history',()=>{
   const db=fixture();db.workouts=[workout('one','2026-09-01',[set(100,3)]),workout('two','2026-09-08',[set(80,3)]),workout('single','2026-09-15',[set(80,1)])];db.maxes=[{clientId:'a',exercise:'Bench Press',valueKg:500,kind:'e1rm',source:'auto'}]
   const metric={...exercise,measure:'e1rm'},rows=series(db,metric).rows

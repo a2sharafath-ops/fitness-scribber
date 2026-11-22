@@ -1,6 +1,7 @@
 import { addDays, daysBetween } from './dates.js'
 import { exerciseKey, workingGroup } from './muscleVolume.js'
 import { estOneRepMax } from './assessment.js'
+import { workoutReviewPath } from './schedule.js'
 
 export const EXERCISE_MEASURES = [
   { id: 'load', label: 'Heaviest set load', unit: 'kg' },
@@ -109,7 +110,7 @@ export function trackingSeries(db, clientId, metric, start, end) {
       }
       if (!sets.length) continue
       const best = [...sets].sort((a, b) => b.value - a.value || (b.reps || 0) - (a.reps || 0))[0]
-      rows.push({ id: workout.id, date: workout.date, value: metric.measure === 'sets' ? sets.length : best.value, source: 'Completed workout', detail: metric.measure === 'sets' ? `${sets.length} working sets` : '', ...(metric.measure === 'sets' ? {} : { load: best.load, reps: best.reps, effort: best.effort, effortType: best.effortType }), path: `${path(clientId)}/training?date=${workout.date}&workout=${encodeURIComponent(workout.id)}#selected-workout` })
+      rows.push({ id: workout.id, date: workout.date, value: metric.measure === 'sets' ? sets.length : best.value, source: 'Completed workout', detail: metric.measure === 'sets' ? `${sets.length} working sets` : '', ...(metric.measure === 'sets' ? {} : { load: best.load, reps: best.reps, effort: best.effort, effortType: best.effortType }), path: workoutReviewPath(workout) })
     }
   } else if (metric.kind === 'body' || metric.kind === 'legacy') {
     for (const r of (db[metric.kind === 'body' ? 'assessments' : 'logs'] || []).filter(inRange)) {
