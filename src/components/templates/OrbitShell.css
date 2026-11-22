@@ -300,14 +300,15 @@ body:has(.orbit-shell) {
   #app.orbit-shell, #app.orbit-shell[data-sidebar-collapsed="true"] { display: block; margin: 7px; min-height: calc(100dvh - 14px); border-radius: 21px; }
   .orbit-shell #sidebar { display: none; }
   .orbit-shell #main { padding: 12px 12px 28px; }
-  .orbit-toolbar { gap: 6px; flex-wrap: wrap; justify-content: flex-start; }
+  .global-bar.orbit-toolbar { gap: 6px; justify-content: flex-start; }
   .orbit-toolbar .gb-search { width: 100%; order: 1; }
   .orbit-toolbar .gb-results { width: 100%; }
   .orbit-toolbar .gb-avatar { display: none; }
   .orbit-toolbar .gb-drop { right: 0; }
   .orbit-mobile-menu { display: inline-grid; }
-  .orbit-mobile-brand { display: inline-flex; align-items: center; gap: 5px; margin-right: auto; color: var(--text); border: 0; background: none; font: 650 13px var(--orbit-font); }
+  .orbit-mobile-brand { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; gap: 5px; margin-right: auto; padding: 0; color: var(--text); border: 0; background: none; font: 650 13px var(--orbit-font); }
   .orbit-mobile-brand .orbit-brand-lockup { width: 23px; }
+  .orbit-mobile-brand > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .orbit-crumb { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -346,6 +347,8 @@ body:has(.orbit-shell) {
   .orbit-toolbar-panel { top: 46px; }
 }
 @media (max-width: 375px) {
+  .global-bar.orbit-toolbar { gap: 3px; }
+  .orbit-mobile-brand { justify-content: center; }
   .orbit-mobile-brand > span { display: none; }
 }
 
@@ -466,7 +469,8 @@ body:has(.orbit-shell) {
 @media (max-width: 700px) {
   .orbit-command-input input { font-size: 16px; }
   .orbit-toolbar .orbit-icon-button, .orbit-search-trigger { min-height: 44px; }
-  .orbit-toolbar > .orbit-icon-button, .orbit-toolbar .gb-bell { width: 44px; }
+  .orbit-toolbar > .orbit-icon-button, .orbit-toolbar .gb-bell,
+  .orbit-toolbar [data-panel="appearance"] > summary { width: 44px; }
   .orbit-search-trigger { width: 44px; flex: none; justify-content: center; padding: 0; }
   .orbit-search-trigger span { display: none; }
   .orbit-toolbar .orbit-create-menu summary { min-width: 44px; }
@@ -474,8 +478,5 @@ body:has(.orbit-shell) {
 @media (max-width: 430px) {
   .orbit-create-menu summary { padding: 0; width: 44px; }
   .orbit-create-menu summary span { display: none; }
-}
-@media (max-width: 375px) {
-  .orbit-toolbar .orbit-mobile-brand { margin-right: auto; }
 }
 .orbit-toolbar [data-exiting] > :is(.orbit-toolbar-panel, .gb-drop) { animation: orbit-panel-out .12s ease-in both; pointer-events: none; }
