@@ -318,9 +318,9 @@ body:has(.orbit-shell) {
   .orbit-toolbar .gb-avatar { display: none; }
   .orbit-toolbar .gb-drop { right: 0; }
   .orbit-mobile-menu { display: inline-grid; }
-  .orbit-mobile-brand { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; gap: 5px; margin-right: auto; padding: 0; color: var(--text); border: 0; background: none; font: 650 13px var(--orbit-font); }
+  .orbit-mobile-brand { display: inline-flex; flex: none; align-items: center; min-width: 44px; min-height: 44px; gap: 5px; margin-right: auto; padding: 0; color: var(--text); border: 0; background: none; font: 650 13px var(--orbit-font); }
   .orbit-mobile-brand .orbit-brand-lockup { width: 23px; }
-  .orbit-mobile-brand > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .orbit-mobile-brand > span { white-space: nowrap; }
   .orbit-crumb { display: none; }
   .orbit-appearance-panel select { font-size: 16px; }
 }
@@ -367,8 +367,7 @@ body:has(.orbit-shell) {
   .orbit-toolbar-menu { position: static; }
   .orbit-toolbar-panel { top: 46px; }
 }
-@media (max-width: 375px) {
-  .global-bar.orbit-toolbar { gap: 3px; }
+@media (max-width: 383px) {
   .orbit-mobile-brand { justify-content: center; }
   .orbit-mobile-brand > span { display: none; }
 }
@@ -496,7 +495,8 @@ body:has(.orbit-shell) {
   .orbit-search-trigger span { display: none; }
   .orbit-toolbar .orbit-create-menu summary { min-width: 44px; }
 }
-@media (max-width: 430px) {
+@media (max-width: 460px) {
+  .global-bar.orbit-toolbar { gap: 3px; }
   .orbit-create-menu summary { padding: 0; width: 44px; }
   .orbit-create-menu summary span { display: none; }
 }

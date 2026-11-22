@@ -3,3 +3,7 @@
 @media(min-width:1600px){.program-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.program-editor-grid{grid-template-columns:1fr}.program-days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.program-heading{align-items:flex-start;flex-wrap:wrap}.program-weekbar{flex-wrap:wrap}.program-weekbar .program-actions{justify-content:flex-start}.program-day-content{padding:18px}}
 @media(max-width:600px){.program-grid,.program-filters,.program-fields{grid-template-columns:1fr}.program-tile{padding:20px}.program-heading h2{font-size:24px}.program-heading .program-actions{width:100%;justify-content:flex-start}.program-steps{gap:4px}.program-steps li{padding:10px 6px;font-size:11px}.program-schedule>div{grid-template-columns:1fr 1fr}.program-schedule small{grid-column:2}.program-tile-bottom{flex-wrap:wrap}.programs .training-exercise-row{flex-direction:column;align-items:flex-start}.programs .training-exercise-row>span{text-align:left}}
+
+[data-orbit-theme="dark"] .program-eyebrow {
+  color: var(--muted);
+}
