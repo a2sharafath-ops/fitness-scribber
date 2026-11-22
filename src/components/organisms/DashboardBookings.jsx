@@ -27,6 +27,7 @@ function bookingSlide(db, booking, client, today, next) {
   const status = bookingWorkoutStatus(booking, workout)
   return {
     booking, client, plan, originalWorkout, title, program, status,
+    state: workout?.status || booking.status?.toLowerCase(),
     subject: `${client.name} at ${booking.time || 'unscheduled time'}`,
     featuredStatus: !workout && booking.id === next?.id ? 'Next scheduled' : status,
     destination: bookingDestination(db, booking, today),
@@ -53,6 +54,47 @@ function BookingSlide({ slide, active, direction, cardRef }) {
         : <span className="btn">{destination.label}</span>}
     </div>
   </article>
+}
+
+function BookingList({ slides, index, onChoose }) {
+  const [expanded, setExpanded] = useState(false)
+  const count = slides.length
+  const previewSize = 3
+  const showToggle = count > previewSize
+  const first = expanded || !showToggle ? 0 : Math.min(Math.max(0, index - 1), count - previewSize)
+  const end = expanded ? count : first + previewSize
+
+  return <section className="orbit-booking-list" aria-labelledby="orbit-booking-list-title">
+    <header>
+      <h3 id="orbit-booking-list-title">All bookings today</h3>
+      {showToggle ? <button className="orbit-booking-list-toggle" type="button"
+        aria-label={expanded ? 'Show fewer bookings' : `Show all ${count} bookings`}
+        aria-controls="orbit-booking-rows" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
+        {expanded ? 'Show fewer' : `Show all ${count}`} <Icon name="chevron-down" size={14} />
+      </button> : <span className="orbit-booking-list-count">{count} bookings</span>}
+    </header>
+    <ul id="orbit-booking-rows">
+      {slides.slice(first, end).map(({ booking, client, title, status, state }, offset) => {
+        const active = index === first + offset
+        const [primaryStatus, statusDetail] = status.split(' · ')
+        return <li key={booking.id}>
+          <button className="orbit-booking-row" type="button" aria-current={active ? 'true' : undefined}
+            onClick={() => onChoose(first + offset)}>
+            <span className="orbit-booking-row-time">{booking.time ? <time dateTime={booking.time}>{booking.time}</time> : 'No time'}</span>
+            <span className="orbit-booking-row-copy">
+              <strong>{client.name}</strong>
+              <small>{title}</small>
+              <span className="orbit-booking-row-status">
+                <span data-state={state}>{primaryStatus}</span>
+                {statusDetail && <small>{statusDetail}</small>}
+              </span>
+            </span>
+            <Icon name={active ? 'check' : 'chevron-right'} size={15} />
+          </button>
+        </li>
+      })}
+    </ul>
+  </section>
 }
 
 function resetTilt(deck) {
@@ -125,6 +167,12 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
     animation.finished.then(finish, finish)
   }
   const shift = (offset) => select((index + offset + count) % count, offset)
+  const showFromList = (position) => {
+    if (departure.current) return
+    select(position)
+    deckRef.current?.focus({ preventScroll: true })
+    deckRef.current?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'center' })
+  }
   const startSwipe = (event) => {
     const deck = event.currentTarget
     resetTilt(deck)
@@ -209,22 +257,16 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
         </div>
         {count > 1 && <div className="orbit-booking-controls" role="group" aria-label="Browse bookings">
           <Button variant="ghost" className="orbit-booking-previous" aria-label="Previous booking" onClick={() => shift(-1)}><Icon name="chevron-right" size={14} /><span>Previous</span></Button>
-          <div className="orbit-booking-position"><p aria-live="polite">{index + 1} of {count}</p><div className="orbit-carousel-dots">
-            {bookings.map((entry, position) => <button key={entry.id} type="button"
-              aria-label={`Show booking for ${roster.get(entry.clientId).name} at ${entry.time || 'unscheduled time'}`}
-              aria-current={entry.id === booking.id ? 'true' : undefined} onClick={() => select(position)} />)}
-          </div></div>
+          <div className="orbit-booking-position"><p aria-live="polite">{index + 1} of {count}</p>
+            {count <= 5 && <div className="orbit-carousel-dots">
+              {slides.map(({ booking: entry, subject }, position) => <button key={entry.id} type="button"
+                aria-label={`Show booking for ${subject}`} aria-current={entry.id === booking.id ? 'true' : undefined}
+                onClick={() => select(position)} />)}
+            </div>}
+          </div>
           <Button variant="ghost" aria-label="Next booking" onClick={() => shift(1)}><span>Next</span><Icon name="chevron-right" size={14} /></Button>
         </div>}
-        {count > 1 && <details className="orbit-booking-list">
-          <summary>All bookings today ({count})</summary>
-          {slides.map(({ booking: entry, client, title, status }, position) => (
-            <button key={entry.id} type="button" aria-current={entry.id === booking.id ? 'true' : undefined} onClick={() => select(position)}>
-              <time>{entry.time || 'Time not set'}</time><span><strong>{client.name}</strong><small>{title}</small><small>{status}</small></span>
-              <Icon name="chevron-right" size={15} />
-            </button>
-          ))}
-        </details>}
+        {count > 1 && <BookingList slides={slides} index={index} onChoose={showFromList} />}
     </> : <div className="orbit-booking-card orbit-booking-feature orbit-booking-empty">
       <span className="orbit-booking-empty-icon" aria-hidden="true"><Icon name="calendar" size={20} /></span>
       <h3>No bookings today.</h3>
