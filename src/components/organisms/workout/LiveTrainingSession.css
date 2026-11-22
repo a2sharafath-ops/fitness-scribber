@@ -265,6 +265,17 @@
   padding-block:5px;
   align-items:center
 }
+.ls-set-row.is-next {
+  background: var(--orbit-selected, #edf2fd);
+  border-radius: 8px;
+  box-shadow: -3px 0 var(--ls-accent), 0 0 0 1px var(--ls-line);
+}
+.ls-set-next {
+  color: var(--ls-accent);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+}
 .ls-set-number,.ls-measure {
   display:grid;
   justify-items:center;

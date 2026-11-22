@@ -24,7 +24,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
   const { sessionRef, headerRef, dockRef, markerRef, compact, dockBounds } = useLiveSessionLayout(readOnly)
   const units = reviewUnits || session.liveState.settings.units || preferredUnits || 'kg'
   const blocks = liveBlocks(session)
-  const pending = liveDockSet(session)
+  const pending = readOnly ? null : liveDockSet(session)
   const rows = sessionRows(session)
   const allSetsLogged = rows.length > 0 && rows.every(row => row.done)
   const nextDuration = pending ? adjustedSetDuration(pending.row) : null
@@ -110,6 +110,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
         {liveExerciseUnits(block.items).map((group) => <div key={group[0].id} className={group.length > 1 ? 'ls-superset' : ''}>
           {group.length > 1 && <div className="ls-superset-label">↔ Superset</div>}
           {group.map((exercise) => <LiveExerciseCard key={exercise.id} session={session} exercise={exercise} block={block} units={units} now={now}
+            nextRowId={pending?.item?.id === exercise.id ? pending.row?.id : undefined}
             readOnly={readOnly} locked={locked} onAction={act} onEdit={openEditor} />)}
         </div>)}
         {!readOnly && !locked && !block.skipped && <button type="button" className="ls-button ls-add-exercise" onClick={() => openEditor({ kind: 'add-exercise', blockId: block.id })}>+ Add exercise</button>}
