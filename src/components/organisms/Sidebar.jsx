@@ -52,8 +52,8 @@ export default function Sidebar({ collapsed, mobile, onCollapse, onNavigate }) {
       {!collapsed && <div className="orbit-sidebar-context">
         <section className="orbit-sidebar-week" aria-label="This week’s sessions">
           <span>This week</span>
-          <p><strong>{week.completed}</strong> / {week.booked} booked</p>
-          <progress value={week.completed} max={Math.max(1, week.booked)} aria-label="Completed bookings this week" aria-valuetext={`${week.completed} of ${week.booked} booked sessions completed`} />
+          <p>{week.booked ? <><strong>{week.completed}</strong> of {week.booked} completed</> : "No bookings this week"}</p>
+          {week.booked > 0 && <progress value={week.completed} max={Math.max(1, week.booked)} aria-label="Completed bookings this week" aria-valuetext={`${week.completed} of ${week.booked} booked sessions completed`} />}
         </section>
         <Link className="orbit-sidebar-profile" to="/settings" onClick={onNavigate} aria-label={`${trainer}, settings`}>
           <span aria-hidden="true">{initials(trainer)}</span><strong>{trainer}</strong><Icon name="chevron-right" size={15} />

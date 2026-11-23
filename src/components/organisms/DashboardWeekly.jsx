@@ -20,7 +20,7 @@ export default function DashboardWeekly({ bookings, monday }) {
         onChange={(range) => { setCount(range); setSelected(null); setHovered(null) }} />
     </header>
     <div className="orbit-weekly-summary"><div className="orbit-weekly-legend"><span>Completed</span><span>Booked</span></div>
-      <span><strong>{weeks.reduce((sum, week) => sum + week.completed, 0)}</strong> completed</span>
+      <span><strong>{weeks.reduce((sum, week) => sum + week.completed, 0)}</strong> completed in {count} weeks</span>
     </div>
     <div className="orbit-weekly-plot" style={{ '--weeks': count }}>
       <div className="orbit-weekly-scale" aria-hidden="true"><span>{max}</span><span>0</span></div>
@@ -36,7 +36,8 @@ export default function DashboardWeekly({ bookings, monday }) {
           event.currentTarget.parentElement.children[Math.min(weeks.length - 1, Math.max(0, index + offset))]?.focus()
         }}
         aria-label={`Week of ${fmtDate(week.from)}, ${week.booked} booked, ${week.completed} completed`}>
-        <span key={count} className="orbit-weekly-pair" aria-hidden="true"><i style={{ height: `${week.completed / max * 100}%` }} /><i style={{ height: `${week.booked / max * 100}%` }} /></span>
+        {week.booked === 0 ? <span className="orbit-weekly-zero" aria-hidden="true">0</span> :
+          <span key={count} className="orbit-weekly-pair" aria-hidden="true"><i style={{ height: `${week.completed / max * 100}%` }} /><i style={{ height: `${week.booked / max * 100}%` }} /></span>}
       </button>)}
       <div className="orbit-weekly-tooltip" data-hovered={Boolean(hovered)} style={{ '--weekly-tooltip-x': `${activePosition}%` }} aria-hidden="true">
         <strong>{fmtDate(active.from)}</strong><span>{active.booked} booked · {active.completed} completed</span>
