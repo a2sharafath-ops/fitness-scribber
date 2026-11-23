@@ -79,7 +79,7 @@ function Shell({ appearance }) {
               <Route path="/progress" element={<ProgressPage />} />
               <Route path="/concerns" element={<ConcernsPage />} />
               <Route path="/messages" element={<MessagesPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/settings" element={<SettingsPage appearance={appearance} />} />
             </Route>
           </Routes></Suspense>
         </ClipboardProvider>

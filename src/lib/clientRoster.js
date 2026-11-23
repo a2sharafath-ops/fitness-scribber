@@ -48,7 +48,7 @@ export function clientRoster(db, today) {
 export function rosterResults(rows, { filter = 'active', query = '', unassigned = false, sort = 'name', page = 1 } = {}) {
   const counts = { active: rows.filter(r => r.client.status === 'Active').length, all: rows.length, review: rows.filter(r => r.client.status === 'Active' && r.reviews.length).length, inactive: rows.filter(r => r.client.status !== 'Active').length }
   const term = query.trim().toLocaleLowerCase()
-  const filtered = rows.filter(r => (filter === 'all' || filter === 'active' && r.client.status === 'Active' || filter === 'inactive' && r.client.status !== 'Active' || filter === 'review' && r.client.status === 'Active' && r.reviews.length) && (!unassigned || !r.program) && (!term || [r.client.name, r.client.email, r.client.goal, ...r.programs.map(p => p.name)].some(v => String(v || '').toLocaleLowerCase().includes(term))))
+  const filtered = rows.filter(r => (filter === 'all' || filter === 'paused' && r.client.status === 'Paused' || filter === 'active' && r.client.status === 'Active' || filter === 'inactive' && r.client.status !== 'Active' || filter === 'review' && r.client.status === 'Active' && r.reviews.length) && (!unassigned || !r.program) && (!term || [r.client.name, r.client.email, r.client.goal, ...r.programs.map(p => p.name)].some(v => String(v || '').toLocaleLowerCase().includes(term))))
   const rank = r => r.client.status !== 'Active' ? 5 : r.reviews[0]?.priority ?? 4
   filtered.sort((a, b) => sort === 'recent' ? (b.latest?.date || '').localeCompare(a.latest?.date || '') || byName(a, b) : sort === 'review' ? rank(a) - rank(b) || byName(a, b) : byName(a, b))
   const pages = Math.max(1, Math.ceil(filtered.length / ROSTER_PAGE_SIZE))

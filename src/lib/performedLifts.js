@@ -48,10 +48,10 @@ export function performedLiftHistory(db, clientId, { actualOnly = false } = {}) 
   return rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
 }
 
-export function recentLiftTrend(db, clientId, today) {
+export function recentLiftTrend(db, clientId, today, startDate) {
   const lifts = new Map()
   for (const row of performedLiftHistory(db, clientId, { actualOnly: true })) {
-    if (!row.date || row.date > today || row.loadKg == null || row.loadKg < 0) continue
+    if (!row.date || row.date > today || (startDate && row.date < startDate) || row.loadKg == null || row.loadKg < 0) continue
     const key = keyOf(row.name)
     if (!lifts.has(key)) lifts.set(key, new Map())
     const dates = lifts.get(key)
@@ -60,7 +60,9 @@ export function recentLiftTrend(db, clientId, today) {
   }
   const series = [...lifts.values()]
   const chosen = series.find(dates => dates.size >= 2) || series[0]
-  return chosen ? [...chosen.values()].slice(0, 8).reverse() : []
+  if (!chosen) return []
+  const rows = [...chosen.values()]
+  return (startDate ? rows : rows.slice(0, 8)).reverse()
 }
 
 export function performedLiftOptions(db, clientId) {

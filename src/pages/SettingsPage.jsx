@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
+import AppearanceControls from '../components/molecules/AppearanceControls'
 import Field from '../components/atoms/Field'
 import ExportMenu from '../components/organisms/forms/ExportMenu'
 import ChangePasswordCard from '../components/organisms/forms/ChangePasswordCard'
@@ -14,7 +15,7 @@ import { toast, confirmDialog } from '../lib/toast'
 
 const TZS = ['', 'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Berlin', 'Asia/Kolkata', 'Asia/Dubai', 'Asia/Singapore', 'Australia/Sydney']
 
-export default function SettingsPage() {
+export default function SettingsPage({ appearance }) {
   const { db, commit, refresh } = useData()
   const { openModal } = useModal()
   const { user, signOut } = useAuth()
@@ -30,6 +31,10 @@ export default function SettingsPage() {
   return (
     <>
       <div className="topbar"><div><h1>Settings</h1><div className="sub">Preferences apply across the app</div></div></div>
+      <section className="card orbit-appearance-panel" style={{ maxWidth: 560, marginBottom: 16 }}>
+        <h2>Appearance</h2>
+        <AppearanceControls prefix="settings" appearance={appearance} />
+      </section>
       <div className="card" style={{ maxWidth: 560 }}>
         <div className="section-title" style={{ margin: '0 0 12px' }}>Coach &amp; business</div>
         <div className="row2">
@@ -53,16 +58,16 @@ export default function SettingsPage() {
       <div className="card" style={{ maxWidth: 560, marginTop: 16 }}>
         <div className="section-title" style={{ margin: '0 0 8px' }}>Data</div>
         <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-          {hasBackend ? 'Your data is stored in your Supabase account.' : 'All data is stored locally in this browser.'} Export it for backup or to share.
+          {hasBackend ? 'Your workspace is synced to your account.' : 'All data is stored locally in this browser.'} Export it for backup or to share.
         </p>
-        <Button variant="ghost" onClick={() => openModal(<ExportMenu />)}>⬇ Export data (CSV)</Button>
+        <Button variant="ghost" onClick={() => openModal(<ExportMenu />)}>Export data (CSV)</Button>
       </div>
       {hasBackend && (
         <div className="card" style={{ maxWidth: 560, marginTop: 16 }}>
           <div className="section-title" style={{ margin: '0 0 8px' }}>Account</div>
           <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>Signed in as <strong>{user?.email}</strong></p>
           <div className="flex gap">
-            <Button variant="ghost" onClick={loadDemo}>✨ Load demo data</Button>
+            <Button variant="ghost" onClick={loadDemo}>Load demo data</Button>
             <Button variant="danger" onClick={signOut}>Sign out</Button>
           </div>
         </div>

@@ -382,7 +382,7 @@
   animation: orbit-booking-arrival .3s cubic-bezier(.16,.8,.25,1);
 }
 .orbit-booking-deck .orbit-booking-feature {
-  transform: translateX(var(--booking-drag, 0px)) rotateZ(var(--booking-rotate, 0deg))
+  transform: translate(var(--booking-drag, 0px),var(--booking-drag-y, 0px)) rotateZ(var(--booking-rotate, 0deg))
     rotateY(var(--booking-tilt-y, 0deg)) rotateX(var(--booking-tilt-x, 0deg));
   transition: transform .38s cubic-bezier(.2,.75,.2,1);
 }

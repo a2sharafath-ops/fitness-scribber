@@ -375,7 +375,7 @@ body:has(.orbit-shell) {
   #app.orbit-shell { transition: grid-template-columns .28s cubic-bezier(.2,.75,.2,1); }
 }
 #app.orbit-shell[data-sidebar-collapsed="true"] { --orbit-sidebar-width: 78px; }
-.orbit-sidebar .nav-item { font-weight: 550; transition: color .16s, background-color .16s, border-color .16s; }
+.orbit-sidebar .nav-item { font-weight: 500; transition: color .16s, background-color .16s, border-color .16s; }
 .orbit-sidebar .nav-item.active .ic { color: var(--accent); }
 .orbit-sidebar-context { display: grid; gap: 8px; margin: 7px 2px; }
 .orbit-sidebar-week { padding: 10px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface2); color: var(--muted); font-size: 12px; }
@@ -395,7 +395,7 @@ body:has(.orbit-shell) {
   gap: 9px;
   min-width: 0;
   min-height: 42px;
-  width: min(42%, 350px);
+  width: min(42%, 345px);
   padding: 0 13px;
   border: 1px solid var(--border);
   border-radius: 999px;

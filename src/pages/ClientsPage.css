@@ -196,3 +196,10 @@
 [data-orbit-theme] .client-roster .cr-review.cr-red { color: var(--accent); background: var(--tint-red); border-color: var(--line); }
 [data-orbit-theme] .client-roster .cr-review.cr-neutral { color: var(--muted); background: var(--soft); border-color: var(--line); }
 [data-orbit-theme] .client-roster .cr-section-icon { color: var(--accent); background: var(--tint-red); }
+
+.orbit-client-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr)); padding:16px; gap:14px }
+.orbit-client-card { display:grid; align-content:start; gap:12px; min-width:0; border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--surface); overflow-wrap:anywhere }
+.orbit-client-card dl { display:grid; gap:8px; margin:0 }
+.orbit-client-card dt,.orbit-client-card small { display:block; color:var(--muted); font-size:.82rem }
+.orbit-client-card dd { margin:2px 0 0 }
+.orbit-client-card .cr-review { justify-self:start }
