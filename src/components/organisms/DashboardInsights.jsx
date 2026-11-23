@@ -65,7 +65,7 @@ export default function DashboardInsights({ insights }) {
       onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false) }}>
       <div className="orbit-insight-content" key={index} aria-live={playing ? 'off' : 'polite'}>
         <h3>{slide.title}</h3><p>{slide.detail}</p>
-        <Link className="db-link" to={slide.path}>{slide.action}</Link>
+        {slide.action && <Link className="db-link" to={slide.path} onClick={slide.onSelect}>{slide.action}</Link>}
       </div>
       <div className="orbit-booking-controls" role="group" aria-label="Browse insights">
         <button className="btn ghost orbit-booking-previous" type="button" aria-label="Previous insight" onClick={() => shift(-1)}><Icon name="chevron-right" size={14} /><span>Previous</span></button>

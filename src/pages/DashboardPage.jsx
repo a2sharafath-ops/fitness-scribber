@@ -21,7 +21,7 @@ import { initials } from '../lib/format'
 import { addDays, coachTimeZone, fmtDate, fmtDateRange, fmtDay } from '../lib/dates'
 import { baseOptions, shortLabel } from '../lib/chartSetup'
 import { CLIENT_READINESS_PATH } from '../lib/clientRoutes'
-import { dashboardActivity, dashboardClientPath, dashboardClock, dashboardData, dashboardReadiness, dashboardWeeks } from '../lib/dashboard'
+import { dashboardActivity, dashboardClientPath, dashboardClock, dashboardData, dashboardReadiness, dashboardWeeks, readinessRoster } from '../lib/dashboard'
 import { scheduleSort, sessionPath, weekOf } from '../lib/schedule'
 import './DashboardPage.css'
 
@@ -136,7 +136,8 @@ export default function DashboardPage() {
   const reviewFirst = reviews.filter(r => r.kind === 'review'), followup = reviews.filter(r => r.kind === 'followup')
   const reviewCategory = reviewFilter || (reviewFirst.length || !followup.length ? 'review' : 'followup')
   const reviewRows = reviewCategory === 'review' ? reviewFirst : followup
-  const checkinRows = checkinFilter === 'missing' ? missing : recorded
+  const rankedCheckins = useMemo(() => readinessRoster(db, today), [db, today])
+  const checkinRows = rankedCheckins.filter(row => checkinFilter === 'missing' ? row.date !== today : row.date === today)
   const group = dashboardReadiness(db, clients, today)
   const ownedBookings = db.sessions.filter((booking) => roster.has(booking.clientId))
   const monday = weekOf(today)
@@ -144,7 +145,15 @@ export default function DashboardPage() {
   const upcoming = ownedBookings.filter((booking) => booking.date > today && ['Pending', 'Confirmed'].includes(booking.status)).sort(scheduleSort).slice(0, 4)
   const insights = [
     { title: 'Check-in coverage', detail: `${recorded.length} of ${clients.length} active clients checked in today.`, path: CLIENT_READINESS_PATH, action: 'View readiness' },
-    { title: 'Items to review', detail: `${reviewFirst.length} to review and ${followup.length} follow-up items on the dashboard.`, path: '/#dashboard-review', action: 'View review queue' },
+    { title: 'Items to review', detail: [
+      reviewFirst.length && `${reviewFirst.length} priority item${reviewFirst.length === 1 ? '' : 's'} to review`,
+      followup.length && `${followup.length} follow-up${followup.length === 1 ? '' : 's'} due`,
+    ].filter(Boolean).join(' · ') || 'No reviews or follow-ups due.',
+      path: '/#dashboard-review', action: reviewFirst.length ? 'View priority items' : followup.length ? 'View follow-ups' : null,
+      onSelect: () => {
+        setReviewFilter(reviewFirst.length ? 'review' : 'followup')
+        document.getElementById('dashboard-review')?.focus()
+      } },
     { title: 'Booking completion', detail: completion.total ? `${completion.completed} of ${completion.total} bookings were completed in the past 30 days.` : 'There are no past bookings in the last 30 days.', path: '/schedule', action: 'View schedule' },
     { title: 'Upcoming sessions', detail: upcoming.length ? `Next booking on ${fmtDay(upcoming[0].date)} at ${upcoming[0].time}.` : 'There are no future bookings scheduled.', path: '/schedule', action: 'View upcoming sessions' },
   ]
@@ -254,7 +263,7 @@ export default function DashboardPage() {
         onDetails={(booking, trigger) => openModal(<SessionForm session={booking} />, false, trigger)} />
   )
   const reviewCard = (
-      <section className="db-card orbit-review" id="dashboard-review" aria-labelledby="orbit-review-title">
+      <section className="db-card orbit-review" id="dashboard-review" tabIndex={-1} aria-labelledby="orbit-review-title">
         <header className="db-head">
           <h2 id="orbit-review-title">Needs review</h2>
           {reviewCategory === 'review' && <Link className="db-link" to="/concerns">View concerns</Link>}
@@ -364,9 +373,8 @@ export default function DashboardPage() {
           </div>
         </div>
         <DashboardSegments label="Check-in status" options={[[ 'missing', `Still to check in · ${missing.length}` ], ['recorded', `Recorded · ${recorded.length}`]]} value={checkinFilter} onChange={setCheckinFilter} />
-        <DashboardList key={checkinFilter} label="Client check-ins" moreLabel="client" rows={checkinRows.map((client) => {
-          const last = db.wellness.filter((entry) => entry.clientId === client.id && entry.date && entry.date <= today).sort((a, b) => b.date.localeCompare(a.date))[0]
-          return <div className="db-row" key={client.id}><div className="db-info"><strong>{client.name}</strong><small>{last ? last.date === today ? 'Checked in today' : `Last check-in ${fmtDate(last.date)}` : 'No check-in on record'}</small></div>
+        <DashboardList key={checkinFilter} label="Client check-ins" moreLabel="client" rows={checkinRows.map(({ client, date, readiness }) => {
+          return <div className="db-row" key={client.id}><div className="db-info"><strong>{client.name}</strong><small>{date ? date === today ? (readiness ? `Readiness · ${readiness.score}/100` : 'Checked in today') : `Last check-in ${fmtDate(date)}` : 'No check-in on record'}</small></div>
             <Link className="db-link" to={dashboardClientPath(client.id, '/check-ins?view=wellness')}>View check-ins</Link></div>
         })} />
         {!checkinRows.length && <p className="db-note">{!clients.length ? 'No active clients.' : checkinFilter === 'missing' ? 'Everyone has checked in.' : 'No check-ins recorded today.'}</p>}
@@ -377,36 +385,43 @@ export default function DashboardPage() {
     <header className="db-title"><div><p className="db-date">{fmtDay(today)} · {clock.time} {coachTimeZone(tz).replaceAll('_', ' ')}</p><h1 aria-label={title}>{title.split(' ').map((word, index) => <span className="orbit-greeting-word" aria-hidden="true" key={index} style={{ '--word-delay': `${index * 65}ms` }}>{word}{' '}</span>)}</h1></div><div className="db-actions"><Button variant="ghost" onClick={showWeeklyReport}><Icon name="file-text" size={16} /> Weekly report</Button><Button onClick={book}><Icon name="calendar" size={16} /> Book session</Button><details className="db-menu"><summary>More actions <Icon name="chevron-down" size={14} /></summary><div className="db-menu-list">{[['Add client', () => openModal(<ClientForm />)], ['Record assessment', () => pick('assessment')], ['Assign a program', () => pick('program')]].map(([text, action]) => <button key={text} type="button" onClick={e => { e.currentTarget.closest('details').open = false; action() }}>{text}</button>)}</div></details></div></header>
     {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan their training.</p><div className="db-actions"><Button onClick={() => openModal(<ClientForm />)}>＋ Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
     <div className="orbit-dashboard-grid">
-      <div className="orbit-dashboard-column">{bookingCard}{reviewCard}</div>
-      <div className="orbit-dashboard-column">{coachingCard}{weeklyCard}{readinessCard}</div>
-      <DashboardInsights insights={insights} />
-      <section className="db-card orbit-upcoming">
-        <header className="db-head"><h2>Upcoming sessions</h2><Link className="db-link" to="/schedule">View schedule</Link></header>
-        {upcoming.map((booking) => <Link key={booking.id} className="db-row orbit-upcoming-row" to={sessionPath(booking)}>
-          <time className="orbit-date-tile" dateTime={booking.date}>{fmtDate(booking.date).split(',')[0]}</time>
-          <div className="db-info"><strong>{roster.get(booking.clientId)?.name}</strong><small>{booking.type} · {booking.time}</small></div>
-          <Icon name="chevron-right" size={16} />
-        </Link>)}
-        {!upcoming.length && <p className="db-note">No future bookings scheduled.</p>}
-      </section>
-      <section className="db-card orbit-plans">
-        <Heading icon="dumbbell" tone="clients" action={<span className="db-date">Today</span>}>Planned workouts {plans.length > 0 && <span className="db-count">{plans.length}</span>}</Heading>
-        {plans.length > 0 ? <div className="db-list" aria-label="Today’s prescribed workouts">{plans.map(p =>
-          <div className="db-row" key={p.id}><span className="db-avatar">{initials(p.client.name)}</span>
-            <div className="db-info"><strong>{p.client.name}</strong><small>{p.name || 'Planned workout'}{p.workoutStatus && ` · ${p.workoutStatus}`}</small></div>
-            <Link className="db-link db-row-action" to={dashboardClientPath(p.clientId, `/training?date=${today}`)}>Training →</Link>
-          </div>)}</div>
-          : <div className="db-inline-empty"><p>No workouts planned today.</p>{clients.length > 0 && <Link className="db-link" to="/clients">Open clients →</Link>}</div>}
-      </section>
-      <section className="db-card orbit-snapshot"><header className="db-head"><h2>Training snapshot</h2></header>
-        <div className="db-trend-bottom"><div><h3>Booking completion · 30 days</h3><strong className="db-metric">{completion.total ? `${completion.completed} / ${completion.total}` : '—'}</strong><p>{completion.total ? `${completion.missed} missed · ${completion.pending} awaiting status` : 'No past bookings recorded.'}</p><Link className="db-link" to="/schedule">Review bookings →</Link></div>
-          <div><h3>Latest strength estimate</h3>{strength ? <><strong className="db-metric">{fmtWt(+strength.valueKg)} <small>estimated 1RM</small></strong><p>{roster.get(strength.clientId).name} · {strength.exercise} · {fmtDay(strength.date)}</p><Link className="db-link" to={dashboardClientPath(strength.clientId, '/progress#strength')}>View strength →</Link></> : <p>No strength estimates recorded.</p>}</div></div>
-      </section>
-      {noProgram.length > 0 && <section className="db-card orbit-program-followup">
-        <header className="db-head"><h2>Program assignments</h2></header>
-        <div className="db-inline-empty"><p>{noProgram.length} active client{noProgram.length === 1 ? '' : 's'} without a current or upcoming program.</p>
-          <button type="button" className="db-link" onClick={() => pick('program', noProgram)}>Assign a program →</button></div>
-      </section>}
+      <div className="orbit-dashboard-column">
+        {bookingCard}
+        {reviewCard}
+        <DashboardInsights insights={insights} />
+        <section className="db-card orbit-plans">
+          <Heading icon="dumbbell" tone="clients" action={<span className="db-date">Today</span>}>Planned workouts {plans.length > 0 && <span className="db-count">{plans.length}</span>}</Heading>
+          {plans.length > 0 ? <div className="db-list" aria-label="Today’s prescribed workouts">{plans.map(p =>
+            <div className="db-row" key={p.id}><span className="db-avatar">{initials(p.client.name)}</span>
+              <div className="db-info"><strong>{p.client.name}</strong><small>{p.name || 'Planned workout'}{p.workoutStatus && ` · ${p.workoutStatus}`}</small></div>
+              <Link className="db-link db-row-action" to={dashboardClientPath(p.clientId, `/training?date=${today}`)}>Training →</Link>
+            </div>)}</div>
+            : <div className="db-inline-empty"><p>No workouts planned today.</p>{clients.length > 0 && <Link className="db-link" to="/clients">Open clients →</Link>}</div>}
+        </section>
+        {noProgram.length > 0 && <section className="db-card orbit-program-followup">
+          <header className="db-head"><h2>Program assignments</h2></header>
+          <div className="db-inline-empty"><p>{noProgram.length} active client{noProgram.length === 1 ? '' : 's'} without a current or upcoming program.</p>
+            <button type="button" className="db-link" onClick={() => pick('program', noProgram)}>Assign a program →</button></div>
+        </section>}
+      </div>
+      <div className="orbit-dashboard-column">
+        {coachingCard}
+        {weeklyCard}
+        {readinessCard}
+        <section className="db-card orbit-upcoming">
+          <header className="db-head"><h2>Upcoming sessions</h2><Link className="db-link" to="/schedule">View schedule</Link></header>
+          {upcoming.map((booking) => <Link key={booking.id} className="db-row orbit-upcoming-row" to={sessionPath(booking)}>
+            <time className="orbit-date-tile" dateTime={booking.date}>{fmtDate(booking.date).split(',')[0]}</time>
+            <div className="db-info"><strong>{roster.get(booking.clientId)?.name}</strong><small>{booking.type} · {booking.time}</small></div>
+            <Icon name="chevron-right" size={16} />
+          </Link>)}
+          {!upcoming.length && <p className="db-note">No future bookings scheduled.</p>}
+        </section>
+        <section className="db-card orbit-snapshot"><header className="db-head"><h2>Training snapshot</h2></header>
+          <div className="db-trend-bottom"><div><h3>Booking completion · 30 days</h3><strong className="db-metric">{completion.total ? `${completion.completed} of ${completion.total} completed` : '—'}</strong><p>{completion.total ? `${completion.missed} missed · ${completion.pending} awaiting status` : 'No past bookings recorded.'}</p><Link className="db-link" to="/schedule">Review bookings →</Link></div>
+            <div><h3>Latest strength estimate</h3>{strength ? <><strong className="db-metric">{fmtWt(+strength.valueKg)} <small>estimated 1RM</small></strong><p>{roster.get(strength.clientId).name} · {strength.exercise} · {fmtDay(strength.date)}</p><Link className="db-link" to={dashboardClientPath(strength.clientId, '/progress#strength')}>View strength →</Link></> : <p>No strength estimates recorded.</p>}</div></div>
+        </section>
+      </div>
     </div>
   </div>
 }
