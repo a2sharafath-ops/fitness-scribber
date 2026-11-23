@@ -66,7 +66,7 @@ function BookingList({ slides, index, onChoose }) {
 
   return <section className="orbit-booking-list" aria-labelledby="orbit-booking-list-title">
     <header>
-      <h3 id="orbit-booking-list-title">All bookings today</h3>
+      <h3 id="orbit-booking-list-title">Today’s sessions</h3>
       {showToggle ? <button className="orbit-booking-list-toggle" type="button"
         aria-label={expanded ? 'Show fewer bookings' : `Show all ${count} bookings`}
         aria-controls="orbit-booking-rows" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
@@ -81,10 +81,10 @@ function BookingList({ slides, index, onChoose }) {
         return <li key={booking.id} className="orbit-booking-entry">
           <button className="orbit-booking-row" type="button" aria-current={active ? 'true' : undefined}
             onClick={() => onChoose(first + offset)}>
-            <span className="orbit-booking-row-time">{booking.time ? <time dateTime={booking.time}>{booking.time}</time> : 'No time'}</span>
+            <Avatar name={client.name} size={32} />
             <span className="orbit-booking-row-copy">
               <strong>{client.name}</strong>
-              <small>{title}</small>
+              <small>{booking.time && <><time dateTime={booking.time}>{booking.time}</time> · </>}{title}</small>
               <span className="orbit-booking-row-status">
                 <span data-state={state}>{primaryStatus}</span>
                 {statusDetail && <small>{statusDetail}</small>}
@@ -205,6 +205,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
     }
     delete deck.dataset.dragging
     deck.style.removeProperty('--booking-drag')
+    deck.style.removeProperty('--booking-drag-y')
     deck.style.removeProperty('--booking-rotate')
   }
   const browseWithArrows = (event) => {
@@ -225,6 +226,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
       const dragging = Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(event.clientY - start.y)
       deck.toggleAttribute('data-dragging', dragging)
       const offset = dragging ? dx : 0
+      deck.style.setProperty('--booking-drag-y', `${dragging && event.pointerType === 'mouse' ? Math.max(-20, Math.min(20, (event.clientY - start.y) * .25)) : 0}px`)
       deck.style.setProperty('--booking-drag', `${Math.max(-135, Math.min(135, offset))}px`)
       deck.style.setProperty('--booking-rotate', `${Math.max(-8, Math.min(8, offset * .045))}deg`)
       return
@@ -243,7 +245,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
 
   return <section className="db-card orbit-today" id="dashboard-schedule" aria-labelledby="orbit-today-title">
     <header className="db-head">
-      <h2 id="orbit-today-title">Today’s sessions</h2>
+      <h2 id="orbit-today-title">{count ? 'Up next' : 'Today’s sessions'}</h2>
       <Link className="db-link" to="/schedule">View schedule</Link>
     </header>
     {booking ? <>

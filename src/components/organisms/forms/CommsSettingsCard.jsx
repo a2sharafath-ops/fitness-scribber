@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Button from '../../atoms/Button'
 import { useData } from '../../../store/DataContext'
-import { hasBackend } from '../../../lib/supabase'
 
 const def = (v, d) => (v === undefined || v === null ? d : v)
 
@@ -68,7 +67,6 @@ export default function CommsSettingsCard() {
       </label>
 
       <div className="modal-foot" style={{ alignItems: 'center', gap: 10 }}>
-        {hasBackend ? <span className="muted" style={{ fontSize: 11 }}>Requires schema_comms.sql + the comms-cron function.</span> : null}
         <Button onClick={save}>{saved ? 'Saved ✓' : 'Save'}</Button>
       </div>
     </div>

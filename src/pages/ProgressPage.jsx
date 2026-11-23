@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, useSearchParams, useOutletContext } from 'react-router-dom'
 import { Line, Bar } from 'react-chartjs-2'
 import Button from '../components/atoms/Button'
 import ProgressInfo from '../components/atoms/ProgressInfo'
@@ -10,11 +10,19 @@ import { useFormat } from '../hooks/useFormat'
 import { fmtDate, todayISO, addDays } from '../lib/dates'
 import { baseOptions, shortLabel } from '../lib/chartSetup'
 import { metricKey, metricMeta, trackedMetrics, trackingComparison, trackingSeries, trackingWindow } from '../lib/progressTracking'
+import { dashboardActivity } from '../lib/dashboard'
+import { performedLiftHistory } from '../lib/performedLifts'
+import { workoutReviewPath } from '../lib/schedule'
 import './ProgressPage.css'
 
 const number = n => n == null ? '—' : Number(n.toFixed(1)).toLocaleString()
 const timestamp = d => Date.parse(d+'T12:00:00Z')
 const dateAt = value => new Date(value).toISOString().slice(0,10)
+
+function useChartOptions() {
+  const theme = useOutletContext()
+  return theme === 'dark' ? baseOptions('#4d414f', '#c4b8c5') : baseOptions()
+}
 
 function ClientTracking({ client }) {
   const { db, tz } = useData(), { openModal } = useModal(), format = useFormat()
@@ -33,7 +41,7 @@ function ClientTracking({ client }) {
   const manage = () => openModal(<TrackedMetricsForm client={client} />)
   const actionPath = meta?.destination ? `/clients/${client.id}${meta.destination}` : '/schedule'
   const sourceDetail = row => row.load !== undefined ? [row.load==null?'Load not recorded':`${format.fmtWt(row.load)} load`,row.reps==null?'Reps not recorded':`${row.reps} reps`,row.effort!=null?`${row.effort} ${row.effortType}`:'Effort not recorded'].join(' · ') : row.detail
-  const chartOptions = baseOptions()
+  const chartOptions = useChartOptions()
   chartOptions.plugins.legend.display = methods.length>1 && activeMethod==='all'
   chartOptions.plugins.tooltip = { callbacks: { title: items=>items[0]?.raw?.row?fmtDate(items[0].raw.row.date):'', label: item=>`${item.dataset.label}: ${number(item.parsed.y)} ${unit}`, afterLabel: item=>item.raw?.row ? sourceDetail(item.raw.row) : '' } }
   chartOptions.scales.x = { type:'linear', min:timestamp(window.start), max:timestamp(window.end===window.start?addDays(window.end,1):window.end), grid:{display:false}, ticks:{maxTicksLimit:6,callback:value=>shortLabel(dateAt(value))} }
@@ -58,9 +66,90 @@ function ClientTracking({ client }) {
   </>
 }
 
+const trends = [
+  { id: 'consistency', label: 'Average consistency', unit: '%' },
+  { id: 'weight', label: 'Working weight' },
+  { id: 'readiness', label: 'Average readiness', unit: '/100' },
+]
+
+function workingWeights(buckets, lifts, exercise) {
+  const daily = new Map()
+  for (const lift of lifts) {
+    if (lift.name !== exercise) continue
+    const current = daily.get(lift.date)
+    if (current == null || lift.loadKg > current) daily.set(lift.date, lift.loadKg)
+  }
+  return buckets.map(day => ({ ...day, value: daily.get(day.from) ?? null, samples: daily.has(day.from) ? 1 : 0 }))
+}
+
 export default function ProgressPage() {
-  const { db } = useData(), [clientId,setClientId] = useState(''), [query,setQuery] = useState('')
-  const client = db.clients.find(c=>c.id===clientId)||db.clients[0]
-  const clients = db.clients.filter(c=>c.name.toLowerCase().includes(query.toLowerCase())||c.id===client?.id)
-  return <div className="progress-tracking"><header className="pt-title"><h1>Progress tracking</h1><p>Your clients. Their own measures of progress.</p></header>{!client?<section className="pt-card pt-empty"><h2>Add a client to start tracking</h2><Link className="btn" to="/clients">Go to Clients →</Link></section>:<><section className="pt-card pt-client"><span className="pt-avatar" aria-hidden="true">{client.name.split(' ').slice(0,2).map(n=>n[0]).join('')}</span><label>Client<select value={client.id} onChange={e=>setClientId(e.target.value)}>{clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>{db.clients.length>6 && <label className="pt-client-search">Find client<input type="search" placeholder="Search client names…" value={query} onChange={e=>setQuery(e.target.value)} /></label>}</section><ClientTracking key={client.id} client={client} /></>}</div>
+  const { db, tz } = useData(), format = useFormat()
+  const [params, setParams] = useSearchParams()
+  const clientId = params.get('client') || ''
+  const setClientId = id => setParams(previous => {
+    const next = new URLSearchParams(previous)
+    if (id) next.set('client', id)
+    else next.delete('client')
+    return next
+  })
+  const [query, setQuery] = useState('')
+  const [days, setDays] = useState(30), [metric, setMetric] = useState('consistency')
+  const [lift, setLift] = useState('')
+  const today = todayISO(tz), from = addDays(today, 1 - days)
+  const client = db.clients.find(c => c.id === clientId)
+  const scope = useMemo(() => client ? { ...db, clients: [client] } : db, [client, db])
+  const lifts = useMemo(() => scope.clients.flatMap(c => performedLiftHistory(db, c.id, { actualOnly: true }))
+    .filter(r => r.date >= from && r.date <= today && r.loadKg != null && r.loadKg >= 0), [scope, db, from, today])
+  const names = [...new Set(lifts.map(row => row.name))].sort()
+  const exercise = names.includes(lift) ? lift : names[0]
+  const series = useMemo(() => {
+    const range = { today: addDays(today, 1), days, bucketDays: 1 }
+    const consistency = dashboardActivity(scope, { ...range, metric: 'consistency' }).buckets
+    const readiness = dashboardActivity(scope, { ...range, metric: 'readiness' }).buckets
+    return { consistency, readiness, weight: workingWeights(consistency, lifts, exercise) }
+  }, [scope, today, days, lifts, exercise])
+  const valueLabel = (value, id) => value == null ? '—' : id === 'weight' ? format.fmtWt(value) :
+    number(value) + trends.find(t => t.id === id).unit
+  const clients = new Map(scope.clients.map(c => [c.id, c.name]))
+  const moments = (db.workouts || []).filter(w => clients.has(w.clientId) && w.status === 'completed' && w.date >= from && w.date <= today)
+    .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8)
+  const points = series[metric].filter(p => p.value != null)
+  const definition = trends.find(t => t.id === metric)
+  const options = useChartOptions()
+  options.plugins.legend.display = false
+  options.scales.x.ticks.maxTicksLimit = 6
+  options.scales.y.title = { display: true, text: metric === 'weight' ? format.unitName() : definition.unit }
+  options.animation = false
+  if (!db.clients.length) return <section className="progress-tracking"><h1>Progress</h1><p>Add a client to start tracking progress.</p><Link to="/clients">View clients</Link></section>
+  return <div className="progress-tracking"><header className="pt-title"><h1>Progress</h1></header>
+    <section className="pt-card pt-client">
+      <label>Clients<select value={client?.id || ''} onChange={e => setClientId(e.target.value)}>
+        <option value="">All clients</option>{db.clients.filter(c => c.id === clientId || c.name.toLowerCase().includes(query.toLowerCase())).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+      </select></label>
+      {db.clients.length > 6 && <label>Find client<input type="search" value={query} onChange={e => setQuery(e.target.value)} /></label>}
+      <label>Period<select value={days} onChange={e => setDays(Number(e.target.value))}>{[7,30,90].map(n => <option key={n} value={n}>{n} days</option>)}</select></label>
+    </section>
+    <div className="pt-cards">{trends.map(t => {
+      const recorded = series[t.id].filter(p => p.value != null)
+      const samples = recorded.reduce((n, p) => n + p.samples, 0)
+      const value = t.id === 'weight' ? recorded.at(-1)?.value : samples ? recorded.reduce((n,p) => n + p.value * p.samples, 0) / samples : null
+      const delta = recorded.length > 1 ? recorded.at(-1).value - recorded[0].value : null
+      return <button key={t.id} className="pt-card pt-metric" aria-pressed={metric === t.id} onClick={() => setMetric(t.id)}>
+        <span>{t.label}{t.id === 'weight' && exercise ? ' · ' + exercise : ''}</span><strong>{valueLabel(value, t.id)}</strong>
+        <small>{delta == null ? 'Insufficient records for change' : (delta > 0 ? '+' : '') + (t.id === 'weight' ? format.fmtWt(delta) : number(delta) + ' pts') + ' in period'}</small>
+      </button>
+    })}</div>
+    <section className="pt-card pt-chart-card"><div className="pt-section-head"><h2>{definition.label}</h2></div>
+      {metric === 'weight' && names.length > 0 && <div className="pt-chart-controls"><label>Exercise<select value={exercise} onChange={e => setLift(e.target.value)}>{names.map(n => <option key={n}>{n}</option>)}</select></label></div>}
+      {points.length ? <div className="pt-chart"><Line options={options} role="img" aria-label={definition.label + ' from ' + fmtDate(from) + ' to ' + fmtDate(today)} data={{
+        labels: series[metric].map(p => shortLabel(p.from)), datasets: [{ label: definition.label, data: series[metric].map(p => metric === 'weight' && p.value != null ? format.toDisp(p.value) : p.value),
+          borderColor: '#dd4964', pointRadius: 3, backgroundColor: '#dd496425', fill: true, tension: 0.2, spanGaps: false }]
+      }} /></div> : <p className="pt-empty-history">No recorded values in this period.</p>}
+      <div className="pt-card-foot"><span>{metric === 'weight' ? 'Highest recorded set weight per day' : metric === 'consistency' ? 'Prescribed workout days with a completed log' : 'Recorded readiness scores for active clients'}</span><span>{fmtDate(from)} – {fmtDate(today)}</span></div>
+    </section>
+    <section className="pt-card pt-history"><div className="pt-section-head"><h2>Recent milestones</h2></div>
+      {moments.length ? <ul className="progress-moments">{moments.map(w => <li key={w.id}><Link to={workoutReviewPath(w)}>{clients.get(w.clientId)} · {w.name || w.title || 'Completed workout'}</Link><small>{fmtDate(w.date)}</small></li>)}</ul> : <p className="pt-empty-history">No completed workouts in this period.</p>}
+    </section>
+    {client && <ClientTracking key={client.id} client={client} />}
+  </div>
 }

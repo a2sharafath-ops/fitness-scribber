@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
 import ProgressInfo from '../atoms/ProgressInfo'
 import { useData } from '../../store/DataContext'
@@ -18,10 +18,14 @@ export default function StrengthDashboard({ client }) {
   const { fmtWt, toDisp, unitName } = useFormat()
   const [selected, setSelected] = useState('')
   const [chart, setChart] = useState('estimate')
+  const [period, setPeriod] = useState('all')
+  const theme = useOutletContext()
+  const today = todayISO(tz)
+  const since = period === 'all' ? null : addDays(today, 1 - Number(period))
   const options = performedLiftOptions(db, client.id)
   const choice = options.find((option) => option.name === selected) || options[0]
   const lift = choice?.name
-  const work = performedLiftHistory(db, client.id).filter((row) => sameLift(row.name, lift))
+  const work = performedLiftHistory(db, client.id, { actualOnly: true }).filter((row) => sameLift(row.name, lift))
   const bookings = new Map((db.sessions || []).filter((booking) => booking.clientId === client.id).map((booking) => [booking.id, booking]))
   // Zero external load is a recorded value; missing load stays unknown.
   const loaded = [...work].filter((row) => row.loadKg != null).reverse()
@@ -33,13 +37,13 @@ export default function StrengthDashboard({ client }) {
   const lastTm = newest(own.filter((m) => m.kind === 'tm'))
   const main = !lift || choice.group === 'Main Lift'
   const estimateChart = main && chart === 'estimate'
-  const trend = estimateChart ? estimates : loaded
+  const trend = (estimateChart ? estimates : loaded).filter(row => !since || (row.date >= since && row.date <= today))
   const field = estimateChart ? 'valueKg' : 'loadKg'
   const first = trend[0], last = trend.at(-1)
-  const change = trend.length >= 2 ? +(last[field] - first[field]).toFixed(1) : null
-  const today = todayISO(tz)
+  const change = first && last && first.date !== last.date ? +(last[field] - first[field]).toFixed(1) : null
   const dates = trend.length ? trend.map((row) => row.date) : Array.from({ length: 28 }, (_, i) => addDays(today, i - 27))
-  const opts = baseOptions()
+  const opts = baseOptions(theme === 'dark' ? '#4d414f' : '#e6dfe5', theme === 'dark' ? '#c4b8c5' : '#605762')
+  opts.animation = false
   opts.plugins.legend.display = false
   opts.scales.y.title = { display: true, text: unitName() }
   if (!trend.length) opts.scales.y.ticks = { ...opts.scales.y.ticks, display: false }
@@ -65,10 +69,13 @@ export default function StrengthDashboard({ client }) {
         </>}
       </div>
       <div className="progress-chart-toolbar"><h3>{estimateChart ? 'Estimated 1RM over time' : 'Recorded set load over time'} <ProgressInfo label="strength chart context" text={estimateChart ? 'Epley estimates from completed sets. Estimates are not tested maxima; training max is a programming reference.' : 'External load recorded for the same lift. Compare reps and source before interpreting change. Zero means no external load; missing values remain blank.'} /></h3>
+        <label className="progress-lift-select">Chart period <select value={period} onChange={event => setPeriod(event.target.value)}>
+          <option value="all">All time</option>{[7, 30, 90].map(days => <option key={days} value={days}>{days} days</option>)}
+        </select></label>
         {main && <div className="progress-chart-switch" role="group" aria-label="Strength chart"><button type="button" aria-pressed={chart === 'estimate'} onClick={() => setChart('estimate')}>Estimated 1RM</button><button type="button" aria-pressed={chart === 'load'} onClick={() => setChart('load')}>Set load</button></div>}
       </div>
       <div className="progress-chart progress-strength-canvas"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: trend.length ? trend.map((row) => toDisp(row[field])) : dates.map(() => null), borderColor: COLORS.blue, tension: 0.15, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
-        {!trend.length && <p className="load-response-empty-label">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates yet.' : 'No recorded loads yet.'}</p>}
+        {!trend.length && <p className="load-response-empty-label">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates in this period.' : 'No recorded loads in this period.'}</p>}
       </div>
       <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
     </section>

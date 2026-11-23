@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 import Avatar from '../components/atoms/Avatar'
 import Icon from '../components/atoms/Icon'
 import { useData } from '../store/DataContext'
-import { dashboardClientPath, readinessRoster } from '../lib/dashboard'
+import { bookedCompletion, dashboardClientPath, readinessRoster } from '../lib/dashboard'
 import { fmtDate } from '../lib/dates'
 import './ReadinessRoster.css'
 
-function ReadinessCard({ row, today }) {
+function ReadinessCard({ row, today, completion }) {
   const { client, date, readiness } = row
   const description = useId()
   const current = date === today
@@ -33,6 +33,7 @@ function ReadinessCard({ row, today }) {
           {date && <time dateTime={date}>{fmtDate(date)}</time>}
         </div>
       </div>
+      <small>{completion.total ? `${completion.completed} of ${completion.total} bookings completed · past 30 days` : 'No bookings in the past 30 days'}</small>
       <span className="rr-card-action" aria-hidden="true">View check-ins <Icon name="chevron-right" size={15} /></span>
     </Link>
   </li>
@@ -69,7 +70,7 @@ export default function ReadinessRoster({ today }) {
         : `${rows.length} active ${rows.length === 1 ? 'client' : 'clients'}`}</p>
     </div>
     {visible.length ? <ul className="rr-grid" role="list" aria-label="Readiness priority">
-      {visible.map(row => <ReadinessCard key={row.client.id} row={row} today={today} />)}
+      {visible.map(row => <ReadinessCard key={row.client.id} row={row} today={today} completion={bookedCompletion(db.sessions, today, new Set([row.client.id]))} />)}
     </ul> : <p className="card rr-empty">{rows.length ? 'No active clients match this search.' : 'No active clients to review.'}</p>}
   </section>
 }

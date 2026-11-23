@@ -122,7 +122,7 @@ test('planned custom exercises can be chosen without plotting their prescription
 })
 test('page renders saved client metrics, useful empty states and existing manual history',()=>{
   const db=seedBuilderQA(end);db.clients[0].intake={progressTracking:{version:1,metrics:[{kind:'body',measure:'massKg'}]}}
-  const render=d=>renderToStaticMarkup(React.createElement(MemoryRouter,null,React.createElement(DataProvider,{initialDb:d,backend:false},React.createElement(ModalProvider,null,React.createElement(ProgressPage)))))
+  const render=d=>renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:[d.clients.length ? "/progress?client="+d.clients[0].id : "/progress"]},React.createElement(DataProvider,{initialDb:d,backend:false},React.createElement(ModalProvider,null,React.createElement(ProgressPage)))))
   const html=render(db);assert.match(html,/Manage tracked metrics/);assert.match(html,/Body mass/);assert.match(html,/Supporting records/);assert.doesNotMatch(html,/Squat 1RM est\./)
   db.settings.units='lb';db.assessments.push({id:'measured',clientId:db.clients[0].id,date:'2026-10-01',type:'body_comp',data:{massKg:100,method:'BIA'}})
   assert.match(render(db),/220\.5/);assert.match(render(db),/record=measured/)

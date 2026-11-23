@@ -38,16 +38,17 @@ export default function MessagesPage() {
   return (
     <>
       <div className="topbar">
-        <div><h1>Messages</h1><div className="sub">Chat with your athletes</div></div>
+        <div><h1>Messages</h1><div className="sub">Client conversations</div></div>
         <Button onClick={broadcast} disabled={!clients.length}><Icon name="megaphone" size={15} /> Broadcast</Button>
       </div>
-      <div className="msg-layout">
+      <div className="msg-layout" data-thread-open={Boolean(sel)}>
         <div className="card msg-list-card">
           <ConversationList clients={clients} byClient={byClient} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
         <div className="card msg-thread-card">
           {sel ? (
-            <ChatThread clientId={sel.id} viewerRole="coach" headerName={sel.name} subtitle={sel.email} />
+            <><button className="btn ghost msg-back" onClick={() => setSelectedId(null)}>← Conversations</button>
+            <ChatThread key={sel.id} clientId={sel.id} viewerRole="coach" headerName={sel.name} subtitle={sel.email} /></>
           ) : (
             <div className="empty" style={{ padding: 40 }}><div className="big"><Icon name="message" size={40} /></div>Select a conversation to start chatting.</div>
           )}

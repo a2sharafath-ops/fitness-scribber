@@ -1,3 +1,4 @@
+import AppearanceControls from '../molecules/AppearanceControls'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Icon from '../atoms/Icon'
@@ -137,23 +138,7 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
         <summary className="orbit-icon-button" aria-label="Appearance" aria-expanded={panel === 'appearance'} onClick={event => { event.preventDefault(); togglePanel('appearance') }}><Icon name={appearance.effectiveTheme === 'dark' ? 'sun' : 'moon'} size={18} /></summary>
         <div className="orbit-toolbar-panel orbit-appearance-panel" inert={exiting === 'appearance'}>
           <strong>Appearance</strong>
-          <div className="orbit-scheme" role="group" aria-label="Theme">
-            {[['light', 'Light'], ['dark', 'Dark'], ['system', 'Match system']].map(([theme, label]) => (
-              <button key={theme} type="button" aria-pressed={appearance.theme === theme} onClick={() => appearance.updateAppearance({ theme })}>{label}</button>
-            ))}
-          </div>
-          <label htmlFor="orbit-frost">Frost <span>{appearance.frost}%</span></label>
-          <input type="range" id="orbit-frost" min="0" max="100" value={appearance.frost} onChange={(event) => appearance.updateAppearance({ frost: Number(event.target.value) })} />
-          <label htmlFor="orbit-motion">Motion</label>
-          <select id="orbit-motion" value={appearance.motion} onChange={event => appearance.updateAppearance({ motion: event.target.value })}>
-            <option value="system">Device preference</option>
-            <option value="reduce">Reduce motion</option>
-          </select>
-          <label htmlFor="orbit-density">Content spacing</label>
-          <select id="orbit-density" value={appearance.density} onChange={event => appearance.updateAppearance({ density: event.target.value })}>
-            <option value="comfortable">Comfortable</option>
-            <option value="compact">Compact</option>
-          </select>
+          <AppearanceControls appearance={appearance} />
         </div>
       </details>
       <OrbitNotifications key={user?.id ?? 'local'} scope={user?.id ?? 'local'} notices={notices}

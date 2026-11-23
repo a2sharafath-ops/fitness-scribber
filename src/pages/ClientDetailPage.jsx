@@ -14,7 +14,7 @@ import { hasBackend } from '../lib/supabase'
 import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
-import { coachClock, fmtDate } from '../lib/dates'
+import { addDays, coachClock, fmtDate } from '../lib/dates'
 import { forClient, formalAssessments, baselineProgress, dueStatus, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, TYPES } from '../lib/assessment'
 import { bookingWorkout, bookingWorkoutAction, scheduledBooking, sessionPath, trainingBooking, workoutReviewPath } from '../lib/schedule'
 import { readinessScore } from '../lib/calc'
@@ -41,7 +41,7 @@ export default function ClientDetailPage() {
   const strength = (db.maxes || []).filter((row) => row.clientId === id && row.kind === 'e1rm' && row.date <= today && Number(row.valueKg) > 0)
     .sort((a, b) => b.date.localeCompare(a.date))[0]
   const program = clientPrograms(db, client, today)[0]
-  const liftTrend = recentLiftTrend(db, id, today)
+  const liftTrend = recentLiftTrend(db, id, today, addDays(today, -55))
   const metrics = [
     { name: 'Booking completion', value: completion.total ? `${Math.round(completion.completed / completion.total * 100)}%` : '—',
       note: completion.total ? `${completion.completed} of ${completion.total} · past 30 days` : 'No past bookings in 30 days', path: `/clients/${id}/progress#attendance` },

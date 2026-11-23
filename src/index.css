@@ -1527,3 +1527,9 @@ html:has(.progress-index){overflow-x:clip}
   .exercise-library-tools input, .exercise-library-tools select { width: 100%; }
   .muscle-assignment-grid { grid-template-columns: 1fr; }
 }
+
+.msg-layout .msg-back { display:none }
+@media(max-width:820px) {
+  .msg-layout[data-thread-open="true"] .msg-list-card,.msg-layout[data-thread-open="false"] .msg-thread-card { display:none }
+  .msg-layout .msg-back { display:inline-flex; margin:10px; min-height:44px }
+}

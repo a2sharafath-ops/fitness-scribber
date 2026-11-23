@@ -45,7 +45,7 @@ export default function OverviewLiftTrend({ clientId, trend, units }) {
           pointBackgroundColor: '#dc465e', pointRadius: trend.map(point => point === reading ? 5 : 3), borderWidth: 2, fill: true,
         }] }} />
       </div>
-      <p>Heaviest recorded set load per date · {trend.length} dates</p>
-    </> : <p>{last ? 'One more dated load for this lift is needed to show a trend.' : 'No recorded set loads yet.'}</p>}
+      <p>Past 8 weeks · Heaviest recorded set per date · Change {last.loadKg > trend[0].loadKg ? '+' : ''}{fmtWt(last.loadKg - trend[0].loadKg, units)}</p>
+    </> : <p>{last ? 'One more dated load for this lift is needed to show a trend.' : 'No recorded set loads in the past 8 weeks.'}</p>}
   </section>
 }
