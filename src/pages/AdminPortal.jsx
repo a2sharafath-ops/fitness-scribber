@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import StartupScreen from '../components/templates/StartupScreen'
 import Brand from '../components/atoms/Brand'
 import Button from '../components/atoms/Button'
 import Kpi from '../components/atoms/Kpi'
@@ -57,7 +58,7 @@ export default function AdminPortal() {
     return u ? (u.displayName || u.email) : 'unknown'
   }
 
-  if (users === null) return <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading admin portal…</div>
+  if (users === null) return <StartupScreen />
 
   return (
     <div id="app" className="adm-portal">

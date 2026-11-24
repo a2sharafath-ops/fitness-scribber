@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Bar, Line } from 'react-chartjs-2'
 import Button from '../components/atoms/Button'
 import Icon from '../components/atoms/Icon'
@@ -96,7 +96,6 @@ export default function DashboardPage() {
   const { openModal, closeModal } = useModal()
   const nav = useNavigate()
   const { hash: locationHash } = useLocation()
-  const theme = useOutletContext()
   const { fmtWt } = useFormat()
   const reduced = useReducedMotion()
   const [singleColumn, setSingleColumn] = useState(() => globalThis.window?.matchMedia?.('(max-width: 1000px)')?.matches ?? false)
@@ -233,7 +232,7 @@ export default function DashboardPage() {
     }
   }, [locationHash])
   const chartOptions = useMemo(() => {
-    const base = theme === 'dark' ? baseOptions('#4d414f', '#c4b8c5') : baseOptions('#e6dfe5', '#605762')
+    const base = baseOptions()
     const inspect = (_event, points) => { if (points.length) setChartSelection(points[0].index) }
     return {
       ...base,
@@ -250,7 +249,7 @@ export default function DashboardPage() {
         y: { ...base.scales.y, beginAtZero: true, max: isTrend ? 100 : undefined, ticks: { ...base.scales.y.ticks,
           maxTicksLimit: 5, precision: 0, ...(isRate && { callback: value => `${value}%` }) } } },
     }
-  }, [theme, reduced, activity, activityValue, isTrend, isRate, metricLabel, describeBucket])
+  }, [reduced, activity, activityValue, isTrend, isRate, metricLabel, describeBucket])
   const chartData = useMemo(() => ({ labels: activity.buckets.map(b => shortLabel(b.from)), datasets: [{ label: metricLabel, data: activity.buckets.map(b => b.value),
     ...(isTrend ? { borderColor: '#dc465e', backgroundColor: '#dc465e22', pointBackgroundColor: '#dc465e',
       pointRadius: 3, pointHoverRadius: 6, fill: true, tension: .25, spanGaps: false }
@@ -390,7 +389,7 @@ export default function DashboardPage() {
 
   return <div className="coach-dashboard">
     <header className="db-title"><div><p className="db-date">{fmtDay(today)} · {clock.time} {coachTimeZone(tz).replaceAll('_', ' ')}</p><h1 aria-label={title}>{title.split(' ').map((word, index) => <span className="orbit-greeting-word" aria-hidden="true" key={index} style={{ '--word-delay': `${index * 65}ms` }}>{word}{' '}</span>)}</h1></div><div className="db-actions"><Button variant="ghost" onClick={showWeeklyReport}><Icon name="file-text" size={16} /> Weekly report</Button><Button onClick={book}><Icon name="calendar" size={16} /> Book session</Button><details className="db-menu"><summary>More actions <Icon name="chevron-down" size={14} /></summary><div className="db-menu-list">{[['Add client', () => openModal(<ClientForm />)], ['Record assessment', () => pick('assessment')], ['Assign a program', () => pick('program')]].map(([text, action]) => <button key={text} type="button" onClick={e => { e.currentTarget.closest('details').open = false; action() }}>{text}</button>)}</div></details></div></header>
-    {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan their training.</p><div className="db-actions"><Button onClick={() => openModal(<ClientForm />)}>＋ Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
+    {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan their training.</p><div className="db-actions"><Button icon="plus" onClick={() => openModal(<ClientForm />)}>Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
     <div className="orbit-dashboard-grid">
       <div className="orbit-dashboard-column">
         {bookingCard}

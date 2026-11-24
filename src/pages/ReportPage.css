@@ -5,3 +5,23 @@
 @media(max-width:500px){.cr-actionbar>div{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.cr-actionbar button{font-size:10px;padding:7px 5px}.cr-masthead{padding:14px 0 16px}.cr-topline{gap:12px}.cr-period{width:100%}.cr-period label{flex:1}.cr-period select,.cr-period input{width:100%;min-width:0;max-width:none}.cr-hero{grid-template-columns:1fr;padding:25px 22px;border-radius:17px;gap:20px}.cr-hero h2{font-size:39px;margin:14px 0}.cr-hero-side{justify-self:stretch;width:100%;max-width:none}.cr-hero-number strong{font-size:65px}.cr-hero-footer{font-size:9px}.cr-wins>div{padding:10px 8px}.cr-wins span{font-size:9px}.cr-wins strong{font-size:20px}.cr-wins small{font-size:8px}.cr-nav{gap:18px}.cr-nav a{font-size:10px}.cr-section-head{align-items:start}.cr-section-head .cr-pill{white-space:normal;font-size:9px}.cr-card{padding:19px 17px;border-radius:16px}.cr-anatomy-card{grid-template-columns:1fr}.cr-anatomy{max-width:340px}.cr-muscle-side h3{font-size:21px}.cr-next{padding:25px 20px}.cr-next h3{font-size:27px}.cr-body-grid{gap:7px}.cr-body-grid strong{font-size:18px}.cr-footer{flex-direction:column;gap:5px}.cr-settings-grid{grid-template-columns:1fr}.cr-load-appendix>div{grid-template-columns:repeat(2,auto)}}
 @media(prefers-reduced-motion:reduce){.cr-muscle{transition:none}}
 @media print{@page{size:A4;margin:14mm}.cr-page{background:#fff;max-width:none;padding:0;border-radius:0;color:#183b35;print-color-adjust:exact;-webkit-print-color-adjust:exact}.cr-actionbar,.cr-period,.cr-nav,.cr-disclosure,.cr-muscle-tip,.cr-card-foot button,.cr-card-foot a{display:none!important}.cr-page button{display:none!important}.cr-muscle-bars button{display:grid!important;cursor:default}.cr-masthead{padding:0 0 14px}.cr-topline{margin-bottom:15px}.cr-hero{padding:21px;grid-template-columns:1.3fr .7fr;break-inside:avoid}.cr-hero h2{font-size:38px}.cr-hero-number strong{font-size:60px}.cr-wins{gap:9px}.cr-wins>div{padding:10px}.cr-wins strong{font-size:21px}.cr-section{margin:17px 0}.cr-card,.cr-wellbeing,.cr-next,.cr-followup{break-inside:avoid}.cr-card{padding:16px}.cr-two{grid-template-columns:1.15fr 1fr}.cr-outcomes,.cr-next{grid-template-columns:1fr 1fr}.cr-anatomy-card{grid-template-columns:1.1fr .9fr}.cr-anatomy{max-width:265px}.cr-muscle-side h3{font-size:20px}.cr-chart{max-height:160px}.cr-consistency{margin:10px 0}.cr-wellbeing{grid-template-columns:repeat(3,1fr)}.cr-wellbeing>div:first-child{grid-column:auto}.cr-wellbeing>div:nth-child(2){border-left:1px solid var(--cr-line);padding-left:18px}.cr-sources:not([open]){display:none}.cr-sources[open]{break-before:page}.cr-footer{margin-top:12px}#sidebar,.global-bar{display:none!important}#main{margin:0!important;padding:0!important;max-width:none!important}}
+@media screen {
+  .orbit-shell .cr-page {
+    --cr-ink: var(--text);
+    --cr-muted: var(--muted);
+    --cr-line: var(--border);
+    --cr-paper: transparent;
+    --cr-mint: var(--tint-green);
+    --cr-green: var(--green);
+    font-family: var(--orbit-font);
+  }
+  .cr-page :is(.cr-card, .cr-wins > div, .cr-period select, .cr-period input, .cr-card-head select, .cr-segment button, .cr-actionbar button, .cr-muscle-list button, .cr-ring > div) {
+    color: var(--text); background: var(--surface); border-color: var(--border);
+  }
+  .cr-page .cr-actionbar button { border-radius: 999px; box-shadow: var(--control-shadow); }
+  .cr-page :is(.cr-actionbar .cr-primary, .cr-segment button[aria-pressed=true], .cr-muscle-tip) { background: var(--control-fill); color: var(--control-ink); }
+  .cr-page .cr-hero { background: var(--orbit-feature); color: var(--text); border: 1px solid var(--border); }
+  .cr-page .cr-hero :is(.cr-eyebrow, h2 em, .cr-hero-number strong) { color: var(--text); }
+  .cr-page .cr-logo > span { color: var(--control-ink); background: var(--control-fill); }
+  .cr-page :is(.cr-empty, .cr-calendar > span:not([class])) { color: var(--muted); background: var(--surface2); border-color: var(--border); }
+}

@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/design/cureocity/plus-jakarta-sans.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
 :root{
   --bg:#f5f3f1; --surface:#ffffff; --surface2:#f4f2ef; --border:#e9e6e2;
   --text:#15161a; --muted:#62636a; --accent:#c82435; --accent2:#945000;
@@ -8,6 +15,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 a{color:inherit;text-decoration:none}
+button, input, select, textarea{font-family:inherit}
 body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
 #root{min-height:100vh}
@@ -31,14 +39,15 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI'
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:14px;flex-wrap:wrap}
 .topbar h1{font-size:24px;font-weight:600;letter-spacing:-.4px}
 .topbar .sub{color:var(--muted);font-size:13px;margin-top:2px}
-.btn{background:var(--text);color:#fff;border:none;padding:11px 20px;border-radius:999px;
-  font-weight:600;cursor:pointer;font-size:13px;transition:.15s;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
-.btn:hover{background:#000;transform:translateY(-1px)}
+.btn{background:var(--control-fill);color:var(--control-ink);border:none;padding:11px 20px;border-radius:999px;
+  font-weight:600;cursor:pointer;font-size:var(--type-control);line-height:var(--leading-control);transition:.15s;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-control);font-family:inherit}
+.btn:hover{background:var(--control-hover);transform:translateY(-1px)}
 .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
 .btn.ghost:hover{background:var(--surface2)}
-.btn.sm{padding:8px 14px;font-size:12px}
+.btn.sm{padding:8px 14px;font-size:var(--type-caption)}
+.btn:disabled{color:var(--muted);background:var(--surface2);box-shadow:none;transform:none;cursor:not-allowed}
 .btn.danger{background:var(--tint-red);color:var(--accent);border:1px solid transparent}
-.btn.danger:hover{background:#fcdadd}
+.btn.danger:hover{background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
 .grid{display:grid;gap:16px}
 .cards-4{grid-template-columns:repeat(4,1fr)}
 .cards-3{grid-template-columns:repeat(3,1fr)}
@@ -52,7 +61,7 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI'
 .row-link:hover{background:var(--surface2)}
 .section-title{font-size:16px;font-weight:600;margin:26px 0 14px}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;color:#6b6c72;font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--border)}
 td{padding:12px;border-bottom:1px solid var(--border);font-size:13px}
 tr:last-child td{border-bottom:none}
 tr.clickable{cursor:pointer}
@@ -66,17 +75,17 @@ tr.clickable:hover td{background:var(--surface2)}
 .tag.purple{background:var(--tint-purple);color:var(--purple)}
 .tag.gray{background:var(--tint-gray);color:var(--muted)}
 .tag.red{background:var(--tint-red);color:var(--accent)}
-.tag.yellow{background:var(--tint-yellow);color:#8a5200}
+.tag.yellow{background:var(--tint-yellow);color:var(--accent2)}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px}
-input,select,textarea{width:100%;background:var(--surface);border:1px solid rgba(0,0,0,.1);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit}
+input,select,textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--text)}
 input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Checkboxes must never inherit width:100% from the generic input rule above —
    inside flex label rows they stretch and shove the label text aside. */
 input[type=checkbox]{width:18px;height:18px;flex:none;padding:0;accent-color:var(--accent);cursor:pointer}
 textarea{resize:vertical;min-height:70px}
-input[type=range]{-webkit-appearance:none;appearance:none;height:6px;padding:0;background:#eceae7;border-radius:10px;accent-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;padding:0;background:var(--border);border-radius:10px;accent-color:var(--accent)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--accent);cursor:pointer}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}

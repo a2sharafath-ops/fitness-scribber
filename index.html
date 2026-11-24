@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/orbit-icon.png?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f7f5f6" />
+    <meta name="theme-color" content="#ffffff" />
     <script>
       (() => {
         const root = document.documentElement;
@@ -18,16 +18,14 @@
           theme = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
         }
         root.dataset.orbitTheme = theme;
-        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#18151b' : '#f7f5f6';
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#18181c' : '#ffffff';
       })();
     </script>
     <style>
-      html { background: #f7f5f6; color-scheme: light; }
-      html[data-orbit-theme="dark"] { background: #18151b; color-scheme: dark; }
+      html { background: #ffffff; color-scheme: light; }
+      html[data-orbit-theme="dark"] { background: #18181c; color-scheme: dark; }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preload" href="/design/cureocity/plus-jakarta-sans.ttf" as="font" type="font/ttf" crossorigin />
     <title>Orbit Trainer by Cureocity</title>
   </head>
   <body>

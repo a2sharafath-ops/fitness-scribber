@@ -43,7 +43,7 @@ export default function WorkoutInsights({ workout, units, exercises = [], restin
           {s.muscleStrain.length ? (
             <div style={{ height: 180 }}><Bar
               data={{ labels: s.muscleStrain.map((item) => item.muscle), datasets: [{ data: s.muscleStrain.map((item) => item.val), backgroundColor: s.muscleStrain.map((_, index) => MUSCLE_COLORS[index % MUSCLE_COLORS.length]) }] }}
-              options={{ ...baseOptions(), indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } }, y: { grid: { display: false }, ticks: { color: COLORS.muted } } } }}
+              options={{ ...baseOptions(), indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: baseOptions().scales.x, y: { grid: { display: false } } } }}
             /></div>
           ) : <div className="muted" style={{ fontSize: 13 }}>No weighted work to attribute.</div>}
         </div>

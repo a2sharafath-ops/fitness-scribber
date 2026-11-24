@@ -208,7 +208,7 @@ export default function AssessmentDetailPage() {
           <div className="sub">{c.name} · {type === 'pain' ? `${recs.length} pain assessment${recs.length === 1 ? '' : 's'}` : `${recs.length} entr${recs.length === 1 ? 'y' : 'ies'}`}{movementPain.length > 0 ? ` · ${movementPain.length} movement screen${movementPain.length === 1 ? '' : 's'} with pain` : ''}</div>
         </div>
         {canAdd && (
-          <Button onClick={() => add(recs.length ? 'reassessment' : 'baseline')}>＋ {recs.length ? 'Reassessment' : 'Baseline'}</Button>
+          <Button icon="plus" onClick={() => add(recs.length ? 'reassessment' : 'baseline')}>{recs.length ? 'Reassessment' : 'Baseline'}</Button>
         )}
       </div>
 

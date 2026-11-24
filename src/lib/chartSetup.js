@@ -1,4 +1,4 @@
-// Register the Chart.js pieces we use, once, and expose shared light-theme options.
+// Register the Chart.js pieces we use, once, and expose shared workspace options.
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement, BarElement,
@@ -12,8 +12,31 @@ ChartJS.register(
   Title, Tooltip, Legend, Filler, ArcElement,
 )
 
-const GRID = '#eceae7'
-const TEXT = '#6e6f76'
+// Chart.js copies scale defaults at creation. Resolve their colors on each draw
+// so a mounted chart can follow the workspace when the coach switches themes.
+ChartJS.defaults.scale.ticks.color = () => ChartJS.defaults.color
+ChartJS.defaults.scale.title.color = () => ChartJS.defaults.color
+ChartJS.defaults.scale.grid.color = () => ChartJS.defaults.borderColor
+ChartJS.defaults.scale.border.color = () => ChartJS.defaults.borderColor
+
+function syncChartAppearance() {
+  const styles = window.getComputedStyle(document.documentElement)
+  const ink = styles.getPropertyValue('--muted').trim()
+  const line = styles.getPropertyValue('--border').trim()
+  const family = styles.getPropertyValue('--orbit-font').trim()
+  if (ink) ChartJS.defaults.color = ink
+  if (line) ChartJS.defaults.borderColor = line
+  if (family) ChartJS.defaults.font.family = family
+  for (const chart of Object.values(ChartJS.instances)) chart.update('none')
+}
+
+if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+  syncChartAppearance()
+  const observer = new window.MutationObserver(syncChartAppearance)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-orbit-theme'] })
+  document.fonts?.ready.then(syncChartAppearance)
+  if (import.meta.hot) import.meta.hot.dispose(() => observer.disconnect())
+}
 
 // Shared dataset palette so charts across pages stay consistent.
 export const COLORS = {
@@ -32,16 +55,14 @@ export const shortLabel = (iso) => {
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function baseOptions(grid = GRID, text = TEXT) {
+export function baseOptions() {
   return {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: text, boxWidth: 12, font: { size: 11 } } } },
+    plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } },
     scales: {
-      x: { grid: { color: grid }, ticks: { color: text, maxTicksLimit: 8, font: { size: 9 } } },
-      y: { grid: { color: grid }, ticks: { color: text } },
+      x: { grid: {}, ticks: { maxTicksLimit: 8, font: { size: 11 } } },
+      y: { grid: {}, ticks: { font: { size: 11 } } },
     },
   }
 }
-
-export { GRID, TEXT }

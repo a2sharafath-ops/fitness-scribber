@@ -162,15 +162,15 @@ export default function SchedulePage() {
   const dateRows = timed ? gridRows : visible.filter(s => s.date.slice(0, 7) === selected.slice(0, 7))
   const heading = view === 'week' ? `${fmtDay(week)} – ${fmtDay(addDays(week, 6))}` : view === 'day' ? fmtDay(selected) : monthLabel(selected)
   return <div className="schedule-page" ref={page}>
-    <header className="schedule-heading"><div><span className="schedule-eyebrow">YOUR COACHING WEEK</span><h1>Schedule</h1><p>{fmtDay(clock.today)} · {tz}</p></div><Button disabled={!db.clients.length} onClick={() => book()}>＋ Book session</Button></header>
+    <header className="schedule-heading"><div><span className="schedule-eyebrow">YOUR COACHING WEEK</span><h1>Schedule</h1><p>{fmtDay(clock.today)} · {tz}</p></div><Button icon="plus" disabled={!db.clients.length} onClick={() => book()}>Book session</Button></header>
     <div className="schedule-stats"><div><span className="schedule-stat-icon"><Icon name="calendar" size={21} /></span><div><small>Today</small><strong>{todayRows.length} <span>{todayRows.length === 1 ? 'session' : 'sessions'}</span></strong></div></div><div><span className="schedule-stat-icon">◷</span><div><small>This week</small><strong>{Math.round(thisWeek.reduce((sum, s) => sum + Number(s.dur || 0), 0) / 6) / 10} <span>hours · {thisWeek.length} sessions</span></strong></div></div><button onClick={() => openModal(<div className="schedule-dialog"><ModalShell title="Booking status updates" onClose={closeModal}><p className="muted">Past bookings awaiting a status update.</p>{overdue.length ? overdue.map(s => <button className="schedule-agenda-row" key={s.id} onClick={() => edit(s)}><span>{fmtDay(s.date)} · {s.time}</span><strong>{clients.get(s.clientId)?.name}</strong><Badge status={s.status} /></button>) : <p>All up to date.</p>}</ModalShell></div>)}><span className="schedule-stat-icon amber">↻</span><div><small>Status updates</small><strong>{overdue.length} <span>{overdue.length ? 'to review →' : 'All up to date'}</span></strong></div></button></div>
     <div className="schedule-workspace">
       <div className="schedule-controls">
         <div className="schedule-toolbar">
           <div className="schedule-range">
-            <Button variant="ghost" size="sm" aria-label={'Previous ' + view} onClick={() => shift(-1)}>←</Button>
+            <Button variant="ghost" size="sm" aria-label={'Previous ' + view} onClick={() => shift(-1)}><Icon name="chevron-left" size={16} /></Button>
             <h2>{heading}</h2>
-            <Button variant="ghost" size="sm" aria-label={'Next ' + view} onClick={() => shift(1)}>→</Button>
+            <Button variant="ghost" size="sm" aria-label={'Next ' + view} onClick={() => shift(1)}><Icon name="chevron-right" size={16} /></Button>
             <Button variant="ghost" size="sm" onClick={showToday}>Today</Button>
           </div>
           <div className="schedule-views" role="group" aria-label="Calendar view">
@@ -225,7 +225,7 @@ export default function SchedulePage() {
             <p>{client !== 'all' || status !== 'booked' ? 'Try another filter or date.' : 'Book a session when you’re ready.'}</p>
           </div>}
         </div>
-        <footer><Button variant="ghost" disabled={!db.clients.length} onClick={() => book()}>＋ Book on this day</Button></footer>
+        <footer><Button icon="plus" variant="ghost" disabled={!db.clients.length} onClick={() => book()}>Book on this day</Button></footer>
       </section>
       <section className="schedule-calendar" aria-label="Session calendar">
         <div className="schedule-caption"><span>{dateRows.length} {dateRows.length === 1 ? 'booking' : 'bookings'} shown</span><span>{timed ? 'Drag to move · Pull the bottom edge to resize' : view === 'month' ? 'Drag to another date · Time stays the same' : ''}</span></div>

@@ -377,7 +377,7 @@
   border:1px solid #ccd6e9;
   border-radius:50%;
   background:#fff;
-  font:800 19px/1 system-ui,sans-serif;
+  font:800 19px/1 var(--orbit-display-font);
   color:#405b92
 }
 .ls-done[aria-pressed=true]>span {
@@ -1082,8 +1082,8 @@
 }
 [data-orbit-theme] :is(.ls-button, .ls-more, .ls-value):hover:not(:disabled),
 [data-orbit-theme] .ls-menu button:is(:hover, :focus-visible) { background: var(--tint-red); }
-[data-orbit-theme] .ls-button.primary { background: var(--orbit-red); color: #fff; border-color: transparent; }
-[data-orbit-theme] .ls-button.primary:hover:not(:disabled) { background: var(--orbit-red-hover); }
+[data-orbit-theme] .ls-button.primary { background: var(--control-fill); color: var(--control-ink); border-color: transparent; border-radius: 999px; box-shadow: var(--control-shadow); }
+[data-orbit-theme] .ls-button.primary:hover:not(:disabled) { background: var(--control-hover); }
 [data-orbit-theme] .ls-button.ls-finish, [data-orbit-theme] .ls-rest-toggle[aria-pressed="true"] {
   color: var(--ls-accent); background: var(--tint-red); border-color: var(--ls-line);
 }

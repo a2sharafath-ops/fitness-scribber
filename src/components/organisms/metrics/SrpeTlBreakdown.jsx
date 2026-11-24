@@ -81,8 +81,8 @@ export default function SrpeTlBreakdown({ client, range }) {
               interaction: { mode: 'index', intersect: false },
               scales: {
                 x: baseOptions().scales.x,
-                y: { position: 'left', title: { display: true, text: 'Minutes', color: COLORS.green, font: { size: 10 } }, min: 0, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } },
-                y1: { position: 'right', title: { display: true, text: 'RPE', color: COLORS.red, font: { size: 10 } }, min: 0, max: 10, grid: { drawOnChartArea: false }, ticks: { color: COLORS.muted } },
+                y: { position: 'left', title: { display: true, text: 'Minutes', color: COLORS.green, font: { size: 10 } }, min: 0 },
+                y1: { position: 'right', title: { display: true, text: 'RPE', color: COLORS.red, font: { size: 10 } }, min: 0, max: 10, grid: { drawOnChartArea: false } },
               },
             }}
           />

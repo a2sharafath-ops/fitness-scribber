@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
+import StartupScreen from '../components/templates/StartupScreen'
+import Icon from '../components/atoms/Icon'
 import Card from '../components/atoms/Card'
 import Button from '../components/atoms/Button'
 import ReadinessTag from '../components/molecules/ReadinessTag'
@@ -68,12 +70,12 @@ export default function AthletePortal() {
     }
   }, [])
 
-  if (!state) return <div className="empty" style={{ paddingTop: 120 }}><div className="big">⏳</div>Loading…</div>
+  if (!state) return <StartupScreen />
   if (!state.client) {
     return (
       <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
         <Card style={{ maxWidth: 420, textAlign: 'center' }}>
-          <div className="big" style={{ fontSize: 40 }}>🔌</div>
+          <Icon name="link" size={32} />
           <h2 style={{ fontSize: 18, margin: '8px 0' }}>Account not linked</h2>
           <p className="muted" style={{ fontSize: 13 }}>Ask your coach for an invite code, then re-enter it.</p>
           <Button variant="ghost" style={{ marginTop: 12 }} onClick={signOut}>Sign out</Button>

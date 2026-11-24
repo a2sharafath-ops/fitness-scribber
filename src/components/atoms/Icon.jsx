@@ -9,6 +9,7 @@ const PATHS = {
   moon: <path d="M20.8 14.1A9 9 0 0 1 9.9 3.2a9 9 0 1 0 10.9 10.9Z" />,
 
   'chevron-down': <path d="m6 9 6 6 6-6" />,
+  'chevron-left': <path d="m15 18-6-6 6-6" />,
   'chevron-right': <path d="m9 18 6-6-6-6" />,
   dashboard: (
     <>
@@ -293,7 +294,22 @@ const SOLAR = {
   },
 }
 
+const designIcons = {
+  sidebar: 'sidebar', dashboard: 'home', search: 'search', calendar: 'schedule',
+  'fitness-play': 'play', 'arrow-right': 'arrow-right', 'new-session': 'new-session', 'studio-client': 'client', 'chevron-down': 'down',
+}
+
 export default function Icon({ name, size = 18, ...props }) {
+  const asset = designIcons[name]
+  if (asset) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" {...props}
+        className={['orbit-design-icon', props.className].filter(Boolean).join(' ')}
+        style={{ maskImage: `url(/design/cureocity/${asset}.svg)`, ...props.style }}>
+        <rect width="24" height="24" fill="currentColor" />
+      </svg>
+    )
+  }
   const solar = SOLAR[name]
   if (solar) {
     return (

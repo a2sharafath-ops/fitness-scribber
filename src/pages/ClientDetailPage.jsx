@@ -121,7 +121,7 @@ export default function ClientDetailPage() {
   return <>
     <div className="topbar overview-title"><h1>Overview</h1><div className="flex gap">
       {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={client} />)}><Icon name="link" size={14} /> Invite</Button>}
-      <Button onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button>
+      <Button icon="plus" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>Quick log</Button>
     </div></div>
     <div className="overview-metrics" role="group" aria-label="Client progress at a glance">
       {metrics.map(({ name, value, note, path }) => <Link className="card overview-metric" key={name} to={path}>
