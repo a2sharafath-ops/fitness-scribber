@@ -376,6 +376,36 @@ body:has(.orbit-shell) {
 .orbit-select-wrap { position: relative; display: inline-flex; min-width: 0; }
 .orbit-select-wrap select { appearance: none; padding-inline-end: 32px; }
 .orbit-select-wrap > svg { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
+.client-section-picker { display: none; }
+@media (max-width: 700px) {
+  .client-workspace > .client-workspace-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .client-workspace .client-workspace-actions, .client-workspace > .client-subnav { display: none; }
+  .client-workspace-header .client-workspace-identity { gap: 7px; }
+  .client-workspace-identity .avatar { flex-shrink: 0; }
+  .client-workspace-header .client-workspace-name { font-size: 16px; overflow-wrap: anywhere; }
+  .client-section-picker { display: inline-flex; max-width: 100%; }
+  .client-section-picker select {
+    width: 9.6em;
+    min-height: 44px;
+    padding: 0 28px 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .client-section-picker select:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  @supports (field-sizing: content) {
+    .client-section-picker select { field-sizing: content; width: auto; }
+  }
+}
 .client-workspace:has(> #workout-log) > :is(.client-workspace-header, .client-save-status, .client-subnav) { display: none; }
 .orbit-shell:has(#workout-log) .orbit-toolbar { margin-bottom: 14px; }
 

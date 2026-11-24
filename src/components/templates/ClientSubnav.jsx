@@ -1,4 +1,5 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import Icon from '../atoms/Icon'
 
 const sections = (id) => [
   { to: `/clients/${id}`, label: 'Overview', end: true },
@@ -8,6 +9,31 @@ const sections = (id) => [
   { to: `/clients/${id}/assessments`, label: 'Assessments' },
   { to: `/clients/${id}/profile`, label: 'Profile' },
 ]
+
+export function ClientSectionPicker({ client, messagePath, reportPath }) {
+  const { pathname, search, hash } = useLocation()
+  const navigate = useNavigate()
+  const options = sections(client.id)
+  const current = options.find(({ to, end }) => pathname === to || (!end && pathname.startsWith(to + '/')))
+  const sectionLabel = current?.label ?? (pathname.endsWith('/srpetl') ? 'Progress' : 'Check-ins')
+  const onSectionRoot = current?.to === pathname && !search && !hash
+
+  return <span className="orbit-select-wrap client-section-picker">
+    <select aria-label="Client sections and actions" value={onSectionRoot ? current.to : ''}
+      onChange={event => navigate(event.target.value)}>
+      {!onSectionRoot && <option value="" disabled hidden>{sectionLabel}</option>}
+      <optgroup label="Client sections">
+        {options.map(({ to, label }) => <option key={to} value={to}>{label}</option>)}
+      </optgroup>
+      <optgroup label="Client actions">
+        <option value={messagePath}>Message</option>
+        <option value={reportPath}>Report</option>
+        <option value="/clients">All clients</option>
+      </optgroup>
+    </select>
+    <Icon name="chevron-down" size={16} aria-hidden="true" />
+  </span>
+}
 
 export default function ClientSubnav({ client }) {
   const { pathname } = useLocation()

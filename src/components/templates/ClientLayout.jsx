@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation, useOutletContext, useParams } from 'react-router-dom'
 import Avatar from '../atoms/Avatar'
-import ClientSubnav from './ClientSubnav'
+import ClientSubnav, { ClientSectionPicker } from './ClientSubnav'
 import { useData } from '../../store/DataContext'
 
 export default function ClientLayout() {
@@ -28,6 +28,8 @@ export default function ClientLayout() {
     </div>
   }
 
+  const messagePath = `/messages?clientId=${encodeURIComponent(client.id)}`
+  const reportPath = `/report/${client.id}`
   return (
     <div className="client-workspace" key={client.id}>
       <header className="client-workspace-header">
@@ -38,9 +40,10 @@ export default function ClientLayout() {
             <div className="sub">{client.goal || 'No goal recorded'}</div>
           </div>
         </div>
+        <ClientSectionPicker client={client} messagePath={messagePath} reportPath={reportPath} />
         <div className="client-workspace-actions">
-          <Link className="btn ghost" to={`/messages?clientId=${encodeURIComponent(client.id)}`}>Message</Link>
-          <Link className="btn ghost" to={`/report/${client.id}`}>Report</Link>
+          <Link className="btn ghost" to={messagePath}>Message</Link>
+          <Link className="btn ghost" to={reportPath}>Report</Link>
         </div>
       </header>
       {saveStatus !== 'idle' && <div className={'client-save-status ' + saveStatus} role={saveStatus === 'failed' ? 'alert' : 'status'}>
