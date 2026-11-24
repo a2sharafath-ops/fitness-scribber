@@ -92,7 +92,7 @@ function WellnessView({ client, today, openModal, del }) {
     </section>
 
     <section className="card">
-      <div className="checkins-section-head"><h2>Wellness check-ins</h2><Button onClick={() => openModal(<WellnessForm clientId={client.id} />)}>＋ Record check-in</Button></div>
+      <div className="checkins-section-head"><h2>Wellness check-ins</h2><Button icon="plus" onClick={() => openModal(<WellnessForm clientId={client.id} />)}>Record check-in</Button></div>
       {wellness[0] && <SourceLine row={wellness[0]} today={today} />}
       {wellness[0] ? <div className="checkins-latest">Latest: sleep {valueOf(wellness[0].sleep)}/7 · stress {valueOf(wellness[0].stress)}/7 · fatigue {valueOf(wellness[0].fatigue)}/7 · soreness {valueOf(wellness[0].soreness)}/7</div> : <p className="checkins-empty">No wellness check-ins yet.</p>}
       {observed > 1 && <div className="checkins-chart"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: 'Wellness score /28', data: dates.map((date) => byDate[date] ?? null), borderColor: COLORS.blue, backgroundColor: 'rgba(11,135,201,.08)', fill: false, pointRadius: 3, spanGaps: false }] }} options={lineOptions()} /></div>}
@@ -123,7 +123,7 @@ function ConcernsView({ client, openModal }) {
   const cards = (rows) => rows.map((row) => <ConcernCard key={row.id} concern={row} clientName={client.name} session={row.sessionId ? db.sessions.find((session) => session.id === row.sessionId && session.clientId === client.id) : null}
     onResolve={() => resolve(row.id)} onReopen={() => reopen(row.id)} onEdit={() => openModal(<ConcernForm concern={row} />)} onDelete={() => remove(row.id)} />)
   return <div className="checkins-stack">
-    <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2><p className="muted">{open.length} open · review the report, date, and source before the next session.</p></div><Button onClick={() => openModal(<ConcernForm clientId={client.id} />)}>＋ Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns recorded.</p>}</section>
+    <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2><p className="muted">{open.length} open · review the report, date, and source before the next session.</p></div><Button icon="plus" onClick={() => openModal(<ConcernForm clientId={client.id} />)}>Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns recorded.</p>}</section>
     <section className="card"><h2>Resolved concerns</h2>{resolved.length ? cards(resolved) : <p className="checkins-empty">No resolved concerns recorded.</p>}</section>
   </div>
 }
@@ -164,7 +164,7 @@ function WearablesView({ client, openModal, del }) {
   }
   const pauseSync = () => { commit((draft) => { draft.clients.find((row) => row.id === client.id).monitorOptIn = false }); toast('Wearable sync paused') }
   return <div className="checkins-stack">
-    <section className="card"><div className="checkins-section-head"><h2>Wearable observations</h2><Button onClick={() => openModal(<WearableForm clientId={client.id} />)}>＋ Manual entry</Button></div>
+    <section className="card"><div className="checkins-section-head"><h2>Wearable observations</h2><Button icon="plus" onClick={() => openModal(<WearableForm clientId={client.id} />)}>Manual entry</Button></div>
       {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div>{latest.hrv != null && <p className="checkins-window">30-day HRV baseline: {baseline ? `${baseline.toFixed(1)} ms (${baselineCount} reading${baselineCount === 1 ? '' : 's'})` : '1 earlier usable reading needed'}</p>}</> : <p className="checkins-empty">No wearable data yet.</p>}
       {observed > 1 && <div className="checkins-chart"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: 'HRV (ms)', data: dates.map((date) => byDate[date] ?? null), borderColor: COLORS.purple, pointRadius: 3, spanGaps: false }] }} options={lineOptions()} /></div>}
       {observed > 1 && <p className="checkins-window">Last 28 days · {observed}/28 days recorded</p>}

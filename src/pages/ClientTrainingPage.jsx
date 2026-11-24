@@ -134,7 +134,7 @@ export default function ClientTrainingPage() {
   </section>
 
   return <>
-    <div className="topbar training-topbar"><h1>Training</h1><Button variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>＋ Quick log</Button></div>
+    <div className="topbar training-topbar"><h1>Training</h1><Button icon="plus" variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>Quick log</Button></div>
     <div className="training-workspace-grid">
       <div className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>
         <TrainingDayPanel key={JSON.stringify([runnerKey, searchParams.get('workout')])} client={client} date={selectedDate} today={today}

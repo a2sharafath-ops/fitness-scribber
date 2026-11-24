@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
 import { baseOptions, shortLabel } from '../../lib/chartSetup'
 import { fmtDate } from '../../lib/dates'
 import { fmtWt, toDisp, unitName } from '../../lib/units'
 
 export default function OverviewLiftTrend({ clientId, trend, units }) {
-  const theme = useOutletContext()
   const [selected, setSelected] = useState(null)
   const last = trend.at(-1)
   const reading = trend.find(point => point.date === selected) || last
@@ -20,7 +19,7 @@ export default function OverviewLiftTrend({ clientId, trend, units }) {
     const index = trend.indexOf(reading) + (event.key === 'ArrowLeft' ? -1 : 1)
     setSelected(trend[Math.max(0, Math.min(index, trend.length - 1))].date)
   }
-  const options = baseOptions(theme === 'dark' ? '#4d414f' : '#e6dfe5', theme === 'dark' ? '#c4b8c5' : '#605762')
+  const options = baseOptions()
   options.animation = false
   options.interaction = { mode: 'index', intersect: false }
   options.onHover = selectPoint

@@ -21,6 +21,7 @@ const AthletePortal = lazy(() => import('./pages/AthletePortal'))
 const AdminPortal = lazy(() => import('./pages/AdminPortal'))
 const loadDashboard = () => import('./pages/DashboardPage')
 const DashboardPage = lazy(loadDashboard)
+const SessionSetupPage = lazy(() => import('./pages/SessionSetupPage'))
 const ClientsPage = lazy(() => import('./pages/ClientsPage'))
 const ClientDetailPage = lazy(() => import('./pages/ClientDetailPage'))
 const ClientProfilePage = lazy(() => import('./pages/ClientProfilePage'))
@@ -59,6 +60,7 @@ function Shell({ appearance }) {
           <Suspense fallback={routeLoading}><Routes>
             <Route element={<AppLayout appearance={appearance} />}>
               <Route path="/" element={<DashboardPage />} />
+              <Route path="/session-setup" element={<SessionSetupPage />} />
               <Route path="/clients" element={<ClientsPage />} />
               <Route path="/clients/:id" element={<ClientLayout />}>
                 <Route index element={<ClientDetailPage />} />

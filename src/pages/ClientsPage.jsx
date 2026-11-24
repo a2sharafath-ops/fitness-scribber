@@ -106,7 +106,7 @@ function ClientRoster({ today }) {
   const changePage = value => { setPage(value); listRef.current?.focus({ preventScroll: true }); listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
 
   return <div className="client-roster">
-    <header className="cr-page-title"><div><h1>Clients</h1><p>{counts.all} total · {counts.active} active</p></div><Button onClick={add}>＋ Add client</Button></header>
+    <header className="cr-page-title"><div><h1>Clients</h1><p>{counts.all} total · {counts.active} active</p></div><Button icon="plus" onClick={add}>Add client</Button></header>
     <section className="cr-card" aria-label="Client roster">
       <div className="cr-roster-top">
         <div className="cr-roster-heading"><h2><span className="cr-section-icon"><Icon name="users" size={18} /></span>Your roster</h2>

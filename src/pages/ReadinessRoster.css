@@ -108,3 +108,6 @@
   .rr-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .rr-search input { font-size: 16px; }
 }
+.rr-search { border-radius: 999px; background: var(--surface); }
+.rr-card .rr-card-action { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.rr-card .rr-status { border-radius: 999px; }

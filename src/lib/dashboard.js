@@ -46,12 +46,18 @@ export function bookedCompletion(sessions, today, clientIds) {
   return { total: past.length, completed: past.filter(s => s.status === 'Completed').length, missed: past.filter(s => s.status === 'Missed').length, pending: past.filter(s => !['Completed', 'Missed'].includes(s.status)).length }
 }
 
-export function dashboardData(db, { today, time }) {
-  const clients = [...db.clients].filter(c => c.status === 'Active').sort((a, b) => a.name.localeCompare(b.name))
+export function dashboardBookings(db, { today, time }) {
   const roster = new Map(db.clients.map(c => [c.id, c]))
   const bookings = db.sessions.filter(s => roster.has(s.clientId) && s.date === today && s.status !== 'Cancelled').sort((a, b) => (a.time || '').localeCompare(b.time || ''))
   const upcoming = bookings.filter(s => scheduledBooking(s) && s.time >= time && !['completed', 'discarded'].includes(bookingWorkout(db, s)?.status))
   const next = upcoming[0]
+  return { roster, bookings, upcoming, next }
+}
+
+export function dashboardData(db, clock) {
+  const { today } = clock
+  const { roster, bookings, upcoming, next } = dashboardBookings(db, clock)
+  const clients = [...db.clients].filter(c => c.status === 'Active').sort((a, b) => a.name.localeCompare(b.name))
   const checked = new Set(db.wellness.filter(w => w.date === today).map(w => w.clientId))
   const recorded = clients.filter(c => checked.has(c.id)), missing = clients.filter(c => !checked.has(c.id))
   const reviews = clientReviewItems(db, today, clients)

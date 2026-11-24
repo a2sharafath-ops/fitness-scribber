@@ -34,7 +34,7 @@ export default function useOrbitAppearance() {
     root.style.setProperty('--orbit-frost', appearance.frost / 100)
     root.dataset.orbitDensity = appearance.density
     const themeColor = document.querySelector('meta[name="theme-color"]')
-    if (themeColor) themeColor.content = theme === 'dark' ? '#18151b' : '#f7f5f6'
+    if (themeColor) themeColor.content = theme === 'dark' ? '#18181c' : '#ffffff'
   }, [theme, appearance.frost, appearance.density])
   useLayoutEffect(() => {
     const root = document.documentElement

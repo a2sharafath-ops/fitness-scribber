@@ -45,7 +45,7 @@ export default function ReadinessBreakdown({ client, range }) {
     interaction: { mode: 'index', intersect: false },
     scales: {
       x: baseOptions().scales.x,
-      y: { min: 0, max: 100, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } },
+      y: { min: 0, max: 100 },
     },
   }
 
@@ -60,7 +60,7 @@ export default function ReadinessBreakdown({ client, range }) {
       <div className="kpi-strip">
         <Kpi label="Readiness (latest)" value={latest?.score ?? '—'}
           delta={tinfo?.smoothed != null ? `${TREND_ICON[tinfo.trend]} 5-day avg ${tinfo.smoothed}${tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}` : 'composite /100'}
-          deltaColor={latest ? (latest.color === 'green' ? 'var(--green)' : latest.color === 'yellow' ? 'var(--amber)' : 'var(--accent)') : 'var(--muted)'} />
+          deltaColor={latest ? (latest.color === 'green' ? 'var(--green)' : latest.color === 'yellow' ? 'var(--accent2)' : 'var(--accent)') : 'var(--muted)'} />
         <Kpi label="Wellness part" value={latest?.wellnessPart ?? '—'} delta={w ? `Hooper ${w.score}/28` : 'no check-in'} />
         <Kpi label="HRV part" value={latest?.hrvPart ?? '—'} delta={latest?.hrvDev != null ? `${latest.hrvDev > 0 ? '+' : ''}${latest.hrvDev.toFixed(1)}% vs base` : 'no wearable'} />
         <Kpi label="Confidence" value={latest ? (latest.confidence === 'high' ? 'High' : 'Low') : '—'} delta={latest ? CONF_LABEL[latest.confidence] : `${logged} of ${range} logged`} />
@@ -124,7 +124,7 @@ export default function ReadinessBreakdown({ client, range }) {
                   { label: 'Soreness', data: sub('soreness'), borderColor: COLORS.purple, tension: 0.3, spanGaps: true, pointRadius: 0 },
                 ],
               }}
-              options={{ ...baseOptions(), interaction: { mode: 'index', intersect: false }, scales: { x: baseOptions().scales.x, y: { min: 1, max: 7, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted, stepSize: 1 } } } }}
+              options={{ ...baseOptions(), interaction: { mode: 'index', intersect: false }, scales: { x: baseOptions().scales.x, y: { min: 1, max: 7, ticks: { stepSize: 1 } } } }}
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function ReadinessBreakdown({ client, range }) {
                 labels: ['Sleep', 'Stress (8−)', 'Fatigue (8−)', 'Soreness (8−)'],
                 datasets: [{ label: 'Contribution', data: [w.sleep, 8 - w.stress, 8 - w.fatigue, 8 - w.soreness], backgroundColor: [COLORS.green, COLORS.red, COLORS.amber, COLORS.purple] }],
               }}
-              options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: baseOptions().scales.x, y: { min: 0, max: 8, grid: { color: '#eceae7' }, ticks: { color: COLORS.muted } } } }}
+              options={{ ...baseOptions(), plugins: { legend: { display: false } }, scales: { x: baseOptions().scales.x, y: { min: 0, max: 8 } } }}
             />
           </div>
         </div>

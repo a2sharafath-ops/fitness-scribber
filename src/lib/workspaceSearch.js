@@ -6,7 +6,7 @@ import { toDisp } from './units'
 
 export const WORKSPACE_PAGES = [
   ['/', 'Dashboard'], ['/clients', 'Clients'], ['/workouts', 'Workouts'], ['/schedule', 'Schedule'],
-  ['/progress', 'Progress'], ['/messages', 'Messages'], ['/concerns', 'Concerns'], ['/settings', 'Settings'],
+  ['/progress', 'Progress'], ['/messages', 'Messages'], ['/concerns', 'Concerns'], ['/settings', 'Settings'], ['/session-setup', 'Session setup'],
 ]
 
 export function workspaceSearch(db, messages, query, units) {

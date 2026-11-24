@@ -34,7 +34,7 @@ export default function WorkoutsPage() {
     <>
       <div className="topbar">
         <div><h1>Workouts</h1></div>
-        {tab === 'lib' && <Button onClick={() => openModal(<ExerciseForm />)}>＋ New Exercise</Button>}
+        {tab === 'lib' && <Button icon="plus" onClick={() => openModal(<ExerciseForm />)}>New exercise</Button>}
       </div>
       <div className="tabs">
         <button className={'tab' + (tab === 'programs' ? ' active' : '')} onClick={() => setTab('programs')}>Programs</button>

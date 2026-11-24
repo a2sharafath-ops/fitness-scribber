@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams, useOutletContext } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Line, Bar } from 'react-chartjs-2'
 import Button from '../components/atoms/Button'
 import ProgressInfo from '../components/atoms/ProgressInfo'
@@ -19,11 +19,6 @@ const number = n => n == null ? '—' : Number(n.toFixed(1)).toLocaleString()
 const timestamp = d => Date.parse(d+'T12:00:00Z')
 const dateAt = value => new Date(value).toISOString().slice(0,10)
 
-function useChartOptions() {
-  const theme = useOutletContext()
-  return theme === 'dark' ? baseOptions('#4d414f', '#c4b8c5') : baseOptions()
-}
-
 function ClientTracking({ client }) {
   const { db, tz } = useData(), { openModal } = useModal(), format = useFormat()
   const [selected, setSelected] = useState(''), [days, setDays] = useState('56'), [expanded,setExpanded] = useState(false), [method,setMethod] = useState('all')
@@ -41,7 +36,7 @@ function ClientTracking({ client }) {
   const manage = () => openModal(<TrackedMetricsForm client={client} />)
   const actionPath = meta?.destination ? `/clients/${client.id}${meta.destination}` : '/schedule'
   const sourceDetail = row => row.load !== undefined ? [row.load==null?'Load not recorded':`${format.fmtWt(row.load)} load`,row.reps==null?'Reps not recorded':`${row.reps} reps`,row.effort!=null?`${row.effort} ${row.effortType}`:'Effort not recorded'].join(' · ') : row.detail
-  const chartOptions = useChartOptions()
+  const chartOptions = baseOptions()
   chartOptions.plugins.legend.display = methods.length>1 && activeMethod==='all'
   chartOptions.plugins.tooltip = { callbacks: { title: items=>items[0]?.raw?.row?fmtDate(items[0].raw.row.date):'', label: item=>`${item.dataset.label}: ${number(item.parsed.y)} ${unit}`, afterLabel: item=>item.raw?.row ? sourceDetail(item.raw.row) : '' } }
   chartOptions.scales.x = { type:'linear', min:timestamp(window.start), max:timestamp(window.end===window.start?addDays(window.end,1):window.end), grid:{display:false}, ticks:{maxTicksLimit:6,callback:value=>shortLabel(dateAt(value))} }
@@ -115,7 +110,7 @@ export default function ProgressPage() {
     .sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8)
   const points = series[metric].filter(p => p.value != null)
   const definition = trends.find(t => t.id === metric)
-  const options = useChartOptions()
+  const options = baseOptions()
   options.plugins.legend.display = false
   options.scales.x.ticks.maxTicksLimit = 6
   options.scales.y.title = { display: true, text: metric === 'weight' ? format.unitName() : definition.unit }

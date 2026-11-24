@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
 import ProgressInfo from '../atoms/ProgressInfo'
 import { useData } from '../../store/DataContext'
@@ -19,7 +19,6 @@ export default function StrengthDashboard({ client }) {
   const [selected, setSelected] = useState('')
   const [chart, setChart] = useState('estimate')
   const [period, setPeriod] = useState('all')
-  const theme = useOutletContext()
   const today = todayISO(tz)
   const since = period === 'all' ? null : addDays(today, 1 - Number(period))
   const options = performedLiftOptions(db, client.id)
@@ -44,7 +43,7 @@ export default function StrengthDashboard({ client }) {
   const dayMillis = 86400000
   const points = trend.map(row => ({ x: Date.parse(row.date) / dayMillis, y: toDisp(row[field]) }))
   const dateAt = day => new Date(day * dayMillis).toISOString().slice(0, 10)
-  const opts = baseOptions(theme === 'dark' ? '#4d414f' : '#e6dfe5', theme === 'dark' ? '#c4b8c5' : '#605762')
+  const opts = baseOptions()
   opts.animation = false
   opts.plugins.legend.display = false
   opts.scales.x.type = 'linear'

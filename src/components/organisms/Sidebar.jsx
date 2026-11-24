@@ -4,15 +4,16 @@ import { useConversations } from '../../hooks/useConversations'
 import { openConcerns } from '../../lib/calc'
 import { hasBackend } from '../../lib/supabase'
 import { dashboardWeeks } from '../../lib/dashboard'
-import { todayISO } from '../../lib/dates'
-import { weekOf } from '../../lib/schedule'
+import { fmtDay, todayISO } from '../../lib/dates'
+import { weekOf, workoutReviewPath } from '../../lib/schedule'
 import { initials } from '../../lib/format'
 import Brand from '../atoms/Brand'
 import Icon from '../atoms/Icon'
 
 const ITEMS = [
+  ['/session-setup', 'new-session', 'Session setup'],
   ['/', 'dashboard', 'Dashboard', true],
-  ['/clients', 'users', 'Clients'],
+  ['/clients', 'studio-client', 'Clients'],
   ['/workouts', 'dumbbell', 'Workouts'],
   ['/schedule', 'calendar', 'Schedule'],
   ['/progress', 'chart', 'Progress'],
@@ -26,6 +27,10 @@ export default function Sidebar({ collapsed, mobile, onCollapse, onNavigate }) {
   const openCount = openConcerns(db).length
   const [week] = dashboardWeeks(db.sessions, weekOf(todayISO(tz)), 1)
   const trainer = db.settings?.trainerName?.trim() || 'Trainer'
+  const recent = collapsed ? [] : (db.workouts || [])
+    .filter(workout => workout.status === 'completed' && workout.id && workout.date && db.clients.some(client => client.id === workout.clientId))
+    .sort((a, b) => b.date.localeCompare(a.date) || String(b.completedAt || '').localeCompare(String(a.completedAt || '')))
+    .slice(0, 3)
   return (
     <nav id={mobile ? undefined : 'sidebar'} className="orbit-sidebar" aria-label="Main navigation">
       <div className="orbit-sidebar-head">
@@ -44,6 +49,12 @@ export default function Sidebar({ collapsed, mobile, onCollapse, onNavigate }) {
           {to === '/messages' && <span className={'nav-badge' + (totalUnread > 0 ? ' show' : '')}>{totalUnread}</span>}
         </NavLink>
       ))}
+      {recent.length > 0 && <section className="orbit-sidebar-recent" aria-label="Recent sessions">
+        <h2>Recent sessions</h2>
+        {recent.map(workout => <Link key={workout.id} to={workoutReviewPath(workout)} onClick={onNavigate}>
+          <span>{workout.title || 'Workout'}</span><small>{fmtDay(workout.date)}</small>
+        </Link>)}
+      </section>}
       <div className="nav-spacer" />
       <NavLink to="/settings" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Settings" title={collapsed ? "Settings" : undefined} onClick={onNavigate}>
         <span className="ic" aria-hidden="true"><Icon name="settings" /></span>

@@ -125,7 +125,7 @@ export default function AssessmentsPage() {
     </section>
 
   return <div className="client-assessments">
-    <div className="topbar assess-title"><h1>Assessments</h1><Button onClick={() => openModal(<NewAssessmentMenu clientId={id} types={TEST_TYPES.map((type) => type.key)} />)}>＋ New assessment</Button></div>
+    <div className="topbar assess-title"><h1>Assessments</h1><Button icon="plus" onClick={() => openModal(<NewAssessmentMenu clientId={id} types={TEST_TYPES.map((type) => type.key)} />)}>New assessment</Button></div>
     {!screeningSettled && screeningCard}
     <section className="assessment-section" id="formal-assessments" aria-labelledby="assess-tests-title">
       <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`Next reassessment uses the date saved on the latest record. Blank means not scheduled. Older records without a saved date show a suggested review using the ${intervalDays}-day Settings default. These are scheduling prompts, not clinical thresholds.`} /></div>
