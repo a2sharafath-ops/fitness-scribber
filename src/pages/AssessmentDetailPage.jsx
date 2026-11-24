@@ -42,7 +42,7 @@ function EntryRow({ rec, onEdit, onDelete, initiallyOpen = false }) {
       <div className="ad-entry-head">
         <button type="button" className="ad-entry-toggle" aria-expanded={open} onClick={toggle}>
           <span className="asr-caret" aria-hidden="true">{open ? '▾' : '▸'}</span>
-          <span className="tag-sm">{rec.phase === 'baseline' ? 'Baseline' : 'Reassessment'}</span>
+          <span className="tag-sm">{['goals', 'lifestyle'].includes(rec.type) ? 'Profile update' : rec.phase === 'baseline' ? 'Baseline' : 'Reassessment'}</span>
           <span className="ad-entry-when">Assessed {fmtDate(rec.date)}</span>
           <span className="ahr-sum">{summarize(rec)}</span>
         </button>
@@ -207,8 +207,8 @@ export default function AssessmentDetailPage() {
           <h1 className="flex gap" style={{ alignItems: 'center' }}><Icon name={meta.icon} size={22} /> {meta.label}</h1>
           <div className="sub">{c.name} · {type === 'pain' ? `${recs.length} pain assessment${recs.length === 1 ? '' : 's'}` : `${recs.length} entr${recs.length === 1 ? 'y' : 'ies'}`}{movementPain.length > 0 ? ` · ${movementPain.length} movement screen${movementPain.length === 1 ? '' : 's'} with pain` : ''}</div>
         </div>
-        {canAdd && (
-          <Button icon="plus" onClick={() => add(recs.length ? 'reassessment' : 'baseline')}>{recs.length ? 'Reassessment' : 'Baseline'}</Button>
+        {canAdd && (recs.length > 0 || movementPain.length > 0) && (
+          <Button icon="plus" onClick={() => add(recs.length ? 'reassessment' : 'baseline')}>{isProfileType ? 'Record update' : recs.length ? 'Reassessment' : 'Baseline'}</Button>
         )}
       </div>
 
@@ -251,7 +251,7 @@ export default function AssessmentDetailPage() {
           <div className="empty" style={{ padding: 24 }}>
             <div className="big"><Icon name={meta.icon} size={40} /></div>
             No {meta.label.toLowerCase()} recorded yet.
-            {canAdd && <div style={{ marginTop: 8 }}><Button size="sm" onClick={() => add('baseline')}>Add baseline</Button></div>}
+            {canAdd && <div style={{ marginTop: 8 }}><Button size="sm" onClick={() => add('baseline')}>{isProfileType ? (type === 'goals' ? 'Record goals' : 'Record lifestyle') : 'Add baseline'}</Button></div>}
           </div>
         )}
       </div>

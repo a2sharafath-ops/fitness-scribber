@@ -96,9 +96,9 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
   return <section className="card load-response" aria-labelledby="load-response-title">
     <div className="load-response-heading"><h2 id="load-response-title">Load response <ProgressInfo label="load response" text="Session load is RPE × duration in minutes (AU). Missing days remain blank. Display choices do not change the load calculations." /></h2>{action}</div>
     <div className="progress-load-primary-controls"><label>Show <select value={primary} onChange={(event) => setPrimary(event.target.value)}><MetricOptions /></select></label><label>Period <select value={days} onChange={(event) => setDays(Number(event.target.value))}>{[28,56,84,180].map(n => <option key={n} value={n}>{n} days</option>)}</select></label></div>
-    <div className="load-response-canvas">{scatter
+    {hasData ? <div className="load-response-canvas">{scatter
       ? <Scatter data={chartData} options={options} role="img" aria-label={`Load response scatter chart, ${plotted}. X-axis ${byId[xMetric].label}; Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />
-      : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}{!hasData && <p className="load-response-empty-label">{emptyLabel}</p>}</div>
+      : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}</div> : <p className="progress-empty">{emptyLabel}</p>}
     {hasData && <div className="load-response-status">{(scatter || primary !== 'load' || secondary) && <span>{plotted}</span>}<span>Session RPE: {logged}/{days} days</span><span>Unlogged days are unknown</span></div>}
     <div className="progress-card-foot"><span>{fmtDate(rows[0].date)}–{fmtDate(today)}</span><span>Gaps = unrecorded days</span></div>
     <details className="load-response-settings">

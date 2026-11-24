@@ -30,3 +30,7 @@
 .setup-launch > span::before { content: ""; position: absolute; inset: 19%; border-radius: 50%; background: var(--orbit-glass); box-shadow: var(--control-shadow); z-index: -1; }
 .setup-launch:hover > span::before { background: var(--surface); }
 .setup-launch > span:active { transform: scale(.98); }
+@media (min-width: 1200px) and (min-height: 900px) {
+  .session-setup { padding-top: clamp(90px, 13vh, 160px); }
+}
+.setup-meta span { max-width: 100%; overflow-wrap: anywhere; }

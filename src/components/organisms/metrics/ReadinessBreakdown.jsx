@@ -3,7 +3,7 @@ import { Line, Bar } from 'react-chartjs-2'
 import Kpi from '../../atoms/Kpi'
 import { useData } from '../../../store/DataContext'
 import { baseOptions, COLORS, shortLabel } from '../../../lib/chartSetup'
-import { lastNDates } from '../../../lib/dates'
+import { fmtDate, lastNDates } from '../../../lib/dates'
 import { readinessParts, readinessTrend, rollingAvg } from '../../../lib/calc'
 
 const TREND_ICON = { up: '▲', down: '▼', flat: '→' }
@@ -55,11 +55,15 @@ export default function ReadinessBreakdown({ client, range }) {
     return r ? r[field] : null
   })
 
+  if (!latest) return <section className="card"><h2 className="section-title">Readiness</h2>
+    <p className="muted">No readiness score recorded in the past {range} days.</p>
+  </section>
+
   return (
     <>
       <div className="kpi-strip">
-        <Kpi label="Readiness (latest)" value={latest?.score ?? '—'}
-          delta={tinfo?.smoothed != null ? `${TREND_ICON[tinfo.trend]} 5-day avg ${tinfo.smoothed}${tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}` : 'composite /100'}
+        <Kpi label={latest ? `Readiness · ${fmtDate(D[lastIdx])}` : 'Readiness in this period'} value={latest ? `${latest.score}/100` : '—'}
+          delta={tinfo?.smoothed != null ? `${TREND_ICON[tinfo.trend]} 5-day avg ${tinfo.smoothed}${tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}` : `${logged} of ${range} days recorded`}
           deltaColor={latest ? (latest.color === 'green' ? 'var(--green)' : latest.color === 'yellow' ? 'var(--accent2)' : 'var(--accent)') : 'var(--muted)'} />
         <Kpi label="Wellness part" value={latest?.wellnessPart ?? '—'} delta={w ? `Hooper ${w.score}/28` : 'no check-in'} />
         <Kpi label="HRV part" value={latest?.hrvPart ?? '—'} delta={latest?.hrvDev != null ? `${latest.hrvDev > 0 ? '+' : ''}${latest.hrvDev.toFixed(1)}% vs base` : 'no wearable'} />
@@ -77,7 +81,7 @@ export default function ReadinessBreakdown({ client, range }) {
           </select>
         </div>
         <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>{v.sub} 7-day smoothing against the 28-day baseline.</div>
-        <div style={{ height: 220 }}>
+        {v.series.some(value => value != null) ? <div style={{ height: 220 }}>
           <Line
             data={{
               labels,
@@ -89,7 +93,7 @@ export default function ReadinessBreakdown({ client, range }) {
             }}
             options={tOpts}
           />
-        </div>
+        </div> : <p className="progress-empty">No {v.label.toLowerCase()} readings in this period.</p>}
       </div>
 
       <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>

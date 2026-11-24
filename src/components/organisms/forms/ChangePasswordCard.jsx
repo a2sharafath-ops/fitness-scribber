@@ -33,7 +33,7 @@ export default function ChangePasswordCard({ style }) {
       {!open ? (
         <>
           {msg?.type === 'ok' && <p style={{ fontSize: 13, color: 'var(--green)', marginBottom: 10 }}>{msg.text}</p>}
-          <Button variant="ghost" onClick={() => { setMsg(null); setOpen(true) }}>🔑 Change password</Button>
+          <Button variant="ghost" icon="shield" onClick={() => { setMsg(null); setOpen(true) }}> Change password</Button>
         </>
       ) : (
         <form onSubmit={submit}>

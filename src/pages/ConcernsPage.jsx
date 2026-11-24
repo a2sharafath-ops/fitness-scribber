@@ -42,8 +42,7 @@ export default function ConcernsPage() {
       </div>
       <div className="section-title" style={{ marginTop: 0 }}>Open</div>
       {open.length ? render(open) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div>No open concerns.</div>}
-      <div className="section-title">Resolved</div>
-      {resolved.length ? render(resolved) : <div className="muted" style={{ fontSize: 13 }}>Nothing resolved yet.</div>}
+      {resolved.length > 0 && <details className="card"><summary>Resolved concerns · {resolved.length}</summary>{render(resolved)}</details>}
     </>
   )
 }

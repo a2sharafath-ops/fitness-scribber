@@ -8,7 +8,7 @@ import { loadProgressPath } from '../lib/clientRoutes'
 
 const METRICS = {
   readiness: { title: 'Readiness', sub: 'Dated app summary of available wellness and HRV inputs; not clearance', Comp: ReadinessBreakdown },
-  srpetl: { title: 'sRPE-TL', sub: 'Session load — RPE × duration (AU)', Comp: SrpeTlBreakdown },
+  srpetl: { title: 'Session training load', sub: 'sRPE-TL · session RPE × duration in minutes (AU)', Comp: SrpeTlBreakdown },
 }
 
 export default function MetricDetailPage() {
@@ -34,7 +34,7 @@ export default function MetricDetailPage() {
       <Link className="back" to={metric === 'srpetl' ? loadProgressPath(c.id) : `/clients/${c.id}/check-ins`}>← Back to {metric === 'srpetl' ? 'Training load' : 'Check-ins'}</Link>
       <div className="topbar">
         <div><h1>{m.title}</h1><div className="sub">{c.name} · {m.sub}</div></div>
-        <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '12 wk']]} value={range} onChange={setRange} ariaLabel="Date range" />
+        <SegToggle options={[[28, '4 wk'], [56, '8 wk'], [90, '90 days']]} value={range} onChange={setRange} ariaLabel="Date range" />
       </div>
 
       <Comp client={c} range={range} />

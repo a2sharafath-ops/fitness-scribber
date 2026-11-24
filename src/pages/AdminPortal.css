@@ -6,7 +6,7 @@
   padding: 10px 22px; border-bottom: 1px solid var(--border);
   background: var(--surface); position: sticky; top: 0; z-index: 5;
 }
-.adm-bar .seg, .adm-main .seg { border-radius: 12px; }
+.adm-bar .seg, .adm-main .seg { border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); }
 .adm-main { max-width: 1080px; margin: 0 auto; padding: 22px; display: grid; gap: 16px; }
 .adm-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 
@@ -26,4 +26,15 @@
 @media (max-width: 860px) {
   .adm-cols, .adm-cols-ath { grid-template-columns: 1fr; gap: 6px; }
   .adm-head { display: none; }
+}
+@media (max-width: 700px) {
+  .adm-bar { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+  .adm-bar .muted { overflow-wrap: anywhere; }
+  .adm-main { padding: 12px; }
+  .adm-main .seg { display: flex; }
+  .adm-main .seg button { flex: 1; min-width: 0; min-height: 44px; padding: 6px; }
+  .adm-management-head { flex-direction: column; align-items: stretch !important; }
+  .adm-management-head > .flex { flex-wrap: wrap; }
+  .adm-management-head .btn { flex: 1 1 110px; min-height: 44px; }
+  .adm-cols-cli { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 }

@@ -33,7 +33,7 @@ function BodyMetric({ label, field, first, last, comparable, weight, format }) {
 }
 
 function OutcomeCard({ title, path, first, last, comparable, children, empty }) {
-  return <article className="progress-outcome">
+  return <article className="progress-outcome" data-empty={!last}>
     <h3>{title}</h3>
     {!last ? <p className="muted">{empty}</p> : <>
       <div className="progress-date-pair"><span>Baseline: {fmtDate(first.date)}</span><span>Latest: {fmtDate(last.date)}</span></div>
@@ -105,7 +105,7 @@ export default function ClientProgressPage() {
     <section id="progress-panel-outcomes" className="progress-panel" role="tabpanel" aria-labelledby="outcomes" tabIndex={0} hidden={activeView !== 'outcomes'}>
       {activeView === 'outcomes' && <>
       <div className="progress-outcome-grid">
-        <article className="progress-outcome progress-body"><h3>Body measurements</h3>
+        <article className="progress-outcome progress-body" data-empty={!body.last}><h3>Body measurements</h3>
           {body.last ? <>
             <div className="progress-date-pair"><span>Baseline: {fmtDate(body.first.date)} · {body.first.data?.method || 'method not recorded'}</span><span>Latest: {fmtDate(body.last.date)} · {body.last.data?.method || 'method not recorded'}</span></div>
             <div className="progress-body-metrics">
@@ -141,8 +141,8 @@ export default function ClientProgressPage() {
         </div>
         {attendance.todayCompleted > 0 && <p className="progress-footnote">{attendance.todayCompleted} completed today · outside the past-booking rate</p>}
         <div className="progress-card-foot"><span>{fmtDate(attendance.start)}–{fmtDate(addDays(today, -1))} · past bookings</span><Link to="/schedule">{attendance.unresolved ? 'Review booking status' : 'Open schedule'} →</Link></div>
+      <div className="progress-workout-completion"><div><h3>Completed workout logs</h3><p>Counted separately from bookings</p></div><strong>{completedWorkouts}</strong><div className="progress-card-foot"><span>Through {fmtDate(today)}</span><Link to={`/clients/${id}/training?history=workouts#training-history-title`}>View workout history →</Link></div></div>
       </section>
-      <section className="card progress-workout-completion"><div><h3>Completed workout logs</h3><p>Counted separately from bookings</p></div><strong>{completedWorkouts}</strong><div className="progress-card-foot"><span>Through {fmtDate(today)}</span><Link to={`/clients/${id}/training?history=workouts#training-history-title`}>View workout history →</Link></div></section>
       </>}
     </section>
   </div>

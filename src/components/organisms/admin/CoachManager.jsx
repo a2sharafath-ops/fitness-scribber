@@ -26,7 +26,7 @@ export default function CoachManager({ users, clientCounts, currentUserId, busy,
   return (
     <div className="grid" style={{ gap: 14 }}>
       <Card>
-        <div className="flex gap" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="flex gap adm-management-head" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: 15 }}>Coaches & admins · {users.length}</h3>
           <div className="flex gap">
             <Button size="sm" onClick={() => setMode(mode === 'create' ? null : 'create')}>+ Create coach</Button>

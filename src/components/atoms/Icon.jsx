@@ -1,6 +1,8 @@
 // Line icons matching the Cureocity design-system icon set (Figma: _Web Components).
 // Stroke-based, 24px grid, inherit color via currentColor.
 const PATHS = {
+  paperclip: <path d="m8 13 6-6a2 2 0 0 1 3 3l-8 8a4 4 0 0 1-6-6l9-9a5 5 0 0 1 7 7l-9 9" />,
+  microphone: <><rect x="9" y="2" width="6" height="13" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8" /></>,
   sidebar: <><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></>,
   close: <path d="m6 6 12 12M18 6 6 18" />,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,

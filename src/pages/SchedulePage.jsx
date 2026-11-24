@@ -1,3 +1,4 @@
+import MobileOptions from '../components/molecules/MobileOptions'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/atoms/Button'
@@ -177,7 +178,7 @@ export default function SchedulePage() {
             {['month', 'week', 'day', 'agenda'].map(v => <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>{v[0].toUpperCase() + v.slice(1)}</button>)}
           </div>
         </div>
-        <div className="schedule-filters">
+        <MobileOptions className="schedule-filters" activeCount={Number(client !== 'all') + Number(status !== 'booked')}>
           <div className="schedule-filter">
             <label htmlFor="schedule-client-filter">Client</label>
             <span className="orbit-select-wrap">
@@ -200,7 +201,7 @@ export default function SchedulePage() {
             </span>
           </div>
           {(client !== 'all' || status !== 'booked') && <button className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}
-        </div>
+        </MobileOptions>
       </div>
       <section className="schedule-day-panel" aria-labelledby="schedule-selected-date">
         <header>
