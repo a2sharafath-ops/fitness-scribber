@@ -327,7 +327,26 @@
 .orbit-activity-reading strong { color: var(--accent); font-size: 24px; line-height: 1; }
 .orbit-activity-reading span { color: var(--muted); font-size: 12px; }
 .orbit-activity-reading small { display: block; }
-.orbit-metric-select { display: none; }
+.orbit-metric-select {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.coach-dashboard .orbit-metric-select select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding-inline-start: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 16px;
+}
+.orbit-metric-select select:focus-visible { outline-color: var(--orbit-focus); }
 .coach-dashboard .orbit-trend-change { border-radius: 6px; background: var(--surface); padding: 3px 6px; }
 .coach-dashboard .orbit-trend-change[data-tone="up"] { background: var(--tint-green); color: var(--green); }
 .coach-dashboard .orbit-trend-change[data-tone="down"] { background: var(--tint-amber); color: var(--accent2); }
@@ -406,9 +425,9 @@
 .orbit-booking-deck[data-dragging]::after { scale: 1.025; }
 .orbit-booking-deck[data-count="3"][data-dragging]::before { opacity: .55; }
 .orbit-booking-controls { grid-template-columns: auto minmax(55px, 1fr) auto; }
-.orbit-booking-list { margin-top: 12px; border-top: 1px solid var(--border); container-type: inline-size; }
+.orbit-booking-list { container-type: inline-size; }
 .orbit-booking-list > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; }
-.orbit-booking-list h3 { font-size: 14px; overflow-wrap: anywhere; }
+.orbit-booking-list h2 { overflow-wrap: anywhere; }
 .orbit-booking-list-count { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .orbit-booking-list-toggle {
   display: inline-flex;
@@ -442,7 +461,7 @@
   background: var(--orbit-selected);
   box-shadow: inset 2px 0 var(--accent);
 }
-.orbit-today .orbit-booking-row-action {
+.orbit-booking-list .orbit-booking-row-action {
   justify-content: center;
   min-width: 68px;
   min-height: 44px;
@@ -598,27 +617,6 @@
   .coach-dashboard .orbit-trend-tiles .db-stat > strong { grid-area: 1 / 3; font-size: 18px; letter-spacing: 0; white-space: nowrap; }
   .orbit-trend-tiles .db-stat > strong small { font-size: 12px; }
   .orbit-trend-tiles .orbit-trend-change { grid-area: 1 / 2; white-space: nowrap; }
-  .orbit-metric-buttons { display: none; }
-  .orbit-metric-select {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .coach-dashboard .orbit-metric-select select {
-    width: 100%;
-    min-width: 0;
-    min-height: 44px;
-    padding-inline-start: 10px;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    font-family: inherit;
-    font-size: 16px;
-  }
-  .orbit-metric-select select:focus-visible { outline-color: var(--orbit-focus); }
   .coach-dashboard .orbit-coaching :is(.db-note, .db-chart-heading, .db-chart-empty) { margin-top: 8px; }
   .orbit-coaching .orbit-activity-reading { min-height: 0; }
   .orbit-readiness-overview { gap: 11px; }
@@ -675,3 +673,5 @@
   pointer-events: none;
 }
 .orbit-weekly-bars:has(button:focus-visible) .orbit-weekly-tooltip, .orbit-weekly-tooltip[data-hovered="true"] { opacity: 1; }
+
+.orbit-weekly-bars[data-midline] { background-image: linear-gradient(var(--border),var(--border)), linear-gradient(var(--border),var(--border)), linear-gradient(var(--border),var(--border)); background-position: 0 13px, 0 calc(100% - 4px), 0 calc(50% + 4.5px); background-size: 100% 1px; background-repeat: no-repeat; }

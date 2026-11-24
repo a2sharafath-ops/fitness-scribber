@@ -11,6 +11,7 @@ html:has(.client-progress){overflow-x:visible}
 .client-progress .progress-section-head h2,.client-progress .load-response h2{font-size:19px;line-height:1.4;margin:0;display:flex;align-items:center;gap:8px}
 .client-progress .progress-title .btn{background:var(--surface);color:var(--text);border:1px solid var(--border)}
 .client-progress .progress-lift-select{font-weight:500}
+.client-progress .progress-lift-select select{min-height:44px;max-width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)}
 .client-progress .progress-metric-grid{gap:12px;margin:18px 0 22px}
 .client-progress .progress-metric{border:0;padding:16px;min-height:112px}
 .client-progress .progress-metric>span{font-size:11px;font-weight:500}

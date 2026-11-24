@@ -90,11 +90,11 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         <DayBlockReview compact workout={actual ? log : log ? null : pending} prescription={day.prescription} units={units} />
         {actual && log?.liveState && <div className="ls-session"><LiveSessionReview key={log.id} session={log} units={units} /></div>}
         {(actual ? log.note : pending?.note || day.prescription?.notes) && <p className="training-selected-notes">{actual ? log.note : pending?.note || day.prescription?.notes}</p>}
-      </div></> : <div className="training-selected-empty"><strong>{missingLog ? 'This workout log is no longer available for the selected day.' : appointment ? 'Booking completed · No workout log' : date < today ? 'No workout was prescribed or logged.' : 'No workout planned for this date'}</strong>
+      </div></> : (missingLog || appointment) && <div className="training-selected-empty"><strong>{missingLog ? 'This workout log is no longer available for the selected day.' : 'Booking completed · No workout log'}</strong>
         {!missingLog && appointment && !selectedAction && <Link className="btn ghost sm" to="/schedule">View schedule →</Link>}
       </div>}
     </div>
-    {!missingLog && <div className="training-selected-foot"><span>{label}</span>{(day.prescription || log) && <details className="training-more" key={`${date}:${log?.id || ''}`}><summary>More actions</summary><div className="training-more-menu">
+    {!missingLog && hasDetails && <div className="training-selected-foot"><span>{label}</span>{(day.prescription || log) && <details className="training-more" key={`${date}:${log?.id || ''}`}><summary>More actions</summary><div className="training-more-menu">
       {day.prescription && <Button variant="ghost" size="sm" onClick={(event) => { event.currentTarget.closest('details').open = false; openModal(<CopyWorkoutModal client={client} date={date} onCopied={onSelectDate} />) }}>Copy workout…</Button>}
       {day.canDeletePlan && <Button variant="danger" size="sm" onClick={(event) => { event.currentTarget.closest('details').open = false; remove() }}>Delete plan</Button>}
       {log && log.status === 'completed' && <Button variant="ghost" size="sm" onClick={(event) => { event.currentTarget.closest('details').open = false; openModal(<SessionInsightsModal workout={log} client={client} units={units} exercises={db.exercises} />, true) }}>Session insights</Button>}

@@ -68,6 +68,7 @@ export default function ClientTrainingPage() {
   const [loggingKey, setLoggingKey] = useState(null)
   const [bookingDraft, setBookingDraft] = useState(null)
   const [historyType, setHistoryType] = useState('workouts')
+  const [expandedHistory, setExpandedHistory] = useState(false)
   const [historyRequest, setHistoryRequest] = useState(0)
   const [selectedProgramId, setSelectedProgramId] = useState('')
   useEffect(() => {
@@ -166,14 +167,14 @@ export default function ClientTrainingPage() {
           </>}
         </section>
         <details className="card training-history" open><summary id="training-history-title">Session history</summary>
-          <SegToggle options={[[ 'workouts', `Workout logs (${workouts.length})` ], [ 'appointments', `Appointments (${appointments.length})` ]]} value={historyType} onChange={setHistoryType} ariaLabel="History type" />
+          <SegToggle options={[[ 'workouts', `Workout logs (${workouts.length})` ], [ 'appointments', `Appointments (${appointments.length})` ]]} value={historyType} onChange={value => { setHistoryType(value); setExpandedHistory(false) }} ariaLabel="History type" />
           <div className="training-history-list" role="region" aria-label="Session history entries" tabIndex={0}>
-            {historyType === 'workouts' ? workouts.length ? workouts.map((item) => <button key={item.id} className="training-history-row" onClick={() => reviewHistory(item)}>
+            {historyType === 'workouts' ? workouts.length ? workouts.slice(0, expandedHistory ? undefined : 5).map((item) => <button key={item.id} className="training-history-row" onClick={() => reviewHistory(item)}>
               <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.bookingId
                 ? db.sessions.find(row => row.id === item.bookingId)?.time || 'Booked workout'
                 : 'Unlinked'} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review workout →</span>
             </button>) : <p className="muted">No completed workout logs yet.</p>
-              : appointments.length ? appointments.map((item) => {
+              : appointments.length ? appointments.slice(0, expandedHistory ? undefined : 5).map((item) => {
                 const action = bookingWorkoutAction(db, item, today)
                 return <div key={item.id} className="training-history-row static">
                   <span><strong>{item.type || 'Appointment'}</strong><small>{fmtDate(item.date)} · {item.time || 'Time not set'} · {item.dur || '—'} min</small>
@@ -182,6 +183,7 @@ export default function ClientTrainingPage() {
                 </div>
               }) : <p className="muted">No completed appointments yet.</p>}
           </div>
+          {(historyType === 'workouts' ? workouts : appointments).length > 5 && <button type="button" className="overview-text-link" aria-expanded={expandedHistory} onClick={() => setExpandedHistory(!expandedHistory)}>{expandedHistory ? 'Show fewer entries' : 'Show all entries'}</button>}
         </details>
       </div>
     </div>

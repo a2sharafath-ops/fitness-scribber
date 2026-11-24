@@ -64,14 +64,14 @@ function BookingList({ slides, index, onChoose }) {
   const first = expanded || !showToggle ? 0 : Math.min(Math.max(0, index - 1), count - previewSize)
   const end = expanded ? count : first + previewSize
 
-  return <section className="orbit-booking-list" aria-labelledby="orbit-booking-list-title">
+  return <section className="db-card orbit-booking-list" aria-labelledby="orbit-booking-list-title">
     <header>
-      <h3 id="orbit-booking-list-title">Today’s sessions</h3>
+      <h2 id="orbit-booking-list-title">Today’s sessions</h2>
       {showToggle ? <button className="orbit-booking-list-toggle" type="button"
         aria-label={expanded ? 'Show fewer bookings' : `Show all ${count} bookings`}
         aria-controls="orbit-booking-rows" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
         {expanded ? 'Show fewer' : `Show all ${count}`} <Icon name="chevron-down" size={14} />
-      </button> : <span className="orbit-booking-list-count">{count} bookings</span>}
+      </button> : <span className="orbit-booking-list-count">{count} {count === 1 ? 'booking' : 'bookings'}</span>}
     </header>
     <ul id="orbit-booking-rows">
       {slides.slice(first, end).map(({ booking, client, title, status, state, subject, destination }, offset) => {
@@ -90,7 +90,7 @@ function BookingList({ slides, index, onChoose }) {
                 {statusDetail && <small>{statusDetail}</small>}
               </span>
             </span>
-            <Icon name={active ? 'check' : 'chevron-right'} size={15} />
+            <Icon name={state === 'completed' ? 'check' : 'chevron-right'} size={15} />
           </button>
           <Link className="btn ghost orbit-booking-row-action" to={destination.path}
             aria-label={`${destination.label} for ${subject}`}>{actionLabel}</Link>
@@ -243,7 +243,7 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
     deck.dataset.hovering = 'true'
   }
 
-  return <section className="db-card orbit-today" id="dashboard-schedule" aria-labelledby="orbit-today-title">
+  return <><section className="db-card orbit-today" id="dashboard-schedule" aria-labelledby="orbit-today-title">
     <header className="db-head">
       <h2 id="orbit-today-title">{count ? 'Up next' : 'Today’s sessions'}</h2>
       <Link className="db-link" to="/schedule">View schedule</Link>
@@ -271,11 +271,12 @@ export default function DashboardBookings({ db, bookings, roster, next, today, r
           </div>
           <Button variant="ghost" aria-label="Next booking" onClick={() => shift(1)}><span>Next</span><Icon name="chevron-right" size={14} /></Button>
         </div>}
-        {count > 1 && <BookingList slides={slides} index={index} onChoose={showFromList} />}
     </> : <div className="orbit-booking-card orbit-booking-feature orbit-booking-empty">
       <span className="orbit-booking-empty-icon" aria-hidden="true"><Icon name="calendar" size={20} /></span>
       <h3>No bookings today.</h3>
       <Button aria-haspopup="dialog" onClick={onBook}>Book session</Button>
     </div>}
   </section>
+    {count > 0 && <BookingList slides={slides} index={index} onChoose={showFromList} />}
+  </>
 }

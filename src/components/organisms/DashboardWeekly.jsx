@@ -11,7 +11,8 @@ export default function DashboardWeekly({ bookings, monday }) {
   const [hovered, setHovered] = useState(null)
   const weeks = dashboardWeeks(bookings, monday, count)
   const active = weeks.find((week) => week.from === (hovered ?? selected)) || weeks.at(-1)
-  const max = Math.max(1, ...weeks.map((week) => week.booked))
+  const peak = Math.max(1, ...weeks.map((week) => week.booked))
+  const max = peak > 2 ? 2 * Math.ceil(peak / 2) : peak
   const activePosition = (weeks.indexOf(active) + .5) / weeks.length * 100
 
   return <section className="db-card orbit-weekly" aria-labelledby="orbit-weekly-heading">
@@ -23,8 +24,8 @@ export default function DashboardWeekly({ bookings, monday }) {
       <span><strong>{weeks.reduce((sum, week) => sum + week.completed, 0)}</strong> completed in {count} weeks</span>
     </div>
     <div className="orbit-weekly-plot" style={{ '--weeks': count }}>
-      <div className="orbit-weekly-scale" aria-hidden="true"><span>{max}</span><span>0</span></div>
-      <div className="orbit-weekly-bars" role="group" aria-label="Sessions by week"
+      <div className="orbit-weekly-scale" aria-hidden="true"><span>{max}</span>{max >= 2 && <span>{max / 2}</span>}<span>0</span></div>
+      <div className="orbit-weekly-bars" data-midline={max >= 2 || undefined} role="group" aria-label="Sessions by week"
         onPointerLeave={() => setHovered(null)}>
       {weeks.map((week, index) => <button key={week.from} type="button" style={{ '--week-delay': `${index * 22}ms` }}
         aria-pressed={active.from === week.from} onClick={() => setSelected(week.from)} onFocus={() => setSelected(week.from)}
