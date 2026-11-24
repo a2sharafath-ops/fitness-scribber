@@ -117,6 +117,7 @@ export default function ClientDetailPage() {
     })),
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8)
 
+  const activityRow = event => <Link className="act-row" key={event.id} to={event.to}><span className="act-chip"><Icon name={event.icon} size={16} /></span><span className="act-info"><span className="t">{event.title}</span><span className="s">{event.meta}</span></span></Link>
   return <>
     <div className="topbar overview-title"><h1>Overview</h1><div className="flex gap">
       {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={client} />)}><Icon name="link" size={14} /> Invite</Button>}
@@ -176,7 +177,8 @@ export default function ClientDetailPage() {
         <div className="overview-concerns-empty"><p className="muted">No open concerns.</p><Link className="overview-text-link" to={concernsUrl}>Concern history →</Link></div>
       </section>}
       <section className="card overview-activity" aria-labelledby="activity-title"><h2 id="activity-title">Recent activity</h2>
-        <div className="overview-activity-list">{activity.length ? activity.map((event) => <Link className="act-row" key={event.id} to={event.to}><span className="act-chip"><Icon name={event.icon} size={16} /></span><span className="act-info"><span className="t">{event.title}</span><span className="s">{event.meta}</span></span></Link>) : <p className="muted">No recent activity.</p>}</div>
+        <div className="overview-activity-list">{activity.length ? activity.slice(0, 4).map(activityRow) : <p className="muted">No recent activity.</p>}</div>
+        {activity.length > 4 && <details><summary className="overview-text-link">More recent activity ({activity.length - 4})</summary><div className="overview-activity-list">{activity.slice(4).map(activityRow)}</div></details>}
       </section>
     </div>
   </>

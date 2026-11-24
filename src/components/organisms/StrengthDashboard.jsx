@@ -41,12 +41,26 @@ export default function StrengthDashboard({ client }) {
   const field = estimateChart ? 'valueKg' : 'loadKg'
   const first = trend[0], last = trend.at(-1)
   const change = first && last && first.date !== last.date ? +(last[field] - first[field]).toFixed(1) : null
-  const dates = trend.length ? trend.map((row) => row.date) : Array.from({ length: 28 }, (_, i) => addDays(today, i - 27))
+  const dayMillis = 86400000
+  const points = trend.map(row => ({ x: Date.parse(row.date) / dayMillis, y: toDisp(row[field]) }))
+  const dateAt = day => new Date(day * dayMillis).toISOString().slice(0, 10)
   const opts = baseOptions(theme === 'dark' ? '#4d414f' : '#e6dfe5', theme === 'dark' ? '#c4b8c5' : '#605762')
   opts.animation = false
   opts.plugins.legend.display = false
-  opts.scales.y.title = { display: true, text: unitName() }
-  if (!trend.length) opts.scales.y.ticks = { ...opts.scales.y.ticks, display: false }
+  opts.scales.x.type = 'linear'
+  opts.scales.x.grid.display = false
+  opts.scales.x.ticks.precision = 0
+  opts.scales.x.ticks.callback = day => shortLabel(dateAt(day))
+  if (!points.length) {
+    opts.scales.x.min = Date.parse(since || addDays(today, -27)) / dayMillis
+    opts.scales.x.max = Date.parse(today) / dayMillis
+    opts.scales.y.ticks.display = false
+  } else if (first.date === last.date) {
+    opts.scales.x.min = points[0].x - 1
+    opts.scales.x.max = points[0].x + 1
+  }
+  opts.plugins.tooltip = { callbacks: { title: items => items.length ? fmtDate(dateAt(items[0].parsed.x)) : '' } }
+  opts.scales.y.title = { display: true, text: unitName(), color: opts.scales.y.ticks.color }
   const metric = (label, value, note) => <div className="progress-metric"><span>{label}</span><strong>{value}</strong><small>{note}</small></div>
 
   return <div className="progress-strength">
@@ -74,7 +88,7 @@ export default function StrengthDashboard({ client }) {
         </select></label>
         {main && <div className="progress-chart-switch" role="group" aria-label="Strength chart"><button type="button" aria-pressed={chart === 'estimate'} onClick={() => setChart('estimate')}>Estimated 1RM</button><button type="button" aria-pressed={chart === 'load'} onClick={() => setChart('load')}>Set load</button></div>}
       </div>
-      <div className="progress-chart progress-strength-canvas"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: trend.length ? trend.map((row) => toDisp(row[field])) : dates.map(() => null), borderColor: COLORS.blue, tension: 0.15, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
+      <div className="progress-chart progress-strength-canvas"><Line data={{ datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: points, borderColor: COLORS.blue, tension: 0, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
         {!trend.length && <p className="load-response-empty-label">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates in this period.' : 'No recorded loads in this period.'}</p>}
       </div>
       <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>

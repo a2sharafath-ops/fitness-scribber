@@ -99,10 +99,19 @@ export default function DashboardPage() {
   const theme = useOutletContext()
   const { fmtWt } = useFormat()
   const reduced = useReducedMotion()
+  const [singleColumn, setSingleColumn] = useState(() => globalThis.window?.matchMedia?.('(max-width: 1000px)')?.matches ?? false)
+  useEffect(() => {
+    const layout = window.matchMedia?.('(max-width: 1000px)')
+    if (!layout) return
+    const update = () => setSingleColumn(layout.matches)
+    update()
+    layout.addEventListener('change', update)
+    return () => layout.removeEventListener('change', update)
+  }, [])
   const chartRef = useRef(null)
   const [now, setNow] = useState(() => new Date())
   const [reviewFilter, setReviewFilter] = useState(null)
-  const [checkinFilter, setCheckinFilter] = useState('missing')
+  const [chosenCheckinFilter, setCheckinFilter] = useState(null)
   const [metric, setMetric] = useState('consistency')
   const [period, setPeriod] = useState('30')
   const [chartSelection, setChartSelection] = useState(null)
@@ -137,6 +146,7 @@ export default function DashboardPage() {
   const reviewCategory = reviewFilter || (reviewFirst.length || !followup.length ? 'review' : 'followup')
   const reviewRows = reviewCategory === 'review' ? reviewFirst : followup
   const rankedCheckins = useMemo(() => readinessRoster(db, today), [db, today])
+  const checkinFilter = chosenCheckinFilter ?? (missing.length || !recorded.length ? 'missing' : 'recorded')
   const checkinRows = rankedCheckins.filter(row => checkinFilter === 'missing' ? row.date !== today : row.date === today)
   const group = dashboardReadiness(db, clients, today)
   const ownedBookings = db.sessions.filter((booking) => roster.has(booking.clientId))
@@ -309,9 +319,6 @@ export default function DashboardPage() {
             {delta != null && <small className="orbit-trend-change" data-tone={delta > 0 ? 'up' : delta < 0 ? 'down' : undefined} title="Compared with the previous period">{delta > 0 ? '+' : delta < 0 ? '−' : ''}{Math.abs(delta)} pt{Math.abs(delta) === 1 ? '' : 's'}</small>}
           </div>)}
         </div>
-        <div className="orbit-metric-buttons">
-          <DashboardSegments label="Activity metric" options={ACTIVITY_METRICS} value={metric} onChange={chooseMetric} />
-        </div>
         <label className="orbit-metric-select">
           Metric
           <span className="orbit-select-wrap">
@@ -388,6 +395,7 @@ export default function DashboardPage() {
       <div className="orbit-dashboard-column">
         {bookingCard}
         {reviewCard}
+        {singleColumn && <>{coachingCard}{readinessCard}{weeklyCard}</>}
         <DashboardInsights insights={insights} />
         <section className="db-card orbit-plans">
           <Heading icon="dumbbell" tone="clients" action={<span className="db-date">Today</span>}>Planned workouts {plans.length > 0 && <span className="db-count">{plans.length}</span>}</Heading>
@@ -405,9 +413,7 @@ export default function DashboardPage() {
         </section>}
       </div>
       <div className="orbit-dashboard-column">
-        {coachingCard}
-        {weeklyCard}
-        {readinessCard}
+        {!singleColumn && <>{coachingCard}{weeklyCard}{readinessCard}</>}
         <section className="db-card orbit-upcoming">
           <header className="db-head"><h2>Upcoming sessions</h2><Link className="db-link" to="/schedule">View schedule</Link></header>
           {upcoming.map((booking) => <Link key={booking.id} className="db-row orbit-upcoming-row" to={sessionPath(booking)}>

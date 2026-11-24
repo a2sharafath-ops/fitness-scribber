@@ -35,7 +35,7 @@ export default function OverviewLiftTrend({ clientId, trend, units }) {
   return <section className="card overview-strength" aria-labelledby="overview-strength-title">
     <header><h2 id="overview-strength-title">Strength trend</h2><Link className="overview-text-link" to={`/clients/${encodeURIComponent(clientId)}/progress#strength`}>View strength →</Link></header>
     {reading && <div className="overview-lift-reading" aria-live="polite">
-      <strong>{fmtWt(reading.loadKg, units)}</strong><span>{last.name} · {fmtDate(reading.date)}</span>
+      <strong>{fmtWt(reading.loadKg, units)}</strong><span>Recorded set load · {last.name} · {fmtDate(reading.date)}</span>
     </div>}
     {chart ? <>
       <div className="overview-lift-chart" tabIndex={0}

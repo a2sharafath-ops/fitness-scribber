@@ -31,7 +31,7 @@ export default function OverviewTraining({ clientId, today }) {
     <div className="overview-training-status"><div><h3 title={title}>{title}</h3><p className="muted">{meta}</p></div><Link className={'btn' + (completed || closed && !hasWorkout ? ' ghost' : '')} to={url}>{action} →</Link></div>
     <div className="overview-week" aria-label="This week at a glance">{weekDates(0, tz).map((date) => {
       const day = trainingDay(db, clientId, date, today)
-      return <Link key={date} to={`/clients/${clientId}/training?date=${date}`} className={`overview-day ${day.status}${date === today ? ' today' : ''}`}
+      return <Link key={date} to={`/clients/${clientId}/training?date=${date}`} className={`overview-day overview-day-${day.status}${date === today ? ' today' : ''}`}
         aria-current={date === today ? 'date' : undefined} aria-label={`${fmtDate(date)} · ${day.label}`}>
         <span>{date === today ? 'Today' : fmtDay(date).split(',')[0]}</span><strong>{Number(date.slice(8))}</strong>
         {day.status !== 'empty' && <span>{day.label}</span>}
