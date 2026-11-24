@@ -89,6 +89,12 @@ export default function AssessmentsPage() {
   const prior = (db.screenings || []).filter((s) => s.clientId === id && s.status === 'complete' && s.id !== row?.id)
     .sort((a, b) => (b.completedOn || '').localeCompare(a.completedOn || ''))
   const intervalDays = db.settings?.reassessIntervalDays || DEFAULT_REASSESS_DAYS
+  const today = todayISO(tz)
+  const categories = TEST_TYPES.filter(type => ONBOARDING_TYPES.includes(type.key)).map(type => {
+    const entries = records.filter(record => record.type === type.key)
+    const due = dueStatus(entries, type.key, intervalDays, today)
+    return { type, entries, priority: !hasBaselineRecord(entries, type.key) ? 0 : due.overdue ? 1 : 2, dueDate: due.dueDate || '' }
+  }).sort((a, b) => a.priority - b.priority || a.dueDate.localeCompare(b.dueDate))
   const progress = baselineProgress(records)
   const pain = records.filter((r) => r.type === 'pain')
   const latestPain = latest(pain, 'pain')
@@ -131,7 +137,7 @@ export default function AssessmentsPage() {
       <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`Next reassessment uses the date saved on the latest record. Blank means not scheduled. Older records without a saved date show a suggested review using the ${intervalDays}-day Settings default. These are scheduling prompts, not clinical thresholds.`} /></div>
         <div className="assessment-baseline-count"><span>{progress.done}/{progress.total} baselines</span><span className="assessment-mini-track" aria-hidden="true"><span style={{ width: `${progress.done / progress.total * 100}%` }} /></span></div>
       </div>
-      <div className="assessment-category-grid">{TEST_TYPES.filter((type) => ONBOARDING_TYPES.includes(type.key)).map((type) => <AssessmentCard key={type.key} type={type} records={records.filter((rec) => rec.type === type.key)} intervalDays={intervalDays} today={todayISO(tz)} clientId={id} onAdd={addType} onEdit={(record) => openModal(assessmentForm(record.type, id, record))} />)}</div>
+      <div className="assessment-category-grid">{categories.map(({ type, entries }) => <AssessmentCard key={type.key} type={type} records={entries} intervalDays={intervalDays} today={today} clientId={id} onAdd={addType} onEdit={(record) => openModal(assessmentForm(record.type, id, record))} />)}</div>
       <article className="card assessment-pain"><div className="assessment-pain-summary"><h3>Pain assessment</h3>
         {latestPain && <p>{`${summarize(latestPain)} · ${fmtDate(latestPain.date)} · ${sourceOf(latestPain)}`}</p>}
         {movementPain.length > 0 ? <details className="assessment-movement-pain">

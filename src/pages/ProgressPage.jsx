@@ -122,6 +122,7 @@ export default function ProgressPage() {
         <option value="">All clients</option>{db.clients.filter(c => c.id === clientId || c.name.toLowerCase().includes(query.toLowerCase())).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
       </select></label>
       {db.clients.length > 6 && <label>Find client<input type="search" value={query} onChange={e => setQuery(e.target.value)} /></label>}
+      <label className="pt-mobile-metric">Metric<select value={metric} onChange={e => setMetric(e.target.value)}>{trends.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
       <label>Period<select value={days} onChange={e => setDays(Number(e.target.value))}>{[7,30,90].map(n => <option key={n} value={n}>{n} days</option>)}</select></label>
     </section>
     <div className="pt-cards">{trends.map(t => {

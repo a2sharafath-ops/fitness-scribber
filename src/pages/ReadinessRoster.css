@@ -111,3 +111,9 @@
 .rr-search { border-radius: 999px; background: var(--surface); }
 .rr-card .rr-card-action { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .rr-card .rr-status { border-radius: 999px; }
+.rr-score strong { font-size: 30px; }
+.rr-card > small { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) {
+  .rr-card { gap: 8px; }
+  .rr-card-action { padding-top: 6px; }
+}

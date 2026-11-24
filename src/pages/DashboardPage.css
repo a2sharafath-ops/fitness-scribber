@@ -675,3 +675,8 @@
 .orbit-weekly-bars:has(button:focus-visible) .orbit-weekly-tooltip, .orbit-weekly-tooltip[data-hovered="true"] { opacity: 1; }
 
 .orbit-weekly-bars[data-midline] { background-image: linear-gradient(var(--border),var(--border)), linear-gradient(var(--border),var(--border)), linear-gradient(var(--border),var(--border)); background-position: 0 13px, 0 calc(100% - 4px), 0 calc(50% + 4.5px); background-size: 100% 1px; background-repeat: no-repeat; }
+.coach-dashboard .db-menu-list .db-report-mobile { display: none; }
+@media (max-width: 700px) {
+  .coach-dashboard .db-actions > .db-report-desktop { display: none; }
+  .coach-dashboard .db-menu-list .db-report-mobile { display: block; }
+}

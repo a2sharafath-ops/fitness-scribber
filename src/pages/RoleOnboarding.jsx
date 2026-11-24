@@ -35,8 +35,8 @@ export default function RoleOnboarding() {
             <h2 style={{ fontSize: 18, marginBottom: 4 }}>Welcome — how will you use Orbit?</h2>
             <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Pick one to set up your account.</p>
             <div className="grid" style={{ gap: 10 }}>
-              <Button onClick={coach} disabled={busy}>{busy ? 'Checking…' : "🏋️ I'm a coach — manage athletes"}</Button>
-              <Button variant="ghost" onClick={() => setMode('athlete')}>🎟️ I have an invite code (athlete)</Button>
+              <Button icon="users" onClick={coach} disabled={busy}>{busy ? 'Checking…' : "I'm a coach — manage athletes"}</Button>
+              <Button variant="ghost" icon="link" onClick={() => setMode('athlete')}>I have an invite code (athlete)</Button>
             </div>
             {err && <div style={{ fontSize: 12, color: '#fb404a', marginTop: 10 }}>{err}</div>}
           </>

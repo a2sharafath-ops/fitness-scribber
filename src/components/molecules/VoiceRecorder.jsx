@@ -1,3 +1,4 @@
+import Icon from '../atoms/Icon'
 import { useState, useRef, useEffect } from 'react'
 import { toast } from '../../lib/toast'
 
@@ -55,6 +56,6 @@ export default function VoiceRecorder({ onRecorded, disabled }) {
       <span className="rec-dot" /> {mm}:{ss} · stop
     </button>
   ) : (
-    <button type="button" className="rec-btn" onClick={start} disabled={disabled} aria-label="Record voice note" title="Record voice note">🎙️</button>
+    <button type="button" className="rec-btn" onClick={start} disabled={disabled} aria-label="Record voice note" title="Record voice note"><Icon name="microphone" size={20} /></button>
   )
 }

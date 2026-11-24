@@ -1,3 +1,4 @@
+import Icon from '../atoms/Icon'
 import { useEffect, useRef } from 'react'
 import MessageBubble from '../molecules/MessageBubble'
 import ChatComposer from '../molecules/ChatComposer'
@@ -38,7 +39,7 @@ export default function ChatThread({ clientId, viewerRole, headerName, subtitle 
             <MessageBubble key={m.id} {...m} mine={m.senderRole === viewerRole} mediaSrc={mediaUrls[m.id]} />
           ))
         ) : (
-          <div className="empty" style={{ padding: 24 }}><div className="big">💬</div>No messages yet. Say hello.</div>
+          <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="message" size={20} /></div>No messages yet. Say hello.</div>
         )}
       </div>
       <ChatComposer onSend={send} onVoice={guard(sendVoice)} onFile={guard(sendFile)} busy={uploading} />

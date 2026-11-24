@@ -26,7 +26,7 @@ export default function CommsSettingsCard() {
   const save = () => { commit((d) => Object.assign(d.settings, f)); setSaved(true); setTimeout(() => setSaved(false), 1500) }
 
   return (
-    <div className="card" style={{ maxWidth: 560, marginTop: 16 }}>
+    <div className="card">
       <div className="section-title" style={{ margin: '0 0 6px' }}>Client communication</div>
       <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
         Automated reminders and follow-up nudges posted to each athlete's chat.

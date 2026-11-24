@@ -661,10 +661,10 @@ test('empty Check-ins and Progress views disclose missing observations for the s
   const outcomes = renderClientPage('/clients/a/progress#outcomes', db, ClientProgressPage)
   assert.match(wellness, /No wellness check-ins yet/)
   assert.match(wellness, /No check-in or wearable data yet/)
-  assert.doesNotMatch(wellness, /App readiness score|View all 0 wellness entries|Last 28 days/)
+  assert.doesNotMatch(wellness, /Latest readiness score|View all 0 wellness entries|Last 28 days/)
   assert.doesNotMatch(wellness, /Training load/)
   assert.match(load, /Load response/)
-  assert.match(load, /Load response date chart, 0 plotted days/)
+  assert.doesNotMatch(load, /<canvas/)
   assert.match(load, /Session load \(AU\) will appear here/)
   assert.match(load, /No session RPE in the past 28 days/)
   assert.equal((load.match(/<strong>—<\/strong>/g) || []).length, 3)
@@ -678,10 +678,10 @@ test('empty Check-ins and Progress views disclose missing observations for the s
   assert.doesNotMatch(wellness + load + outcomes, /Blair/)
 })
 
-test('Strength retains an empty chart and distinguishes missing load from recorded bodyweight', () => {
+test('Strength explains an empty chart and distinguishes missing load from recorded bodyweight', () => {
   const db = fixture()
   const empty = renderClientPage('/clients/a/progress', db, ClientProgressPage)
-  assert.match(empty, /Estimated 1RM chart, 0 recorded values/)
+  assert.doesNotMatch(empty, /<canvas/)
   assert.match(empty, /Complete a set to start this chart/)
   const date = todayISO('UTC')
   db.resistance.push(
@@ -730,7 +730,7 @@ test('Check-ins shows the existing score requirement only when an observation ca
 
   db.wellness.push({ id: 'wellness-a', clientId: 'a', date, score: 20, sleep: 5, stress: 3, fatigue: 3, soreness: 3, source: 'Coach check-in' })
   const withWellness = renderClientPage('/clients/a/check-ins?view=wellness', db, MonitorPage)
-  assert.match(withWellness, /App readiness score/)
+  assert.match(withWellness, /Latest readiness score/)
   assert.doesNotMatch(withWellness, /1 complete wellness check-in needed/)
   assert.match(withWellness, /Coach check-in/)
 })

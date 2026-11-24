@@ -87,9 +87,8 @@ export default function StrengthDashboard({ client }) {
         </select></label>
         {main && <div className="progress-chart-switch" role="group" aria-label="Strength chart"><button type="button" aria-pressed={chart === 'estimate'} onClick={() => setChart('estimate')}>Estimated 1RM</button><button type="button" aria-pressed={chart === 'load'} onClick={() => setChart('load')}>Set load</button></div>}
       </div>
-      <div className="progress-chart progress-strength-canvas"><Line data={{ datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: points, borderColor: COLORS.blue, tension: 0, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
-        {!trend.length && <p className="load-response-empty-label">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates in this period.' : 'No recorded loads in this period.'}</p>}
-      </div>
+      {trend.length > 0 ? <div className="progress-chart progress-strength-canvas"><Line data={{ datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: points, borderColor: COLORS.blue, tension: 0, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
+      </div> : <p className="progress-empty">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates in this period.' : 'No recorded loads in this period.'}</p>}
       <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
     </section>
     <details className="card progress-disclosure progress-strength-logs"><summary>Recorded sets <span>{work.length} entries</span></summary>

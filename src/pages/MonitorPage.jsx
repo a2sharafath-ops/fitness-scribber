@@ -85,7 +85,7 @@ function WellnessView({ client, today, openModal, del }) {
     <section className="card checkins-summary">
       <div className="checkins-section-head"><h2>Training response snapshot</h2><InfoTip {...GLOSSARY.readiness} /></div>
       {latestDate ? <div className="checkins-snapshot-grid">
-        <div className="checkins-stat"><span>App readiness score</span><strong>{parts?.score == null ? '—' : `${parts.score}/100`}</strong><small>{fmtDate(latestDate)} · {parts?.score == null ? missingScoreInput : parts.confidence === 'high' ? 'wellness and HRV baseline' : 'one usable input'}</small></div>
+        <div className="checkins-stat checkins-primary-score"><span>Latest readiness score</span><strong>{parts?.score == null ? '—' : `${parts.score}/100`}</strong><small>{fmtDate(latestDate)} · {parts?.score == null ? missingScoreInput : parts.confidence === 'high' ? 'wellness and HRV baseline' : 'one usable input'}</small></div>
         {dayWellness && <div className="checkins-stat"><span>Wellness input</span><strong>{valueOf(dayWellness.score)}/28</strong><small>{fmtDate(dayWellness.date)} · {sourceOf(dayWellness)}</small></div>}
         {dayWearable && <div className="checkins-stat"><span>Wearable input</span><strong>{valueOf(dayWearable.hrv, ' ms')} HRV</strong><small>{fmtDate(dayWearable.date)} · {sourceOf(dayWearable)}</small></div>}
       </div> : <p className="checkins-empty">No check-in or wearable data yet.</p>}
@@ -124,7 +124,7 @@ function ConcernsView({ client, openModal }) {
     onResolve={() => resolve(row.id)} onReopen={() => reopen(row.id)} onEdit={() => openModal(<ConcernForm concern={row} />)} onDelete={() => remove(row.id)} />)
   return <div className="checkins-stack">
     <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2><p className="muted">{open.length} open · review the report, date, and source before the next session.</p></div><Button icon="plus" onClick={() => openModal(<ConcernForm clientId={client.id} />)}>Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns recorded.</p>}</section>
-    <section className="card"><h2>Resolved concerns</h2>{resolved.length ? cards(resolved) : <p className="checkins-empty">No resolved concerns recorded.</p>}</section>
+    {resolved.length > 0 && <details className="card"><summary>Resolved concerns · {resolved.length}</summary>{cards(resolved)}</details>}
   </div>
 }
 

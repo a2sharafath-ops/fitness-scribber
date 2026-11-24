@@ -40,7 +40,7 @@ export default function BroadcastComposer({ clients = [], onSent }) {
 
   return (
     <ModalShell
-      title="📣 Broadcast message"
+      title="Broadcast message"
       onClose={closeModal}
       footer={(
         <>

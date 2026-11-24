@@ -31,11 +31,12 @@ export default function SettingsPage({ appearance }) {
   return (
     <>
       <div className="topbar"><div><h1>Settings</h1><div className="sub">Preferences apply across the app</div></div></div>
-      <section className="card orbit-appearance-panel" style={{ maxWidth: 560, marginBottom: 16 }}>
+      <div className="orbit-settings-grid">
+      <section className="card orbit-appearance-panel">
         <h2>Appearance</h2>
         <AppearanceControls prefix="settings" appearance={appearance} />
       </section>
-      <div className="card" style={{ maxWidth: 560 }}>
+      <div className="card">
         <div className="section-title" style={{ margin: '0 0 12px' }}>Coach &amp; business</div>
         <div className="row2">
           <Field label="Coach name"><input value={f.trainerName} onChange={set('trainerName')} /></Field>
@@ -55,7 +56,7 @@ export default function SettingsPage({ appearance }) {
       </div>
 
       <CommsSettingsCard />
-      <div className="card" style={{ maxWidth: 560, marginTop: 16 }}>
+      <div className="card">
         <div className="section-title" style={{ margin: '0 0 8px' }}>Data</div>
         <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
           {hasBackend ? 'Your workspace is synced to your account.' : 'All data is stored locally in this browser.'} Export it for backup or to share.
@@ -63,7 +64,7 @@ export default function SettingsPage({ appearance }) {
         <Button variant="ghost" onClick={() => openModal(<ExportMenu />)}>Export data (CSV)</Button>
       </div>
       {hasBackend && (
-        <div className="card" style={{ maxWidth: 560, marginTop: 16 }}>
+        <div className="card">
           <div className="section-title" style={{ margin: '0 0 8px' }}>Account</div>
           <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>Signed in as <strong>{user?.email}</strong></p>
           <div className="flex gap">
@@ -72,7 +73,8 @@ export default function SettingsPage({ appearance }) {
           </div>
         </div>
       )}
-      {hasBackend && <ChangePasswordCard style={{ maxWidth: 560, marginTop: 16 }} />}
+      {hasBackend && <ChangePasswordCard />}
+      </div>
     </>
   )
 }

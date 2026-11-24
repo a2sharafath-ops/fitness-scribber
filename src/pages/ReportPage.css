@@ -25,3 +25,7 @@
   .cr-page .cr-logo > span { color: var(--control-ink); background: var(--control-fill); }
   .cr-page :is(.cr-empty, .cr-calendar > span:not([class])) { color: var(--muted); background: var(--surface2); border-color: var(--border); }
 }
+@media (max-width: 700px) {
+  .cr-actionbar .mobile-options-content[data-expanded="true"] { display: flex; flex-wrap: wrap; gap: 6px; }
+}
+.cr-page .cr-nav { flex-wrap: wrap; row-gap: 0; }

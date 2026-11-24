@@ -217,13 +217,7 @@ export default function AthletePortal() {
 
         <ScreeningCard clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
           onSave={saveScreening} onComplete={completeScreening} />
-        <WearableSection
-          clientId={client.id}
-          connections={state.wearableConnections || []}
-          connectionError={state.wearableConnectionError}
-          latest={[...state.wearable].sort((a, b) => b.date.localeCompare(a.date))[0]}
-          onChange={load}
-        />
+
 
         <div style={{ marginTop: 16 }}>
           <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
@@ -256,6 +250,14 @@ export default function AthletePortal() {
             </div>
           )) : <div className="muted">No check-ins yet.</div>}
         </Card>
+
+        <WearableSection
+          clientId={client.id}
+          connections={state.wearableConnections || []}
+          connectionError={state.wearableConnectionError}
+          latest={[...state.wearable].sort((a, b) => b.date.localeCompare(a.date))[0]}
+          onChange={load}
+        />
 
         <ChangePasswordCard style={{ marginTop: 16 }} />
       </main>

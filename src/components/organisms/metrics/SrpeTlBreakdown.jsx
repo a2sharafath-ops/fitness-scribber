@@ -30,18 +30,22 @@ export default function SrpeTlBreakdown({ client, range }) {
   // Headline figures.
   const w7 = lastNDates(7, tz).map((d) => intMap[d] || 0)
   const weekLoad = Math.round(w7.reduce((a, b) => a + b, 0))
-  const loadDays = D.map((d) => intMap[d]).filter((v) => v)
+  const loadDays = D.map((d) => intMap[d]).filter((v) => v != null)
   const avgSession = loadDays.length ? Math.round(loadDays.reduce((a, b) => a + b, 0) / loadDays.length) : null
-  const latestDay = [...D].reverse().find((d) => intMap[d])
+  const latestDay = [...D].reverse().find((d) => intMap[d] != null)
   const latestLoad = latestDay ? Math.round(intMap[latestDay]) : null
   const sessions = db.srpe.filter((r) => r.clientId === client.id && D.includes(r.date)).length
+
+  if (!sessions) return <section className="card"><h2 className="section-title">Session load</h2>
+    <p className="muted">No session RPE recorded in the past {range} days.</p>
+  </section>
 
   return (
     <>
       <div className="kpi-strip">
-        <Kpi label="Last session load" value={latestLoad != null ? latestLoad.toLocaleString() : '—'} delta={latestDay ? `AU · ${shortLabel(latestDay)}` : 'no sessions'} />
+        <Kpi label="Latest daily load" value={latestLoad != null ? latestLoad.toLocaleString() : '—'} delta={latestDay ? `AU · ${shortLabel(latestDay)}` : 'no sessions'} />
         <Kpi label="Weekly load (7d)" value={weekLoad.toLocaleString()} delta="Σ sRPE-TL (AU)" />
-        <Kpi label="Avg session load" value={avgSession != null ? avgSession.toLocaleString() : '—'} delta={`over ${range} days`} />
+        <Kpi label="Average per recorded day" value={avgSession != null ? avgSession.toLocaleString() : '—'} delta={`over ${range} days`} />
         <Kpi label="Sessions logged" value={sessions} delta={`of last ${range} days`} />
       </div>
 

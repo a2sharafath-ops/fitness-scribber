@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import MobileOptions from '../components/molecules/MobileOptions'
 import ProgramsLibrary from '../components/organisms/program/ProgramsLibrary'
 import Button from '../components/atoms/Button'
 import ExerciseThumb from '../components/molecules/ExerciseThumb'
@@ -21,6 +22,7 @@ export default function WorkoutsPage() {
   const setSearch = (query) => setParams(query ? { view: 'exercises', q: query } : { view: 'exercises' }, { replace: true })
   const [mappingFilter, setMappingFilter] = useState('all')
   const [equipmentFilter, setEquipmentFilter] = useState('all')
+  const [limit, setLimit] = useState(30)
   const equipmentOptions = [...new Set(db.exercises.map(exercise => exercise.equip).filter(Boolean))].sort((a, b) => a.localeCompare(b))
   const mappingState = (e) => e.mode === 'SMR' || e.mode === 'Stretch' ? 'mobility' : muscleTargets(e).direct.length ? 'mapped' : 'review'
   const visibleExercises = db.exercises.filter((e) =>
@@ -45,26 +47,29 @@ export default function WorkoutsPage() {
         <ProgramsLibrary onDirtyChange={setProgramDirty} />
       ) : (
         <div className="card" style={{ padding: 0 }}>
-          <div className="exercise-library-tools"><div><h2>Exercise Library</h2><p>{visibleExercises.length} of {db.exercises.length} exercises · {mappedCount} with muscles assigned · {reviewCount} need review</p></div><label>Find exercise<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name, alternate name, muscle or equipment" /></label><label>Equipment<select value={equipmentFilter} onChange={e => setEquipmentFilter(e.target.value)}><option value="all">All equipment</option>{equipmentOptions.map(equipment => <option key={equipment}>{equipment}</option>)}</select></label><label>Show<select value={mappingFilter} onChange={(e) => setMappingFilter(e.target.value)}><option value="all">All exercises</option><option value="mapped">Muscles assigned</option><option value="review">Needs review</option><option value="mobility">Mobility</option></select></label></div>
-          <div className="exercise-library-scroll" role="region" aria-label="Exercise library; scroll horizontally for more columns" tabIndex={0}><table>
+          <div className="exercise-library-tools"><div><h2>Exercise Library</h2><p>{visibleExercises.length} of {db.exercises.length} exercises · {mappedCount} with muscles assigned · {reviewCount} need review</p></div><label>Find exercise<input value={search} onChange={(e) => { setLimit(30); setSearch(e.target.value) }} placeholder="Name, alternate name, muscle or equipment" /></label><MobileOptions activeCount={Number(equipmentFilter !== 'all') + Number(mappingFilter !== 'all')}><label>Equipment<select value={equipmentFilter} onChange={e => { setLimit(30); setEquipmentFilter(e.target.value) }}><option value="all">All equipment</option>{equipmentOptions.map(equipment => <option key={equipment}>{equipment}</option>)}</select></label><label>Show<select value={mappingFilter} onChange={e => { setLimit(30); setMappingFilter(e.target.value) }}><option value="all">All exercises</option><option value="mapped">Muscles assigned</option><option value="review">Needs review</option><option value="mobility">Mobility</option></select></label></MobileOptions></div>
+          <div className="exercise-library-scroll" role="region" aria-label="Exercise library" tabIndex={0}><table>
             <caption className="sr-only">Exercise library muscle assignments</caption>
             <thead><tr><th scope="col">Demo</th><th scope="col">Exercise</th><th scope="col">Direct muscles</th><th scope="col">Assisting muscles</th><th scope="col">Equipment</th><th scope="col">Assignment</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>
-              {visibleExercises.map((e) => {
+              {visibleExercises.slice(0, limit).map((e) => {
                 const aliasDescription = search.trim() ? exerciseSuggestionDescription(e, search) : ''
                 return (
                 <tr key={e.id}>
-                  <td style={{ width: 110 }}><ExerciseThumb exercise={e} size="sm" /></td>
+                  <td className="exercise-demo"><ExerciseThumb exercise={e} size="sm" /></td>
                   <th scope="row"><strong>{e.name}</strong>{aliasDescription && <small className="exercise-alias">{aliasDescription}</small>}</th>
-                  <td>{muscleTargets(e).direct.join(', ') || '—'}</td>
-                  <td>{muscleTargets(e).indirect.join(', ') || '—'}</td>
-                  <td className="muted">{e.equip}</td>
-                  <td>{mappingState(e) === 'mobility' ? 'Mobility' : mappingState(e) === 'review' ? 'Needs review' : e.muscleTargets?.source === 'coach' ? 'Coach assigned' : e.muscleTargets?.source === 'catalog' ? 'Library assigned' : 'Muscles assigned'}</td>
-                  <td style={{ textAlign: 'right' }}><Button variant="ghost" size="sm" onClick={() => openModal(<ExerciseForm exercise={e} />)}>Edit</Button></td></tr>
+                  <td><span className="exercise-field">Direct muscles</span>{muscleTargets(e).direct.join(', ') || '—'}</td>
+                  <td><span className="exercise-field">Assisting muscles</span>{muscleTargets(e).indirect.join(', ') || '—'}</td>
+                  <td className="muted"><span className="exercise-field">Equipment</span>{e.equip || '—'}</td>
+                  <td><span className="exercise-field">Assignment</span>{mappingState(e) === 'mobility' ? 'Mobility' : mappingState(e) === 'review' ? 'Needs review' : e.muscleTargets?.source === 'coach' ? 'Coach assigned' : e.muscleTargets?.source === 'catalog' ? 'Library assigned' : 'Muscles assigned'}</td>
+                  <td style={{ textAlign: 'right' }}><Button variant="ghost" size="sm" aria-label={`Edit ${e.name}`} onClick={() => openModal(<ExerciseForm exercise={e} />)}>Edit</Button></td></tr>
               )})}
               {!visibleExercises.length && <tr><td colSpan={7}>No exercises match this filter.</td></tr>}
             </tbody>
           </table></div>
+          {visibleExercises.length > limit && <div className="exercise-library-more">
+            <Button variant="ghost" onClick={() => setLimit(limit + 30)}>Show {Math.min(30, visibleExercises.length - limit)} more exercises</Button>
+          </div>}
         </div>
       )}
     </>

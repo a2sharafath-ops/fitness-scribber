@@ -106,3 +106,6 @@
 [data-orbit-theme="dark"] :is(.schedule-event, .schedule-badge):is(.Cancelled, .Missed) { background: var(--tint-gray); color: var(--muted); }
 [data-orbit-theme="dark"] :is(.schedule-resize:focus-visible, .schedule-now) { border-color: var(--accent); outline-color: var(--orbit-focus); }
 [data-orbit-theme="dark"] .schedule-now::before { background: var(--accent); }
+@media (max-width: 700px) {
+  .schedule-controls > .mobile-options-toggle { margin: 0 12px 10px; }
+}
