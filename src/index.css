@@ -2,7 +2,7 @@
   --orbit-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --orbit-display-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --bg:#fff; --surface:#fff; --surface2:#f6f5f7; --border:#dfdce2;
-  --text:#302d34; --muted:#635d69; --accent:#665575; --accent-ink:#fff;
+  --text:#15161a; --muted:#635d69; --accent:#665575; --accent-ink:#fff;
   --orbit-hover:#f3eff5; --orbit-selected:#e9e2ef; --orbit-focus:#79658b;
   --danger:#8b5059; --accent2:#795938; --green:#476654; --blue:#4b647b; --purple:#705985;
   --tint-red:#f6e9e8; --tint-green:#eaf0e9; --tint-blue:#ebeff4;
@@ -1551,7 +1551,6 @@ html:has(.progress-index){overflow-x:clip}
 .checkins-primary-score strong { color: var(--text); }
 .orbit-settings-grid { display: grid; gap: 16px; align-items: start; }
 .orbit-settings-grid > .card { min-width: 0; margin: 0; }
-.orbit-settings-grid > .orbit-appearance-panel { width: 100%; max-height: none; overflow: visible; }
 @media (min-width: 1050px) {
   .orbit-settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -1626,8 +1625,4 @@ html:has(.progress-index){overflow-x:clip}
   .stacked-records td::before { display: block; content: attr(data-label); color: var(--muted); font-size: 12px; }
 }
 
-.appearance-choice { display: grid; gap: 6px; min-width: 0; }
-.appearance-choice > span { color: var(--muted); font-size: 13px; font-weight: 600; }
-.appearance-choice .seg { display: flex; flex-wrap: wrap; max-width: 100%; }
-.appearance-choice .seg button { flex: 1 1 auto; min-height: 44px; }
 .account-onboarding .auth-link { color: var(--accent); }

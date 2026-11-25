@@ -34,13 +34,14 @@ export default function Sidebar({ collapsed, mobile, onCollapse, onNavigate }) {
   return (
     <nav id={mobile ? undefined : 'sidebar'} className="orbit-sidebar" aria-label="Main navigation">
       <div className="orbit-sidebar-head">
-        <Link className="orbit-sidebar-home" to="/" onClick={onNavigate}><Brand workspace ringOnly={collapsed} /></Link>
+        <Link className="orbit-sidebar-home" to="/" onClick={onNavigate} aria-label="Orbit Trainer home"><Brand ringOnly={collapsed} /></Link>
         <button type="button" className="orbit-icon-button orbit-sidebar-toggle"
           onClick={mobile ? onNavigate : onCollapse}
           aria-expanded={mobile ? undefined : !collapsed} aria-label={mobile ? 'Close navigation' : collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
           <Icon name={mobile ? 'close' : 'sidebar'} size={18} />
         </button>
       </div>
+      {!collapsed && <h2 className="orbit-sidebar-label">Trainer workspace</h2>}
       {ITEMS.map(([to, ic, label, end]) => (
         <NavLink key={to} to={to} end={end} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label={label} title={collapsed ? label : undefined} onClick={onNavigate}>
           <span className="ic" aria-hidden="true"><Icon name={ic} /></span>

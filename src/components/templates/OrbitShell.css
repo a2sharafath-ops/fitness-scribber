@@ -1,7 +1,7 @@
 :root {
-  --control-fill: #302d34;
+  --control-fill: #000;
   --control-ink: #fff;
-  --control-hover: #48414f;
+  --control-hover: #353535;
   --control-shadow: inset 0 1px 2px #ffffff38, 0 8px 40px #0000001f;
   --orbit-frost: .64;
   --type-page: clamp(24px, 2vw, 28px);
@@ -31,7 +31,7 @@
   --surface: #232328;
   --surface2: #303036;
   --border: #48484f;
-  --text: #eeeaf0;
+  --text: #f7f7fa;
   --muted: #c1bac7;
   --accent: #c8b8d5;
   --accent-ink: #17171b;
@@ -55,9 +55,9 @@
   --orbit-shadow: 0 18px 52px #08060c66;
   --orbit-focus: #c2adce;
   --orbit-selected: #403946;
-  --control-fill: #e6e1e9;
+  --control-fill: #efeff2;
   --control-ink: #17171b;
-  --control-hover: #f3eff5;
+  --control-hover: #fff;
   --control-shadow: inset 0 1px 2px #ffffff26, 0 8px 40px #00000024;
   color-scheme: dark;
 }
@@ -189,7 +189,6 @@ body:has(#orbit-preload) > #root:is(:empty, :has(> [data-orbit-loading])) { min-
 [data-orbit-theme="dark"] .orbit-brand img.orbit-brand-light-ink, .orbit-brand-on-dark img.orbit-brand-light-ink { display: block; }
 .orbit-brand-by { justify-self: end; color: var(--muted); font-size: 11px; line-height: 1.15; }
 .orbit-brand-on-dark .orbit-brand-by { color: #f1dfe7; }
-.orbit-brand-workspace { font-size: 12px; font-weight: 650; }
 .orbit-brand-icon .orbit-brand-lockup { width: 29px; }
 .auth-wrap .orbit-auth-card { border: 1px solid var(--border); }
 .auth-wrap .auth-brand { background: linear-gradient(140deg, #282634, #19191e 67%, #3c3030); width: min(43vw, 620px); }
@@ -252,8 +251,9 @@ body:has(.orbit-shell) {
 }
 .orbit-sidebar { display: flex; flex-direction: column; color: var(--text); background: var(--orbit-panel); }
 .orbit-shell .orbit-sidebar { background: var(--surface); }
-.orbit-sidebar-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 5px; padding: 3px 4px; margin-bottom: 23px; }
+.orbit-sidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 4px; margin-bottom: 16px; }
 .orbit-sidebar-home { min-width: 0; }
+.orbit-sidebar-label { margin: 0 15px 6px; color: var(--muted); font: 600 var(--type-caption)/var(--leading-control) var(--orbit-font); }
 .orbit-shell #sidebar, .orbit-drawer .orbit-sidebar { overflow: auto; }
 .orbit-sidebar .nav-item { border: 1px solid transparent; margin-bottom: 5px; }
 .orbit-sidebar .nav-item .orbit-nav-label { display: inline; }
@@ -307,13 +307,53 @@ body:has(.orbit-shell) {
 .orbit-toolbar-panel { position: absolute; right: 0; top: 48px; z-index: 11; width: max-content; max-width: calc(100vw - 42px); border-radius: 14px; border: 1px solid var(--border); padding: 7px; background: var(--surface); box-shadow: var(--orbit-shadow); }
 .orbit-toolbar-panel button { padding: 9px 12px; display: block; width: 100%; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .orbit-toolbar-panel button:hover { background: var(--orbit-hover); }
-.orbit-appearance-panel { width: min(262px, calc(100vw - 50px)); max-height: calc(100dvh - 76px); overflow: auto; padding: 13px; }
-.orbit-appearance-panel label { display: flex; justify-content: space-between; margin: 14px 0 4px; }
-.orbit-appearance-panel input { padding: 0; accent-color: var(--accent); }
-.orbit-appearance-panel select { width: 100%; min-height: 44px; }
-.orbit-scheme { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-.orbit-scheme button { width: auto; padding: 8px; font-size: 12px; }
-.orbit-scheme button[aria-pressed="true"] { background: var(--control-fill); color: var(--control-ink); }
+.orbit-toolbar-panel.orbit-appearance-panel {
+  width: min(304px, calc(100vw - 32px));
+  max-height: calc(100dvh - 84px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px 16px 16px;
+}
+.orbit-appearance-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.orbit-appearance-head h2 { font-size: 16px; font-weight: 650; }
+.orbit-appearance-head button { display: inline-grid; width: 36px; height: 36px; padding: 0; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); }
+.orbit-appearance-panel > h2 { margin-bottom: 14px; }
+.appearance-controls { display: grid; gap: 14px; }
+.appearance-choice { display: grid; gap: 6px; min-width: 0; }
+.appearance-choice > :is(label, span:not(.orbit-select-wrap)) { color: var(--muted); font-size: 13px; font-weight: 600; }
+.appearance-choice .seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: auto;
+  overflow: visible;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.appearance-choice .seg button {
+  min-height: 44px;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  text-align: center;
+  font: 600 var(--type-caption)/var(--leading-control) var(--orbit-font);
+}
+.appearance-choice .seg button:hover { background: var(--orbit-hover); color: var(--text); }
+.appearance-choice .seg button[aria-pressed="true"] {
+  border-color: var(--border);
+  background: var(--orbit-selected);
+  color: var(--accent);
+}
+.appearance-range-label { display: flex; justify-content: space-between; gap: 8px; }
+.appearance-range-label span { color: var(--text); font-variant-numeric: tabular-nums; }
+.appearance-choice input[type="range"] { height: 24px; border: 0; background: transparent; cursor: pointer; }
+.appearance-choice input[type="range"]::-webkit-slider-runnable-track { height: 5px; border-radius: 99px; background: var(--border); }
+.appearance-choice input[type="range"]::-webkit-slider-thumb { margin-top: -6.5px; }
+.appearance-choice input[type="range"]::-moz-range-track { height: 5px; border-radius: 99px; background: var(--border); }
+.appearance-choice select { width: 100%; min-height: 44px; }
 .orbit-mobile-brand, .orbit-mobile-menu { display: none; }
 
 [data-orbit-theme] :is(.orbit-shell, .orbit-drawer, .ls-current, .ls-dialog, .ls-menu) :focus-visible { outline: 2px solid var(--orbit-focus); outline-offset: 2px; }
@@ -344,6 +384,7 @@ body:has(.orbit-shell) {
   .orbit-mobile-brand .orbit-brand-lockup { width: 23px; }
   .orbit-mobile-brand > span { white-space: nowrap; }
   .orbit-crumb { display: none; }
+  .orbit-appearance-head button { width: 44px; height: 44px; }
   .orbit-appearance-panel select { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {

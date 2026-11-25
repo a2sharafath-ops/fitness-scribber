@@ -67,7 +67,7 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
     }
     const outside = (event) => {
       const target = event.target.closest('.orbit-toolbar [data-panel]')
-      if (panel && (!toolbar.current?.contains(event.target) || target && target.dataset.panel !== panel)) closePanel(false, !target)
+      if (panel && target?.dataset.panel !== panel) closePanel(false, !target)
     }
     window.addEventListener('keydown', shortcut)
     document.addEventListener('pointerdown', outside)
@@ -135,9 +135,12 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
         </div>
       </details>
       <details className="orbit-toolbar-menu" data-panel="appearance" data-exiting={exiting === 'appearance' || undefined} open={panel === 'appearance' || exiting === 'appearance'}>
-        <summary className="orbit-icon-button" aria-label="Appearance" aria-expanded={panel === 'appearance'} onClick={event => { event.preventDefault(); togglePanel('appearance') }}><Icon name={appearance.effectiveTheme === 'dark' ? 'sun' : 'moon'} size={18} /></summary>
-        <div className="orbit-toolbar-panel orbit-appearance-panel" inert={exiting === 'appearance'}>
-          <strong>Appearance</strong>
+        <summary className="orbit-icon-button" aria-label="Appearance" aria-controls="orbit-appearance" aria-expanded={panel === 'appearance'} onClick={event => { event.preventDefault(); togglePanel('appearance') }}><Icon name={appearance.effectiveTheme === 'dark' ? 'sun' : 'moon'} size={18} /></summary>
+        <div id="orbit-appearance" className="orbit-toolbar-panel orbit-appearance-panel" inert={exiting === 'appearance'}>
+          <div className="orbit-appearance-head">
+            <h2>Appearance</h2>
+            <button className="orbit-icon-button" type="button" onClick={() => closePanel(true)} aria-label="Close appearance"><Icon name="close" size={16} /></button>
+          </div>
           <AppearanceControls appearance={appearance} />
         </div>
       </details>
