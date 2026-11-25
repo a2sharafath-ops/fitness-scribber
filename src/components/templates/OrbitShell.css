@@ -45,6 +45,7 @@
   --text: #f7f7fa;
   --muted: #bfbfc8;
   --accent: #fca5a7;
+  --accent-ink: #17171b;
   --accent2: #ffcb7d;
   --green: #91dca8;
   --blue: #9bd6fd;
@@ -210,7 +211,6 @@ body:has(#orbit-preload) > #root:is(:empty, :has(> [data-orbit-loading])) { min-
   background: var(--surface2);
   border-color: var(--border);
 }
-[data-orbit-theme="dark"] .auth-wrap .auth-divider span { background: var(--border); }
 
 body:has(.orbit-shell) {
   background: var(--bg);
