@@ -1,6 +1,4 @@
 :root {
-  --orbit-font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --orbit-display-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --orbit-red: #fb404a;
   --control-fill: #000;
   --control-ink: #fff;
@@ -72,7 +70,7 @@
   color-scheme: dark;
 }
 
-html[data-orbit-theme] body { font-family: var(--orbit-font); line-height: var(--leading-body); }
+html[data-orbit-theme] body { line-height: var(--leading-body); }
 @media screen {
   #main :is(.topbar, .db-title, .rr-header, .cr-page-title, .pt-title, .schedule-heading, .cp-title) h1 {
     font: 600 var(--type-page)/var(--leading-heading) var(--orbit-display-font);
@@ -80,7 +78,7 @@ html[data-orbit-theme] body { font-family: var(--orbit-font); line-height: var(-
   }
   #main :is(.db-head, .cr-roster-heading, .cp-head, .progress-section-head, .checkins-section-head, .load-response, .schedule-toolbar) h2,
   .overlay .modal > h2 {
-    font: 600 var(--type-section)/var(--leading-heading) var(--orbit-font);
+    font: 600 var(--type-section)/var(--leading-heading) var(--orbit-display-font);
     letter-spacing: -.02em;
   }
   .orbit-shell :is(.topbar, .cr-page-title, .pt-title, .schedule-heading, .cp-title) { row-gap: var(--space-control); }
@@ -568,8 +566,7 @@ body:has(.orbit-shell) {
 .orbit-sidebar .nav-item { border-radius: 12px; }
 .orbit-sidebar .nav-item:not(.active) { color: var(--text); }
 .orbit-sidebar .nav-item.active:hover { border-color: var(--border); }
-.orbit-shell h1 { font-family: var(--orbit-display-font); }
-:where(.orbit-shell, .overlay) :is(h2,h3) { font-family: var(--orbit-font); line-height: var(--leading-heading); }
+:where(.orbit-shell, .overlay) :is(h2,h3) { line-height: var(--leading-heading); }
 [data-orbit-theme] :is(.orbit-shell,.overlay) .btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: var(--control-shadow); }
 [data-orbit-theme] :is(.orbit-shell,.overlay) .btn:disabled { background: var(--surface2); color: var(--muted); box-shadow: none; }
 @media (max-width: 700px) {

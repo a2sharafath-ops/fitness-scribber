@@ -1,11 +1,6 @@
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  src: url('/design/cureocity/plus-jakarta-sans.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 200 800;
-  font-display: swap;
-}
 :root{
+  --orbit-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --orbit-display-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --bg:#f5f3f1; --surface:#ffffff; --surface2:#f4f2ef; --border:#e9e6e2;
   --text:#15161a; --muted:#62636a; --accent:#c82435; --accent2:#945000;
   --green:#187136; --blue:#096598; --purple:#8e44ad; --radius:20px; --radius-sm:14px;
@@ -16,8 +11,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 a{color:inherit;text-decoration:none}
 button, input, select, textarea{font-family:inherit}
-body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+body{font-family:var(--orbit-font);
   background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+h1,h2,h3{font-family:var(--orbit-display-font)}
 #root{min-height:100vh}
 #app{display:flex;min-height:100vh}
 #sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);
