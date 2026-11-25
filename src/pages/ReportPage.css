@@ -22,8 +22,15 @@
   .cr-page :is(.cr-actionbar .cr-primary, .cr-segment button[aria-pressed=true], .cr-muscle-tip) { background: var(--control-fill); color: var(--control-ink); }
   .cr-page .cr-hero { background: var(--orbit-feature); color: var(--text); border: 1px solid var(--border); }
   .cr-page .cr-hero :is(.cr-eyebrow, h2 em, .cr-hero-number strong) { color: var(--text); }
+  .cr-page .cr-hero-footer { color: var(--muted); border-color: var(--border); }
+  .cr-page .cr-hero-footer b { color: var(--text); }
   .cr-page .cr-logo > span { color: var(--control-ink); background: var(--control-fill); }
-  .cr-page :is(.cr-empty, .cr-calendar > span:not([class])) { color: var(--muted); background: var(--surface2); border-color: var(--border); }
+  .cr-page :is(.cr-empty, .cr-calendar > span:not(.done)) { color: var(--muted); background: var(--surface2); border-color: var(--border); }
+  .cr-page :is(.cr-calendar > span.done, .cr-calendar-key i) {
+    color: var(--cr-green); background: var(--cr-mint); border-color: var(--border);
+  }
+  .cr-page .cr-ring { background: conic-gradient(var(--cr-green) var(--angle), var(--surface2) 0); }
+  .cr-page .cr-next { color: var(--text); background: var(--surface2); border-color: var(--border); }
 }
 @media (max-width: 700px) {
   .cr-actionbar .mobile-options-content[data-expanded="true"] { display: flex; flex-wrap: wrap; gap: 6px; }

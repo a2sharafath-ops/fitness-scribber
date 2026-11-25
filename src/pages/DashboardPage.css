@@ -20,7 +20,7 @@
 .db-stat>strong{grid-column:1;grid-row:2;line-height:1.15;font-size:37px;letter-spacing:-1.5px;font-weight:650}
 .db-stat>strong small{font-size:20px;font-weight:400;margin-left:3px;color:#8a908d}
 .db-stat-icon{grid-column:2;grid-row:1/3;width:44px;height:44px;align-self:center;border-radius:14px;display:grid;place-items:center;font-style:normal}
-.db-clients{background:#fcebee;color:#d9445b}.db-schedule{background:#eeedf9;color:#7165a9}.db-checkin{background:#eaf3eb;color:#477459}
+.db-clients{background:var(--tint-red);color:var(--accent)}.db-schedule{background:var(--tint-purple);color:var(--purple)}.db-checkin{background:var(--tint-green);color:var(--green)}
 .db-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);gap:22px;align-items:stretch}
 .db-card{background:#fff;padding:24px;border-radius:24px;border:1px solid #e8e5df;box-shadow:0 3px 14px #242c2004;min-width:0;scroll-margin-top:20px}
 .db-work-card{height:482px;display:flex;flex-direction:column}
@@ -139,7 +139,6 @@
 .orbit-today .btn { min-height: 44px; border-radius: 999px; font-size: 13px; white-space: normal; }
 .orbit-today .orbit-booking-card .btn { background: var(--control-fill); color: var(--control-ink); border: 1px solid #ffffff1c; }
 .orbit-today .orbit-booking-feature .btn:hover { background: var(--control-hover); }
-.orbit-today .orbit-booking-feature .btn:focus-visible { outline-color: #ffabb8; }
 .coach-dashboard .db-stats { gap: 8px; margin: 0 0 16px; }
 .coach-dashboard .db-stat { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-height: 0; padding: 11px 12px; border-color: var(--border); background: var(--surface2); border-radius: 14px; }
 .coach-dashboard .db-stat:hover { border-color: var(--accent); }
