@@ -24,6 +24,7 @@
 .orbit-select-options [aria-disabled="true"] { color: var(--muted); opacity: .65; cursor: default; }
 .orbit-select-options .menu-selection { margin-inline-start: auto; flex: none; }
 .orbit-select-group { display: block; padding: 8px 9px 3px; color: var(--muted); font-size: 12px; font-weight: 650; }
+.orbit-select, .orbit-select-options .menu-item { -webkit-tap-highlight-color: transparent; }
 
 @media (forced-colors: active) {
   .orbit-select-options [data-active] { outline: 1px solid Highlight; outline-offset: -1px; }
