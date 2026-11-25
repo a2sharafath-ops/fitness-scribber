@@ -36,7 +36,7 @@ export default function ScreeningProfile({ screening: s, trainerView }) {
 
   return (
     <div>
-      <Rows icon="like" title="Goals & targets" rows={[
+      <Rows icon="target" title="Goals & targets" rows={[
         ['Primary', g.primary], ['Secondary', j(g.secondary)], ['Success looks like', g.smart],
         ['Target', [g.target?.metric, g.target?.value, g.target?.date && fmtDate(g.target.date)].filter(Boolean).join(' · ') || null],
         ['Event / deadline', g.event], ['Priority order', g.priority],
@@ -80,7 +80,7 @@ export default function ScreeningProfile({ screening: s, trainerView }) {
         ['Locations', j(g.environment?.locations)], ['Equipment', j(g.environment?.equipment)],
         ['Space constraints', g.environment?.space], ['Session format', g.environment?.groupPref],
       ]} />
-      <Rows icon="tuning" title="Baseline measurements" rows={[
+      <Rows icon="scale" title="Baseline measurements" rows={[
         ['Height', p.heightCm ? p.heightCm + ' cm' : null], ['Weight', p.massKg ? p.massKg + ' kg' : null],
         ['BMI (computed)', bmi],
         ['More', 'Body composition, movement screens & fitness tests live in Assessments (time series).'],

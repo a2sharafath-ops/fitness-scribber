@@ -173,7 +173,7 @@ canvas{max-width:100%}
 .ex-del:hover{color:var(--danger)}
 .wp-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .wp-title{font-size:16px;font-weight:700}
-.wp-timer{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)}
+.wp-timer{display:inline-flex;align-items:center;gap:6px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)}
 .wp-section-title{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin:16px 0 2px}
 .wp-collapse{margin:12px 0}
 .wp-collapse-h{width:100%;text-align:left;background:none;border:none;color:var(--text);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;padding:4px 0}

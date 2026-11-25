@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
+import Icon from '../../atoms/Icon'
 import Field from '../../atoms/Field'
 import { useData } from '../../../store/DataContext'
 import { useModal } from '../../../store/ModalContext'
@@ -189,7 +190,7 @@ export function AssignPlanForm({ client }) {
       </Field>
       {gated && (
         <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
-          ⚠ {client.name}'s health screening needs review before an active program starts.
+          <Icon name="alert" size={14} /> {client.name}'s health screening needs review before an active program starts.
           Record physician/ePARmed-X+ clearance as <strong>Received</strong> in their Assessments
           (Health screening section) to unlock plan assignment.
         </p>

@@ -4,6 +4,7 @@
 // names arrive flagged for manual validation.
 import { useState, useRef, useEffect } from 'react'
 import Button from '../../atoms/Button'
+import Icon from '../../atoms/Icon'
 import { callFunction, hasBackend } from '../../../api/functions'
 import { parseTranscript, normalizeParsed, applySynonyms } from '../../../lib/voiceParse'
 
@@ -62,7 +63,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
 
   return (
     <div className="dictate">
-      <div className="section-title" style={{ marginTop: 0 }}>🎙️ Dictate workout</div>
+      <div className="section-title" style={{ marginTop: 0 }}><Icon name="microphone" size={16} /> Dictate workout</div>
       <div className="flex gap" style={{ marginBottom: 8 }}>
         {listening
           ? <Button variant="danger" size="sm" onClick={stop}><span className="rec-dot" /> Stop listening</Button>
@@ -87,7 +88,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
               <strong>{b.blockType}</strong>
               {b.exercises.map((e) => (
                 <div key={e.exerciseId} className={e.unmapped ? 'dp-unmapped' : ''} style={{ fontSize: 12, paddingLeft: 10 }}>
-                  {e.unmapped ? '⚠ ' : '✓ '}{e.exerciseName} — {e.sets.length}×{e.sets[0]?.prescribedReps}
+                  <Icon name={e.unmapped ? 'alert' : 'check'} size={14} />{' '}{e.exerciseName} — {e.sets.length}×{e.sets[0]?.prescribedReps}
                   {e.sets[0]?.prescribedIntensityValue != null ? ` @ ${e.sets[0].prescribedIntensityValue}${e.intensityType === '%1RM' ? '%' : e.intensityType === 'RPE' ? ' RPE' : e.intensityType === 'RIR' ? ' RIR' : e.intensityType === 'Seconds' ? 's' : e.intensityType === 'Minutes' ? ' min' : ''}` : ''}
                   {['%1RM', 'Load'].includes(e.intensityType) && e.sets[0]?.prescribedRir != null ? ` · ${e.sets[0].prescribedRir} RIR` : ''}
                   {e.sets[0]?.prescribedLoadKg != null ? ` · ${e.sets[0].prescribedLoadKg}kg` : ''}
