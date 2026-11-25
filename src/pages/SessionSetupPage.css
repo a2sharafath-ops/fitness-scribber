@@ -34,3 +34,6 @@
   .session-setup { padding-top: clamp(90px, 13vh, 160px); }
 }
 .setup-meta span { max-width: 100%; overflow-wrap: anywhere; }
+
+.session-setup header p { font-size: 14px; font-weight: 400; }
+.setup-schedule { font-size: 14px; color: var(--muted); }

@@ -16,7 +16,8 @@ import { useModal } from '../store/ModalContext'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { addDays, coachClock, fmtDate } from '../lib/dates'
 import { forClient, formalAssessments, baselineProgress, dueStatus, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, TYPES } from '../lib/assessment'
-import { bookingWorkout, bookingWorkoutAction, scheduledBooking, sessionPath, trainingBooking, workoutReviewPath } from '../lib/schedule'
+import { bookingWorkout, bookingWorkoutAction, scheduledBooking, sessionPath, workoutReviewPath } from '../lib/schedule'
+import { bookingSlide } from '../lib/bookingPresentation'
 import { readinessScore } from '../lib/calc'
 import { bookedCompletion } from '../lib/dashboard'
 import { clientPrograms } from '../lib/clientPrograms'
@@ -53,10 +54,8 @@ export default function ClientDetailPage() {
   const nextSession = sessions.filter((session) => (session.date > today || session.date === today && (!session.time || session.time >= currentTime))
     && scheduledBooking(session) && !['completed', 'discarded'].includes(bookingWorkout(db, session)?.status))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))[0]
-  const nextAction = nextSession && (bookingWorkoutAction(db, nextSession, today) || {
-    path: sessionPath(nextSession),
-    label: trainingBooking(nextSession) ? 'Open training' : { Assessment: 'Open assessments', 'Check-in': 'Open check-ins' }[nextSession.type],
-  })
+  const nextSlide = nextSession && bookingSlide(db, nextSession, client, today, nextSession)
+  const nextAction = nextSlide?.destination
   const earlierUnresolved = sessions.filter((session) => session.date === today && session.time && session.time < currentTime
     && scheduledBooking(session))
   const assessmentList = forClient(db.assessments, id)
@@ -123,6 +122,26 @@ export default function ClientDetailPage() {
       {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={client} />)}><Icon name="link" size={14} /> Invite</Button>}
       <Button icon="plus" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>Quick log</Button>
     </div></div>
+    <div className="overview-priority">
+      <section className="card overview-next" aria-labelledby="next-session-title">
+        <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSlide?.title || 'No upcoming session booked'}</h2>
+        {nextSession && <p className="muted">{nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · {nextSession.time || 'Time not set'} · {nextSession.dur || '—'} min <span className="overview-booking-status">{nextSession.status}</span></p>}
+        <div className="overview-next-actions">{nextSession ? <>{nextAction.label && <Link className="btn" to={nextAction.path}>{nextAction.label} →</Link>}<Button variant="ghost" onClick={() => openModal(<SessionForm session={nextSession} />)}>View booking</Button></>
+          : <Button onClick={() => openModal(<SessionForm clientId={id} date={today} />)}>Book session</Button>}</div>
+      </section>
+      <section className="card overview-attention" aria-labelledby="attention-title">
+        <div className="overview-review-head"><h2 id="attention-title">What needs review</h2><span className="overview-review-count">{reviewCount} item{reviewCount === 1 ? '' : 's'}</span></div>
+        <div className="overview-review-list" aria-label="Items needing review">
+          {openConcerns.map((concern) => <div className="overview-review-row concern" key={concern.id}><div><strong>{concern.category || 'Concern'}</strong><p title={concern.text}>{concern.text}</p><small>{fmtDate(concern.date)} · {concern.severity || 'Severity not recorded'}</small></div><button className="overview-text-link" onClick={() => reviewConcern(concern.id)}>Review →</button></div>)}
+          {earlierUnresolved.length > 0 && <div className="overview-review-row"><div><strong>Session status</strong><p>{earlierUnresolved.length} earlier session{earlierUnresolved.length === 1 ? '' : 's'} awaiting an update</p></div><Link className="overview-text-link" to="/schedule">Review →</Link></div>}
+          {(missingBaselines > 0 || dueTypes.length > 0) && <div className="overview-review-row"><div><strong>Assessments</strong><p>{[missingBaselines > 0 ? `${missingBaselines} baseline${missingBaselines === 1 ? '' : 's'} missing` : '', dueTypes.length > 0 ? `${dueTypes.length} reassessment${dueTypes.length === 1 ? '' : 's'} due` : ''].filter(Boolean).join(' · ')}</p></div><Link className="overview-text-link" to={assessmentsUrl}>Review →</Link></div>}
+          {!checkedIn && <div className="overview-review-row"><strong>No check-in today</strong><button className="overview-text-link" onClick={() => openModal(<WellnessForm clientId={id} />)}>Record →</button></div>}
+          {reviewCount === 0 && <p className="muted">All caught up.</p>}
+        </div>
+        <div className="overview-review-footer"><small>{openConcerns.length} open concern{openConcerns.length === 1 ? '' : 's'}</small><Link className="overview-text-link" to={concernsUrl}>All concerns →</Link></div>
+      </section>
+    </div>
+    <OverviewTraining clientId={id} today={today} />
     <div className="overview-metrics" role="group" aria-label="Client progress at a glance">
       {metrics.map(({ name, value, note, path }) => <Link className="card overview-metric" key={name} to={path}>
         <span>{name}</span><strong>{value}</strong><small>{note}</small><Icon name="chevron-right" size={16} aria-hidden="true" />
@@ -142,26 +161,6 @@ export default function ClientDetailPage() {
       </section>
       <OverviewLiftTrend key={id} clientId={id} trend={liftTrend} units={units} />
     </div>
-    <div className="overview-priority">
-      <section className="card overview-next" aria-labelledby="next-session-title">
-        <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSession ? nextSession.type : 'No upcoming session booked'}</h2>
-        {nextSession && <p className="muted">{nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · {nextSession.time || 'Time not set'} · {nextSession.dur || '—'} min <span className="overview-booking-status">{nextSession.status}</span></p>}
-        <div className="overview-next-actions">{nextSession ? <>{nextAction.label && <Link className="btn" to={nextAction.path}>{nextAction.label} →</Link>}<Button variant="ghost" onClick={() => openModal(<SessionForm session={nextSession} />)}>View booking</Button></>
-          : <Button onClick={() => openModal(<SessionForm clientId={id} date={today} />)}>Book session</Button>}</div>
-      </section>
-      <section className="card overview-attention" aria-labelledby="attention-title">
-        <div className="overview-review-head"><h2 id="attention-title">What needs review</h2><span className="overview-review-count">{reviewCount} item{reviewCount === 1 ? '' : 's'}</span></div>
-        <div className="overview-review-list" aria-label="Items needing review">
-          {openConcerns.map((concern) => <div className="overview-review-row concern" key={concern.id}><div><strong>{concern.category || 'Concern'}</strong><p title={concern.text}>{concern.text}</p><small>{fmtDate(concern.date)} · {concern.severity || 'Severity not recorded'}</small></div><button className="overview-text-link" onClick={() => reviewConcern(concern.id)}>Review →</button></div>)}
-          {earlierUnresolved.length > 0 && <div className="overview-review-row"><div><strong>Session status</strong><p>{earlierUnresolved.length} earlier session{earlierUnresolved.length === 1 ? '' : 's'} awaiting an update</p></div><Link className="overview-text-link" to="/schedule">Review →</Link></div>}
-          {(missingBaselines > 0 || dueTypes.length > 0) && <div className="overview-review-row"><div><strong>Assessments</strong><p>{[missingBaselines > 0 ? `${missingBaselines} baseline${missingBaselines === 1 ? '' : 's'} missing` : '', dueTypes.length > 0 ? `${dueTypes.length} reassessment${dueTypes.length === 1 ? '' : 's'} due` : ''].filter(Boolean).join(' · ')}</p></div><Link className="overview-text-link" to={assessmentsUrl}>Review →</Link></div>}
-          {!checkedIn && <div className="overview-review-row"><strong>No check-in today</strong><button className="overview-text-link" onClick={() => openModal(<WellnessForm clientId={id} />)}>Record →</button></div>}
-          {reviewCount === 0 && <p className="muted">All caught up.</p>}
-        </div>
-        <div className="overview-review-footer"><small>{openConcerns.length} open concern{openConcerns.length === 1 ? '' : 's'}</small><Link className="overview-text-link" to={concernsUrl}>All concerns →</Link></div>
-      </section>
-    </div>
-    <OverviewTraining clientId={id} today={today} />
     <OverviewCheckin clientId={id} today={today} />
     <div className="overview-bottom">
       {openConcerns.length ? <details ref={concernDetails} id="open-concerns" className="card overview-concerns">

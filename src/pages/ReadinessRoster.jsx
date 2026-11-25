@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Avatar from '../components/atoms/Avatar'
 import Icon from '../components/atoms/Icon'
@@ -42,20 +42,18 @@ function ReadinessCard({ row, today, completion }) {
 export default function ReadinessRoster({ today }) {
   const { db } = useData()
   const [query, setQuery] = useState('')
-  const heading = useRef(null)
   const rows = useMemo(() => readinessRoster(db, today), [db, today])
   const term = query.trim().toLocaleLowerCase()
   const visible = rows.filter(({ client }) => client.name.toLocaleLowerCase().includes(term))
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    heading.current?.focus({ preventScroll: true })
   }, [])
 
   return <section className="readiness-roster" aria-labelledby="client-readiness">
     <header className="rr-header">
       <div>
-        <h1 id="client-readiness" ref={heading} tabIndex={-1}>Client readiness</h1>
+        <h1 id="client-readiness" tabIndex={-1}>Client readiness</h1>
         <p>Missing and older check-ins first, then today’s lowest scores.</p>
       </div>
       <Link className="btn ghost" to="/clients">All clients</Link>

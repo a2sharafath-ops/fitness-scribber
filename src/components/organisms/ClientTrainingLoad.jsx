@@ -172,7 +172,8 @@ export default function ClientTrainingLoad({ client }) {
   const cardio = mine(db.cardio, client.id)
   return <div className="progress-load-content">
     <LoadResponseChart db={db} clientId={client.id} today={today} action={<Button onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Record session RPE</Button>} />
-    <AdvancedLoad rows={srpe} clientId={client.id} today={today} />
+    {srpe.length ? <AdvancedLoad rows={srpe} clientId={client.id} today={today} /> :
+      <details className="card progress-disclosure"><summary>Load calculations</summary><p className="muted">No session RPE in the past 28 days. Record effort and duration to calculate load ratio, monotony and strain.</p></details>}
     <ClientMuscleVolume key={client.id} clientId={client.id} />
     <details className="card progress-disclosure progress-training-logs"><summary>Training logs</summary><div className="progress-load-logs">
       <section className="progress-log-card"><h3>Session RPE</h3><SourceLine row={srpe[0]} today={today} />

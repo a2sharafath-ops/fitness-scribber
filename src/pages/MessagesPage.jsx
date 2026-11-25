@@ -39,7 +39,7 @@ export default function MessagesPage() {
     <>
       <div className="topbar">
         <div><h1>Messages</h1><div className="sub">Client conversations</div></div>
-        <Button onClick={broadcast} disabled={!clients.length}><Icon name="megaphone" size={15} /> Broadcast</Button>
+        <Button variant="ghost" onClick={broadcast} disabled={!clients.length}><Icon name="megaphone" size={15} /> Broadcast</Button>
       </div>
       <div className="msg-layout" data-thread-open={Boolean(sel)}>
         <div className="card msg-list-card">

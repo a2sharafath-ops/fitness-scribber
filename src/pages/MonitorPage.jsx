@@ -28,9 +28,9 @@ function SourceLine({ row, today }) {
   return <p className="checkins-source">{row ? `${row.date === today ? 'Recorded today' : fmtDate(row.date)} · ${sourceOf(row)}` : 'Not recorded · source unavailable'}</p>
 }
 
-function LogTable({ caption, children }) {
-  return <div className="checkins-table-scroll" role="region" aria-label={`${caption} table; scroll horizontally for more columns`} tabIndex={0}>
-    <table className="checkins-table"><caption className="sr-only">{caption}</caption>{children}</table>
+function LogTable({ caption, children, stacked = false }) {
+  return <div className="checkins-table-scroll" role="region" aria-label={caption} tabIndex={0}>
+    <table className={'checkins-table' + (stacked ? ' stacked-records' : '')}><caption className="sr-only">{caption}</caption>{children}</table>
   </div>
 }
 
@@ -96,8 +96,8 @@ function WellnessView({ client, today, openModal, del }) {
       {wellness[0] && <SourceLine row={wellness[0]} today={today} />}
       {wellness[0] ? <div className="checkins-latest">Latest: sleep {valueOf(wellness[0].sleep)}/7 · stress {valueOf(wellness[0].stress)}/7 · fatigue {valueOf(wellness[0].fatigue)}/7 · soreness {valueOf(wellness[0].soreness)}/7</div> : <p className="checkins-empty">No wellness check-ins yet.</p>}
       {observed > 1 && <div className="checkins-chart"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: 'Wellness score /28', data: dates.map((date) => byDate[date] ?? null), borderColor: COLORS.blue, backgroundColor: 'rgba(11,135,201,.08)', fill: false, pointRadius: 3, spanGaps: false }] }} options={lineOptions()} /></div>}
-      {wellness.length > 0 && <History count={wellness.length} label="wellness"><LogTable caption="Wellness check-in history"><thead><tr><th scope="col">Date</th><th scope="col">Sleep</th><th scope="col">Stress</th><th scope="col">Fatigue</th><th scope="col">Soreness</th><th scope="col">Score</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
-        {wellness.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.sleep)}</td><td>{valueOf(row.stress)}</td><td>{valueOf(row.fatigue)}</td><td>{valueOf(row.soreness)}</td><td>{valueOf(row.score)}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete wellness entry from ${fmtDate(row.date)}`} onClick={() => del('wellness', row.id)}>×</button></td></tr>)}
+      {wellness.length > 0 && <History count={wellness.length} label="wellness"><LogTable caption="Wellness check-in history" stacked><thead><tr><th scope="col">Date</th><th scope="col">Sleep</th><th scope="col">Stress</th><th scope="col">Fatigue</th><th scope="col">Soreness</th><th scope="col">Score</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
+        {wellness.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td data-label="Sleep">{valueOf(row.sleep)}</td><td data-label="Stress">{valueOf(row.stress)}</td><td data-label="Fatigue">{valueOf(row.fatigue)}</td><td data-label="Soreness">{valueOf(row.soreness)}</td><td data-label="Score">{valueOf(row.score)}</td><td data-label="Source">{sourceOf(row)}</td><td data-label="Actions"><button className="x" aria-label={`Delete wellness entry from ${fmtDate(row.date)}`} onClick={() => del('wellness', row.id)}>×</button></td></tr>)}
       </tbody></LogTable></History>}
     </section>
   </div>
@@ -163,6 +163,7 @@ function WearablesView({ client, openModal, del }) {
     toast('Wearable sync enabled')
   }
   const pauseSync = () => { commit((draft) => { draft.clients.find((row) => row.id === client.id).monitorOptIn = false }); toast('Wearable sync paused') }
+  const deviceControls = <><div className="checkins-section-head"><h2>Device connection <InfoTip term="Device sync" text="Live sync requires backend functions and vendor credentials. Manual entry works without a device." /></h2>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</>
   return <div className="checkins-stack">
     <section className="card"><div className="checkins-section-head"><h2>Wearable observations</h2><Button icon="plus" onClick={() => openModal(<WearableForm clientId={client.id} />)}>Manual entry</Button></div>
       {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div>{latest.hrv != null && <p className="checkins-window">30-day HRV baseline: {baseline ? `${baseline.toFixed(1)} ms (${baselineCount} reading${baselineCount === 1 ? '' : 's'})` : '1 earlier usable reading needed'}</p>}</> : <p className="checkins-empty">No wearable data yet.</p>}
@@ -171,7 +172,8 @@ function WearablesView({ client, openModal, del }) {
       {records.length > 0 && <History count={records.length} label="wearable"><LogTable caption="Wearable reading history"><thead><tr><th scope="col">Date</th><th scope="col">HRV</th><th scope="col">Resting HR</th><th scope="col">Sleep</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>
         {records.map((row) => <tr key={row.id}><th scope="row">{fmtDate(row.date)}</th><td>{valueOf(row.hrv, ' ms')}</td><td>{valueOf(row.rhr, ' bpm')}</td><td>{valueOf(row.sleepHrs, ' h')}</td><td>{sourceOf(row)}</td><td><button className="x" aria-label={`Delete wearable reading from ${fmtDate(row.date)}`} onClick={() => del('wearable', row.id)}>×</button></td></tr>)}
       </tbody></LogTable></History>}
+      {!latest && <div className="wearable-device-start">{deviceControls}</div>}
     </section>
-    <section className="card"><div className="checkins-section-head"><h2>Device connection <InfoTip term="Device sync" text="Live sync requires backend functions and vendor credentials. Manual entry works without a device." /></h2>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</section>
+    {latest && <section className="card">{deviceControls}</section>}
   </div>
 }

@@ -61,13 +61,17 @@ export default function ReadinessBreakdown({ client, range }) {
 
   return (
     <>
-      <div className="kpi-strip">
-        <Kpi label={latest ? `Readiness · ${fmtDate(D[lastIdx])}` : 'Readiness in this period'} value={latest ? `${latest.score}/100` : '—'}
-          delta={tinfo?.smoothed != null ? `${TREND_ICON[tinfo.trend]} 5-day avg ${tinfo.smoothed}${tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}` : `${logged} of ${range} days recorded`}
-          deltaColor={latest ? (latest.color === 'green' ? 'var(--green)' : latest.color === 'yellow' ? 'var(--accent2)' : 'var(--accent)') : 'var(--muted)'} />
+      <section className="card readiness-score-lead" aria-label="Latest recorded readiness">
+        <div className="readiness-score-ring" style={{ '--score': latest.score + '%' }}><strong>{latest.score}<small>/100</small></strong></div>
+        <div><h2>{D[lastIdx] === D.at(-1) ? 'Today’s readiness' : 'Last recorded readiness'}</h2>
+          <time dateTime={D[lastIdx]}>{fmtDate(D[lastIdx])}</time>
+          <p>{CONF_LABEL[latest.confidence]} · {logged} of {range} days recorded</p>
+          {tinfo?.smoothed != null && <small>{TREND_ICON[tinfo.trend]} 5-day average {tinfo.smoothed}{tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}</small>}
+        </div>
+      </section>
+      <div className="kpi-strip metric-secondary">
         <Kpi label="Wellness part" value={latest?.wellnessPart ?? '—'} delta={w ? `Hooper ${w.score}/28` : 'no check-in'} />
         <Kpi label="HRV part" value={latest?.hrvPart ?? '—'} delta={latest?.hrvDev != null ? `${latest.hrvDev > 0 ? '+' : ''}${latest.hrvDev.toFixed(1)}% vs base` : 'no wearable'} />
-        <Kpi label="Confidence" value={latest ? (latest.confidence === 'high' ? 'High' : 'Low') : '—'} delta={latest ? CONF_LABEL[latest.confidence] : `${logged} of ${range} logged`} />
       </div>
 
       <div className="card">

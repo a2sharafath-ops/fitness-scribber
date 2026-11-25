@@ -248,8 +248,7 @@ export default function AssessmentDetailPage() {
             {recs.map((a) => <EntryRow key={`${a.id}-${location.search}`} rec={a} initiallyOpen={new URLSearchParams(location.search).get('record') === a.id} onEdit={() => editRec(a)} onDelete={() => del(a)} />)}
           </>
         ) : movementPain.length > 0 ? <p className="muted">No standalone pain assessment recorded.</p> : (
-          <div className="empty" style={{ padding: 24 }}>
-            <div className="big"><Icon name={meta.icon} size={40} /></div>
+          <div className="assessment-history-empty">
             No {meta.label.toLowerCase()} recorded yet.
             {canAdd && <div style={{ marginTop: 8 }}><Button size="sm" onClick={() => add('baseline')}>{isProfileType ? (type === 'goals' ? 'Record goals' : 'Record lifestyle') : 'Add baseline'}</Button></div>}
           </div>

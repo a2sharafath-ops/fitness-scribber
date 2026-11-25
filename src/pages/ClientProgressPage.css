@@ -94,3 +94,5 @@ html:has(.client-progress){overflow-x:visible}
 .client-progress .progress-outcome[data-empty="true"] { min-height: 0; padding-block: 16px; }
 .client-progress .progress-outcome[data-empty="true"] .progress-source-link { margin-top: 6px; }
 .client-progress .progress-attendance .progress-workout-completion { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px; }
+
+.progress-strength .progress-metric:first-child { background: var(--surface2); border-inline-start: 3px solid var(--accent); }

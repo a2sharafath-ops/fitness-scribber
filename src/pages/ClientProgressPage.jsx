@@ -74,6 +74,7 @@ export default function ClientProgressPage() {
   // Automatically generated lift peaks are displayed in Strength, not treated
   // as a new complete fitness reassessment.
   const fitness = assessmentPair(formalAssessments(assessments), 'fitness')
+  const missingBaselines = [['Body measurements', 'body_comp', body], ['Movement', 'movement', movement], ['Fitness tests', 'fitness', fitness]].filter(([, , assessment]) => !assessment.last)
   const fitnessRows = fitness.comparable ? compareFitnessTests(fitness.first.data?.otherTests, fitness.last.data?.otherTests) : []
   const movementRows = movement.comparable ? compare('movement', movement.first, movement.last) : []
   const movementNow = movement.last ? movementScore(movement.last.data) : null
@@ -105,7 +106,11 @@ export default function ClientProgressPage() {
     <section id="progress-panel-outcomes" className="progress-panel" role="tabpanel" aria-labelledby="outcomes" tabIndex={0} hidden={activeView !== 'outcomes'}>
       {activeView === 'outcomes' && <>
       <div className="progress-outcome-grid">
-        <article className="progress-outcome progress-body" data-empty={!body.last}><h3>Body measurements</h3>
+        {missingBaselines.length > 0 && <section className="card missing-baselines"><h3>Baselines to record</h3>
+          <ul>{missingBaselines.map(([label, type]) => <li key={type}><span>{label}</span>
+            <Link className="progress-source-link" to={`/clients/${id}/assessments/${type}`} aria-label={`Record ${label.toLowerCase()} baseline`}>Record baseline →</Link></li>)}</ul>
+        </section>}
+        {body.last && <article className="progress-outcome progress-body"><h3>Body measurements</h3>
           {body.last ? <>
             <div className="progress-date-pair"><span>Baseline: {fmtDate(body.first.date)} · {body.first.data?.method || 'method not recorded'}</span><span>Latest: {fmtDate(body.last.date)} · {body.last.data?.method || 'method not recorded'}</span></div>
             <div className="progress-body-metrics">
@@ -117,16 +122,16 @@ export default function ClientProgressPage() {
             {body.comparable && body.first.data?.method !== body.last.data?.method && <p className="progress-caution">Methods differ or are missing; compare with care.</p>}
           </> : <p className="muted">No body composition assessment yet.</p>}
           <Link className="progress-source-link" to={`/clients/${id}/assessments/body_comp`}>{body.last ? 'Assessment history' : 'Record baseline'} →</Link>
-        </article>
-        <OutcomeCard title="Movement" path={`/clients/${id}/assessments/movement`} {...movement} empty="No movement screen yet.">
+        </article>}
+        {movement.last && <OutcomeCard title="Movement" path={`/clients/${id}/assessments/movement`} {...movement} empty="No movement screen yet.">
           {movementNow && <div className="progress-outcome-value">{movementNow.score}/{movementNow.max}<span>Latest {movementNow.protocol === 'nasm' ? 'movement quality' : 'screen score'}</span></div>}
           {movement.comparable && <div className="progress-compare-list">{movementRows.slice(0, 6).map((row) => <div key={row.label}><span>{row.label}</span><b>{row.from ?? '—'} → {row.to ?? '—'}{row.unit}</b></div>)}</div>}
           {movement.last && <p className="progress-footnote">{movement.last.data?.protocol === 'nasm' ? 'NASM protocol' : 'Five-pattern screen'}</p>}
-        </OutcomeCard>
-        <OutcomeCard title="Fitness tests" path={`/clients/${id}/assessments/fitness`} {...fitness} empty="No formal fitness assessment yet.">
+        </OutcomeCard>}
+        {fitness.last && <OutcomeCard title="Fitness tests" path={`/clients/${id}/assessments/fitness`} {...fitness} empty="No formal fitness assessment yet.">
           {fitness.last && <><p className="progress-fitness-summary">{summarize(fitness.last)}</p><div className="progress-compare-list">{(fitness.last.data?.strength || []).slice(0, 4).map((test) => <div key={test.lift}><span>{test.lift}</span><b>{test.valueKg != null ? format.fmtWt(test.valueKg) : '—'}</b></div>)}</div></>}
           {fitness.last && <div className="progress-compare-list">{fitness.comparable ? fitnessRows.map((row, i) => <div key={i}><span>{row.label}</span><b>{row.from ?? '—'} → {row.to ?? '—'}{row.unit}</b></div>) : (fitness.last.data?.otherTests || []).map((test, i) => <div key={i}><span>{fitnessTestLabel(test)}</span><b>{fitnessTestValue(test)}</b></div>)}</div>}
-        </OutcomeCard>
+        </OutcomeCard>}
       </div>
       </>}
     </section>

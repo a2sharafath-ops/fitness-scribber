@@ -42,7 +42,8 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const selectedAction = selectedBooking && bookingWorkoutAction(db, selectedBooking, today)
   const appointment = selectedBooking ? selectedBooking.status === 'Completed' : !day.scheduled && day.appointment
   const legacyAction = !selectedBooking && legacyDay.canRun
-  const title = missingLog ? 'Workout log unavailable' : log?.title || pending?.title || (selectedBooking ? `Booking at ${selectedBooking.time}` : day.title)
+  const title = missingLog ? 'Workout log unavailable' : log?.title || log?.name || pending?.title || (selectedBooking ? `Booking at ${selectedBooking.time}` : day.title)
+  const resultBooking = selectedBooking || (log?.bookingId && bookings.find(row => row.id === log.bookingId))
   const actual = Boolean(log) && (recordView === 'actual' || !day.prescription)
   const hasDetails = !missingLog && Boolean(log || pending || day.prescription && !appointment)
   const openBuilder = () => openModal(<WorkoutBuilderModal clientId={client.id} date={date} />, 'xl')
@@ -57,7 +58,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
   const notice = log ? actual ? `${doneSets} recorded set${doneSets === 1 ? '' : 's'}${log.durationSec > 0 ? ` · ${Math.round(log.durationSec / 60)} min` : ''}` : 'Prescription only · The logged workout is a separate record.'
     : pending ? 'Saved workout details' : `${stats.exercises} exercise${stats.exercises === 1 ? '' : 's'} · ${stats.sets} prescribed set${stats.sets === 1 ? '' : 's'}`
   return <section className="training-selected-day" aria-labelledby="selected-day-title">
-    {bookings.length > 0 && <section id="training-bookings" className="training-bookings" aria-labelledby="training-bookings-title">
+    {!selectedWorkoutId && bookings.length > 0 && <section id="training-bookings" className="training-bookings" aria-labelledby="training-bookings-title">
       <h3 id="training-bookings-title">Training bookings</h3>
       <ul>{bookings.map((booking) => {
         const workout = bookingWorkout(db, booking)
@@ -70,12 +71,12 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         </li>
       })}</ul>
     </section>}
-    <div id="selected-workout" className="training-selected-head"><div><div className="overview-eyebrow">{date === today ? 'Today' : fmtDay(date).split(',')[0]} · {fmtDate(date)}{selectedBooking && ` · ${selectedBooking.time}`}</div><h3 id="selected-day-title" tabIndex={-1} title={title}>{title}</h3></div>
+    <div id="selected-workout" className="training-selected-head"><div><div className="overview-eyebrow">{date === today ? 'Today' : fmtDay(date).split(',')[0]} · {fmtDate(date)}{resultBooking?.time && ` · ${resultBooking.time}`}</div><h3 id="selected-day-title" tabIndex={-1} title={title}>{title}</h3></div>
       <div className="training-selected-actions">
         {selectedAction?.label === 'Log workout' && <Link className="btn" to={selectedAction.path} aria-label={`Log workout for ${selectedBooking.time} booking`}>Log workout</Link>}
-        {legacyAction && <Link className="btn" to={`/clients/${client.id}/training?date=${date}&run=1#workout-log`}>{legacyDay.pending?.status === 'in_progress' ? bookings.length ? 'Resume unlinked workout' : 'Resume workout' : 'Start workout'}</Link>}
-        {day.canEditPlan && <Button variant={legacyAction ? 'ghost' : 'primary'} onClick={openBuilder}>{bookings.length ? 'Edit day’s plan' : 'Edit session'}</Button>}
-        {day.canPlan && <Button onClick={openBuilder}>Plan workout</Button>}
+        {!selectedWorkoutId && legacyAction && <Link className="btn" to={`/clients/${client.id}/training?date=${date}&run=1#workout-log`}>{legacyDay.pending?.status === 'in_progress' ? bookings.length ? 'Resume unlinked workout' : 'Resume workout' : 'Start workout'}</Link>}
+        {!selectedWorkoutId && day.canEditPlan && <Button variant={legacyAction ? 'ghost' : 'primary'} onClick={openBuilder}>{bookings.length ? 'Edit day’s plan' : 'Edit session'}</Button>}
+        {!selectedWorkoutId && day.canPlan && <Button onClick={openBuilder}>Plan workout</Button>}
         {log && log.status === 'completed' && <Button variant="ghost" onClick={() => openModal(<WorkoutBuilderModal clientId={client.id} date={date} review selectedWorkoutId={log.id} initialMode="edit-log" />, 'xl')}>Edit logged details</Button>}
       </div>
     </div>

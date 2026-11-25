@@ -21,14 +21,14 @@ export default function LiveSetRow({ row, index, exercise, block, session, units
     <div className={'ls-set-row' + (row.done ? ' is-done' : '') + (skipped ? ' is-skipped' : '') + (isNext ? ' is-next' : '')}
       id={'live-set-' + row.id} role="group" aria-label={`Set ${index + 1} of ${exercise.name}`} aria-current={isNext ? 'step' : undefined}>
       <div className="ls-set-number">
-        <button type="button" className="ls-value ls-number" disabled={locked} onClick={() => onEdit('type', row)} aria-label={`Change type for ${label}`}>{index + 1}</button>
+        <span className="ls-number">{index + 1}</span>
         {isNext && <span className="ls-set-next">Next</span>}
         {type !== 'normal' && <small className="ls-set-type">{LIVE_SET_TYPES[type] || type}</small>}
       </div>
       <div className="ls-measure"><button type="button" className="ls-value" disabled={locked} onClick={() => onEdit('weight', row)} aria-label={`Weight for ${label}`}>{weight}</button>
         <small>{row.pLoadKg == null ? 'No weight target' : `Target ${toDisp(row.pLoadKg, units)} ${unitName(units)}`}</small></div>
       <div className="ls-measure"><button type="button" className="ls-value" disabled={locked || running} onClick={() => onEdit('result', row)} aria-label={`Reps or duration for ${label}`}>{metric}</button>
-        <button type="button" className="ls-target" disabled={locked} onClick={() => onEdit('target', row)} aria-label={`Edit target for ${label}`}>Target {targetMetric}</button>
+        <small>Target {targetMetric}</small>
         {(row.pIntensityValue != null || row.pTempo) && <small>{row.pIntensityValue != null ? `${row.pIntensityValue} ${row.pIntensityType || ''}` : ''}{row.pTempo ? ` · Tempo ${row.pTempo}` : ''}</small>}
       </div>
       <div className="ls-measure ls-effort-field"><button type="button" className="ls-value" disabled={locked || running} onClick={() => onEdit('effort', row)} aria-label={`Effort for ${label}`}>{effort}</button></div>

@@ -109,7 +109,7 @@ export default function AssessmentsPage() {
   const history = records.filter((r) => !historyType || r.type === historyType)
     .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''))
   const screeningSettled = row?.validUntil && !expired && !gated && !screening.draft
-  const screeningCard = <section className="card assessment-screen-summary" id="health-screening" aria-labelledby="assess-screen-title">
+  const screeningCard = <section className="card assessment-screen-summary" data-empty={!row && !screening.draft || undefined} id="health-screening" aria-labelledby="assess-screen-title">
       <div className="assessment-screen-head"><div><p className="assessment-eyebrow">Trainer-only</p><h2 id="assess-screen-title">Health screening</h2></div>
         <Button variant={row ? 'ghost' : 'primary'} onClick={() => openModal(<CoachScreeningModal client={client} />, true)}>{screening.draft ? 'Continue screening' : row ? 'Re-screen' : 'Record screening'}</Button>
       </div>

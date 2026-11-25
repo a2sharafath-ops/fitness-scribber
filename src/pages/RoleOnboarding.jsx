@@ -28,7 +28,7 @@ export default function RoleOnboarding() {
 
   return (
     <div id="app" style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <div className="card" style={{ width: 400, maxWidth: '92vw' }}>
+      <div className="card account-onboarding">
         <Brand style={{ padding: '0 0 14px' }} />
         {!mode && (
           <>
@@ -54,7 +54,7 @@ export default function RoleOnboarding() {
           </>
         )}
         <div style={{ marginTop: 16, textAlign: 'center' }}>
-          <button className="back" style={{ margin: 0, fontSize: 12 }} onClick={signOut}>Sign out</button>
+          <button className="auth-link" onClick={signOut}>Sign out</button>
         </div>
       </div>
     </div>

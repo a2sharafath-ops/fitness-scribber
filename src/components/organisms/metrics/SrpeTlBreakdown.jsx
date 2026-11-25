@@ -36,14 +36,15 @@ export default function SrpeTlBreakdown({ client, range }) {
   const latestLoad = latestDay ? Math.round(intMap[latestDay]) : null
   const sessions = db.srpe.filter((r) => r.clientId === client.id && D.includes(r.date)).length
 
-  if (!sessions) return <section className="card"><h2 className="section-title">Session load</h2>
+  if (!latestDay) return <section className="card"><h2 className="section-title">Session load</h2>
     <p className="muted">No session RPE recorded in the past {range} days.</p>
   </section>
 
   return (
     <>
-      <div className="kpi-strip">
-        <Kpi label="Latest daily load" value={latestLoad != null ? latestLoad.toLocaleString() : '—'} delta={latestDay ? `AU · ${shortLabel(latestDay)}` : 'no sessions'} />
+      <section className="card metric-lead"><h2>Latest daily load</h2>
+        <strong>{latestLoad.toLocaleString()} AU</strong><time dateTime={latestDay}>{shortLabel(latestDay)}</time></section>
+      <div className="kpi-strip metric-secondary">
         <Kpi label="Weekly load (7d)" value={weekLoad.toLocaleString()} delta="Σ sRPE-TL (AU)" />
         <Kpi label="Average per recorded day" value={avgSession != null ? avgSession.toLocaleString() : '—'} delta={`over ${range} days`} />
         <Kpi label="Sessions logged" value={sessions} delta={`of last ${range} days`} />

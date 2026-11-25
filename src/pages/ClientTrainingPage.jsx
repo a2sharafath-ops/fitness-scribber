@@ -133,12 +133,19 @@ export default function ClientTrainingPage() {
       pendingFinish={pendingFinish} onRunStateChange={changeLogging} onSessionComplete={closeRunner} />
   </section>
 
+  const resultId = searchParams.get('workout')
+  const dayPanel = <TrainingDayPanel key={JSON.stringify([runnerKey, resultId])} client={client} date={selectedDate} today={today}
+    bookings={bookings} selectedBooking={booking} selectedWorkoutId={resultId} onSelectDate={selectDate} />
+  if (resultId) return <section className="card training-result">
+    <Link className="overview-text-link" to={`/clients/${id}/training?date=${selectedDate}`}>← Back to training</Link>
+    {dayPanel}
+  </section>
+
   return <>
     <div className="topbar training-topbar"><h1>Training</h1><Button icon="plus" variant="ghost" size="sm" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>Quick log</Button></div>
     <div className="training-workspace-grid">
       <div className="training-planner"><WorkoutPlanner client={client} focusDate={selectedDate} onSelectDate={selectDate}>
-        <TrainingDayPanel key={JSON.stringify([runnerKey, searchParams.get('workout')])} client={client} date={selectedDate} today={today}
-          bookings={bookings} selectedBooking={booking} selectedWorkoutId={searchParams.get('workout')} onSelectDate={selectDate} />
+        {dayPanel}
       </WorkoutPlanner></div>
       <div className="training-workspace-side">
         <section className="card training-program" aria-labelledby="training-program-title">

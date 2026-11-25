@@ -109,3 +109,10 @@
 @media (max-width: 700px) {
   .schedule-controls > .mobile-options-toggle { margin: 0 12px 10px; }
 }
+
+@media (max-width: 700px) {
+  .schedule-page[data-view="day"] .schedule-day-panel header :is(.schedule-eyebrow,h2) {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+  }
+  .schedule-page[data-view="day"] .schedule-day-panel header { padding-block: 8px; }
+}
