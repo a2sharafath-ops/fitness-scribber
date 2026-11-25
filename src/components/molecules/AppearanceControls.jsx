@@ -1,4 +1,5 @@
 import SegToggle from './SegToggle'
+import Icon from '../atoms/Icon'
 
 const choices = {
   theme: [['light', 'Light'], ['dark', 'Dark'], ['system', 'Match system']],
@@ -14,16 +15,23 @@ export default function AppearanceControls({ appearance, prefix = 'orbit' }) {
       <span>{label}</span>
       <SegToggle ariaLabel={label} options={choices[key]} value={appearance[key]} onChange={update} />
     </div>
-    return <><label htmlFor={id}>{label}</label>
-      <select id={id} value={appearance[key]} onChange={event => update(event.target.value)}>
-        {choices[key].map(([value, title]) => <option key={value} value={value}>{title}</option>)}
-      </select></>
+    return <div className="appearance-choice">
+      <label htmlFor={id}>{label}</label>
+      <span className="orbit-select-wrap">
+        <select id={id} value={appearance[key]} onChange={event => update(event.target.value)}>
+          {choices[key].map(([value, title]) => <option key={value} value={value}>{title}</option>)}
+        </select>
+        <Icon name="chevron-down" size={13} />
+      </span>
+    </div>
   }
-  return <>
+  return <div className="appearance-controls">
     {choice('theme', 'Theme')}
-    <label htmlFor={prefix + '-frost'}>Frost <span>{appearance.frost}%</span></label>
-    <input type="range" id={prefix + '-frost'} min="0" max="100" value={appearance.frost} onChange={event => appearance.updateAppearance({ frost: Number(event.target.value) })} />
+    <div className="appearance-choice">
+      <label className="appearance-range-label" htmlFor={prefix + '-frost'}>Frost <span aria-hidden="true">{appearance.frost}%</span></label>
+      <input type="range" id={prefix + '-frost'} min="0" max="100" value={appearance.frost} onChange={event => appearance.updateAppearance({ frost: Number(event.target.value) })} />
+    </div>
     {choice('motion', 'Motion')}
     {choice('density', 'Content spacing')}
-  </>
+  </div>
 }
