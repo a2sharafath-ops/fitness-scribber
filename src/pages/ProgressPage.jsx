@@ -125,6 +125,7 @@ export default function ProgressPage() {
       <label className="pt-mobile-metric">Metric<select value={metric} onChange={e => setMetric(e.target.value)}>{trends.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
       <label>Period<select value={days} onChange={e => setDays(Number(e.target.value))}>{[7,30,90].map(n => <option key={n} value={n}>{n} days</option>)}</select></label>
     </section>
+    <section className="pt-card pt-chart-card pt-trend" aria-label="Metric and trend">
     <div className="pt-cards">{trends.map(t => {
       const recorded = series[t.id].filter(p => p.value != null)
       const samples = recorded.reduce((n, p) => n + p.samples, 0)
@@ -135,7 +136,7 @@ export default function ProgressPage() {
         <small>{delta == null ? 'Insufficient records for change' : (delta > 0 ? '+' : '') + (t.id === 'weight' ? format.fmtWt(delta) : number(delta) + ' pts') + ' in period'}</small>
       </button>
     })}</div>
-    <section className="pt-card pt-chart-card"><div className="pt-section-head"><h2>{definition.label}</h2></div>
+    <div className="pt-section-head"><h2>{definition.label}</h2></div>
       {metric === 'weight' && names.length > 0 && <div className="pt-chart-controls"><label>Exercise<select value={exercise} onChange={e => setLift(e.target.value)}>{names.map(n => <option key={n}>{n}</option>)}</select></label></div>}
       {points.length ? <div className="pt-chart"><Line options={options} role="img" aria-label={definition.label + ' from ' + fmtDate(from) + ' to ' + fmtDate(today)} data={{
         labels: series[metric].map(p => shortLabel(p.from)), datasets: [{ label: definition.label, data: series[metric].map(p => metric === 'weight' && p.value != null ? format.toDisp(p.value) : p.value),

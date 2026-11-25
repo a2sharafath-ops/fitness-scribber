@@ -34,14 +34,15 @@ export default function ConcernsPage() {
         onResolve={() => resolve(x.id)} onReopen={() => reopen(x.id)} onEdit={() => openModal(<ConcernForm concern={x} />)} onDelete={() => del(x.id)} />
     ))
 
+  const flagAction = <Button onClick={() => openModal(<ConcernForm />)}><Icon name="flag" size={14} /> Flag a concern</Button>
   return (
     <>
       <div className="topbar">
         <div><h1>Concerns</h1><div className="sub">{open.length} open · {high} high severity · {resolved.length} resolved</div></div>
-        <Button onClick={() => openModal(<ConcernForm />)}><Icon name="flag" size={14} /> Flag a concern</Button>
+        {open.length > 0 && flagAction}
       </div>
       <div className="section-title" style={{ marginTop: 0 }}>Open</div>
-      {open.length ? render(open) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div>No open concerns.</div>}
+      {open.length ? render(open) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div><p>No open concerns.</p>{flagAction}</div>}
       {resolved.length > 0 && <details className="card"><summary>Resolved concerns · {resolved.length}</summary>{render(resolved)}</details>}
     </>
   )

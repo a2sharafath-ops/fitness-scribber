@@ -6,7 +6,7 @@ import { LIVE_SET_TYPES, locateLive, rowMode, adjustedSetDuration, rowType, live
 import { secToClock } from '../../../../lib/workout'
 import { toDisp, dispToKg } from '../../../../lib/units'
 
-export default function LiveSessionEditor({ editor, session, units, exercises, history, onAction, onClose, onReload, onFinish, onDiscard, busy, error }) {
+export default function LiveSessionEditor({ editor, session, units, exercises, history, onAction, onEdit, onClose, onReload, onFinish, onDiscard, busy, error }) {
   const { kind, rowId, exerciseId, blockId } = editor
   const { item, row } = locateLive(session, rowId || exerciseId)
   const block = liveBlocks(session).find((entry) => entry.id === blockId)
@@ -22,6 +22,8 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
     const index = item.setRows.findIndex((set) => set.id === row.id)
     return <LiveSessionDialog title="Set options" onClose={onClose}>
       <div className="ls-tools">
+        <button type="button" className="ls-button" onClick={() => onEdit({ ...editor, kind: 'type' })}>Change set type</button>
+        <button type="button" className="ls-button" onClick={() => onEdit({ ...editor, kind: 'target' })}>Edit target</button>
         <button type="button" className="ls-button" disabled={index === 0} onClick={() => submitAction({ type: 'move-set', id: row.id, beforeId: item.setRows[index - 1]?.id })}>Move set up</button>
         <button type="button" className="ls-button" disabled={index === item.setRows.length - 1} onClick={() => submitAction({ type: 'move-set', id: row.id, beforeId: item.setRows[index + 2]?.id })}>Move set down</button>
         <button type="button" className="ls-button ls-danger-text" onClick={() => submitAction({ type: 'skip-row', id: row.id })}>Skip set</button>

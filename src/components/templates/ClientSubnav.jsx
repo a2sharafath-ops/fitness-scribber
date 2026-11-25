@@ -42,9 +42,7 @@ export default function ClientSubnav({ client }) {
   return (
     <div className="client-subnav">
       <nav className="crumb" aria-label="Breadcrumb">
-        <NavLink to="/clients" end className="crumb-link">Clients</NavLink>
-        <span className="crumb-sep" aria-hidden="true">›</span>
-        <span className="crumb-cur">{client.name}</span>
+        <NavLink to="/clients" end className="crumb-link">← All clients</NavLink>
       </nav>
       <nav className="tabs client-tabs" aria-label="Client sections">
         {sections(client.id).map(({ to, label, end }) => (

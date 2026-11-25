@@ -76,8 +76,8 @@ export default function StrengthDashboard({ client }) {
           {metric('Coach-entered 1RM', lastEntered ? fmtWt(lastEntered.valueKg) : '—', lastEntered ? `Coach entry · ${fmtDate(lastEntered.date)}` : 'No coach entry')}
           {metric('Training max', lastTm ? fmtWt(lastTm.valueKg) : '—', lastTm ? `Programming · ${fmtDate(lastTm.date)}` : 'No checkpoint')}
         </> : <>
-          {metric('Recorded entries', work.length, '')}
           {metric('Latest recorded load', loadText(latestWork?.loadKg, fmtWt), latestWork ? fmtDate(latestWork.date) : '')}
+          {metric('Recorded entries', work.length, '')}
           {metric('Latest recorded reps', latestWork?.reps ?? '—', latestWork ? `${fmtDate(latestWork.date)} · ${latestWork.sets ?? '—'} sets` : '')}
         </>}
       </div>
@@ -92,8 +92,8 @@ export default function StrengthDashboard({ client }) {
       <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
     </section>
     <details className="card progress-disclosure progress-strength-logs"><summary>Recorded sets <span>{work.length} entries</span></summary>
-      {work.length ? <div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table; scroll horizontally for more columns`} tabIndex={0}>
-        <table className="checkins-table">
+      {work.length ? <div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table`} tabIndex={0}>
+        <table className="checkins-table stacked-records">
           <caption className="sr-only">Recorded {lift} work</caption>
           <thead><tr><th scope="col">Date</th><th scope="col">Source</th><th scope="col">Sets</th><th scope="col">Reps</th><th scope="col">Recorded load</th><th scope="col">Record</th></tr></thead>
           <tbody>{work.map((row, index) => {
@@ -101,8 +101,8 @@ export default function StrengthDashboard({ client }) {
             const date = fmtDate(row.date)
             const when = booking?.time && booking.date === row.date ? `${date} · ${booking.time}` : date
             return <tr key={`${row.workoutId ?? row.date}-${row.source}-${index}`}>
-              <th scope="row">{when}</th><td>{row.source}</td><td>{row.sets ?? '—'}</td><td>{row.reps ?? '—'}</td><td>{loadText(row.loadKg, fmtWt)}</td>
-              <td>{row.workoutId ? <Link to={workoutReviewPath({ id: row.workoutId, date: row.date, clientId: client.id, bookingId: row.bookingId })}
+              <th scope="row">{when}</th><td data-label="Source">{row.source}</td><td data-label="Sets">{row.sets ?? '—'}</td><td data-label="Reps">{row.reps ?? '—'}</td><td data-label="Recorded load">{loadText(row.loadKg, fmtWt)}</td>
+              <td data-label="Record">{row.workoutId ? <Link to={workoutReviewPath({ id: row.workoutId, date: row.date, clientId: client.id, bookingId: row.bookingId })}
                 aria-label={`View workout · ${when}`}>View workout →</Link> : '—'}</td>
             </tr>
           })}</tbody>

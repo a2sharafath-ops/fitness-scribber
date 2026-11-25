@@ -12,3 +12,11 @@
 .muscle-modal-period{font-size:12px;color:var(--muted);margin:2px 0 14px}.muscle-modal-totals{display:flex;gap:28px;margin-bottom:18px}.muscle-modal-totals strong{display:block;font-size:29px;font-variant-numeric:tabular-nums}.muscle-modal-totals span{font-size:12px;color:var(--muted)}.muscle-modal .muscle-table-scroll{max-height:min(55vh,480px);overflow:auto}.muscle-modal table{width:100%;min-width:460px;border-collapse:collapse;font-size:12px}.muscle-modal caption{text-align:left;font-weight:700;padding:10px 0}.muscle-modal th,.muscle-modal td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}.muscle-modal small{display:block;font-size:11px;color:var(--muted);font-weight:400}.muscle-modal .muscle-notice{margin-top:10px}.muscle-modal-note{font-size:12px;color:var(--muted);margin:15px 0 0}
 @media(max-width:600px){.muscle-body{max-width:100%}.muscle-hover-value{min-width:100px;padding:6px 8px;font-size:11px}.muscle-hover-value span{font-size:12px}.muscle-modal table{min-width:400px}}
 @media(prefers-reduced-motion:reduce){.muscle-region{transition:none}}
+
+[data-orbit-theme="dark"] .muscle-report { --card: var(--surface); --line: var(--border); }
+[data-orbit-theme="dark"] .muscle-report :is(.muscle-week button, .muscle-metrics button, .muscle-week input) {
+  background: var(--surface2); color: var(--text); border-color: var(--border);
+}
+[data-orbit-theme="dark"] .muscle-report .muscle-metrics button[aria-pressed="true"] {
+  background: var(--control-fill); color: var(--control-ink);
+}

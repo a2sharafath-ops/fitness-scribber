@@ -123,25 +123,6 @@ export default function ClientDetailPage() {
       {hasBackend && <Button variant="ghost" onClick={() => openModal(<InviteAthleteForm client={client} />)}><Icon name="link" size={14} /> Invite</Button>}
       <Button icon="plus" onClick={() => openModal(<QuickLogMenu clientId={id} />)}>Quick log</Button>
     </div></div>
-    <div className="overview-metrics" role="group" aria-label="Client progress at a glance">
-      {metrics.map(({ name, value, note, path }) => <Link className="card overview-metric" key={name} to={path}>
-        <span>{name}</span><strong>{value}</strong><small>{note}</small><Icon name="chevron-right" size={16} aria-hidden="true" />
-      </Link>)}
-    </div>
-    <div className="overview-progress">
-      <section className="card overview-program" aria-labelledby="overview-program-title">
-        <h2 id="overview-program-title">{program?.upcoming ? 'Upcoming program' : 'Current program'}</h2>
-        <div className="overview-program-content">
-          {program?.week && <div className="overview-week-ring" aria-hidden="true"
-            style={{ '--program-week': `${program.week / program.totalWeeks * 100}%` }}><span><b>{program.week}</b> / {program.totalWeeks}</span></div>}
-          <div><strong>{program?.name || 'No current or upcoming program'}</strong>
-            {program?.note && <p>{program.note}</p>}
-          </div>
-        </div>
-        <Link className="btn ghost" to={`/clients/${id}/training${program ? '#training-program-title' : ''}`}>{program ? 'View training plan' : 'Open Training'}</Link>
-      </section>
-      <OverviewLiftTrend key={id} clientId={id} trend={liftTrend} units={units} />
-    </div>
     <div className="overview-priority">
       <section className="card overview-next" aria-labelledby="next-session-title">
         <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSession ? nextSession.type : 'No upcoming session booked'}</h2>
@@ -162,6 +143,25 @@ export default function ClientDetailPage() {
       </section>
     </div>
     <OverviewTraining clientId={id} today={today} />
+    <div className="overview-metrics" role="group" aria-label="Client progress at a glance">
+      {metrics.map(({ name, value, note, path }) => <Link className="card overview-metric" key={name} to={path}>
+        <span>{name}</span><strong>{value}</strong><small>{note}</small><Icon name="chevron-right" size={16} aria-hidden="true" />
+      </Link>)}
+    </div>
+    <div className="overview-progress">
+      <section className="card overview-program" aria-labelledby="overview-program-title">
+        <h2 id="overview-program-title">{program?.upcoming ? 'Upcoming program' : 'Current program'}</h2>
+        <div className="overview-program-content">
+          {program?.week && <div className="overview-week-ring" aria-hidden="true"
+            style={{ '--program-week': `${program.week / program.totalWeeks * 100}%` }}><span><b>{program.week}</b> / {program.totalWeeks}</span></div>}
+          <div><strong>{program?.name || 'No current or upcoming program'}</strong>
+            {program?.note && <p>{program.note}</p>}
+          </div>
+        </div>
+        <Link className="btn ghost" to={`/clients/${id}/training${program ? '#training-program-title' : ''}`}>{program ? 'View training plan' : 'Open Training'}</Link>
+      </section>
+      <OverviewLiftTrend key={id} clientId={id} trend={liftTrend} units={units} />
+    </div>
     <OverviewCheckin clientId={id} today={today} />
     <div className="overview-bottom">
       {openConcerns.length ? <details ref={concernDetails} id="open-concerns" className="card overview-concerns">

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../atoms/Button'
+import MobileOptions from '../molecules/MobileOptions'
 import SegToggle from '../molecules/SegToggle'
 import WorkoutBuilderModal from './program/WorkoutBuilderModal'
 import PastePlanModal from './program/PastePlanModal'
@@ -87,7 +88,8 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
     catch (error) { return toast(error.message, 'error') }
     selectDate(date); toast('Plan copied.')
   }
-  return <section className="card training-calendar" aria-labelledby="training-calendar-title">
+  return <section className="card training-calendar" aria-label={title}>
+    <MobileOptions label={`Calendar · ${fmtDay(anchor)}`}>
     <div className="training-calendar-head"><h2 id="training-calendar-title">{title}</h2><div className="training-calendar-toolbar">
       <SegToggle options={[[ 'week', 'Week' ], [ 'month', 'Month' ]]} value={view} onChange={setView} ariaLabel="Calendar view" />
       <div className="training-period-nav">
@@ -127,6 +129,7 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
         : (day.prescription || day.pending || day.completed.length > 0) && <span className="training-calendar-name">{day.title}</span>}
     </button>)}</div>
     <div className="training-calendar-legend" aria-hidden="true"><span className="planned">Planned or booked</span><span className="completed">Workout logged</span><span className="progress">In progress</span><span className="appointment">Booking completed</span></div>
+    </MobileOptions>
     {children}
   </section>
 }

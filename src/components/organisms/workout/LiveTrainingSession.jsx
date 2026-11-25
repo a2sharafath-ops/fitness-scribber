@@ -127,7 +127,7 @@ export default function LiveTrainingSession({ workout, units: preferredUnits, cl
       {pending?.row ? <button type="button" className="ls-button primary" disabled={conflict || session.liveState.clock.paused && pending.action === 'start'} onClick={nextAction}>
         {nextLabel}</button> : <button type="button" className="ls-button primary" disabled={conflict} onClick={() => openEditor({ kind: 'finish' })}>Finish workout</button>}
     </div>, document.body)}
-    {editor && <LiveSessionEditor key={JSON.stringify(editor)} editor={editor} session={session} units={units} exercises={exercises} history={history} onAction={act}
+    {editor && <LiveSessionEditor key={JSON.stringify(editor)} editor={editor} onEdit={openEditor} session={session} units={units} exercises={exercises} history={history} onAction={act}
       onClose={() => setEditor(null)} onReload={reloadSaved} onFinish={finish} onDiscard={discard} busy={busy} error={actionError || error} />}
   </div>
 }

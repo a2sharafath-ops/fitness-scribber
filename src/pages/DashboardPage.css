@@ -680,3 +680,11 @@
   .coach-dashboard .db-actions > .db-report-desktop { display: none; }
   .coach-dashboard .db-menu-list .db-report-mobile { display: block; }
 }
+
+@media (max-width: 700px) {
+  .orbit-today .orbit-booking-card { gap: 8px; min-height: 0; padding: 12px; }
+  .orbit-today .orbit-booking-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  .orbit-today .orbit-booking-client > :first-child:not(p) { display: none; }
+  .orbit-today .orbit-booking-position { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 6px; }
+  .orbit-today .orbit-booking-tools, .orbit-today .orbit-booking-controls { margin-top: 4px; }
+}

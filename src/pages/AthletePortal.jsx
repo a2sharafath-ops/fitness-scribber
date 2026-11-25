@@ -20,7 +20,7 @@ import { beginWearableConnection } from '../api/wearable'
 import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
-import { screeningsFor, finalizeScreening } from '../lib/screening'
+import { screeningsFor, finalizeScreening, isExpired, programStatus } from '../lib/screening'
 import { workoutPeaks, resolveTrainingMax } from '../lib/program'
 
 export default function AthletePortal() {
@@ -203,6 +203,9 @@ export default function AthletePortal() {
     await load()
   }
 
+  const needsScreening = !scr.complete || scr.draft || isExpired(scr.complete, today) || programStatus(scr.complete) === 'gated'
+  const screeningCard = <ScreeningCard clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
+          onSave={saveScreening} onComplete={completeScreening} />
   return (
     <div id="app">
       <main id="main" role="main" style={{ marginLeft: 0, maxWidth: 760, margin: '0 auto' }}>
@@ -215,8 +218,7 @@ export default function AthletePortal() {
           <Button variant="ghost" onClick={signOut}>Sign out</Button>
         </div>
 
-        <ScreeningCard clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
-          onSave={saveScreening} onComplete={completeScreening} />
+        {needsScreening && screeningCard}
 
 
         <div style={{ marginTop: 16 }}>
@@ -225,6 +227,8 @@ export default function AthletePortal() {
             athlete history={state.workouts} resolveTm={(name) => resolveTrainingMax(state, client.id, name, today).kg}
             onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
         </div>
+
+        {!needsScreening && screeningCard}
 
         {checkinW && (
           <CheckInModal busy={busy} today={today}

@@ -29,11 +29,11 @@ function ClientCard({ row, reading }) {
     <header className="cr-identity"><span className="cr-avatar" aria-hidden="true">{initials(client.name)}</span>
       <div><Link className="cr-client-link" to={dashboardClientPath(client.id)}>{client.name}</Link>
         <small>{client.goal || client.status}</small></div></header>
+    {reviews[0] && <ReviewLink item={reviews[0]} clientName={client.name} />}
     <div>{program ? <Link className="cr-program-name" to={program.path}>{program.name}</Link>
       : <Link to={dashboardClientPath(client.id, '/training')}>View training</Link>}</div>
     <dl><div><dt>Readiness</dt><dd>{reading?.readiness ? `${reading.readiness.score}/100 · ${fmtDate(reading.date)}` : 'No score recorded'}</dd></div>
       <div><dt>Past 30 days</dt><dd>{completion.total ? `${completion.completed} of ${completion.total} bookings completed` : 'No bookings'}</dd></div></dl>
-    {reviews[0] && <ReviewLink item={reviews[0]} clientName={client.name} />}
     <OtherReviews reviews={reviews} clientName={client.name} />
   </article>
 }

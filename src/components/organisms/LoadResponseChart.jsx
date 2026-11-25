@@ -43,6 +43,7 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
   const points = scatter ? pairedResponsePoints(rows, xValues, yValues) : []
   const secondPoints = scatter && secondary ? pairedResponsePoints(rows, xValues, y2Values) : []
   const hasData = scatter ? points.length || secondPoints.length : yValues.some((item) => item.value != null) || y2Values?.some((item) => item.value != null)
+  const latestLoad = rows.findLast(row => row.values.load != null)
   const logged = rows.filter((row) => row.values.load != null).length
   const plotted = scatter ? `${points.length} same-date pairs${secondary ? ` · ${secondPoints.length} second-axis pairs` : ''}`
     : `${yValues.filter((item) => item.value != null).length} plotted days${secondary ? ` · ${y2Values.filter((item) => item.value != null).length} second-axis days` : ''}`
@@ -73,6 +74,7 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
     : `${byId[primary].label}${secondary ? ` and ${byId[secondary].label}` : ` (${byId[primary].unit})`} will appear here`
   const options = {
     ...baseOptions(),
+    animation: false,
     interaction: { mode: scatter ? 'nearest' : 'index', intersect: false },
     plugins: {
       ...baseOptions().plugins,
@@ -95,6 +97,8 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
 
   return <section className="card load-response" aria-labelledby="load-response-title">
     <div className="load-response-heading"><h2 id="load-response-title">Load response <ProgressInfo label="load response" text="Session load is RPE × duration in minutes (AU). Missing days remain blank. Display choices do not change the load calculations." /></h2>{action}</div>
+    {latestLoad && <div className="metric-lead"><span>Latest daily load</span>
+      <strong>{formatValue(latestLoad.values.load)} AU</strong><time dateTime={latestLoad.date}>{fmtDate(latestLoad.date)}</time></div>}
     <div className="progress-load-primary-controls"><label>Show <select value={primary} onChange={(event) => setPrimary(event.target.value)}><MetricOptions /></select></label><label>Period <select value={days} onChange={(event) => setDays(Number(event.target.value))}>{[28,56,84,180].map(n => <option key={n} value={n}>{n} days</option>)}</select></label></div>
     {hasData ? <div className="load-response-canvas">{scatter
       ? <Scatter data={chartData} options={options} role="img" aria-label={`Load response scatter chart, ${plotted}. X-axis ${byId[xMetric].label}; Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />
