@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import Tag from '../../atoms/Tag'
 import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
@@ -88,16 +89,16 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
           <div className="i-h">✅ Clearance workflow — you decide and communicate this to the client</div>
           <div className="row3" style={{ marginTop: 8 }}>
             <Field label="Action">
-              <select value={cl.action} onChange={(e) => setCl({ action: e.target.value })}>
+              <Select value={cl.action} onChange={(e) => setCl({ action: e.target.value })}>
                 <option value="eparmedx_or_physician">ePARmed-X+ / physician clearance</option>
                 <option value="physician_clearance">Physician clearance letter</option>
                 <option value="none">No action needed</option>
-              </select>
+              </Select>
             </Field>
             <Field label="Status">
-              <select value={cl.status} onChange={(e) => setCl({ status: e.target.value, dateCleared: e.target.value === 'received' ? (cl.dateCleared || today) : cl.dateCleared })}>
+              <Select value={cl.status} onChange={(e) => setCl({ status: e.target.value, dateCleared: e.target.value === 'received' ? (cl.dateCleared || today) : cl.dateCleared })}>
                 {CLEARANCE_STATUSES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
+              </Select>
             </Field>
             <Field label="Date cleared"><input type="date" value={cl.dateCleared || ''} onChange={(e) => setCl({ dateCleared: e.target.value })} /></Field>
           </div>

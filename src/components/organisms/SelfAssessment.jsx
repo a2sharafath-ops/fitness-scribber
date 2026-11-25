@@ -1,3 +1,4 @@
+import Select from '../molecules/Select'
 import { useState } from 'react'
 import Card from '../atoms/Card'
 import Button from '../atoms/Button'
@@ -78,7 +79,7 @@ export default function SelfAssessment({ onSubmit, busy }) {
             <RangeSlider label="Sleep quality" value={life.sleepQuality} min={1} max={7} lo="Poor" hi="Great" onChange={(v) => setLife({ ...life, sleepQuality: v })} />
             <RangeSlider label="Stress" value={life.stress} min={1} max={7} lo="None" hi="Extreme" onChange={(v) => setLife({ ...life, stress: v })} />
             <div className="row2">
-              <Field label="Activity level"><select value={life.activityLevel} onChange={(e) => setLife({ ...life, activityLevel: e.target.value })}>{ACTIVITY_LEVELS.map((a) => <option key={a}>{a}</option>)}</select></Field>
+              <Field label="Activity level"><Select value={life.activityLevel} onChange={(e) => setLife({ ...life, activityLevel: e.target.value })}>{ACTIVITY_LEVELS.map((a) => <option key={a}>{a}</option>)}</Select></Field>
               <Field label="Daily steps (avg)"><input type="number" step="500" value={life.steps} onChange={(e) => setLife({ ...life, steps: e.target.value })} /></Field>
             </div>
           </>

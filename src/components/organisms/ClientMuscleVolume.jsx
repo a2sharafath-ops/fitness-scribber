@@ -1,3 +1,4 @@
+import Select from '../molecules/Select'
 import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '../../store/DataContext'
@@ -28,8 +29,8 @@ function ReviewSet({ record, clientId }) {
   }
   return <div className="muscle-review-row">
     <span><strong>{record.name}</strong><small>{fmtDate(record.date)} · {record.setIndex == null ? `${record.sets} recorded sets` : `Set ${record.setIndex + 1}`} · {record.reason}</small></span>
-    <label>Lift group<select value={group} onChange={(e) => setGroup(e.target.value)}><option value="">Choose group</option>{WORKING_GROUPS.map((name) => <option key={name}>{name}</option>)}</select></label>
-    <label>Set type<select value={purpose} onChange={(e) => setPurpose(e.target.value)}><option value="">Choose type</option><option value="working">Working</option><option value="warmup">Warm-up</option></select></label>
+    <label>Lift group<Select value={group} onChange={(e) => setGroup(e.target.value)}><option value="">Choose group</option>{WORKING_GROUPS.map((name) => <option key={name}>{name}</option>)}</Select></label>
+    <label>Set type<Select value={purpose} onChange={(e) => setPurpose(e.target.value)}><option value="">Choose type</option><option value="working">Working</option><option value="warmup">Warm-up</option></Select></label>
     <button type="button" className="btn" disabled={!group || !purpose} onClick={save}>Save classification</button>
     {message && <small role="status">{message}</small>}
   </div>

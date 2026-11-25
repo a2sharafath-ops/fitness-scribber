@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import MobileOptions from '../components/molecules/MobileOptions'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -118,10 +119,9 @@ function ClientRoster({ today }) {
           <MobileOptions label="Roster options" activeCount={Number(unassigned) + Number(sort !== 'name') + Number(layout !== 'cards')}>
           <div className="cr-filters" role="group" aria-label="Roster layout">{['cards','table'].map(value =>
             <button key={value} aria-pressed={layout === value} onClick={() => setLayout(value)}>{value === 'cards' ? 'Cards' : 'Table'}</button>)}</div>
-          <label className="cr-sort">Sort <span className="orbit-select-wrap">
-            <select value={sort} onChange={e => update(setSort)(e.target.value)}><option value="name">Name A–Z</option><option value="recent">Latest activity</option><option value="review">Review first</option></select>
-            <Icon name="chevron-down" size={14} aria-hidden="true" />
-          </span></label>
+          <label className="cr-sort">Sort
+            <Select value={sort} onChange={e => update(setSort)(e.target.value)}><option value="name">Name A–Z</option><option value="recent">Latest activity</option><option value="review">Review first</option></Select>
+          </label>
           <label className="cr-no-program"><input type="checkbox" checked={unassigned} onChange={e => update(setUnassigned)(e.target.checked)} />No program</label>
           </MobileOptions>
         </div>

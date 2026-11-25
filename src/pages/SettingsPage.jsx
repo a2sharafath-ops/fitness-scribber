@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import { useState } from 'react'
 import Button from '../components/atoms/Button'
 import AppearanceControls from '../components/molecules/AppearanceControls'
@@ -45,10 +46,10 @@ export default function SettingsPage({ appearance }) {
         <div className="section-title" style={{ margin: '14px 0 12px' }}>Units &amp; time</div>
         <div className="row2">
           <Field label="Weight units">
-            <select value={f.units} onChange={set('units')}><option value="kg">Metric (kg)</option><option value="lb">Imperial (lb)</option></select>
+            <Select value={f.units} onChange={set('units')}><option value="kg">Metric (kg)</option><option value="lb">Imperial (lb)</option></Select>
           </Field>
           <Field label="Coach timezone">
-            <select value={f.tz || ''} onChange={set('tz')}>{TZS.map((t) => <option key={t} value={t}>{t || 'UTC (default)'}</option>)}</select>
+            <Select value={f.tz || ''} onChange={set('tz')}>{TZS.map((t) => <option key={t} value={t}>{t || 'UTC (default)'}</option>)}</Select>
           </Field>
         </div>
         <div className="muted" style={{ fontSize: 12 }}>Today resolves to: <strong>{fmtDate(todayISO(f.tz))}</strong></div>

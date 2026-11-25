@@ -1,7 +1,7 @@
+import Select from '../components/molecules/Select'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
-import Icon from '../components/atoms/Icon'
 import SegToggle from '../components/molecules/SegToggle'
 import ClientWorkoutFlow from '../components/organisms/ClientWorkoutFlow'
 import WorkoutPlanner from '../components/organisms/WorkoutPlanner'
@@ -46,14 +46,14 @@ function BookingWorkoutSetup({ booking, client, db, prescription, onStart, onClo
     <h2 id="booking-workout-title">{label}</h2>
     <p className="muted">Choose a starting plan for this booking. Any plan you copy stays intact.</p>
     <form onSubmit={start}>
-      <label>Workout source<select value={source} onChange={event => setSource(event.target.value)}>
+      <label>Workout source<Select value={source} onChange={event => setSource(event.target.value)}>
         {prescription && <option value="prescription">Copy day’s plan · {prescription.name || 'Prescribed workout'}</option>}
         {!!db.plans.length && <option value="library">Copy a library workout</option>}
         <option value="blank">Start with an empty workout</option>
-      </select></label>
-      {source === 'library' && <label>Library workout<select value={planId} onChange={event => setPlanId(event.target.value)}>
+      </Select></label>
+      {source === 'library' && <label>Library workout<Select value={planId} onChange={event => setPlanId(event.target.value)}>
         {db.plans.map(plan => <option key={plan.id} value={plan.id}>{plan.name}</option>)}
-      </select></label>}
+      </Select></label>}
       <Button type="submit">{label}</Button>
     </form>
   </section>
@@ -157,12 +157,9 @@ export default function ClientTrainingPage() {
               <div className="training-program-copy">
                 {assignedPrograms.length > 1 ? <>
                   <label className="training-program-copy-label" htmlFor="training-client-program">Client program</label>
-                  <span className="orbit-select-wrap">
-                    <select id="training-client-program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
-                      {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {a.status}{a.period ? ` · ${fmtDate(a.period.start)}` : ''}</option>)}
-                    </select>
-                    <Icon name="chevron-down" size={14} aria-hidden="true" />
-                  </span>
+                  <Select id="training-client-program" value={selectedProgram.id} onChange={e => setSelectedProgramId(e.target.value)}>
+                    {assignedPrograms.map(a => <option key={a.id} value={a.id}>{a.name} · {a.status}{a.period ? ` · ${fmtDate(a.period.start)}` : ''}</option>)}
+                  </Select>
                 </> : <strong>{selectedProgram.name}</strong>}
                 <div className="training-program-meta"><span className="training-program-status" data-status={selectedProgram.status}>{selectedProgram.status}</span>
                   {selectedProgram.period && <small>{fmtDateRange(selectedProgram.period.start, selectedProgram.period.end)}</small>}

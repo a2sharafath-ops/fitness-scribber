@@ -1,12 +1,12 @@
 .client-roster{--ink:var(--text);--line:var(--border);--soft:var(--surface2);max-width:1400px;margin:0 auto;color:var(--ink)}
 .client-roster h1,.client-roster h2,.client-roster h3,.client-roster p{margin:0}
 .client-roster a{text-decoration:none}.client-roster button,.client-roster a{touch-action:manipulation}
-.client-roster button:focus-visible,.client-roster a:focus-visible,.client-roster summary:focus-visible,.client-roster select:focus-visible,.client-roster [tabindex]:focus-visible{outline:3px solid var(--orbit-focus);outline-offset:3px}
+.client-roster button:focus-visible,.client-roster a:focus-visible,.client-roster summary:focus-visible,.client-roster .orbit-select:focus-visible,.client-roster [tabindex]:focus-visible{outline:3px solid var(--orbit-focus);outline-offset:3px}
 .client-roster button:disabled{opacity:.4;cursor:not-allowed}
 .client-roster .cr-card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 3px 14px #242c2004;min-width:0;overflow:hidden}
 .client-roster .btn{font-size:12px;min-height:42px;padding:11px 18px}
 .client-roster .cr-search input{min-height:0;padding:0;border-radius:0;box-shadow:none}
-.client-roster .cr-sort select{width:auto;margin:0}
+.client-roster .cr-sort .orbit-select{width:auto;margin:0}
 .client-roster .cr-no-program input{padding:0;margin:0;flex-shrink:0}
 .client-roster .cr-program-name,.client-roster .cr-latest,.client-roster .cr-completion{width:fit-content}
 .client-roster .cr-results{scroll-margin-top:16px}
@@ -30,7 +30,7 @@
 .client-roster .cr-search input:focus-visible{outline:none}
 .client-roster .cr-clear{display:grid;place-items:center;background:none;border:0;color:var(--muted);width:25px;height:28px;font-size:18px;flex:none}
 .client-roster .cr-sort{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
-.client-roster .cr-sort select{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 32px 11px 12px;font-size:12px;min-height:44px}
+.client-roster .cr-sort .orbit-select{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:12px;min-height:44px}
 .client-roster .cr-no-program{display:flex;align-items:center;gap:7px;font-size:12px;white-space:nowrap;color:#58675e;cursor:pointer;padding:9px 4px}
 .client-roster .cr-no-program input{accent-color:var(--green);height:15px;width:15px}
 .client-roster .cr-active-query{display:flex;justify-content:space-between;align-items:center;gap:15px;font-size:12px;color:#6a756c;padding-top:14px}
@@ -134,7 +134,7 @@
 .client-roster .cr-tools{gap:12px 8px}
 .client-roster .cr-search{flex-basis:100%}
 .client-roster .cr-sort{gap:5px}
-.client-roster .cr-sort select{font-size:11px;padding:8px 32px 8px 8px;min-height:40px}
+.client-roster .cr-sort .orbit-select{font-size:11px;padding:8px;min-height:44px}
 .client-roster .cr-no-program{font-size:11px;gap:5px}
 .client-roster .cr-no-program input{height:14px;width:14px}
 .client-roster .cr-roster-heading h2{font-size:17px}
@@ -171,7 +171,7 @@
 @media(max-width:560px){.client-roster .cr-search{min-width:0}}
 @media(max-width:420px){.client-roster .cr-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.client-roster .cr-filters button{justify-content:center}}
 
-[data-orbit-theme] .client-roster :is(.cr-card, .cr-sort select, .cr-pagination button) { background: var(--surface); border-color: var(--line); }
+[data-orbit-theme] .client-roster :is(.cr-card, .cr-sort .orbit-select, .cr-pagination button) { background: var(--surface); border-color: var(--line); }
 [data-orbit-theme] .client-roster :is(th, .cr-filters, .cr-search, .cr-program-cell, .cr-bar) { background: var(--soft); border-color: var(--line); }
 [data-orbit-theme] .client-roster tbody tr:hover { background: var(--soft); }
 [data-orbit-theme] .client-roster td { border-color: var(--line); }

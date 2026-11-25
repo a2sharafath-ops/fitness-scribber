@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
@@ -21,10 +22,10 @@ const recordedSource = (entry) => entry ? entry.source ?? null : 'Coach manual'
 const optionalNumber = (value) => value === '' || value == null ? null : Number(value)
 
 function RatingSelect({ label, value, min, max, lo, hi, onChange }) {
-  return <Field label={label}><select value={value ?? ''} onChange={(event) => onChange(event.target.value === '' ? '' : Number(event.target.value))}>
+  return <Field label={label}><Select value={value ?? ''} onChange={(event) => onChange(event.target.value === '' ? '' : Number(event.target.value))}>
     <option value="">Select a rating</option>
     {Array.from({ length: max - min + 1 }, (_, index) => min + index).map((number) => <option value={number} key={number}>{number}{number === min ? ` — ${lo}` : number === max ? ` — ${hi}` : ''}</option>)}
-  </select></Field>
+  </Select></Field>
 }
 
 export function WellnessForm({ clientId, entry }) {
@@ -116,7 +117,7 @@ export function ResistanceForm({ clientId, entry }) {
         <Field label="Exercise"><input value={f.exercise} onChange={(e) => setF({ ...f, exercise: e.target.value })} placeholder="e.g. Back Squat" /></Field>
       </div>
       <Field label="Movement pattern">
-        <select value={f.pattern} onChange={(e) => setF({ ...f, pattern: e.target.value })}><option value="">Select pattern</option>{PATTERNS.map((p) => <option key={p}>{p}</option>)}</select>
+        <Select value={f.pattern} onChange={(e) => setF({ ...f, pattern: e.target.value })}><option value="">Select pattern</option>{PATTERNS.map((p) => <option key={p}>{p}</option>)}</Select>
       </Field>
       <div className="row3">
         <Field label="Sets"><input type="number" value={f.sets} onChange={(e) => setF({ ...f, sets: +e.target.value })} /></Field>
@@ -187,7 +188,7 @@ export function WearableForm({ clientId, entry }) {
         <Field label="Sleep (h)"><input type="number" min="0" step="0.1" value={f.sleepHrs ?? ''} onChange={set('sleepHrs')} /></Field>
       </div>
       <Field label="Source">
-        <select value={f.source} onChange={set('source')}><option value="">Select source</option>{['Manual', 'Oura', 'Whoop', 'Apple HealthKit', 'Google Health Connect'].map((s) => <option key={s}>{s}</option>)}</select>
+        <Select value={f.source} onChange={set('source')}><option value="">Select source</option>{['Manual', 'Oura', 'Whoop', 'Apple HealthKit', 'Google Health Connect'].map((s) => <option key={s}>{s}</option>)}</Select>
       </Field>
     </ModalShell>
   )
@@ -208,7 +209,7 @@ export function BodyMetricForm({ clientId }) {
     <ModalShell title="Log Body Metric" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save Entry</Button></>}>
       <Field label="Client">
-        <select value={f.clientId} onChange={(e) => setF({ ...f, clientId: e.target.value })}>{db.clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+        <Select value={f.clientId} onChange={(e) => setF({ ...f, clientId: e.target.value })}>{db.clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select>
       </Field>
       <div className="row3">
         <Field label="Date"><input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>

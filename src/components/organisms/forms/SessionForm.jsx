@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
@@ -45,10 +46,10 @@ export default function SessionForm({ session, date, time, clientId, proposed, o
   if (review) return <ScheduleMoveReview request={review} onSaved={onSaved} onEdit={next => { setF(next); setReview(null) }} />
   return <div className="schedule-dialog"><ModalShell title={session ? 'Booking details' : 'Book session'} onClose={closeModal}
     footer={<>{session && !lock && <Button variant="danger" disabled={busy} onClick={del}>Delete booking</Button>}<Button variant="ghost" disabled={busy} onClick={closeModal}>Cancel</Button><Button disabled={busy || !db.clients.length} onClick={save}>{busy ? 'Saving…' : session && ['date', 'time', 'dur'].some(k => session[k] !== f[k]) ? 'Review change' : 'Save booking'}</Button></>}>
-    <Field label="Client"><select disabled={!!session || busy} value={f.clientId || ''} onChange={set('clientId')}><option value="" disabled>Choose a client</option>{db.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
+    <Field label="Client"><Select disabled={!!session || busy} value={f.clientId || ''} onChange={set('clientId')}><option value="" disabled>Choose a client</option>{db.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</Select></Field>
     {lock && <p className="schedule-preserved">{lock}</p>}
     <div className="row2"><Field label="Date"><input disabled={!!lock || busy} type="date" value={f.date} onChange={set('date')} /></Field><Field label="Time"><input disabled={!!lock || busy} type="time" value={f.time} onChange={set('time')} /></Field></div>
-    <div className="row3"><Field label="Type"><select disabled={!!lock || busy} value={f.type} onChange={set('type')}>{[...new Set([...TYPES, f.type])].map(t => <option key={t}>{t}</option>)}</select></Field><Field label="Duration (min)"><input disabled={!!lock || busy} type="number" min="15" max="480" step="15" value={f.dur} onChange={set('dur', true)} /></Field><Field label="Status"><select disabled={busy} value={f.status} onChange={set('status')}>{STATUSES.map(s => <option key={s}>{s}</option>)}</select></Field></div>
+    <div className="row3"><Field label="Type"><Select disabled={!!lock || busy} value={f.type} onChange={set('type')}>{[...new Set([...TYPES, f.type])].map(t => <option key={t}>{t}</option>)}</Select></Field><Field label="Duration (min)"><input disabled={!!lock || busy} type="number" min="15" max="480" step="15" value={f.dur} onChange={set('dur', true)} /></Field><Field label="Status"><Select disabled={busy} value={f.status} onChange={set('status')}>{STATUSES.map(s => <option key={s}>{s}</option>)}</Select></Field></div>
     {!!issues.length && <ScheduleConflicts issues={issues} alternatives={freeScheduleSlots(db, session, f, clock)} onChoose={setF} />}
     {error && <p className="schedule-error" role="alert">{error}</p>}
   </ModalShell></div>

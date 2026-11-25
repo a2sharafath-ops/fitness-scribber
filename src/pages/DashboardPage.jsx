@@ -10,6 +10,7 @@ import DayBlockReview from '../components/organisms/program/DayBlockReview'
 import { OriginalWorkoutPlan } from '../components/organisms/workout/live/LiveSessionReview'
 import ModalShell from '../components/molecules/ModalShell'
 import DashboardSegments from '../components/molecules/DashboardSegments'
+import Select from '../components/molecules/Select'
 import BulkWellnessForm from '../components/organisms/forms/BulkWellnessForm'
 import SessionForm from '../components/organisms/forms/SessionForm'
 import { ClientForm } from '../components/organisms/forms/ClientForms'
@@ -318,15 +319,12 @@ export default function DashboardPage() {
             {delta != null && <small className="orbit-trend-change" data-tone={delta > 0 ? 'up' : delta < 0 ? 'down' : undefined} title="Compared with the previous period">{delta > 0 ? '+' : delta < 0 ? '−' : ''}{Math.abs(delta)} pt{Math.abs(delta) === 1 ? '' : 's'}</small>}
           </div>)}
         </div>
-        <label className="orbit-metric-select">
-          Metric
-          <span className="orbit-select-wrap">
-            <select value={metric} onChange={event => chooseMetric(event.target.value)}>
-              {ACTIVITY_METRICS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
-            <Icon name="chevron-down" size={14} aria-hidden="true" />
-          </span>
-        </label>
+        <div className="orbit-metric-select">
+          <span>Metric</span>
+          <Select aria-label="Metric" value={metric} onChange={event => chooseMetric(event.target.value)}>
+            {ACTIVITY_METRICS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </Select>
+        </div>
         <p className="db-chart-heading">{metricLabel} · {fmtDateRange(activity.start, activity.end)}</p>
         {activity.hasData ? <>
           <div className="orbit-activity-reading" aria-live="polite">

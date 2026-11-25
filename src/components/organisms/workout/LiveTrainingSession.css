@@ -679,7 +679,7 @@
   font-size:13px;
   font-weight:650
 }
-.ls-fields input,.ls-fields select {
+.ls-fields input,.ls-fields .orbit-select {
   width:100%;
   font:inherit;
   border:1px solid #ccd7ec;
@@ -687,7 +687,7 @@
   background:#fafbfe;
   padding:11px;
   color:#29313f;
-  min-height:42px
+  min-height:44px
 }
 .ls-fields input[type=radio] {
   width:auto;
@@ -1075,7 +1075,7 @@
   border-color: var(--ls-line);
 }
 [data-orbit-theme] .ls-layout, [data-orbit-theme] .ls-blocks { min-width: 0; }
-[data-orbit-theme] :is(.ls-button, .ls-more, .ls-value, .ls-done > span, .ls-note textarea, .ls-fields input, .ls-fields select) {
+[data-orbit-theme] :is(.ls-button, .ls-more, .ls-value, .ls-done > span, .ls-note textarea, .ls-fields input, .ls-fields .orbit-select) {
   color: var(--ls-accent);
   background: var(--surface);
   border-color: var(--ls-line);

@@ -305,7 +305,7 @@ body:has(.orbit-shell) {
 .orbit-create-menu summary { background: var(--control-fill); border-color: transparent; color: var(--control-ink); }
 .orbit-create-menu summary:hover { background: var(--control-hover); color: var(--control-ink); }
 .orbit-toolbar-panel { position: absolute; right: 0; top: 48px; z-index: 11; width: max-content; max-width: calc(100vw - 42px); border-radius: 14px; border: 1px solid var(--border); padding: 7px; background: var(--surface); box-shadow: var(--orbit-shadow); }
-.orbit-toolbar-panel button { padding: 9px 12px; display: block; width: 100%; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+.orbit-toolbar-panel button:where(:not(.orbit-select)) { padding: 9px 12px; display: block; width: 100%; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 .orbit-toolbar-panel button:hover { background: var(--orbit-hover); }
 .orbit-toolbar-panel.orbit-appearance-panel {
   width: min(304px, calc(100vw - 32px));
@@ -320,7 +320,7 @@ body:has(.orbit-shell) {
 .orbit-appearance-panel > h2 { margin-bottom: 14px; }
 .appearance-controls { display: grid; gap: 14px; }
 .appearance-choice { display: grid; gap: 6px; min-width: 0; }
-.appearance-choice > :is(label, span:not(.orbit-select-wrap)) { color: var(--muted); font-size: 13px; font-weight: 600; }
+.appearance-choice > :is(label, span:not(.orbit-select-options)) { color: var(--muted); font-size: 13px; font-weight: 600; }
 .appearance-choice .seg {
   display: grid;
   grid-auto-flow: column;
@@ -353,11 +353,11 @@ body:has(.orbit-shell) {
 .appearance-choice input[type="range"]::-webkit-slider-runnable-track { height: 5px; border-radius: 99px; background: var(--border); }
 .appearance-choice input[type="range"]::-webkit-slider-thumb { margin-top: -6.5px; }
 .appearance-choice input[type="range"]::-moz-range-track { height: 5px; border-radius: 99px; background: var(--border); }
-.appearance-choice select { width: 100%; min-height: 44px; }
+.appearance-choice .orbit-select { width: 100%; min-height: 44px; }
 .orbit-mobile-brand, .orbit-mobile-menu { display: none; }
 
 [data-orbit-theme] :is(.orbit-shell, .orbit-drawer, .ls-current, .ls-dialog, .ls-menu) :focus-visible { outline: 2px solid var(--orbit-focus); outline-offset: 2px; }
-[data-orbit-theme] :is(.orbit-shell, .overlay) :is(input,select,textarea) { border-color: var(--border); }
+[data-orbit-theme] :is(.orbit-shell, .overlay) :is(input,.orbit-select,textarea) { border-color: var(--border); }
 [data-orbit-theme] :is(.orbit-shell, .overlay) .btn:not(.ghost,.danger) { background: var(--control-fill); color: var(--control-ink); box-shadow: var(--control-shadow); }
 [data-orbit-theme] :is(.orbit-shell, .overlay) .btn:not(.ghost,.danger):hover:not(:disabled) { background: var(--control-hover); }
 [data-orbit-theme] :is(.orbit-shell,.overlay) th { color: var(--muted); }
@@ -385,7 +385,7 @@ body:has(.orbit-shell) {
   .orbit-mobile-brand > span { white-space: nowrap; }
   .orbit-crumb { display: none; }
   .orbit-appearance-head button { width: 44px; height: 44px; }
-  .orbit-appearance-panel select { font-size: 16px; }
+  .orbit-appearance-panel .orbit-select { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .orbit-shell *, .orbit-drawer * { scroll-behavior: auto; transition-duration: 0s; animation-duration: 0s; }
@@ -404,9 +404,6 @@ body:has(.orbit-shell) {
 }
 
 [data-orbit-theme] .client-tabs .tab.active { background: var(--orbit-selected); color: var(--accent); box-shadow: 0 1px 4px #0002; }
-.orbit-select-wrap { position: relative; display: inline-flex; min-width: 0; }
-.orbit-select-wrap select { appearance: none; padding-inline-end: 32px; }
-.orbit-select-wrap > svg { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--muted); }
 .client-section-picker { display: none; }
 @media (max-width: 700px) {
   .client-workspace > .client-workspace-header {
@@ -421,20 +418,16 @@ body:has(.orbit-shell) {
   .client-workspace-identity .avatar { flex-shrink: 0; }
   .client-workspace-header .client-workspace-name { font-size: 16px; overflow-wrap: anywhere; }
   .client-section-picker { display: inline-flex; max-width: 100%; }
-  .client-section-picker select {
+  .client-section-picker .orbit-select {
     width: 9.6em;
     min-height: 44px;
-    padding: 0 28px 0 10px;
+    padding: 0 8px 0 10px;
     font-size: 14px;
     font-weight: 600;
     color: var(--text);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-  }
-  .client-section-picker select:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-  @supports (field-sizing: content) {
-    .client-section-picker select { field-sizing: content; width: auto; }
   }
 }
 .client-workspace:has(> #workout-log) > :is(.client-workspace-header, .client-save-status, .client-subnav) { display: none; }
@@ -540,10 +533,10 @@ body:has(.orbit-shell) {
 .orbit-command-header { justify-content: space-between; margin-bottom: 9px; }
 .orbit-command-header h2 { margin: 0; font-size: 16px; }
 .orbit-command-input { border: 1px solid var(--border); border-radius: 9px; padding-inline: 10px; }
-.orbit-command-input:focus-within { border-color: var(--accent); outline: 1px solid var(--orbit-focus); }
+.orbit-command-input:focus-within { border-color: transparent; outline: 2px solid var(--orbit-focus); }
 .orbit-command-input svg { flex: none; }
 .orbit-command-input input { flex: 1; min-width: 0; min-height: 42px; padding-inline: 0; border: 0; background: transparent; outline: 0; }
-.orbit-command-input input:focus-visible { outline: 0; }
+[data-orbit-theme] .orbit-command-input input:focus-visible { outline: 0; }
 .orbit-command-results { display: grid; gap: 2px; max-height: min(390px, 58dvh); overflow: auto; margin-top: 8px; }
 .orbit-command-results button {
   display: grid;

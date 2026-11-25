@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import Button from '../../atoms/Button'
 import Tag from '../../atoms/Tag'
@@ -74,9 +75,9 @@ export default function TodayWorkout({ client, today, workout, bookingTime, pres
             {plans.length > 0 && (
               <div className="flex gap" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <label style={{ fontSize: 12, color: 'var(--muted)' }}>Choose another plan
-                  <select value={altId} onChange={(e) => setAltId(e.target.value)} style={{ display: 'block', marginTop: 4 }}>
+                  <Select value={altId} onChange={(e) => setAltId(e.target.value)} style={{ display: 'block', marginTop: 4 }}>
                     {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  </Select>
                 </label>
                 <Button variant="ghost" size="sm" disabled={!altId} onClick={() => pick(buildFromPlan(plans.find((p) => p.id === altId), exercises, ctx))}>Use selected</Button>
               </div>

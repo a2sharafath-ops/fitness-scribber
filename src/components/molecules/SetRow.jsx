@@ -1,3 +1,4 @@
+import Select from './Select'
 // One prescribed set inside an exercise card. Presentational and
 // prescription-only: dynamic fields swap on the parent exercise's intensityType
 // (spec 2.2); values arrive via props and edits are raised through
@@ -60,10 +61,10 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
       {intensityType === 'RPE' && (
         <>
           <label className="sf"><span>RPE</span>
-            <select value={set.prescribedIntensityValue ?? ''} aria-label="Target RPE" onChange={num('prescribedIntensityValue')}>
+            <Select value={set.prescribedIntensityValue ?? ''} aria-label="Target RPE" onChange={num('prescribedIntensityValue')}>
               <option value="">—</option>
               {RPE_SCALE.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select></label>
+            </Select></label>
           {effort && (
             <label className={'sf sf-calc' + (repAware ? ' sf-exact' : '')} title={subjTitle}>
               <span>%1RM</span>
@@ -74,10 +75,10 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
       {intensityType === 'RIR' && (
         <>
           <label className="sf"><span>RIR</span>
-            <select value={set.prescribedIntensityValue ?? ''} aria-label="Target reps in reserve" onChange={num('prescribedIntensityValue')}>
+            <Select value={set.prescribedIntensityValue ?? ''} aria-label="Target reps in reserve" onChange={num('prescribedIntensityValue')}>
               <option value="">—</option>
               {RIR_SCALE.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select></label>
+            </Select></label>
           {effort && (
             <label className={'sf sf-calc' + (repAware ? ' sf-exact' : '')} title={subjTitle}>
               <span>%1RM</span>
@@ -115,10 +116,10 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
       {['%1RM', 'Load'].includes(intensityType) && (
         <label className="sf" title="Target reps remaining at the end of this set">
           <span>RIR (optional)</span>
-          <select value={set.prescribedRir ?? ''} aria-label="Target reps in reserve" onChange={num('prescribedRir')}>
+          <Select value={set.prescribedRir ?? ''} aria-label="Target reps in reserve" onChange={num('prescribedRir')}>
             <option value="">—</option>
             {RIR_SCALE.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
+          </Select>
         </label>
       )}
       <label className="sf sf-sm"><span>Tempo</span>

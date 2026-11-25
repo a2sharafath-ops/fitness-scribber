@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import { Line, Bar } from 'react-chartjs-2'
 import Kpi from '../../atoms/Kpi'
@@ -77,12 +78,12 @@ export default function ReadinessBreakdown({ client, range }) {
       <div className="card">
         <div className="flex between" style={{ alignItems: 'center', gap: 8 }}>
           <div className="section-title" style={{ margin: 0 }}>Readiness trend</div>
-          <select value={view} onChange={(e) => setView(e.target.value)} aria-label="Readiness view"
+          <Select value={view} onChange={(e) => setView(e.target.value)} aria-label="Readiness view"
             style={{ fontSize: 12, padding: '5px 8px' }}>
             <option value="combined">Combined</option>
             <option value="subjective">Subjective (wellness)</option>
             <option value="objective">Objective (HRV)</option>
-          </select>
+          </Select>
         </div>
         <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>{v.sub} 7-day smoothing against the 28-day baseline.</div>
         {v.series.some(value => value != null) ? <div style={{ height: 220 }}>

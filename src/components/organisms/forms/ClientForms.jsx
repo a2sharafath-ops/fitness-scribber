@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
@@ -74,13 +75,13 @@ export function ClientForm({ client }) {
       <Field label="Goal"><input value={f.goal} onChange={set('goal')} placeholder="e.g. Lose 8kg & tone" /></Field>
       <div className="row3">
         <Field label="Level">
-          <select value={f.level} onChange={set('level')}>{LEVELS.map((o) => <option key={o}>{o}</option>)}</select>
+          <Select value={f.level} onChange={set('level')}>{LEVELS.map((o) => <option key={o}>{o}</option>)}</Select>
         </Field>
         <Field label="Status">
-          <select value={f.status} onChange={set('status')}>{['Active', 'Paused'].map((o) => <option key={o}>{o}</option>)}</select>
+          <Select value={f.status} onChange={set('status')}>{['Active', 'Paused'].map((o) => <option key={o}>{o}</option>)}</Select>
         </Field>
         <Field label="Plan tier">
-          <select value={f.plan} onChange={set('plan')}>{['Standard', 'Premium'].map((o) => <option key={o}>{o}</option>)}</select>
+          <Select value={f.plan} onChange={set('plan')}>{['Standard', 'Premium'].map((o) => <option key={o}>{o}</option>)}</Select>
         </Field>
       </div>
       <Field label="Coach notes"><textarea value={f.notes} onChange={set('notes')} placeholder="Scheduling, package or follow-up notes" /></Field>
@@ -183,10 +184,10 @@ export function AssignPlanForm({ client }) {
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button disabled={blocked} onClick={save}>Save</Button></>}
     >
       <Field label="Workout plan">
-        <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
+        <Select value={planId} onChange={(e) => setPlanId(e.target.value)}>
           <option value="">— None —</option>
           {db.plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        </Select>
       </Field>
       {gated && (
         <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>

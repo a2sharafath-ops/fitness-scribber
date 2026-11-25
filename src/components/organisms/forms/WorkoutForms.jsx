@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
@@ -55,18 +56,18 @@ export function ExerciseForm({ exercise, initialName = '' }) {
       </>}>
       <Field label="Name"><input value={f.name} onChange={set('name')} placeholder="e.g. Incline Dumbbell Press" /></Field>
       <div className="row2">
-        <Field label="Broad category (legacy)"><select value={f.muscle} onChange={set('muscle')}>{GROUPS.map((g) => <option key={g}>{g}</option>)}</select></Field>
-        <Field label="Equipment"><select value={f.equip} onChange={set('equip')}>{equipmentOptions.map((q) => <option key={q}>{q}</option>)}</select></Field>
+        <Field label="Broad category (legacy)"><Select value={f.muscle} onChange={set('muscle')}>{GROUPS.map((g) => <option key={g}>{g}</option>)}</Select></Field>
+        <Field label="Equipment"><Select value={f.equip} onChange={set('equip')}>{equipmentOptions.map((q) => <option key={q}>{q}</option>)}</Select></Field>
       </div>
       <details className="progress-disclosure" open={!!initialName}>
         <summary>Muscle assignments · {targets.direct.length} direct / {targets.indirect.length} indirect</summary>
         {f.mode === 'SMR' || f.mode === 'Stretch' ? <p className="checkins-note">This is a mobility exercise. Its targeted tissues are listed separately; it has no resistance working-set mapping.</p> : <>
           <p className="checkins-note">Direct = principal movers; indirect = assisting muscles. These are anatomical categories for this variation, not measured force. Coach edits override the catalog suggestion and apply to all history.</p>
-          <div className="muscle-assignment-grid">{MUSCLES.map((muscle) => <label key={muscle}>{muscle}<select aria-label={`${muscle} contribution`} value={targets.direct.includes(muscle) ? 'direct' : targets.indirect.includes(muscle) ? 'indirect' : ''} onChange={(e) => setRole(muscle, e.target.value)}><option value="">Not assigned</option><option value="direct">Direct</option><option value="indirect">Indirect</option></select></label>)}</div>
+          <div className="muscle-assignment-grid">{MUSCLES.map((muscle) => <label key={muscle}>{muscle}<Select aria-label={`${muscle} contribution`} value={targets.direct.includes(muscle) ? 'direct' : targets.indirect.includes(muscle) ? 'indirect' : ''} onChange={(e) => setRole(muscle, e.target.value)}><option value="">Not assigned</option><option value="direct">Direct</option><option value="indirect">Indirect</option></Select></label>)}</div>
         </>}
       </details>
       <div className="row2">
-        <Field label="Difficulty"><select value={f.difficulty || 'Beginner'} onChange={set('difficulty')}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</select></Field>
+        <Field label="Difficulty"><Select value={f.difficulty || 'Beginner'} onChange={set('difficulty')}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</Select></Field>
         <Field label="Video URL"><input value={f.video || ''} onChange={set('video')} placeholder="YouTube/Vimeo/MP4 link" /></Field>
       </div>
       <Field label="Thumbnail image URL (optional)"><input value={f.thumb || ''} onChange={set('thumb')} placeholder="Leave blank to use a placeholder" /></Field>
@@ -126,9 +127,9 @@ export function PlanForm({ plan }) {
         )) : <div className="muted" style={{ fontSize: 12, padding: '8px 0' }}>No exercises added yet.</div>}
       </div>
       <div className="flex gap" style={{ marginBottom: 6 }}>
-        <select value={addEx} onChange={(e) => setAddEx(e.target.value)} style={{ flex: 1 }}>
+        <Select value={addEx} onChange={(e) => setAddEx(e.target.value)} style={{ flex: 1 }}>
           {db.exercises.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-        </select>
+        </Select>
         <Button variant="ghost" size="sm" onClick={add}>＋ Add</Button>
       </div>
     </ModalShell>

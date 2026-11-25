@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 // Progression Rule Window (spec 3.2). Calendar duplication into a future
 // microcycle stops here first. Every exercise carries its own editable
 // scheme (+Load / +Percentage / +Reps / +Sets and increment), initialised
@@ -14,10 +15,10 @@ const UNIT_HINT = { load: 'kg', percentage: '% points', reps: 'reps', sets: 'set
 const TypeValue = ({ rule, ariaBase, onChange, types = Object.keys(TYPE_LABEL) }) => (
   <>
     <label className="sf"><span>Type</span>
-      <select value={rule.type} aria-label={`${ariaBase} progression type`} onChange={(e) => onChange({ type: e.target.value })}>
+      <Select value={rule.type} aria-label={`${ariaBase} progression type`} onChange={(e) => onChange({ type: e.target.value })}>
         {!types.includes(rule.type) && <option value={rule.type} disabled>{TYPE_LABEL[rule.type]} — unavailable</option>}
         {types.map(k => <option key={k} value={k}>{TYPE_LABEL[k]}</option>)}
-      </select></label>
+      </Select></label>
     <label className="sf"><span>Value (+{UNIT_HINT[rule.type]})</span>
       <input type="number" step="0.5" value={rule.value} aria-label={`${ariaBase} progression value`}
         onChange={(e) => onChange({ value: +e.target.value })} /></label>

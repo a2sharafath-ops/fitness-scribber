@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import Field from '../../atoms/Field'
 import YesNoRow from '../../molecules/YesNoRow'
 import { CLIENT_RESULT_MESSAGE } from '../../../lib/parq'
@@ -24,9 +25,9 @@ export default function HhqPersonalStep({ personal, contacts, onChange }) {
         <Field label="Date of birth"><input type="date" value={personal.dob || ''} onChange={setDob} /></Field>
         <Field label={'Age' + (personal.dob ? ' (from DOB)' : '')}><input type="number" value={personal.age ?? ''} onChange={pn('age')} disabled={!!personal.dob} /></Field>
         <Field label="Sex at birth">
-          <select value={personal.sex || ''} onChange={p('sex')}>
+          <Select value={personal.sex || ''} onChange={p('sex')}>
             <option value="">—</option>{['Female', 'Male', 'Prefer not to say'].map((o) => <option key={o}>{o}</option>)}
-          </select>
+          </Select>
         </Field>
       </div>
       <div className="row3">
@@ -41,9 +42,9 @@ export default function HhqPersonalStep({ personal, contacts, onChange }) {
       <div className="row2">
         <Field label="Occupation"><input value={personal.occupation || ''} onChange={p('occupation')} /></Field>
         <Field label="Typical activity at work">
-          <select value={personal.workActivity || ''} onChange={p('workActivity')}>
+          <Select value={personal.workActivity || ''} onChange={p('workActivity')}>
             <option value="">—</option>{['sitting', 'standing', 'manual'].map((o) => <option key={o}>{o}</option>)}
-          </select>
+          </Select>
         </Field>
       </div>
       <h3 className="scr-step-title" style={{ marginTop: 14 }}>Emergency & medical contacts</h3>
