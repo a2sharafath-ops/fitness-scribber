@@ -8,7 +8,7 @@ import { useData } from '../store/DataContext'
 import { useModal } from '../store/ModalContext'
 import { useFormat } from '../hooks/useFormat'
 import { fmtDate, todayISO, addDays } from '../lib/dates'
-import { baseOptions, shortLabel } from '../lib/chartSetup'
+import { baseOptions, COLORS, shortLabel } from '../lib/chartSetup'
 import { metricKey, metricMeta, trackedMetrics, trackingComparison, trackingSeries, trackingWindow } from '../lib/progressTracking'
 import { dashboardActivity } from '../lib/dashboard'
 import { performedLiftHistory } from '../lib/performedLifts'
@@ -42,7 +42,8 @@ function ClientTracking({ client }) {
   chartOptions.scales.x = { type:'linear', min:timestamp(window.start), max:timestamp(window.end===window.start?addDays(window.end,1):window.end), grid:{display:false}, ticks:{maxTicksLimit:6,callback:value=>shortLabel(dateAt(value))} }
   chartOptions.scales.y = { ...chartOptions.scales.y, title:{display:true,text:unit}, beginAtZero:metric?.kind==='consistency', ...(metric?.kind==='consistency'&&metric.measure==='bookings'?{min:0,max:100}:{}) }
   const seriesGroups = metric?.kind==='body' ? [...new Set(rows.map(r=>r.method))] : ['Recorded values']
-  const data = { datasets:seriesGroups.map((group,i)=>({label:metric?.kind==='body'?group:meta?.subtitle,data:rows.filter(r=>metric?.kind!=='body'||r.method===group).map(row=>({x:timestamp(row.date),y:row.value==null?null:meta.unit==='kg'?format.toDisp(row.value):row.value,row})),borderColor:['#315b4d','#826d9c','#b2843f'][i%3],backgroundColor:metric?.kind==='consistency'?'#315b4dbb':'#fff',borderWidth:2,pointRadius:4,pointHoverRadius:6,spanGaps:false,tension:0,showLine:group!=='Method not recorded',barThickness:22})) }
+  const seriesColors = [COLORS.purple, COLORS.green, COLORS.amber]
+  const data = { datasets:seriesGroups.map((group,i)=>({label:metric?.kind==='body'?group:meta?.subtitle,data:rows.filter(r=>metric?.kind!=='body'||r.method===group).map(row=>({x:timestamp(row.date),y:row.value==null?null:meta.unit==='kg'?format.toDisp(row.value):row.value,row})),borderColor:seriesColors[i % seriesColors.length],backgroundColor:metric?.kind==='consistency'?COLORS.purple + 'bb':seriesColors[i % seriesColors.length],borderWidth:2,pointRadius:4,pointHoverRadius:6,spanGaps:false,tension:0,showLine:group!=='Method not recorded',barThickness:22})) }
   return <>
     <div className="pt-client-summary"><p>{client.goal || 'Choose what matters for this client.'}</p><div><Link to={`/clients/${client.id}/progress#${metric?.kind==='body'?'outcomes':metric?.kind==='consistency'?'attendance':'strength'}`}>Client progress →</Link><Link className="btn ghost" to={`/report/${client.id}`}>Report ↗</Link></div></div>
     <div className="pt-section-head"><h2>Tracked metrics</h2><Button variant="ghost" onClick={manage}>{metrics.length?'Manage tracked metrics':'Choose metrics'}</Button></div>
@@ -140,7 +141,7 @@ export default function ProgressPage() {
       {metric === 'weight' && names.length > 0 && <div className="pt-chart-controls"><label>Exercise<select value={exercise} onChange={e => setLift(e.target.value)}>{names.map(n => <option key={n}>{n}</option>)}</select></label></div>}
       {points.length ? <div className="pt-chart"><Line options={options} role="img" aria-label={definition.label + ' from ' + fmtDate(from) + ' to ' + fmtDate(today)} data={{
         labels: series[metric].map(p => shortLabel(p.from)), datasets: [{ label: definition.label, data: series[metric].map(p => metric === 'weight' && p.value != null ? format.toDisp(p.value) : p.value),
-          borderColor: '#dd4964', pointRadius: 3, backgroundColor: '#dd496425', fill: true, tension: 0.2, spanGaps: false }]
+          borderColor: COLORS.purple, pointRadius: 3, backgroundColor: COLORS.purple + '25', fill: true, tension: 0.2, spanGaps: false }]
       }} /></div> : <p className="pt-empty-history">No recorded values in this period.</p>}
       <div className="pt-card-foot"><span>{metric === 'weight' ? 'Highest recorded set weight per day' : metric === 'consistency' ? 'Prescribed workout days with a completed log' : 'Recorded readiness scores for active clients'}</span><span>{fmtDate(from)} – {fmtDate(today)}</span></div>
     </section>

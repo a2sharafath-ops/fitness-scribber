@@ -176,17 +176,17 @@
 [data-orbit-theme] .client-roster tbody tr:hover { background: var(--soft); }
 [data-orbit-theme] .client-roster td { border-color: var(--line); }
 [data-orbit-theme] .client-roster :is(.cr-filters button, th, th small, .cr-email, .cr-client-link .cr-arrow, .cr-cell-note, .cr-search svg, .cr-no-program, .cr-upcoming, .cr-active-query, .cr-completion span, .cr-pagination) { color: var(--muted); }
-[data-orbit-theme] .client-roster .cr-filters button[aria-pressed="true"] { color: var(--text); background: var(--surface); box-shadow: 0 1px 4px #0002; }
+[data-orbit-theme] .client-roster .cr-filters button[aria-pressed="true"] { color: var(--accent); background: var(--orbit-selected); box-shadow: 0 1px 4px #0002; }
 [data-orbit-theme] .client-roster .cr-filters button[aria-pressed="true"] .cr-count { color: inherit; }
-[data-orbit-theme] .client-roster .cr-no-program input { accent-color: var(--orbit-red); }
+[data-orbit-theme] .client-roster .cr-no-program input { accent-color: var(--accent); }
 [data-orbit-theme] .client-roster .cr-search input::placeholder { color: var(--muted); opacity: 1; }
 [data-orbit-theme] .client-roster :is(.cr-review-footnote, .cr-latest, .cr-muted, .cr-mobile-label, .cr-other-reviews>summary, .cr-other-review small, .cr-count) { color: var(--muted); }
 [data-orbit-theme] .client-roster :is(.cr-assign, .cr-empty-icon) { color: var(--green); background: var(--tint-green); border-color: var(--line); }
 [data-orbit-theme] .client-roster .cr-program-name { color: var(--green); }
 [data-orbit-theme] .client-roster .cr-review { color: var(--accent2); background: var(--tint-amber); border-color: var(--line); }
-[data-orbit-theme] .client-roster .cr-review.cr-red { color: var(--accent); background: var(--tint-red); border-color: var(--line); }
+[data-orbit-theme] .client-roster .cr-review.cr-red { color: var(--danger); background: var(--tint-red); border-color: var(--line); }
 [data-orbit-theme] .client-roster .cr-review.cr-neutral { color: var(--muted); background: var(--soft); border-color: var(--line); }
-[data-orbit-theme] .client-roster .cr-section-icon { color: var(--accent); background: var(--tint-red); }
+[data-orbit-theme] .client-roster .cr-section-icon { color: var(--accent); background: var(--orbit-selected); }
 
 .orbit-client-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr)); padding:16px; gap:14px }
 .orbit-client-card { display:grid; align-content:start; gap:12px; min-width:0; border:1px solid var(--border); border-radius:16px; padding:16px; background:var(--surface); overflow-wrap:anywhere }

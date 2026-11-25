@@ -40,12 +40,12 @@ if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'functio
 
 // Shared dataset palette so charts across pages stay consistent.
 export const COLORS = {
-  blue: '#0b87c9',
-  red: '#fb404a',
-  green: '#34c759',
-  purple: '#af52de',
-  amber: '#e8850c',
-  muted: '#9a9ba2',
+  blue: '#6e8397',
+  red: '#a47278',
+  green: '#718b79',
+  purple: '#89749c',
+  amber: '#a17e60',
+  muted: '#85818a',
 }
 
 // Short axis label from an ISO date ("Jun 30").

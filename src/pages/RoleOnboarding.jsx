@@ -38,7 +38,7 @@ export default function RoleOnboarding() {
               <Button icon="users" onClick={coach} disabled={busy}>{busy ? 'Checking…' : "I'm a coach — manage athletes"}</Button>
               <Button variant="ghost" icon="link" onClick={() => setMode('athlete')}>I have an invite code (athlete)</Button>
             </div>
-            {err && <div style={{ fontSize: 12, color: '#fb404a', marginTop: 10 }}>{err}</div>}
+            {err && <div style={{ fontSize: 12, color: 'var(--danger)', marginTop: 10 }}>{err}</div>}
           </>
         )}
         {mode === 'athlete' && (
@@ -46,7 +46,7 @@ export default function RoleOnboarding() {
             <h2 style={{ fontSize: 18, marginBottom: 4 }}>Enter your invite code</h2>
             <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Your coach generated this for you.</p>
             <Field label="Invite code"><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="e.g. 7KQ2-9F" autoFocus /></Field>
-            {err && <div style={{ fontSize: 12, color: '#fb404a', marginBottom: 10 }}>{err}</div>}
+            {err && <div style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 10 }}>{err}</div>}
             <div className="flex gap">
               <Button onClick={redeem} disabled={busy || !code.trim()}>{busy ? 'Linking…' : 'Link my account'}</Button>
               <Button variant="ghost" onClick={() => { setMode(null); setErr(null) }}>Back</Button>

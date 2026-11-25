@@ -85,7 +85,7 @@
 }
 .rr-status[data-tone="green"] { background: var(--tint-green); color: var(--green); }
 .rr-status[data-tone="yellow"] { background: var(--tint-amber); color: var(--accent2); }
-.rr-status[data-tone="red"] { background: var(--tint-red); color: var(--accent); }
+.rr-status[data-tone="red"] { background: var(--tint-red); color: var(--danger); }
 .rr-card-action {
   display: flex;
   align-items: center;

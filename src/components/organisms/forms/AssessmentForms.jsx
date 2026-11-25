@@ -44,7 +44,7 @@ function MetaRow({ f, setF }) {
         <small className="muted">Optional · leave blank if not scheduled.</small>
         {suggested.dueDate && <Button variant="ghost" size="sm" onClick={() => setF({ ...f, nextReassessmentDate: suggested.dueDate })}>Use {suggested.intervalDays}-day default · {fmtDate(suggested.dueDate)}</Button>}
       </div>
-      {error && <p role="alert" style={{ color: 'var(--accent)', fontSize: 12 }}>{error}</p>}
+      {error && <p role="alert" style={{ color: 'var(--danger)', fontSize: 12 }}>{error}</p>}
     </div>}
     </>
   )

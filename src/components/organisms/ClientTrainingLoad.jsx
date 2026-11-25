@@ -48,7 +48,7 @@ function LoadMetricGraphModal({ measure, history, today }) {
   const hasBand = dates.some((date, index) => inObservedSpan(date) && bands[index])
   const datasets = hasBand ? [
     { label: 'Lower quartile', data: dates.map((date, index) => inObservedSpan(date) ? bands[index]?.lower ?? null : null), borderColor: 'transparent', pointRadius: 0, fill: false },
-    { label: 'Upper quartile', data: dates.map((date, index) => inObservedSpan(date) ? bands[index]?.upper ?? null : null), borderColor: 'transparent', pointRadius: 0, backgroundColor: 'rgba(11,135,201,.18)', fill: '-1' },
+    { label: 'Upper quartile', data: dates.map((date, index) => inObservedSpan(date) ? bands[index]?.upper ?? null : null), borderColor: 'transparent', pointRadius: 0, backgroundColor: COLORS.blue + '2e', fill: '-1' },
   ] : []
   datasets.push({ label: measure.title, data: dates.map((date) => byDate[date]?.[measure.id] ?? null), borderColor: COLORS.blue, backgroundColor: COLORS.blue, pointRadius: dates.map((date) => byDate[date]?.[measure.id] == null ? 0 : date === selected?.date ? 6 : 4), pointHoverRadius: 7, showLine: false, spanGaps: false })
   const axisLabel = measure.id === 'strain' ? 'Strain (AU)' : `${measure.title} (ratio)`

@@ -9,7 +9,7 @@ html:has(.client-assessments){overflow-y:scroll;scrollbar-gutter:stable}
 .client-assessments .assessment-screen-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
 .client-assessments .assessment-badge{display:inline-flex;align-items:center;padding:4px 8px;background:var(--surface2);border-radius:7px;color:var(--muted);font-size:11px;font-weight:600}
 .client-assessments .assessment-badge.green{background:var(--tint-green);color:var(--green)}
-.client-assessments .assessment-badge.red{background:var(--tint-red);color:var(--accent)}
+.client-assessments .assessment-badge.red{background:var(--tint-red);color:var(--danger)}
 .client-assessments .assessment-badge.amber{background:var(--tint-amber);color:var(--accent2)}
 .client-assessments .assessment-screen-date{font-size:12px;color:var(--muted);margin:10px 0 0}
 .client-assessments .assessment-review-strip{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;background:var(--tint-amber);border-radius:10px;margin-top:16px;font-size:12px}
