@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import Field from '../../atoms/Field'
 import ChipSelect from '../../molecules/ChipSelect'
 import { GOAL_OPTIONS } from '../../../lib/screening'
@@ -20,9 +21,9 @@ export default function GoalsStep({ goals, onChange }) {
       </div>
       <div className="row3">
         <Field label="Target metric (optional)">
-          <select value={goals.target?.metric || ''} onChange={setT('metric')}>
+          <Select value={goals.target?.metric || ''} onChange={setT('metric')}>
             <option value="">—</option>{['weight', 'body-fat %', 'distance', 'lift', 'other'].map((o) => <option key={o}>{o}</option>)}
-          </select>
+          </Select>
         </Field>
         <Field label="Target value"><input value={goals.target?.value || ''} onChange={setT('value')} placeholder="e.g. −6 kg" /></Field>
         <Field label="Target date"><input type="date" value={goals.target?.date || ''} onChange={setT('date')} /></Field>

@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 // One exercise inside a block: name (library datalist), intensity metric,
 // superset link, and its set rows. Voice-parsed names that missed the synonym
 // index render with an orange border and force a manual library selection
@@ -49,13 +50,13 @@ export default function ExerciseCard({
           onChange={(v) => onChange({ exerciseName: v, unmapped: false, exerciseDbRef: null })}
         />
         <label className="sf"><span>Intensity</span>
-          <select value={ex.intensityType} aria-label="Intensity metric" title="Changing the metric clears incompatible intensity targets." onChange={(e) => onChange(changeIntensity(ex, e.target.value))}>
+          <Select value={ex.intensityType} aria-label="Intensity metric" title="Changing the metric clears incompatible intensity targets." onChange={(e) => onChange(changeIntensity(ex, e.target.value))}>
             {INTENSITY_TYPES.map((t) => <option key={t}>{t}</option>)}
-          </select></label>
+          </Select></label>
         <label className="sf"><span>Superset</span>
-          <select value={ex.supersetLinkId || ''} aria-label="Superset group" onChange={(e) => onChange({ supersetLinkId: e.target.value || null })}>
+          <Select value={ex.supersetLinkId || ''} aria-label="Superset group" onChange={(e) => onChange({ supersetLinkId: e.target.value || null })}>
             {SUPERSET_GROUPS.map((g) => <option key={g} value={g}>{g || 'None'}</option>)}
-          </select></label>
+          </Select></label>
         {['%1RM', 'RPE', 'RIR'].includes(ex.intensityType) && (
           <span className="ex-tm muted"
             title={tmInfo?.source === 'derived'
@@ -74,11 +75,11 @@ export default function ExerciseCard({
       {ex.unmapped && (
         <div className="ex-validate" role="alert">
           <Icon name="alert" size={14} /> “{ex.exerciseName}” isn’t in the exercise library — pick the standard term to continue:
-          <select aria-label="Validate exercise name" value=""
+          <Select aria-label="Validate exercise name" value=""
             onChange={(e) => e.target.value && onChange({ exerciseName: e.target.value, unmapped: false })}>
             <option value="">Select exercise…</option>
             {exercises.map((x) => <option key={x.id} value={x.name}>{x.name}</option>)}
-          </select>
+          </Select>
           <button type="button" className="link-btn" onClick={() => onChange({ unmapped: false })}>keep as typed</button>
         </div>
       )}

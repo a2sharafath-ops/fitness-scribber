@@ -1,3 +1,4 @@
+import Select from './Select'
 import { toDisp, dispToKg, unitName } from '../../lib/units'
 
 // One set inside the block-by-block session runner. Shows the coach's prescribed
@@ -37,7 +38,7 @@ export default function SetLogRow({ row, units, onChange, warmupBlock = false })
   return (
     <div className={'slog' + (row.done ? ' done' : '')}>
       <span className="slog-n">{row.n}</span>
-      <span className="slog-target" title="Prescribed target">{target}<select style={{ minHeight: 44, marginTop: 4, width: '100%' }} aria-label={`Set ${row.n} type`} value={warmupBlock ? 'warmup' : row.purpose || ''} disabled={warmupBlock} onChange={(e) => onChange({ purpose: e.target.value })}><option value="">Choose set type</option><option value="working">Working set</option><option value="warmup">Warm-up set</option></select></span>
+      <span className="slog-target" title="Prescribed target">{target}<Select style={{ minHeight: 44, marginTop: 4, width: '100%' }} aria-label={`Set ${row.n} type`} value={warmupBlock ? 'warmup' : row.purpose || ''} disabled={warmupBlock} onChange={(e) => onChange({ purpose: e.target.value })}><option value="">Choose set type</option><option value="working">Working set</option><option value="warmup">Warm-up set</option></Select></span>
       <label className="slog-f"><span>Load ({unitName(units)})</span>
         <input type="number" step="0.5" inputMode="decimal" value={row.load == null ? '' : toDisp(row.load, units)}
           placeholder={row.pLoadKg != null ? String(toDisp(row.pLoadKg, units)) : '—'} aria-label={`Set ${row.n} load`}
@@ -47,11 +48,11 @@ export default function SetLogRow({ row, units, onChange, warmupBlock = false })
           placeholder={row.pReps != null ? String(row.pReps) : '—'}
           onChange={(e) => onChange({ [timed ? 'durationSeconds' : 'reps']: numOrNull(e.target.value) })} /></label>
       <label className="slog-f"><span>{effortType}</span>
-        <select value={row.effort ?? ''} aria-label={`Set ${row.n} ${effortType}`}
+        <Select value={row.effort ?? ''} aria-label={`Set ${row.n} ${effortType}`}
           onChange={(e) => onChange({ effort: numOrNull(e.target.value) })}>
           <option value="">—</option>
           {scale.map((v) => <option key={v} value={v}>{v}</option>)}
-        </select></label>
+        </Select></label>
       <label className="slog-done" title="Mark set completed">
         <input type="checkbox" checked={!!row.done} onChange={(e) => toggleDone(e.target.checked)} aria-label={`Set ${row.n} done`} />
       </label>

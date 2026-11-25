@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
@@ -33,20 +34,20 @@ export default function ConcernForm({ concern, clientId }) {
     <ModalShell title={(concern ? 'Edit' : 'Flag a') + ' Concern'} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Submit</Button></>}>
       <Field label="Client (reporting)">
-        <select value={f.clientId} onChange={(e) => setF({ ...f, clientId: e.target.value, sessionId: '' })}>
+        <Select value={f.clientId} onChange={(e) => setF({ ...f, clientId: e.target.value, sessionId: '' })}>
           {db.clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+        </Select>
       </Field>
       <div className="row3">
-        <Field label="Category"><select value={f.category} onChange={set('category')}>{CATS.map((o) => <option key={o}>{o}</option>)}</select></Field>
-        <Field label="Severity"><select value={f.severity} onChange={set('severity')}>{['Low', 'Medium', 'High'].map((o) => <option key={o}>{o}</option>)}</select></Field>
+        <Field label="Category"><Select value={f.category} onChange={set('category')}>{CATS.map((o) => <option key={o}>{o}</option>)}</Select></Field>
+        <Field label="Severity"><Select value={f.severity} onChange={set('severity')}>{['Low', 'Medium', 'High'].map((o) => <option key={o}>{o}</option>)}</Select></Field>
         <Field label="Date"><input type="date" value={f.date} onChange={set('date')} /></Field>
       </div>
       <Field label="Related session (optional)">
-        <select value={f.sessionId || ''} onChange={set('sessionId')}>
+        <Select value={f.sessionId || ''} onChange={set('sessionId')}>
           <option value="">— Not session-specific —</option>
           {sessions.map((s) => <option key={s.id} value={s.id}>{fmtDay(s.date)} · {s.time} · {s.type}</option>)}
-        </select>
+        </Select>
       </Field>
       <Field label="What's the concern?"><textarea value={f.text} onChange={set('text')} placeholder="Describe the issue..." /></Field>
     </ModalShell>

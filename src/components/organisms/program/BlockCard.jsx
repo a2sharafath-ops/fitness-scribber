@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 // One workout block container (spec 2.1): type header, auto-1RM toggle and
 // the exercises it holds. Presentational — state lives in the builder modal.
 import ExerciseCard from './ExerciseCard'
@@ -35,10 +36,10 @@ export default function BlockCard({
     <div className={'block-card' + (isOver ? ' drag-over' : '') + (isDragging ? ' dragging' : '')} {...dragProps}>
       <div className="block-head">
         <span className="drag-grip" title="Drag to reorder this block" aria-label="Reorder block" {...dragHandleProps}>⠿</span>
-        <select className="block-type" value={block.blockType} aria-label="Block type"
+        <Select className="block-type" value={block.blockType} aria-label="Block type"
           onChange={(e) => onChange({ blockType: e.target.value, autoCalculate1RM: e.target.value === 'Main Lifts' })}>
           {BLOCK_TYPES.map((t) => <option key={t}>{t}</option>)}
-        </select>
+        </Select>
         <span className="muted block-hint">{BLOCK_HINT[block.blockType]}</span>
         {block.blockType === 'Main Lifts' && (
           <label className="block-auto">

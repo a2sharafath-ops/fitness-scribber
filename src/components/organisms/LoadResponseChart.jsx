@@ -1,3 +1,4 @@
+import Select from '../molecules/Select'
 import { useState } from 'react'
 import ProgressInfo from '../atoms/ProgressInfo'
 import { Chart, Scatter } from 'react-chartjs-2'
@@ -11,7 +12,7 @@ const modeChoices = [['raw', 'Raw values'], ['7', '7-day rolling mean'], ['28', 
 const displayLabel = { dot: 'Dots', line: 'Line', column: 'Columns' }
 const formatValue = (value) => value == null ? '—' : Number.isInteger(value) ? value.toLocaleString() : Number(value.toFixed(2)).toLocaleString()
 
-function MetricOptions({ includeDate = false, includeNone = false }) {
+function metricOptions({ includeDate = false, includeNone = false } = {}) {
   return <>
     {includeDate && <option value="date">Date</option>}
     {includeNone && <option value="">None</option>}
@@ -99,7 +100,7 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
     <div className="load-response-heading"><h2 id="load-response-title">Load response <ProgressInfo label="load response" text="Session load is RPE × duration in minutes (AU). Missing days remain blank. Display choices do not change the load calculations." /></h2>{action}</div>
     {latestLoad && <div className="metric-lead"><span>Latest daily load</span>
       <strong>{formatValue(latestLoad.values.load)} AU</strong><time dateTime={latestLoad.date}>{fmtDate(latestLoad.date)}</time></div>}
-    <div className="progress-load-primary-controls"><label>Show <select value={primary} onChange={(event) => setPrimary(event.target.value)}><MetricOptions /></select></label><label>Period <select value={days} onChange={(event) => setDays(Number(event.target.value))}>{[28,56,84,180].map(n => <option key={n} value={n}>{n} days</option>)}</select></label></div>
+    <div className="progress-load-primary-controls"><label>Show <Select value={primary} onChange={(event) => setPrimary(event.target.value)}>{metricOptions()}</Select></label><label>Period <Select value={days} onChange={(event) => setDays(Number(event.target.value))}>{[28,56,84,180].map(n => <option key={n} value={n}>{n} days</option>)}</Select></label></div>
     {hasData ? <div className="load-response-canvas">{scatter
       ? <Scatter data={chartData} options={options} role="img" aria-label={`Load response scatter chart, ${plotted}. X-axis ${byId[xMetric].label}; Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />
       : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}</div> : <p className="progress-empty">{emptyLabel}</p>}
@@ -108,11 +109,11 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
     <details className="load-response-settings">
       <summary><span className="load-response-settings-title">Customize chart</span><span className="load-response-settings-current">X: {scatter ? byId[xMetric].label : 'Date'} · Y: {byId[primary].label}{secondary ? ` + ${byId[secondary].label}` : ''} · {mode === 'raw' ? 'Raw' : `${mode}-day mean`} · {days} days</span></summary>
       <div className="load-response-controls">
-        <label>X-axis<select value={xMetric} onChange={(event) => setXMetric(event.target.value)}><MetricOptions includeDate /></select></label>
-        <label>Second Y-axis<select value={secondary} onChange={(event) => setSecondary(event.target.value)}><MetricOptions includeNone /></select></label>
-        <label>Y display<select value={scatter ? 'dot' : primaryStyle} disabled={scatter} onChange={(event) => setPrimaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Second Y display<select value={scatter ? 'dot' : secondaryStyle} disabled={scatter || !secondary} onChange={(event) => setSecondaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Values<select value={mode} onChange={(event) => setMode(event.target.value)}>{modeChoices.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>X-axis<Select value={xMetric} onChange={(event) => setXMetric(event.target.value)}>{metricOptions({ includeDate: true })}</Select></label>
+        <label>Second Y-axis<Select value={secondary} onChange={(event) => setSecondary(event.target.value)}>{metricOptions({ includeNone: true })}</Select></label>
+        <label>Y display<Select value={scatter ? 'dot' : primaryStyle} disabled={scatter} onChange={(event) => setPrimaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
+        <label>Second Y display<Select value={scatter ? 'dot' : secondaryStyle} disabled={scatter || !secondary} onChange={(event) => setSecondaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
+        <label>Values<Select value={mode} onChange={(event) => setMode(event.target.value)}>{modeChoices.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
       </div>
       {scatter && <p className="load-response-hint">Metric X-axis uses same-date pairs as dots. Line and column styles apply to the date view only.</p>}
     </details>

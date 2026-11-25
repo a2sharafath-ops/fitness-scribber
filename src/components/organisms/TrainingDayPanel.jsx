@@ -1,3 +1,4 @@
+import Select from '../molecules/Select'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../atoms/Button'
@@ -85,7 +86,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
         <p role="status">{recovery.kind === 'saved' ? 'Workout corrections were saved.' : 'A correction draft is available in Edit logged details.'}</p>
         {recovery.kind === 'saved' && <Button size="sm" variant="ghost" onClick={dismiss}>Dismiss</Button>}
       </div>}
-      {log && records.length > 1 && <label className="training-log-picker">Workout log<select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</select></label>}
+      {log && records.length > 1 && <label className="training-log-picker">Workout log<Select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</Select></label>}
       {log && day.prescription && <SegToggle options={[[ 'actual', 'Logged workout' ], [ 'plan', bookings.length ? 'Day’s plan' : 'Original plan' ]]} value={recordView} onChange={setRecordView} ariaLabel="Completed day view" />}
       {hasDetails ? <><p className="training-selected-notice">{notice}</p><div className="training-selected-scroll" role="region" aria-label={actual ? 'Recorded sets' : pending ? 'Saved workout details' : 'Planned exercises'} tabIndex={0}>
         <DayBlockReview compact workout={actual ? log : log ? null : pending} prescription={day.prescription} units={units} />

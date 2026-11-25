@@ -1,3 +1,4 @@
+import Select from '../molecules/Select'
 import { useState } from 'react'
 import { Line } from 'react-chartjs-2'
 import Button from '../atoms/Button'
@@ -68,7 +69,7 @@ function LoadMetricGraphModal({ measure, history, today }) {
   return <ModalShell title={<span className="progress-load-graph-title">{measure.title} history <button type="button" className="progress-info" aria-label={`What is ${measure.title}?`} aria-expanded={showDefinition} onClick={() => setShowDefinition(value => !value)}>i</button></span>} onClose={closeModal} footer={<Button variant="ghost" onClick={closeModal}>Close</Button>}>
     <div className="progress-load-graph">
       {showDefinition && <p className="progress-info-text">{GLOSSARY[measure.id].text}</p>}
-      <div className="progress-load-graph-controls"><label>Display period <select value={displayDays} onChange={(event) => setDisplayDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option></select></label>{plotted.length > 0 && <label className="progress-load-band-toggle"><input type="checkbox" checked={showBand} onChange={(event) => setShowBand(event.target.checked)} /> Show personal baseline band</label>}</div>
+      <div className="progress-load-graph-controls"><label>Display period <Select value={displayDays} onChange={(event) => setDisplayDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option></Select></label>{plotted.length > 0 && <label className="progress-load-band-toggle"><input type="checkbox" checked={showBand} onChange={(event) => setShowBand(event.target.checked)} /> Show personal baseline band</label>}</div>
       <div className="progress-load-graph-canvas"><Line data={{ labels: dates.map(shortLabel), datasets }} options={options} role="img" aria-label={`${measure.title} chart, ${plotted.length} calculated values between ${fmtDate(start)} and ${fmtDate(end)}. Unlogged days have no point.${selectedBand ? ` Trailing personal baseline band for ${fmtDate(selected.date)}: ${bandText}.` : ''}`} /></div>
       {plotted.length ? <><div className="progress-load-graph-legend"><span><i className="progress-load-graph-point" /> Dated {measure.title} values</span>{hasBand && <span><i className="progress-load-graph-band" /> Trailing personal baseline band</span>}</div><p className="checkins-window">{plotted.length} calculated values · {chronological.length}/{displayDays} days logged</p></> : <p className="checkins-empty">No calculable {measure.title} values yet. {unavailableReason(measure.id, chronological.at(-1))}</p>}
       {chronological.length > 0 && <details className="progress-derived-table"><summary>Show dated {measure.title} table</summary><div className="progress-derived-detail">
@@ -77,7 +78,7 @@ function LoadMetricGraphModal({ measure, history, today }) {
         </tbody></LogTable>
         <p className="checkins-note">Unlogged days may be missing entries, not rest days.</p>
       </div></details>}
-      {selected && <div className="progress-load-graph-breakdown"><label>Inspect recorded date <select value={selected.date} onChange={(event) => setSelectedDate(event.target.value)}>{[...chronological].reverse().map((row) => <option key={row.date} value={row.date}>{fmtDate(row.date)}</option>)}</select></label><div className="progress-load-graph-summary"><strong>{measure.title}: {measureValue(measure.id, selected)}</strong><span>{fmtDate(selected.date)} · {selected.logged7}/7 days logged{measure.id === 'acwr' ? ` · ${selected.logged28}/28 days logged` : ''}</span></div><dl>{componentRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p>Sources in calculation window: {sources}.</p></div>}
+      {selected && <div className="progress-load-graph-breakdown"><label>Inspect recorded date <Select value={selected.date} onChange={(event) => setSelectedDate(event.target.value)}>{[...chronological].reverse().map((row) => <option key={row.date} value={row.date}>{fmtDate(row.date)}</option>)}</Select></label><div className="progress-load-graph-summary"><strong>{measure.title}: {measureValue(measure.id, selected)}</strong><span>{fmtDate(selected.date)} · {selected.logged7}/7 days logged{measure.id === 'acwr' ? ` · ${selected.logged28}/28 days logged` : ''}</span></div><dl>{componentRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p>Sources in calculation window: {sources}.</p></div>}
     </div>
   </ModalShell>
 }

@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import MobileOptions from '../components/molecules/MobileOptions'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -181,24 +182,18 @@ export default function SchedulePage() {
         <MobileOptions className="schedule-filters" activeCount={Number(client !== 'all') + Number(status !== 'booked')}>
           <div className="schedule-filter">
             <label htmlFor="schedule-client-filter">Client</label>
-            <span className="orbit-select-wrap">
-              <select id="schedule-client-filter" value={client} onChange={e => setClient(e.target.value)}>
-                <option value="all">All clients</option>
-                {db.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-              <Icon name="chevron-down" size={14} />
-            </span>
+            <Select id="schedule-client-filter" value={client} onChange={e => setClient(e.target.value)}>
+              <option value="all">All clients</option>
+              {db.clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </Select>
           </div>
           <div className="schedule-filter">
             <label htmlFor="schedule-status-filter">Status</label>
-            <span className="orbit-select-wrap">
-              <select id="schedule-status-filter" value={status} onChange={e => setStatus(e.target.value)}>
-                <option value="booked">All except cancelled</option>
-                {['Pending', 'Confirmed', 'Completed', 'Cancelled', 'Missed'].map(s => <option key={s}>{s}</option>)}
-                <option value="all">All statuses</option>
-              </select>
-              <Icon name="chevron-down" size={14} />
-            </span>
+            <Select id="schedule-status-filter" value={status} onChange={e => setStatus(e.target.value)}>
+              <option value="booked">All except cancelled</option>
+              {['Pending', 'Confirmed', 'Completed', 'Cancelled', 'Missed'].map(s => <option key={s}>{s}</option>)}
+              <option value="all">All statuses</option>
+            </Select>
           </div>
           {(client !== 'all' || status !== 'booked') && <button className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}
         </MobileOptions>

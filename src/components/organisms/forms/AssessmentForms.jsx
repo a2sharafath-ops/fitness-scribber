@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState, useEffect } from 'react'
 import ModalShell from '../../molecules/ModalShell'
 import Button from '../../atoms/Button'
@@ -32,10 +33,10 @@ function MetaRow({ f, setF }) {
     <div className="row2">
       <Field label="Assessment date"><input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></Field>
       <Field label="Phase">
-        <select value={f.phase} onChange={(e) => setF({ ...f, phase: e.target.value })}>
+        <Select value={f.phase} onChange={(e) => setF({ ...f, phase: e.target.value })}>
           <option value="baseline">Baseline (onboarding)</option>
           <option value="reassessment">Reassessment</option>
-        </select>
+        </Select>
       </Field>
     </div>
     {hasReviewDate && <div style={{ marginBottom: 12 }}>
@@ -142,9 +143,9 @@ function PostureRow({ item, f = {}, onChange }) {
       </div>
       {on && (
         <div className="pos-row-detail">
-          <select value={f.severity || 'moderate'} onChange={(e) => onChange({ severity: e.target.value })} aria-label={item.label + ' severity'}>
+          <Select value={f.severity || 'moderate'} onChange={(e) => onChange({ severity: e.target.value })} aria-label={item.label + ' severity'}>
             {SEVERITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
+          </Select>
           <label className="pos-pain"><input type="checkbox" checked={!!f.pain} aria-label={`${item.label} pain`} onChange={(e) => onChange({ pain: e.target.checked })} /> pain</label>
           <input className="pos-note" value={f.note || ''} onChange={(e) => onChange({ note: e.target.value })} placeholder="note…" aria-label={item.label + ' note'} />
         </div>
@@ -168,9 +169,9 @@ function LegacyMovementForm({ clientId, record, defaultPhase }) {
       {screens.map((s, i) => (
         <div className="asr-row" key={s.pattern}>
           <span className="asr-pat">{s.pattern}</span>
-          <select value={s.score} onChange={(e) => upd(i, 'score', +e.target.value)} aria-label={s.pattern + ' score'}>
+          <Select value={s.score} onChange={(e) => upd(i, 'score', +e.target.value)} aria-label={s.pattern + ' score'}>
             {[0, 1, 2, 3].map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
+          </Select>
           <label className="asr-pain"><input type="checkbox" checked={s.pain} aria-label={`${s.pattern} pain`} onChange={(e) => upd(i, 'pain', e.target.checked)} /> pain</label>
         </div>
       ))}
@@ -202,9 +203,9 @@ function ReportImport({ pdf, imported, importedSource, onPick, candidates, selec
       </label>
       <a className="bc-template" href={'data:text/csv;charset=utf-8,' + encodeURIComponent(BODY_COMP_TEMPLATE)} download="body-composition-template.csv">CSV template</a>
       {candidates.length > 0 && <div className="bc-table-preview">
-        <Field label={`Choose measurements · ${candidates.length} row${candidates.length === 1 ? '' : 's'}`}><select aria-label="Import measurement row" value={selectedIndex} onChange={e => onSelect(e.target.value)}>
+        <Field label={`Choose measurements · ${candidates.length} row${candidates.length === 1 ? '' : 's'}`}><Select aria-label="Import measurement row" value={selectedIndex} onChange={e => onSelect(e.target.value)}>
           <option value="">Select a row</option>{candidates.map((row, index) => <option key={index} value={String(index)}>{row.label}</option>)}
-        </select></Field>
+        </Select></Field>
         {selectedIndex !== '' && selected && <>
           <p className="bc-row-label">{selected.label}{selected.method ? ` · ${selected.method}` : ''}</p>
           <dl>{selected.found.map(key => <div key={key}><dt>{FIELD_LABELS[key]}</dt><dd>{selected.values[key]}{['massKg', 'leanMassKg', 'skeletalMuscleKg'].includes(key) ? ' kg' : key === 'bodyFatPct' ? '%' : key === 'hydrationL' ? ' L' : ''}</dd></div>)}</dl>
@@ -373,7 +374,7 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
       <MetaRow f={f} setF={setF} />
       <ReportImport pdf={pdf} imported={imported} importedSource={importedSource} onPick={onPdf} candidates={candidates} selectedIndex={selectedIndex} onSelect={setSelectedIndex} onApply={applyImport} onCancel={() => setCandidates([])} />
       <Field label="Method">
-        <select value={f.method} onChange={set('method')}><option>InBody</option><option>BIA</option><option>Calipers</option><option>DEXA</option></select>
+        <Select value={f.method} onChange={set('method')}><option>InBody</option><option>BIA</option><option>Calipers</option><option>DEXA</option></Select>
       </Field>
       <div className="row3">
         <BcField label="Body mass (kg)" k="massKg" f={f} set={set} imported={imported} />
@@ -486,12 +487,12 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
           <div className="asf-lift-head"><span>{test.name || 'New test'}</span><button type="button" className="x" aria-label={`Remove other test ${i + 1}`} onClick={() => setOtherTests(tests => tests.filter((_, index) => index !== i))}>×</button></div>
           <Field label="Test name"><input value={test.name} aria-label={`Other test name ${i + 1}`} placeholder="e.g. Handgrip dynamometer" onChange={e => updTest(i, 'name', e.target.value)} /></Field>
           <div className="asf-lift-metrics">
-            <Field label="Side"><select value={test.side} aria-label={`Other test side ${i + 1}`} onChange={e => updTest(i, 'side', e.target.value)}><option value="">Not specified</option><option>Left</option><option>Right</option><option>Both</option></select></Field>
+            <Field label="Side"><Select value={test.side} aria-label={`Other test side ${i + 1}`} onChange={e => updTest(i, 'side', e.target.value)}><option value="">Not specified</option><option>Left</option><option>Right</option><option>Both</option></Select></Field>
             <Field label="Result"><input type="number" step="any" value={test.value} aria-label={`Other test result ${i + 1}`} onChange={e => updTest(i, 'value', e.target.value)} /></Field>
             <Field label="Unit"><input value={test.unit} aria-label={`Other test unit ${i + 1}`} placeholder="kgf, N, s, cm…" onChange={e => updTest(i, 'unit', e.target.value)} /></Field>
           </div>
           <Field label="Protocol / device"><input value={test.protocol} aria-label={`Other test protocol ${i + 1}`} placeholder="Device, position, trials and result used" onChange={e => updTest(i, 'protocol', e.target.value)} /></Field>
-          <Field label="Change to highlight"><select value={test.direction} aria-label={`Other test direction ${i + 1}`} onChange={e => updTest(i, 'direction', e.target.value)}><option value="none">No preferred direction</option><option value="up">Higher result</option><option value="down">Lower result</option></select></Field>
+          <Field label="Change to highlight"><Select value={test.direction} aria-label={`Other test direction ${i + 1}`} onChange={e => updTest(i, 'direction', e.target.value)}><option value="none">No preferred direction</option><option value="up">Higher result</option><option value="down">Lower result</option></Select></Field>
         </fieldset>)}
         <div className="flex gap" style={{ flexWrap: 'wrap' }}>
           <Button variant="ghost" size="sm" onClick={() => setOtherTests(tests => [...tests, blankFitnessTest()])}>＋ Add test</Button>
@@ -559,7 +560,7 @@ export function LifestyleForm({ clientId, record, defaultPhase }) {
       <RangeSlider label="Sleep quality" value={f.sleepQuality} min={1} max={7} lo="Poor" hi="Excellent" onChange={sl('sleepQuality')} />
       <RangeSlider label="Stress" value={f.stress} min={1} max={7} lo="None" hi="Extreme" onChange={sl('stress')} />
       <div className="row2">
-        <Field label="Activity level"><select value={f.activityLevel} onChange={set('activityLevel')}>{ACTIVITY_LEVELS.map((a) => <option key={a}>{a}</option>)}</select></Field>
+        <Field label="Activity level"><Select value={f.activityLevel} onChange={set('activityLevel')}>{ACTIVITY_LEVELS.map((a) => <option key={a}>{a}</option>)}</Select></Field>
         <Field label="Daily steps (avg)"><input type="number" step="500" value={f.steps} onChange={set('steps')} /></Field>
       </div>
       <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Occupation, routine, constraints…" /></Field>

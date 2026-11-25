@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
@@ -154,7 +155,7 @@ export default function AssessmentsPage() {
     </section>
     {screeningSettled && screeningCard}
     {records.length > 0 && <details className="card assessment-history"><summary>Assessment history <span className="assessment-badge">{records.length} records</span></summary>
-      <div className="assessment-history-body"><label className="assessment-filter">Assessment type<select value={historyType} onChange={(e) => setHistoryType(e.target.value)}><option value="">All types</option>{TEST_TYPES.map((type) => <option key={type.key} value={type.key}>{type.label}</option>)}</select></label>
+      <div className="assessment-history-body"><label className="assessment-filter">Assessment type<Select value={historyType} onChange={(e) => setHistoryType(e.target.value)}><option value="">All types</option>{TEST_TYPES.map((type) => <option key={type.key} value={type.key}>{type.label}</option>)}</Select></label>
         <div className="assessment-history-scroll" tabIndex={0} role="region" aria-label="Assessment history records">{history.length ? history.map((rec) => <div className="assessment-history-row" key={rec.id}><div><strong>{TEST_TYPES.find((t) => t.key === rec.type)?.label} · {fmtDate(rec.date)}</strong><small>{rec.phase === 'reassessment' ? 'Reassessment' : 'Baseline'} · {summarize(rec)}</small></div><Link className="assessment-link" to={recordPath(id, rec)} aria-label={`View ${rec.type} assessment from ${fmtDate(rec.date)}`}>View →</Link></div>) : <p className="assessment-empty">No records for this type.</p>}</div>
       </div>
     </details>}

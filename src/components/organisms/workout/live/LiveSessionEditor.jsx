@@ -1,4 +1,6 @@
+import Select from '../../../molecules/Select'
 import { useState } from 'react'
+import Autocomplete from '../../../molecules/Autocomplete'
 import LiveSessionDialog from '../../../molecules/LiveSessionDialog'
 import LivePlateCalculator from './LivePlateCalculator'
 import LiveWorkoutOrder from './LiveWorkoutOrder'
@@ -14,6 +16,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
   const [mode, setMode] = useState(row ? rowMode(row) : 'reps')
   const [value, setValue] = useState(toDisp(confirmedLoad, units) ?? '')
   const [plates, setPlates] = useState(false)
+  const [exerciseName, setExerciseName] = useState('')
   const libraryItem = exercises.find((entry) => entry.id === item?.exId || entry.id === item?.exerciseId || entry.name?.toLowerCase() === item?.name?.toLowerCase())
   const submitAction = (action) => { if (onAction(action)) onClose() }
   const field = (name, label, value, { min = 0, max = 999, step = 1, required = false } = {}) => <label>{label}<input type="number" name={name} defaultValue={value ?? ''} min={min} max={max} step={step} required={required} /></label>
@@ -94,7 +97,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       break
     case 'type':
       title = 'Change set type'
-      content = <label>Set type<select name="type" defaultValue={rowType(row)}>{Object.entries(LIVE_SET_TYPES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
+      content = <label>Set type<Select name="type" defaultValue={rowType(row)}>{Object.entries(LIVE_SET_TYPES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</Select></label>
       submit = (form) => submitAction({ type: 'row', id: row.id, patch: { type: form.get('type'), purpose: ['warmup', 'cooldown'].includes(form.get('type')) ? form.get('type') : 'working' } })
       break
     case 'target':
@@ -109,7 +112,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       break
     case 'effort':
       title = 'Enter set effort'
-      content = <><label>Effort metric<select name="effortType" defaultValue={row.effortType || 'RIR'}><option>RIR</option><option>RPE</option></select></label>
+      content = <><label>Effort metric<Select name="effortType" defaultValue={row.effortType || 'RIR'}><option>RIR</option><option>RPE</option></Select></label>
         {field('effort', 'Actual effort', row.effort, { max: 10, step: 0.5 })}
         {row.effort != null && <p>Recorded effort · {row.effort} {row.effortType || 'RIR'}</p>}</>
       submit = (form) => submitAction({ type: 'row', id: row.id, patch: { effortType: form.get('effortType'), effort: form.get('effort') === '' ? null : Number(form.get('effort')) } })
@@ -121,7 +124,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       break
     case 'settings':
       title = 'Workout settings'
-      content = <><label>Weight units<select name="units" defaultValue={units}><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option></select></label>
+      content = <><label>Weight units<Select name="units" defaultValue={units}><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option></Select></label>
         {field('rest', 'Default rest (seconds)', session.liveState.settings.defaultRestSeconds, { min: 1, max: 900, required: true })}</>
       submit = (form) => submitAction({ type: 'settings', settings: { units: form.get('units'), defaultRestSeconds: Number(form.get('rest')) } })
       break
@@ -133,15 +136,15 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
     case 'add-exercise':
     case 'replace':
       title = kind === 'replace' ? `Replace ${item.name}` : `Add exercise · ${block.title}`
-      content = <><label>Exercise<input name="name" list="live-exercise-library" maxLength={100} required autoComplete="off" /></label>
-        <datalist id="live-exercise-library">{exercises.map((entry) => <option key={entry.id} value={entry.name} />)}</datalist>
+      content = <><label>Exercise<Autocomplete ariaLabel="Exercise" name="name" maxLength={100} required
+        value={exerciseName} onChange={setExerciseName} options={exercises.map(entry => entry.name)} /></label>
         {kind === 'replace' && <p className="ls-hint">The replacement starts with new sets. Previous sets stay with the original exercise.</p>}</>
       submit = (form) => { const name = String(form.get('name')).trim(); const entry = exercises.find((exercise) => exercise.name === name)
         submitAction({ type: kind, id: item?.id, blockId, name, exerciseId: entry?.id }) }
       break
     case 'superset':
       title = 'Create superset'
-      content = <label>Pair with<select name="partner">{block.items.filter((entry) => entry.id !== item.id && !entry.supersetId && !entry.skipped).map((entry) => <option value={entry.id} key={entry.id}>{entry.name}</option>)}</select></label>
+      content = <label>Pair with<Select name="partner">{block.items.filter((entry) => entry.id !== item.id && !entry.supersetId && !entry.skipped).map((entry) => <option value={entry.id} key={entry.id}>{entry.name}</option>)}</Select></label>
       submit = (form) => submitAction({ type: 'superset', id: item.id, partnerId: form.get('partner') })
       break
     default: return null

@@ -1,5 +1,5 @@
+import Select from '../molecules/Select'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import Icon from '../atoms/Icon'
 
 const sections = (id) => [
   { to: `/clients/${id}`, label: 'Overview', end: true },
@@ -18,8 +18,8 @@ export function ClientSectionPicker({ client, messagePath, reportPath }) {
   const sectionLabel = current?.label ?? (pathname.endsWith('/srpetl') ? 'Progress' : 'Check-ins')
   const onSectionRoot = current?.to === pathname && !search && !hash
 
-  return <span className="orbit-select-wrap client-section-picker">
-    <select aria-label="Client sections and actions" value={onSectionRoot ? current.to : ''}
+  return <span className="client-section-picker">
+    <Select aria-label="Client sections and actions" value={onSectionRoot ? current.to : ''}
       onChange={event => navigate(event.target.value)}>
       {!onSectionRoot && <option value="" disabled hidden>{sectionLabel}</option>}
       <optgroup label="Client sections">
@@ -30,8 +30,7 @@ export function ClientSectionPicker({ client, messagePath, reportPath }) {
         <option value={reportPath}>Report</option>
         <option value="/clients">All clients</option>
       </optgroup>
-    </select>
-    <Icon name="chevron-down" size={16} aria-hidden="true" />
+    </Select>
   </span>
 }
 

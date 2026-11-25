@@ -1,7 +1,7 @@
 .coach-dashboard{--db-ink:#17191b;--db-muted:#6b7177;--db-line:#e7e4df;--db-green:#315b4d;max-width:1400px;margin:0 auto;color:var(--db-ink)}
 .coach-dashboard h1,.coach-dashboard h2,.coach-dashboard h3,.coach-dashboard p{margin:0}
 .coach-dashboard button,.coach-dashboard a,.coach-dashboard summary{touch-action:manipulation}
-.coach-dashboard button:focus-visible,.coach-dashboard a:focus-visible,.coach-dashboard summary:focus-visible,.coach-dashboard select:focus-visible,.coach-dashboard [tabindex]:focus-visible{outline:3px solid var(--orbit-focus);outline-offset:3px}
+.coach-dashboard button:focus-visible,.coach-dashboard a:focus-visible,.coach-dashboard summary:focus-visible,.coach-dashboard .orbit-select:focus-visible,.coach-dashboard [tabindex]:focus-visible{outline:3px solid var(--orbit-focus);outline-offset:3px}
 .db-title{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:24px;flex-wrap:wrap}
 .db-title h1{font-size:30px;letter-spacing:-1px;font-weight:650}
 .coach-dashboard .db-date{font-size:12px;color:var(--db-muted);margin-top:5px}
@@ -74,7 +74,7 @@
 .db-trend-body{padding:0 24px 24px}
 .db-chart-controls{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
 .db-chart-controls .db-tabs{margin:0}.db-chart-controls label{font-size:12px;color:var(--db-muted)}
-.db-chart-controls select{border:1px solid var(--db-line);border-radius:8px;background:#fff;padding:7px 9px;font-size:12px;margin-left:6px;min-width:100px;width:auto}
+.db-chart-controls .orbit-select{border:1px solid var(--db-line);border-radius:8px;background:#fff;padding:7px 9px;font-size:12px;margin-left:6px;min-width:100px;width:auto}
 .coach-dashboard .db-chart-heading{font-size:12px;color:var(--db-muted);margin-bottom:10px}
 .db-chart{height:230px;position:relative}
 .coach-dashboard .db-chart-empty,.coach-dashboard .db-note{font-size:12px;color:var(--db-muted);margin-top:12px}
@@ -144,7 +144,7 @@
 .coach-dashboard .db-stat:hover { border-color: var(--accent); }
 .coach-dashboard .db-stat strong { font-size: 27px; }
 .coach-dashboard .db-stat > span, .coach-dashboard .db-stat small, .coach-dashboard .db-info small { color: var(--muted); }
-.coach-dashboard .db-tabs button, .coach-dashboard select, .coach-dashboard .db-menu summary,
+.coach-dashboard .db-tabs button, .coach-dashboard .orbit-select, .coach-dashboard .db-menu summary,
 .coach-dashboard .db-menu-list, .coach-dashboard .db-notice {
   border-color: var(--border);
   background: var(--surface);
@@ -209,7 +209,7 @@
 .coach-dashboard .db-chart { height: 150px; }
 .coach-dashboard .db-chart-heading { margin: 12px 0 6px; }
 .coach-dashboard .db-chart-controls { gap: 8px; }
-.coach-dashboard .db-chart-controls select { min-height: 40px; font: inherit; color: var(--text); }
+.coach-dashboard .db-chart-controls .orbit-select { min-height:44px; font: inherit; color: var(--text); }
 .coach-dashboard .db-note { color: var(--muted); }
 .orbit-readiness-overview { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 0 0 17px; }
 .orbit-readiness-actions { display: flex; gap: 4px 16px; flex-wrap: wrap; }
@@ -335,17 +335,7 @@
   font-size: 12px;
   font-weight: 600;
 }
-.coach-dashboard .orbit-metric-select select {
-  width: 100%;
-  min-width: 0;
-  min-height: 44px;
-  padding-inline-start: 10px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  font-family: inherit;
-  font-size: 16px;
-}
-.orbit-metric-select select:focus-visible { outline-color: var(--orbit-focus); }
+.orbit-metric-select .orbit-select { font-size: 16px; }
 .coach-dashboard .orbit-trend-change { border-radius: 6px; background: var(--surface); padding: 3px 6px; }
 .coach-dashboard .orbit-trend-change[data-tone="up"] { background: var(--tint-green); color: var(--green); }
 .coach-dashboard .orbit-trend-change[data-tone="down"] { background: var(--tint-amber); color: var(--accent2); }

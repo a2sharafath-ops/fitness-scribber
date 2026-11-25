@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 // match against `options` (a string[]) — more reliable and consistent across
 // browsers than a native <datalist>. Free text is allowed: onChange fires on
 // every keystroke; picking a suggestion just sets the value.
-export default function Autocomplete({ value, onChange, options, placeholder, ariaLabel, max = 8, className, inputClassName, filterOption, sortOptions, getOptionDescription, showAllMatches = false }) {
+export default function Autocomplete({ value, onChange, options, placeholder, ariaLabel, name, maxLength, required, max = 8, className, inputClassName, filterOption, sortOptions, getOptionDescription, showAllMatches = false }) {
   const [open, setOpen] = useState(false)
   const [hi, setHi] = useState(0)
   const listId = useId()
@@ -28,6 +28,7 @@ export default function Autocomplete({ value, onChange, options, placeholder, ar
     <div className={'ac-wrap' + (className ? ' ' + className : '')}>
       <input
         className={inputClassName} value={value} placeholder={placeholder} aria-label={ariaLabel} autoComplete="off"
+        name={name} maxLength={maxLength} required={required}
         role="combobox" aria-expanded={show} aria-autocomplete="list"
         aria-controls={show ? listId : undefined} aria-activedescendant={show ? `${listId}-${activeIndex}` : undefined}
         title={value || undefined}

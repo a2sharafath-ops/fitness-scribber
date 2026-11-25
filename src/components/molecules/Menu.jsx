@@ -1,67 +1,90 @@
-import { useState, useRef, useLayoutEffect } from 'react'
-import { createPortal } from 'react-dom'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import Icon from '../atoms/Icon'
 
-// Small "⋯" actions dropdown. `items`: [{ label, icon?, danger?, onClick }].
-// Clicking the trigger toggles a popup; selecting an item runs its onClick.
-// Danger items (e.g. Delete) render in the accent colour as a warning.
-//
-// The popup is rendered into <body> through a portal and positioned to the
-// trigger. Kept inline it was clipped by any ancestor with `overflow: hidden` —
-// a collapsed assessment entry cut the menu off completely. A portal escapes
-// every such ancestor, so the menu works wherever it is used.
 export default function Menu({ items, label = 'Actions' }) {
+  const id = useId()
+  const triggerRef = useRef(null)
+  const menuRef = useRef(null)
   const [open, setOpen] = useState(false)
-  const [pos, setPos] = useState(null)
-  const btnRef = useRef(null)
-  const popRef = useRef(null)
 
-  // Position against the trigger, flipping above it when there isn't room
-  // below, and keeping the popup inside the viewport horizontally.
-  useLayoutEffect(() => {
-    if (!open) return undefined
-    const place = () => {
-      const b = btnRef.current?.getBoundingClientRect()
-      const p = popRef.current?.getBoundingClientRect()
-      if (!b || !p) return
-      const gap = 4
-      const up = b.bottom + p.height + gap > window.innerHeight && b.top - p.height - gap > 8
-      setPos({
-        top: up ? b.top - p.height - gap : b.bottom + gap,
-        left: Math.max(8, Math.min(b.right - p.width, window.innerWidth - p.width - 8)),
-      })
-    }
+  const place = useCallback(() => {
+    const menu = menuRef.current
+    const trigger = triggerRef.current.getBoundingClientRect()
+    const gap = 4
+    const edge = 8
+    const { width, height } = menu.getBoundingClientRect()
+    const above = trigger.bottom + height + gap > innerHeight - edge
+      && trigger.top - height - gap >= edge
+    const top = above ? trigger.top - height - gap : trigger.bottom + gap
+    menu.style.top = Math.max(edge, Math.min(top, innerHeight - height - edge)) + 'px'
+    menu.style.left = Math.max(edge, Math.min(trigger.right - width, innerWidth - width - edge)) + 'px'
+  }, [])
+
+  const show = (edge) => {
+    const menu = menuRef.current
+    menu.showPopover()
     place()
-    // `true` captures scrolls on inner containers too, not just the window.
+    const buttons = menu.querySelectorAll('button')
+    const focused = edge === 'last' ? buttons[buttons.length - 1] : buttons[0]
+    focused?.focus()
+  }
+
+  const close = () => {
+    menuRef.current.hidePopover()
+    triggerRef.current.focus()
+  }
+
+  useEffect(() => {
+    if (!open) return undefined
     window.addEventListener('scroll', place, true)
     window.addEventListener('resize', place)
     return () => {
       window.removeEventListener('scroll', place, true)
       window.removeEventListener('resize', place)
     }
-  }, [open])
+  }, [open, place])
 
-  const close = () => { setOpen(false); setPos(null) }
+  const move = (event) => {
+    if (event.key === 'Escape' || event.key === 'Tab') {
+      if (event.key === 'Escape') event.preventDefault()
+      close()
+      return
+    }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const buttons = [...menuRef.current.querySelectorAll('button')]
+    const index = buttons.indexOf(document.activeElement)
+    const last = buttons.length - 1
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? last
+      : (index + (event.key === 'ArrowDown' ? 1 : last)) % buttons.length
+    buttons[next]?.focus()
+  }
 
   return (
     <div className="menu-wrap">
-      <button type="button" ref={btnRef} className="menu-btn" aria-haspopup="menu" aria-expanded={open} aria-label={label}
-        onClick={() => (open ? close() : setOpen(true))}
-        onBlur={() => setTimeout(close, 150)}><Icon name="more" size={16} /></button>
-      {open && createPortal(
-        // Hidden until measured, so it never flashes at the wrong spot.
-        <div ref={popRef} className="menu-pop" role="menu"
-          style={{ top: pos?.top ?? 0, left: pos?.left ?? 0, visibility: pos ? 'visible' : 'hidden' }}>
-          {items.map((it) => (
-            <button key={it.label} type="button" role="menuitem"
-              className={'menu-item' + (it.danger ? ' danger' : '')}
-              onMouseDown={(e) => { e.preventDefault(); close(); it.onClick() }}>
-              {it.icon && <Icon name={it.icon} size={14} />} {it.label}
-            </button>
-          ))}
-        </div>,
-        document.body,
-      )}
+      <button type="button" ref={triggerRef} className="menu-btn" aria-haspopup="menu" aria-controls={id} popoverTarget={id}
+        aria-expanded={open} aria-label={label} onClick={(event) => {
+          event.preventDefault()
+          if (menuRef.current.matches(':popover-open')) close()
+          else show()
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
+          event.preventDefault()
+          show(event.key === 'ArrowUp' ? 'last' : 'first')
+        }}>
+        <Icon name="more" size={20} />
+      </button>
+      <div id={id} ref={menuRef} className="menu-pop" popover="auto" role="menu" aria-label={label}
+        onToggle={(event) => setOpen(event.currentTarget.matches(':popover-open'))} onKeyDown={move}>
+        {items.map((item) => (
+          <button key={item.label} type="button" role="menuitem" tabIndex={-1}
+            className={'menu-item' + (item.danger ? ' danger' : '')}
+            onClick={() => { close(); item.onClick() }}>
+            {item.icon && <Icon name={item.icon} size={16} />} {item.label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

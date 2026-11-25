@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import { useState } from 'react'
 import './ClientProgressPage.css'
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
@@ -139,7 +140,7 @@ export default function ClientProgressPage() {
     <section id="progress-panel-attendance" className="progress-panel progress-attendance" role="tabpanel" aria-labelledby="attendance" tabIndex={0} hidden={activeView !== 'attendance'}>
       {activeView === 'attendance' && <>
       <section className="card">
-        <div className="progress-section-head"><h2 id="progress-attendance-title">Booked session completion <ProgressInfo label="booking completion" text="The rate uses past, non-cancelled bookings. Bookings awaiting status remain in the denominator. Today's bookings and workout logs are counted separately." /></h2><label className="progress-lift-select">Period <select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></select></label></div>
+        <div className="progress-section-head"><h2 id="progress-attendance-title">Booked session completion <ProgressInfo label="booking completion" text="The rate uses past, non-cancelled bookings. Bookings awaiting status remain in the denominator. Today's bookings and workout logs are counted separately." /></h2><label className="progress-lift-select">Period <Select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></Select></label></div>
         <div className="progress-attendance-layout">
           <div className="progress-completion-ring" style={{ '--completion': `${attendance.percent ?? 0}%` }} role={attendance.total ? 'progressbar' : undefined} aria-label="Booked session completion" aria-valuenow={attendance.percent ?? undefined} aria-valuemin={attendance.total ? 0 : undefined} aria-valuemax={attendance.total ? 100 : undefined}><div><strong>{attendance.percent == null ? '—' : `${attendance.percent}%`}</strong><span>{attendance.total ? `${attendance.completed} of ${attendance.total} bookings` : 'No past bookings'}</span></div></div>
           <div className="progress-completion-counts"><div><strong>{attendance.completed}</strong><span>Completed</span></div><div><strong>{attendance.unresolved}</strong><span>Awaiting status</span></div><div><strong>{attendance.cancelled}</strong><span>Cancelled · excluded</span></div></div>

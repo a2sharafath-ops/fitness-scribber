@@ -1,5 +1,5 @@
+import Select from './Select'
 import SegToggle from './SegToggle'
-import Icon from '../atoms/Icon'
 
 const choices = {
   theme: [['light', 'Light'], ['dark', 'Dark'], ['system', 'Match system']],
@@ -17,12 +17,9 @@ export default function AppearanceControls({ appearance, prefix = 'orbit' }) {
     </div>
     return <div className="appearance-choice">
       <label htmlFor={id}>{label}</label>
-      <span className="orbit-select-wrap">
-        <select id={id} value={appearance[key]} onChange={event => update(event.target.value)}>
-          {choices[key].map(([value, title]) => <option key={value} value={value}>{title}</option>)}
-        </select>
-        <Icon name="chevron-down" size={13} />
-      </span>
+      <Select id={id} value={appearance[key]} onChange={event => update(event.target.value)}>
+        {choices[key].map(([value, title]) => <option key={value} value={value}>{title}</option>)}
+      </Select>
     </div>
   }
   return <div className="appearance-controls">

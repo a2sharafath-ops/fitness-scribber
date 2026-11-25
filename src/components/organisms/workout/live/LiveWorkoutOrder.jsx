@@ -1,3 +1,4 @@
+import Select from '../../../molecules/Select'
 import LiveSessionDialog from '../../../molecules/LiveSessionDialog'
 import { liveBlocks, liveExerciseUnits } from '../../../../lib/liveSession'
 
@@ -19,8 +20,8 @@ export default function LiveWorkoutOrder({ session, onAction, onClose }) {
         {groups.map((group) => <div className="ls-order-exercise" key={group[0].id}>
           <div><strong>{group.map((item) => item.name).join(' + ')}</strong>{group.length > 1 && <small>Superset</small>}</div>
           <div className="ls-tools">{arrows(group[0].id, groups.map((unit) => unit[0]), 'move-exercise', { blockId: block.id })}</div>
-          <label>Move to block<select value={block.id} onChange={(event) => onAction({ type: 'move-exercise', id: group[0].id, blockId: event.target.value })}>
-            {blocks.map((destination) => <option key={destination.id} value={destination.id}>{destination.title}</option>)}</select></label>
+          <label>Move to block<Select value={block.id} onChange={(event) => onAction({ type: 'move-exercise', id: group[0].id, blockId: event.target.value })}>
+            {blocks.map((destination) => <option key={destination.id} value={destination.id}>{destination.title}</option>)}</Select></label>
           {group.map((item) => item.setRows.length > 1 && <details key={item.id}><summary>Reorder sets · {item.name}</summary>{item.setRows.map((row, index) => <div className="ls-order-set" key={row.id}>
             <span>Set {index + 1}{row.done ? ' · Done' : ''}</span><div className="ls-tools">{arrows(row.id, item.setRows, 'move-set')}</div></div>)}</details>)}
         </div>)}

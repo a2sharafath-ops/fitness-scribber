@@ -1,3 +1,4 @@
+import Select from '../molecules/Select'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
@@ -65,10 +66,10 @@ export default function StrengthDashboard({ client }) {
   return <div className="progress-strength">
     <section className="card progress-performance">
       <div className="progress-section-head"><h2 id="progress-strength-title">Lift performance</h2>
-        <label className="progress-lift-select">Performed lift <select value={lift || ''} disabled={!lift} onChange={(event) => { setSelected(event.target.value); setChart('estimate') }}>
+        <label className="progress-lift-select">Performed lift <Select value={lift || ''} disabled={!lift} onChange={(event) => { setSelected(event.target.value); setChart('estimate') }}>
           {!lift && <option value="">No performed lifts</option>}
           {LIFT_GROUPS.map((group) => { const members = options.filter((option) => option.group === group); return members.length ? <optgroup key={group} label={group}>{members.map((option) => <option key={option.name} value={option.name}>{option.name}</option>)}</optgroup> : null })}
-        </select></label>
+        </Select></label>
       </div>
       <div className="progress-metric-grid">
         {main ? <>
@@ -82,9 +83,9 @@ export default function StrengthDashboard({ client }) {
         </>}
       </div>
       <div className="progress-chart-toolbar"><h3>{estimateChart ? 'Estimated 1RM over time' : 'Recorded set load over time'} <ProgressInfo label="strength chart context" text={estimateChart ? 'Epley estimates from completed sets. Estimates are not tested maxima; training max is a programming reference.' : 'External load recorded for the same lift. Compare reps and source before interpreting change. Zero means no external load; missing values remain blank.'} /></h3>
-        <label className="progress-lift-select">Chart period <select value={period} onChange={event => setPeriod(event.target.value)}>
+        <label className="progress-lift-select">Chart period <Select value={period} onChange={event => setPeriod(event.target.value)}>
           <option value="all">All time</option>{[7, 30, 90].map(days => <option key={days} value={days}>{days} days</option>)}
-        </select></label>
+        </Select></label>
         {main && <div className="progress-chart-switch" role="group" aria-label="Strength chart"><button type="button" aria-pressed={chart === 'estimate'} onClick={() => setChart('estimate')}>Estimated 1RM</button><button type="button" aria-pressed={chart === 'load'} onClick={() => setChart('load')}>Set load</button></div>}
       </div>
       {trend.length > 0 ? <div className="progress-chart progress-strength-canvas"><Line data={{ datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: points, borderColor: COLORS.blue, tension: 0, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />

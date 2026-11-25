@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Line, Bar } from 'react-chartjs-2'
@@ -50,7 +51,7 @@ function ClientTracking({ client }) {
     {!metrics.length ? <section className="pt-card pt-empty"><h2>Track what matters to {client.name.split(' ')[0]}</h2><p>Choose exercises, body measurements or training consistency.</p></section> : <>
       <div className="pt-cards">{metrics.slice(0,3).map(m=>{const definition=metricMeta(m),history=trackingSeries(db,client.id,m,window.start,window.end).rows,last=history.filter(r=>r.value!=null).at(-1);return <button type="button" key={metricKey(m)} className="pt-card pt-metric" aria-pressed={metricKey(m)===metricKey(metric)} onClick={()=>choose(metricKey(m))}><span>{definition.title}</span><small>{definition.subtitle}</small><strong>{displayValue(last?.value,definition)} <em>{last?definition.unit==='kg'?format.unitName():definition.unit:''}</em></strong><small>{last?`${fmtDate(last.date)}${last.partial?' · partial week':''}`:'No values in this period'}</small></button>})}</div>
       <section className="pt-card pt-chart-card"><div className="pt-section-head"><h2>Progress over time</h2><ProgressInfo label="selected metric" text={meta.help} /></div>
-        <div className="pt-chart-controls"><label>Metric<select value={metricKey(metric)} onChange={e=>choose(e.target.value)}>{metrics.map(m=><option key={metricKey(m)} value={metricKey(m)}>{metricMeta(m).title} · {metricMeta(m).subtitle}</option>)}</select></label><label>Period<select value={days} onChange={e=>{setDays(e.target.value);setExpanded(false)}}><option value="28">4 weeks</option><option value="56">8 weeks</option><option value="84">12 weeks</option><option value="all">All time</option></select></label>{methods.length>1 && <label>Measurement method<select value={activeMethod} onChange={e=>{setMethod(e.target.value);setExpanded(false)}}><option value="all">All methods · separate series</option>{methods.map(m=><option key={m}>{m}</option>)}</select></label>}</div>
+        <div className="pt-chart-controls"><label>Metric<Select value={metricKey(metric)} onChange={e=>choose(e.target.value)}>{metrics.map(m=><option key={metricKey(m)} value={metricKey(m)}>{metricMeta(m).title} · {metricMeta(m).subtitle}</option>)}</Select></label><label>Period<Select value={days} onChange={e=>{setDays(e.target.value);setExpanded(false)}}><option value="28">4 weeks</option><option value="56">8 weeks</option><option value="84">12 weeks</option><option value="all">All time</option></Select></label>{methods.length>1 && <label>Measurement method<Select value={activeMethod} onChange={e=>{setMethod(e.target.value);setExpanded(false)}}><option value="all">All methods · separate series</option>{methods.map(m=><option key={m}>{m}</option>)}</Select></label>}</div>
         <div className="pt-change">{comparison ? <><strong>{comparison.change>0?'+':''}{displayValue(comparison.change)} <small>{changeUnit}</small></strong><span>change · {fmtDate(comparison.first.date)}–{fmtDate(comparison.last.date)}</span></> : <><strong>{values.length?'Recorded values':'No measurements yet'}</strong><span>{values.length===1?'1 more dated record needed to compare':values.length>1?metric.kind==='body'?'Compare within one known measurement method.':metric.kind==='consistency'?'Comparison needs two complete weeks.':'Comparison needs records on two separate dates.':''}</span></>}</div>
         <div className="pt-chart">{metric.kind==='consistency'?<Bar data={data} options={chartOptions} role="img" aria-label={`${meta.title} chart, ${values.length} recorded values`} />:<Line data={data} options={chartOptions} role="img" aria-label={`${meta.title} ${meta.subtitle} chart, ${values.length} recorded values`} />}{!values.length && <p className="pt-chart-empty">{meta.title} · {meta.subtitle.toLowerCase()} will appear here.</p>}</div>
         <div className="pt-card-foot"><span>{values.length} {metric.kind==='consistency'?'weekly values':'records'} · {fmtDate(window.start)}–{fmtDate(window.end)}</span><Link to={actionPath}>{meta.action} →</Link></div>
@@ -119,12 +120,12 @@ export default function ProgressPage() {
   if (!db.clients.length) return <section className="progress-tracking"><h1>Progress</h1><p>Add a client to start tracking progress.</p><Link to="/clients">View clients</Link></section>
   return <div className="progress-tracking"><header className="pt-title"><h1>Progress</h1></header>
     <section className="pt-card pt-client">
-      <label>Clients<select value={client?.id || ''} onChange={e => setClientId(e.target.value)}>
+      <label>Clients<Select value={client?.id || ''} onChange={e => setClientId(e.target.value)}>
         <option value="">All clients</option>{db.clients.filter(c => c.id === clientId || c.name.toLowerCase().includes(query.toLowerCase())).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-      </select></label>
+      </Select></label>
       {db.clients.length > 6 && <label>Find client<input type="search" value={query} onChange={e => setQuery(e.target.value)} /></label>}
-      <label className="pt-mobile-metric">Metric<select value={metric} onChange={e => setMetric(e.target.value)}>{trends.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-      <label>Period<select value={days} onChange={e => setDays(Number(e.target.value))}>{[7,30,90].map(n => <option key={n} value={n}>{n} days</option>)}</select></label>
+      <label className="pt-mobile-metric">Metric<Select value={metric} onChange={e => setMetric(e.target.value)}>{trends.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</Select></label>
+      <label>Period<Select value={days} onChange={e => setDays(Number(e.target.value))}>{[7,30,90].map(n => <option key={n} value={n}>{n} days</option>)}</Select></label>
     </section>
     <section className="pt-card pt-chart-card pt-trend" aria-label="Metric and trend">
     <div className="pt-cards">{trends.map(t => {
@@ -138,7 +139,7 @@ export default function ProgressPage() {
       </button>
     })}</div>
     <div className="pt-section-head"><h2>{definition.label}</h2></div>
-      {metric === 'weight' && names.length > 0 && <div className="pt-chart-controls"><label>Exercise<select value={exercise} onChange={e => setLift(e.target.value)}>{names.map(n => <option key={n}>{n}</option>)}</select></label></div>}
+      {metric === 'weight' && names.length > 0 && <div className="pt-chart-controls"><label>Exercise<Select value={exercise} onChange={e => setLift(e.target.value)}>{names.map(n => <option key={n}>{n}</option>)}</Select></label></div>}
       {points.length ? <div className="pt-chart"><Line options={options} role="img" aria-label={definition.label + ' from ' + fmtDate(from) + ' to ' + fmtDate(today)} data={{
         labels: series[metric].map(p => shortLabel(p.from)), datasets: [{ label: definition.label, data: series[metric].map(p => metric === 'weight' && p.value != null ? format.toDisp(p.value) : p.value),
           borderColor: COLORS.purple, pointRadius: 3, backgroundColor: COLORS.purple + '25', fill: true, tension: 0.2, spanGaps: false }]

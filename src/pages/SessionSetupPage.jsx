@@ -1,3 +1,4 @@
+import Select from '../components/molecules/Select'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import './SessionSetupPage.css'
@@ -40,11 +41,10 @@ export default function SessionSetupPage() {
       <div className="setup-panel">
         <label className="setup-picker">
           <Icon name="search" size={19} />
-          <select aria-label="Select a booking" value={booking.id}
+          <Select aria-label="Select a booking" value={booking.id}
             onChange={event => setParams({ booking: event.target.value }, { replace: true })}>
             {bookings.map(item => <option value={item.id} key={item.id}>{item.time || 'Time not set'} · {roster.get(item.clientId).name}</option>)}
-          </select>
-          <Icon name="chevron-down" size={16} />
+          </Select>
         </label>
         <div className="setup-meta">
           <span><Icon name="clock" size={16} />{booking.time || 'Time not set'}</span>

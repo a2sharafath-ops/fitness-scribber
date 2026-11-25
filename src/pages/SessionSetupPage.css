@@ -11,9 +11,7 @@
 .session-setup header p, .setup-action p { margin: 9px 0 0; color: var(--muted); }
 .setup-panel { display: grid; align-content: center; gap: 15px; min-height: 178px; padding: 20px; border: 3px solid color-mix(in srgb, var(--text) 7%, transparent); border-radius: 44px; background: rgb(var(--orbit-frame) / calc(.38 + .36 * var(--orbit-frost))); }
 .setup-picker { display: flex; width: 100%; margin: auto; align-items: center; gap: 10px; position: relative; min-width: 0; border: 1px solid var(--border); border-radius: 999px; padding: 0 16px; background: var(--orbit-glass); color: var(--text); box-shadow: var(--control-shadow); }
-.setup-picker select { width: 100%; min-width: 0; height: clamp(48px, 4vw, 68px); appearance: none; background: transparent; border: 0; padding: 0 30px 0 0; color: inherit; cursor: pointer; text-overflow: ellipsis; }
-.setup-picker select option { color: var(--text); background: var(--surface); }
-.setup-picker > :last-child { position: absolute; right: 16px; pointer-events: none; }
+.setup-picker .orbit-select { width: 100%; min-width: 0; height: clamp(48px, 4vw, 68px); appearance: none; background: transparent; border: 0; padding: 0; color: inherit; cursor: pointer; text-overflow: ellipsis; }
 .setup-meta, .session-setup footer { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px 22px; }
 .setup-meta span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
 .setup-action, .session-setup footer { margin-top: 34px; }
@@ -24,7 +22,7 @@
 .setup-empty { justify-items: center; }
 @media (max-width: 700px) {
   .setup-panel { border-radius: 28px; }
-  .setup-picker select { font-size: 16px; }
+  .setup-picker .orbit-select { font-size: 16px; }
 }
 
 .setup-launch > span::before { content: ""; position: absolute; inset: 19%; border-radius: 50%; background: var(--orbit-glass); box-shadow: var(--control-shadow); z-index: -1; }

@@ -1,3 +1,4 @@
+import Select from '../../molecules/Select'
 import { useState } from 'react'
 import Button from '../../atoms/Button'
 import Field from '../../atoms/Field'
@@ -27,10 +28,10 @@ export default function RPEModal({ busy, workout, attempt, finishError, onSubmit
           </>}>
           <fieldset disabled={!!attempt || busy} style={{ border: 0, minWidth: 0 }}>
           <Field label="Session RPE (Borg CR10)">
-            <select value={rpe} onChange={(e) => setRpe(e.target.value)}>
+            <Select value={rpe} onChange={(e) => setRpe(e.target.value)}>
               <option value="">Choose your rating</option>
               {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => <option key={value} value={value}>{value} / 10</option>)}
-            </select>
+            </Select>
           </Field>
           <Field label="Workout duration (minutes)">
             <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
