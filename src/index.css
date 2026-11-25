@@ -1580,6 +1580,7 @@ html:has(.progress-index){overflow-x:clip}
   .exercise-library-scroll td:last-child:not([colspan]) { grid-area: 1 / 4; justify-self: end; }
   .exercise-library-scroll td:not(:first-child):not(:last-child), .exercise-library-scroll td[colspan] { grid-column: 1 / -1; }
   .exercise-library-scroll .exercise-field { display: inline; color: var(--muted); margin-inline-end: 8px; }
+  .exercise-library-scroll .btn.sm { min-width: 44px; padding-inline: 5px; white-space: nowrap; }
   .exercise-library-scroll .btn, .client-profile .btn { min-height: 44px; }
 }
 

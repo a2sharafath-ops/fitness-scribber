@@ -16,7 +16,8 @@ import { useModal } from '../store/ModalContext'
 import { toast, confirmDialog, promptDialog } from '../lib/toast'
 import { addDays, coachClock, fmtDate } from '../lib/dates'
 import { forClient, formalAssessments, baselineProgress, dueStatus, REASSESS_TYPES, DEFAULT_REASSESS_DAYS, TYPES } from '../lib/assessment'
-import { bookingWorkout, bookingWorkoutAction, scheduledBooking, sessionPath, trainingBooking, workoutReviewPath } from '../lib/schedule'
+import { bookingWorkout, bookingWorkoutAction, scheduledBooking, sessionPath, workoutReviewPath } from '../lib/schedule'
+import { bookingSlide } from '../lib/bookingPresentation'
 import { readinessScore } from '../lib/calc'
 import { bookedCompletion } from '../lib/dashboard'
 import { clientPrograms } from '../lib/clientPrograms'
@@ -53,10 +54,8 @@ export default function ClientDetailPage() {
   const nextSession = sessions.filter((session) => (session.date > today || session.date === today && (!session.time || session.time >= currentTime))
     && scheduledBooking(session) && !['completed', 'discarded'].includes(bookingWorkout(db, session)?.status))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))[0]
-  const nextAction = nextSession && (bookingWorkoutAction(db, nextSession, today) || {
-    path: sessionPath(nextSession),
-    label: trainingBooking(nextSession) ? 'Open training' : { Assessment: 'Open assessments', 'Check-in': 'Open check-ins' }[nextSession.type],
-  })
+  const nextSlide = nextSession && bookingSlide(db, nextSession, client, today, nextSession)
+  const nextAction = nextSlide?.destination
   const earlierUnresolved = sessions.filter((session) => session.date === today && session.time && session.time < currentTime
     && scheduledBooking(session))
   const assessmentList = forClient(db.assessments, id)
@@ -125,7 +124,7 @@ export default function ClientDetailPage() {
     </div></div>
     <div className="overview-priority">
       <section className="card overview-next" aria-labelledby="next-session-title">
-        <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSession ? nextSession.type : 'No upcoming session booked'}</h2>
+        <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSlide?.title || 'No upcoming session booked'}</h2>
         {nextSession && <p className="muted">{nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · {nextSession.time || 'Time not set'} · {nextSession.dur || '—'} min <span className="overview-booking-status">{nextSession.status}</span></p>}
         <div className="overview-next-actions">{nextSession ? <>{nextAction.label && <Link className="btn" to={nextAction.path}>{nextAction.label} →</Link>}<Button variant="ghost" onClick={() => openModal(<SessionForm session={nextSession} />)}>View booking</Button></>
           : <Button onClick={() => openModal(<SessionForm clientId={id} date={today} />)}>Book session</Button>}</div>
