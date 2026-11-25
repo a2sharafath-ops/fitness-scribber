@@ -47,7 +47,7 @@ export default function Menu({ items, label = 'Actions' }) {
     <div className="menu-wrap">
       <button type="button" ref={btnRef} className="menu-btn" aria-haspopup="menu" aria-expanded={open} aria-label={label}
         onClick={() => (open ? close() : setOpen(true))}
-        onBlur={() => setTimeout(close, 150)}>⋯</button>
+        onBlur={() => setTimeout(close, 150)}><Icon name="more" size={16} /></button>
       {open && createPortal(
         // Hidden until measured, so it never flashes at the wrong spot.
         <div ref={popRef} className="menu-pop" role="menu"

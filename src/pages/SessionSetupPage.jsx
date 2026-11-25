@@ -47,8 +47,8 @@ export default function SessionSetupPage() {
           <Icon name="chevron-down" size={16} />
         </label>
         <div className="setup-meta">
-          <span><Icon name="calendar" size={16} />{booking.time || 'Time not set'}</span>
-          {hasDuration(booking) && <span><Icon name="clock" size={16} />{durationLabel(booking)}</span>}
+          <span><Icon name="clock" size={16} />{booking.time || 'Time not set'}</span>
+          {hasDuration(booking) && <span><Icon name="timer" size={16} />{durationLabel(booking)}</span>}
           <span><Icon name="activity" size={16} />{slide.status}</span>
         </div>
       </div>

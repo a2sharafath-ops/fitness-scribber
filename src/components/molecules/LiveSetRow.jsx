@@ -1,6 +1,7 @@
 import { LIVE_SET_TYPES, rowMode, adjustedSetDuration, rowType, liveSetLoad, timerElapsed, restRemainingMs } from '../../lib/liveSession'
 import { toDisp, unitName } from '../../lib/units'
 import { secToClock } from '../../lib/workout'
+import Icon from '../atoms/Icon'
 
 export default function LiveSetRow({ row, index, exercise, block, session, units, now, isNext, readOnly, onAction, onEdit }) {
   const skipped = !row.done && (block.skipped || exercise.skipped || row.skipped)
@@ -34,8 +35,8 @@ export default function LiveSetRow({ row, index, exercise, block, session, units
       <div className="ls-measure ls-effort-field"><button type="button" className="ls-value" disabled={locked || running} onClick={() => onEdit('effort', row)} aria-label={`Effort for ${label}`}>{effort}</button></div>
       <div className="ls-set-actions">{skipped ? <><small>Skipped</small>{!readOnly && !block.skipped && !exercise.skipped && <button type="button" className="ls-text" onClick={() => onAction({ type: 'skip-row', id: row.id })}>Restore</button>}</> : <>
         <button type="button" className="ls-done" aria-pressed={!!row.done} disabled={readOnly || running}
-          aria-label={row.done ? `Undo done for ${label}` : `Mark ${label} done`} onClick={() => onAction({ type: 'done', id: row.id })}><span aria-hidden="true">✓</span>{row.done && !readOnly && <small>Undo</small>}</button>
-        {!locked && <button type="button" className="ls-text ls-row-options" aria-label={`Options for ${label}`} onClick={() => onEdit('set-options', row)}>⋯</button>}</>}
+          aria-label={row.done ? `Undo done for ${label}` : `Mark ${label} done`} onClick={() => onAction({ type: 'done', id: row.id })}><span><Icon name="check" size={14} /></span>{row.done && !readOnly && <small>Undo</small>}</button>
+        {!locked && <button type="button" className="ls-text ls-row-options" aria-label={`Options for ${label}`} onClick={() => onEdit('set-options', row)}><Icon name="more" size={20} /></button>}</>}
       </div>
     </div>
     {rowMode(row) === 'duration' && !locked && <div className="ls-set-stopwatch"><span role={running ? 'timer' : undefined}>{running ? secToClock(Math.floor(timerElapsed(session.liveState.setTimer, now) / 1000)) : row.durationSeconds == null ? 'Timed set' : 'Ready to log'}</span>

@@ -1,4 +1,5 @@
 import { useId, useRef } from 'react'
+import Icon from '../atoms/Icon'
 
 export default function LiveSessionMenu({ label, children }) {
   const id = useId()
@@ -25,7 +26,7 @@ export default function LiveSessionMenu({ label, children }) {
   }
   return <>
     <button type="button" className="ls-more" ref={trigger} aria-label={label} aria-haspopup="menu" popoverTarget={id}
-      onClick={(event) => { event.preventDefault(); open() }}>⋯</button>
+      onClick={(event) => { event.preventDefault(); open() }}><Icon name="more" size={20} /></button>
     <div id={id} ref={menu} className="ls-menu" popover="auto" role="menu" aria-label={label} onKeyDown={keyDown}
       onClick={(event) => { if (event.target.closest('button')) close() }}>{children}</div>
   </>

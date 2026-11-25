@@ -368,7 +368,7 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
     }
   }, record)
   return (
-    <ModalShell title={<><Icon name="tuning" size={16} /> Body composition</>} onClose={closeModal}
+    <ModalShell title={<><Icon name="scale" size={16} /> Body composition</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button disabled={pdf.busy || candidates.length > 0} onClick={() => save(f)}>Save assessment</Button></>}>
       <MetaRow f={f} setF={setF} />
       <ReportImport pdf={pdf} imported={imported} importedSource={importedSource} onPick={onPdf} candidates={candidates} selectedIndex={selectedIndex} onSelect={setSelectedIndex} onApply={applyImport} onCancel={() => setCandidates([])} />
@@ -606,7 +606,7 @@ export function GoalForm({ clientId, record, defaultPhase }) {
     </fieldset>
   )
   return (
-    <ModalShell title={<><Icon name="like" size={16} /> {record ? 'Edit goals' : 'Goal setting'}</>} onClose={closeModal}
+    <ModalShell title={<><Icon name="target" size={16} /> {record ? 'Edit goals' : 'Goal setting'}</>} onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={() => save(f)}>{record ? 'Save changes' : 'Save goals'}</Button></>}>
       <MetaRow f={f} setF={setF} />
       {seed && (

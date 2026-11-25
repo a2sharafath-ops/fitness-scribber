@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Button from '../../atoms/Button'
+import Icon from '../../atoms/Icon'
 import ExerciseEditorRow from '../../molecules/ExerciseEditorRow'
 import SetLogRow from '../../molecules/SetLogRow'
 import { newExercise, secToClock, workoutVolume, runBlocks, normalizeRunItem, doneRowWork } from '../../../lib/workout'
@@ -94,7 +95,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
             <div className="wp-title">{w.title}</div>
             <div className="muted" style={{ fontSize: 12 }}>Block {step + 1} of {blocks.length} · logged volume {fmtVL((w.main || []).reduce((total, item) => total + item.setRows.reduce((sum, row) => sum + doneRowWork(row), 0), 0), units)}</div>
           </div>
-          <div className="wp-timer" role="timer" aria-label="Elapsed time">⏱ {secToClock(elapsed)}</div>
+          <div className="wp-timer" role="timer" aria-label="Elapsed time"><Icon name="timer" size={20} /> {secToClock(elapsed)}</div>
         </div>
 
         {/* Progress across blocks */}
@@ -117,7 +118,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
               <div className="wp-ex" key={it.id}>
                 <div className="wp-ex-name">{it.name}</div>
                 <div className="slog-head">
-                  <span /><span>Target</span><span>Load</span><span>Reps</span><span>{it.setRows[0]?.effortType === 'RPE' ? 'RPE' : 'RIR'}</span><span>✓</span>
+                  <span /><span>Target</span><span>Load</span><span>Reps</span><span>{it.setRows[0]?.effortType === 'RPE' ? 'RPE' : 'RIR'}</span><span><Icon name="check" size={14} /></span>
                 </div>
                 {it.setRows.map((r, i) => (
                   <SetLogRow key={i} row={r} units={units} warmupBlock={cur.section === 'warmup' || /warm[ -]?up/i.test(it.blockType || '')} onChange={(patch) => patchRow(cur.section, it.id, i, patch)} />
@@ -129,7 +130,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
                 </label>
               </div>
             ))}
-            <Button variant="ghost" size="sm" onClick={markBlockDone}>✓ Mark all sets in this block done</Button>
+            <Button icon="check" variant="ghost" size="sm" onClick={markBlockDone}>Mark all sets in this block done</Button>
           </div>
         )}
 
@@ -138,7 +139,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
           <div className="flex gap">
             {step > 0 && <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>← Back</Button>}
             {last
-              ? <Button onClick={complete}>✓ Complete session</Button>
+              ? <Button icon="check" onClick={complete}>Complete session</Button>
               : <Button onClick={() => setStep((s) => s + 1)}>Next block →</Button>}
           </div>
         </div>

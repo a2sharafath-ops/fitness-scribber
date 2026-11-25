@@ -3,6 +3,7 @@
 // index render with an orange border and force a manual library selection
 // before the builder allows a save (spec 5.2). Presentational only.
 import SetRow from '../../molecules/SetRow'
+import Icon from '../../atoms/Icon'
 import Autocomplete from '../../molecules/Autocomplete'
 import { INTENSITY_TYPES, SUPERSET_GROUPS, newSet } from '../../../lib/program'
 import { changeIntensity, editPrescribedSet, followFirstSet } from '../../../lib/prescription'
@@ -72,7 +73,7 @@ export default function ExerciseCard({
 
       {ex.unmapped && (
         <div className="ex-validate" role="alert">
-          ⚠ “{ex.exerciseName}” isn’t in the exercise library — pick the standard term to continue:
+          <Icon name="alert" size={14} /> “{ex.exerciseName}” isn’t in the exercise library — pick the standard term to continue:
           <select aria-label="Validate exercise name" value=""
             onChange={(e) => e.target.value && onChange({ exerciseName: e.target.value, unmapped: false })}>
             <option value="">Select exercise…</option>

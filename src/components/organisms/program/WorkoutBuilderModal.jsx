@@ -353,7 +353,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
             <Button variant="ghost" size="sm" onClick={() => quickClone(1)} disabled={!blocks.length}>→ Copy to Tomorrow</Button>
             <Button variant="ghost" size="sm" onClick={() => setStep('clients')} disabled={!blocks.length}>👥 Copy to clients…</Button>
             <Button variant="ghost" size="sm" onClick={() => setStep('dates')} disabled={!blocks.length}>📅 Bulk paste…</Button>
-            <Button variant="ghost" size="sm" onClick={() => setStep('dictate')}>🎙️ Dictate</Button>
+            <Button icon="microphone" variant="ghost" size="sm" onClick={() => setStep('dictate')}>Dictate</Button>
             <Button variant="ghost" size="sm" onClick={copyLast}>↩ Copy last session</Button>
           </div>
 

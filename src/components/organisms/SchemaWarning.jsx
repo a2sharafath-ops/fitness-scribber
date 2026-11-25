@@ -1,4 +1,5 @@
 import { useData } from '../../store/DataContext'
+import Icon from '../atoms/Icon'
 
 // Surfaces a visible banner when the database is out of sync with the app:
 //   • a table failed to load (usually a migration never applied), or
@@ -14,7 +15,7 @@ export default function SchemaWarning() {
   const action = write && load ? 'load or save' : write ? 'save' : 'load'
   return (
     <div className="schema-warn" role="alert">
-      <span className="schema-warn-ic" aria-hidden="true">⚠</span>
+      <span className="schema-warn-ic" aria-hidden="true"><Icon name="alert" size={18} /></span>
       <div>
         <strong>Data issue:</strong> couldn’t {action} {tables}.
         {' '}{write ? 'Some changes may not be saved.' : 'Some records may be missing from this view.'}

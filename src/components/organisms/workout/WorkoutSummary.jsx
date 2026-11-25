@@ -1,4 +1,5 @@
 import Button from '../../atoms/Button'
+import Icon from '../../atoms/Icon'
 import Tag from '../../atoms/Tag'
 import WorkoutInsights from './WorkoutInsights'
 import { fmtDate } from '../../../lib/dates'
@@ -47,13 +48,13 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
   return (
     <div>
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <div className="flex gap"><Tag color="green">✓ Completed</Tag>
+        <div className="flex gap"><Tag color="green"><Icon name="check" size={13} style={{ verticalAlign: '-2px' }} /> Completed</Tag>
           <div><strong style={{ fontSize: 16 }}>{workout.title}</strong>
             <div className="muted" style={{ fontSize: 12 }}>{fmtDate(workout.date)} · {s.doneMain}/{s.totalMain} exercises ticked</div></div>
         </div>
         <div className="flex gap" style={{ flexWrap: 'wrap' }}>
           {!locked && <Button variant="ghost" size="sm" onClick={onEdit}>✎ Edit</Button>}
-          {onDuration && <Button variant="ghost" size="sm" onClick={editDuration}>⏱ Edit duration</Button>}
+          {onDuration && <Button icon="timer" variant="ghost" size="sm" onClick={editDuration}>Edit duration</Button>}
           <Button variant="ghost" size="sm" onClick={share}>↗ Share</Button>
           {!locked && onTemplate && <Button variant="ghost" size="sm" onClick={template}>＋ Save as template</Button>}
           {!locked && onDelete && <Button variant="danger" size="sm" onClick={del}>🗑 Delete</Button>}
@@ -70,7 +71,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
           return (
             <div key={m.id} className="sumex">
               <div className="sumex-head">
-                <span style={{ color: anyDone ? 'var(--green)' : 'var(--accent2)', width: 16 }} aria-hidden="true">{anyDone ? '✓' : '⚠'}</span>
+                <span style={{ color: anyDone ? 'var(--green)' : 'var(--accent2)', width: 16 }} aria-hidden="true"><Icon name={anyDone ? 'check' : 'alert'} size={16} /></span>
                 <strong>{m.name}</strong>
                 {!anyDone && <Tag color="orange">Not logged</Tag>}
               </div>
@@ -92,7 +93,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
         const logged = m.doneSets != null || m.doneReps != null || m.doneWeight != null
         return (
           <div key={m.id} className="ex-row" style={m.done ? undefined : { opacity: .75 }}>
-            <span style={{ color: m.done ? 'var(--green)' : 'var(--accent2)', flex: 'none', width: 18 }} aria-hidden="true">{m.done ? '✓' : '⚠'}</span>
+            <span style={{ color: m.done ? 'var(--green)' : 'var(--accent2)', flex: 'none', width: 18 }} aria-hidden="true"><Icon name={m.done ? 'check' : 'alert'} size={16} /></span>
             <div style={{ flex: 1 }}>
               <div className="flex gap" style={{ alignItems: 'center' }}>
                 <strong>{m.name}</strong>
