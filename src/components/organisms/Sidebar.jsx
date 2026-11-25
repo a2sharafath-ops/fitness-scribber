@@ -2,76 +2,94 @@ import { Link, NavLink } from 'react-router-dom'
 import { useData } from '../../store/DataContext'
 import { useConversations } from '../../hooks/useConversations'
 import { openConcerns } from '../../lib/calc'
-import { hasBackend } from '../../lib/supabase'
-import { dashboardWeeks } from '../../lib/dashboard'
-import { fmtDay, todayISO } from '../../lib/dates'
-import { weekOf, workoutReviewPath } from '../../lib/schedule'
+import { fmtDay } from '../../lib/dates'
+import { workoutReviewPath } from '../../lib/schedule'
 import { initials } from '../../lib/format'
 import Brand from '../atoms/Brand'
 import Icon from '../atoms/Icon'
 
-const ITEMS = [
-  ['/session-setup', 'new-session', 'Session setup'],
-  ['/', 'dashboard', 'Dashboard', true],
-  ['/clients', 'studio-client', 'Clients'],
-  ['/workouts', 'dumbbell', 'Workouts'],
-  ['/schedule', 'calendar', 'Schedule'],
-  ['/progress', 'chart', 'Progress'],
-  ['/messages', 'message', 'Messages'],
-  ['/concerns', 'alert', 'Concerns'],
+const GROUPS = [
+  [
+    ['/', 'dashboard', 'Dashboard'],
+    ['/schedule', 'calendar', 'Schedule'],
+    ['/session-setup', 'new-session', 'Session setup'],
+  ],
+  [
+    ['/clients', 'studio-client', 'Clients'],
+    ['/workouts', 'dumbbell', 'Workouts'],
+    ['/progress', 'chart', 'Progress'],
+  ],
+  [
+    ['/messages', 'message', 'Messages'],
+    ['/concerns', 'alert', 'Concerns'],
+  ],
 ]
 
+const navClass = ({ isActive }) => 'nav-item' + (isActive ? ' active' : '')
+
 export default function Sidebar({ collapsed, mobile, onCollapse, onNavigate }) {
-  const { db, tz } = useData()
+  const { db } = useData()
   const { totalUnread } = useConversations()
-  const openCount = openConcerns(db).length
-  const [week] = dashboardWeeks(db.sessions, weekOf(todayISO(tz)), 1)
+  const counts = { '/messages': [totalUnread, 'unread'], '/concerns': [openConcerns(db).length, 'open'] }
   const trainer = db.settings?.trainerName?.trim() || 'Trainer'
+  const clients = new Map(db.clients.map(client => [client.id, client.name]))
   const recent = collapsed ? [] : (db.workouts || [])
-    .filter(workout => workout.status === 'completed' && workout.id && workout.date && db.clients.some(client => client.id === workout.clientId))
+    .filter(workout => workout.status === 'completed' && workout.id && workout.date && clients.has(workout.clientId))
     .sort((a, b) => b.date.localeCompare(a.date) || String(b.completedAt || '').localeCompare(String(a.completedAt || '')))
     .slice(0, 3)
+
   return (
     <nav id={mobile ? undefined : 'sidebar'} className="orbit-sidebar" aria-label="Main navigation">
       <div className="orbit-sidebar-head">
-        <Link className="orbit-sidebar-home" to="/" onClick={onNavigate} aria-label="Orbit Trainer home"><Brand ringOnly={collapsed} /></Link>
+        <Link className="orbit-sidebar-home" to="/" onClick={onNavigate} aria-label="Orbit Trainer home">
+          <Brand ringOnly={collapsed} trainerLockup />
+        </Link>
         <button type="button" className="orbit-icon-button orbit-sidebar-toggle"
           onClick={mobile ? onNavigate : onCollapse}
           aria-expanded={mobile ? undefined : !collapsed} aria-label={mobile ? 'Close navigation' : collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
           <Icon name={mobile ? 'close' : 'sidebar'} size={18} />
         </button>
       </div>
-      {!collapsed && <h2 className="orbit-sidebar-label">Trainer workspace</h2>}
-      {ITEMS.map(([to, ic, label, end]) => (
-        <NavLink key={to} to={to} end={end} className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label={label} title={collapsed ? label : undefined} onClick={onNavigate}>
-          <span className="ic" aria-hidden="true"><Icon name={ic} /></span>
-          <span className="orbit-nav-label">{label}</span>
-          {to === '/concerns' && <span className={'nav-badge' + (openCount > 0 ? ' show' : '')}>{openCount}</span>}
-          {to === '/messages' && <span className={'nav-badge' + (totalUnread > 0 ? ' show' : '')}>{totalUnread}</span>}
+
+      <div className="orbit-sidebar-scroll">
+        {GROUPS.map(group => (
+          <div className="orbit-sidebar-group" key={group[0][0]}>
+            {group.map(([to, icon, label]) => {
+              const [count, status] = counts[to] ?? []
+              const name = count > 0 ? `${label}, ${count} ${status}` : label
+              return <NavLink key={to} to={to} end={to === '/'} className={navClass}
+                aria-label={name} title={collapsed ? name : undefined} onClick={onNavigate}>
+                <span className="ic" aria-hidden="true"><Icon name={icon} /></span>
+                <span className="orbit-nav-label">{label}</span>
+                {count > 0 && <span className="nav-badge show" aria-hidden="true">{count}</span>}
+              </NavLink>
+            })}
+          </div>
+        ))}
+        {recent.length > 0 && <details className="orbit-sidebar-recent">
+          <summary className="nav-item">
+            Recent sessions
+            <Icon name="chevron-down" size={16} />
+          </summary>
+          <div className="orbit-sidebar-recent-list">
+            {recent.map(workout => <Link key={workout.id} to={workoutReviewPath(workout)} onClick={onNavigate}>
+              <strong>{workout.title || 'Workout'}</strong>
+              <small>{[clients.get(workout.clientId), fmtDay(workout.date)].filter(Boolean).join(' · ')}</small>
+            </Link>)}
+          </div>
+        </details>}
+      </div>
+
+      <div className="orbit-sidebar-footer">
+        <NavLink to="/settings" className={state => `orbit-sidebar-account ${navClass(state)}`}
+          aria-label={collapsed ? 'Settings' : `${trainer}, Settings`} title={collapsed ? 'Settings' : undefined} onClick={onNavigate}>
+          {!collapsed && <>
+            <span className="orbit-sidebar-avatar" aria-hidden="true">{initials(trainer)}</span>
+            <span className="orbit-sidebar-account-label"><strong>{trainer}</strong><small>Settings</small></span>
+          </>}
+          <span className="ic" aria-hidden="true"><Icon name="settings" size={18} /></span>
         </NavLink>
-      ))}
-      {recent.length > 0 && <section className="orbit-sidebar-recent" aria-label="Recent sessions">
-        <h2>Recent sessions</h2>
-        {recent.map(workout => <Link key={workout.id} to={workoutReviewPath(workout)} onClick={onNavigate}>
-          <span>{workout.title || 'Workout'}</span><small>{fmtDay(workout.date)}</small>
-        </Link>)}
-      </section>}
-      <div className="nav-spacer" />
-      <NavLink to="/settings" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')} aria-label="Settings" title={collapsed ? "Settings" : undefined} onClick={onNavigate}>
-        <span className="ic" aria-hidden="true"><Icon name="settings" /></span>
-        <span className="orbit-nav-label">Settings</span>
-      </NavLink>
-      {!collapsed && <div className="orbit-sidebar-context">
-        <section className="orbit-sidebar-week" aria-label="This week’s sessions">
-          <span>This week</span>
-          <p>{week.booked ? <><strong>{week.completed}</strong> of {week.booked} completed</> : "No bookings this week"}</p>
-          {week.booked > 0 && <progress value={week.completed} max={Math.max(1, week.booked)} aria-label="Completed bookings this week" aria-valuetext={`${week.completed} of ${week.booked} booked sessions completed`} />}
-        </section>
-        <Link className="orbit-sidebar-profile" to="/settings" onClick={onNavigate} aria-label={`${trainer}, settings`}>
-          <span aria-hidden="true">{initials(trainer)}</span><strong>{trainer}</strong><Icon name="chevron-right" size={15} />
-        </Link>
-      </div>}
-      <div className="sb-foot">{hasBackend ? 'Synced to your account' : 'All data saved locally'}</div>
+      </div>
     </nav>
   )
 }
