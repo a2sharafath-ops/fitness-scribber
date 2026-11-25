@@ -19,8 +19,8 @@ function MetricOptions({ includeDate = false, includeNone = false }) {
   </>
 }
 
-function axis(metric, side, color) {
-  return { ...baseOptions().scales.y, position: side, title: { display: true, text: `${metric.label} (${metric.unit})`, color }, grid: side === 'right' ? { drawOnChartArea: false } : baseOptions().scales.y.grid }
+function axis(metric, side) {
+  return { ...baseOptions().scales.y, position: side, title: { display: true, text: `${metric.label} (${metric.unit})` }, grid: side === 'right' ? { drawOnChartArea: false } : baseOptions().scales.y.grid }
 }
 
 export default function LoadResponseChart({ db, clientId, today, action }) {
@@ -86,8 +86,8 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
     },
     scales: {
       x: scatter ? emptyScale({ ...baseOptions().scales.x, type: 'linear', title: { display: true, text: `${byId[xMetric].label} (${byId[xMetric].unit})` } }) : { ...baseOptions().scales.x, title: { display: true, text: 'Recorded date' } },
-      y: emptyScale(axis(byId[primary], 'left', COLORS.blue)),
-      ...(secondary ? { y2: emptyScale(axis(byId[secondary], 'right', COLORS.amber)) } : {}),
+      y: emptyScale(axis(byId[primary], 'left')),
+      ...(secondary ? { y2: emptyScale(axis(byId[secondary], 'right')) } : {}),
     },
   }
   const tableRows = rows.filter((row, index) => scatter

@@ -59,7 +59,7 @@ export default function SrpeTlBreakdown({ client, range }) {
             data={{
               labels,
               datasets: [
-                { type: 'bar', label: 'Daily sRPE-TL', data: tl, backgroundColor: 'rgba(74,168,255,.45)', order: 2 },
+                { type: 'bar', label: 'Daily sRPE-TL', data: tl, backgroundColor: COLORS.blue + '98', order: 2 },
                 { type: 'line', label: '7-day avg', data: roll7, borderColor: COLORS.blue, borderWidth: 2, tension: 0.3, pointRadius: 0, spanGaps: true, order: 1 },
               ],
             }}
@@ -77,7 +77,7 @@ export default function SrpeTlBreakdown({ client, range }) {
             data={{
               labels,
               datasets: [
-                { type: 'bar', label: 'Duration (min)', data: dur, yAxisID: 'y', backgroundColor: 'rgba(52,199,89,.35)', order: 2 },
+                { type: 'bar', label: 'Duration (min)', data: dur, yAxisID: 'y', backgroundColor: COLORS.green + '98', order: 2 },
                 { type: 'line', label: 'Session RPE', data: rpe, yAxisID: 'y1', borderColor: COLORS.red, tension: 0.3, pointRadius: 2, spanGaps: true, order: 1 },
               ],
             }}
@@ -86,8 +86,8 @@ export default function SrpeTlBreakdown({ client, range }) {
               interaction: { mode: 'index', intersect: false },
               scales: {
                 x: baseOptions().scales.x,
-                y: { position: 'left', title: { display: true, text: 'Minutes', color: COLORS.green, font: { size: 10 } }, min: 0 },
-                y1: { position: 'right', title: { display: true, text: 'RPE', color: COLORS.red, font: { size: 10 } }, min: 0, max: 10, grid: { drawOnChartArea: false } },
+                y: { position: 'left', title: { display: true, text: 'Minutes', font: { size: 10 } }, min: 0 },
+                y1: { position: 'right', title: { display: true, text: 'RPE', font: { size: 10 } }, min: 0, max: 10, grid: { drawOnChartArea: false } },
               },
             }}
           />

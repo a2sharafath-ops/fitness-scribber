@@ -21,7 +21,7 @@ html:has(.client-progress){overflow-x:visible}
 .progress-chart-toolbar h3{margin:0;display:flex;gap:8px;align-items:center;font-size:15px}
 .progress-chart-switch{display:flex;gap:2px;padding:3px;background:var(--surface2);border-radius:24px}
 .progress-chart-switch button{font:inherit;font-size:11px;min-height:34px;padding:7px 12px;border:0;border-radius:22px;background:transparent;color:var(--muted);cursor:pointer}
-.progress-chart-switch button[aria-pressed=true]{background:var(--surface);color:var(--text);box-shadow:0 1px 4px #0001;font-weight:700}
+.progress-chart-switch button[aria-pressed=true]{background:var(--orbit-selected);color:var(--accent);box-shadow:0 1px 4px #0001;font-weight:700}
 .client-progress .progress-strength-canvas{height:270px;position:relative}
 .progress-card-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:11px;margin-top:16px}
 .progress-card-foot strong{color:var(--blue)}

@@ -30,6 +30,16 @@
     color: var(--cr-green); background: var(--cr-mint); border-color: var(--border);
   }
   .cr-page .cr-ring { background: conic-gradient(var(--cr-green) var(--angle), var(--surface2) 0); }
+  .cr-page .cr-actionbar button:hover { background: var(--orbit-hover); color: var(--accent); }
+  .cr-page .cr-actionbar .cr-primary:hover { background: var(--control-hover); color: var(--control-ink); }
+  .cr-page :focus-visible { outline-color: var(--orbit-focus); }
+  .cr-page .cr-chart path { stroke: var(--border); }
+  .cr-page .cr-muscle:is(:hover, .active) { stroke: var(--accent); }
+  .cr-page .cr-muscle:focus-visible { stroke: var(--orbit-focus); }
+  .cr-page .cr-chart polyline { stroke: var(--accent); }
+  .cr-page .cr-chart circle { fill: var(--surface); stroke: var(--accent); }
+  .cr-page .cr-chart circle:is(:hover, :focus-visible) { fill: var(--orbit-selected); }
+  .cr-page .cr-chart text { fill: var(--muted); }
   .cr-page .cr-next { color: var(--text); background: var(--surface2); border-color: var(--border); }
 }
 @media (max-width: 700px) {

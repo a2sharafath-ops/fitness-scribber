@@ -24,9 +24,9 @@ export default function ReadinessBreakdown({ client, range }) {
 
   // The trend chart can show the combined score or either component on its own.
   const VIEW = {
-    combined: { series: score, color: COLORS.green, fill: 'rgba(61,220,151,.10)', label: 'Readiness', sub: 'Combined score — the red-flag-weighted blend of both parts.' },
-    subjective: { series: wellnessPart, color: COLORS.purple, fill: 'rgba(167,139,250,.12)', label: 'Wellness (subjective)', sub: 'Hooper check-in mapped to 0–100 — the subjective part only.' },
-    objective: { series: hrvPart, color: COLORS.amber, fill: 'rgba(245,177,76,.10)', label: 'HRV (objective)', sub: 'HRV vs the 30-day baseline mapped to 0–100 — the objective part only.' },
+    combined: { series: score, color: COLORS.green, fill: COLORS.green + '1a', label: 'Readiness', sub: 'Combined score — the red-flag-weighted blend of both parts.' },
+    subjective: { series: wellnessPart, color: COLORS.purple, fill: COLORS.purple + '1f', label: 'Wellness (subjective)', sub: 'Hooper check-in mapped to 0–100 — the subjective part only.' },
+    objective: { series: hrvPart, color: COLORS.amber, fill: COLORS.amber + '1a', label: 'HRV (objective)', sub: 'HRV vs the 30-day baseline mapped to 0–100 — the objective part only.' },
   }
   const v = VIEW[view]
   const vTrend = rollingAvg(v.series, 7)
@@ -109,8 +109,8 @@ export default function ReadinessBreakdown({ client, range }) {
               data={{
                 labels,
                 datasets: [
-                  { label: 'Wellness part', data: wellnessPart, borderColor: COLORS.purple, backgroundColor: 'rgba(167,139,250,.12)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
-                  { label: 'HRV part', data: hrvPart, borderColor: COLORS.amber, backgroundColor: 'rgba(245,177,76,.10)', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
+                  { label: 'Wellness part', data: wellnessPart, borderColor: COLORS.purple, backgroundColor: COLORS.purple + '1f', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
+                  { label: 'HRV part', data: hrvPart, borderColor: COLORS.amber, backgroundColor: COLORS.amber + '1a', fill: true, tension: 0.3, spanGaps: true, pointRadius: 0 },
                 ],
               }}
               options={tOpts}

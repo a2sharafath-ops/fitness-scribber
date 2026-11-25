@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
-import { baseOptions, shortLabel } from '../../lib/chartSetup'
+import { baseOptions, COLORS, shortLabel } from '../../lib/chartSetup'
 import { fmtDate } from '../../lib/dates'
 import { fmtWt, toDisp, unitName } from '../../lib/units'
 
@@ -40,8 +40,8 @@ export default function OverviewLiftTrend({ clientId, trend, units }) {
       <div className="overview-lift-chart" tabIndex={0}
         aria-label={`${last.name} recorded set load. Use the arrow keys to browse dates.`} onKeyDown={browse}>
         <Line aria-hidden="true" options={options} data={{ labels: trend.map(point => shortLabel(point.date)), datasets: [{
-          data: trend.map(point => toDisp(point.loadKg, units)), borderColor: '#dc465e', backgroundColor: '#dc465e20',
-          pointBackgroundColor: '#dc465e', pointRadius: trend.map(point => point === reading ? 5 : 3), borderWidth: 2, fill: true,
+          data: trend.map(point => toDisp(point.loadKg, units)), borderColor: COLORS.purple, backgroundColor: COLORS.purple + '20',
+          pointBackgroundColor: COLORS.purple, pointRadius: trend.map(point => point === reading ? 5 : 3), borderWidth: 2, fill: true,
         }] }} />
       </div>
       <p>Past 8 weeks · Heaviest recorded set per date · Change {last.loadKg > trend[0].loadKg ? '+' : ''}{fmtWt(last.loadKg - trend[0].loadKg, units)}</p>

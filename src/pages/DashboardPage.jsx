@@ -19,7 +19,7 @@ import { useFormat } from '../hooks/useFormat'
 import useReducedMotion from '../hooks/useReducedMotion'
 import { initials } from '../lib/format'
 import { addDays, coachTimeZone, fmtDate, fmtDateRange, fmtDay } from '../lib/dates'
-import { baseOptions, shortLabel } from '../lib/chartSetup'
+import { baseOptions, COLORS, shortLabel } from '../lib/chartSetup'
 import { CLIENT_READINESS_PATH } from '../lib/clientRoutes'
 import { dashboardActivity, dashboardClientPath, dashboardClock, dashboardData, dashboardReadiness, dashboardWeeks, readinessRoster } from '../lib/dashboard'
 import { scheduleSort, sessionPath, weekOf } from '../lib/schedule'
@@ -251,9 +251,9 @@ export default function DashboardPage() {
     }
   }, [reduced, activity, activityValue, isTrend, isRate, metricLabel, describeBucket])
   const chartData = useMemo(() => ({ labels: activity.buckets.map(b => shortLabel(b.from)), datasets: [{ label: metricLabel, data: activity.buckets.map(b => b.value),
-    ...(isTrend ? { borderColor: '#dc465e', backgroundColor: '#dc465e22', pointBackgroundColor: '#dc465e',
+    ...(isTrend ? { borderColor: COLORS.purple, backgroundColor: COLORS.purple + '22', pointBackgroundColor: COLORS.purple,
       pointRadius: 3, pointHoverRadius: 6, fill: true, tension: .25, spanGaps: false }
-      : { backgroundColor: '#dc465e', borderRadius: 5, maxBarThickness: 40 }) }] }), [activity, isTrend, metricLabel])
+      : { backgroundColor: COLORS.purple, borderRadius: 5, maxBarThickness: 40 }) }] }), [activity, isTrend, metricLabel])
   const selectBucket = (index) => {
     setChartSelection(index)
     const chart = chartRef.current

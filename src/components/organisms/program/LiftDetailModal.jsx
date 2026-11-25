@@ -50,7 +50,7 @@ export default function LiftDetailModal({ client, lift }) {
       label: `Recorded 1RM (${unitName()})`,
       data: chron.map((m) => toDisp(m.valueKg)),
       borderColor: COLORS.green,
-      backgroundColor: 'rgba(52,199,89,.12)',
+      backgroundColor: COLORS.green + '1f',
       fill: true, tension: 0.3, pointRadius: 4, pointHoverRadius: 6,
       // Auto (Epley) peaks and manual entries get distinct point colours.
       pointBackgroundColor: chron.map((m) => (m.source === 'auto' ? COLORS.blue : COLORS.amber)),

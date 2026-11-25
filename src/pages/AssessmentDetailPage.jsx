@@ -17,7 +17,7 @@ import { compareFitnessTests } from '../lib/fitnessTests'
 
 function DeltaRow({ r }) {
   const arrow = r.delta == null || r.delta === 0 ? '' : r.delta > 0 ? '▲' : '▼'
-  const color = r.better == null ? 'var(--muted)' : r.better ? 'var(--green)' : 'var(--accent)'
+  const color = r.better == null ? 'var(--muted)' : r.better ? 'var(--green)' : 'var(--danger)'
   const cell = (v) => (v == null ? '—' : `${v}${r.unit || ''}`)
   return (
     <div className="cmp-row">

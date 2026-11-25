@@ -4,7 +4,7 @@ import { fmtVL } from '../../../lib/units'
 import { summarize, secToClock } from '../../../lib/workout'
 import Kpi from '../../atoms/Kpi'
 
-const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, COLORS.red, '#5ac8fa', '#f59ec4']
+const MUSCLE_COLORS = [COLORS.blue, COLORS.purple, COLORS.amber, COLORS.green, COLORS.red, '#708d91', '#987e90']
 
 // Recorded workout facts. Missing HR and mood stay missing rather than
 // becoming estimated observations.
@@ -34,7 +34,7 @@ export default function WorkoutInsights({ workout, units, exercises = [], restin
           {s.muscularPct + s.cardioPct > 0 ? (
             <div style={{ height: 180 }}><Doughnut
               data={{ labels: ['Muscular', 'Cardio'], datasets: [{ data: [s.muscularPct, s.cardioPct], backgroundColor: [COLORS.blue, COLORS.red], borderWidth: 0 }] }}
-              options={{ responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: COLORS.muted, boxWidth: 12 } }, tooltip: { callbacks: { label: (item) => `${item.label}: ${item.raw}%` } } } }}
+              options={{ responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } }, tooltip: { callbacks: { label: (item) => `${item.label}: ${item.raw}%` } } } }}
             /></div>
           ) : <div className="muted" style={{ fontSize: 13 }}>No load recorded.</div>}
         </div>

@@ -13,12 +13,12 @@ html:has(.client-profile){overflow-y:scroll;scrollbar-gutter:stable}
 .client-profile .cp-mark svg{display:block}
 .client-profile .btn{font-size:13px;min-height:42px;padding:10px 17px;transition:background .16s,box-shadow .16s,border-color .16s}
 .client-profile .btn.sm{min-height:36px;padding:8px 14px;font-size:12px}
-.client-profile .btn.ghost:hover{background:var(--surface2);border-color:var(--border)}
+.client-profile .btn.ghost:hover{background:var(--orbit-hover);border-color:var(--border)}
 .client-profile .cp-goals .btn{box-shadow:0 3px 8px #191b2015}
 .client-profile .cp-link{display:inline-flex;align-items:center;border:0;background:none;color:var(--accent);font:inherit;font-weight:600;font-size:12px;text-decoration:none;min-height:36px;padding:4px 0;cursor:pointer;text-align:left}
 .client-profile .cp-link:hover{text-decoration:underline;text-underline-offset:4px}
 .client-profile .cp-goals{padding:26px 28px;background:linear-gradient(120deg,var(--surface2) 0%,var(--surface) 68%);border-color:var(--border)}
-.client-profile .cp-goals .cp-mark{background:var(--tint-red);color:var(--accent)}
+.client-profile .cp-goals .cp-mark{background:var(--orbit-selected);color:var(--accent)}
 .client-profile .cp-meta{font-size:10px;color:var(--cp-muted);margin:0 0 4px}
 .client-profile .cp-meta small{font-size:inherit}
 .client-profile .cp-goal-meta{padding-left:44px;margin-top:-10px;margin-bottom:22px}
