@@ -24,7 +24,7 @@ export function ClientForm({ client }) {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
   const save = () => {
-    if (!f.name.trim()) return toast('Name is required', 'error')
+    if (!f.name.trim()) return toast('Enter a name.', 'error')
     commit((db) => {
       if (client) Object.assign(db.clients.find((c) => c.id === client.id), f)
       else
@@ -43,7 +43,7 @@ export function ClientForm({ client }) {
     try {
       const result = await deleteClient(client.id)
       closeModal()
-      toast(result?.refreshFailed ? 'Client deleted. Reload to refresh the remaining data.' : 'Client deleted')
+      toast(result?.refreshFailed ? 'Client deleted. Reload to refresh the list.' : 'Client deleted')
     } catch (error) {
       console.error('Client deletion failed', error)
       setDeleteError(error?.message || 'Client deletion failed. Please try again.')
@@ -72,7 +72,7 @@ export function ClientForm({ client }) {
         <Field label="Email"><input value={f.email} onChange={set('email')} /></Field>
         <Field label="Phone"><input value={f.phone} onChange={set('phone')} /></Field>
       </div>
-      <Field label="Goal"><input value={f.goal} onChange={set('goal')} placeholder="e.g. Lose 8kg & tone" /></Field>
+      <Field label="Goal"><input value={f.goal} onChange={set('goal')} placeholder="e.g. Build strength" /></Field>
       <div className="row3">
         <Field label="Level">
           <Select value={f.level} onChange={set('level')}>{LEVELS.map((o) => <option key={o}>{o}</option>)}</Select>
@@ -102,15 +102,13 @@ export function InviteAthleteForm({ client }) {
   if (client.userId) {
     return (
       <ModalShell title="Athlete access" onClose={closeModal} footer={<Button onClick={closeModal}>Close</Button>}>
-        <p>✓ {client.name} has linked their athlete account and can submit their own check-ins.</p>
+        <p>Athlete account linked. {client.name} can submit check-ins.</p>
       </ModalShell>
     )
   }
   return (
     <ModalShell title={'Invite ' + client.name} onClose={closeModal} footer={<Button onClick={closeModal}>Done</Button>}>
-      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-        Share this code with your athlete. They sign up, choose “I have an invite code”, and enter it to link their account — then they can submit their own morning check-ins and session RPE.
-      </p>
+      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>Share this code with your athlete. They can select “I have an invite code” at sign-up to link their account and submit check-ins and session RPE.</p>
       {code && (
         <div className="card" style={{ textAlign: 'center' }}>
           <div className="muted" style={{ fontSize: 11 }}>INVITE CODE</div>
@@ -145,7 +143,7 @@ export function UpgradePackageForm({ client }) {
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button disabled={plan === client.plan} onClick={save}>Save package</Button></>}
     >
       <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-        Current package: <strong>{client.plan}</strong>. Choose {client.name}'s package tier.
+        Current package: <strong>{client.plan}</strong>
       </p>
       <div className="pkg-tiers">
         {PACKAGE_TIERS.map((t) => (
@@ -191,9 +189,8 @@ export function AssignPlanForm({ client }) {
       </Field>
       {gated && (
         <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
-          <Icon name="alert" size={14} /> {client.name}'s health screening needs review before an active program starts.
-          Record physician/ePARmed-X+ clearance as <strong>Received</strong> in their Assessments
-          (Health screening section) to unlock plan assignment.
+          <Icon name="alert" size={14} /> Review health screening before assigning a program.
+          In Assessments → Health screening, mark physician or ePARmed-X+ clearance as <strong>Received</strong>.
         </p>
       )}
     </ModalShell>

@@ -29,7 +29,7 @@ export default function ChatComposer({ onSend, onVoice, onFile, busy }) {
       {onFile && (
         <>
           <button type="button" className="rec-btn" onClick={() => fileRef.current?.click()} disabled={busy}
-            aria-label="Attach a video or image" title="Attach form-check video / image"><Icon name="paperclip" size={20} /></button>
+            aria-label="Attach a video or image" title="Attach a form-check video or image"><Icon name="paperclip" size={20} /></button>
           <input ref={fileRef} type="file" accept="video/*,image/*,audio/*" hidden onChange={pickFile} />
         </>
       )}

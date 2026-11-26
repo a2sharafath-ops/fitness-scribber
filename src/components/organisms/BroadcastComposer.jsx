@@ -34,7 +34,7 @@ export default function BroadcastComposer({ clients = [], onSent }) {
       closeModal()
     } catch (e) {
       setBusy(false)
-      toast('Broadcast failed: ' + (e.message || 'unknown error'), 'error')
+      toast('Couldn’t send broadcast.' + (e.message ? ' ' + e.message : ''), 'error')
     }
   }
 
@@ -49,9 +49,7 @@ export default function BroadcastComposer({ clients = [], onSent }) {
         </>
       )}
     >
-      <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
-        Sends the same message to each selected athlete in their own chat thread.
-      </p>
+      <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>Each selected athlete gets this message in their own chat.</p>
 
       <div className="flex between" style={{ marginBottom: 6 }}>
         <span className="section-title" style={{ margin: 0, fontSize: 13 }}>Recipients</span>

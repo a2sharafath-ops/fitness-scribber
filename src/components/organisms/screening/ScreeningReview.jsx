@@ -45,13 +45,14 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
         </div>
       </div>
       <p className="muted" style={{ fontSize: 12, margin: '6px 0 10px' }}>
-        Completed {fmtDate(s.completedOn)} · valid until {fmtDate(s.validUntil)} (invalid earlier if their health changes).
-        Signed: {s.parq?.declaration?.signature || '—'}{s.parq?.declaration?.witness ? ` · witness ${s.parq.declaration.witness}` : ''}
+        Completed {fmtDate(s.completedOn)} · valid until {fmtDate(s.validUntil)} unless health changes.
+        {s.parq?.declaration?.signature ? `Signed: ${s.parq.declaration.signature}` : 'Signature not recorded'}
+        {s.parq?.declaration?.witness ? ` · witness ${s.parq.declaration.witness}` : ''}.
       </p>
 
       {(gYes.length > 0 || delays.length > 0) && (
         <div className="intake-block">
-          <div className="i-h">📋 PAR-Q+ answers that triggered review</div>
+          <div className="i-h">PAR-Q+ answers that triggered review</div>
           <div className="i-b">
             {gYes.map((id) => <div key={id}>YES — {id}: {questionText(id)}</div>)}
             {fYes.map((id) => <div key={id}>YES — {id}: {questionText(id)}</div>)}
@@ -104,7 +105,7 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
           </div>
           <div className="row2">
             <Field label="Notes"><input value={cl.notes || ''} onChange={(e) => setCl({ notes: e.target.value })} placeholder="e.g. GP letter received, moderate intensity approved" /></Field>
-            <Field label="Clearance letter (link/URL)"><input value={cl.attachmentUrl || ''} onChange={(e) => setCl({ attachmentUrl: e.target.value })} placeholder="Paste a link to the scanned letter" /></Field>
+            <Field label="Clearance letter (link/URL)"><input value={cl.attachmentUrl || ''} onChange={(e) => setCl({ attachmentUrl: e.target.value })} placeholder="Link to the scanned letter" /></Field>
           </div>
           <p className="muted" style={{ fontSize: 11.5, margin: 0 }}>
             Program start stays gated until clearance is marked <strong>Received</strong>. The PAR-Q+ screens risk — it is not a diagnosis or a substitute for medical clearance.
@@ -113,7 +114,7 @@ export default function ScreeningReview({ screening, draft, onClearance, onStart
       )}
       {historical && s.clearance && <div className="intake-block">
         <div className="i-h">Recorded clearance decision</div>
-        <div className="i-b">Status: {s.clearance.status || 'Not recorded'} · Date: {fmtDate(s.clearance.dateCleared)}{s.clearance.notes ? ` · ${s.clearance.notes}` : ''}</div>
+        <div className="i-b">{s.clearance.status ? `Status: ${s.clearance.status}` : 'Status not recorded'} · {fmtDate(s.clearance.dateCleared)}{s.clearance.notes ? ` · ${s.clearance.notes}` : ''}</div>
       </div>}
       {onStart && (
         <div className="flex gap" style={{ marginTop: 10 }}>

@@ -85,8 +85,8 @@ export function bookingPlan(db, s) {
 
 export function scheduleLock(db, s, clock = scheduleClock(new Date(), db.settings?.tz)) {
   if (!['Pending', 'Confirmed'].includes(s.status)) return 'Only pending or confirmed bookings can be moved.'
-  if (beforeNow(s, clock)) return 'This session has already started or is in the past. Update its booking status instead.'
-  if (trainingBooking(s) && at(db.workouts, s).some(row => !row.bookingId || row.bookingId === s.id)) return 'A workout record is linked to this booking or its original day. Open Training to review it.'
+  if (beforeNow(s, clock)) return 'This session has started or is in the past. Update its status instead.'
+  if (trainingBooking(s) && at(db.workouts, s).some(row => !row.bookingId || row.bookingId === s.id)) return 'A workout record is linked to this booking or its original day. Review it in Training.'
   return ''
 }
 

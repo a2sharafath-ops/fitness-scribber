@@ -26,7 +26,7 @@ export async function approvePlanReplacement(db, targets, confirm) {
   const rows = clashes.map(target => `${db.clients?.find(client => client.id === target.clientId)?.name || 'Client'} · ${target.date}`)
   return !!await confirm({
     title: 'Replace existing plans?',
-    message: `${clashes.length} existing plan${clashes.length === 1 ? '' : 's'} will be replaced: ${rows.slice(0, 6).join('; ')}${rows.length > 6 ? `; and ${rows.length - 6} more` : ''}.`,
+    message: `Replace ${clashes.length} existing plan${clashes.length === 1 ? '' : 's'}? ${rows.slice(0, 6).join('; ')}${rows.length > 6 ? `; and ${rows.length - 6} more` : ''}.`,
     confirmLabel: 'Replace plans',
   })
 }

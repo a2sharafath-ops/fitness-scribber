@@ -39,7 +39,7 @@ function OutcomeCard({ title, path, first, last, comparable, children, empty }) 
     {!last ? <p className="muted">{empty}</p> : <>
       <div className="progress-date-pair"><span>Baseline: {fmtDate(first.date)}</span><span>Latest: {fmtDate(last.date)}</span></div>
       {children}
-      {!comparable && <p className="progress-footnote">1 reassessment needed to compare.</p>}
+      {!comparable && <p className="progress-footnote">Record one reassessment to compare.</p>}
     </>}
     <Link className="progress-source-link" to={path}>{last ? 'Assessment history' : 'Record baseline'} →</Link>
   </article>
@@ -119,8 +119,8 @@ export default function ClientProgressPage() {
               <BodyMetric label="Body fat" field="bodyFatPct" first={body.first} last={body.last} comparable={body.comparable} format={format} />
               <BodyMetric label="Lean mass" field="leanMassKg" first={body.first} last={body.last} comparable={body.comparable} weight format={format} />
             </div>
-            {!body.comparable && <p className="progress-footnote">1 reassessment needed to compare.</p>}
-            {body.comparable && body.first.data?.method !== body.last.data?.method && <p className="progress-caution">Methods differ or are missing; compare with care.</p>}
+            {!body.comparable && <p className="progress-footnote">Record one reassessment to compare.</p>}
+            {body.comparable && body.first.data?.method !== body.last.data?.method && <p className="progress-caution">Measurement methods differ or are missing. Compare with care.</p>}
           </> : <p className="muted">No body composition assessment yet.</p>}
           <Link className="progress-source-link" to={`/clients/${id}/assessments/body_comp`}>{body.last ? 'Assessment history' : 'Record baseline'} →</Link>
         </article>}
@@ -140,12 +140,12 @@ export default function ClientProgressPage() {
     <section id="progress-panel-attendance" className="progress-panel progress-attendance" role="tabpanel" aria-labelledby="attendance" tabIndex={0} hidden={activeView !== 'attendance'}>
       {activeView === 'attendance' && <>
       <section className="card">
-        <div className="progress-section-head"><h2 id="progress-attendance-title">Booked session completion <ProgressInfo label="booking completion" text="The rate uses past, non-cancelled bookings. Bookings awaiting status remain in the denominator. Today's bookings and workout logs are counted separately." /></h2><label className="progress-lift-select">Period <Select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></Select></label></div>
+        <div className="progress-section-head"><h2 id="progress-attendance-title">Booked session completion <ProgressInfo label="booking completion" text="Includes past non-cancelled bookings and bookings awaiting status. Today’s bookings and workout logs are counted separately." /></h2><label className="progress-lift-select">Period <Select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></Select></label></div>
         <div className="progress-attendance-layout">
           <div className="progress-completion-ring" style={{ '--completion': `${attendance.percent ?? 0}%` }} role={attendance.total ? 'progressbar' : undefined} aria-label="Booked session completion" aria-valuenow={attendance.percent ?? undefined} aria-valuemin={attendance.total ? 0 : undefined} aria-valuemax={attendance.total ? 100 : undefined}><div><strong>{attendance.percent == null ? '—' : `${attendance.percent}%`}</strong><span>{attendance.total ? `${attendance.completed} of ${attendance.total} bookings` : 'No past bookings'}</span></div></div>
           <div className="progress-completion-counts"><div><strong>{attendance.completed}</strong><span>Completed</span></div><div><strong>{attendance.unresolved}</strong><span>Awaiting status</span></div><div><strong>{attendance.cancelled}</strong><span>Cancelled · excluded</span></div></div>
         </div>
-        {attendance.todayCompleted > 0 && <p className="progress-footnote">{attendance.todayCompleted} completed today · outside the past-booking rate</p>}
+        {attendance.todayCompleted > 0 && <p className="progress-footnote">{attendance.todayCompleted} completed today · excluded from this rate</p>}
         <div className="progress-card-foot"><span>{fmtDate(attendance.start)}–{fmtDate(addDays(today, -1))} · past bookings</span><Link to="/schedule">{attendance.unresolved ? 'Review booking status' : 'Open schedule'} →</Link></div>
       <div className="progress-workout-completion"><div><h3>Completed workout logs</h3><p>Counted separately from bookings</p></div><strong>{completedWorkouts}</strong><div className="progress-card-foot"><span>Through {fmtDate(today)}</span><Link to={`/clients/${id}/training?history=workouts#training-history-title`}>View workout history →</Link></div></div>
       </section>

@@ -18,12 +18,12 @@ export function clientReviewItems(db, today, clients = db.clients.filter(c => c.
   const add = (c, kind, reason, detail, suffix, tone = 'amber', priority = 3) => reviews.push({ key: `${c.id}:${reason}`, client: c, kind, reason, detail, path: dashboardClientPath(c.id, suffix), tone, priority })
   for (const c of clients) {
     const concerns = openConcerns(db, c.id).filter(r => !r.date || r.date <= today)
-    if (concerns.length) add(c, 'review', `${concerns.length} open concern${concerns.length === 1 ? '' : 's'}`, 'Review client concerns', '/check-ins?view=concerns', 'red', 0)
+    if (concerns.length) add(c, 'review', `${concerns.length} open concern${concerns.length === 1 ? '' : 's'}`, '', '/check-ins?view=concerns', 'red', 0)
     const screening = screeningsFor((db.screenings || []).filter(s => !s.completedOn || s.completedOn <= today), c.id).complete
     if (screening && programStatus(screening) === 'gated') add(c, 'review', 'Screening needs review', 'Review clearance record', '/assessments#health-screening', 'red', 1)
     else if (rescreenDue(screening, today)) add(c, 'followup', 'Screening renewal due', `Valid until ${fmtDay(screening.validUntil)}`, '/assessments#health-screening')
     const readiness = computeReadiness(db, c.id, today)
-    if (readiness.color === 'red') add(c, 'review', 'Lower app score today', 'Review today’s recorded inputs', '/check-ins?view=wellness', 'amber', 2)
+    if (readiness.color === 'red') add(c, 'review', 'Lower app score today', 'Review today’s inputs.', '/check-ins?view=wellness', 'amber', 2)
     const lastCheckin = recent(db.wellness.filter(w => w.clientId === c.id && w.date <= today))[0]
     if (lastCheckin && daysBetween(lastCheckin.date, today) >= 8) add(c, 'followup', 'Check-in follow-up', `Last recorded ${fmtDay(lastCheckin.date)}`, '/check-ins?view=wellness')
     const assessments = formalAssessments(db.assessments).filter(a => a.clientId === c.id && a.date <= today)

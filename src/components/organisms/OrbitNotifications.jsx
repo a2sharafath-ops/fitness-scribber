@@ -51,7 +51,7 @@ export default function OrbitNotifications({ notices, open, exiting, onToggle, o
           <button type="button" className="orbit-notification-mark" onClick={() => toggleRead(id)}
             aria-label={`Mark as ${seen.has(id) ? 'unread' : 'read'}: ${label}`}>{seen.has(id) ? 'Mark unread' : 'Mark read'}</button>
         </div>)}
-        {!visible.length && <p className="gb-empty">{unreadOnly ? 'No unread notifications.' : 'You’re all caught up.'}</p>}
+        {!visible.length && <p className="gb-empty">{unreadOnly ? 'No unread notifications.' : 'No notifications yet.'}</p>}
       </section>
     </>}
   </div>

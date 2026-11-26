@@ -20,8 +20,8 @@ test('incomplete, non-finite and duplicate measurements block saving rather than
   for (const value of ['', ' ', 'abc', Infinity, -Infinity, NaN]) assert.match(fitnessTestsError([{ ...row, value }]), /numeric result/)
   assert.match(fitnessTestsError([{ ...row, name: '' }]), /test name/)
   assert.match(fitnessTestsError([{ ...row, unit: '' }]), /result unit/)
-  assert.match(fitnessTestsError([row, { ...row, name: '  HANDGRIP   DYNAMOMETER ' }]), /already have a result/)
-  assert.throws(() => cleanFitnessTests([row, row]), /already have a result/)
+  assert.match(fitnessTestsError([row, { ...row, name: '  HANDGRIP   DYNAMOMETER ' }]), /a result already exists/)
+  assert.throws(() => cleanFitnessTests([row, row]), /a result already exists/)
   assert.equal(fitnessTestsError([row, { ...row, protocol: 'Different device' }]), '')
 })
 

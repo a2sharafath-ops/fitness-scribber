@@ -52,7 +52,7 @@ export default function SrpeTlBreakdown({ client, range }) {
 
       <div className="card">
         <div className="section-title" style={{ margin: 0 }}>Session load trend</div>
-        <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>Daily sRPE-TL (bars) with a 7-day rolling average. Each bar is that day's RPE × minutes.</div>
+        <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>Daily session load bars with a 7-day average.</div>
         <div style={{ height: 220 }}>
           <Chart
             type="bar"
@@ -97,13 +97,9 @@ export default function SrpeTlBreakdown({ client, range }) {
       <div className="card" style={{ marginTop: 16 }}>
         <div className="section-title" style={{ margin: 0 }}>How session load is computed</div>
         <p className="muted" style={{ fontSize: 13, lineHeight: 1.6 }}>
-          <strong>sRPE-TL</strong> (session-RPE training load) is the athlete's <strong>session RPE (0–10)</strong> multiplied by the
-          <strong> session duration in minutes</strong>, in arbitrary units (AU). It is logged at the end of each session in the
-          Start → Complete → RPE flow. This single number is the app's core measure of <em>internal</em> load — how much stress a
-          session imposed — and it is what every other load metric is built from: the 7-day sum is the acute load in
-          <strong> ACWR</strong>, its day-to-day spread drives <strong>monotony</strong>, and load × monotony gives <strong>strain</strong>.
-          A long easy session and a short intense one can produce the same load, which is exactly what makes it comparable across very
-          different session types.
+          Session load (sRPE-TL) is RPE (0–10) × session minutes, in arbitrary units (AU).
+          Enter RPE when completing the workout. ACWR compares daily load averages, monotony describes how daily load
+          varies, and strain multiplies 7-day load by monotony. A short hard session and a longer easy session can have the same load.
         </p>
       </div>
     </>

@@ -24,10 +24,10 @@ const measureValue = (measure, row) => row?.[measure] == null ? 'Not calculable'
 const unavailableReason = (measure, row) => {
   if (!row) return 'No session RPE entries in this period.'
   if (measure === 'acwr') return row.positive28 < MIN_ACWR_DAYS
-    ? `${row.positive28}/${MIN_ACWR_DAYS} positive-load days needed by the existing 28-day calculation.`
+    ? `${row.positive28} of ${MIN_ACWR_DAYS} positive-load days in the past 28 days.`
     : 'The 28-day average load is zero, so the ratio is undefined.'
-  if (measure === 'monotony') return 'No variation in the 7-day daily loads, so mean ÷ standard deviation is undefined.'
-  return '7-day monotony is unavailable, so strain cannot be calculated.'
+  if (measure === 'monotony') return 'Monotony is unavailable because the daily loads did not vary over 7 days.'
+  return 'Strain needs a calculable 7-day monotony value.'
 }
 
 function LoadMetricGraphModal({ measure, history, today }) {
@@ -71,7 +71,7 @@ function LoadMetricGraphModal({ measure, history, today }) {
       {showDefinition && <p className="progress-info-text">{GLOSSARY[measure.id].text}</p>}
       <div className="progress-load-graph-controls"><label>Display period <Select value={displayDays} onChange={(event) => setDisplayDays(Number(event.target.value))}><option value={28}>28 days</option><option value={56}>56 days</option><option value={84}>84 days</option></Select></label>{plotted.length > 0 && <label className="progress-load-band-toggle"><input type="checkbox" checked={showBand} onChange={(event) => setShowBand(event.target.checked)} /> Show personal baseline band</label>}</div>
       <div className="progress-load-graph-canvas"><Line data={{ labels: dates.map(shortLabel), datasets }} options={options} role="img" aria-label={`${measure.title} chart, ${plotted.length} calculated values between ${fmtDate(start)} and ${fmtDate(end)}. Unlogged days have no point.${selectedBand ? ` Trailing personal baseline band for ${fmtDate(selected.date)}: ${bandText}.` : ''}`} /></div>
-      {plotted.length ? <><div className="progress-load-graph-legend"><span><i className="progress-load-graph-point" /> Dated {measure.title} values</span>{hasBand && <span><i className="progress-load-graph-band" /> Trailing personal baseline band</span>}</div><p className="checkins-window">{plotted.length} calculated values · {chronological.length}/{displayDays} days logged</p></> : <p className="checkins-empty">No calculable {measure.title} values yet. {unavailableReason(measure.id, chronological.at(-1))}</p>}
+      {plotted.length ? <><div className="progress-load-graph-legend"><span><i className="progress-load-graph-point" /> Dated {measure.title} values</span>{hasBand && <span><i className="progress-load-graph-band" /> Trailing personal baseline band</span>}</div><p className="checkins-window">{plotted.length} calculated values · {chronological.length}/{displayDays} days logged</p></> : <p className="checkins-empty">{measure.title} is unavailable. {unavailableReason(measure.id, chronological.at(-1))}</p>}
       {chronological.length > 0 && <details className="progress-derived-table"><summary>Show dated {measure.title} table</summary><div className="progress-derived-detail">
         <LogTable caption={`${measure.title} history`}><thead><tr><th scope="col">Date</th><th scope="col">{measure.title}</th><th scope="col">7-day load</th><th scope="col">7-day coverage</th>{measure.id === 'acwr' && <th scope="col">28-day coverage</th>}<th scope="col">Sources in window</th></tr></thead><tbody>
           {[...chronological].reverse().map((row) => <tr key={row.date}><th scope="row">{fmtDate(row.date)}</th><td>{measureValue(measure.id, row)}</td><td>{row.load7.toLocaleString()} AU</td><td>{row.logged7}/7 days logged</td>{measure.id === 'acwr' && <td>{row.logged28}/28 days logged</td>}<td>{measure.id === 'acwr' ? row.sources28 : row.sources7}</td></tr>)}
@@ -142,10 +142,10 @@ function AdvancedLoad({ rows, clientId, today }) {
         const indicator = !available ? '' : position === 'unavailable' ? '— Baseline unavailable' : {
           above: '↑ Above baseline', below: '↓ Below baseline', within: '≈ Within baseline',
         }[position]
-        const shortDetail = !recent ? 'No session RPE in the past 28 days' : !available ? measure.id === 'acwr' && current.positive28 < MIN_ACWR_DAYS ? `${current.positive28}/${MIN_ACWR_DAYS} positive-load days · ${MIN_ACWR_DAYS - current.positive28} more needed` : 'No daily load variation' : `Latest · ${fmtDate(current.date)}`
-        const detail = !recent ? `No session RPE in the past 28 days${latest ? `; last entry ${fmtDate(latest.date)}` : ''}.` : current[measure.id] == null
+        const shortDetail = !recent ? 'No session RPE in the past 28 days' : !available ? measure.id === 'acwr' && current.positive28 < MIN_ACWR_DAYS ? `${current.positive28} of ${MIN_ACWR_DAYS} positive-load days · ${MIN_ACWR_DAYS - current.positive28} more needed` : 'No daily load variation' : `Latest · ${fmtDate(current.date)}`
+        const detail = !recent ? `No session RPE in the past 28 days.${latest ? ` Last entry ${fmtDate(latest.date)}.` : ''}` : current[measure.id] == null
           ? `${fmtDate(current.date)}. ${unavailableReason(measure.id, current)}`
-          : `${fmtDate(current.date)}. ${measure.id === 'acwr' ? `${current.logged28}/28` : `${current.logged7}/7`} days logged; other days unconfirmed.`
+          : `${fmtDate(current.date)}. Load recorded for ${measure.id === 'acwr' ? `${current.logged28} of 28` : `${current.logged7} of 7`} days. The other days are unconfirmed.`
         return <button key={measure.id} type="button" className="progress-derived-card" aria-label={`Open ${measure.title} graph and table. ${indicator ? `${indicator}. ` : ''}${detail}`} onClick={() => openModal(<LoadMetricGraphModal measure={measure} history={history} today={today} />, true)}>
           <span className="progress-derived-card-heading"><span>{measure.title}</span>{recent && <time dateTime={current.date}>{shortLabel(current.date)}</time>}</span>
           <strong>{available ? measureValue(measure.id, current) : '—'}</strong>
@@ -174,7 +174,7 @@ export default function ClientTrainingLoad({ client }) {
   return <div className="progress-load-content">
     <LoadResponseChart db={db} clientId={client.id} today={today} action={<Button onClick={() => openModal(<SRPEForm clientId={client.id} />)}>＋ Record session RPE</Button>} />
     {srpe.length ? <AdvancedLoad rows={srpe} clientId={client.id} today={today} /> :
-      <details className="card progress-disclosure"><summary>Load calculations</summary><p className="muted">No session RPE in the past 28 days. Record effort and duration to calculate load ratio, monotony and strain.</p></details>}
+      <details className="card progress-disclosure"><summary>Load calculations</summary><p className="muted">No session RPE in 28 days. Record effort and duration to calculate ACWR, monotony and strain.</p></details>}
     <ClientMuscleVolume key={client.id} clientId={client.id} />
     <details className="card progress-disclosure progress-training-logs"><summary>Training logs</summary><div className="progress-load-logs">
       <section className="progress-log-card"><h3>Session RPE</h3><SourceLine row={srpe[0]} today={today} />

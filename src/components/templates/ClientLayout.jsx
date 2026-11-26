@@ -23,7 +23,7 @@ export default function ClientLayout() {
   if (!client) {
     return <div className="empty" style={{ padding: 40 }}>
       <div className="big">Client unavailable</div>
-      <p>This client may have been removed.</p>
+      <p>Client unavailable.</p>
       <Link to="/clients">Back to clients</Link>
     </div>
   }
@@ -47,7 +47,7 @@ export default function ClientLayout() {
         </div>
       </header>
       {saveStatus !== 'idle' && <div className={'client-save-status ' + saveStatus} role={saveStatus === 'failed' ? 'alert' : 'status'}>
-        {saveStatus === 'saving' ? 'Saving changes…' : saveStatus === 'saved' ? 'Changes saved' : 'Changes may not have saved. Review the data warning before continuing.'}
+        {saveStatus === 'saving' ? 'Saving changes…' : saveStatus === 'saved' ? 'Changes saved' : 'Some changes may be unsaved. Review the data warning before continuing.'}
       </div>}
       <ClientSubnav client={client} />
       <Outlet context={theme} />

@@ -13,14 +13,15 @@ const recordedWhen = (date, today) => {
   return age === 0 ? 'Today' : `${fmtDate(date)} · ${age === 1 ? '1 day' : `${age} days`} ago`
 }
 
-function BaselineExplanation({ baseline }) {
+function BaselineExplanation({ baseline, coverage }) {
   const { closeModal } = useModal()
   return <ModalShell title="Personal baseline comparison" onClose={closeModal} footer={<Button variant="ghost" onClick={closeModal}>Close</Button>}>
-    <p>Zero is your usual level. One Z-score unit is one standard deviation from your earlier ratings.</p>
+    <p>Zero is your usual level. Each point is one standard deviation from your earlier ratings.</p>
     <div className="overview-baseline-explanation"><strong>Z = (latest favourable-scaled rating − baseline mean) ÷ sample standard deviation</strong>
-      <p>Sleep uses its recorded rating: 7 is best. Stress, fatigue and soreness use 8 − rating: 1 is best. Positive/right therefore means more favourable, matching the wellness total.</p></div>
-    <p>Gray is within ±1 standard deviation of the earlier baseline. Green is above +1; amber is below −1. These are descriptive bands, not health cutoffs. A more favourable change can still come from a poor rating.</p>
-    <p className="muted">The comparison needs {MIN_WELLNESS_BASELINE_DAYS} earlier daily ratings in the preceding {WELLNESS_BASELINE_DAYS} days. The latest date is excluded. Missing ratings and zero baseline variation have no point. Values beyond ±3 appear at the edge; the numeric score remains visible.</p>
+      <p>Sleep uses the original rating (7 is best). Stress, fatigue and soreness use 8 − rating (1 is best). Positive scores are more favourable.</p></div>
+    <p>Gray is within ±1 of baseline, green is above +1, and amber is below −1. These bands describe change from your usual ratings. They do not indicate health or clearance.</p>
+    <p className="muted">This needs {MIN_WELLNESS_BASELINE_DAYS} earlier daily ratings within {WELLNESS_BASELINE_DAYS} days. It excludes the latest date. Missing ratings and a flat baseline show no point. Scores beyond ±3 appear at the chart edge with their actual number.</p>
+    <p className="muted">{coverage} earlier daily ratings. The latest date is excluded.</p>
     <table className="table overview-baseline-table"><thead><tr><th>Metric</th><th>Days</th><th>Raw mean</th><th>SD</th></tr></thead><tbody>{baseline.metrics.map((metric) => <tr key={metric.key}><th scope="row">{metric.label}</th><td>{metric.count}</td><td>{metric.mean?.toFixed(2) ?? '—'}</td><td>{metric.sd?.toFixed(2) ?? '—'}</td></tr>)}</tbody></table>
   </ModalShell>
 }
@@ -36,11 +37,11 @@ export default function OverviewCheckin({ clientId, today }) {
   const lowCount = Math.min(...counts), highCount = Math.max(...counts)
   const missing = metrics.some((metric) => metric.reason === 'missing-rating')
   const noVariation = metrics.some((metric) => metric.reason === 'no-variation')
-  const caption = !latest ? 'No check-ins yet. Record your first check-in.'
-    : lowCount < MIN_WELLNESS_BASELINE_DAYS ? `${MIN_WELLNESS_BASELINE_DAYS - lowCount} more complete check-in${MIN_WELLNESS_BASELINE_DAYS - lowCount === 1 ? '' : 's'} needed for a full baseline comparison.`
-      : missing ? 'Some latest ratings are missing. Available ratings are compared below.'
-        : noVariation ? 'Some baseline ratings have no variation; those scores are unavailable.'
-          : `${lowCount === highCount ? lowCount : `${lowCount}–${highCount}`} earlier daily ratings · Latest date excluded`
+  const coverage = lowCount === highCount ? lowCount : `${lowCount}–${highCount}`
+  const needed = MIN_WELLNESS_BASELINE_DAYS - lowCount
+  const caption = needed > 0 ? `${needed} more complete check-in${needed === 1 ? '' : 's'} needed for comparison.`
+    : missing ? 'Some latest ratings are missing. Only available ratings are compared.'
+      : noVariation ? 'Some baseline ratings have no variation, so their scores are unavailable.' : ''
   const wearable = (db.wearable || []).filter((row) => row.clientId === clientId && row.date <= today).sort((a, b) => b.date.localeCompare(a.date))[0]
   return <section className="card overview-checkin" aria-labelledby="checkin-title">
     <div className="flex between overview-section-head"><h2 id="checkin-title">Check-in snapshot</h2><div className="overview-inline-actions">
@@ -54,10 +55,10 @@ export default function OverviewCheckin({ clientId, today }) {
       </div>}
       <div className="overview-baseline-chart">
       <div className="overview-chart-head"><h3>{hasComparison ? 'Baseline change · Z-score' : latest ? 'Baseline comparison unavailable' : 'No check-ins yet'}</h3>
-        {latest && <button type="button" className="overview-info" aria-label="How baseline Z-scores work" onClick={() => openModal(<BaselineExplanation baseline={baseline} />)}>i</button>}
+        {latest && <button type="button" className="overview-info" aria-label="How baseline Z-scores work" onClick={() => openModal(<BaselineExplanation baseline={baseline} coverage={coverage} />)}>i</button>}
       </div>
-      <p className="overview-chart-caption">{latest && !hasComparison && lowCount >= MIN_WELLNESS_BASELINE_DAYS
-        ? 'A comparison needs a latest rating and enough variation in earlier ratings.' : latest ? caption : 'Record a check-in to see the latest ratings here.'}</p>
+      {(!latest || !hasComparison || caption) && <p className="overview-chart-caption">{latest && !hasComparison && needed <= 0
+        ? 'Comparison needs a latest rating and variation in earlier ratings.' : latest ? caption : 'Record a check-in to see ratings here.'}</p>}
       {hasComparison && <>
       <div className="overview-chart-direction"><span>← Less favourable</span><span>More favourable →</span></div>
       <div role="group" aria-label="Wellness change in standard deviations from personal baseline">{metrics.map((metric) => {

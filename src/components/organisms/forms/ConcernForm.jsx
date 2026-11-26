@@ -21,7 +21,7 @@ export default function ConcernForm({ concern, clientId }) {
   const sessions = db.sessions.filter((s) => s.clientId === f.clientId).sort((a, b) => b.date.localeCompare(a.date))
   const save = () => {
     if (!f.clientId) return toast('Add a client first', 'error')
-    if (!f.text.trim()) return toast('Please describe the concern', 'error')
+    if (!f.text.trim()) return toast('Describe the concern.', 'error')
     commit((d) => {
       const val = { clientId: f.clientId, category: f.category, severity: f.severity, date: f.date, sessionId: f.sessionId || null, text: f.text.trim(), source: 'Client' }
       if (concern) Object.assign(d.concerns.find((c) => c.id === concern.id), val)
@@ -45,11 +45,11 @@ export default function ConcernForm({ concern, clientId }) {
       </div>
       <Field label="Related session (optional)">
         <Select value={f.sessionId || ''} onChange={set('sessionId')}>
-          <option value="">— Not session-specific —</option>
+          <option value="">No specific session</option>
           {sessions.map((s) => <option key={s.id} value={s.id}>{fmtDay(s.date)} · {s.time} · {s.type}</option>)}
         </Select>
       </Field>
-      <Field label="What's the concern?"><textarea value={f.text} onChange={set('text')} placeholder="Describe the issue..." /></Field>
+      <Field label="What's the concern?"><textarea value={f.text} onChange={set('text')} placeholder="When it started and what happened…" /></Field>
     </ModalShell>
   )
 }

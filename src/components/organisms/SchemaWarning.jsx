@@ -17,9 +17,9 @@ export default function SchemaWarning() {
     <div className="schema-warn" role="alert">
       <span className="schema-warn-ic" aria-hidden="true"><Icon name="alert" size={18} /></span>
       <div>
-        <strong>Data issue:</strong> couldn’t {action} {tables}.
-        {' '}{write ? 'Some changes may not be saved.' : 'Some records may be missing from this view.'}
-        {' '}Check the connection and schema, then reload after the issue is resolved.
+        Couldn’t {action} {tables}.
+        {' '}{write ? 'Some changes may be unsaved.' : 'Some records may be missing.'}
+        {' '}Resolve the connection or data issue before reloading.
         {import.meta.env.DEV && <details>
           <summary>Technical details</summary>
           <ul>{dbIssues.map((issue) => <li key={`${issue.table}:${issue.kind}`}>{issue.table}: {issue.message}</li>)}</ul>

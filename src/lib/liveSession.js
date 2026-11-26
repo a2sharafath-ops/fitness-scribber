@@ -183,7 +183,7 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       if (state.setTimer?.rowId === row.id) throw new Error('Stop the set timer before editing this set.')
       if (action.patch.load != null && !validNumber(action.patch.load, 2000)) throw new Error('Enter a weight between 0 and 2000 kg.')
       if (action.patch.reps != null && !validNumber(action.patch.reps, 999, true)) throw new Error('Enter whole reps between 0 and 999.')
-      if (action.patch.durationSeconds != null && !validNumber(action.patch.durationSeconds, 35999, true, 1)) throw new Error('Enter duration between 1 and 35999 seconds.')
+      if (action.patch.durationSeconds != null && !validNumber(action.patch.durationSeconds, 35999, true, 1)) throw new Error('Enter 1–35,999 seconds in whole numbers.')
       if (Object.hasOwn(action.patch, 'pLoadKg') && row.load != null && liveSetLoad(row) == null) {
         row.autofill = { ...row.autofill, load: 'suggested' }
       }
@@ -213,7 +213,7 @@ export function applyLiveAction(workout, action, now = Date.now()) {
         row.load = actualLoad
         const timed = mode === 'duration'
         const metric = timed ? row.durationSeconds : row.reps
-        if (!validNumber(metric, timed ? 35999 : 999, true, timed ? 1 : 0)) throw new Error('Enter the performed reps or duration first.')
+        if (!validNumber(metric, timed ? 35999 : 999, true, timed ? 1 : 0)) throw new Error('Enter actual reps or duration first.')
         if (timed) row.mode = 'duration'
         row.done = true
         row.completedAt = now
@@ -244,7 +244,7 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       if (!item.restEnabled && state.rest?.itemId === item.id) state.rest = null
       break
     case 'rest-duration':
-      if (!validNumber(action.seconds, 900, true, 1)) throw new Error('Rest must be between 1 and 900 seconds.')
+      if (!validNumber(action.seconds, 900, true, 1)) throw new Error('Enter a rest time of 1–900 seconds.')
       item.restSeconds = action.seconds
       break
     case 'note': item.note = action.note; break
@@ -336,7 +336,7 @@ export function applyLiveAction(workout, action, now = Date.now()) {
       state.clock = { elapsedMs: liveElapsed(next, now), runningSince: null, paused: true }
       state.rest = null
       break
-    default: throw new Error('Unknown session action.')
+    default: throw new Error('This action is unavailable.')
   }
   // Move metadata changes back into the legacy arrays used by reports/exports.
   // Read items from their old sections before reorganising the arrays.

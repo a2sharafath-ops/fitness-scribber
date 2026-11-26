@@ -77,7 +77,7 @@ export function SRPEForm({ clientId, entry }) {
       <RatingSelect label="Session RPE (Borg CR10)" value={f.rpe} min={1} max={10} lo="Rest" hi="Max effort" onChange={(v) => setF({ ...f, rpe: v })} />
       <Field label="Session Duration (minutes)"><input type="number" min="1" value={f.duration} onChange={(e) => setF({ ...f, duration: e.target.value })} /></Field>
       <div className="card" style={{ textAlign: 'center' }}>
-        <div className="muted" style={{ fontSize: 11 }}>sRPE-TL = sRPE × DURATION</div>
+        <div className="muted" style={{ fontSize: 11 }}>Session load = RPE × minutes</div>
         <div style={{ fontSize: 30, fontWeight: 800 }}>{tl ?? '—'}</div>
         <div className="muted" style={{ fontSize: 11 }}>arbitrary units (AU)</div>
       </div>
@@ -148,7 +148,7 @@ export function CardioForm({ clientId, entry }) {
   return (
     <ModalShell title="Conditioning Load" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save} disabled={!complete}>Save</Button></>}>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Enter at least one measured value. Leave unavailable measures blank.</p>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Enter at least one measured value. Leave the rest blank.</p>
       <div className="row2">
         <Field label="Date"><input type="date" value={f.date} onChange={set('date')} /></Field>
         <Field label="Modality"><input value={f.modality} onChange={set('modality')} placeholder="e.g. Intervals" /></Field>
@@ -180,7 +180,7 @@ export function WearableForm({ clientId, entry }) {
   return (
     <ModalShell title="Wearable Reading" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save} disabled={!complete}>Save</Button></>}>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Enter at least one measured value. Leave unavailable measures blank.</p>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Enter at least one measured value. Leave the rest blank.</p>
       <Field label="Date"><input type="date" value={f.date} onChange={set('date')} /></Field>
       <div className="row3">
         <Field label="HRV / RMSSD (ms)"><input type="number" min="0" value={f.hrv ?? ''} onChange={set('hrv')} /></Field>
@@ -200,7 +200,7 @@ export function BodyMetricForm({ clientId }) {
   const { dispToKg, unitName } = useFormat()
   const [f, setF] = useState({ clientId: clientId || db.clients[0]?.id, date: todayISO(tz), weight: '', squat: '' })
   const save = () => {
-    if (!f.clientId) return toast('Add a client first', 'error')
+    if (!f.clientId) return toast('Add a client before logging progress.', 'error')
     commit((d) => d.logs.push({ id: uid(), clientId: f.clientId, date: f.date, weightKg: dispToKg(f.weight) || 0, squat: dispToKg(f.squat) || 0 }))
     closeModal()
     toast('Progress logged')

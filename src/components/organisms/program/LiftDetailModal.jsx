@@ -38,7 +38,7 @@ export default function LiftDetailModal({ client, lift }) {
   const removeEntry = async (m) => {
     if (!await confirmDialog({
       title: 'Delete 1RM entry',
-      message: `Delete the ${toDisp(m.valueKg)} ${unitName()} ${lift} 1RM from ${fmtDate(m.date)}? It will no longer feed this client's Training Max or assessment. This can't be undone.`,
+      message: `Permanently delete the ${toDisp(m.valueKg)} ${unitName()} ${lift} 1RM from ${fmtDate(m.date)}? It will no longer be used for this client’s Training Max or assessment.`,
       confirmLabel: 'Delete', danger: true,
     })) return
     commit((d) => deleteLiftMax(d, m.id))

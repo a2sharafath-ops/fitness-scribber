@@ -1,3 +1,4 @@
+import HelperTip from '../components/atoms/HelperTip'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Bar, Line } from 'react-chartjs-2'
@@ -89,7 +90,7 @@ function DashboardList({ label, rows, moreLabel }) {
 function DashboardClientPicker({ clients, title, onChoose }) {
   const [query, setQuery] = useState('')
   const rows = clients.filter(c => c.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
-  return <div className="db-picker"><h2>{title}</h2><label htmlFor="dashboard-client-search">Find client by name</label><input id="dashboard-client-search" placeholder="Search clients…" value={query} onChange={e => setQuery(e.target.value)} /><div className="db-picker-list">{rows.map(c => <button key={c.id} type="button" onClick={() => onChoose(c.id)}><span>{c.name}</span><Icon name="chevron-right" size={16} /></button>)}{!rows.length && <p>{clients.length ? 'No matching clients.' : 'Add an active client first.'}</p>}</div></div>
+  return <div className="db-picker"><h2>{title}</h2><label htmlFor="dashboard-client-search">Find client by name</label><input id="dashboard-client-search" placeholder="Search clients…" value={query} onChange={e => setQuery(e.target.value)} /><div className="db-picker-list">{rows.map(c => <button key={c.id} type="button" onClick={() => onChoose(c.id)}><span>{c.name}</span><Icon name="chevron-right" size={16} /></button>)}{!rows.length && <p>{clients.length ? 'No matching clients.' : 'Add an active client.'}</p>}</div></div>
 }
 
 export default function DashboardPage() {
@@ -164,8 +165,8 @@ export default function DashboardPage() {
         setReviewFilter(reviewFirst.length ? 'review' : 'followup')
         document.getElementById('dashboard-review')?.focus()
       } },
-    { title: 'Booking completion', detail: completion.total ? `${completion.completed} of ${completion.total} bookings were completed in the past 30 days.` : 'There are no past bookings in the last 30 days.', path: '/schedule', action: 'View schedule' },
-    { title: 'Upcoming sessions', detail: upcoming.length ? `Next booking on ${fmtDay(upcoming[0].date)} at ${upcoming[0].time}.` : 'There are no future bookings scheduled.', path: '/schedule', action: 'View upcoming sessions' },
+    { title: 'Booking completion', detail: completion.total ? `${completion.completed} of ${completion.total} bookings completed in the past 30 days.` : 'No past bookings in the last 30 days.', path: '/schedule', action: 'View schedule' },
+    { title: 'Upcoming sessions', detail: upcoming.length ? `Next booking on ${fmtDay(upcoming[0].date)} at ${upcoming[0].time}.` : 'No upcoming bookings.', path: '/schedule', action: 'View upcoming sessions' },
   ]
   const toPercent = (value) => group.count ? value * 100 / group.count : 0
   const highShare = toPercent(group.high)
@@ -180,7 +181,7 @@ export default function DashboardPage() {
     return { key, current, delta: current != null && previous != null ? current - previous : null }
   }), [db, days, today])
   const metricEmpty = { sessions: 'No bookings marked complete in this period.', checkins: 'No check-ins recorded in this period.',
-    load: 'No session load recorded in this period.', completion: 'No bookings marked complete or missed in this period.',
+    load: 'No session load in this period.', completion: 'No bookings marked complete or missed in this period.',
     readiness: 'No readiness scores recorded in this period.', consistency: 'No prescribed training days in this period.' }[metric]
   const metricLabel = { sessions: 'Completed bookings', checkins: 'Recorded check-ins', load: 'Recorded session load (sRPE · AU)',
     completion: 'Booking completion rate', readiness: 'Average group readiness', consistency: 'Training consistency' }[metric]
@@ -223,7 +224,7 @@ export default function DashboardPage() {
         <p className="muted">Original plan saved with this workout.</p>
         <OriginalWorkoutPlan session={originalWorkout} units={units} />
       </> : <>
-        <p className="muted">Day’s plan · Available to copy into this booking.</p>
+        <p className="muted">Copy the day’s plan into this booking.</p>
         <DayBlockReview prescription={plan} units={units} />
       </>}
     </ModalShell>, true, trigger)
@@ -325,7 +326,10 @@ export default function DashboardPage() {
             {ACTIVITY_METRICS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </Select>
         </div>
-        <p className="db-chart-heading">{metricLabel} · {fmtDateRange(activity.start, activity.end)}</p>
+        <p className="db-chart-heading"><span>{metricLabel} · {fmtDateRange(activity.start, activity.end)}</span>
+          {metric === 'consistency' && <HelperTip label="Training consistency" text="Percentage of prescribed client-days with a completed workout log." />}
+          {metric === 'completion' && <HelperTip label="Booking completion rate" text="Completed bookings divided by bookings marked complete or missed." />}
+        </p>
         {activity.hasData ? <>
           <div className="orbit-activity-reading" aria-live="polite">
             <strong>{activityValue(activeBucket.value)}</strong>
@@ -340,10 +344,8 @@ export default function DashboardPage() {
             }}>
             <ActivityChart ref={chartRef} data={chartData} options={chartOptions} plugins={[CHART_GUIDE]} aria-hidden="true" />
             <span className="db-chart-guide" aria-hidden="true" hidden />
-          </div><p className="db-note orbit-chart-instructions">Hover, tap, or use arrow keys to inspect a {daily ? 'day' : 'week'}.</p></> :
+          </div><p className="db-note orbit-chart-instructions">Hover, tap, or use arrow keys to view a {daily ? 'day' : 'week'}.</p></> :
           <p className="db-chart-empty">{metricEmpty}</p>}
-        {metric === 'consistency' && <p className="db-note">Share of prescribed client-days with a completed workout log.</p>}
-        {metric === 'completion' && <p className="db-note">Share of bookings marked complete among bookings marked complete or missed.</p>}
         {metric === 'load' && <button className="db-link" type="button" onClick={() => pick('load')}>View a client’s load records →</button>}
       </section>
   )
@@ -387,7 +389,7 @@ export default function DashboardPage() {
 
   return <div className="coach-dashboard">
     <header className="db-title"><div><p className="db-date">{fmtDay(today)} · {clock.time} {coachTimeZone(tz).replaceAll('_', ' ')}</p><h1 aria-label={title}>{title.split(' ').map((word, index) => <span className="orbit-greeting-word" aria-hidden="true" key={index} style={{ '--word-delay': `${index * 65}ms` }}>{word}{' '}</span>)}</h1></div><div className="db-actions"><Button variant="ghost" className="db-report-desktop" onClick={showWeeklyReport}><Icon name="file-text" size={16} /> Weekly report</Button><Button variant={bookings.length ? 'primary' : 'ghost'} onClick={book}><Icon name="calendar" size={16} /> Book session</Button><details className="db-menu"><summary>More actions <Icon name="chevron-down" size={14} /></summary><div className="db-menu-list"><button type="button" className="db-report-mobile" onClick={event => { event.currentTarget.closest('details').open = false; showWeeklyReport() }}>Weekly report</button>{[['Add client', () => openModal(<ClientForm />)], ['Record assessment', () => pick('assessment')], ['Assign a program', () => pick('program')]].map(([text, action]) => <button key={text} type="button" onClick={e => { e.currentTarget.closest('details').open = false; action() }}>{text}</button>)}</div></details></div></header>
-    {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan their training.</p><div className="db-actions"><Button icon="plus" onClick={() => openModal(<ClientForm />)}>Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
+    {!db.clients.length && <section className="db-card db-onboard"><h2>Start with your first client</h2><p>Add a client, record a baseline, then plan training.</p><div className="db-actions"><Button icon="plus" onClick={() => openModal(<ClientForm />)}>Add client</Button><span>2. Record baseline</span><span>3. Plan training</span></div></section>}
     <div className="orbit-dashboard-grid">
       <div className="orbit-dashboard-column">
         {bookingCard}
@@ -405,7 +407,7 @@ export default function DashboardPage() {
         </section>
         {noProgram.length > 0 && <section className="db-card orbit-program-followup">
           <header className="db-head"><h2>Program assignments</h2></header>
-          <div className="db-inline-empty"><p>{noProgram.length} active client{noProgram.length === 1 ? '' : 's'} without a current or upcoming program.</p>
+          <div className="db-inline-empty"><p>{noProgram.length} active {noProgram.length === 1 ? 'client needs' : 'clients need'} a current or upcoming program.</p>
             <button type="button" className="db-link" onClick={() => pick('program', noProgram)}>Assign a program →</button></div>
         </section>}
       </div>
@@ -418,7 +420,7 @@ export default function DashboardPage() {
             <div className="db-info"><strong>{roster.get(booking.clientId)?.name}</strong><small>{booking.type} · {booking.time}</small></div>
             <Icon name="chevron-right" size={16} />
           </Link>)}
-          {!upcoming.length && <p className="db-note">No future bookings scheduled.</p>}
+          {!upcoming.length && <p className="db-note">No upcoming bookings.</p>}
         </section>
         <section className="db-card orbit-snapshot"><header className="db-head"><h2>Training snapshot</h2></header>
           <div className="db-trend-bottom"><div><h3>Booking completion · 30 days</h3><strong className="db-metric">{completion.total ? `${completion.completed} of ${completion.total} completed` : '—'}</strong><p>{completion.total ? `${completion.missed} missed · ${completion.pending} awaiting status` : 'No past bookings recorded.'}</p><Link className="db-link" to="/schedule">Review bookings →</Link></div>

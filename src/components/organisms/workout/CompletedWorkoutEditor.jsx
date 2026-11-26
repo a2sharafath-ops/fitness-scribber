@@ -62,13 +62,13 @@ export default function CompletedWorkoutEditor({ workout, units, sessionEffort, 
               <label>Session RPE (1–10)<input type="number" min="1" max="10" step="1" value={rpe}
                 disabled={!originalEffort.editable} placeholder="Not recorded" onChange={(event) => setRpe(event.target.value)} /></label>
             </div>
-            {!readOnly && !originalEffort.editable && <p className="muted">The existing effort record can’t be linked to this workout. It can be edited in Training load.</p>}
+            {!readOnly && !originalEffort.editable && <p className="muted">This effort record can’t be linked to the workout. Edit it in Training load.</p>}
             {+rpe >= 1 && +rpe <= 10 && +minutes > 0 && <p className="muted">Training load · {calcSRPETL(+rpe, +minutes)} AU</p>}
           </>
         )}
         <label>Session notes<textarea rows={2} value={draft.note || ''} onChange={(event) => setDraft({ ...draft, note: event.target.value })} /></label>
       </div>
-      {!readOnly && <p className="muted">Correct existing sets below. The completed exercise list stays fixed.</p>}
+      {!readOnly && <p className="muted">Edit the sets below. The exercise list is fixed.</p>}
       {runBlocks(draft).map((block) => (
         <section key={block.key} className="training-day-block" aria-label={block.title}>
           <h3>{block.title}</h3>

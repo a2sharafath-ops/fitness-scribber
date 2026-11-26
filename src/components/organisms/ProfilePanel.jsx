@@ -1,3 +1,4 @@
+import HelperTip from '../atoms/HelperTip'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Avatar from '../atoms/Avatar'
@@ -21,7 +22,7 @@ export function EditProfileForm({ client }) {
   const save = () => {
     const changed = Object.keys(dirty).filter((field) => dirty[field])
     if (changed.some((field) => a[field] !== '' && a[field] != null && (!Number.isFinite(+a[field]) || +a[field] < 0))) {
-      toast('Enter a valid non-negative measurement', 'error')
+      toast('Enter a measurement of zero or more.', 'error')
       return
     }
     if (changed.length) commit((db) => {
@@ -49,7 +50,7 @@ export function EditProfileForm({ client }) {
   return (
     <ModalShell title="Edit profile measurements" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save</Button></>}>
-      <p className="muted" style={{ fontSize: 12, margin: '0 0 12px' }}>Only changed fields are saved as profile entries. Clear a field to use the latest assessment or screening value again.</p>
+      <p className="muted" style={{ fontSize: 12, margin: '0 0 12px' }}>Only changed fields are saved. Clear a field to use the latest assessment or screening value again.</p>
       <div className="row3">
         {input('age', 'Age', '1')}
         {input('heightCm', 'Height (cm)', '0.1')}
@@ -59,9 +60,7 @@ export function EditProfileForm({ client }) {
         {input('bodyFatPct', 'Body fat %', '0.1')}
         {input('leanMassKg', 'Lean mass (kg)', '0.1')}
       </div>
-      <p className="muted" style={{ fontSize: 12, margin: '4px 0 0' }}>
-        Medical and injury history remain in Assessments → Health screening.
-      </p>
+      <HelperTip label="Medical and injury history" text="Medical and injury history is in Assessments → Health screening." />
     </ModalShell>
   )
 }

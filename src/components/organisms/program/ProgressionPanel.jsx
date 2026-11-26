@@ -53,7 +53,7 @@ export default function ProgressionPanel({ blocks, dates, onConfirm, onBack }) {
       <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
         Cloning to {dates.length} date{dates.length === 1 ? '' : 's'}: {dates.map(fmtDay).join(' · ')}
       </div>
-      <p className="muted">Percentage progression replaces fixed weights with targets based on each client’s Training Max.</p>
+      <p className="muted">Percentage progression uses each client’s Training Max in place of fixed weights.</p>
       {blocks.map((b) => {
         const r = rules[b.blockId]
         return (

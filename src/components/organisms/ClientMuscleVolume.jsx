@@ -1,3 +1,4 @@
+import HelperTip from '../atoms/HelperTip'
 import Select from '../molecules/Select'
 import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -42,15 +43,14 @@ function MuscleDetailModal({ muscle, metric, start, end }) {
   const missing = metric === 'load' && muscle.missingVolumeSets > 0
   return <ModalShell title={muscle.muscle} onClose={closeModal}>
     <div className="muscle-modal">
-      <p className="muscle-modal-period">{fmtDate(start)}–{fmtDate(end)}</p>
+      <p className="muscle-modal-period">{fmtDate(start)}–{fmtDate(end)} <HelperTip label="Muscle volume details" text="One exercise can count toward several muscles. Direct and assisting sets are shown separately." /></p>
       <div className="muscle-modal-totals"><div><strong>{fmt(direct)}</strong><span>{metric === 'sets' ? 'direct sets' : `kg·reps${missing ? ' · partial' : ''}`}</span></div><div><strong>{muscle.indirectSets}</strong><span>assisting sets</span></div></div>
       {muscle.observations.length ? <div className="muscle-table-scroll" tabIndex={0} role="region" aria-label={`${muscle.muscle} exercise records; scroll horizontally`}>
         <table><caption>{muscle.muscle} · completed working sets</caption><thead><tr><th scope="col">Exercise / source</th><th scope="col">Actuals</th><th scope="col">Exposure</th></tr></thead><tbody>
           {muscle.observations.map((r) => <tr key={r.key}><th scope="row">{r.name}<small>{fmtDate(r.date)} · {r.group}<br />{r.source} · {r.targets.direct.includes(muscle.muscle) ? 'Direct' : 'Assisting'}</small></th><td>{r.sets} × {fmt(r.reps)} reps<br />{fmt(r.load)} kg</td><td>{r.targets.direct.includes(muscle.muscle) && metric === 'load' ? r.volume == null ? 'Unknown' : `${fmt(r.volume)} kg·reps` : `${r.sets} ${r.sets === 1 ? 'set' : 'sets'}`}</td></tr>)}
         </tbody></table>
       </div> : <p className="muscle-notice">No completed working sets recorded for this muscle in this week.</p>}
-      {missing && <p className="muscle-notice">{muscle.missingVolumeSets} direct sets lack reps or load. The displayed volume is a known subtotal.</p>}
-      <p className="muscle-modal-note">Exercise load can appear under several muscles. Assisting sets stay separate.</p>
+      {missing && <p className="muscle-notice">{muscle.missingVolumeSets} direct sets are missing reps or load. The total uses recorded values only.</p>}
     </div>
   </ModalShell>
 }
@@ -91,7 +91,7 @@ export default function ClientMuscleVolume({ clientId }) {
   const retry = async () => { setRetrying(true); setRetryError(''); try { await refresh() } catch (e) { setRetryError(e.message || 'Could not refresh data') } finally { setRetrying(false) } }
 
   return <section className="muscle-report" aria-labelledby={`${id}-title`}>
-    <header className="muscle-report-head"><h3 id={`${id}-title`} className="muscle-report-title">Weekly muscle volume <ProgressInfo term="Muscle volume" text="Completed Power, Main and Accessory working sets only. Warm-ups are excluded. Volume load is recorded reps × external kg; missing load stays unknown. Muscle totals may overlap." /></h3>
+    <header className="muscle-report-head"><h3 id={`${id}-title`} className="muscle-report-title">Weekly muscle volume <ProgressInfo term="Muscle volume" text="Counts completed Power, Main and Accessory working sets. Excludes warm-ups. Volume load uses recorded reps × external kg. Missing load stays unknown, and muscle totals can overlap." /></h3>
       <div className="muscle-week"><button type="button" aria-label="Previous muscle-volume week" onClick={() => setAnchor(addDays(start, -7))}>←</button><label><span className="sr-only">Week containing</span><input type="date" aria-label="Muscle-volume week containing" value={anchor} max={today} onChange={(e) => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value) && e.target.value <= today) setAnchor(e.target.value) }} /></label><button type="button" aria-label="Next muscle-volume week" disabled={end >= today} onClick={() => setAnchor(addDays(start, 7))}>→</button></div>
     </header>
     {issue ? <div role="alert" className="muscle-notice">Some workout or exercise data could not be loaded or saved. Totals may be incomplete. <button type="button" onClick={retry} disabled={retrying}>{retrying ? 'Retrying…' : 'Retry data load'}</button>{retryError && <p>{retryError}</p>}</div> : null}
@@ -107,7 +107,7 @@ export default function ClientMuscleVolume({ clientId }) {
         </svg>
         {hover && <div className="muscle-hover-value" aria-hidden="true" style={{ left: hover.x, top: hover.y }}><strong>{hover.name}</strong><span>{hoverValue(byName[hover.name])}</span></div>}
       </div>
-      <p className="muscle-caption">Select a muscle for exercises</p>
+      <p className="muscle-caption">Select a muscle to see its exercises.</p>
       <div className="muscle-legend" aria-label={`Relative weekly scale, zero to ${fmt(max)} ${metric === 'sets' ? 'sets' : 'kg repetitions'}`}><span>Low</span>{palette.map((color) => <i key={color} style={{ background: color }} />)}<span>{fmt(max)} {metric === 'sets' ? 'sets' : 'kg·reps'}</span></div>
       <p className="muscle-caption">Gray: no direct sets{metric === 'load' ? ' · Stripes: unknown load · White: zero external load' : ''}</p>
     </div>
@@ -118,6 +118,6 @@ export default function ClientMuscleVolume({ clientId }) {
       {!!report.unmapped.length && <div className="muscle-notice"><strong>Muscle assignments needed</strong><ul>{report.unmapped.map((r) => <li key={r.key}>{r.name} · {fmtDate(r.date)} · {r.sets} sets</li>)}</ul><Link to="/workouts">Open Exercise Library</Link></div>}
       {!!review.length && review.map((r) => <ReviewSet key={r.key} record={r} clientId={clientId} />)}
     </details>}
-    {saveStatus === 'failed' && !issue && <p className="muscle-notice" role="alert">Changes could not be saved. Resolve the save issue before reloading.</p>}
+    {saveStatus === 'failed' && !issue && <p className="muscle-notice" role="alert">Couldn’t save changes. Resolve the save issue before reloading.</p>}
   </section>
 }

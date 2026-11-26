@@ -24,7 +24,7 @@ export default function HhqLifestyleStep({ lifestyle, activity, onChange }) {
         <SegToggle options={[['low', 'Low'], ['moderate', 'Moderate'], ['high', 'High']]} value={lifestyle.stress || ''} onChange={(v) => l('stress', v)} ariaLabel="Stress" />
       </div>
       <Field label="Main sources of stress (optional)"><input value={lifestyle.stressSources || ''} onChange={(e) => l('stressSources', e.target.value)} /></Field>
-      <Field label="Nutrition snapshot (meals/day · typical pattern · restrictions · hydration)"><textarea value={lifestyle.nutrition || ''} onChange={(e) => l('nutrition', e.target.value)} /></Field>
+      <Field label="Meals per day, usual diet, restrictions and hydration"><textarea value={lifestyle.nutrition || ''} onChange={(e) => l('nutrition', e.target.value)} /></Field>
       <div className="row2">
         <Field label="Caffeine intake"><input value={lifestyle.caffeine || ''} onChange={(e) => l('caffeine', e.target.value)} /></Field>
         <Field label="Energy through the day"><input value={lifestyle.energy || ''} onChange={(e) => l('energy', e.target.value)} placeholder="e.g. afternoon slump" /></Field>
@@ -33,14 +33,14 @@ export default function HhqLifestyleStep({ lifestyle, activity, onChange }) {
       <h3 className="scr-step-title" style={{ marginTop: 14 }}>Your activity</h3>
       <YesNoRow text="Do you currently exercise?" value={activity.exercises} onChange={(v) => a('exercises', v)} />
       {activity.exercises === true && (
-        <Field label="What type · how often · how long · how intense?"><input value={activity.detail || ''} onChange={(e) => a('detail', e.target.value)} /></Field>
+        <Field label="Type, frequency, duration and intensity"><input value={activity.detail || ''} onChange={(e) => a('detail', e.target.value)} /></Field>
       )}
       <div className="yn-row">
         <div className="yn-q">Training experience</div>
         <SegToggle options={[['new', 'New'], ['returning', 'Returning after a break'], ['experienced', 'Experienced']]} value={activity.trainingAge || ''} onChange={(v) => a('trainingAge', v)} ariaLabel="Training experience" />
       </div>
       <div className="row2">
-        <Field label="Worked with a trainer before? What worked / didn't?"><input value={activity.priorTrainer || ''} onChange={(e) => a('priorTrainer', e.target.value)} /></Field>
+        <Field label="Worked with a trainer before? What worked for you?"><input value={activity.priorTrainer || ''} onChange={(e) => a('priorTrainer', e.target.value)} /></Field>
         <Field label="Sports / activities you do or have done"><input value={activity.sports || ''} onChange={(e) => a('sports', e.target.value)} /></Field>
       </div>
       <RangeSlider label="How would you rate your current fitness?" value={activity.selfRating ?? 5} min={1} max={10} lo="1" hi="10" onChange={(v) => a('selfRating', v)} />

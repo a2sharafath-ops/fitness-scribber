@@ -28,7 +28,6 @@ export default function ResetPasswordPage() {
       <div className="card" style={{ width: 360, maxWidth: '92vw' }}>
         <Brand style={{ padding: '0 0 18px' }} />
         <h2 style={{ fontSize: 18, marginBottom: 4 }}>Set a new password</h2>
-        <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Choose a new password for your account.</p>
         <form onSubmit={submit}>
           <Field label="New password"><input type="password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={8} autoComplete="new-password" /></Field>
           <Field label="Confirm new password"><input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required autoComplete="new-password" /></Field>

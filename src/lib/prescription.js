@@ -32,9 +32,9 @@ export function changeIntensity(exercise, intensityType) {
 }
 
 export function validatePrescription(name, blocks) {
-  if (!String(name || '').trim()) throw new Error('Add a session name before saving or copying.')
+  if (!String(name || '').trim()) throw new Error('Enter a session name before saving or copying.')
   const exercises = (blocks || []).flatMap(block => block.exercises || [])
-  if (!exercises.length) throw new Error('Add an exercise before saving or copying.')
+  if (!exercises.length) throw new Error('Add at least one exercise before saving or copying.')
   const finite = value => typeof value === 'number' && Number.isFinite(value)
   for (const exercise of exercises) {
     if (!String(exercise.exerciseName || '').trim()) throw new Error('Choose a name for every exercise.')
@@ -45,23 +45,23 @@ export function validatePrescription(name, blocks) {
     exercise.sets.forEach((set, index) => {
       const fail = message => { throw new Error(`${exercise.exerciseName}, set ${index + 1}: ${message}`) }
       const reps = set.prescribedReps
-      if (reps != null && (!finite(reps) || !Number.isInteger(reps) || reps <= 0)) fail('reps must be a positive whole number.')
+      if (reps != null && (!finite(reps) || !Number.isInteger(reps) || reps <= 0)) fail('Enter a positive whole number of reps.')
       if (['%1RM', 'Load', 'RIR', 'RPE'].includes(type) && reps == null) fail('add a rep target.')
       const max = set.prescribedRepsMax
-      if (max != null && (!finite(max) || !Number.isInteger(max) || reps == null || max < reps)) fail('maximum reps must be a whole number at least equal to the rep target.')
+      if (max != null && (!finite(max) || !Number.isInteger(max) || reps == null || max < reps)) fail('Maximum reps must be a whole number at least as high as the rep target.')
       const load = set.prescribedLoadKg
-      if (load != null && (!finite(load) || load < 0)) fail('load must be zero or greater.')
+      if (load != null && (!finite(load) || load < 0)) fail('Enter a load of zero or more.')
       const rest = set.prescribedRestSeconds
-      if (rest != null && (!finite(rest) || !Number.isInteger(rest) || rest < 0)) fail('rest must be a non-negative whole number of seconds.')
+      if (rest != null && (!finite(rest) || !Number.isInteger(rest) || rest < 0)) fail('Enter rest in whole seconds, zero or more.')
       const intensity = set.prescribedIntensityValue
       if (type !== 'Load') {
         if (!finite(intensity)) fail(`add a ${type} target.`)
-        if (type === 'RIR' && (!Number.isInteger(intensity) || intensity < 0 || intensity > 10)) fail('RIR must be a whole number from 0 to 10.')
-        else if (type === 'RPE' && (intensity < 1 || intensity > 10 || intensity * 2 % 1 !== 0)) fail('RPE must be 1–10 in half-point steps.')
-        else if (type === '%1RM' && (intensity <= 0 || intensity > 100)) fail('percentage must be greater than 0 and at most 100.')
+        if (type === 'RIR' && (!Number.isInteger(intensity) || intensity < 0 || intensity > 10)) fail('Enter a whole-number RIR from 0 to 10.')
+        else if (type === 'RPE' && (intensity < 1 || intensity > 10 || intensity * 2 % 1 !== 0)) fail('Enter RPE from 1 to 10 in 0.5 steps.')
+        else if (type === '%1RM' && (intensity <= 0 || intensity > 100)) fail('Enter a percentage above 0 and up to 100.')
         else if (!['RIR', 'RPE', '%1RM'].includes(type) && intensity <= 0) fail(`${type} must be greater than zero.`)
       }
-      if (['%1RM', 'Load'].includes(type) && set.prescribedRir != null && (!finite(set.prescribedRir) || !Number.isInteger(set.prescribedRir) || set.prescribedRir < 0 || set.prescribedRir > 10)) fail('optional RIR must be a whole number from 0 to 10.')
+      if (['%1RM', 'Load'].includes(type) && set.prescribedRir != null && (!finite(set.prescribedRir) || !Number.isInteger(set.prescribedRir) || set.prescribedRir < 0 || set.prescribedRir > 10)) fail('If provided, enter a whole-number RIR from 0 to 10.')
     })
   }
   return true

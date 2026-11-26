@@ -1,3 +1,4 @@
+import HelperTip from '../../atoms/HelperTip'
 import Select from '../../molecules/Select'
 import { useState } from 'react'
 import ModalShell from '../../molecules/ModalShell'
@@ -29,8 +30,8 @@ export function ExerciseForm({ exercise, initialName = '' }) {
   })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const save = () => {
-    if (!f.name.trim()) return toast('Exercise name is required', 'error')
-    if (db.exercises.some((e) => e.id !== exercise?.id && exerciseKey(e.name) === exerciseKey(f.name))) return toast('An exercise with this name already exists. Edit that entry or use a distinct name.', 'error')
+    if (!f.name.trim()) return toast('Enter an exercise name.', 'error')
+    if (db.exercises.some((e) => e.id !== exercise?.id && exerciseKey(e.name) === exerciseKey(f.name))) return toast('This exercise name already exists. Edit the existing exercise or use a different name.', 'error')
     commit((db) => {
       if (exercise) Object.assign(db.exercises.find((x) => x.id === exercise.id), f)
       else db.exercises.push({ id: uid(), ...f })
@@ -52,6 +53,7 @@ export function ExerciseForm({ exercise, initialName = '' }) {
       footer={<>
         {exercise && <Button variant="danger" onClick={del}>Delete</Button>}
         <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+        {f.mode !== 'SMR' && f.mode !== 'Stretch' && <small className="muted">Changes to muscle assignments also apply to past records.</small>}
         <Button onClick={save}>Save</Button>
       </>}>
       <Field label="Name"><input value={f.name} onChange={set('name')} placeholder="e.g. Incline Dumbbell Press" /></Field>
@@ -61,14 +63,14 @@ export function ExerciseForm({ exercise, initialName = '' }) {
       </div>
       <details className="progress-disclosure" open={!!initialName}>
         <summary>Muscle assignments · {targets.direct.length} direct / {targets.indirect.length} indirect</summary>
-        {f.mode === 'SMR' || f.mode === 'Stretch' ? <p className="checkins-note">This is a mobility exercise. Its targeted tissues are listed separately; it has no resistance working-set mapping.</p> : <>
-          <p className="checkins-note">Direct = principal movers; indirect = assisting muscles. These are anatomical categories for this variation, not measured force. Coach edits override the catalog suggestion and apply to all history.</p>
+        {f.mode === 'SMR' || f.mode === 'Stretch' ? <HelperTip label="Mobility exercise mapping" text="Mobility exercises list targeted tissues separately and do not count toward resistance working-set volume." /> : <>
+          <HelperTip label="Muscle assignments" text="Direct muscles are the main movers. Indirect muscles assist. These categories describe muscle roles. Coach edits override the library mapping and apply to past records." />
           <div className="muscle-assignment-grid">{MUSCLES.map((muscle) => <label key={muscle}>{muscle}<Select aria-label={`${muscle} contribution`} value={targets.direct.includes(muscle) ? 'direct' : targets.indirect.includes(muscle) ? 'indirect' : ''} onChange={(e) => setRole(muscle, e.target.value)}><option value="">Not assigned</option><option value="direct">Direct</option><option value="indirect">Indirect</option></Select></label>)}</div>
         </>}
       </details>
       <div className="row2">
         <Field label="Difficulty"><Select value={f.difficulty || 'Beginner'} onChange={set('difficulty')}>{LEVELS.map((l) => <option key={l}>{l}</option>)}</Select></Field>
-        <Field label="Video URL"><input value={f.video || ''} onChange={set('video')} placeholder="YouTube/Vimeo/MP4 link" /></Field>
+        <Field label="Video URL"><input value={f.video || ''} onChange={set('video')} placeholder="YouTube, Vimeo or MP4 link" /></Field>
       </div>
       <Field label="Thumbnail image URL (optional)"><input value={f.thumb || ''} onChange={set('thumb')} placeholder="Leave blank to use a placeholder" /></Field>
     </ModalShell>
@@ -87,7 +89,7 @@ export function PlanForm({ plan }) {
   const upd = (i, k, v) => setItems(items.map((it, j) => (j === i ? { ...it, [k]: v } : it)))
   const add = () => setItems([...items, { exId: addEx, sets: 3, reps: '10', rest: '60s' }])
   const save = () => {
-    if (!name.trim()) return toast('Plan name is required', 'error')
+    if (!name.trim()) return toast('Enter a plan name.', 'error')
     commit((d) => {
       if (plan) Object.assign(d.plans.find((p) => p.id === plan.id), { name, desc, items })
       else d.plans.push({ id: uid(), name, desc, items })

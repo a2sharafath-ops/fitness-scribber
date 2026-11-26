@@ -68,7 +68,7 @@ export function programConflicts(db, clientId, targets, today) {
     const reasons = []
     if (t.date < today) reasons.push({ code: 'past', label: 'Past date', resolution: 'Choose a future start week.' })
     if (owned) reasons.push({ code: 'program', label: `Already assigned: ${owned.name}`, resolution: 'Choose dates outside this program, or edit its client copy in Training.' })
-    if (workout) reasons.push({ code: 'workout', label: 'Workout record exists', resolution: 'Keep this record and choose another training day or start week.' })
+    if (workout) reasons.push({ code: 'workout', label: 'Workout record exists', resolution: 'A workout is already recorded. Choose another training day or start week.' })
     if (completed) reasons.push({ code: 'completed', label: 'Appointment completed', resolution: 'Choose another training day or start week.' })
     const protectedDay = isPlanTargetBlocked(db, clientId, t.date, today) || owned
     if (!protectedDay && existing) reasons.push({ code: 'plan', label: 'Unstarted individual plan', resolution: 'Change the schedule, or confirm replacement below.' })
@@ -107,11 +107,11 @@ export function applyAssignment(db, prepared, today) {
   if (db.programAssignments.some(a => a.id === assignment.id)) return // unchanged save retry
   if (!db.clients.some(c => c.id === assignment.clientId)) throw new Error('The client is no longer available.')
   const timing = trainingSchedule(db.clients.find(c => c.id === assignment.clientId))
-  if (JSON.stringify(timing) !== JSON.stringify(assignment.data.trainingTiming ?? null)) throw new Error('Profile training time changed. Review the assignment again.')
+  if (JSON.stringify(timing) !== JSON.stringify(assignment.data.trainingTiming ?? null)) throw new Error('Training time changed in Profile. Review the assignment again.')
   const bookings = assignment.data.initialBookings || []
   const clock = scheduleClock(new Date(), db.settings?.tz)
   for (const booking of bookings) {
-    if (db.sessions.some(s => s.id === booking.id)) throw new Error('Booking identity already exists. Review the assignment again.')
+    if (db.sessions.some(s => s.id === booking.id)) throw new Error('This booking already exists. Review the assignment again.')
     const issues = bookingConflicts(db, null, booking, clock)
     if (issues.length) throw new Error(booking.date + ': ' + issues.map(i => i.title + '. ' + i.detail).join(' '))
   }

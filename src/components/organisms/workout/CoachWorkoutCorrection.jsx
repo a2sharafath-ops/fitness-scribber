@@ -31,7 +31,7 @@ export default function CoachWorkoutCorrection({ workout, units, onDone, onCance
   const discard = async () => {
     if (!await confirmDialog({
       title: 'Discard this recovery draft?',
-      message: 'The saved workout and its Training load will be kept.',
+      message: 'The saved workout and its training load stay intact.',
       confirmLabel: 'Discard draft', danger: true,
     })) return
     dismiss()

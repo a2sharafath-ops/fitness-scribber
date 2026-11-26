@@ -32,9 +32,9 @@ export default function AdminPortal() {
       adminApi.platformCounts(),
     ])
     if (u.status === 'fulfilled') setUsers(u.value)
-    else { setUsers([]); toast(`User list failed: ${u.reason?.message || u.reason}`, 'error', 8000) }
+    else { setUsers([]); toast(`Couldn’t load users. ${u.reason?.message || u.reason}`, 'error', 8000) }
     if (c.status === 'fulfilled') setClients(c.value)
-    else toast(`Clients failed: ${c.reason?.message || c.reason}`, 'error', 8000)
+    else toast(`Couldn’t load clients. ${c.reason?.message || c.reason}`, 'error', 8000)
     if (n.status === 'fulfilled') setCounts(n.value)
   }, [])
   useEffect(() => { load() }, [load])
@@ -42,7 +42,7 @@ export default function AdminPortal() {
   const run = async (fn, okMsg) => {
     setBusy(true)
     try { await fn(); if (okMsg) toast(okMsg); await load() }
-    catch (e) { toast(e.message || 'Action failed', 'error') }
+    catch (e) { toast(e.message || 'Couldn’t complete this action.', 'error') }
     finally { setBusy(false) }
   }
 

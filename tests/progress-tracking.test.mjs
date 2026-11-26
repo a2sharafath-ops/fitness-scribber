@@ -14,6 +14,7 @@ const { DataProvider } = await load('store/DataContext.jsx')
 const { ModalProvider } = await load('store/ModalContext.jsx')
 const { seedBuilderQA } = await load('lib/builderQA.js')
 const { persistDiff } = await load('api/sync.js')
+const { todayISO } = await load('lib/dates.js')
 const start='2026-09-01',end='2026-10-11'
 const exercise={kind:'exercise',exerciseId:'bench',name:'Bench Press',measure:'load'}
 const set=(load,reps,extra={})=>({done:true,purpose:'working',load,reps,effort:2,effortType:'RIR',...extra})
@@ -124,7 +125,7 @@ test('page renders saved client metrics, useful empty states and existing manual
   const db=seedBuilderQA(end);db.clients[0].intake={progressTracking:{version:1,metrics:[{kind:'body',measure:'massKg'}]}}
   const render=d=>renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:[d.clients.length ? "/progress?client="+d.clients[0].id : "/progress"]},React.createElement(DataProvider,{initialDb:d,backend:false},React.createElement(ModalProvider,null,React.createElement(ProgressPage)))))
   const html=render(db);assert.match(html,/Manage tracked metrics/);assert.match(html,/Body mass/);assert.match(html,/Supporting records/);assert.doesNotMatch(html,/Squat 1RM est\./)
-  db.settings.units='lb';db.assessments.push({id:'measured',clientId:db.clients[0].id,date:'2026-10-01',type:'body_comp',data:{massKg:100,method:'BIA'}})
+  db.settings.units='lb';db.assessments.push({id:'measured',clientId:db.clients[0].id,date:todayISO(db.settings.tz),type:'body_comp',data:{massKg:100,method:'BIA'}})
   assert.match(render(db),/220\.5/);assert.match(render(db),/record=measured/)
   db.clients[0].intake={};assert.match(render(db),/Choose metrics/)
   db.clients=[];assert.match(render(db),/Add a client to start tracking/)

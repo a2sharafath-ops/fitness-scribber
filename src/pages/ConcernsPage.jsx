@@ -15,14 +15,14 @@ export default function ConcernsPage() {
   const clientName = (cid) => db.clients.find((c) => c.id === cid)?.name
 
   const resolve = async (id) => {
-    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional):', multiline: true, confirmLabel: 'Resolve' })
+    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional)', multiline: true, confirmLabel: 'Resolve' })
     if (note === null) return
     commit((d) => { const x = d.concerns.find((q) => q.id === id); x.status = 'Resolved'; x.resolution = note.trim() })
     toast('Concern resolved')
   }
   const reopen = (id) => { commit((d) => { const x = d.concerns.find((q) => q.id === id); x.status = 'Open'; x.resolution = '' }); toast('Concern reopened', 'info') }
   const del = async (id) => {
-    if (!await confirmDialog({ title: 'Delete concern', message: 'Delete this concern? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
+    if (!await confirmDialog({ title: 'Delete concern', message: 'This concern will be permanently deleted.', confirmLabel: 'Delete', danger: true })) return
     commit((d) => { d.concerns = d.concerns.filter((q) => q.id !== id) })
     toast('Concern deleted')
   }

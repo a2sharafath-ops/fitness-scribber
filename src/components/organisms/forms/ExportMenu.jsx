@@ -65,9 +65,7 @@ export default function ExportMenu({ clientId }) {
   return (
     <ModalShell title={'Export — ' + who} onClose={closeModal}
       footer={<Button variant="ghost" onClick={closeModal}>Close</Button>}>
-      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-        Download CSV files for backup or to share with athletes / medical staff.
-      </p>
+      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>Download CSV files to back up or share selected data.</p>
       <div className="grid cards-2" style={{ gap: 10 }}>
         {buttons.map(([k, label]) => <Button key={k} variant="ghost" onClick={() => run(k)}>{label}</Button>)}
       </div>

@@ -41,7 +41,7 @@ export default function CurrentLiftsPerformance({ client }) {
     <div className="card">
       <div className="flex between" style={{ flexWrap: 'wrap', gap: 8 }}>
         <div className="section-title" style={{ margin: 0 }}><Icon name="dumbbell" size={16} /> 1RM records</div>
-        <ProgressInfo label="1RM records" text="Historical 1RM-only lifts stay here for review. A lift appears in the performance selector after completed work is logged. Coach entries and training maxes remain separate." />
+        <ProgressInfo label="1RM records" text="Historical 1RM-only lifts stay in this list. A lift enters the chart selector when it has completed work. Coach entries and Training Max are separate." />
       </div>
 
       {lifts.length ? (
@@ -59,7 +59,7 @@ export default function CurrentLiftsPerformance({ client }) {
                 <span className="clp-val"><small className="clp-mobile-label">Highest 1RM (30d)</small>{abs != null ? `${toDisp(abs)} ${unitName()}` : '—'}</span>
                 <span><small className="clp-mobile-label">Training max</small>{tm != null ? `${toDisp(tm)} ${unitName()}` : '—'}</span>
                 <span className="muted" style={{ fontSize: 11 }}>
-                  {ev ? `${fmtDate(ev.date)} · ${ev.source === 'auto' ? 'auto (Epley)' : 'manual'}` : 'no data yet'}
+                  {ev ? `${fmtDate(ev.date)} · ${ev.source === 'auto' ? 'auto (Epley)' : 'manual'}` : 'No data yet'}
                 </span>
                 <button className="clp-detail" onClick={() => openDetail(lift)} aria-label={`View ${lift} history and chart`}>
                   <Icon name="chart" size={13} /> View
@@ -76,9 +76,7 @@ export default function CurrentLiftsPerformance({ client }) {
           })}
         </>
       ) : (
-        <div className="muted" style={{ fontSize: 12, margin: '10px 0' }}>
-          No performed lifts recorded yet. Complete a workout set or log resistance first.
-        </div>
+        <div className="muted" style={{ fontSize: 12, margin: '10px 0' }}>No lifts recorded. Complete a set or log resistance to start.</div>
       )}
     </div>
   )

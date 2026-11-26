@@ -17,7 +17,7 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
 
   const editDuration = async () => {
     const cur = Math.max(1, Math.round((workout.durationSec || 0) / 60)) || 30
-    const v = await promptDialog({ title: 'Edit duration', message: 'Workout duration (minutes):', defaultValue: String(cur), confirmLabel: 'Save' })
+    const v = await promptDialog({ title: 'Edit duration', message: 'Workout duration (minutes)', defaultValue: String(cur), confirmLabel: 'Save' })
     if (v == null) return
     const min = Math.max(1, Math.round(+v))
     if (!isNaN(min)) { onDuration?.(min * 60); toast('Duration updated') }
@@ -37,9 +37,9 @@ export default function WorkoutSummary({ workout, units, exercises = [], resting
     try { if (navigator.share) { await navigator.share({ title: workout.title, text }); return } } catch { /* cancelled */ }
     try { await navigator.clipboard.writeText(text); toast('Summary copied to clipboard.') } catch { toast('Could not copy to clipboard.', 'error') }
   }
-  const del = async () => { if (await confirmDialog({ title: 'Delete workout', message: 'Delete this workout? This cannot be undone.', confirmLabel: 'Delete', danger: true })) onDelete() }
+  const del = async () => { if (await confirmDialog({ title: 'Delete workout', message: 'This workout will be permanently deleted.', confirmLabel: 'Delete', danger: true })) onDelete() }
   const template = async () => {
-    const name = await promptDialog({ title: 'Save as template', message: 'Name this plan template:', defaultValue: workout.title.replace(' · auto', ''), confirmLabel: 'Save' })
+    const name = await promptDialog({ title: 'Save as template', message: 'Template name', defaultValue: workout.title.replace(' · auto', ''), confirmLabel: 'Save' })
     if (name == null) return
     onTemplate(workoutToPlan(workout, name))
     toast('Saved to your plan library.')

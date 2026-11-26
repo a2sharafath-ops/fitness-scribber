@@ -27,13 +27,13 @@ export default function PastePlanModal({ clip }) {
     const list = [...ids]
     if (!list.length || !start) return
     if (list.some((cid) => targets.some((date) => isPlanTargetBlocked(db, cid, date, todayISO(tz))))) {
-      toast('Choose current or future dates without existing workouts or completed appointments.', 'error')
+      toast('Choose today or a future date with no workout record or completed appointment.', 'error')
       return
     }
     const clash = list.filter((cid) => clipClashes(db, clip, cid, start).length)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',
-      message: `${clash.length} of the selected client${clash.length === 1 ? ' already has a session' : 's already have sessions'} on those dates — overwrite?`,
+      message: `Replace existing sessions on these dates for ${clash.length} selected client${clash.length === 1 ? '' : 's'}?`,
       confirmLabel: 'Overwrite',
     })) return
     try { await confirmedPlanWrite(saveTrainingPlans, (d) => list.forEach((cid) => pasteClip(d, clip, cid, start))) }
@@ -53,7 +53,7 @@ export default function PastePlanModal({ clip }) {
     >
       <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
         <strong>{clip.days.length}</strong> session{clip.days.length === 1 ? '' : 's'} copied from <strong>{clip.sourceClientName}</strong>.
-        The pattern is preserved — sessions keep their spacing relative to the start date.
+        The spacing between sessions stays the same.
       </p>
 
       <Field label="Start date">

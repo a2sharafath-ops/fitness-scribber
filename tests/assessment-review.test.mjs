@@ -198,7 +198,7 @@ test('assessment cards and record history disclose saved, suggested and unschedu
   const html = render(null, db, '/clients/local-builder-100/assessments')
   assert.match(html, /Next reassessment Nov 5, 2026/)
   assert.match(html, /Suggested review Dec 24, 2026/)
-  assert.match(html, /Next reassessment not scheduled/)
+  assert.match(html, /Reassessment not scheduled/)
   assert.match(html, /Edit reassessment date/)
   const history = render(null, db, '/clients/local-builder-100/assessments/fitness?record=record-a')
   assert.match(history, /Next reassessment/)

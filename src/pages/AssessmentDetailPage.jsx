@@ -1,3 +1,4 @@
+import HelperTip from '../components/atoms/HelperTip'
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import Button from '../components/atoms/Button'
@@ -79,7 +80,7 @@ function MovementChanges({ changes, previous, current }) {
     <div className="card" style={{ marginBottom: 16 }}>
       <div className="section-title" style={{ margin: '0 0 3px' }}>Reassessment findings</div>
       <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
-        Compensation-level change from {fmtDateTime(previous.createdAt) || fmtDate(previous.date)} to {fmtDateTime(current.createdAt) || fmtDate(current.date)} (the two latest NASM screens).
+        Changes in movement compensations between the two latest NASM screens ({fmtDateTime(previous.createdAt) || fmtDate(previous.date)} and {fmtDateTime(current.createdAt) || fmtDate(current.date)}).
       </div>
       <div className="mv-diff-grid">
         {groups.map(([label, items, tone, side]) => (
@@ -107,7 +108,7 @@ function CorrectivePlan({ plan, assessment, onReview }) {
       <div className="flex between gap" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div>
           <div className="section-title" style={{ margin: '0 0 3px' }}>Corrective starting point</div>
-          <div className="muted" style={{ fontSize: 12 }}>Generated from the latest movement screen ({fmtDate(assessment.date)}); review before prescribing.</div>
+          <div className="muted" style={{ fontSize: 12 }}>Based on the {fmtDate(assessment.date)} movement screen. Review before prescribing.</div>
         </div>
         {plan.block && <Button size="sm" onClick={onReview}>Review in workout builder →</Button>}
       </div>
@@ -131,7 +132,7 @@ function CorrectivePlan({ plan, assessment, onReview }) {
             )
           })}
         </div>
-      ) : <div className="muted" style={{ fontSize: 12, marginTop: 10 }}>No library exercises matched these findings.</div>}
+      ) : <div className="muted" style={{ fontSize: 12, marginTop: 10 }}>No exercises match these findings.</div>}
     </div>
   )
 }
@@ -212,11 +213,10 @@ export default function AssessmentDetailPage() {
         )}
       </div>
 
-      {type === 'fitness' && <p className="assess-progress-link">Strength outcomes and tracked lift estimates are in <Link to={`/clients/${id}/progress`}>Progress →</Link></p>}
+      {type === 'fitness' && <p className="assess-progress-link">See <Link to={`/clients/${id}/progress`}>Progress</Link> for strength outcomes and tracked lifts.</p>}
       {rows.length ? (
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="section-title" style={{ margin: '0 0 10px' }}>Baseline → latest <Link className="assess-inline-link" to={`/clients/${id}/progress#outcomes`}>View in Progress →</Link></div>
-          {type === 'fitness' && <p className="muted" style={{ fontSize: 12 }}>Changes compare the same test, side, unit and protocol.</p>}
+          <div className="section-title" style={{ margin: '0 0 10px' }}>Baseline → latest {type === 'fitness' && <HelperTip label="Assessment comparisons" text="Comparisons require the same test, side, unit and protocol." />} <Link className="assess-inline-link" to={`/clients/${id}/progress#outcomes`}>View in Progress →</Link></div>
           <div className="cmp">
             <div className="cmp-head"><span>Metric</span><span>{fmtDate(b.date)}</span><span /><span>{fmtDate(l.date)}</span><span>Δ</span></div>
             {rows.map((r, i) => <DeltaRow r={r} key={i} />)}
@@ -229,7 +229,7 @@ export default function AssessmentDetailPage() {
 
       {movementPain.length > 0 && <section className="card" style={{ marginBottom: 16 }} aria-label="Pain reported in movement screens">
         <h2 className="section-title" style={{ margin: '0 0 10px' }}>Pain reported in movement screens</h2>
-        <p className="muted" style={{ fontSize: 12 }}>Pain severity was not scored in these screens. Edit the source screen to update a flag.</p>
+        <p className="muted" style={{ fontSize: 12 }}>These screens did not score pain severity. Edit the original screen to update a flag.</p>
         {movementPain.map(({ record: source, findings }) => <details className="assess-disclosure" key={source.id}>
           <summary>{fmtDate(source.date)} · {findings.length} pain flag{findings.length === 1 ? '' : 's'} · {source.id === latestMovementId ? 'Latest movement screen' : 'Earlier movement screen'}</summary>
           {findings.map(finding => <div className="asr-kv" key={finding.id}><span className="asr-k">{finding.label}{finding.side ? ` · ${finding.side}` : ''}</span><span className="asr-v">Pain reported{finding.note ? ` — ${finding.note}` : ''}</span></div>)}
@@ -244,7 +244,6 @@ export default function AssessmentDetailPage() {
         <div className="section-title" style={{ margin: '0 0 6px' }}>{type === 'pain' ? 'Pain assessments' : 'Entries'}</div>
         {recs.length ? (
           <>
-            <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Newest assessment date first · select an entry to see its recorded data</div>
             {recs.map((a) => <EntryRow key={`${a.id}-${location.search}`} rec={a} initiallyOpen={new URLSearchParams(location.search).get('record') === a.id} onEdit={() => editRec(a)} onDelete={() => del(a)} />)}
           </>
         ) : movementPain.length > 0 ? <p className="muted">No standalone pain assessment recorded.</p> : (

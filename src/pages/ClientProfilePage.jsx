@@ -58,7 +58,7 @@ function GoalPanel({ title, goals, today }) {
   return <div className="cp-goal-panel"><h3>{title}</h3><ul>{goals.map((goal, index) =>
     <li key={`${goal.text}-${index}`}><strong>{goal.text || 'Goal text not recorded'}</strong>
       {(goal.target || goal.by) && <small>{goal.target ? `Target ${goal.target}` : ''}{goal.target && goal.by ? ' · ' : ''}{goal.by ? `By ${fmtDate(goal.by)}` : ''}</small>}
-      {goal.by && goal.by < today && <small className="cp-past-goal">Past target date; completion not recorded</small>}
+      {goal.by && goal.by < today && <small className="cp-past-goal">Target date passed · completion unrecorded</small>}
     </li>)}</ul></div>
 }
 function SnapshotValue({ label, value, word }) {
@@ -120,8 +120,8 @@ export default function ClientProfilePage() {
 
     <section className="card cp-card" aria-labelledby="cp-training-time-title" id="training-time">
       <div className="cp-head"><h2 id="cp-training-time-title"><SectionMark name="calendar" />Usual training time</h2><Button variant="ghost" size="sm" onClick={() => openModal(<TrainingScheduleForm client={client} />)}>Edit training time</Button></div>
-      {trainingSchedule(client) ? <dl className="cp-fields"><Field label="Start time" value={formatTrainingTime(trainingSchedule(client).time)} /><Field label="Duration" value={trainingSchedule(client).duration + ' min'} /><Field label="Time zone" value={tz || 'UTC'} /></dl> : <Empty>No automatic booking time set.</Empty>}
-      <p className="muted">Applies to planned workouts. Save to add missing future bookings; adjust individual times in Schedule.</p>
+      {trainingSchedule(client) ? <dl className="cp-fields"><Field label="Start time" value={formatTrainingTime(trainingSchedule(client).time)} /><Field label="Duration" value={trainingSchedule(client).duration + ' min'} /><Field label="Time zone" value={tz || 'UTC'} /></dl> : <Empty>No usual training time set.</Empty>}
+      <p className="muted">Saving this time adds missing future bookings for planned workouts. Edit individual bookings in Schedule.</p>
     </section>
     <section aria-labelledby="cp-preferences-title">
       <div className="cp-caption"><h2 id="cp-preferences-title">Preferences &amp; availability</h2>

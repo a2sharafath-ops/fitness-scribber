@@ -22,8 +22,8 @@ export default function SettingsPage({ appearance }) {
   const { user, signOut } = useAuth()
   const s = db.settings
   const loadDemo = async () => {
-    if (!await confirmDialog({ title: 'Load demo data', message: 'Load demo athletes & 28 days of sample data into your account?', confirmLabel: 'Load' })) return
-    try { await seedRemote(); await refresh(); toast('Demo data loaded') } catch (e) { toast('Seed failed: ' + e.message, 'error') }
+    if (!await confirmDialog({ title: 'Load demo data', message: 'Add demo athletes and 28 days of sample data to this account?', confirmLabel: 'Load' })) return
+    try { await seedRemote(); await refresh(); toast('Demo data loaded') } catch (e) { toast('Couldn’t load demo data.' + (e.message ? ' ' + e.message : ''), 'error') }
   }
   const [f, setF] = useState({ trainerName: s.trainerName || '', businessName: s.businessName || '', units: s.units, tz: s.tz })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
@@ -60,7 +60,7 @@ export default function SettingsPage({ appearance }) {
       <div className="card">
         <div className="section-title" style={{ margin: '0 0 8px' }}>Data</div>
         <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-          {hasBackend ? 'Your workspace is synced to your account.' : 'All data is stored locally in this browser.'} Export it for backup or to share.
+          {hasBackend ? 'Data is synced to your account.' : 'Data is stored in this browser.'}
         </p>
         <Button variant="ghost" onClick={() => openModal(<ExportMenu />)}>Export data (CSV)</Button>
       </div>

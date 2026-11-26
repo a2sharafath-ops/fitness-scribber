@@ -14,7 +14,7 @@ export function programBookingConflicts(db, clientId, targets, clock) {
   try { validateTrainingSchedule(timing) } catch (e) { return [{ date: targets[0]?.date, protected: true, reasons: [{ label: e.message, resolution: 'Update the training schedule in Profile.' }] }] }
   return targets.flatMap(t => {
     const issues = bookingConflicts(db, null, { id: 'assignment-preview', clientId, date: t.date, time: timing.time, dur: timing.duration, type: 'Personal training', status: 'Confirmed' }, clock)
-    return issues.length ? [{ date: t.date, name: t.session?.name || 'Training', protected: true, reasons: issues.map(i => ({ label: i.title, resolution: i.detail + ' Adjust Profile timing, the existing booking in Schedule, or the program dates.' })) }] : []
+    return issues.length ? [{ date: t.date, name: t.session?.name || 'Training', protected: true, reasons: issues.map(i => ({ label: i.title, resolution: i.detail + ' Change the time in Profile, the booking in Schedule, or the program dates.' })) }] : []
   })
 }
 

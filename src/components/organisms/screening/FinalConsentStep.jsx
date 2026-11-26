@@ -12,7 +12,7 @@ export default function FinalConsentStep({ acknowledgements, onChange }) {
   return (
     <>
       <h3 className="scr-step-title">Almost done</h3>
-      <p className="scr-step-sub">Please confirm the following to submit your screening.</p>
+      <p className="scr-step-sub">Confirm the following to submit your screening.</p>
       {ACKS.map(([k, text]) => (
         <label className="scr-check" key={k}>
           <input type="checkbox" checked={!!a[k]} onChange={toggle(k)} />

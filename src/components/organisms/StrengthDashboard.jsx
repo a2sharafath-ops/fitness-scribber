@@ -82,7 +82,7 @@ export default function StrengthDashboard({ client }) {
           {metric('Latest recorded reps', latestWork?.reps ?? '—', latestWork ? `${fmtDate(latestWork.date)} · ${latestWork.sets ?? '—'} sets` : '')}
         </>}
       </div>
-      <div className="progress-chart-toolbar"><h3>{estimateChart ? 'Estimated 1RM over time' : 'Recorded set load over time'} <ProgressInfo label="strength chart context" text={estimateChart ? 'Epley estimates from completed sets. Estimates are not tested maxima; training max is a programming reference.' : 'External load recorded for the same lift. Compare reps and source before interpreting change. Zero means no external load; missing values remain blank.'} /></h3>
+      <div className="progress-chart-toolbar"><h3>{estimateChart ? 'Estimated 1RM over time' : 'Recorded set load over time'} <ProgressInfo label="strength chart context" text={estimateChart ? 'Epley estimates come from completed sets. A Training Max is used for programming. A tested 1RM is recorded separately.' : 'Shows external load for the same lift. Compare reps and source. Zero means no external load. Blank means unavailable.'} /></h3>
         <label className="progress-lift-select">Chart period <Select value={period} onChange={event => setPeriod(event.target.value)}>
           <option value="all">All time</option>{[7, 30, 90].map(days => <option key={days} value={days}>{days} days</option>)}
         </Select></label>
@@ -90,7 +90,7 @@ export default function StrengthDashboard({ client }) {
       </div>
       {trend.length > 0 ? <div className="progress-chart progress-strength-canvas"><Line data={{ datasets: [{ label: `${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} (${unitName()})`, data: points, borderColor: COLORS.blue, tension: 0, pointRadius: 5, spanGaps: false }] }} options={opts} role="img" aria-label={`${estimateChart ? 'Estimated 1RM' : 'Recorded set load'} chart, ${trend.length} recorded values, ${unitName()}`} />
       </div> : <p className="progress-empty">{!lift ? 'Complete a set to start this chart.' : estimateChart ? 'No completed-set estimates in this period.' : 'No recorded loads in this period.'}</p>}
-      <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · 1 more dated record needed to compare' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
+      <div className="progress-card-foot"><span>{trend.length === 1 ? '1 record · one more date needed' : trend.length ? `${trend.length} records · ${fmtDate(first.date)}–${fmtDate(last.date)}` : 'No comparable records'}</span>{change != null && <strong>{change > 0 ? '+' : ''}{toDisp(change)} {unitName()} from first record</strong>}</div>
     </section>
     <details className="card progress-disclosure progress-strength-logs"><summary>Recorded sets <span>{work.length} entries</span></summary>
       {work.length ? <div className="checkins-table-scroll" role="region" aria-label={`${lift} recorded work table`} tabIndex={0}>

@@ -63,10 +63,10 @@ export default function AthletePortal() {
     const p = new URLSearchParams(window.location.search)
     if (p.get('wearable') === 'connected') {
       window.history.replaceState({}, '', window.location.pathname)
-      alert('Wearable connected — tap “Sync now” to pull your latest reading.')
+      alert('Device connected. Select “Sync now” for your latest reading.')
     } else if (p.get('wearable') === 'error') {
       window.history.replaceState({}, '', window.location.pathname)
-      alert('Wearable connection failed. Please try connecting again.')
+      alert('Couldn’t connect the wearable. Try again.')
     }
   }, [])
 
@@ -77,7 +77,7 @@ export default function AthletePortal() {
         <Card style={{ maxWidth: 420, textAlign: 'center' }}>
           <Icon name="link" size={32} />
           <h2 style={{ fontSize: 18, margin: '8px 0' }}>Account not linked</h2>
-          <p className="muted" style={{ fontSize: 13 }}>Ask your coach for an invite code, then re-enter it.</p>
+          <p className="muted" style={{ fontSize: 13 }}>Ask your coach for an invite code, then enter it here.</p>
           <Button variant="ghost" style={{ marginTop: 12 }} onClick={signOut}>Sign out</Button>
         </Card>
       </div>
@@ -278,7 +278,7 @@ function WearableSection({ clientId, connections, connectionError, latest, onCha
   const connect = async (provider) => {
     setBusy(true)
     try { await beginWearableConnection(provider, clientId) }
-    catch (e) { alert('Connect failed: ' + (e.message || 'wearable functions not deployed yet')) } finally { setBusy(false) }
+    catch (e) { alert('Couldn’t connect device. ' + (e.message || 'Device connection is unavailable.')) } finally { setBusy(false) }
   }
   const disconnect = async (provider) => {
     if (!confirm('Disconnect ' + provider + '?')) return
@@ -286,22 +286,20 @@ function WearableSection({ clientId, connections, connectionError, latest, onCha
     try {
       await callFunction('wearable-connections', { clientId, provider, action: 'disconnect' })
       await onChange()
-    } catch { alert('Device could not be disconnected. Please try again.') }
+    } catch { alert('Couldn’t disconnect the device. Try again.') }
     finally { setBusy(false) }
   }
   const sync = async () => {
     setBusy(true)
     try { const r = await callFunction('wearable-sync', { clientId }); alert('Synced ' + (r.synced ?? 0) + ' device(s).'); onChange() }
-    catch (e) { alert('Sync failed: ' + (e.message || 'wearable functions not deployed yet')) } finally { setBusy(false) }
+    catch (e) { alert('Couldn’t sync device. ' + (e.message || 'Device sync is unavailable.')) } finally { setBusy(false) }
   }
 
   return (
     <Card style={{ marginTop: 16 }}>
       <div className="section-title" style={{ margin: '0 0 4px' }}>My wearable</div>
       {connectionError && <p role="alert">{connectionError} <Button variant="ghost" onClick={onChange}>Retry</Button></p>}
-      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
-        Connect a device to automatically share your morning HRV, resting HR &amp; sleep with your coach.
-      </p>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Connect a device to share morning HRV, resting heart rate and sleep with your coach.</p>
       {latest && (
         <div className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
           Latest: HRV {latest.hrv ?? '—'} ms · RHR {latest.rhr ?? '—'} bpm · Sleep {latest.sleepHrs ?? '—'} h
@@ -318,7 +316,7 @@ function WearableSection({ clientId, connections, connectionError, latest, onCha
         )}
         {connected.length > 0 && <Button size="sm" disabled={busy} onClick={sync}>⟳ Sync now</Button>}
       </div>
-      <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>Apple Health isn't available on the web — log manually or ask your coach.</p>
+      <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>Apple Health sync is unavailable on the web. Log manually or ask your coach.</p>
     </Card>
   )
 }

@@ -59,10 +59,10 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     if (scheduleSavingRef.current) return Promise.reject(new Error('Wait for the booking to finish saving.'))
     if (!backend) return Promise.resolve()
     return writeQueueRef.current.then(() => {
-      if (writeFailedRef.current) throw new Error('Unsaved changes are still shown locally. Resolve the save issue before reloading data.')
+      if (writeFailedRef.current) throw new Error('Unsaved changes are visible in this browser. Resolve the save issue before reloading.')
       const version = commitVersionRef.current
       return fetchAll().then((d) => {
-        if (commitVersionRef.current !== version) throw new Error('Changes were made while data refreshed. Try again after they finish saving.')
+        if (commitVersionRef.current !== version) throw new Error('Data was refreshed while edits were saving. Try again after saving finishes.')
         return d
       })
     }).then((d) => {
@@ -102,7 +102,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   }, [backend, db])
 
   const commit = useCallback((mutator) => {
-    if (scheduleSavingRef.current) throw new Error('A booking is saving. Please wait, then try again.')
+    if (scheduleSavingRef.current) throw new Error('A booking is saving. Try again when it finishes.')
     const prev = dbRef.current
     if (!prev) return Promise.resolve({ saved: false, issues: [] })
     const next = structuredClone(prev)
@@ -136,11 +136,11 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   // A calendar move can update three collections. Publish only after the whole
   // transaction succeeds, and prevent an unrelated optimistic edit racing it.
   const saveSchedule = useCallback(async (request) => {
-    if (scheduleSavingRef.current) throw new Error('A booking is already saving. Please wait.')
+    if (scheduleSavingRef.current) throw new Error('A booking is saving. Try again when it finishes.')
     scheduleSavingRef.current = true
     try {
       await writeQueueRef.current
-      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before changing the schedule.')
+      if (writeFailedRef.current) throw new Error('Resolve the save issue before changing the schedule.')
       const next = backend ? structuredClone(dbRef.current) : readStoredDB()
       applyScheduleRequest(next, request)
       setSaveStatus('saving')
@@ -159,11 +159,11 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   }, [backend])
 
   const saveProgramAssignment = useCallback(async (prepared) => {
-    if (scheduleSavingRef.current) throw new Error('A program assignment is already saving. Please wait.')
+    if (scheduleSavingRef.current) throw new Error('A program is being assigned. Try again when it finishes.')
     scheduleSavingRef.current = true
     try {
       await writeQueueRef.current
-      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before changing the schedule.')
+      if (writeFailedRef.current) throw new Error('Resolve the save issue before changing the schedule.')
       const next = backend ? structuredClone(dbRef.current) : readStoredDB()
       applyAssignment(next, prepared, todayISO(next.settings?.tz))
       setSaveStatus('saving')
@@ -182,7 +182,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   }, [backend])
 
   const saveTrainingPlans = useCallback(async (mutate, syncClientIds = []) => {
-    if (scheduleSavingRef.current) throw new Error('A schedule update is saving. Please wait.')
+    if (scheduleSavingRef.current) throw new Error('The schedule is updating. Try again when it finishes.')
     scheduleSavingRef.current = true
     try {
       await writeQueueRef.current
@@ -204,11 +204,11 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   }, [backend])
 
   const finishWorkout = useCallback(async (attempt) => {
-    if (scheduleSavingRef.current) throw new Error('Another change is saving. Please wait and retry.')
+    if (scheduleSavingRef.current) throw new Error('Another change is saving. Try again when it finishes.')
     scheduleSavingRef.current = true
     try {
       await writeQueueRef.current
-      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before finishing the workout.')
+      if (writeFailedRef.current) throw new Error('Resolve the save issue before finishing the workout.')
       const db = backend ? dbRef.current : readStoredDB()
       const current = db?.workouts.find(row => row.id === attempt.workout.id)
       if (!current || current.clientId !== attempt.workout.clientId) {
@@ -242,11 +242,11 @@ export function DataProvider({ children, initialDb, initialError = null, backend
   }, [backend])
 
   const saveWorkoutCorrection = useCallback(async (scope, { expected, workout, effort }, retryId) => {
-    if (scheduleSavingRef.current) throw new Error('Another change is saving. Please wait and retry.')
+    if (scheduleSavingRef.current) throw new Error('Another change is saving. Try again when it finishes.')
     scheduleSavingRef.current = true
     try {
       await writeQueueRef.current
-      if (writeFailedRef.current) throw new Error('Resolve the existing save issue before correcting the workout.')
+      if (writeFailedRef.current) throw new Error('Resolve the save issue before correcting the workout.')
       const db = backend ? dbRef.current : readStoredDB()
       const current = db.workouts.find(row => row.id === workout.id)
       const recovery = inspectCorrectionDraft(scope, db, current)
@@ -263,7 +263,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
         const savedEffort = recovery.attempt.effort
         effort = savedEffort ? { expected: savedEffort.expected, rpe: savedEffort.row?.rpe ?? null } : null
       } else if (recovery && recovery.kind !== 'saved') {
-        throw new Error('Review the existing recovery draft before saving a new correction.')
+        throw new Error('Review the recovery draft before saving another correction.')
       }
       const correction = prepareWorkoutCorrection(db, expected, workout, effort)
       const attempt = { id: retryId || crypto.randomUUID(), expected, workout, effort: correction.effort }
@@ -291,7 +291,7 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     }
     await writeQueueRef.current
     if (writeFailedRef.current) {
-      throw new Error('Resolve the existing save issue before deleting a client.')
+      throw new Error('Resolve the save issue before deleting the client.')
     }
     await deleteClientRemote(clientId)
     try {

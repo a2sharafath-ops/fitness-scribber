@@ -1305,7 +1305,6 @@ html:has(.progress-index){overflow-x:clip}
 .training-program-assignment small{font-size:12px;color:var(--muted)}
 .training-program-assignment .btn{flex-shrink:0;white-space:nowrap}
 .training-program-copy-label{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted)}
-.training-program-note{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.5}
 @media(max-width:600px){.training-program-assignment{flex-direction:column;align-items:stretch;gap:12px}.training-program-assignment .btn{width:100%}}
 .training-program-copy{display:flex;flex-direction:column;gap:6px;min-width:0;overflow-wrap:anywhere}.training-program-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}.training-program-status{font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px;color:var(--muted);background:var(--surface)}.training-program-status[data-status="Current"]{color:var(--green);background:var(--tint-green)}.training-program-status[data-status="Upcoming"]{color:var(--blue);background:var(--tint-blue)}
 .training-program .overview-eyebrow{margin:0}

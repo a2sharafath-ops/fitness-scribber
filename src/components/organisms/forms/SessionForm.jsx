@@ -41,7 +41,7 @@ export default function SessionForm({ session, date, time, clientId, proposed, o
     else persist(f)
   }
   const del = async () => {
-    if (await confirmDialog({ title: 'Delete booking', message: 'Remove this calendar booking? The prescribed workout will stay in Training.', confirmLabel: 'Delete booking', danger: true })) await persist(null)
+    if (await confirmDialog({ title: 'Delete booking', message: 'Remove this booking? The workout plan stays in Training.', confirmLabel: 'Delete booking', danger: true })) await persist(null)
   }
   if (review) return <ScheduleMoveReview request={review} onSaved={onSaved} onEdit={next => { setF(next); setReview(null) }} />
   return <div className="schedule-dialog"><ModalShell title={session ? 'Booking details' : 'Book session'} onClose={closeModal}

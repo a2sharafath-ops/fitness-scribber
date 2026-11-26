@@ -21,7 +21,7 @@ export default function CheckInModal({ busy, today, onSubmit, onSkip, onClose })
             <Button variant="ghost" disabled={busy} onClick={onSkip}>Skip — start anyway</Button>
             <Button disabled={busy} onClick={() => onSubmit({ date: today, ...f, score })}>{busy ? 'Saving…' : 'Submit & start workout'}</Button>
           </>}>
-          <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>Quick check-in before the session starts — it feeds readiness and helps match training to how the athlete feels.</p>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>Record how the athlete feels before training. This check-in contributes to their readiness score.</p>
           <RangeSlider label="Sleep Quality" value={f.sleep} min={1} max={7} lo="Terrible" hi="Excellent" onChange={(v) => setF({ ...f, sleep: v })} />
           <RangeSlider label="Stress" value={f.stress} min={1} max={7} lo="None" hi="Extreme" onChange={(v) => setF({ ...f, stress: v })} />
           <RangeSlider label="Fatigue" value={f.fatigue} min={1} max={7} lo="Fresh" hi="Exhausted" onChange={(v) => setF({ ...f, fatigue: v })} />

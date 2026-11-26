@@ -23,7 +23,7 @@ export function createSnapshotQueue(initial, persist) {
 
 export async function confirmedPlanWrite(commit, mutate) {
   const result = await commit(mutate)
-  if (!result?.saved) throw new Error('Changes could not be saved. Review the data warning, then retry.')
+  if (!result?.saved) throw new Error('Couldn’t save changes. Review the data warning and retry.')
   return result
 }
 

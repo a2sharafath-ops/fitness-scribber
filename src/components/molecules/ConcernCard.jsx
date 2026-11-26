@@ -23,8 +23,8 @@ export default function ConcernCard({ concern, clientName, session, onResolve, o
       </div>
       <div style={{ marginBottom: 6 }}>{x.text}</div>
       <div className="muted" style={{ fontSize: 12 }}>
-        Source: {x.source === 'Client' ? clientName || 'client' : x.source || 'not recorded'}
-        {session ? ` · re: ${fmtDay(session.date)} ${session.time} session` : ''}
+        {x.source ? `Source: ${x.source === 'Client' ? clientName || 'client' : x.source}` : 'Source not recorded'}
+        {session ? ` · Session ${fmtDay(session.date)}${session.time ? `, ${session.time}` : ''}` : ''}
       </div>
       {x.status === 'Resolved' && x.resolution && (
         <div style={{ marginTop: 8, fontSize: 12, color: 'var(--green)' }}>✔ {x.resolution}</div>

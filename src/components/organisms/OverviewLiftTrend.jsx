@@ -45,6 +45,6 @@ export default function OverviewLiftTrend({ clientId, trend, units }) {
         }] }} />
       </div>
       <p>Past 8 weeks · Heaviest recorded set per date · Change {last.loadKg > trend[0].loadKg ? '+' : ''}{fmtWt(last.loadKg - trend[0].loadKg, units)}</p>
-    </> : <p>{last ? 'One more dated load for this lift is needed to show a trend.' : 'No recorded set loads in the past 8 weeks.'}</p>}
+    </> : <p>{last ? 'Record one more dated load for this lift to see a trend.' : 'No set loads in the past 8 weeks.'}</p>}
   </section>
 }

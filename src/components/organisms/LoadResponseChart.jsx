@@ -1,3 +1,4 @@
+import HelperTip from '../atoms/HelperTip'
 import Select from '../molecules/Select'
 import { useState } from 'react'
 import ProgressInfo from '../atoms/ProgressInfo'
@@ -97,7 +98,7 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
   const display = (value) => value.value == null ? '—' : `${formatValue(value.value)}${window ? ` (${value.count}/${window} observed days)` : ''}`
 
   return <section className="card load-response" aria-labelledby="load-response-title">
-    <div className="load-response-heading"><h2 id="load-response-title">Load response <ProgressInfo label="load response" text="Session load is RPE × duration in minutes (AU). Missing days remain blank. Display choices do not change the load calculations." /></h2>{action}</div>
+    <div className="load-response-heading"><h2 id="load-response-title">Load response <ProgressInfo label="load response" text="Session load = RPE × minutes (AU). Missing days stay blank. Chart options do not change the load calculations." /></h2>{action}</div>
     {latestLoad && <div className="metric-lead"><span>Latest daily load</span>
       <strong>{formatValue(latestLoad.values.load)} AU</strong><time dateTime={latestLoad.date}>{fmtDate(latestLoad.date)}</time></div>}
     <div className="progress-load-primary-controls"><label>Show <Select value={primary} onChange={(event) => setPrimary(event.target.value)}>{metricOptions()}</Select></label><label>Period <Select value={days} onChange={(event) => setDays(Number(event.target.value))}>{[28,56,84,180].map(n => <option key={n} value={n}>{n} days</option>)}</Select></label></div>
@@ -115,11 +116,16 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
         <label>Second Y display<Select value={scatter ? 'dot' : secondaryStyle} disabled={scatter || !secondary} onChange={(event) => setSecondaryStyle(event.target.value)}>{Object.entries(displayLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
         <label>Values<Select value={mode} onChange={(event) => setMode(event.target.value)}>{modeChoices.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
       </div>
-      {scatter && <p className="load-response-hint">Metric X-axis uses same-date pairs as dots. Line and column styles apply to the date view only.</p>}
+      <div className="load-response-hint">
+        <HelperTip label="X-axis and display style" text="A metric on the X-axis shows same-date pairs as dots. Lines and columns are available when the X-axis is Date." />
+        <HelperTip label="Chart values" text={window
+          ? `${window}-day means use recorded days only. Counts show how many days are included. Paired measurements and separate Y scales do not establish cause.`
+          : 'Loads on the same date are summed. Multiple ratings or device readings on a date are averaged. Paired measurements and separate Y scales do not establish cause.'} />
+      </div>
     </details>
     {secondary && <p className="load-response-hint">Separate Y scales: compare values, not line crossings.</p>}
     {tableRows.length > 0 && <details className="progress-derived-table"><summary>Show dated values and sources</summary><div className="progress-derived-detail"><div className="checkins-table-scroll" role="region" aria-label="Load response table; scroll horizontally for more columns" tabIndex={0}><table className="checkins-table"><caption className="sr-only">Load response recorded dates, selected values, and sources</caption><thead><tr><th scope="col">Date</th>{scatter && <th scope="col">{byId[xMetric].label} ({byId[xMetric].unit})</th>}<th scope="col">{byId[primary].label} ({byId[primary].unit})</th>{secondary && <th scope="col">{byId[secondary].label} ({byId[secondary].unit})</th>}<th scope="col">Sources on date</th></tr></thead><tbody>
       {tableRows.map((row) => { const index = rows.indexOf(row); return <tr key={row.date}><th scope="row">{fmtDate(row.date)}</th>{scatter && <td>{display(xValues[index])}</td>}<td>{display(yValues[index])}</td>{secondary && <td>{display(y2Values[index])}</td>}<td>{[...new Set([xMetric, primary, secondary].filter(Boolean).map((metric) => row.sources[metric]).filter(Boolean))].join(', ') || 'Source not recorded'}</td></tr> })}
-    </tbody></table></div><p className="checkins-note">Missing days stay blank. {window ? `${window}-day means use recorded days only; counts show coverage. ` : 'Daily loads are summed; ratings and readings are averaged when multiple entries share a date. '}Pairing and separate Y scales do not show causation. Display choices do not change ACWR, monotony, or strain calculations.</p></div></details>}
+    </tbody></table></div></div></details>}
   </section>
 }

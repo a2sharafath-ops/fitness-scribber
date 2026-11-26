@@ -20,7 +20,7 @@ export default function ChatThread({ clientId, viewerRole, headerName, subtitle 
   }, [messages])
 
   const guard = (fn) => async (...args) => {
-    try { await fn(...args) } catch (e) { toast('Upload failed: ' + (e.message || 'unknown error'), 'error') }
+    try { await fn(...args) } catch (e) { toast('Couldn’t upload attachment.' + (e.message ? ' ' + e.message : ''), 'error') }
   }
 
   return (

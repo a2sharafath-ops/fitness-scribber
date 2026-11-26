@@ -1,3 +1,4 @@
+import HelperTip from '../components/atoms/HelperTip'
 import { useEffect, useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Avatar from '../components/atoms/Avatar'
@@ -54,7 +55,7 @@ export default function ReadinessRoster({ today }) {
     <header className="rr-header">
       <div>
         <h1 id="client-readiness" tabIndex={-1}>Client readiness</h1>
-        <p>Missing and older check-ins first, then today’s lowest scores.</p>
+        <p>Check-in priority <HelperTip label="Check-in priority" text="The roster shows missing check-ins first, then older check-ins, then today’s lowest scores." /></p>
       </div>
       <Link className="btn ghost" to="/clients">All clients</Link>
     </header>

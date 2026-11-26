@@ -133,7 +133,7 @@ test('local store commit reports actual storage success and keeps a failed save 
     function Capture() { captured = useData(); return null }
     renderToStaticMarkup(React.createElement(DataProvider, { backend: false, initialDb: { prescriptions: [], settings: {} } }, React.createElement(Capture)))
     const mutation = db => planner.writePrescription(db, 'a', '2026-10-11', example(), '', 'Coach session')
-    await assert.rejects((await load('lib/confirmedPersistence.js')).confirmedPlanWrite(captured.commit, mutation), /could not be saved/)
+    await assert.rejects((await load('lib/confirmedPersistence.js')).confirmedPlanWrite(captured.commit, mutation), /Couldn’t save changes/)
     fail = false
     assert.equal((await captured.commit(mutation)).saved, true)
     assert.equal(stored.prescriptions.length, 1)
@@ -178,7 +178,7 @@ test('fix 11: success waits for persistence, errors stay failed, and unchanged r
   await Promise.resolve(); await Promise.resolve()
   assert.equal(settled, false)
   release()
-  assert.match((await request).message, /could not be saved/)
+  assert.match((await request).message, /Couldn’t save changes/)
   fail = false
   assert.equal((await confirmedPlanWrite(() => queue.enqueue(edited), () => {})).saved, true)
   assert.equal(calls[1].prev, initial)
@@ -187,7 +187,7 @@ test('fix 11: success waits for persistence, errors stay failed, and unchanged r
   assert.equal(calls[2].prev, edited)
   const thrown = createSnapshotQueue(initial, () => { throw new Error('Disconnected') })
   assert.equal((await thrown.enqueue(edited)).saved, false)
-  await assert.rejects(confirmedPlanWrite(() => Promise.resolve({ saved: false, local: true }), () => {}), /could not be saved/)
+  await assert.rejects(confirmedPlanWrite(() => Promise.resolve({ saved: false, local: true }), () => {}), /Couldn’t save changes/)
   assert.equal((await confirmedPlanWrite(() => Promise.resolve({ saved: true, local: true }), () => {})).local, true)
 })
 test('fix 10: lower-set overrides are field-specific and reset preserves IDs and completion evidence', () => {
@@ -269,7 +269,7 @@ test('fix 6: all prescription writes protect ready, running and completed workou
   }
   const invalid = { days: [{ offset: 0, name: 'Valid', blocks: example() }, { offset: 1, name: 'Invalid', blocks: [] }] }
   const db = { prescriptions: [], sessions: [], workouts: [] }
-  assert.throws(() => planner.pasteClip(db, invalid, 'a', '2026-10-11'), /Add an exercise/)
+  assert.throws(() => planner.pasteClip(db, invalid, 'a', '2026-10-11'), /Add at least one exercise/)
   assert.equal(db.prescriptions.length, 0)
 })
 test('fix 5: bulk replacement requires approval and cancellation leaves every existing plan intact', async () => {
@@ -306,7 +306,7 @@ test('fix 3: shared validation rejects malformed prescriptions and permits bodyw
     assert.throws(() => validatePrescription('Squat session', blocks), /Squat, set 1/)
   }
   assert.throws(() => validatePrescription('', example()), /session name/)
-  assert.throws(() => validatePrescription('Session', []), /Add an exercise/)
+  assert.throws(() => validatePrescription('Session', []), /Add at least one exercise/)
   const unnamed = example(); unnamed[0].exercises[0].exerciseName = ''; assert.throws(() => validatePrescription('Session', unnamed), /name/)
   const empty = example(); empty[0].exercises[0].sets = []; assert.throws(() => validatePrescription('Session', empty), /at least one set/)
   assert.equal(validatePrescription('Bodyweight', example('Load', { loadKg: 0, rir: 0 })), true)
