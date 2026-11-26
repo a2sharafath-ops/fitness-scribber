@@ -35,7 +35,7 @@ export default function BlockCard({
   return (
     <div className={'block-card' + (isOver ? ' drag-over' : '') + (isDragging ? ' dragging' : '')} {...dragProps}>
       <div className="block-head">
-        <span className="drag-grip" title="Drag to reorder this block" aria-label="Reorder block" {...dragHandleProps}>⠿</span>
+        <span className="drag-grip" title="Drag this handle to reorder." aria-label="Reorder block" {...dragHandleProps}>⠿</span>
         <Select className="block-type" value={block.blockType} aria-label="Block type"
           onChange={(e) => onChange({ blockType: e.target.value, autoCalculate1RM: e.target.value === 'Main Lifts' })}>
           {BLOCK_TYPES.map((t) => <option key={t}>{t}</option>)}

@@ -37,10 +37,10 @@ export default function RPEModal({ busy, workout, attempt, finishError, onSubmit
             <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
           </Field>
           </fieldset>
-          {attempt && busy && <p role="status">Saving the workout and updating Progress…</p>}
+          {attempt && busy && <p role="status">Saving workout and updating Progress…</p>}
           {finishError && <p role="alert">{finishError.message}</p>}
           <div className="muted" style={{ fontSize: 12 }}>
-            Training load: <strong>{rpe ? `${calcSRPETL(Number(rpe), mins)} AU` : 'Select an RPE to calculate'}</strong>
+            {rpe ? <>Training load: <strong>{calcSRPETL(Number(rpe), mins)} AU</strong></> : 'Choose an RPE to calculate training load.'}
           </div>
         </ModalShell>
       </div>

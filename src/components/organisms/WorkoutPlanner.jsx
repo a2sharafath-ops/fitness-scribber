@@ -60,7 +60,7 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
     const copied = buildClip(db, client, selection)
     if (!copied) return
     setClip(copied); setSel(null)
-    toast(`Copied ${copied.days.length} session${copied.days.length === 1 ? '' : 's'}. Select an open date to paste.`, 'info')
+    toast(`${copied.days.length} session${copied.days.length === 1 ? '' : 's'} copied. Select an open date to paste.`, 'info')
   }
   const remove = async () => {
     if (!sessions.length || selectionClosed) return
@@ -69,9 +69,9 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
     setSel(null); toast('Selected plans deleted.')
   }
   const paste = async (date) => {
-    if (clipTargets(clip, date).some((target) => isPlanTargetBlocked(db, client.id, target, today))) return toast('Choose a current or future date without an existing workout or completed appointment.', 'error')
+    if (clipTargets(clip, date).some((target) => isPlanTargetBlocked(db, client.id, target, today))) return toast('Choose today or a future date with no workout record or completed appointment.', 'error')
     const clashes = clipClashes(db, clip, client.id, date)
-    if (clashes.length && !await confirmDialog({ title: 'Replace plans?', message: `${clashes.length} target day${clashes.length === 1 ? ' already has' : 's already have'} a plan. Replace?`, confirmLabel: 'Replace' })) return
+    if (clashes.length && !await confirmDialog({ title: 'Replace plans?', message: `Replace existing plans on ${clashes.length} target date${clashes.length === 1 ? '' : 's'}?`, confirmLabel: 'Replace' })) return
     try { await confirmedPlanWrite(saveTrainingPlans, (data) => pasteClip(data, clip, client.id, date)) }
     catch (error) { return toast(error.message, 'error') }
     clearClip(); selectDate(date); toast('Plans pasted.')
@@ -105,7 +105,7 @@ export default function WorkoutPlanner({ client, initialView = 'week', focusDate
       <Button variant="danger" size="sm" disabled={!sessions.length || selectionClosed} onClick={remove}>Delete plans</Button>
       <Button variant="ghost" size="sm" onClick={() => setSel(null)}>Clear</Button>
     </div></div>}
-    {clip && <div className="training-calendar-selection" role="status"><span>{clip.days.length} plans copied · Select an open date to paste</span><div className="flex gap">
+    {clip && <div className="training-calendar-selection" role="status"><span>{clip.days.length} plan{clip.days.length === 1 ? '' : 's'} copied. Choose an open date to paste.</span><div className="flex gap">
       <Button variant="ghost" size="sm" onClick={() => openModal(<PastePlanModal clip={clip} />)}>Paste to clients…</Button>
       <Button variant="ghost" size="sm" onClick={clearClip}>Cancel copy</Button>
     </div></div>}

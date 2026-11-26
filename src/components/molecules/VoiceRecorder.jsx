@@ -16,7 +16,7 @@ export default function VoiceRecorder({ onRecorded, disabled }) {
 
   const start = async () => {
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-      toast('Voice recording is not supported in this browser.', 'error')
+      toast('This browser doesn’t support voice recording.', 'error')
       return
     }
     try {
@@ -37,7 +37,7 @@ export default function VoiceRecorder({ onRecorded, disabled }) {
       setSecs(0)
       timerRef.current = setInterval(() => setSecs((s) => s + 1), 1000)
     } catch {
-      toast('Microphone access was denied.', 'error')
+      toast('Allow microphone access to record a voice note.', 'error')
     }
   }
 

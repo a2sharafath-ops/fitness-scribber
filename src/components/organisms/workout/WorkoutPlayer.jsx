@@ -125,7 +125,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
                 ))}
                 <label className="wp-ex-note">
                   <span>Note / reflection</span>
-                  <textarea rows={1} value={it.note || ''} placeholder="How did it feel? form cues, pain, adjustments…"
+                  <textarea rows={1} value={it.note || ''} placeholder="Form, pain or adjustments…"
                     onChange={(e) => setNote(cur.section, it.id, e.target.value)} />
                 </label>
               </div>
@@ -178,7 +178,7 @@ export default function WorkoutPlayer({ workout, units, running, locked, resolve
       {w.main.length ? w.main.map((ex) => (
         <ExerciseEditorRow key={ex.id} ex={ex} units={units} mode="edit"
           onChange={(p) => setItem('main', ex.id, p)} onRemove={() => removeEx('main', ex.id)} />
-      )) : <div className="muted" style={{ padding: '8px 0' }}>No exercises yet{locked ? '.' : ' — add one.'}</div>}
+      )) : <div className="muted" style={{ padding: '8px 0' }}>No exercises yet.{!locked && ' Add an exercise.'}</div>}
 
       <Section title={`Cool-down (${w.cooldown.length})`} open={showCool} onToggle={() => setShowCool((v) => !v)}>
         {w.cooldown.map((ex) => (

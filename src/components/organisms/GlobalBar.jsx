@@ -104,7 +104,7 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
       <button type="button" className="orbit-mobile-brand" aria-label="Orbit Trainer home" onClick={() => go('/')}><Brand ringOnly /><span>Orbit Trainer</span></button>
       <span className="orbit-crumb">{page}</span>
       <button ref={searchTrigger} type="button" className="orbit-search-trigger" onClick={showSearch} aria-label="Search workspace" aria-haspopup="dialog">
-        <Icon name="search" size={17} /><span>Search clients, workouts, pages</span><kbd>⌘ K</kbd>
+        <Icon name="search" size={17} /><span>Search workspace</span><kbd>⌘ K</kbd>
       </button>
       <dialog ref={command} className="orbit-command" aria-labelledby="orbit-command-title"
         onCancel={event => { event.preventDefault(); closeSearch() }}
@@ -112,7 +112,7 @@ export default function GlobalBar({ menuTrigger, onOpenNavigation, appearance })
         <div className="orbit-command-content">
           <div className="orbit-command-header"><h2 id="orbit-command-title">Search workspace</h2><button className="orbit-icon-button" type="button" onClick={closeSearch} aria-label="Close search"><Icon name="close" size={17} /></button></div>
           <div className="orbit-command-input"><Icon name="search" size={17} /><input ref={input} value={query} onChange={(event) => { setQuery(event.target.value); setActive(0) }}
-            onKeyDown={searchKey} placeholder="Search clients, exercises, sessions and more" aria-label="Search workspace"
+            onKeyDown={searchKey} placeholder="Search clients, exercises or sessions…" aria-label="Search workspace"
             role="combobox" autoComplete="off" aria-expanded="true" aria-controls="orbit-search-results"
             aria-activedescendant={results[active] ? 'orbit-search-result-' + active : undefined} /></div>
           <div id="orbit-search-results" role="listbox" aria-label="Search results" className="orbit-command-results">

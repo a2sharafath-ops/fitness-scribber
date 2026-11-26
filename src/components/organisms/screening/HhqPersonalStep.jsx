@@ -20,7 +20,6 @@ export default function HhqPersonalStep({ personal, contacts, onChange }) {
     <>
       <div className="scr-banner">{CLIENT_RESULT_MESSAGE}</div>
       <h3 className="scr-step-title">About you</h3>
-      <p className="scr-step-sub">Basics your trainer needs on file.</p>
       <div className="row3">
         <Field label="Date of birth"><input type="date" value={personal.dob || ''} onChange={setDob} /></Field>
         <Field label={'Age' + (personal.dob ? ' (from DOB)' : '')}><input type="number" value={personal.age ?? ''} onChange={pn('age')} disabled={!!personal.dob} /></Field>

@@ -43,7 +43,7 @@ export default function SelfAssessment({ onSubmit, busy }) {
 
   const submit = async () => {
     const data = build()
-    if (!data) { toast('Please fill in at least one field.', 'error'); return }
+    if (!data) { toast('Fill in at least one field.', 'error'); return }
     const ok = await onSubmit(tab, data)
     if (ok) {
       setDone(tab)

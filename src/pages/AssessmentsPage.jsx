@@ -65,7 +65,7 @@ function AssessmentCard({ type, records, intervalDays, today, clientId, onAdd, o
         <p className="assessment-result" title={summary}>{summary === '—' ? 'No result recorded' : summary}</p>
         <p className="assessment-source">{sourceOf(current)}</p>
         <p className={'assessment-review-date' + (due?.overdue ? ' overdue' : '')}>Latest {fmtDate(current.date)}<br />
-          {due?.dueDate ? `${due.kind === 'suggested' ? 'Suggested review' : 'Next reassessment'} ${fmtDate(due.dueDate)}` : 'Next reassessment not scheduled'}
+          {due?.dueDate ? `${due.kind === 'suggested' ? 'Suggested review' : 'Next reassessment'} ${fmtDate(due.dueDate)}` : 'Reassessment not scheduled'}
         </p>
         <button type="button" className="assessment-link" onClick={() => onEdit(current)}>{due?.kind === 'scheduled' ? 'Edit reassessment date' : 'Set reassessment date'}</button>
       </> : <p className="assessment-empty">No assessment recorded.</p>}
@@ -135,7 +135,7 @@ export default function AssessmentsPage() {
     <div className="topbar assess-title"><h1>Assessments</h1><Button icon="plus" onClick={() => openModal(<NewAssessmentMenu clientId={id} types={TEST_TYPES.map((type) => type.key)} />)}>New assessment</Button></div>
     {!screeningSettled && screeningCard}
     <section className="assessment-section" id="formal-assessments" aria-labelledby="assess-tests-title">
-      <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`Next reassessment uses the date saved on the latest record. Blank means not scheduled. Older records without a saved date show a suggested review using the ${intervalDays}-day Settings default. These are scheduling prompts, not clinical thresholds.`} /></div>
+      <div className="assessment-section-head"><div className="assessment-title-group"><h2 id="assess-tests-title">Baseline &amp; reassessment</h2><ProgressInfo term="Review dates" text={`The next reassessment comes from the latest record. A blank date means it is unscheduled. Older records use the ${intervalDays}-day Settings default as a suggestion. These dates are scheduling prompts, not clinical thresholds.`} /></div>
         <div className="assessment-baseline-count"><span>{progress.done}/{progress.total} baselines</span><span className="assessment-mini-track" aria-hidden="true"><span style={{ width: `${progress.done / progress.total * 100}%` }} /></span></div>
       </div>
       <div className="assessment-category-grid">{categories.map(({ type, entries }) => <AssessmentCard key={type.key} type={type} records={entries} intervalDays={intervalDays} today={today} clientId={id} onAdd={addType} onEdit={(record) => openModal(assessmentForm(record.type, id, record))} />)}</div>

@@ -28,9 +28,7 @@ export default function CommsSettingsCard() {
   return (
     <div className="card">
       <div className="section-title" style={{ margin: '0 0 6px' }}>Client communication</div>
-      <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>
-        Automated reminders and follow-up nudges posted to each athlete's chat.
-      </p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 0 }}>Send reminders and follow-ups to each athlete’s chat.</p>
 
       <label className="cs-row">
         <input type="checkbox" checked={f.remindersEnabled} onChange={setBool('remindersEnabled')} />

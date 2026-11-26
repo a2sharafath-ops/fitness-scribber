@@ -115,8 +115,8 @@ export function computeReadiness(db, clientId, date) {
   let score = null
   if (parts.length === 1) score = parts[0]
   else if (parts.length === 2) {
-    // Soft worst-of: 60% weight on the lower signal, so a poor reading in one
-    // system is not cancelled by a good reading in the other (a plain mean was).
+    // Moving 40% of the way from the lower score to the mean weights the
+    // lower input at 80% and the higher input at 20%.
     const lo = Math.min(...parts)
     score = Math.round(lo + (mean(parts) - lo) * 0.4)
   }

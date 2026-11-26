@@ -48,20 +48,15 @@ export default function ScreeningCard({ clientId, complete, draft, busy, onSave,
         {complete && !expired && <span className="tag green">✓ Complete</span>}
       </div>
       {justDone ? (
-        <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
-          Thanks — your screening has been sent to your trainer, who will use it to build the right plan for you.
-        </p>
+        <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>Screening sent to your trainer.</p>
       ) : draft ? (
         <>
-          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>You have a screening in progress — pick up where you left off.</p>
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>Your screening draft is saved. Continue where you left off.</p>
           <Button style={{ marginTop: 10 }} onClick={() => setOpen(true)}>Resume screening</Button>
         </>
       ) : complete && !expired ? (
         <>
-          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
-            Completed {fmtDate(complete.completedOn)} · next one due {fmtDate(complete.validUntil)}.
-            If your health changes before then, please update it.
-          </p>
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>Completed {fmtDate(complete.completedOn)} · next due {fmtDate(complete.validUntil)}. Update it if your health changes.</p>
           <div className="flex gap" style={{ marginTop: 10, flexWrap: 'wrap' }}>
             <Button variant="ghost" onClick={() => setShowAnswers(!showAnswers)}>{showAnswers ? 'Hide my answers' : 'View my answers'}</Button>
             <Button variant="ghost" onClick={() => setOpen(true)}>My health has changed — update screening</Button>
@@ -72,8 +67,8 @@ export default function ScreeningCard({ clientId, complete, draft, busy, onSave,
       ) : (
         <>
           <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
-            {expired ? 'Your last screening has expired — please complete a new one so your trainer can keep your plan safe and current.'
-              : 'A few questions about your health, history, and goals (about 5–10 minutes) so your trainer can build the right plan for you. You can save and finish later.'}
+            {expired ? 'Your screening has expired. Complete a new one before your trainer updates your plan.'
+              : 'Health, history and goals · about 5–10 minutes. You can save and finish later.'}
           </p>
           <Button style={{ marginTop: 10 }} onClick={() => setOpen(true)}>{expired ? 'Start new screening' : 'Start screening'}</Button>
         </>

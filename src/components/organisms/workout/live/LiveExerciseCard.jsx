@@ -7,7 +7,7 @@ export default function LiveExerciseCard({ session, exercise, block, units, now,
   const edit = (kind, row) => onEdit({ kind, exerciseId: exercise.id, blockId: block.id, rowId: row?.id })
   return <article className="ls-exercise" aria-label={exercise.name}>
     <header className="ls-exercise-head"><div><h3>{exercise.name}</h3><p>{exercise.setRows.length} {exercise.setRows.length === 1 ? 'set' : 'sets'}
-      {exercise.replaces && ' · Replacement'}{exercise.replacedBy && ' · Replaced'}{exercise.skipped && ' · Upcoming sets skipped'}</p></div>
+      {exercise.replaces && ' · Replacement'}{exercise.replacedBy && ' · Replaced'}{exercise.skipped && ' · Remaining sets skipped'}</p></div>
       <div className="ls-tools">{!readOnly && !exercise.skipped && !block.skipped && <button type="button" className="ls-button ls-rest-toggle" aria-pressed={!!exercise.restEnabled}
         onClick={() => onAction({ type: 'rest-toggle', id: exercise.id })}>{exercise.restEnabled ? 'Rest on' : 'Rest'}</button>}
         <LiveSessionMenu label={`${exercise.name} options`}>
@@ -27,6 +27,6 @@ export default function LiveExerciseCard({ session, exercise, block, units, now,
     <footer className="ls-exercise-foot"><button type="button" className="ls-text" onClick={() => edit('history')}>View last performance</button>
       {!readOnly && !locked && !exercise.skipped && !block.skipped && <button type="button" className="ls-text" onClick={() => onAction({ type: 'add-set', id: exercise.id })}>+ Add set</button>}</footer>
     <label className="ls-note">Note / reflection<textarea rows={1} value={exercise.note || ''} disabled={readOnly}
-      onChange={(event) => onAction({ type: 'note', id: exercise.id, note: event.target.value })} placeholder="Form cues, pain or adjustments…" /></label>
+      onChange={(event) => onAction({ type: 'note', id: exercise.id, note: event.target.value })} placeholder="Form, pain or adjustments…" /></label>
   </article>
 }

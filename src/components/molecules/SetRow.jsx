@@ -53,7 +53,7 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
         <>
           <label className="sf"><span>%1RM</span>
             <input type="number" value={set.prescribedIntensityValue ?? ''} aria-label="Percent of 1RM" onChange={num('prescribedIntensityValue')} /></label>
-          <label className="sf sf-calc" title="Training Max × input percentage">
+          <label className="sf sf-calc" title="Load = Training Max × the entered percentage.">
             <span>Target {unitName()}</span>
             <input readOnly tabIndex={-1} aria-label="Calculated target weight" value={pctCalc != null ? toDisp(pctCalc) : tmKg ? '' : 'no TM'} /></label>
         </>
@@ -95,7 +95,7 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
           <input type="number" min="0" step="0.5" value={set.prescribedIntensityValue ?? ''} aria-label="Duration in minutes" onChange={num('prescribedIntensityValue')} /></label>
       )}
       {intensityType === 'Load' && (
-        <label className="sf" title="An entered weight overrides the calculated percentage or effort target."><span>Load ({unitName()})</span>
+        <label className="sf" title="Entering a weight overrides the calculated target."><span>Load ({unitName()})</span>
           <input type="number" value={toDisp(set.prescribedLoadKg) ?? ''} aria-label="Prescribed load" onChange={kg('prescribedLoadKg')} /></label>
       )}
       {intensityType === 'Target HR' && (
@@ -114,7 +114,7 @@ export default function SetRow({ set, intensityType, tmKg, maxHr, toDisp, dispTo
           <input type="number" value={toDisp(set.prescribedLoadKg) ?? ''} aria-label="Working load" onChange={kg('prescribedLoadKg')} placeholder={loadHint} /></label>
       )}
       {['%1RM', 'Load'].includes(intensityType) && (
-        <label className="sf" title="Target reps remaining at the end of this set">
+        <label className="sf" title="Reps you could still do at the end of this set.">
           <span>RIR (optional)</span>
           <Select value={set.prescribedRir ?? ''} aria-label="Target reps in reserve" onChange={num('prescribedRir')}>
             <option value="">—</option>

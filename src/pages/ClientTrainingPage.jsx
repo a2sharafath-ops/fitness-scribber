@@ -1,3 +1,4 @@
+import HelperTip from '../components/atoms/HelperTip'
 import Select from '../components/molecules/Select'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
@@ -44,7 +45,7 @@ function BookingWorkoutSetup({ booking, client, db, prescription, onStart, onClo
       <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
     </div>
     <h2 id="booking-workout-title">{label}</h2>
-    <p className="muted">Choose a starting plan for this booking. Any plan you copy stays intact.</p>
+    <p className="muted">Choose a plan to copy into this booking. The original stays intact.</p>
     <form onSubmit={start}>
       <label>Workout source<Select value={source} onChange={event => setSource(event.target.value)}>
         {prescription && <option value="prescription">Copy day’s plan · {prescription.name || 'Prescribed workout'}</option>}
@@ -150,7 +151,10 @@ export default function ClientTrainingPage() {
       <div className="training-workspace-side">
         <section className="card training-program" aria-labelledby="training-program-title">
           <div className="training-program-head"><div className="training-program-copy">
-            <h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
+            <div className="flex">
+              <h2 id="training-program-title">{assignedPrograms.length ? 'Assigned programs' : plan?.name || 'No program assigned'}</h2>
+              {assignedPrograms.length > 0 && <HelperTip label="Client program edits" text="Edits apply to this client’s program. The library template stays intact." />}
+            </div>
           </div><Link className="btn ghost sm" to={`/workouts?clientId=${encodeURIComponent(id)}`}>Assign from library →</Link></div>
           {assignedPrograms.length > 0 && <>
             <div className="training-program-list"><div className="training-program-assignment">
@@ -167,7 +171,6 @@ export default function ClientTrainingPage() {
               </div>
               <Link className="btn sm" aria-label={`Edit client program: ${selectedProgram.name}`} to={`/workouts?assignment=${encodeURIComponent(selectedProgram.id)}&clientId=${encodeURIComponent(id)}`}>Edit client program →</Link>
             </div></div>
-            <p className="training-program-note">Program edits apply to this client’s copy.</p>
           </>}
         </section>
         <details className="card training-history" open><summary id="training-history-title">Session history</summary>
@@ -177,7 +180,7 @@ export default function ClientTrainingPage() {
               <span><strong>{item.title || 'Workout'}</strong><small>{fmtDate(item.date)} · {item.bookingId
                 ? db.sessions.find(row => row.id === item.bookingId)?.time || 'Booked workout'
                 : 'Unlinked'} · {item.status === 'discarded' ? 'Discarded · sets retained' : 'Workout log'}</small></span><span>Review workout →</span>
-            </button>) : <p className="muted">No completed workout logs yet.</p>
+            </button>) : <p className="muted">No workout logs yet.</p>
               : appointments.length ? appointments.slice(0, expandedHistory ? undefined : 5).map((item) => {
                 const action = bookingWorkoutAction(db, item, today)
                 return <div key={item.id} className="training-history-row static">
@@ -185,7 +188,7 @@ export default function ClientTrainingPage() {
                     <small>{bookingWorkoutStatus(item, bookingWorkout(db, item))}</small></span>
                   {action && <Link className="overview-text-link" to={action.path} aria-label={`${action.label} for ${fmtDate(item.date)} at ${item.time}`}>{action.label}</Link>}
                 </div>
-              }) : <p className="muted">No completed appointments yet.</p>}
+              }) : <p className="muted">No completed appointments.</p>}
           </div>
           {(historyType === 'workouts' ? workouts : appointments).length > 5 && <button type="button" className="overview-text-link" aria-expanded={expandedHistory} onClick={() => setExpandedHistory(!expandedHistory)}>{expandedHistory ? 'Show fewer entries' : 'Show all entries'}</button>}
         </details>

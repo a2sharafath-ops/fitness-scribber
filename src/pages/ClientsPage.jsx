@@ -33,7 +33,7 @@ function ClientCard({ row, reading }) {
     {reviews[0] && <ReviewLink item={reviews[0]} clientName={client.name} />}
     <div>{program ? <Link className="cr-program-name" to={program.path}>{program.name}</Link>
       : <Link to={dashboardClientPath(client.id, '/training')}>View training</Link>}</div>
-    <dl><div><dt>Readiness</dt><dd>{reading?.readiness ? `${reading.readiness.score}/100 · ${fmtDate(reading.date)}` : 'No score recorded'}</dd></div>
+    <dl><div><dt>Readiness</dt><dd>{reading?.readiness ? `${reading.readiness.score}/100 · ${fmtDate(reading.date)}` : 'No readiness score'}</dd></div>
       <div><dt>Past 30 days</dt><dd>{completion.total ? `${completion.completed} of ${completion.total} bookings completed` : 'No bookings'}</dd></div></dl>
     <OtherReviews reviews={reviews} clientName={client.name} />
   </article>
@@ -115,7 +115,7 @@ function ClientRoster({ today }) {
           <div className="cr-filters" role="group" aria-label="Filter clients">{[['active','Active'],['all','All clients'],['review','Needs review'],['paused','Paused'],['inactive','Inactive']].map(([key, label]) => <button key={key} type="button" aria-pressed={filter === key} onClick={() => update(setFilter)(key)}>{label}<span className="cr-count">{key === 'paused' ? rows.filter(row => row.client.status === 'Paused').length : counts[key]}</span></button>)}</div>
         </div>
         <div className="cr-tools">
-          <div className="cr-search"><Icon name="search" size={17} /><input ref={searchRef} type="search" value={query} onChange={e => update(setQuery)(e.target.value)} aria-label="Search roster" placeholder="Search name, email, goal or program…" />{query && <button className="cr-clear" type="button" onClick={clearSearch} aria-label="Clear search">×</button>}</div>
+          <div className="cr-search"><Icon name="search" size={17} /><input ref={searchRef} type="search" value={query} onChange={e => update(setQuery)(e.target.value)} aria-label="Search roster" placeholder="Search name, email, goal or program" />{query && <button className="cr-clear" type="button" onClick={clearSearch} aria-label="Clear search">×</button>}</div>
           <MobileOptions label="Roster options" activeCount={Number(unassigned) + Number(sort !== 'name') + Number(layout !== 'cards')}>
           <div className="cr-filters" role="group" aria-label="Roster layout">{['cards','table'].map(value =>
             <button key={value} aria-pressed={layout === value} onClick={() => setLayout(value)}>{value === 'cards' ? 'Cards' : 'Table'}</button>)}</div>
@@ -131,7 +131,7 @@ function ClientRoster({ today }) {
         {visible.length && layout === 'cards' ? <div className="orbit-client-grid">{visible.map(row => <ClientCard key={row.client.id} row={row} reading={readings.get(row.client.id)} />)}</div> : visible.length ? <table aria-label="Client roster results"><colgroup><col style={{ width: '27%' }} /><col style={{ width: '23%' }} /><col style={{ width: '14%' }} /><col style={{ width: '16%' }} /><col style={{ width: '20%' }} /></colgroup>
           <thead><tr><th scope="col">Client</th><th scope="col">Program</th><th scope="col">Booked sessions<small>Past 30 days</small></th><th scope="col">Latest record</th><th scope="col">Review</th></tr></thead>
           <tbody>{visible.map((row, index) => <ClientRow key={row.client.id} row={row} index={index} today={today} />)}</tbody>
-        </table> : <div className="cr-empty"><span className="cr-empty-icon"><Icon name={counts.all ? 'search' : 'users'} size={26} /></span><h3>{counts.all ? 'No clients match' : 'Meet your first client'}</h3><p>{counts.all ? 'Try another name or reset the filters.' : 'Add a client to start planning and tracking their training.'}</p><Button variant={counts.all ? 'ghost' : 'primary'} onClick={counts.all ? reset : add}>{counts.all ? 'Reset filters' : '＋ Add client'}</Button></div>}
+        </table> : <div className="cr-empty"><span className="cr-empty-icon"><Icon name={counts.all ? 'search' : 'users'} size={26} /></span><h3>{counts.all ? 'No clients match' : 'Meet your first client'}</h3><p>{counts.all ? 'Try another search or reset your filters.' : 'Add a client to start planning their training.'}</p><Button variant={counts.all ? 'ghost' : 'primary'} onClick={counts.all ? reset : add}>{counts.all ? 'Reset filters' : '＋ Add client'}</Button></div>}
       </div>
       {!!visible.length && <footer className="cr-roster-foot"><span role="status">{start + 1}–{Math.min(start + ROSTER_PAGE_SIZE, filtered.length)} of {filtered.length} {filter === 'active' ? 'active ' : ''}clients</span>{pages > 1 && <div className="cr-pagination"><button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => changePage(page - 1)}>←</button><span>Page {page} of {pages}</span><button type="button" aria-label="Next page" disabled={page === pages} onClick={() => changePage(page + 1)}>→</button></div>}</footer>}
     </section>

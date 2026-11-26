@@ -8,9 +8,9 @@ import { toast } from '../lib/toast'
 // Copy per mode — mirrors the Cureocity "01 · Login / Sign up" Figma frame,
 // adapted for the three auth flows the backend supports.
 const COPY = {
-  signin: { h: 'Sign in to Orbit Trainer', sub: 'Your coaching workspace', cta: 'Sign in' },
-  signup: { h: 'Create your account', sub: 'Athletes join with an invite code · coach accounts are set up by your admin', cta: 'Create account' },
-  reset: { h: 'Reset your password', sub: "We'll email you a reset link", cta: 'Send reset link' },
+  signin: { h: 'Sign in to Orbit Trainer', cta: 'Sign in' },
+  signup: { h: 'Create your account', sub: 'Athletes join with a coach’s invite code. Admins set up coach accounts.', cta: 'Create account' },
+  reset: { h: 'Reset your password', sub: "Enter your email for a reset link.", cta: 'Send reset link' },
 }
 
 export default function AuthPage() {
@@ -31,14 +31,14 @@ export default function AuthPage() {
     if (mode === 'reset') {
       const { error } = await sendPasswordReset(email)
       setBusy(false)
-      setMsg(error ? { type: 'err', text: error.message } : { type: 'ok', text: 'If that email has an account, a reset link is on its way. Check your inbox.' })
+      setMsg(error ? { type: 'err', text: error.message } : { type: 'ok', text: 'If there’s an account for that email, check your inbox for a reset link.' })
       return
     }
     const fn = mode === 'signin' ? signIn : signUp
     const { error } = await fn(email.trim(), password)
     setBusy(false)
     if (error) setMsg({ type: 'err', text: error.message })
-    else if (mode === 'signup') setMsg({ type: 'ok', text: 'Account created. Check your email to confirm, then sign in.' })
+    else if (mode === 'signup') setMsg({ type: 'ok', text: 'Check your email to confirm your account, then sign in.' })
   }
 
   const google = async () => {
@@ -67,7 +67,7 @@ export default function AuthPage() {
           <Brand />
           <div className="auth-head">
             <h1 className="auth-h">{copy.h}</h1>
-            <p className="auth-sub">{copy.sub}</p>
+            {copy.sub && <p className="auth-sub">{copy.sub}</p>}
           </div>
 
           <form onSubmit={submit} className="auth-form">

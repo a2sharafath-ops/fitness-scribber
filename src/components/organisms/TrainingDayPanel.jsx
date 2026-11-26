@@ -83,7 +83,7 @@ export default function TrainingDayPanel({ client, date, today, onSelectDate, bo
     </div>
     <div className="training-selected-body" data-empty={!hasDetails || undefined} data-logged-workout={actual || undefined}>
       {recovery && saveStatus !== 'saving' && <div className="workout-correction-notice">
-        <p role="status">{recovery.kind === 'saved' ? 'Workout corrections were saved.' : 'A correction draft is available in Edit logged details.'}</p>
+        <p role="status">{recovery.kind === 'saved' ? 'Workout corrections were saved.' : 'A correction draft is available under Edit logged details.'}</p>
         {recovery.kind === 'saved' && <Button size="sm" variant="ghost" onClick={dismiss}>Dismiss</Button>}
       </div>}
       {log && records.length > 1 && <label className="training-log-picker">Workout log<Select value={log.id} onChange={(event) => { setLogId(event.target.value); setRecordView('actual') }}>{records.map((row) => <option key={row.id} value={row.id}>{row.title || 'Workout'} · {bookings.find(booking => booking.id === row.bookingId)?.time || 'Unlinked'}</option>)}</Select></label>}

@@ -11,6 +11,6 @@ export default function WearableReturn() {
   }, [])
   return <main className="empty" style={{ padding: 40 }}>
     <h1>{!result ? 'Connecting device…' : result.error ? 'Device connection failed' : 'Device connected'}</h1>
-    {result && <><p>{result.error ? 'Return to the client page and start again in this browser tab.' : 'You can now sync device readings.'}</p><a className="btn" href={result.path || '/'}>Continue</a></>}
+    {result && <><p>{result.error ? 'Return to the client page and restart the connection in this tab.' : 'Device connected. You can now sync readings.'}</p><a className="btn" href={result.path || '/'}>Continue</a></>}
   </main>
 }

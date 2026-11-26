@@ -20,8 +20,8 @@ export default function ProfilePreferencesForm({ client, screening }) {
   }
   const save = () => {
     const changed = Object.keys(dirty).filter((key) => dirty[key])
-    if (changed.includes('daysPerWeek') && values.daysPerWeek && (+values.daysPerWeek < 0 || !Number.isFinite(+values.daysPerWeek))) return toast('Enter a valid number of days', 'error')
-    if (changed.includes('sessionMinutes') && values.sessionMinutes && (+values.sessionMinutes < 0 || !Number.isFinite(+values.sessionMinutes))) return toast('Enter a valid session length', 'error')
+    if (changed.includes('daysPerWeek') && values.daysPerWeek && (+values.daysPerWeek < 0 || !Number.isFinite(+values.daysPerWeek))) return toast('Enter a valid number of days.', 'error')
+    if (changed.includes('sessionMinutes') && values.sessionMinutes && (+values.sessionMinutes < 0 || !Number.isFinite(+values.sessionMinutes))) return toast('Enter a valid session length.', 'error')
     if (changed.length) commit((draft) => {
       const row = draft.clients.find((item) => item.id === client.id)
       row.intake = row.intake || {}
@@ -43,7 +43,7 @@ export default function ProfilePreferencesForm({ client, screening }) {
   </Field>
   return <ModalShell title="Edit preferences & availability" onClose={closeModal}
     footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save}>Save preferences</Button></>}>
-    <p className="muted" style={{ fontSize: 12, margin: '0 0 12px' }}>Only changed fields are saved. Clear a field to use the latest completed screening answer. The signed screening stays unchanged.</p>
+    <p className="muted" style={{ fontSize: 12, margin: '0 0 12px' }}>Only changed fields are saved. Clear a field to use the latest completed screening answer. The signed screening stays intact.</p>
     <div className="section-title">Training preferences</div>
     <div className="row2">{field('enjoys', 'Enjoys')}{field('dislikes', 'Dislikes')}</div>
     {field('intensity', 'Intensity preference')}

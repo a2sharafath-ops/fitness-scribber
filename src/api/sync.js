@@ -91,7 +91,7 @@ export async function persistDiff(prev, next, client = supabase) {
   for (const assignment of newAssignments) {
     const rows = assignment.data.schedule.map(s => next.prescriptions.find(p => p.id === s.prescriptionId))
     if (rows.some(r => !r)) {
-      issues.push({ table: 'programAssignments', kind: 'write', message: 'An unsaved assignment has missing sessions. Restore it before retrying.' })
+      issues.push({ table: 'programAssignments', kind: 'write', message: 'This unsaved assignment is missing sessions. Restore them before retrying.' })
       continue
     }
     const expected = rows.map(row => prev.prescriptions.find(p => p.clientId === row.clientId && p.date === row.date) || null)

@@ -17,7 +17,7 @@ export function fitnessTestsError(tests) {
     if (numeric(test.value) == null) return `${prefix}: enter a numeric result.`
     if (!text(test.unit)) return `${prefix}: enter the result unit.`
     const key = identity(test)
-    if (seen.has(key)) return `${prefix}: this test, side, unit and protocol already have a result. Use the protocol field to distinguish different methods.`
+    if (seen.has(key)) return `${prefix}: a result already exists for this test, side, unit and protocol. Use a different protocol to record a different method.`
     seen.add(key)
   }
   return ''

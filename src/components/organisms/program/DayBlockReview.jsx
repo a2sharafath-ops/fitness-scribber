@@ -20,7 +20,7 @@ function LoggedSet({ row, index, units, completed }) {
     row.mode === 'duration' ? secToClock(row.durationSeconds || 0) : (row.reps ?? row.pReps) != null ? `${row.reps ?? row.pReps} reps` : null,
     (row.load ?? row.pLoadKg) != null ? `${toDisp(row.load ?? row.pLoadKg, units)} ${unitName(units)}` : null,
   ].filter(Boolean).join(' · ') : completed ? 'Skipped' : 'Not logged yet'
-  return <li>Set {row.n ?? index + 1}: {value || 'Completed; values not recorded'}</li>
+  return <li>Set {row.n ?? index + 1}: {value || 'Completed · values unavailable'}</li>
 }
 
 // Mirrors the builder's block order while presenting recorded values as facts.

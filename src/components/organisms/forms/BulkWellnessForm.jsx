@@ -39,7 +39,7 @@ export default function BulkWellnessForm() {
   return (
     <ModalShell title="Bulk Morning Check-in" onClose={closeModal}
       footer={<><Button variant="ghost" onClick={closeModal}>Cancel</Button><Button onClick={save} disabled={!date || !hasEntry || incomplete}>Save check-ins</Button></>}>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Complete all four ratings for each client you include. Empty rows are skipped.</p>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>Fill in all four ratings for each client you include. Blank rows are skipped.</p>
       <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
       <div className="bulk-grid" style={{ fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
         <span>Athlete</span><span>Sleep</span><span>Stress</span><span>Fatigue</span><span>Soreness</span>
@@ -52,9 +52,7 @@ export default function BulkWellnessForm() {
           ))}
         </div>
       ))}
-      <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>
-        Sleep 1–7 (7 = best). Stress / Fatigue / Soreness 1–7 (1 = best). Leave a row blank to skip.
-      </p>
+      <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>All ratings use 1–7. Sleep: 7 is best. Stress, fatigue and soreness: 1 is best.</p>
     </ModalShell>
   )
 }

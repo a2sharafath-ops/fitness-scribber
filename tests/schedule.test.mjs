@@ -202,7 +202,7 @@ test('backend save is a single atomic RPC; missing migration reports a clear err
 test('schedule renders calendar views, stable panels and real client names',async()=>{
   const {default:Page}=await load('pages/SchedulePage.jsx'),{DataProvider}=await load('store/DataContext.jsx'),{ModalProvider}=await load('store/ModalContext.jsx')
   const html=renderToStaticMarkup(React.createElement(DataProvider,{initialDb:fixture(),backend:false},React.createElement(ModalProvider,null,React.createElement(MemoryRouter,null,React.createElement(Page)))))
-  for(const s of ['Schedule','Week','Month','Agenda','Status updates','schedule-day-panel','Pull the bottom edge'])assert.ok(html.includes(s))
+  for(const s of ['Schedule','Week','Month','Agenda','Status updates','schedule-day-panel','Help with Calendar'])assert.ok(html.includes(s))
 })
 
 test('local schedule saves use the newest stored data and storage failure leaves the booking unchanged',async()=>{

@@ -23,7 +23,7 @@ export default function LogisticsStep({ availability, environment, prefs, onChan
       </div>
       <div className="row2">
         <Field label="Training split preference"><input value={availability.splitPref || ''} onChange={(e) => av('splitPref', e.target.value)} placeholder="or 'let the trainer decide'" /></Field>
-        <Field label="Dates you'll be unavailable (travel etc.)"><input value={availability.unavailable || ''} onChange={(e) => av('unavailable', e.target.value)} /></Field>
+        <Field label="Dates you’re unavailable, such as travel"><input value={availability.unavailable || ''} onChange={(e) => av('unavailable', e.target.value)} /></Field>
       </div>
 
       <h3 className="scr-step-title" style={{ marginTop: 14 }}>Where & with what</h3>

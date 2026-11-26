@@ -45,9 +45,9 @@ export default function ClientDetailPage() {
   const liftTrend = recentLiftTrend(db, id, today, addDays(today, -55))
   const metrics = [
     { name: 'Booking completion', value: completion.total ? `${Math.round(completion.completed / completion.total * 100)}%` : '—',
-      note: completion.total ? `${completion.completed} of ${completion.total} · past 30 days` : 'No past bookings in 30 days', path: `/clients/${id}/progress#attendance` },
+      note: completion.total ? `${completion.completed} of ${completion.total} · past 30 days` : 'No past bookings in the last 30 days', path: `/clients/${id}/progress#attendance` },
     { name: 'Readiness today', value: readiness == null ? '—' : `${readiness}/100`,
-      note: readiness == null ? 'No readiness score today' : 'Today’s recorded readiness', path: checkInsUrl },
+      note: readiness == null ? 'No readiness score today' : '', path: checkInsUrl },
     { name: 'Latest strength estimate', value: strength ? fmtWt(Number(strength.valueKg), units) : '—',
       note: strength ? `${strength.exercise} · ${fmtDate(strength.date)}` : 'No estimated 1RM recorded', path: `/clients/${id}/progress#strength` },
   ]
@@ -79,7 +79,7 @@ export default function ClientDetailPage() {
     document.getElementById(`overview-concern-${concernId}`)?.scrollIntoView({ behavior, block: 'nearest' })
   }
   const resolve = async (concernId) => {
-    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional):', multiline: true, confirmLabel: 'Resolve' })
+    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional)', multiline: true, confirmLabel: 'Resolve' })
     if (note === null) return
     commit((data) => { const concern = data.concerns.find((item) => item.id === concernId); concern.status = 'Resolved'; concern.resolution = note.trim() })
     toast('Concern resolved')
@@ -89,7 +89,7 @@ export default function ClientDetailPage() {
     toast('Concern reopened', 'info')
   }
   const delConcern = async (concernId) => {
-    if (!await confirmDialog({ title: 'Delete concern', message: 'Delete this concern? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
+    if (!await confirmDialog({ title: 'Delete concern', message: 'This concern will be permanently deleted.', confirmLabel: 'Delete', danger: true })) return
     commit((data) => { data.concerns = data.concerns.filter((item) => item.id !== concernId) })
     toast('Concern deleted')
   }
@@ -124,8 +124,8 @@ export default function ClientDetailPage() {
     </div></div>
     <div className="overview-priority">
       <section className="card overview-next" aria-labelledby="next-session-title">
-        <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSlide?.title || 'No upcoming session booked'}</h2>
-        {nextSession && <p className="muted">{nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · {nextSession.time || 'Time not set'} · {nextSession.dur || '—'} min <span className="overview-booking-status">{nextSession.status}</span></p>}
+        <div className="overview-eyebrow">NEXT SESSION</div><h2 id="next-session-title">{nextSlide?.title || 'No upcoming session'}</h2>
+        {nextSession && <p className="muted">{nextSession.date === today ? 'Today' : fmtDate(nextSession.date)} · {nextSession.time || 'Time not set'}{nextSession.dur ? ` · ${nextSession.dur} min` : ''} · <span className="overview-booking-status">{nextSession.status}</span></p>}
         <div className="overview-next-actions">{nextSession ? <>{nextAction.label && <Link className="btn" to={nextAction.path}>{nextAction.label} →</Link>}<Button variant="ghost" onClick={() => openModal(<SessionForm session={nextSession} />)}>View booking</Button></>
           : <Button onClick={() => openModal(<SessionForm clientId={id} date={today} />)}>Book session</Button>}</div>
       </section>
@@ -144,7 +144,7 @@ export default function ClientDetailPage() {
     <OverviewTraining clientId={id} today={today} />
     <div className="overview-metrics" role="group" aria-label="Client progress at a glance">
       {metrics.map(({ name, value, note, path }) => <Link className="card overview-metric" key={name} to={path}>
-        <span>{name}</span><strong>{value}</strong><small>{note}</small><Icon name="chevron-right" size={16} aria-hidden="true" />
+        <span>{name}</span><strong>{value}</strong>{note && <small>{note}</small>}<Icon name="chevron-right" size={16} aria-hidden="true" />
       </Link>)}
     </div>
     <div className="overview-progress">

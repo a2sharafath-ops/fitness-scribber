@@ -36,7 +36,7 @@ export default function ExerciseCard({
   return (
     <div className={'ex-card' + (ex.unmapped ? ' ex-unmapped' : '') + (isOver ? ' drag-over' : '') + (isDragging ? ' dragging' : '')} {...dragProps}>
       <div className="ex-head">
-        <span className="drag-grip" title="Drag to reorder this exercise" aria-label="Reorder exercise" {...dragHandleProps}>⠿</span>
+        <span className="drag-grip" title="Drag this handle to reorder." aria-label="Reorder exercise" {...dragHandleProps}>⠿</span>
         <Autocomplete
           className="ac-grow" inputClassName="presc-ex"
           value={ex.exerciseName}
@@ -60,10 +60,10 @@ export default function ExerciseCard({
         {['%1RM', 'RPE', 'RIR'].includes(ex.intensityType) && (
           <span className="ex-tm muted"
             title={tmInfo?.source === 'derived'
-              ? `Derived: ${tmInfo.relPct}% of ${tmInfo.relTo} (${toDisp(tmInfo.refKg)} ${unitName()}). Log this lift's own 1RM to override.`
+              ? `Based on ${tmInfo.relPct}% of ${tmInfo.relTo} (${toDisp(tmInfo.refKg)} ${unitName()}). Log this lift’s own 1RM to override.`
               : tmInfo?.source === 'assessment'
-                ? 'From the latest fitness assessment. A recent training PR will override it.'
-                : 'Training Max used for %1RM / RPE / RIR load targets'}>
+                ? 'Uses the latest fitness assessment until a recent training PR replaces it.'
+                : 'Training Max sets percentage, RPE and RIR load targets.'}>
             TM {tmKg ? `${toDisp(tmKg)} ${unitName()}` : '— none yet'}
             {tmInfo?.source === 'derived' && <span className="ex-tm-rel"> · {tmInfo.relPct}% of {tmInfo.relTo}</span>}
             {tmInfo?.source === 'assessment' && <span className="ex-tm-rel"> · assessment</span>}
@@ -90,7 +90,7 @@ export default function ExerciseCard({
           onChange={setSet(si)} onRemove={removeSet(si)} />
       ))}
       <button type="button" className="link-btn" onClick={addSet}>＋ Add set</button>
-      {ex.sets.length > 1 && <span className="muted" style={{ fontSize: 10, marginLeft: 8 }}>set 1 fills unchanged fields below</span>}
+      {ex.sets.length > 1 && <span className="muted" style={{ fontSize: 10, marginLeft: 8 }}>Set 1 fills the unchanged fields below.</span>}
       {ex.sets.some(set => set.touched || Object.values(set.touchedFields || {}).some(Boolean)) && <button type="button" className="link-btn" onClick={() => onChange({ sets: followFirstSet(ex.sets) })}>Reset targets to set 1</button>}
     </div>
   )

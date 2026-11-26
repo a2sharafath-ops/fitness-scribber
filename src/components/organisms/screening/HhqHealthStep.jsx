@@ -31,7 +31,7 @@ export default function HhqHealthStep({ meds, msk, womens, sex, pregnantFromParq
         <Field label="Surgeries (what & when)"><input value={msk.surgeries || ''} onChange={k('surgeries')} /></Field>
       </div>
       <div className="row2">
-        <Field label="Implants / prostheses (joint replacement, pacemaker…)"><input value={msk.implants || ''} onChange={k('implants')} /></Field>
+        <Field label="Implants or prostheses (e.g. joint replacement or pacemaker)"><input value={msk.implants || ''} onChange={k('implants')} /></Field>
         <Field label="Stiff or recurring 'problem' joints"><input value={msk.romLimits || ''} onChange={k('romLimits')} /></Field>
       </div>
       <Field label="Movements you've been told to avoid, or that reliably cause pain"><input value={msk.avoidMovements || ''} onChange={k('avoidMovements')} /></Field>
@@ -41,7 +41,7 @@ export default function HhqHealthStep({ meds, msk, womens, sex, pregnantFromParq
         <>
           <h3 className="scr-step-title" style={{ marginTop: 14 }}>Women's health</h3>
           {pregnantFromParq ? (
-            <div className="scr-banner">You indicated on the previous section that you are pregnant — we've noted that here so you don't have to answer again.</div>
+            <div className="scr-banner">Your earlier pregnancy answer has already been recorded.</div>
           ) : (
             <YesNoRow text="Are you currently pregnant, or could you be?" value={womens.pregnant} onChange={(v) => w('pregnant', v)} />
           )}

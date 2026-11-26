@@ -37,7 +37,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
   if (kind === 'history') {
     const previous = previousLivePerformance(history, session, item)
     return <LiveSessionDialog title={`Last performance · ${item.name}`} onClose={onClose}>
-      {previous ? <><p>{previous.date}</p>{previous.rows.map((set, index) => <p className="ls-history-row" key={index}><strong>Set {index + 1}</strong><span>{set.mode === 'duration' ? secToClock(set.durationSeconds) : set.reps == null ? 'Reps not recorded' : `${set.reps} reps`}{set.load != null ? ` · ${toDisp(set.load, units)} ${units}` : ''}</span></p>)}</> : <p>No previous logged performance for this exercise.</p>}
+      {previous ? <><p>{previous.date}</p>{previous.rows.map((set, index) => <p className="ls-history-row" key={index}><strong>Set {index + 1}</strong><span>{set.mode === 'duration' ? secToClock(set.durationSeconds) : set.reps == null ? 'Reps not recorded' : `${set.reps} reps`}{set.load != null ? ` · ${toDisp(set.load, units)} ${units}` : ''}</span></p>)}</> : <p>No previous logs for this exercise.</p>}
     </LiveSessionDialog>
   }
   if (kind === 'about') return <LiveSessionDialog title={item.name} onClose={onClose}>
@@ -46,12 +46,12 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
     {libraryItem?.video && /^https?:\/\//i.test(libraryItem.video) && <a href={libraryItem.video} target="_blank" rel="noreferrer">View exercise demonstration ↗</a>}
   </LiveSessionDialog>
   if (kind === 'reload') return <LiveSessionDialog title="Load the saved session?" onClose={onClose} confirm="Keep draft & reload" onSubmit={onReload}>
-    <p>A recovery copy of this draft will be kept on this browser. The session will reload its saved record.</p>
+    <p>This browser keeps a recovery copy. The saved session will reopen.</p>
     {error && <p role="alert">{error}</p>}
   </LiveSessionDialog>
   if (kind === 'finish' || kind === 'discard') return <LiveSessionDialog title={kind === 'finish' ? 'Finish workout?' : 'Discard workout?'} onClose={onClose}
     confirm={kind === 'finish' ? 'Continue to finish' : 'Discard workout'} busy={busy} onSubmit={kind === 'finish' ? onFinish : onDiscard}>
-    <p>{kind === 'finish' ? 'Review your effort and duration next to finish the session.' : 'This ends the session and marks it discarded. The original plan, adjustments and recorded sets stay available for review.'}</p>
+    <p>{kind === 'finish' ? 'Review effort and duration to finish the session.' : 'Discard this session? Its original plan, changes and logged sets remain available.'}</p>
     {error && <p role="alert">{error}</p>}
   </LiveSessionDialog>
   let title, content, submit, confirm
@@ -90,7 +90,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       content = <><fieldset className="ls-mode"><legend className="ls-sr-only">Measurement</legend>{['reps', 'duration'].map((key) => <label key={key}>
         <input type="radio" name="mode" value={key} checked={mode === key} onChange={() => setMode(key)} />{key === 'reps' ? 'Reps' : 'Duration'}</label>)}</fieldset>
         <div hidden={mode !== 'reps'}>{field('reps', 'Actual reps', row.reps)}</div>
-        <div hidden={mode !== 'duration'}>{field('durationSeconds', 'Actual duration (seconds)', row.durationSeconds, { min: 1, max: 35999 })}<p className="ls-hint">Apply an empty duration to use the set stopwatch.</p></div></>
+        <div hidden={mode !== 'duration'}>{field('durationSeconds', 'Actual duration (seconds)', row.durationSeconds, { min: 1, max: 35999 })}<p className="ls-hint">Leave duration blank to use the stopwatch.</p></div></>
       submit = (form) => submitAction({ type: 'row', id: row.id, patch: { mode,
         reps: form.get('reps') === '' ? null : Number(form.get('reps')),
         durationSeconds: form.get('durationSeconds') === '' ? null : Number(form.get('durationSeconds')) } })
@@ -104,7 +104,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       title = 'Edit set targets'
       content = <>{field('pLoadKg', `Target weight (${units})`, toDisp(row.pLoadKg, units), { max: units === 'lb' ? 4409 : 2000, step: 0.01 })}
         {field('pReps', 'Target reps', row.pReps)}{field('pDurationSeconds', 'Target duration (seconds)', adjustedSetDuration(row), { min: 1, max: 35999 })}
-        <p className="ls-hint">This adjusts this session. The original target remains in Original plan.</p></>
+        <p className="ls-hint">Changes apply to this session. The original target stays in Original plan.</p></>
       submit = (form) => submitAction({ type: 'row', id: row.id, patch: {
         pLoadKg: form.get('pLoadKg') === '' ? null : String(form.get('pLoadKg')) === String(toDisp(row.pLoadKg, units)) ? row.pLoadKg : dispToKg(form.get('pLoadKg'), units),
         pReps: form.get('pReps') === '' ? null : Number(form.get('pReps')),
@@ -119,7 +119,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       break
     case 'rest':
       title = `Rest duration · ${item.name}`
-      content = <>{field('seconds', 'Rest between sets (seconds)', exerciseRestSeconds(session, item), { min: 1, max: 900, required: true })}<p className="ls-hint">Applies to upcoming rest countdowns.</p></>
+      content = <>{field('seconds', 'Rest between sets (seconds)', exerciseRestSeconds(session, item), { min: 1, max: 900, required: true })}<p className="ls-hint">Applies to future rest timers.</p></>
       submit = (form) => submitAction({ type: 'rest-duration', id: item.id, seconds: Number(form.get('seconds')) })
       break
     case 'settings':
@@ -138,7 +138,7 @@ export default function LiveSessionEditor({ editor, session, units, exercises, h
       title = kind === 'replace' ? `Replace ${item.name}` : `Add exercise · ${block.title}`
       content = <><label>Exercise<Autocomplete ariaLabel="Exercise" name="name" maxLength={100} required
         value={exerciseName} onChange={setExerciseName} options={exercises.map(entry => entry.name)} /></label>
-        {kind === 'replace' && <p className="ls-hint">The replacement starts with new sets. Previous sets stay with the original exercise.</p>}</>
+        {kind === 'replace' && <p className="ls-hint">The replacement starts with new sets. Prior sets stay with the original exercise.</p>}</>
       submit = (form) => { const name = String(form.get('name')).trim(); const entry = exercises.find((exercise) => exercise.name === name)
         submitAction({ type: kind, id: item?.id, blockId, name, exerciseId: entry?.id }) }
       break

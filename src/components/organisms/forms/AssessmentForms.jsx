@@ -42,7 +42,7 @@ function MetaRow({ f, setF }) {
     {hasReviewDate && <div style={{ marginBottom: 12 }}>
       <Field label="Next reassessment date"><input type="date" value={f.nextReassessmentDate} min={isAssessmentDate(f.date) ? addDays(f.date, 1) : undefined} aria-invalid={!!error} onChange={(e) => setF({ ...f, nextReassessmentDate: e.target.value })} /></Field>
       <div className="flex between gap" style={{ flexWrap: 'wrap', marginTop: 6 }}>
-        <small className="muted">Optional · leave blank if not scheduled.</small>
+        <small className="muted">Leave blank if unscheduled.</small>
         {suggested.dueDate && <Button variant="ghost" size="sm" onClick={() => setF({ ...f, nextReassessmentDate: suggested.dueDate })}>Use {suggested.intervalDays}-day default · {fmtDate(suggested.dueDate)}</Button>}
       </div>
       {error && <p role="alert" style={{ color: 'var(--danger)', fontSize: 12 }}>{error}</p>}
@@ -119,7 +119,7 @@ function NasmMovementForm({ clientId, record, defaultPhase }) {
       ))}
 
       <Field label="Posture"><input value={f.posture} onChange={(e) => setF({ ...f, posture: e.target.value })} placeholder="e.g. Mild anterior pelvic tilt" /></Field>
-      <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Overall observations, cues, limitations…" /></Field>
+      <Field label="Notes"><input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} placeholder="Observations, cues or limitations…" /></Field>
     </ModalShell>
   )
 }
@@ -147,7 +147,7 @@ function PostureRow({ item, f = {}, onChange }) {
             {SEVERITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </Select>
           <label className="pos-pain"><input type="checkbox" checked={!!f.pain} aria-label={`${item.label} pain`} onChange={(e) => onChange({ pain: e.target.checked })} /> pain</label>
-          <input className="pos-note" value={f.note || ''} onChange={(e) => onChange({ note: e.target.value })} placeholder="note…" aria-label={item.label + ' note'} />
+          <input className="pos-note" value={f.note || ''} onChange={(e) => onChange({ note: e.target.value })} placeholder="Notes…" aria-label={item.label + ' note'} />
         </div>
       )}
     </div>
@@ -218,10 +218,8 @@ function ReportImport({ pdf, imported, importedSource, onPick, candidates, selec
         <div className={'bc-import-msg ' + (importedSource.ocr ? 'warn' : 'ok')} role="status">
           <Icon name={importedSource.ocr ? 'alert' : 'check'} size={13} />
           <span>
-            Filled {filled.length} field{filled.length === 1 ? '' : 's'} from <b>{importedSource.name}</b>: {filled.join(', ')}.
-            {importedSource.ocr
-              ? ' Read from a scan by text recognition, so digits can be misread — please check every value against the report before saving.'
-              : ' Check them before saving.'}
+            Imported {filled.length} field{filled.length === 1 ? '' : 's'} from {importedSource.ocr ? 'the scan' : <b>{importedSource.name}</b>}: {filled.join(', ')}.
+            {importedSource.ocr ? <> Check every value against <b>{importedSource.name}</b> before saving.</> : ' Check before saving.'}
           </span>
         </div>
       )}
@@ -330,8 +328,8 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
         setPdf({
           busy: false, name: file.name, step: '', pct: 0, ocr: viaOcr,
           error: viaOcr
-            ? "Couldn't read any values from that scan. Try a sharper, straight-on image, or enter the values manually below."
-            : "Couldn't find any body-composition values in that report. Enter them manually below.",
+            ? 'Couldn’t read the scan. Try a sharper, straight-on image or enter values below.'
+            : 'No body composition values found. Enter them below.',
         })
         return
       }
@@ -340,7 +338,7 @@ export function BodyCompForm({ clientId, record, defaultPhase }) {
       setImportedSource({ name: file.name, ocr: viaOcr })
       setPdf({ busy: false, name: file.name, error: '', step: '', pct: 0, ocr: viaOcr })
     } catch (err) {
-      setPdf({ busy: false, name: file.name, step: '', pct: 0, ocr: false, error: err?.message || 'That file could not be read.' })
+      setPdf({ busy: false, name: file.name, step: '', pct: 0, ocr: false, error: err?.message || 'Couldn’t read this file.' })
     }
   }
   const data = () => ({
@@ -441,7 +439,7 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
       <MetaRow f={f} setF={setF} />
 
       <div className="section-title" style={{ margin: '4px 0 2px', fontSize: 13 }}>Strength — estimated 1RM</div>
-      <p className="muted" style={{ fontSize: 11.5, margin: '0 0 8px' }}>Enter a test weight and reps; we estimate the 1RM (1 rep = a true 1RM). These feed the workout builder's Training Max.</p>
+      <p className="muted" style={{ fontSize: 11.5, margin: '0 0 8px' }}>Enter test weight and reps. A single rep uses the entered weight. Multiple reps estimate 1RM. The result informs Training Max.</p>
       {strength.map((r, i) => {
         const est = estOneRepMax(r.weightKg, r.reps)
         return (
@@ -481,7 +479,7 @@ export function FitnessAssessmentForm({ clientId, record, defaultPhase }) {
 
       <section className="fitness-other-tests" aria-label="Other fitness tests">
         <div className="section-title" style={{ margin: '12px 0 6px', fontSize: 13 }}>Other tests</div>
-        <p className="muted" style={{ fontSize: 12 }}>Record measured results. Use the same unit and protocol when reassessing.</p>
+        <p className="muted" style={{ fontSize: 12 }}>Enter measured results. Use the same unit and protocol for reassessment.</p>
         {otherTests.map((test, i) => <fieldset className="asf-other-test" key={i}>
           <legend>Test {i + 1}</legend>
           <div className="asf-lift-head"><span>{test.name || 'New test'}</span><button type="button" className="x" aria-label={`Remove other test ${i + 1}`} onClick={() => setOtherTests(tests => tests.filter((_, index) => index !== i))}>×</button></div>
@@ -623,7 +621,7 @@ export function GoalForm({ clientId, record, defaultPhase }) {
       )}
       {rows(shortTerm, setShort, 'Short-term goals', 'Short-term')}
       {rows(longTerm, setLong, 'Long-term goals', 'Long-term')}
-      <div style={{ marginTop: 10 }}><Field label="Why it matters"><input value={f.why} onChange={(e) => setF({ ...f, why: e.target.value })} placeholder="The deeper motivation…" /></Field></div>
+      <div style={{ marginTop: 10 }}><Field label="Why it matters"><input value={f.why} onChange={(e) => setF({ ...f, why: e.target.value })} placeholder="Why does this goal matter?" /></Field></div>
     </ModalShell>
   )
 }
@@ -654,7 +652,7 @@ export function NewAssessmentMenu({ clientId, types = ACTIVE_TYPES }) {
           return <Button key={t} variant="ghost" onClick={() => openModal(FORMS[t](clientId))}><Icon name={m.icon} size={14} /> {m.label}</Button>
         })}
       </div>
-      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Pain may also be self-reported by the athlete. Their reports are dated; use Concerns for new symptoms between formal assessments.</p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>Athlete pain reports are dated. Use Concerns for new symptoms between assessments.</p>
     </ModalShell>
   )
 }

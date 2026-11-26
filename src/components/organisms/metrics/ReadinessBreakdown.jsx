@@ -25,9 +25,9 @@ export default function ReadinessBreakdown({ client, range }) {
 
   // The trend chart can show the combined score or either component on its own.
   const VIEW = {
-    combined: { series: score, color: COLORS.green, fill: COLORS.green + '1a', label: 'Readiness', sub: 'Combined score — the red-flag-weighted blend of both parts.' },
-    subjective: { series: wellnessPart, color: COLORS.purple, fill: COLORS.purple + '1f', label: 'Wellness (subjective)', sub: 'Hooper check-in mapped to 0–100 — the subjective part only.' },
-    objective: { series: hrvPart, color: COLORS.amber, fill: COLORS.amber + '1a', label: 'HRV (objective)', sub: 'HRV vs the 30-day baseline mapped to 0–100 — the objective part only.' },
+    combined: { series: score, color: COLORS.green, fill: COLORS.green + '1a', label: 'Readiness', sub: 'Combined wellness and HRV score' },
+    subjective: { series: wellnessPart, color: COLORS.purple, fill: COLORS.purple + '1f', label: 'Wellness (subjective)', sub: 'Wellness check-in scaled to 0–100' },
+    objective: { series: hrvPart, color: COLORS.amber, fill: COLORS.amber + '1a', label: 'HRV (objective)', sub: 'HRV against its prior 30-day baseline, scaled to 0–100' },
   }
   const v = VIEW[view]
   const vTrend = rollingAvg(v.series, 7)
@@ -104,7 +104,7 @@ export default function ReadinessBreakdown({ client, range }) {
       <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <div className="card">
           <div className="section-title" style={{ margin: 0 }}>Component contribution</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>The composite is a red-flag-weighted blend — the weaker signal counts ~60%, so one alarmed system isn't averaged away.</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>With both inputs available, the lower score contributes 80% and the higher score 20%.</div>
           <div style={{ height: 200 }}>
             <Line
               data={{
@@ -158,14 +158,11 @@ export default function ReadinessBreakdown({ client, range }) {
       <div className="card" style={{ marginTop: 16 }}>
         <div className="section-title" style={{ margin: 0 }}>How readiness is computed</div>
         <p className="muted" style={{ fontSize: 13, lineHeight: 1.6 }}>
-          Readiness blends a subjective and an objective signal into a 0–100 score. The <strong>wellness part</strong> maps
-          the Hooper index (sleep + inverted stress, fatigue and soreness, range 4–28) onto 0–100. The <strong>HRV part</strong> compares
-          the day's heart-rate variability to a rolling 30-day baseline — above baseline pushes up, below pulls down. Both parts are
-          unchanged; what's new is how they <em>combine</em>: instead of a plain mean, the composite is a
-          <strong> red-flag-weighted blend</strong> where the weaker signal carries ~60%, so one poor reading isn't cancelled by a good
-          one in the other system. The traffic light comes from that same number, so they always agree: 67+ green, 45–66 amber, below 45
-          a flag. <strong>Confidence</strong> is high only when both a check-in and HRV are present; the headline also shows a 5-day
-          smoothed trend, since a single day — especially HRV — is noisy.
+          Readiness uses a wellness check-in and HRV compared with its prior 30-day baseline.
+          With both inputs, the lower score contributes 80% and the higher score 20%.
+          With one usable input, the app shows that score with low confidence.
+          Scores of 67 or more display green, 45–66 amber, and below 45 red.
+          The headline trend uses a 5-day average. These bands do not provide exercise or medical clearance.
         </p>
       </div>
     </>

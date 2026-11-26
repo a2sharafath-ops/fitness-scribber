@@ -99,7 +99,7 @@ export default function useLiveSession(workout, scope, resolveTm, onPersist) {
       allowReload.current = true
       window.location.reload()
     } catch {
-      setError('The browser could not keep a recovery copy. Download the draft before closing this session.')
+      setError('Browser recovery is unavailable. Download this draft before closing the session.')
     }
   }
   return { session, change, flush, status, error, conflict: recovered.conflict, storageFailed, reloadSaved }

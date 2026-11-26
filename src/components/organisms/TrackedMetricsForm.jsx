@@ -1,3 +1,4 @@
+import HelperTip from '../atoms/HelperTip'
 import Select from '../molecules/Select'
 import { useState, useEffect } from 'react'
 import ModalShell from '../molecules/ModalShell'
@@ -28,19 +29,20 @@ export default function TrackedMetricsForm({ client }) {
     setBusy(true); setError('')
     try {
       const result = await commit(draft => saveTrackedMetrics(draft, client.id, metrics))
-      if (!result?.saved) throw new Error('Metrics could not be saved. Review the data warning and retry before leaving.')
+      if (!result?.saved) throw new Error('Couldn’t save metrics. Review the data warning and retry before leaving.')
       closeModal({ force: true })
     } catch (e) { setError(e.message) } finally { setBusy(false) }
   }
   return <ModalShell title="Manage tracked metrics" onClose={busy ? () => {} : closeModal} footer={<><Button variant="ghost" disabled={busy} onClick={closeModal}>Cancel</Button><Button disabled={busy} onClick={save}>{busy ? 'Saving…' : 'Save metrics'}</Button></>}>
     <div className="pt-manager"><p>{client.name} · {metrics.length}/8 metrics</p>
       <ol className="pt-chosen">{metrics.map((m,i) => <li key={metricKey(m)}><div><strong>{metricMeta(m).title}</strong><small>{metricMeta(m).subtitle}</small></div><button type="button" disabled={busy || i === 0} aria-label={`Move ${metricMeta(m).title} ${metricMeta(m).subtitle} up`} onClick={() => { const next=[...metrics]; [next[i-1],next[i]]=[next[i],next[i-1]];setMetrics(next) }}>↑</button><button type="button" disabled={busy} aria-label={`Remove ${metricMeta(m).title} ${metricMeta(m).subtitle}`} onClick={() => setMetrics(metrics.filter((_,j)=>j!==i))}>×</button></li>)}</ol>
-      {!metrics.length && <p className="muted">Choose the measurements that matter for this client.</p>}
       <fieldset disabled={busy}><legend>Add a metric</legend>
         <label>Category<Select value={kind} onChange={e=>{setKind(e.target.value);setMeasure(e.target.value==='exercise'?'load':e.target.value==='body'?'massKg':e.target.value==='legacy'?'weightKg':'workouts')}}><option value="exercise">Exercise performance</option><option value="body">Body measurements</option><option value="consistency">Training consistency</option>{db.logs?.some(r=>r.clientId===client.id) && <option value="legacy">Previous manual entries</option>}</Select></label>
         {kind === 'exercise' && <><label>Find exercise<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search exercise library…" /></label><label>Exercise<Select value={selectedExercise ? exercise : ''} onChange={e=>setExercise(e.target.value)}><option value="">Choose exercise</option>{available.map(e=><option key={keyOf(e)} value={keyOf(e)}>{e.name}{exercises.filter(x=>x.name===e.name).length>1?` · ${e.exerciseId}`:''}</option>)}</Select></label></>}
         <label>Measurement<Select value={measure} onChange={e=>setMeasure(e.target.value)}>{choices.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</Select></label>
-        {kind==='exercise' && <p className="pt-form-note">Completed workouts only. {measure==='e1rm' ? 'Loaded main lifts only; timed, ballistic and bodyweight exercises are excluded.' : 'Warm-ups and unclassified sets are excluded.'}</p>}
+        {kind==='exercise' && <p className="pt-form-note">Completed workouts only. <HelperTip label="Exercise measurement" text={measure === 'e1rm'
+          ? 'Counts loaded main lifts only. Excludes timed, ballistic and bodyweight exercises.'
+          : 'Counts completed working sets. Excludes warm-ups and sets with no recorded purpose.'} /></p>}
         <Button variant="ghost" disabled={metrics.length>=8 || duplicate || kind==='exercise'&&!selectedExercise} onClick={add}>{duplicate?'Already selected':metrics.length>=8?'8 metrics selected':'＋ Add metric'}</Button>
       </fieldset>{error && <p className="pt-error" role="alert">{error}</p>}
     </div>

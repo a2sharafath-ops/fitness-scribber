@@ -85,7 +85,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     if (!changed) return undefined
     return setCloseGuard(() => confirmDialog({
       title: 'Discard workout changes?',
-      message: 'The unsaved prescription changes for this client and date will be lost.',
+      message: 'Unsaved plan changes for this client and date will be lost.',
       confirmLabel: 'Discard changes', danger: true,
     }))
   }, [changed, saving, setCloseGuard])
@@ -161,7 +161,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     const clash = ids.filter(hasSession)
     if (clash.length && !await confirmDialog({
       title: 'Overwrite sessions',
-      message: `${clash.length} of the selected client${clash.length === 1 ? ' already has' : 's already have'} a session on ${fmtDay(date)} — overwrite ${clash.length === 1 ? 'it' : 'them'}?`,
+      message: `Replace the session on ${fmtDay(date)} for ${clash.length} selected client${clash.length === 1 ? '' : 's'}?`,
       confirmLabel: 'Overwrite',
     })) return
     // Each client gets its own deep copy with brand-new ids; %1RM targets
@@ -177,7 +177,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
     const dt = addDays(date, offset)
     if (isPlanTargetBlocked(db, clientId, dt, todayISO(tz))) return toast('The target day is closed to new planning.', 'error')
     if (db.prescriptions.some((p) => p.clientId === clientId && p.date === dt) &&
-      !await confirmDialog({ title: 'Overwrite session', message: `${fmtDay(dt)} already has a session — overwrite it?`, confirmLabel: 'Overwrite' })) return
+      !await confirmDialog({ title: 'Overwrite session', message: `Replace the existing session on ${fmtDay(dt)}?`, confirmLabel: 'Overwrite' })) return
     await persistPlan((d) => writeTo(d, dt, cloneBlocksFresh(blocks)), `Copied to ${fmtDay(dt)}.`)
   }
 
@@ -272,7 +272,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
           {completed.map((item) => <Button key={item.id} variant={item.id === selectedLog?.id ? 'primary' : 'ghost'} size="sm" onClick={() => setSelectedLogId(item.id)}>{item.title}</Button>)}
         </div>}
         {selectedLog || unfinishedWorkout || existing ? <DayBlockReview workout={selectedLog || (!existing && unfinishedWorkout)} prescription={existing} units={units} />
-          : <p className="muted">{completedAppointment ? 'The appointment is complete, but no workout log was saved.' : 'No workout was prescribed or logged. Past days are closed to new planning.'}</p>}
+          : <p className="muted">{completedAppointment ? 'Appointment complete. No workout was logged.' : 'No plan or workout log for this date. Past dates are closed to new planning.'}</p>}
         {selectedLog && <>
           <h3 className="training-day-insights-title">Session insights</h3>
           <WorkoutInsights workout={selectedLog} units={units} exercises={db.exercises}
@@ -292,7 +292,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
 
       {mode === 'edit' && step === 'dates' && (
         <>
-          <div className="section-title" style={{ marginTop: 0 }}>Bulk paste — select target dates</div>
+          <div className="section-title" style={{ marginTop: 0 }}>Select dates to paste the plan.</div>
           <MultiDatePicker selected={targets} minDate={date} sourceDate={date} sessionDates={sessionDates}
             onToggle={(dt) => setTargets((s) => { const n = new Set(s); if (n.has(dt)) n.delete(dt); else n.add(dt); return n })} />
           <div className="flex gap" style={{ marginTop: 10, justifyContent: 'flex-end' }}>
@@ -305,8 +305,8 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
         <>
           <div className="section-title" style={{ marginTop: 0 }}>Copy this workout to other clients</div>
           <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
-            The same blocks, exercises and sets are prescribed for <strong>{fmtDay(date)}</strong>. Loads copy across as-is;
-            %1RM / RPE / RIR targets re-resolve against each client's own Training Max.
+            Copy the blocks, exercises and sets from <strong>{fmtDay(date)}</strong>. Fixed loads stay the same.
+            Percentage, RPE and RIR loads use each client’s Training Max.
           </p>
           {others.length ? (
             <>
@@ -357,11 +357,6 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
             <Button variant="ghost" size="sm" onClick={copyLast}>↩ Copy last session</Button>
           </div>
 
-          {blocks.length > 1 && (
-            <div className="muted" style={{ fontSize: 11, margin: '2px 0 6px' }}>
-              Drag the ⠿ grip to reorder blocks, or exercises within a block.
-            </div>
-          )}
           {blocks.map((b, bi) => (
             <BlockCard key={b.blockId} block={b} exercises={db.exercises}
               tmInfo={tmInfo} maxHr={maxHr}
@@ -370,7 +365,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
               dragProps={blockDrag.itemProps(bi)} dragHandleProps={blockDrag.handleProps(bi)}
               isOver={blockDrag.over === bi && blockDrag.src !== bi} isDragging={blockDrag.src === bi} />
           ))}
-          {!blocks.length && <div className="muted" style={{ fontSize: 12, padding: '6px 0' }}>No blocks yet — add one below or dictate the session.</div>}
+          {!blocks.length && <div className="muted" style={{ fontSize: 12, padding: '6px 0' }}>No blocks yet. Add a block or dictate the workout.</div>}
           <Button variant="ghost" size="sm" onClick={addBlock} style={{ margin: '6px 0' }}>＋ Add block</Button>
 
           <Field label="Session notes"><input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. knee-friendly, deload" /></Field>
@@ -381,7 +376,7 @@ export default function WorkoutBuilderModal({ clientId, date, seedBlocks = [], s
           <div className="card" style={{ textAlign: 'center', padding: 12 }}>
             <div className="muted" style={{ fontSize: 11 }}>{volume.hasRange ? 'MINIMUM TARGET' : volume.estimated ? 'ESTIMATED' : 'PLANNED'} VOLUME LOAD</div>
             <div style={{ fontSize: 26, fontWeight: 800 }}>{volume.total == null ? 'Unavailable' : `${fmtVL(volume.total)}${volume.missing ? ' + unknown' : ''}`}</div>
-            {volume.missing > 0 && <small className="muted">Weight or Training Max needed for {volume.missing} set{volume.missing === 1 ? '' : 's'}.</small>}
+            {volume.missing > 0 && <small className="muted">{volume.missing} {volume.missing === 1 ? 'set needs' : 'sets need'} a weight or Training Max.</small>}
           </div>
         </>
       )}

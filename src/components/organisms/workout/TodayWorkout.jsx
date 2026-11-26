@@ -49,7 +49,7 @@ export default function TodayWorkout({ client, today, workout, bookingTime, pres
             <span className="tw-rest-ic" aria-hidden="true"><Icon name="coffee" size={20} /></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="tw-rest-h">{dayClosed ? 'No workout logged' : 'Rest day'}</div>
-              <div className="muted" style={{ fontSize: 13 }}>{completedAppointment ? 'Appointment completed; no workout log was saved.' : dayClosed ? 'This past date is closed to new planning.' : `Nothing prescribed for ${isToday ? 'today' : 'this date'}.`}</div>
+              <div className="muted" style={{ fontSize: 13 }}>{completedAppointment ? 'Appointment complete. No workout was logged.' : dayClosed ? 'Past date. New plans are unavailable.' : `Nothing prescribed for ${isToday ? 'today' : 'this date'}.`}</div>
             </div>
             {onAddSession && <Button size="sm" onClick={onAddSession}>＋ Add a session</Button>}
           </div>

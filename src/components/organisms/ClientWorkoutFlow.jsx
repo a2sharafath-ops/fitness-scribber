@@ -103,7 +103,7 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, pend
     } catch (error) {
       if (mounted.current) setFinishError({ conflict: error.conflict, message: error.conflict
         ? `${error.message} Open the saved workout to continue.`
-        : `The workout could not finish saving. Your duration and effort are kept on this browser. ${error.message}` })
+        : `Couldn’t finish saving. Your duration and effort are saved in this browser. ${error.message}` })
       return
     } finally {
       savingFinish.current = false
@@ -133,7 +133,7 @@ export default function ClientWorkoutFlow({ client, date, booking, starter, pend
       void saveCompletion(attempt)
     } catch (error) {
       setFinishError({ message: error.name === 'QuotaExceededError' || error.name === 'SecurityError'
-        ? 'This browser could not keep your finish details. Allow browser storage and retry.' : error.message })
+        ? 'Finish details couldn’t be saved here. Enable browser storage and retry.' : error.message })
     }
   }
 

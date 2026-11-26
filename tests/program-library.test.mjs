@@ -124,7 +124,7 @@ test('range validation, propagation and calculations preserve intent without imp
   e.sets = editPrescribedSet(e.sets, 0, 'prescribedRepsMax', 15)
   assert.equal(e.sets[1].prescribedRepsMax, 15)
   e.sets[0].prescribedRepsMax = 4
-  assert.throws(() => validatePrescription('Range', blocks), /maximum reps/)
+  assert.throws(() => validatePrescription('Range', blocks), /Maximum reps/)
   e.sets[0].prescribedRepsMax = 12
   assert.equal(targetLoadKg('RIR', { ...e.sets[0], prescribedIntensityValue: 2 }, 100), null)
   e.sets[0].prescribedLoadKg = 20
@@ -190,7 +190,7 @@ test('Profile changes require assignment review and never retime existing bookin
   const db=timedFixture(), prepared=lib.prepareAssignment(db,programStarters()[0],futureOptions(db),today)
   db.clients[0].intake.trainingSchedule.time='19:00'
   const before=structuredClone(db)
-  assert.throws(()=>lib.applyAssignment(db,prepared,today),/Profile training time changed/)
+  assert.throws(()=>lib.applyAssignment(db,prepared,today),/Training time changed in Profile/)
   assert.deepEqual(db,before)
 })
 test('timed remote assignments use one transaction without individual booking fallback',async()=>{

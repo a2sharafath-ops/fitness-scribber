@@ -12,7 +12,7 @@ export default function LiveWorkoutOrder({ session, onAction, onClose }) {
         onClick={() => onAction({ type, id, beforeId: list[index + 2]?.id, ...extra })}>↓</button></>
   }
   return <LiveSessionDialog title="Reorder workout" onClose={onClose}>
-    <p className="ls-hint">Changes save as you move. Supersets move together.</p>
+    <p className="ls-hint">Changes save as you move items. Supersets move together.</p>
     {blocks.map((block) => {
       const groups = liveExerciseUnits(block.items)
       return <section className="ls-order-block" key={block.id}>

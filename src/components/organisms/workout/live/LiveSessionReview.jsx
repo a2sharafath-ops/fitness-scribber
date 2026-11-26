@@ -1,3 +1,4 @@
+import HelperTip from '../../../atoms/HelperTip'
 import { useState } from 'react'
 import { sessionRows, liveBlocks, SESSION_SECTIONS, adjustedSetDuration, prescribedSetDuration } from '../../../../lib/liveSession'
 import { ensureSetRows, runBlocks, secToClock } from '../../../../lib/workout'
@@ -57,7 +58,7 @@ export default function LiveSessionReview({ session, units }) {
     {[[originalCount, 'Originally planned sets'], [adjustedCount, 'Adjusted sets'], [rows.filter((row) => row.done).length, 'Sets logged']].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
   </div><div className="ls-tabs ls-review-tabs" role="group" aria-label="Session summary view">{[['original', 'Original plan'], ['adjusted', 'Adjusted'], ['actual', 'Actual']].map(([key, label]) =>
     <button type="button" key={key} aria-pressed={view === key} onClick={() => setView(key)}>{label}</button>)}</div>
-    {session.liveState.recoveredInProgress && <p className="ls-hint">Original snapshot captured when this saved session first opened in the updated logger.</p>}
+    {session.liveState.recoveredInProgress && <HelperTip label="Original plan" text="The original plan was captured when this saved session first opened in the updated workout logger." />}
     {blocks.map((block) => <section key={block.id}><h3>{block.title}{view === 'adjusted' && block.skipped ? ' · Skipped' : ''}</h3>{block.items.map((item) => {
       const sets = ensureSetRows(item)
       return <div className="ls-review-exercise" key={item.id}><strong>{item.name}{view === 'adjusted' && item.skipped ? ' · Upcoming skipped' : ''}</strong>

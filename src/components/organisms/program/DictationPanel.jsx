@@ -21,7 +21,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
   useEffect(() => () => recRef.current?.stop?.(), [])
 
   const start = () => {
-    if (!SR) { setErr('Speech recognition is not supported in this browser — type or paste the dictation below instead.'); return }
+    if (!SR) { setErr('This browser can’t transcribe speech. Type or paste the workout instead.'); return }
     const rec = new SR()
     rec.continuous = true
     rec.interimResults = false
@@ -30,7 +30,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
       const chunk = [...e.results].slice(e.resultIndex).map((r) => r[0].transcript).join(' ')
       setTranscript((t) => (t + ' ' + chunk).trim())
     }
-    rec.onerror = (e) => { setErr('Mic error: ' + e.error); setListening(false) }
+    rec.onerror = (e) => { setErr('Microphone error: ' + e.error); setListening(false) }
     rec.onend = () => setListening(false)
     recRef.current = rec
     setErr('')
@@ -57,7 +57,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
     }
     blocks = applySynonyms(blocks, synonyms, exercises)
     setParsed(blocks)
-    if (!blocks.length) setErr('Nothing parseable found — try “Main lift block: back squat, 5 sets of 5 at 80 percent”.')
+    if (!blocks.length) setErr('No workout found. Try “Back squat, 5 sets of 5 at 80%.”')
     setBusy(false)
   }
 
@@ -75,7 +75,7 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
       <textarea
         rows={4}
         value={transcript}
-        placeholder='e.g. "Main lift block. Bench press, three sets of ten… no wait, scratch that — four sets of eight at RPE 8. Then assisted block: RDL, 3 sets of 12 at 60 kilos."'
+        placeholder='e.g. Bench press, 4 sets of 8 at RPE 8. Then RDL, 3 sets of 12 at 60 kg.'
         aria-label="Dictation transcript"
         onChange={(e) => { setTranscript(e.target.value); setParsed(null) }}
       />

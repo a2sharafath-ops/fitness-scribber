@@ -25,7 +25,7 @@ const mine = (rows, id) => (rows || []).filter((row) => row.clientId === id).sor
 const lineOptions = () => ({ ...baseOptions(), plugins: { legend: { display: false } }, spanGaps: false })
 
 function SourceLine({ row, today }) {
-  return <p className="checkins-source">{row ? `${row.date === today ? 'Recorded today' : fmtDate(row.date)} · ${sourceOf(row)}` : 'Not recorded · source unavailable'}</p>
+  return <p className="checkins-source">{row ? `${row.date === today ? 'Recorded today' : fmtDate(row.date)} · ${sourceOf(row)}` : 'Not recorded'}</p>
 }
 
 function LogTable({ caption, children, stacked = false }) {
@@ -109,21 +109,21 @@ function ConcernsView({ client, openModal }) {
   const open = concerns.filter((row) => row.status === 'Open')
   const resolved = concerns.filter((row) => row.status === 'Resolved')
   const resolve = async (id) => {
-    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional):', multiline: true, confirmLabel: 'Resolve' })
+    const note = await promptDialog({ title: 'Resolve concern', message: 'Resolution note (optional)', multiline: true, confirmLabel: 'Resolve' })
     if (note === null) return
     commit((draft) => { const row = draft.concerns.find((item) => item.id === id); row.status = 'Resolved'; row.resolution = note.trim() })
     toast('Concern resolved')
   }
   const reopen = (id) => { commit((draft) => { const row = draft.concerns.find((item) => item.id === id); row.status = 'Open'; row.resolution = '' }); toast('Concern reopened', 'info') }
   const remove = async (id) => {
-    if (!await confirmDialog({ title: 'Delete concern', message: 'Delete this concern? This cannot be undone.', confirmLabel: 'Delete', danger: true })) return
+    if (!await confirmDialog({ title: 'Delete concern', message: 'This concern will be permanently deleted.', confirmLabel: 'Delete', danger: true })) return
     commit((draft) => { draft.concerns = draft.concerns.filter((row) => row.id !== id) })
     toast('Concern deleted')
   }
   const cards = (rows) => rows.map((row) => <ConcernCard key={row.id} concern={row} clientName={client.name} session={row.sessionId ? db.sessions.find((session) => session.id === row.sessionId && session.clientId === client.id) : null}
     onResolve={() => resolve(row.id)} onReopen={() => reopen(row.id)} onEdit={() => openModal(<ConcernForm concern={row} />)} onDelete={() => remove(row.id)} />)
   return <div className="checkins-stack">
-    <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2><p className="muted">{open.length} open · review the report, date, and source before the next session.</p></div><Button icon="plus" onClick={() => openModal(<ConcernForm clientId={client.id} />)}>Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns recorded.</p>}</section>
+    <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2><p className="muted">{open.length} open. Review the report, date and source before the next session.</p></div><Button icon="plus" onClick={() => openModal(<ConcernForm clientId={client.id} />)}>Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns.</p>}</section>
     {resolved.length > 0 && <details className="card"><summary>Resolved concerns · {resolved.length}</summary>{cards(resolved)}</details>}
   </div>
 }
@@ -134,16 +134,16 @@ function ConnectDevices({ clientId }) {
   const connect = async (provider) => {
     setBusy(true)
     try { await beginWearableConnection(provider, clientId) }
-    catch (error) { toast('Connect failed: ' + (error.message || 'function not deployed'), 'error') } finally { setBusy(false) }
+    catch (error) { toast('Couldn’t connect device. ' + (error.message || 'Device connection is unavailable.'), 'error') } finally { setBusy(false) }
   }
   const sync = async () => {
     setBusy(true)
     try {
       const result = await callFunction('wearable-sync', { clientId })
       try { await refresh(); toast(`Synced ${result.synced ?? 0} device(s).`) }
-      catch (error) { toast(`Device sync finished, but data could not reload: ${error.message || 'refresh failed'}`, 'error') }
+      catch (error) { toast(`Device synced. Couldn’t reload readings. ${error.message || 'refresh failed'}`, 'error') }
     }
-    catch (error) { toast('Sync failed: ' + (error.message || 'function not deployed'), 'error') } finally { setBusy(false) }
+    catch (error) { toast('Couldn’t sync device. ' + (error.message || 'Device sync is unavailable.'), 'error') } finally { setBusy(false) }
   }
   return <div className="checkins-device-actions"><Button variant="ghost" size="sm" disabled={busy} onClick={() => connect('oura')}>Connect Oura</Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => connect('whoop')}>Connect Whoop</Button><Button variant="ghost" size="sm" disabled={busy} onClick={() => connect('fitbit')}>Connect Fitbit</Button><Button size="sm" disabled={busy} onClick={sync}>Sync now</Button></div>
 }
@@ -163,10 +163,10 @@ function WearablesView({ client, openModal, del }) {
     toast('Wearable sync enabled')
   }
   const pauseSync = () => { commit((draft) => { draft.clients.find((row) => row.id === client.id).monitorOptIn = false }); toast('Wearable sync paused') }
-  const deviceControls = <><div className="checkins-section-head"><h2>Device connection <InfoTip term="Device sync" text="Live sync requires backend functions and vendor credentials. Manual entry works without a device." /></h2>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</>
+  const deviceControls = <><div className="checkins-section-head"><h2>Device connection <InfoTip term="Device sync" text="Live sync requires a supported, configured provider. You can enter readings without a connected device." /></h2>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</>
   return <div className="checkins-stack">
     <section className="card"><div className="checkins-section-head"><h2>Wearable observations</h2><Button icon="plus" onClick={() => openModal(<WearableForm clientId={client.id} />)}>Manual entry</Button></div>
-      {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div>{latest.hrv != null && <p className="checkins-window">30-day HRV baseline: {baseline ? `${baseline.toFixed(1)} ms (${baselineCount} reading${baselineCount === 1 ? '' : 's'})` : '1 earlier usable reading needed'}</p>}</> : <p className="checkins-empty">No wearable data yet.</p>}
+      {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div>{latest.hrv != null && <p className="checkins-window">{baseline ? `30-day HRV baseline: ${baseline.toFixed(1)} ms (${baselineCount} reading${baselineCount === 1 ? '' : 's'})` : 'The 30-day HRV baseline needs one earlier usable reading.'}</p>}</> : <p className="checkins-empty">No wearable data yet.</p>}
       {observed > 1 && <div className="checkins-chart"><Line data={{ labels: dates.map(shortLabel), datasets: [{ label: 'HRV (ms)', data: dates.map((date) => byDate[date] ?? null), borderColor: COLORS.purple, pointRadius: 3, spanGaps: false }] }} options={lineOptions()} /></div>}
       {observed > 1 && <p className="checkins-window">Last 28 days · {observed}/28 days recorded</p>}
       {records.length > 0 && <History count={records.length} label="wearable"><LogTable caption="Wearable reading history"><thead><tr><th scope="col">Date</th><th scope="col">HRV</th><th scope="col">Resting HR</th><th scope="col">Sleep</th><th scope="col">Source</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>

@@ -53,7 +53,7 @@ export default function AthleteManager({ athletes, clients, coachName, onToggleA
                 <span className="muted">coach: {coachName(c.coachId)}</span>
               </div>
             ))
-          : <p className="muted" style={{ fontSize: 13 }}>None — codes appear here when a coach generates an athlete invite that hasn't been redeemed yet.</p>}
+          : <p className="muted" style={{ fontSize: 13 }}>No unused invite codes. Codes appear here after a coach creates them.</p>}
       </Card>
     </div>
   )
