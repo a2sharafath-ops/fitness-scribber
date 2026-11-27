@@ -31,7 +31,7 @@ export default function SettingsPage({ appearance }) {
 
   return (
     <>
-      <div className="topbar"><div><h1>Settings</h1><div className="sub">Preferences apply across the app</div></div></div>
+      <div className="topbar"><div><h1>Settings</h1><div className="sub">Appearance settings are saved in this browser.</div></div></div>
       <div className="orbit-settings-grid">
       <section className="card orbit-appearance-panel">
         <h2>Appearance</h2>
@@ -52,7 +52,7 @@ export default function SettingsPage({ appearance }) {
             <Select value={f.tz || ''} onChange={set('tz')}>{TZS.map((t) => <option key={t} value={t}>{t || 'UTC (default)'}</option>)}</Select>
           </Field>
         </div>
-        <div className="muted" style={{ fontSize: 12 }}>Today resolves to: <strong>{fmtDate(todayISO(f.tz))}</strong></div>
+        <div className="muted" style={{ fontSize: 12 }}>Date in this time zone: <strong>{fmtDate(todayISO(f.tz))}</strong></div>
         <div className="modal-foot"><Button onClick={save}>Save settings</Button></div>
       </div>
 

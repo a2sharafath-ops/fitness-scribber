@@ -87,7 +87,7 @@ export default function CoachManager({ users, clientCounts, currentUserId, busy,
             </div>
           )
         })}
-        {!users.length && <div className="empty" style={{ padding: 30 }}>No coach accounts yet.</div>}
+        {!users.length && <div className="empty" style={{ padding: 30 }}>Invite a coach to get started.</div>}
       </div>
     </div>
   )

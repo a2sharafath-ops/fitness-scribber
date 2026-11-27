@@ -43,7 +43,7 @@ export default function OrbitNotifications({ notices, open, exiting, onToggle, o
           </div>
           <button type="button" disabled={!unread.length} onClick={() => markRead(unread.map(({ id }) => id))}>Mark all read</button>
         </header>
-        <p className="orbit-notification-count" role="status">{unread.length} unread</p>
+        {visible.length > 0 && <p className="orbit-notification-count" role="status">{unread.length} unread</p>}
         {visible.map(({ id, label, icon, path }) => <div key={id} className="orbit-notification-row">
           <button type="button" onClick={() => { markRead([id]); onOpen(path) }}>
             <Icon name={icon} size={16} /><span>{label}<small>{seen.has(id) ? 'Read' : 'Unread'}</small></span>
@@ -51,7 +51,7 @@ export default function OrbitNotifications({ notices, open, exiting, onToggle, o
           <button type="button" className="orbit-notification-mark" onClick={() => toggleRead(id)}
             aria-label={`Mark as ${seen.has(id) ? 'unread' : 'read'}: ${label}`}>{seen.has(id) ? 'Mark unread' : 'Mark read'}</button>
         </div>)}
-        {!visible.length && <p className="gb-empty">{unreadOnly ? 'No unread notifications.' : 'No notifications yet.'}</p>}
+        {!visible.length && <p className="gb-empty" role="status">{unreadOnly ? 'No unread notifications.' : 'No notifications yet.'}</p>}
       </section>
     </>}
   </div>

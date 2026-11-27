@@ -1,11 +1,10 @@
 import Tag from '../atoms/Tag'
 import Shape from '../atoms/Shape'
 
-// readiness = { label, color } from calc.readinessFor
-export default function ReadinessTag({ readiness, short = false }) {
-  const label = short ? readiness.label.split(' — ')[0] : readiness.label
+export default function ReadinessTag({ readiness }) {
+  const label = readiness.score == null ? 'No readiness score' : `Readiness: ${readiness.score}/100`
   return (
-    <Tag color={readiness.color} role="status" aria-label={'Readiness: ' + readiness.label}>
+    <Tag color={readiness.color} role="status">
       <Shape color={readiness.color} /> {label}
     </Tag>
   )

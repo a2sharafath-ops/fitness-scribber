@@ -38,11 +38,10 @@ export default function ConcernsPage() {
   return (
     <>
       <div className="topbar">
-        <div><h1>Concerns</h1><div className="sub">{open.length} open · {high} high severity · {resolved.length} resolved</div></div>
+        <div><h1>Concerns</h1>{open.length > 0 && <div className="sub">{open.length} open · {high} high severity · {resolved.length} resolved</div>}</div>
         {open.length > 0 && flagAction}
       </div>
-      <div className="section-title" style={{ marginTop: 0 }}>Open</div>
-      {open.length ? render(open) : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div><p>No open concerns.</p>{flagAction}</div>}
+      {open.length ? <><div className="section-title" style={{ marginTop: 0 }}>Open</div>{render(open)}</> : <div className="empty" style={{ padding: 24 }}><div className="big"><Icon name="flag" size={40} /></div><p>No open concerns.</p>{flagAction}</div>}
       {resolved.length > 0 && <details className="card"><summary>Resolved concerns · {resolved.length}</summary>{render(resolved)}</details>}
     </>
   )

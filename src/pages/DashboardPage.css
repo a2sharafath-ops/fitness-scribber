@@ -322,6 +322,7 @@
 .orbit-trend-head .db-tabs { margin: 0; }
 .coach-dashboard .orbit-trend-tiles { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .coach-dashboard .orbit-trend-tiles .db-stat > span { overflow-wrap: anywhere; }
+.coach-dashboard .db-completion-scope { display: block; color: var(--muted); font-size: 11px; font-weight: 400; }
 .orbit-activity-reading { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-height: 43px; margin: 8px 0; }
 .orbit-activity-reading strong { color: var(--accent); font-size: 24px; line-height: 1; }
 .orbit-activity-reading span { color: var(--muted); font-size: 12px; }
@@ -605,6 +606,7 @@
   .orbit-trend-tiles .db-stat > span { font-size: 12px; }
   .coach-dashboard .orbit-trend-tiles .db-stat > strong { grid-area: 1 / 3; font-size: 18px; letter-spacing: 0; white-space: nowrap; }
   .orbit-trend-tiles .db-stat > strong small { font-size: 12px; }
+  .orbit-trend-tiles .db-completion-scope { grid-column: 1 / -1; }
   .orbit-trend-tiles .orbit-trend-change { grid-area: 1 / 2; white-space: nowrap; }
   .coach-dashboard .orbit-coaching :is(.db-note, .db-chart-heading, .db-chart-empty) { margin-top: 8px; }
   .orbit-coaching .orbit-activity-reading { min-height: 0; }

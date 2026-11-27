@@ -69,14 +69,15 @@ export default function DictationPanel({ synonyms, exercises, onInsert, onBack }
           ? <Button variant="danger" size="sm" onClick={stop}><span className="rec-dot" /> Stop listening</Button>
           : <Button size="sm" onClick={start}>Start listening</Button>}
         <Button variant="ghost" size="sm" onClick={parse} disabled={busy || !transcript.trim()}>
-          {busy ? 'Parsing…' : `Parse transcript${hasBackend ? ' (AI)' : ''}`}
+          {busy ? 'Preparing preview…' : 'Preview workout'}
         </Button>
       </div>
+      <label htmlFor="workout-transcript">Speak, type, or paste your workout</label>
       <textarea
+        id="workout-transcript"
         rows={4}
         value={transcript}
         placeholder='e.g. Bench press, 4 sets of 8 at RPE 8. Then RDL, 3 sets of 12 at 60 kg.'
-        aria-label="Dictation transcript"
         onChange={(e) => { setTranscript(e.target.value); setParsed(null) }}
       />
       {err && <div className="muted" style={{ color: 'var(--accent2)', fontSize: 12, margin: '6px 0' }}>{err}</div>}

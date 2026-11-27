@@ -20,8 +20,7 @@ function BaselineExplanation({ baseline, coverage }) {
     <div className="overview-baseline-explanation"><strong>Z = (latest favourable-scaled rating − baseline mean) ÷ sample standard deviation</strong>
       <p>Sleep uses the original rating (7 is best). Stress, fatigue and soreness use 8 − rating (1 is best). Positive scores are more favourable.</p></div>
     <p>Gray is within ±1 of baseline, green is above +1, and amber is below −1. These bands describe change from your usual ratings. They do not indicate health or clearance.</p>
-    <p className="muted">This needs {MIN_WELLNESS_BASELINE_DAYS} earlier daily ratings within {WELLNESS_BASELINE_DAYS} days. It excludes the latest date. Missing ratings and a flat baseline show no point. Scores beyond ±3 appear at the chart edge with their actual number.</p>
-    <p className="muted">{coverage} earlier daily ratings. The latest date is excluded.</p>
+    <p className="muted">{coverage} earlier check-in{coverage === 1 ? '' : 's'} available in the past {WELLNESS_BASELINE_DAYS} days. A comparison needs {MIN_WELLNESS_BASELINE_DAYS}. The latest check-in is excluded. Missing ratings and a flat baseline show no point. Scores beyond ±3 appear at the chart edge with their actual number.</p>
     <table className="table overview-baseline-table"><thead><tr><th>Metric</th><th>Days</th><th>Raw mean</th><th>SD</th></tr></thead><tbody>{baseline.metrics.map((metric) => <tr key={metric.key}><th scope="row">{metric.label}</th><td>{metric.count}</td><td>{metric.mean?.toFixed(2) ?? '—'}</td><td>{metric.sd?.toFixed(2) ?? '—'}</td></tr>)}</tbody></table>
   </ModalShell>
 }

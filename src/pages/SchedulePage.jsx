@@ -36,6 +36,7 @@ export default function SchedulePage() {
   const [clock, setClock] = useState(() => scheduleClock(new Date(), tz))
   const [selected, setSelected] = useState(clock.today), [view, setView] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 640 ? 'day' : 'week')
   const [client, setClient] = useState('all'), [status, setStatus] = useState('booked'), [preview, setPreview] = useState(null)
+  const hasFilters = client !== 'all' || status !== 'booked'
   const drag = useRef(null), suppressClick = useRef(false), scroller = useRef(null), page = useRef(null), latest = useRef(null)
   const selectedDayHeading = useRef(null), timeGutter = useRef(null)
   const clients = new Map(db.clients.map(c => [c.id, c]))
@@ -196,14 +197,14 @@ export default function SchedulePage() {
               <option value="all">All statuses</option>
             </Select>
           </div>
-          {(client !== 'all' || status !== 'booked') && <button className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}
+          {hasFilters && dayRows.length > 0 && <button className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}
         </MobileOptions>
       </div>
       <section className="schedule-day-panel" aria-labelledby="schedule-selected-date">
         <header>
           <span className="schedule-eyebrow">{selected === clock.today ? 'TODAY' : 'SELECTED DAY'}</span>
           <h2 id="schedule-selected-date">{fmtDay(selected)}</h2>
-          <p>{dayRows.length} {dayRows.length === 1 ? 'booking' : 'bookings'} · {dayRows.reduce((sum, s) => sum + Number(s.dur || 0), 0)} min</p>
+          {dayRows.length > 0 && <p>{dayRows.length} {dayRows.length === 1 ? 'booking' : 'bookings'} · {dayRows.reduce((sum, s) => sum + Number(s.dur || 0), 0)} min</p>}
         </header>
         <div className="schedule-day-scroll">
           {dayRows.length ? dayRows.map(s => <article key={s.id} className={'schedule-day-card' + (s.id === next?.id ? ' next' : '')}>
@@ -218,14 +219,14 @@ export default function SchedulePage() {
             </div>
           </article>) : <div className="schedule-empty">
             <Icon name="calendar" size={32} />
-            <h3>{client !== 'all' || status !== 'booked' ? 'No matching bookings' : 'No bookings on this day'}</h3>
-            {(client !== 'all' || status !== 'booked') && <p>Change filters or date.</p>}
+            <h3>{hasFilters ? 'No bookings match these filters' : 'No bookings on this day'}</h3>
+            {hasFilters && <button type="button" className="schedule-text-link" onClick={resetFilters}>Reset filters</button>}
           </div>}
         </div>
         <footer><Button icon="plus" variant="ghost" disabled={!db.clients.length} onClick={() => book()}>Book on this day</Button></footer>
       </section>
       <section className="schedule-calendar" aria-label="Session calendar">
-        <div className="schedule-caption"><span>{dateRows.length} {dateRows.length === 1 ? 'booking' : 'bookings'} shown</span><HelperTip label="Calendar" text={[timed ? 'Drag a booking to move it. Drag its bottom edge to resize it.'
+        <div className="schedule-caption">{dateRows.length > 0 && <span>{dateRows.length} {dateRows.length === 1 ? 'booking' : 'bookings'} shown</span>}<HelperTip label="Calendar" text={[timed ? 'Drag a booking to move it. Drag its bottom edge to resize it.'
           : view === 'month' ? 'Drag to another date. The booking time stays the same.' : '',
         'Set a usual training time in the client’s Profile to book their planned workouts.'].filter(Boolean).join(' ')} /></div>
         {timed && gridRows.some(s => !validTimeRows.includes(s)) && <div className="schedule-incomplete">{gridRows.filter(s => !validTimeRows.includes(s)).map(s => <button key={s.id} onClick={() => detail(s)}>{fmtDay(s.date)} · {s.time} · {clients.get(s.clientId)?.name} — {durationLabel(s)}</button>)}</div>}{timed ? <div className="schedule-time-scroll" ref={scroller}><div className={'schedule-time-grid ' + (view === 'week' ? 'week' : 'day')} style={{ '--days': dates.length }}><div className="schedule-time-head"><span className="schedule-zone" ref={timeGutter}>Time</span>{dates.map(d => <button key={d} ref={d === selected ? selectedDayHeading : null} aria-pressed={d === selected} aria-label={fmtDay(d)} className={(d === selected ? 'selected ' : '') + (d === clock.today ? 'today' : '')} onClick={() => setSelected(d)}><span>{DAYS[(new Date(d + 'T12:00Z').getUTCDay() + 6) % 7]}</span><strong>{Number(d.slice(8))}</strong></button>)}</div><div className="schedule-time-body" style={{ height: end - start }}><div className="schedule-hours">{Array.from({ length: (end - start) / 60 + 1 }, (_, i) => <span key={i} style={{ top: i * 60, ...(start + i * 60 === end ? { transform: 'translateY(-100%)' } : {}) }}>{clockTime(start + i * 60)}</span>)}</div>{dates.map(d => <div key={d} data-schedule-date={d} className={'schedule-time-column' + (d === selected ? ' selected' : '')} onDoubleClick={e => { if (e.target !== e.currentTarget) return; book(d, clockTime(Math.min(end - 60, Math.max(start, Math.round((e.clientY - e.currentTarget.getBoundingClientRect().top + start) / 15) * 15)))) }}>
