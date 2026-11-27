@@ -32,8 +32,7 @@ export default function RoleOnboarding() {
         <Brand style={{ padding: '0 0 14px' }} />
         {!mode && (
           <>
-            <h2 style={{ fontSize: 18, marginBottom: 4 }}>Welcome — how will you use Orbit?</h2>
-            <p className="muted" style={{ fontSize: 13, marginBottom: 16 }}>Choose how you’ll use Orbit.</p>
+            <h2 style={{ fontSize: 18, marginBottom: 16 }}>How will you use Orbit?</h2>
             <div className="grid" style={{ gap: 10 }}>
               <Button icon="users" onClick={coach} disabled={busy}>{busy ? 'Checking…' : "I'm a coach — manage athletes"}</Button>
               <Button variant="ghost" icon="link" onClick={() => setMode('athlete')}>I have an invite code (athlete)</Button>

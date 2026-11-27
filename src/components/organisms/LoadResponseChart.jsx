@@ -105,8 +105,8 @@ export default function LoadResponseChart({ db, clientId, today, action }) {
     {hasData ? <div className="load-response-canvas">{scatter
       ? <Scatter data={chartData} options={options} role="img" aria-label={`Load response scatter chart, ${plotted}. X-axis ${byId[xMetric].label}; Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />
       : <Chart type="bar" data={chartData} options={options} role="img" aria-label={`Load response date chart, ${plotted}. Y-axis ${byId[primary].label}${secondary ? `; second Y-axis ${byId[secondary].label}` : ''}.`} />}</div> : <p className="progress-empty">{emptyLabel}</p>}
-    {hasData && <div className="load-response-status">{(scatter || primary !== 'load' || secondary) && <span>{plotted}</span>}<span>Session RPE: {logged}/{days} days</span><span>Unlogged days are unknown</span></div>}
-    <div className="progress-card-foot"><span>{fmtDate(rows[0].date)}–{fmtDate(today)}</span><span>Gaps = unrecorded days</span></div>
+    {hasData && <div className="load-response-status">{(scatter || primary !== 'load' || secondary) && <span>{plotted}</span>}<span>Session RPE: {logged}/{days} days</span></div>}
+    <div className="progress-card-foot"><span>{fmtDate(rows[0].date)}–{fmtDate(today)}</span><span>Chart gaps are days without a log.</span></div>
     <details className="load-response-settings">
       <summary><span className="load-response-settings-title">Customize chart</span><span className="load-response-settings-current">X: {scatter ? byId[xMetric].label : 'Date'} · Y: {byId[primary].label}{secondary ? ` + ${byId[secondary].label}` : ''} · {mode === 'raw' ? 'Raw' : `${mode}-day mean`} · {days} days</span></summary>
       <div className="load-response-controls">

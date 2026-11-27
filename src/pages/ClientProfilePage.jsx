@@ -121,7 +121,7 @@ export default function ClientProfilePage() {
     <section className="card cp-card" aria-labelledby="cp-training-time-title" id="training-time">
       <div className="cp-head"><h2 id="cp-training-time-title"><SectionMark name="calendar" />Usual training time</h2><Button variant="ghost" size="sm" onClick={() => openModal(<TrainingScheduleForm client={client} />)}>Edit training time</Button></div>
       {trainingSchedule(client) ? <dl className="cp-fields"><Field label="Start time" value={formatTrainingTime(trainingSchedule(client).time)} /><Field label="Duration" value={trainingSchedule(client).duration + ' min'} /><Field label="Time zone" value={tz || 'UTC'} /></dl> : <Empty>No usual training time set.</Empty>}
-      <p className="muted">Saving this time adds missing future bookings for planned workouts. Edit individual bookings in Schedule.</p>
+      <p className="muted">Adds bookings for future planned workouts that don’t have one. Edit individual bookings in Schedule.</p>
     </section>
     <section aria-labelledby="cp-preferences-title">
       <div className="cp-caption"><h2 id="cp-preferences-title">Preferences &amp; availability</h2>

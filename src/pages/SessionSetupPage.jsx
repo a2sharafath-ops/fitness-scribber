@@ -34,18 +34,18 @@ export default function SessionSetupPage() {
 
   return <section className="session-setup" aria-labelledby="setup-title">
     <header>
-      <h1 id="setup-title"><span className="setup-mark" aria-hidden="true" />Orbit Trainer</h1>
+      <h1 id="setup-title"><span className="setup-mark" aria-hidden="true" />Session setup</h1>
       <p>{fmtDay(clock.today)} · {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'} today</p>
     </header>
     {slide ? <>
       <div className="setup-panel">
-        <label className="setup-picker">
-          <Icon name="search" size={19} />
-          <Select aria-label="Select a booking" value={booking.id}
+        <label className="setup-picker-label" htmlFor="setup-booking">Choose today’s booking</label>
+        <div className="setup-picker">
+          <Select id="setup-booking" value={booking.id}
             onChange={event => setParams({ booking: event.target.value }, { replace: true })}>
             {bookings.map(item => <option value={item.id} key={item.id}>{item.time || 'Time not set'} · {roster.get(item.clientId).name}</option>)}
           </Select>
-        </label>
+        </div>
         <div className="setup-meta">
           <span><Icon name="clock" size={16} />{booking.time || 'Time not set'}</span>
           {hasDuration(booking) && <span><Icon name="timer" size={16} />{durationLabel(booking)}</span>}

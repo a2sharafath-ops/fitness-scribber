@@ -25,7 +25,7 @@ export default function AppearanceControls({ appearance, prefix = 'orbit' }) {
   return <div className="appearance-controls">
     {choice('theme', 'Theme')}
     <div className="appearance-choice">
-      <label className="appearance-range-label" htmlFor={prefix + '-frost'}>Frost <span aria-hidden="true">{appearance.frost}%</span></label>
+      <label className="appearance-range-label" htmlFor={prefix + '-frost'}>Panel opacity <span aria-hidden="true">{appearance.frost}%</span></label>
       <input type="range" id={prefix + '-frost'} min="0" max="100" value={appearance.frost} onChange={event => appearance.updateAppearance({ frost: Number(event.target.value) })} />
     </div>
     {choice('motion', 'Motion')}

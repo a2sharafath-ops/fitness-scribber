@@ -136,7 +136,7 @@ export default function ProgressPage() {
       const delta = recorded.length > 1 ? recorded.at(-1).value - recorded[0].value : null
       return <button key={t.id} className="pt-card pt-metric" aria-pressed={metric === t.id} onClick={() => setMetric(t.id)}>
         <span>{t.label}{t.id === 'weight' && exercise ? ' · ' + exercise : ''}</span><strong>{valueLabel(value, t.id)}</strong>
-        <small>{delta == null ? 'More records are needed to compare.' : (delta > 0 ? '+' : '') + (t.id === 'weight' ? format.fmtWt(delta) : number(delta) + ' pts') + ' in period'}</small>
+        {delta != null && <small>{(delta > 0 ? '+' : '') + (t.id === 'weight' ? format.fmtWt(delta) : number(delta) + ' pts') + ' in period'}</small>}
       </button>
     })}</div>
     <div className="pt-section-head"><h2>{definition.label}</h2></div>
@@ -145,6 +145,7 @@ export default function ProgressPage() {
         labels: series[metric].map(p => shortLabel(p.from)), datasets: [{ label: definition.label, data: series[metric].map(p => metric === 'weight' && p.value != null ? format.toDisp(p.value) : p.value),
           borderColor: COLORS.purple, pointRadius: 3, backgroundColor: COLORS.purple + '25', fill: true, tension: 0.2, spanGaps: false }]
       }} /></div> : <p className="pt-empty-history">No values recorded in this period.</p>}
+      {points.length === 1 && <p className="pt-empty-history">One more chart point is needed to show change.</p>}
       <div className="pt-card-foot"><span>{metric === 'weight' ? 'Highest recorded set weight per day' : metric === 'consistency' ? 'Prescribed workout days with a completed log' : 'Recorded readiness scores for active clients'}</span><span>{fmtDate(from)} – {fmtDate(today)}</span></div>
     </section>
     <section className="pt-card pt-history"><div className="pt-section-head"><h2>Recent milestones</h2></div>

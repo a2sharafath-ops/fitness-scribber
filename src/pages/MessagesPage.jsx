@@ -38,7 +38,7 @@ export default function MessagesPage() {
   return (
     <>
       <div className="topbar">
-        <div><h1>Messages</h1><div className="sub">Client conversations</div></div>
+        <h1>Messages</h1>
         <Button variant="ghost" onClick={broadcast} disabled={!clients.length}><Icon name="megaphone" size={15} /> Broadcast</Button>
       </div>
       <div className="msg-layout" data-thread-open={Boolean(sel)}>
@@ -50,7 +50,7 @@ export default function MessagesPage() {
             <><button className="btn ghost msg-back" onClick={() => setSelectedId(null)}>← Conversations</button>
             <ChatThread key={sel.id} clientId={sel.id} viewerRole="coach" headerName={sel.name} subtitle={sel.email} /></>
           ) : (
-            <div className="empty" style={{ padding: 40 }}><div className="big"><Icon name="message" size={40} /></div>Select a conversation to start chatting.</div>
+            <div className="empty" style={{ padding: 40 }}><div className="big"><Icon name="message" size={40} /></div>Select a conversation.</div>
           )}
         </div>
       </div>

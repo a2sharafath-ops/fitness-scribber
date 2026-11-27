@@ -213,7 +213,7 @@ export default function AthletePortal() {
           <div className="flex gap">
             <Avatar name={client.name} size={44} />
             <div><h1 style={{ fontSize: 20 }}>Hi {client.name.split(' ')[0]} 👋</h1>
-              <div className="sub">{fmtDay(today)} · <ReadinessTag readiness={readiness} short /></div></div>
+              <div className="sub">{fmtDay(today)} · <ReadinessTag readiness={readiness} /></div></div>
           </div>
           <Button variant="ghost" onClick={signOut}>Sign out</Button>
         </div>

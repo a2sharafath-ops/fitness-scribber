@@ -123,7 +123,7 @@ function ConcernsView({ client, openModal }) {
   const cards = (rows) => rows.map((row) => <ConcernCard key={row.id} concern={row} clientName={client.name} session={row.sessionId ? db.sessions.find((session) => session.id === row.sessionId && session.clientId === client.id) : null}
     onResolve={() => resolve(row.id)} onReopen={() => reopen(row.id)} onEdit={() => openModal(<ConcernForm concern={row} />)} onDelete={() => remove(row.id)} />)
   return <div className="checkins-stack">
-    <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2><p className="muted">{open.length} open. Review the report, date and source before the next session.</p></div><Button icon="plus" onClick={() => openModal(<ConcernForm clientId={client.id} />)}>Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns.</p>}</section>
+    <section className="card"><div className="checkins-section-head"><div><h2>Open concerns</h2>{open.length > 0 && <p className="muted">{open.length} open. Review the report, date and source before the next session.</p>}</div><Button icon="plus" onClick={() => openModal(<ConcernForm clientId={client.id} />)}>Flag a concern</Button></div>{open.length ? cards(open) : <p className="checkins-empty">No open concerns.</p>}</section>
     {resolved.length > 0 && <details className="card"><summary>Resolved concerns · {resolved.length}</summary>{cards(resolved)}</details>}
   </div>
 }
@@ -163,7 +163,14 @@ function WearablesView({ client, openModal, del }) {
     toast('Wearable sync enabled')
   }
   const pauseSync = () => { commit((draft) => { draft.clients.find((row) => row.id === client.id).monitorOptIn = false }); toast('Wearable sync paused') }
-  const deviceControls = <><div className="checkins-section-head"><h2>Device connection <InfoTip term="Device sync" text="Live sync requires a supported, configured provider. You can enter readings without a connected device." /></h2>{client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}</div>{client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}</>
+  const deviceControls = <>
+    <div className="checkins-section-head">
+      <h2>Device connection <InfoTip term="Device sync" text="Live sync requires a supported, configured provider." /></h2>
+      {client.monitorOptIn ? <Button variant="ghost" onClick={pauseSync}>Pause sync</Button> : <Button variant="ghost" onClick={enableSync}>Enable sync with consent</Button>}
+    </div>
+    {!client.monitorOptIn && <p className="checkins-note">You can enter readings manually.</p>}
+    {client.monitorOptIn && hasBackend && <ConnectDevices clientId={client.id} />}
+  </>
   return <div className="checkins-stack">
     <section className="card"><div className="checkins-section-head"><h2>Wearable observations</h2><Button icon="plus" onClick={() => openModal(<WearableForm clientId={client.id} />)}>Manual entry</Button></div>
       {latest ? <><div className="checkins-snapshot-grid"><div className="checkins-stat"><span>HRV (RMSSD)</span><strong>{valueOf(latest.hrv, ' ms')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Resting heart rate</span><strong>{valueOf(latest.rhr, ' bpm')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div><div className="checkins-stat"><span>Sleep</span><strong>{valueOf(latest.sleepHrs, ' h')}</strong><small>{fmtDate(latest.date)} · {sourceOf(latest)}</small></div></div>{latest.hrv != null && <p className="checkins-window">{baseline ? `30-day HRV baseline: ${baseline.toFixed(1)} ms (${baselineCount} reading${baselineCount === 1 ? '' : 's'})` : 'The 30-day HRV baseline needs one earlier usable reading.'}</p>}</> : <p className="checkins-empty">No wearable data yet.</p>}

@@ -19,7 +19,6 @@ export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
-  const [remember, setRemember] = useState(true)
   const [msg, setMsg] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -94,10 +93,6 @@ export default function AuthPage() {
 
             {mode === 'signin' && (
               <div className="auth-meta">
-                <label className="auth-remember">
-                  <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                  Remember me for 30 days
-                </label>
                 <button type="button" className="auth-link" onClick={() => go('reset')}>Forgot password?</button>
               </div>
             )}

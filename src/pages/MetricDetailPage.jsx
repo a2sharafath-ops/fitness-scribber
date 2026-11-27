@@ -7,7 +7,7 @@ import { useData } from '../store/DataContext'
 import { loadProgressPath } from '../lib/clientRoutes'
 
 const METRICS = {
-  readiness: { title: 'Readiness', sub: 'Daily score from available wellness and HRV. It does not provide clearance.', Comp: ReadinessBreakdown },
+  readiness: { title: 'Readiness', sub: 'Daily score from available wellness and HRV.', Comp: ReadinessBreakdown },
   srpetl: { title: 'Session training load', sub: 'sRPE-TL · session RPE × duration in minutes (AU)', Comp: SrpeTlBreakdown },
 }
 

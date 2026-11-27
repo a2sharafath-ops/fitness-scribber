@@ -1,5 +1,6 @@
 import Select from '../../molecules/Select'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Line, Bar } from 'react-chartjs-2'
 import Kpi from '../../atoms/Kpi'
 import { useData } from '../../../store/DataContext'
@@ -8,7 +9,6 @@ import { fmtDate, lastNDates } from '../../../lib/dates'
 import { readinessParts, readinessTrend, rollingAvg } from '../../../lib/calc'
 
 const TREND_ICON = { up: '▲', down: '▼', flat: '→' }
-const CONF_LABEL = { high: 'High confidence · check-in + HRV', low: 'Low confidence · one signal only', none: '' }
 
 // Detailed breakdown of the readiness composite: how the wellness (Hooper) and
 // HRV-deviation components combine, plus the subjective sub-scores driving it.
@@ -41,6 +41,9 @@ export default function ReadinessBreakdown({ client, range }) {
   // 5-day smoothed trend ending on the latest logged day.
   const tinfo = lastIdx != null ? readinessTrend(db, client.id, D[lastIdx], 5) : null
 
+  const inputs = latest?.confidence === 'high' ? 'Wellness + HRV available'
+    : latest?.wellnessPart != null ? 'Wellness only' : 'HRV only'
+
   const tOpts = {
     ...baseOptions(),
     interaction: { mode: 'index', intersect: false },
@@ -56,8 +59,9 @@ export default function ReadinessBreakdown({ client, range }) {
     return r ? r[field] : null
   })
 
-  if (!latest) return <section className="card"><h2 className="section-title">Readiness</h2>
-    <p className="muted">No readiness score recorded in the past {range} days.</p>
+  if (!latest) return <section className="card"><h2 className="section-title">No readiness scores in the past {range} days</h2>
+    <p className="muted">Record a wellness check-in to get a score.</p>
+    <Link className="btn ghost sm" to={`/clients/${client.id}/check-ins`}>Open Check-ins →</Link>
   </section>
 
   return (
@@ -66,8 +70,9 @@ export default function ReadinessBreakdown({ client, range }) {
         <div className="readiness-score-ring" style={{ '--score': latest.score + '%' }}><strong>{latest.score}<small>/100</small></strong></div>
         <div><h2>{D[lastIdx] === D.at(-1) ? 'Today’s readiness' : 'Last recorded readiness'}</h2>
           <time dateTime={D[lastIdx]}>{fmtDate(D[lastIdx])}</time>
-          <p>{CONF_LABEL[latest.confidence]} · {logged} of {range} days recorded</p>
+          <p>{inputs} · {logged} of {range} days scored</p>
           {tinfo?.smoothed != null && <small>{TREND_ICON[tinfo.trend]} 5-day average {tinfo.smoothed}{tinfo.delta ? ` (${tinfo.delta > 0 ? '+' : ''}${tinfo.delta})` : ''}</small>}
+          <p>This score does not provide exercise or medical clearance.</p>
         </div>
       </section>
       <div className="kpi-strip metric-secondary">
@@ -85,15 +90,15 @@ export default function ReadinessBreakdown({ client, range }) {
             <option value="objective">Objective (HRV)</option>
           </Select>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>{v.sub} 7-day smoothing against the 28-day baseline.</div>
+        <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>{v.sub}. The chart shows 7- and 28-day rolling averages.</div>
         {v.series.some(value => value != null) ? <div style={{ height: 220 }}>
           <Line
             data={{
               labels,
               datasets: [
                 { label: `${v.label} (daily)`, data: v.series, borderColor: v.color, backgroundColor: v.fill, fill: true, tension: 0.3, spanGaps: true, pointRadius: 2 },
-                { label: '7-day avg', data: vTrend, borderColor: COLORS.blue, borderWidth: 2, pointRadius: 0, spanGaps: true, tension: 0.3 },
-                { label: 'Baseline (28d)', data: vBase, borderColor: COLORS.muted, borderDash: [5, 4], pointRadius: 0, spanGaps: true },
+                { label: '7-day average', data: vTrend, borderColor: COLORS.blue, borderWidth: 2, pointRadius: 0, spanGaps: true, tension: 0.3 },
+                { label: '28-day average', data: vBase, borderColor: COLORS.muted, borderDash: [5, 4], pointRadius: 0, spanGaps: true },
               ],
             }}
             options={tOpts}
@@ -104,7 +109,6 @@ export default function ReadinessBreakdown({ client, range }) {
       <div className="grid cards-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <div className="card">
           <div className="section-title" style={{ margin: 0 }}>Component contribution</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 8px' }}>With both inputs available, the lower score contributes 80% and the higher score 20%.</div>
           <div style={{ height: 200 }}>
             <Line
               data={{
@@ -160,9 +164,8 @@ export default function ReadinessBreakdown({ client, range }) {
         <p className="muted" style={{ fontSize: 13, lineHeight: 1.6 }}>
           Readiness uses a wellness check-in and HRV compared with its prior 30-day baseline.
           With both inputs, the lower score contributes 80% and the higher score 20%.
-          With one usable input, the app shows that score with low confidence.
+          With one usable input, the app shows that input’s score.
           Scores of 67 or more display green, 45–66 amber, and below 45 red.
-          The headline trend uses a 5-day average. These bands do not provide exercise or medical clearance.
         </p>
       </div>
     </>

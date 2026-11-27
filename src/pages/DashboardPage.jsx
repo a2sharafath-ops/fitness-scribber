@@ -187,6 +187,7 @@ export default function DashboardPage() {
     completion: 'Booking completion rate', readiness: 'Average group readiness', consistency: 'Training consistency' }[metric]
   const isRate = metric === 'consistency' || metric === 'completion'
   const isTrend = metric === 'readiness' || isRate
+  const completionScope = 'Completed or missed bookings only'
   const ActivityChart = isTrend ? Line : Bar
   const activityValue = useCallback(value => value == null ? 'No records' : isRate ? `${value}%` : metric === 'readiness' ? `${value}/100` : value, [isRate, metric])
   const activeBucket = activity.buckets[chartSelection ?? activity.buckets.findLastIndex(bucket => bucket.value != null)]
@@ -317,6 +318,7 @@ export default function DashboardPage() {
           {trendSummaries.map(({ key, current, delta }) => <div className="db-stat" key={key}>
             <span>{{ consistency: 'Training consistency', completion: 'Booking completion rate', readiness: 'Avg. group readiness' }[key]}</span>
             <strong>{current == null ? '—' : <><AnimatedNumber value={current} reduced={reduced} /><small>{key === 'readiness' ? '/100' : '%'}</small></>}</strong>
+            {key === 'completion' && <small className="db-completion-scope">{completionScope}</small>}
             {delta != null && <small className="orbit-trend-change" data-tone={delta > 0 ? 'up' : delta < 0 ? 'down' : undefined} title="Compared with the previous period">{delta > 0 ? '+' : delta < 0 ? '−' : ''}{Math.abs(delta)} pt{Math.abs(delta) === 1 ? '' : 's'}</small>}
           </div>)}
         </div>
@@ -328,8 +330,8 @@ export default function DashboardPage() {
         </div>
         <p className="db-chart-heading"><span>{metricLabel} · {fmtDateRange(activity.start, activity.end)}</span>
           {metric === 'consistency' && <HelperTip label="Training consistency" text="Percentage of prescribed client-days with a completed workout log." />}
-          {metric === 'completion' && <HelperTip label="Booking completion rate" text="Completed bookings divided by bookings marked complete or missed." />}
         </p>
+        {metric === 'completion' && <p className="db-completion-scope">{completionScope}</p>}
         {activity.hasData ? <>
           <div className="orbit-activity-reading" aria-live="polite">
             <strong>{activityValue(activeBucket.value)}</strong>
@@ -344,7 +346,7 @@ export default function DashboardPage() {
             }}>
             <ActivityChart ref={chartRef} data={chartData} options={chartOptions} plugins={[CHART_GUIDE]} aria-hidden="true" />
             <span className="db-chart-guide" aria-hidden="true" hidden />
-          </div><p className="db-note orbit-chart-instructions">Hover, tap, or use arrow keys to view a {daily ? 'day' : 'week'}.</p></> :
+          </div><p className="db-note orbit-chart-instructions">Select a point to see the {daily ? 'day' : 'week'}.</p></> :
           <p className="db-chart-empty">{metricEmpty}</p>}
         {metric === 'load' && <button className="db-link" type="button" onClick={() => pick('load')}>View a client’s load records →</button>}
       </section>
@@ -423,7 +425,7 @@ export default function DashboardPage() {
           {!upcoming.length && <p className="db-note">No upcoming bookings.</p>}
         </section>
         <section className="db-card orbit-snapshot"><header className="db-head"><h2>Training snapshot</h2></header>
-          <div className="db-trend-bottom"><div><h3>Booking completion · 30 days</h3><strong className="db-metric">{completion.total ? `${completion.completed} of ${completion.total} completed` : '—'}</strong><p>{completion.total ? `${completion.missed} missed · ${completion.pending} awaiting status` : 'No past bookings recorded.'}</p><Link className="db-link" to="/schedule">Review bookings →</Link></div>
+          <div className="db-trend-bottom"><div><h3>Booking completion · 30 days</h3><strong className="db-metric">{completion.total ? `${completion.completed} of ${completion.total} completed` : '—'}</strong>{completion.total ? <><p>All past non-cancelled bookings</p><p>{completion.missed} missed · {completion.pending} awaiting status</p></> : <p>No past bookings recorded.</p>}<Link className="db-link" to="/schedule">Review bookings →</Link></div>
             <div><h3>Latest strength estimate</h3>{strength ? <><strong className="db-metric">{fmtWt(+strength.valueKg)} <small>estimated 1RM</small></strong><p>{roster.get(strength.clientId).name} · {strength.exercise} · {fmtDay(strength.date)}</p><Link className="db-link" to={dashboardClientPath(strength.clientId, '/progress#strength')}>View strength →</Link></> : <p>No strength estimates recorded.</p>}</div></div>
         </section>
       </div>

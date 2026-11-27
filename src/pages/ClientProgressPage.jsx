@@ -29,7 +29,7 @@ function BodyMetric({ label, field, first, last, comparable, weight, format }) {
   return <div className="progress-body-metric">
     <span>{label}</span>
     <strong>{to == null ? '—' : weight ? format.fmtWt(to) : `${to}%`}</strong>
-    <small>{hasPair ? `From ${weight ? format.fmtWt(from) : `${from}%`} · ${signed(weight ? format.toDisp(change) : change, weight ? format.unitName() : 'percentage points')}` : comparable ? 'Missing baseline or latest value' : last ? `Latest · ${fmtDate(last.date)}` : 'No assessment recorded'}</small>
+    {comparable && <small>{hasPair ? `From ${weight ? format.fmtWt(from) : `${from}%`} · ${signed(weight ? format.toDisp(change) : change, weight ? format.unitName() : 'percentage points')}` : 'Missing baseline or latest value'}</small>}
   </div>
 }
 
@@ -112,17 +112,20 @@ export default function ClientProgressPage() {
             <Link className="progress-source-link" to={`/clients/${id}/assessments/${type}`} aria-label={`Record ${label.toLowerCase()} baseline`}>Record baseline →</Link></li>)}</ul>
         </section>}
         {body.last && <article className="progress-outcome progress-body"><h3>Body measurements</h3>
-          {body.last ? <>
-            <div className="progress-date-pair"><span>Baseline: {fmtDate(body.first.date)} · {body.first.data?.method || 'method not recorded'}</span><span>Latest: {fmtDate(body.last.date)} · {body.last.data?.method || 'method not recorded'}</span></div>
+            <div className="progress-date-pair">
+              {body.comparable ? <>
+                <span>Baseline: {fmtDate(body.first.date)} · {body.first.data?.method || 'method not recorded'}</span>
+                <span>Latest: {fmtDate(body.last.date)} · {body.last.data?.method || 'method not recorded'}</span>
+              </> : <span>{body.first.phase === 'baseline' ? 'Baseline recorded' : 'Assessment recorded'} {fmtDate(body.first.date)} · {body.first.data?.method || 'method not recorded'}</span>}
+            </div>
             <div className="progress-body-metrics">
               <BodyMetric label="Body mass" field="massKg" first={body.first} last={body.last} comparable={body.comparable} weight format={format} />
               <BodyMetric label="Body fat" field="bodyFatPct" first={body.first} last={body.last} comparable={body.comparable} format={format} />
               <BodyMetric label="Lean mass" field="leanMassKg" first={body.first} last={body.last} comparable={body.comparable} weight format={format} />
             </div>
-            {!body.comparable && <p className="progress-footnote">Record one reassessment to compare.</p>}
+            {!body.comparable && <p className="progress-footnote">Record a reassessment to compare.</p>}
             {body.comparable && body.first.data?.method !== body.last.data?.method && <p className="progress-caution">Measurement methods differ or are missing. Compare with care.</p>}
-          </> : <p className="muted">No body composition assessment yet.</p>}
-          <Link className="progress-source-link" to={`/clients/${id}/assessments/body_comp`}>{body.last ? 'Assessment history' : 'Record baseline'} →</Link>
+          <Link className="progress-source-link" to={`/clients/${id}/assessments/body_comp`}>Assessment history →</Link>
         </article>}
         {movement.last && <OutcomeCard title="Movement" path={`/clients/${id}/assessments/movement`} {...movement} empty="No movement screen yet.">
           {movementNow && <div className="progress-outcome-value">{movementNow.score}/{movementNow.max}<span>Latest {movementNow.protocol === 'nasm' ? 'movement quality' : 'screen score'}</span></div>}
@@ -141,12 +144,13 @@ export default function ClientProgressPage() {
       {activeView === 'attendance' && <>
       <section className="card">
         <div className="progress-section-head"><h2 id="progress-attendance-title">Booked session completion <ProgressInfo label="booking completion" text="Includes past non-cancelled bookings and bookings awaiting status. Today’s bookings and workout logs are counted separately." /></h2><label className="progress-lift-select">Period <Select value={days} onChange={(e) => setDays(Number(e.target.value))}><option value={30}>30 days</option><option value={90}>90 days</option></Select></label></div>
+        {attendance.total > 0 && <p className="progress-footnote">All past non-cancelled bookings</p>}
         <div className="progress-attendance-layout">
           <div className="progress-completion-ring" style={{ '--completion': `${attendance.percent ?? 0}%` }} role={attendance.total ? 'progressbar' : undefined} aria-label="Booked session completion" aria-valuenow={attendance.percent ?? undefined} aria-valuemin={attendance.total ? 0 : undefined} aria-valuemax={attendance.total ? 100 : undefined}><div><strong>{attendance.percent == null ? '—' : `${attendance.percent}%`}</strong><span>{attendance.total ? `${attendance.completed} of ${attendance.total} bookings` : 'No past bookings'}</span></div></div>
-          <div className="progress-completion-counts"><div><strong>{attendance.completed}</strong><span>Completed</span></div><div><strong>{attendance.unresolved}</strong><span>Awaiting status</span></div><div><strong>{attendance.cancelled}</strong><span>Cancelled · excluded</span></div></div>
+          <div className="progress-completion-counts"><div><strong>{attendance.completed}</strong><span>Completed</span></div><div><strong>{attendance.unresolved}</strong><span>Not completed</span></div><div><strong>{attendance.cancelled}</strong><span>Cancelled · excluded</span></div></div>
         </div>
         {attendance.todayCompleted > 0 && <p className="progress-footnote">{attendance.todayCompleted} completed today · excluded from this rate</p>}
-        <div className="progress-card-foot"><span>{fmtDate(attendance.start)}–{fmtDate(addDays(today, -1))} · past bookings</span><Link to="/schedule">{attendance.unresolved ? 'Review booking status' : 'Open schedule'} →</Link></div>
+        <div className="progress-card-foot"><span>{fmtDate(attendance.start)}–{fmtDate(addDays(today, -1))} · past bookings</span><Link to="/schedule">View bookings →</Link></div>
       <div className="progress-workout-completion"><div><h3>Completed workout logs</h3><p>Counted separately from bookings</p></div><strong>{completedWorkouts}</strong><div className="progress-card-foot"><span>Through {fmtDate(today)}</span><Link to={`/clients/${id}/training?history=workouts#training-history-title`}>View workout history →</Link></div></div>
       </section>
       </>}

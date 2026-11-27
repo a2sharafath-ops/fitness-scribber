@@ -134,6 +134,7 @@ function AdvancedLoad({ rows, clientId, today }) {
   ]
   return <section className="card progress-derived" aria-labelledby="progress-derived-title">
     <div className="progress-section-head"><h3 id="progress-derived-title">Load calculations</h3></div>
+    <p className="progress-footnote">ACWR, monotony, and strain count days without a log as zero.</p>
     <div className="progress-derived-cards">
       {measures.map((measure) => {
         const available = Boolean(recent && current[measure.id] != null)

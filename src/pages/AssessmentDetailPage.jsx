@@ -213,10 +213,10 @@ export default function AssessmentDetailPage() {
         )}
       </div>
 
-      {type === 'fitness' && <p className="assess-progress-link">See <Link to={`/clients/${id}/progress`}>Progress</Link> for strength outcomes and tracked lifts.</p>}
+      {type === 'fitness' && !rows.length && <p className="assess-progress-link"><Link to={`/clients/${id}/progress#outcomes`}>View outcomes in Progress →</Link></p>}
       {rows.length ? (
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="section-title" style={{ margin: '0 0 10px' }}>Baseline → latest {type === 'fitness' && <HelperTip label="Assessment comparisons" text="Comparisons require the same test, side, unit and protocol." />} <Link className="assess-inline-link" to={`/clients/${id}/progress#outcomes`}>View in Progress →</Link></div>
+          <div className="section-title" style={{ margin: '0 0 10px' }}>Baseline → latest {type === 'fitness' && <HelperTip label="Assessment comparisons" text="Comparisons require the same test, side, unit and protocol." />} <Link className="assess-inline-link" to={`/clients/${id}/progress#outcomes`}>{type === 'fitness' ? 'View outcomes in Progress' : 'View in Progress'} →</Link></div>
           <div className="cmp">
             <div className="cmp-head"><span>Metric</span><span>{fmtDate(b.date)}</span><span /><span>{fmtDate(l.date)}</span><span>Δ</span></div>
             {rows.map((r, i) => <DeltaRow r={r} key={i} />)}
@@ -248,7 +248,7 @@ export default function AssessmentDetailPage() {
           </>
         ) : movementPain.length > 0 ? <p className="muted">No standalone pain assessment recorded.</p> : (
           <div className="assessment-history-empty">
-            No {meta.label.toLowerCase()} recorded yet.
+            <span>{type === 'pain' ? 'No pain assessment recorded.' : type === 'lifestyle' ? 'No lifestyle updates recorded.' : `No ${meta.label.toLowerCase()} recorded yet.`}</span>
             {canAdd && <div style={{ marginTop: 8 }}><Button size="sm" onClick={() => add('baseline')}>{isProfileType ? (type === 'goals' ? 'Record goals' : 'Record lifestyle') : 'Add baseline'}</Button></div>}
           </div>
         )}

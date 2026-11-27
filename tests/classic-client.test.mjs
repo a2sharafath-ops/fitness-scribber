@@ -570,7 +570,8 @@ test('calendar day review shows completed blocks and insights without add-exerci
 
 test('legacy readiness detail keeps neutral wording and one shared client identity', () => {
   const html = renderRoutedSection('/clients/a/metric/readiness', fixture())
-  assert.match(html, /Daily score from available wellness and HRV[.] It does not provide clearance/)
+  assert.match(html, /Daily score from available wellness and HRV[.]/)
+  assert.match(html, /Record a wellness check-in to get a score[.]/)
   assert.equal((html.match(/role="img" aria-label="Avery"/g) || []).length, 1)
   assert.doesNotMatch(html, /🟢/)
 })
@@ -704,15 +705,17 @@ test('Completion separates past bookings, cancellations, today and completed wor
   db.sessions.push(
     { id: 'done', clientId: 'a', date: yesterday, status: 'Completed' },
     { id: 'pending', clientId: 'a', date: yesterday, status: 'Confirmed' },
+    { id: 'missed', clientId: 'a', date: yesterday, status: 'Missed' },
     { id: 'cancelled', clientId: 'a', date: yesterday, status: 'Cancelled' },
     { id: 'today', clientId: 'a', date: today, status: 'Completed' },
     { id: 'other', clientId: 'b', date: yesterday, status: 'Completed' },
   )
   db.workouts.push({ id: 'done-log', clientId: 'a', date: yesterday, status: 'completed', main: [] }, { id: 'unfinished', clientId: 'a', date: today, status: 'in_progress', main: [] })
   const html = renderClientPage('/clients/a/progress#attendance', db, ClientProgressPage)
-  assert.match(html, /aria-valuenow="50"/)
-  assert.match(html, /1 of 2 bookings/)
-  assert.match(html, /<strong>1<\/strong><span>Awaiting status/)
+  assert.match(html, /aria-valuenow="33"/)
+  assert.match(html, /1 of 3 bookings/)
+  assert.match(html, /All past non-cancelled bookings/)
+  assert.match(html, /<strong>2<\/strong><span>Not completed/)
   assert.match(html, /<strong>1<\/strong><span>Cancelled · excluded/)
   assert.match(html, /1 completed today · excluded from this rate/)
   assert.match(html, /Completed workout logs[\s\S]*?<strong>1<\/strong>/)
