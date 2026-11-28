@@ -24,6 +24,7 @@ create table if not exists screenings (
   "outcome" text,                                -- A | B | C  (trainer-only)
   "programStatus" text,                          -- ready | gated (trainer-only)
   "clearance" jsonb,                             -- { action, status, notes, dateCleared } (trainer-only)
+  "rescreenLog" jsonb not null default '[]'::jsonb,
   "updatedAt" timestamptz not null default now()
 );
 create index if not exists screenings_client_idx on screenings ("clientId", "status");
@@ -37,17 +38,7 @@ create policy coach_screenings on screenings for all to authenticated
   using ("clientId" in (select id from clients where "coachId" = auth.uid()))
   with check ("clientId" in (select id from clients where "coachId" = auth.uid()));
 
--- Athlete: read their own screenings.
+-- Install the screening draft/access migration for the athlete answers API.
 drop policy if exists athlete_reads_screenings on screenings;
-create policy athlete_reads_screenings on screenings for select to authenticated
-  using ("clientId" in (select id from clients where "userId" = auth.uid()));
-
--- Athlete: create and update their own screening (drafts + submit).
 drop policy if exists athlete_inserts_screenings on screenings;
-create policy athlete_inserts_screenings on screenings for insert to authenticated
-  with check ("clientId" in (select id from clients where "userId" = auth.uid()));
-
 drop policy if exists athlete_updates_screenings on screenings;
-create policy athlete_updates_screenings on screenings for update to authenticated
-  using ("clientId" in (select id from clients where "userId" = auth.uid()))
-  with check ("clientId" in (select id from clients where "userId" = auth.uid()));

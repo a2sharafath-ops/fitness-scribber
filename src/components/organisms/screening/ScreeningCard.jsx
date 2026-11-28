@@ -22,16 +22,14 @@ export default function ScreeningCard({ clientId, complete, draft, busy, onSave,
     if (!v) return setActive(null)
     if (draft) return setActive(draft)
     const fresh = { id: uid(), ...newScreening(clientId, today) }
-    // Re-screen trigger log: record WHY a new screening started (12-month expiry
-    // or a "my health changed" event) for the trainer's audit trail.
-    if (complete) fresh.rescreenLog = [...(complete.rescreenLog || []), { date: today, reason: expired ? 'expired' : 'health_changed' }]
     setActive(fresh)
   }
 
   if (active) {
     const submit = async (f) => {
-      const ok = await onComplete(f)
-      if (ok) { setActive(null); setJustDone(true) }
+      const confirmed = await onComplete(f)
+      if (confirmed) { setActive(null); setJustDone(true) }
+      return confirmed
     }
     return (
       <Card style={{ marginTop: 16 }}>

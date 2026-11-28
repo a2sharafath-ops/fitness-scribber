@@ -63,7 +63,7 @@ export const newScreening = (clientId, today) => ({
   goals: { primary: '', secondary: [], smart: '', target: {}, event: '', availability: {}, environment: {}, prefs: {} },
   acknowledgements: null,
   outcome: null, programStatus: null, clearance: null,
-  completedOn: null, validUntil: null,
+  completedOn: null, validUntil: null, rescreenLog: [],
 })
 
 // ---- Red flags (trainer-only). Returns { major: [..], minor: [..] } of labels ----
@@ -117,8 +117,10 @@ export function finalizeScreening(s, today) {
 // Latest screening rows for a client (complete + draft, newest first)
 export function screeningsFor(list = [], clientId) {
   const mine = list.filter((x) => x.clientId === clientId)
-  const complete = mine.filter((x) => x.status === 'complete').sort((a, b) => (b.completedOn || '').localeCompare(a.completedOn || ''))[0] || null
-  const draft = mine.find((x) => x.status === 'draft') || null
+  const latestUpdate = (a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')
+  const complete = mine.filter((x) => x.status === 'complete')
+    .sort((a, b) => (b.completedOn || '').localeCompare(a.completedOn || '') || latestUpdate(a, b))[0] || null
+  const draft = mine.filter((x) => x.status === 'draft').sort(latestUpdate)[0] || null
   return { complete, draft }
 }
 

@@ -80,6 +80,11 @@ See the review for exact status.
 - Existing installations: run `supabase/schema_function_permissions.sql` after
   the athlete/admin schemas to remove anonymous access to privileged onboarding
   helpers and browser access to the automatic-RLS event trigger.
+- Health screening requires `schema_screenings.sql` and
+  `migrations/20261128100000_screening_drafts_and_athlete_access.sql`. Deploy the
+  updated athlete portal alongside this migration so it uses the scoped
+  screening functions for answers and drafts. Older open athlete tabs need to
+  reload after deployment. Check for any unsaved screening before reloading.
 - Programs require `schema_program_library.sql`, `schema_session_name.sql`, then
   the protected-schedule, program-training-times and training-plan-sync migrations
   in timestamp order. These were installed in production on 2026-10-11.

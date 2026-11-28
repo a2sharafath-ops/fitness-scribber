@@ -4,6 +4,9 @@ export function createSnapshotQueue(initial, persist) {
   let baseline = initial, tail = Promise.resolve()
   return {
     reset(snapshot) { baseline = snapshot },
+    confirmScreening(row) {
+      baseline = { ...baseline, screenings: replaceScreening(baseline.screenings, row) }
+    },
     enqueue(snapshot) {
       const result = tail.then(async () => {
         try {
@@ -34,4 +37,11 @@ export function sameSavedRecord(a, b) {
   if (Array.isArray(a) && a.length !== b.length) return false
   const keys = Object.keys(a)
   return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && sameSavedRecord(a[key], b[key]))
+}
+
+// Keep history and the pending snapshot intact when one screening is confirmed.
+export function replaceScreening(screenings = [], row) {
+  return screenings.some(existing => existing.id === row.id)
+    ? screenings.map(existing => existing.id === row.id ? row : existing)
+    : [...screenings, row]
 }

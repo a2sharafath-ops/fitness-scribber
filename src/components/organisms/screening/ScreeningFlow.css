@@ -13,6 +13,7 @@
 .scr-progress{display:flex;gap:4px;margin:10px 0 16px}
 .scr-progress i{flex:1;height:4px;border-radius:2px;background:var(--surface2)}
 .scr-progress i.on{background:var(--accent)}
+.scr-step-fields{border:0;padding:0;margin:0;min-inline-size:0}
 .scr-step-title{font-size:15px;font-weight:800;margin:0 0 2px}
 .scr-step-sub{color:var(--muted);font-size:12px;margin:0 0 12px}
 .scr-legal{color:var(--muted);font-size:10.5px;line-height:1.5;margin-top:14px;border-top:1px solid var(--border);padding-top:10px}
