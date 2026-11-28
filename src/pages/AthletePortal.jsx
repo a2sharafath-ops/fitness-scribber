@@ -20,7 +20,9 @@ import { beginWearableConnection } from '../api/wearable'
 import { uid } from '../lib/format'
 import { todayISO, fmtDate, fmtDay, lastNDates } from '../lib/dates'
 import { calcSRPETL, readinessFor, readinessScore, dailySum, acwrSeries, latestOf } from '../lib/calc'
-import { screeningsFor, finalizeScreening, isExpired, programStatus } from '../lib/screening'
+import { screeningsFor, isExpired } from '../lib/screening'
+import { loadAthleteScreenings, saveAthleteScreening } from '../api/screenings'
+import { replaceScreening } from '../lib/confirmedPersistence'
 import { workoutPeaks, resolveTrainingMax } from '../lib/program'
 
 export default function AthletePortal() {
@@ -37,9 +39,14 @@ export default function AthletePortal() {
     const client = clients?.[0]
     if (!client) { setState({ client: null }); return }
     const out = {}
-    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'workouts', 'assessments', 'screenings', 'maxes']) {
+    for (const t of ['wellness', 'srpe', 'sessions', 'prescriptions', 'wearable', 'workouts', 'assessments', 'maxes']) {
       const { data } = await supabase.from(t).select('*').eq('clientId', client.id)
       out[t] = data || []
+    }
+    try {
+      out.screenings = await loadAthleteScreenings(client.id)
+    } catch (error) {
+      out.screeningError = error.message
     }
     // Only connection metadata crosses the server boundary.
     try {
@@ -104,21 +111,13 @@ export default function AthletePortal() {
     return insert('assessments', { type, date: today, phase, data, notes: '' })
   }
 
-  // Pre-participation screening: step saves upsert the draft; submit finalizes
-  // (outcome computed silently — never shown here) and reloads.
   const scr = screeningsFor(state.screenings || [], client.id)
-  const saveScreening = async (row) => {
-    const { error } = await supabase.from('screenings')
-      .upsert({ ...row, clientId: client.id, coachId: client.coachId, updatedAt: new Date().toISOString() })
-    if (error) { alert(error.message); return false }
-    return true
-  }
-  const completeScreening = async (row) => {
-    setBusy(true)
-    const ok = await saveScreening(finalizeScreening(row, today))
-    setBusy(false)
-    if (ok) await load()
-    return ok
+  const saveScreening = async (row, submit = false) => {
+    const confirmed = await saveAthleteScreening(row, submit)
+    setState(current => current?.client?.id === client.id
+      ? { ...current, screenings: replaceScreening(current.screenings, confirmed) }
+      : current)
+    return confirmed
   }
 
   // Today's Workout — the session in progress (workouts) plus whatever the
@@ -203,9 +202,19 @@ export default function AthletePortal() {
     await load()
   }
 
-  const needsScreening = !scr.complete || scr.draft || isExpired(scr.complete, today) || programStatus(scr.complete) === 'gated'
-  const screeningCard = <ScreeningCard clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
-          onSave={saveScreening} onComplete={completeScreening} />
+  const needsScreening = !scr.complete || scr.draft || isExpired(scr.complete, today)
+  const screeningCard = state.screeningError
+    ? <Card key="screening"><p role="alert">{state.screeningError}</p><Button onClick={load}>Retry</Button></Card>
+    : <ScreeningCard key={client.id} clientId={client.id} complete={scr.complete} draft={scr.draft} busy={busy}
+        onSave={saveScreening} onComplete={row => saveScreening(row, true)} />
+  const workoutCard = (
+    <div key="workout" style={{ marginTop: 16 }}>
+      <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
+        units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
+        athlete history={state.workouts} resolveTm={(name) => resolveTrainingMax(state, client.id, name, today).kg}
+        onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
+    </div>
+  )
   return (
     <div id="app">
       <main id="main" role="main" style={{ marginLeft: 0, maxWidth: 760, margin: '0 auto' }}>
@@ -218,17 +227,7 @@ export default function AthletePortal() {
           <Button variant="ghost" onClick={signOut}>Sign out</Button>
         </div>
 
-        {needsScreening && screeningCard}
-
-
-        <div style={{ marginTop: 16 }}>
-          <TodayWorkout client={client} today={today} workout={todayW} prescription={todayP} plans={state.plans} exercises={state.exercises}
-            units="kg" context={{ readiness: rScore, acwr }} restingHr={restingHr} age={client.anthro?.age ?? null} bodyMassKg={client.anthro?.massKg ?? null}
-            athlete history={state.workouts} resolveTm={(name) => resolveTrainingMax(state, client.id, name, today).kg}
-            onStart={startWorkout} onSave={saveWorkout} onComplete={requestComplete} onClear={clearWorkout} />
-        </div>
-
-        {!needsScreening && screeningCard}
+        {needsScreening ? [screeningCard, workoutCard] : [workoutCard, screeningCard]}
 
         {checkinW && (
           <CheckInModal busy={busy} today={today}

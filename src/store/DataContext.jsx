@@ -5,7 +5,9 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, u
 import { loadDB, saveDB, readStoredDB, localStorageKey } from '../lib/storage'
 import { hasBackend } from '../lib/supabase'
 import { fetchAll, persistDiff, deleteClientRemote, saveScheduleRemote, saveAssignmentRemote, saveTrainingPlansRemote } from '../api/sync'
-import { createSnapshotQueue } from '../lib/confirmedPersistence'
+import { createSnapshotQueue, replaceScreening } from '../lib/confirmedPersistence'
+import { saveCoachScreening } from '../api/screenings'
+import { goalHeadline } from '../lib/screening'
 import { applyScheduleRequest } from '../lib/schedule'
 import { applyWorkoutCompletion } from '../lib/workoutCompletion'
 import { prepareWorkoutCorrection } from '../lib/workoutCorrection'
@@ -132,6 +134,50 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     setWriteIssues(issues)
     return Promise.resolve({ saved, local: true, issues })
   }, [backend])
+
+  // A screening is ready to resume only after its write is confirmed.
+  const saveScreening = useCallback(async (row, expected) => {
+    if (scheduleSavingRef.current) throw new Error('Another change is saving. Try again when it finishes.')
+    scheduleSavingRef.current = true
+    const headline = goalHeadline(row)
+    let confirmed
+    try {
+      await writeQueueRef.current
+      const current = backend ? dbRef.current : readStoredDB()
+      const client = current?.clients.find(entry => entry.id === row.clientId)
+      if (!client) throw new Error('The client’s workspace is unavailable.')
+      if (backend) {
+        confirmed = await saveCoachScreening(row, expected)
+      } else {
+        const existing = current.screenings.find(entry => entry.id === row.id)
+        if (existing && (existing.status !== 'draft' || existing.updatedAt !== expected)) {
+          throw new Error('This screening changed in another session. Reopen the saved record before continuing.')
+        }
+        confirmed = { ...row, updatedAt: new Date().toISOString() }
+      }
+      const next = { ...current, screenings: replaceScreening(current.screenings, confirmed) }
+      if (backend) {
+        persistenceRef.current?.confirmScreening(confirmed)
+      } else {
+        if (headline) next.clients = current.clients.map(entry => entry.id === client.id ? { ...entry, goal: headline } : entry)
+        if (!saveDB(next)) throw new Error('Browser storage is unavailable. Your answers are still here. Try again.')
+      }
+      commitVersionRef.current += 1
+      dbRef.current = next
+      setDb(next)
+      setSaveStatus(writeFailedRef.current ? 'failed' : 'saved')
+    } finally {
+      scheduleSavingRef.current = false
+    }
+    // A separate profile update must not undo an already confirmed screening.
+    if (backend && headline && dbRef.current.clients.some(entry => entry.id === row.clientId && entry.goal !== headline)) {
+      await commit(d => {
+        const client = d.clients.find(entry => entry.id === row.clientId)
+        if (client) client.goal = headline
+      })
+    }
+    return confirmed
+  }, [backend, commit])
 
   // A calendar move can update three collections. Publish only after the whole
   // transaction succeeds, and prevent an unrelated optimistic edit racing it.
@@ -316,8 +362,8 @@ export function DataProvider({ children, initialDb, initialError = null, backend
     for (const i of [...(db?._loadIssues || []), ...writeIssues]) {
       byTable.set(i.table, { table: i.table, message: i.message, kind: i.kind || 'load' })
     }
-    return { db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, saveWorkoutCorrection, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
-  }, [db, commit, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, saveWorkoutCorrection, deleteClient, refresh, saveStatus, writeIssues])
+    return { db, commit, saveScreening, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, saveWorkoutCorrection, deleteClient, refresh, saveStatus, tz: coachTimeZone(db?.settings?.tz), units: db?.settings?.units, dbIssues: [...byTable.values()] }
+  }, [db, commit, saveScreening, saveSchedule, saveProgramAssignment, saveTrainingPlans, finishWorkout, saveWorkoutCorrection, deleteClient, refresh, saveStatus, writeIssues])
 
   if (backend && !db) return <StartupScreen error={loadError} onRetry={() => { setLoadError(null); setLoadAttempt(n => n + 1) }} />
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
